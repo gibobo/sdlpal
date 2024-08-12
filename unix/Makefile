@@ -8,8 +8,6 @@ INTER=.unix
 HOST =
 TEST_CCFLAGS =
 
-GENERATED = -DPAL_HAS_GIT_REVISION $(shell ../scripts/gengitrev)
-
 DEPFLAGS = -MT $@ -MMD -MP -MF $*$(INTER).Td
 
 GTEST_DIR = ../3rd/googletest/googletest
