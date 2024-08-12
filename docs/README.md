@@ -10,10 +10,6 @@ SDLPAL
 =======
 Check the link above for a Web-based demo of SDLPAL. It should work on most of modern browsers (e.g., Google Chrome, Mozilla Firefox, Safari, ...), but problems might exist on some browsers. Before you can enjoy the game, please prepare a zipped file containing the game resource data.
 
-gitee镜像
-=======
-中国大陆地区用户如从GitHub下载代码存在困难，请使用[gitee镜像](https://gitee.com/sdlpal/sdlpal) (每小时自动更新)。
-
 LICENSE
 =======
 
@@ -87,8 +83,8 @@ To build SDLPAL as a Windows **desktop** app, you can also use ***MinGW***. Step
 
 * If you need to compile SDLPAL under **Windows** shell environment, please go to the root of the source code tree and type:
 ```cmd
-C:\sdlpal> cd win32
-C:\sdlpal> make -f Makefile.mingw
+cd win32
+make -f Makefile.mingw
 ```
 
 * If you need to compile SDLPAL under **msys** shell environment, please go to the root of the source code tree and type:
@@ -116,58 +112,6 @@ $ cd unix
 $ make
 ```
 You also need to have SDL 2.0 development files installed in the system. The compiled executable should be generated with the filename *`sdlpal`* at the current directory. By default, SDLPAL uses the FLTK library to provide setting GUI at launch. If you do not want to use the library, please define he macro `PAL_NO_LAUNCH_UI` in the `Makefile`. SDLPAL should also be able to compile and run under other Unix-like systems, however it's not tested.
-
-
-macOS
------
-
-To compile, open *`Pal.xcodeproj`* with `Xcode`, and click Build. You need to have SDL framework installed at *`/Library/Frameworks`*.
-
-iOS
----
-
-To compile, please first install dependencies via CocoaPods following the above instruments, then open the project *`ios/SDLPal/SDLPal.xcworkplace`* with `Xcode`, and click Build.
-```shell
-$ cd iOS/SDLPAL
-$ sudo gem install cocoapods # ONLY need do once on one machine
-$ pod install # ONLY need do once in one repository
-```
-
-Android
--------
-
-To build the game, open the `android` directory through ***Android Studio***, and click `Make Project`.
-
-* NOTE: `android/app/src/main/java/org/libsdl/app` is a link to `3rd/SDL/android-project/app/src/main/java/org/libsdl/app`. Deal with it properly if your git system does not create link automatically.
-
-* NOTE: For Windows users, please put the repo at the root of a disk partition. A long path may cause compilation to fail.
-
-Nintendo 3DS
-------------
-
-To build the game, please go to the root of the source code tree and type:
-```shell
-cd 3ds
-make
-make cia
-```
-You need to have *DevkitPro ARM* and *SDL 1.2* for 3DS portlib installed. Creating a CIA package is not required to play the game, but in order to to that, a seperate *makerom* tool is required. The compiled executable should be generated with the filename *`sdlpal`* at the current directory.
- 
-Nintendo Wii
-------------
-
-To build the game, please go to the root of the source code tree and type:
-```shell
-cd wii
-make
-```
-You need to have *DevkitPro PPC* and *SDL 1.2* for Wii portlib installed.
-
-Other platforms
----------------
-
-To be written.
-
 
 Running the game
 ================

@@ -8,7 +8,7 @@ INTER=.mingw
 HOST =
 TEST_CCFLAGS =
 
-GENERATED = -DPAL_HAS_GIT_REVISION $(shell ..\scripts\gengitrev.bat)
+GENERATED = 
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $*$(INTER).Td
 

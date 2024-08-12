@@ -9,8 +9,6 @@ INTER=.emscripten
 
 HOST =
 
-GENERATED = -DPAL_HAS_GIT_REVISION $(shell ../scripts/gengitrev)
-
 DEPFLAGS = -MT $@ -MMD -MP -MF $*$(INTER).Td
 
 CFILES = $(wildcard ../adplug/*.c) $(wildcard ../libmad/*.c) $(wildcard ../timidity/*.c) $(wildcard ../*.c)

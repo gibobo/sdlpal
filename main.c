@@ -22,11 +22,6 @@
 #include "main.h"
 #include <setjmp.h>
 
-#if defined(PAL_HAS_GIT_REVISION)
-# undef PAL_GIT_REVISION
-# include "generated.h"
-#endif
-
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;
 
@@ -59,9 +54,6 @@ PAL_Init(
 --*/
 {
    int           e;
-#if PAL_HAS_GIT_REVISION
-   UTIL_LogOutput(LOGLEVEL_DEBUG, "SDLPal build revision: %s\n", PAL_GIT_REVISION);
-#endif
 
    //
    // Initialize subsystems.
@@ -111,11 +103,7 @@ PAL_Init(
 #else
 	   "",
 #endif
-#if defined(PAL_HAS_GIT_REVISION) && defined(PAL_GIT_REVISION)
-	   " ["  PAL_GIT_REVISION "] "
-#else
 	   ""
-#endif
        ,(gConfig.fEnableGLSL && gConfig.pszShader ? gConfig.pszShader : "")
    ));
 }
