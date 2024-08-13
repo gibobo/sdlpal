@@ -25,7 +25,7 @@ TEST_CPPFILES = $(wildcard ../tests/*.cpp)
 TEST_OBJFILES = $(TEST_CPPFILES:.cpp=.o)
 SDL_CONFIG = sdl2-config
 
-override CCFLAGS += `$(SDL_CONFIG) --cflags` -I../3rd/mingw-std-threads -g -msse2 -Wall -O2 -fno-strict-aliasing $(EXTRA_CCFLAGS) $(TEST_CCFLAGS) $(GENERATED)
+override CCFLAGS += `$(SDL_CONFIG) --cflags` -I../3rd/SDL/include -I../3rd/mingw-std-threads -g -msse2 -Wall -O2 -fno-strict-aliasing $(EXTRA_CCFLAGS) $(TEST_CCFLAGS)
 CXXFLAGS = $(CCFLAGS) -std=c++11
 CFLAGS = $(CCFLAGS) -std=gnu99
 OPENGL_LIBS = -lopengl32
