@@ -318,9 +318,6 @@
     <ClCompile Include="..\audio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\3rd\googletest\googletest\src\gtest-all.cc">
-      <Filter>Test Files\deps</Filter>
-    </ClCompile>
     <ClCompile Include="..\tests\test_main.cpp">
       <Filter>Test Files\deps</Filter>
     </ClCompile>
@@ -1132,9 +1129,6 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\generated.h">
-      <Filter>generated</Filter>
     </ClInclude>
     <ClInclude Include="..\aviplay.h">
       <Filter>Header Files</Filter>
