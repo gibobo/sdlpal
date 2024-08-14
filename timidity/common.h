@@ -8,9 +8,10 @@
 
    common.h
 */
-#include <SDL3/SDL.h>
+#include <SDL.h>
 
-typedef struct {
+typedef struct
+{
   char *path;
   void *next;
 } PathList;

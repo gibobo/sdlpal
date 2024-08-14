@@ -10,14 +10,14 @@
 */
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <SDL3/SDL.h>
+#include <SDL.h>
 
 #include "options.h"
 #include "common.h"
@@ -31,10 +31,10 @@ SDL_RWops *open_file(const char *name)
   SDL_RWops *rw;
 
   if (!name || !(*name))
-    {
-      SNDDBG(("Attempted to open nameless file.\n"));
-      return 0;
-    }
+  {
+    SNDDBG(("Attempted to open nameless file.\n"));
+    return 0;
+  }
 
   /* First try the given name */
 
@@ -48,27 +48,27 @@ SDL_RWops *open_file(const char *name)
     PathList *plp = pathlist;
     size_t l;
 
-    while (plp)  /* Try along the path then */
+    while (plp) /* Try along the path then */
+    {
+      *current_filename = 0;
+      l = strlen(plp->path);
+      if (l)
       {
-	*current_filename = 0;
-	l = strlen(plp->path);
-	if(l)
-	  {
-	    strcpy(current_filename, plp->path);
-	    if(current_filename[l - 1] != PATH_SEP)
-	    {
-	      current_filename[l] = PATH_SEP;
-	      current_filename[l + 1] = '\0';
-	    }
-	  }
-	strcat(current_filename, name);
-	SNDDBG(("Trying to open %s\n", current_filename));
-	if ((rw = SDL_RWFromFile(current_filename, "rb")))
-	  return rw;
-	plp = plp->next;
+        strcpy(current_filename, plp->path);
+        if (current_filename[l - 1] != PATH_SEP)
+        {
+          current_filename[l] = PATH_SEP;
+          current_filename[l + 1] = '\0';
+        }
       }
+      strcat(current_filename, name);
+      SNDDBG(("Trying to open %s\n", current_filename));
+      if ((rw = SDL_RWFromFile(current_filename, "rb")))
+        return rw;
+      plp = plp->next;
+    }
   }
-  
+
   /* Nothing could be opened. */
   SNDDBG(("Could not open %s\n", name));
   return 0;
@@ -80,7 +80,8 @@ void *safe_malloc(size_t count)
   void *p;
 
   p = malloc(count);
-  if (p == NULL) {
+  if (p == NULL)
+  {
     SNDDBG(("Sorry. Couldn't malloc %d bytes.\n", count));
   }
 
@@ -93,13 +94,13 @@ void add_to_pathlist(const char *s)
   PathList *plp = safe_malloc(sizeof(PathList));
 
   if (plp == NULL)
-      return;
+    return;
 
   plp->path = safe_malloc(strlen(s) + 1);
   if (plp->path == NULL)
   {
-      free(plp);
-      return;
+    free(plp);
+    return;
   }
 
   strcpy(plp->path, s);
@@ -109,15 +110,15 @@ void add_to_pathlist(const char *s)
 
 void free_pathlist(void)
 {
-    PathList *plp = pathlist;
-    PathList *next;
+  PathList *plp = pathlist;
+  PathList *next;
 
-    while (plp)
-    {
-	next = plp->next;
-	free(plp->path);
-	free(plp);
-	plp = next;
-    }
-    pathlist = NULL;
+  while (plp)
+  {
+    next = plp->next;
+    free(plp->path);
+    free(plp);
+    plp = next;
+  }
+  pathlist = NULL;
 }

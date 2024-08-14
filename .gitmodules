@@ -1,6 +1,15 @@
-[submodule "3rd/SDL"]
-	path = 3rd/SDL
-	url = https://github.com/sdlpal/SDL.git
-[submodule "SDL"]
-	path = SDL
+[submodule "external/SDL"]
+	path = external/SDL
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "external/libmad"]
+	path = external/libmad
+	url = https://github.com/markjeee/libmad.git
+[submodule "external/SDL_mixer"]
+	path = external/SDL_mixer
+	url = https://github.com/libsdl-org/SDL_mixer.git
+[submodule "external/adplug"]
+	path = external/adplug
+	url = https://github.com/adplug/adplug.git
+[submodule "external/libbinio"]
+	path = external/libbinio
+	url = https://github.com/adplug/libbinio.git

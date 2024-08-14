@@ -5,18 +5,8 @@
       <UniqueIdentifier>{5fb8a8f9-e3e0-47bc-9069-169cab515daa}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{419a6407-1bce-4024-b123-5dd4da5e23bb}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl</Extensions>
-    </Filter>
     <Filter Include="adplug">
       <UniqueIdentifier>{03115a26-b3ad-43f5-ae8b-5029ef689d92}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{00ee67d7-9dbb-42ed-8238-a2226fd0e86e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="native_midi">
-      <UniqueIdentifier>{f3a4dae5-8d13-4d02-ba0f-c5a3b6acb1e7}</UniqueIdentifier>
     </Filter>
     <Filter Include="libmad">
       <UniqueIdentifier>{1e3bd586-dfa2-4acb-8f38-8497f4539508}</UniqueIdentifier>
@@ -54,16 +44,6 @@
     <Filter Include="platform">
       <UniqueIdentifier>{06f44698-1e02-440e-bc40-9858a46c2d8f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Test Files">
-      <UniqueIdentifier>{c04132fc-026a-4e64-892d-76834bbdaef8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Test Files\deps">
-      <UniqueIdentifier>{5f2a83a2-9824-4e9e-a352-8dc90c92fbde}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="generated">
-      <UniqueIdentifier>{85918901-0fba-453a-8dca-fd0665d789b3}</UniqueIdentifier>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
     <Filter Include="adplug\mame">
       <UniqueIdentifier>{ecd0a2c8-523a-482d-b8a4-6ebd08aea825}</UniqueIdentifier>
     </Filter>
@@ -78,9 +58,6 @@
     </Filter>
     <Filter Include="libopusfile">
       <UniqueIdentifier>{8db6e25a-a8d4-4e0e-af84-e231f468e5c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="timidity">
-      <UniqueIdentifier>{d7a20b30-e42b-4804-8b48-4ac1cbaf3b10}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -182,9 +159,6 @@
     </ClCompile>
     <ClCompile Include="..\adplug\surroundopl.cpp">
       <Filter>adplug</Filter>
-    </ClCompile>
-    <ClCompile Include="..\native_midi\native_midi_common.c">
-      <Filter>native_midi</Filter>
     </ClCompile>
     <ClCompile Include="..\libmad\bit.c">
       <Filter>libmad</Filter>
@@ -317,15 +291,6 @@
     </ClCompile>
     <ClCompile Include="..\audio.c">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tests\test_main.cpp">
-      <Filter>Test Files\deps</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tests\test_swprintf.cpp">
-      <Filter>Test Files</Filter>
-    </ClCompile>
-    <ClCompile Include="native_midi.cpp">
-      <Filter>native_midi</Filter>
     </ClCompile>
     <ClCompile Include="..\aviplay.c">
       <Filter>Source Files</Filter>
@@ -777,33 +742,6 @@
     <ClCompile Include="..\libopusfile\silk\float\wrappers_FLP.c">
       <Filter>libopusfile</Filter>
     </ClCompile>
-    <ClCompile Include="..\timidity\common.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\timidity\instrum.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\timidity\mix.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\timidity\output.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\timidity\playmidi.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\timidity\readmidi.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\timidity\resample.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\timidity\tables.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\timidity\timidity.c">
-      <Filter>timidity</Filter>
-    </ClCompile>
     <ClCompile Include="..\midi_timidity.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -812,87 +750,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\ascii.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\battle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ending.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\fight.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\font.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\global.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\itemmenu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\magicmenu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\map.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\midi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\palcommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\palette.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\play.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\res.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\rngplay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\script.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\text.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\uibattle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\uigame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\video.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\adplug\binfile.h">
       <Filter>adplug</Filter>
     </ClInclude>
@@ -913,12 +770,6 @@
     </ClInclude>
     <ClInclude Include="..\adplug\surroundopl.h">
       <Filter>adplug</Filter>
-    </ClInclude>
-    <ClInclude Include="..\native_midi\native_midi.h">
-      <Filter>native_midi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\native_midi\native_midi_common.h">
-      <Filter>native_midi</Filter>
     </ClInclude>
     <ClInclude Include="..\libmad\bit.h">
       <Filter>libmad</Filter>
@@ -961,15 +812,6 @@
     </ClInclude>
     <ClInclude Include="..\libmad\timer.h">
       <Filter>libmad</Filter>
-    </ClInclude>
-    <ClInclude Include="..\codepage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\fontglyph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\resampler.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\liboggvorbis\src\modes\floor_all.h">
       <Filter>liboggvorbis\src\modes</Filter>
@@ -1112,29 +954,11 @@
     <ClInclude Include="..\liboggvorbis\include\ogg\os_types.h">
       <Filter>liboggvorbis\include\ogg</Filter>
     </ClInclude>
-    <ClInclude Include="..\players.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\liboggvorbis\include\ogg\config_types.h">
       <Filter>liboggvorbis\include\ogg</Filter>
     </ClInclude>
-    <ClInclude Include="..\palcfg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\audio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pal_config.h">
       <Filter>platform</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\aviplay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\riff.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\adplug\emuopls.h">
       <Filter>adplug</Filter>
@@ -1198,9 +1022,6 @@
     </ClInclude>
     <ClInclude Include="..\glslp.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\defines.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\libopusfile\src\analysis.h">
       <Filter>libopusfile</Filter>
@@ -1409,44 +1230,8 @@
     <ClInclude Include="..\libopusfile\silk\float\structs_FLP.h">
       <Filter>libopusfile</Filter>
     </ClInclude>
-    <ClInclude Include="..\timidity\common.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\instrum.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\mix.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\options.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\output.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\playmidi.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\readmidi.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\resample.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\tables.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\timidity\timidity.h">
-      <Filter>timidity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\midi_timidity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\sdlpal.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\libmad\D.dat">
       <Filter>libmad</Filter>
     </None>
@@ -1462,26 +1247,5 @@
     <None Include="..\libmad\sf_table.dat">
       <Filter>libmad</Filter>
     </None>
-    <None Include="..\docs\sdlpal.cfg.example">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\AUTHORS.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="..\README.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="sdlpal.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Manifest Include="Application.manifest">
-      <Filter>Resource Files</Filter>
-    </Manifest>
   </ItemGroup>
 </Project>

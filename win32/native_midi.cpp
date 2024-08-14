@@ -22,7 +22,7 @@
 //         @Author: Lou Yihua, 2017
 //
 
-#include <SDL3/SDL.h>
+#include <SDL.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -47,7 +47,8 @@
 
 static int native_midi_available = -1;
 
-enum class MidiSystemMessage {
+enum class MidiSystemMessage
+{
 	Exclusive = 0,
 	TimeCode = 1,
 	SongPositionPointer = 2,
@@ -82,7 +83,7 @@ struct MidiLongMessage
 {
 	MIDIHDR hdr;
 
-	MidiLongMessage(uint8_t* data, int length)
+	MidiLongMessage(uint8_t *data, int length)
 	{
 		memset(&hdr, 0, sizeof(MIDIHDR));
 		hdr.lpData = (LPSTR)malloc(length);
@@ -117,7 +118,8 @@ struct MidiCustomMessage
 
 	MidiCustomMessage(uint8_t status, uint8_t data1, uint8_t data2)
 		: message(status), data1(data1), data2(data2)
-	{}
+	{
+	}
 
 	virtual MMRESULT SendEvent(HMIDIOUT hmo) { return midiOutMessage(hmo, message, data1, data2); }
 };
@@ -125,8 +127,8 @@ struct MidiCustomMessage
 struct MidiEvent
 {
 	std::unique_ptr<MidiMessage> message;
-	uint32_t                     deltaTime;		// time in ticks
-	uint32_t                     tempo;			// microseconds per quarter note
+	uint32_t deltaTime; // time in ticks
+	uint32_t tempo;		// microseconds per quarter note
 
 	std::chrono::system_clock::duration DeltaTimeAsTick(uint16_t ppq)
 	{
@@ -136,30 +138,31 @@ struct MidiEvent
 	MMRESULT Send(HMIDIOUT hmo) { return message->Send(hmo); }
 };
 
-struct _NativeMidiSong {
-	std::vector<MidiEvent>  Events;
-	std::thread             Thread;
-	std::mutex              Mutex;
+struct _NativeMidiSong
+{
+	std::vector<MidiEvent> Events;
+	std::thread Thread;
+	std::mutex Mutex;
 	std::condition_variable Stop;
-	HMIDIOUT                Synthesizer;
-	int                     Size;
-	int                     Position;
-	Uint16                  ppq;		// parts (ticks) per quarter note
-	volatile bool           Playing;
-	bool                    Loaded;
-	bool                    Looping;
+	HMIDIOUT Synthesizer;
+	int Size;
+	int Position;
+	Uint16 ppq; // parts (ticks) per quarter note
+	volatile bool Playing;
+	bool Loaded;
+	bool Looping;
 
 	_NativeMidiSong()
-		: Synthesizer(nullptr), Size(0), Position(0)
-		, ppq(0), Playing(false), Loaded(false), Looping(false)
-	{ }
+		: Synthesizer(nullptr), Size(0), Position(0), ppq(0), Playing(false), Loaded(false), Looping(false)
+	{
+	}
 };
 
 static void MIDItoStream(NativeMidiSong *song, MIDIEvent *eventlist)
 {
 	int eventcount = 0, prevtime = 0, tempo = 500000;
 
-	for (MIDIEvent* event = eventlist; event; event = event->next)
+	for (MIDIEvent *event = eventlist; event; event = event->next)
 	{
 		if (event->status != 0xFF)
 			eventcount++;
@@ -170,9 +173,9 @@ static void MIDItoStream(NativeMidiSong *song, MIDIEvent *eventlist)
 	song->Loaded = true;
 
 	eventcount = 0;
-	for (MIDIEvent* event = eventlist; event; event = event->next)
+	for (MIDIEvent *event = eventlist; event; event = event->next)
 	{
-		MidiMessage* message = nullptr;
+		MidiMessage *message = nullptr;
 		int status = (event->status & 0xF0) >> 4;
 		switch (status)
 		{
@@ -275,7 +278,7 @@ NativeMidiSong *native_midi_loadsong_RW(SDL_RWops *rw)
 		{
 			MIDItoStream(newsong.get(), eventlist);
 			FreeMIDIEventList(eventlist);
-			
+
 			if (midiOutOpen(&newsong->Synthesizer, MIDI_MAPPER, NULL, 0, CALLBACK_NULL) == MMSYSERR_NOERROR)
 				return newsong.release();
 		}
@@ -297,13 +300,15 @@ void native_midi_freesong(NativeMidiSong *song)
 
 void native_midi_start(NativeMidiSong *song, int looping)
 {
-	if (!song) return;
+	if (!song)
+		return;
 
 	native_midi_stop(song);
 
 	song->Playing = true;
 	song->Looping = looping ? true : false;
-	song->Thread = std::move(std::thread([](NativeMidiSong *song)->void {
+	song->Thread = std::move(std::thread([](NativeMidiSong *song) -> void
+										 {
 		auto time = std::chrono::system_clock::now();
 		while (song->Playing)
 		{
@@ -326,8 +331,7 @@ void native_midi_start(NativeMidiSong *song, int looping)
 				song->Position = 0;
 				midiOutReset(song->Synthesizer);
 			}
-		}
-	}, song));
+		} }, song));
 }
 
 void native_midi_stop(NativeMidiSong *song)
@@ -365,5 +369,5 @@ void native_midi_setvolume(NativeMidiSong *song, int volume)
 
 const char *native_midi_error(NativeMidiSong *song)
 {
-  return "";
+	return "";
 }
