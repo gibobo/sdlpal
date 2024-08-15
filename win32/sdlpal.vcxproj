@@ -34,11 +34,11 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -50,7 +50,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -119,8 +119,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>
-        .\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\timidity;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
@@ -135,8 +134,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>
-        opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -160,7 +158,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;SDL2.lib;sdl2main.lib;native_midi.lib;timidity.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;SDL2.lib;sdl2main.lib;native_midi.lib;timidity.lib;libogg.lib;libvorbis_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -170,8 +168,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>
-        .\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\timidity;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
@@ -188,8 +185,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>
-        opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -199,8 +195,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>
-        .\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\timidity;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
@@ -216,8 +211,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>
-        opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
@@ -243,7 +237,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;SDL2.lib;sdl2main.lib;native_midi.lib;timidity.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;SDL2.lib;sdl2main.lib;native_midi.lib;timidity.lib;libogg.lib;libvorbis_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -267,7 +261,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;SDL2.lib;sdl2main.lib;native_midi.lib;timidity.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;SDL2.lib;sdl2main.lib;native_midi.lib;timidity.lib;libogg.lib;libvorbis_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -290,30 +284,6 @@
     <ClCompile Include="..\glslp.c" />
     <ClCompile Include="..\input.c" />
     <ClCompile Include="..\itemmenu.c" />
-    <ClCompile Include="..\liboggvorbis\src\analysis.c" />
-    <ClCompile Include="..\liboggvorbis\src\bitrate.c" />
-    <ClCompile Include="..\liboggvorbis\src\bitwise.c" />
-    <ClCompile Include="..\liboggvorbis\src\block.c" />
-    <ClCompile Include="..\liboggvorbis\src\codebook.c" />
-    <ClCompile Include="..\liboggvorbis\src\envelope.c" />
-    <ClCompile Include="..\liboggvorbis\src\floor0.c" />
-    <ClCompile Include="..\liboggvorbis\src\floor1.c" />
-    <ClCompile Include="..\liboggvorbis\src\framing.c" />
-    <ClCompile Include="..\liboggvorbis\src\info.c" />
-    <ClCompile Include="..\liboggvorbis\src\lookup.c" />
-    <ClCompile Include="..\liboggvorbis\src\lpc.c" />
-    <ClCompile Include="..\liboggvorbis\src\lsp.c" />
-    <ClCompile Include="..\liboggvorbis\src\mapping0.c" />
-    <ClCompile Include="..\liboggvorbis\src\mdct.c" />
-    <ClCompile Include="..\liboggvorbis\src\psy.c" />
-    <ClCompile Include="..\liboggvorbis\src\registry.c" />
-    <ClCompile Include="..\liboggvorbis\src\res0.c" />
-    <ClCompile Include="..\liboggvorbis\src\sharedbook.c" />
-    <ClCompile Include="..\liboggvorbis\src\smallft.c" />
-    <ClCompile Include="..\liboggvorbis\src\synthesis.c" />
-    <ClCompile Include="..\liboggvorbis\src\vorbisenc.c" />
-    <ClCompile Include="..\liboggvorbis\src\vorbisfile.c" />
-    <ClCompile Include="..\liboggvorbis\src\window.c" />
     <ClCompile Include="..\libopusfile\celt\bands.c" />
     <ClCompile Include="..\libopusfile\celt\celt.c" />
     <ClCompile Include="..\libopusfile\celt\celt_decoder.c" />
@@ -526,54 +496,6 @@
     <ClInclude Include="..\adplug\nuked_opl.h" />
     <ClInclude Include="..\adplug\opltypes.h" />
     <ClInclude Include="..\glslp.h" />
-    <ClInclude Include="..\liboggvorbis\include\ogg\config_types.h" />
-    <ClInclude Include="..\liboggvorbis\include\ogg\ogg.h" />
-    <ClInclude Include="..\liboggvorbis\include\ogg\os_types.h" />
-    <ClInclude Include="..\liboggvorbis\include\vorbis\codec.h" />
-    <ClInclude Include="..\liboggvorbis\include\vorbis\vorbisenc.h" />
-    <ClInclude Include="..\liboggvorbis\include\vorbis\vorbisfile.h" />
-    <ClInclude Include="..\liboggvorbis\src\backends.h" />
-    <ClInclude Include="..\liboggvorbis\src\bitrate.h" />
-    <ClInclude Include="..\liboggvorbis\src\books\coupled\res_books_51.h" />
-    <ClInclude Include="..\liboggvorbis\src\books\coupled\res_books_stereo.h" />
-    <ClInclude Include="..\liboggvorbis\src\books\floor\floor_books.h" />
-    <ClInclude Include="..\liboggvorbis\src\books\uncoupled\res_books_uncoupled.h" />
-    <ClInclude Include="..\liboggvorbis\src\codebook.h" />
-    <ClInclude Include="..\liboggvorbis\src\codec_internal.h" />
-    <ClInclude Include="..\liboggvorbis\src\envelope.h" />
-    <ClInclude Include="..\liboggvorbis\src\highlevel.h" />
-    <ClInclude Include="..\liboggvorbis\src\lookup.h" />
-    <ClInclude Include="..\liboggvorbis\src\lookup_data.h" />
-    <ClInclude Include="..\liboggvorbis\src\lpc.h" />
-    <ClInclude Include="..\liboggvorbis\src\lsp.h" />
-    <ClInclude Include="..\liboggvorbis\src\masking.h" />
-    <ClInclude Include="..\liboggvorbis\src\mdct.h" />
-    <ClInclude Include="..\liboggvorbis\src\misc.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\floor_all.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\psych_11.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\psych_16.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\psych_44.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\psych_8.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\residue_16.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\residue_44.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\residue_44p51.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\residue_44u.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\residue_8.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_11.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_16.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_22.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_32.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_44.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_44p51.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_44u.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_8.h" />
-    <ClInclude Include="..\liboggvorbis\src\modes\setup_X.h" />
-    <ClInclude Include="..\liboggvorbis\src\os.h" />
-    <ClInclude Include="..\liboggvorbis\src\psy.h" />
-    <ClInclude Include="..\liboggvorbis\src\registry.h" />
-    <ClInclude Include="..\liboggvorbis\src\scales.h" />
-    <ClInclude Include="..\liboggvorbis\src\smallft.h" />
-    <ClInclude Include="..\liboggvorbis\src\window.h" />
     <ClInclude Include="..\libopusfile\celt\arch.h" />
     <ClInclude Include="..\libopusfile\celt\bands.h" />
     <ClInclude Include="..\libopusfile\celt\celt.h" />

@@ -167,7 +167,8 @@ TIMIDITY_Init(
 	VOID
 )
 {
-	Timidity_Init(gConfig.pszGamePath, gConfig.pszSoundBank);
+	//Timidity_Init(gConfig.pszGamePath, gConfig.pszSoundBank);
+	Timidity_Init(NULL);
 
 	LPTIMIDITYPLAYER player;
 	if ((player = (LPTIMIDITYPLAYER)malloc(sizeof(TIMIDITYPLAYER))) != NULL)
