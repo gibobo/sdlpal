@@ -34,7 +34,7 @@ MIDI_SetVolume(
 	g_iMidiVolume = iVolume;
 	if (g_pMidi)
 	{
-		native_midi_setvolume(g_pMidi, iVolume * 127 / PAL_MAX_VOLUME);
+		native_midi_setvolume(iVolume * 127 / PAL_MAX_VOLUME);
 	}
 #endif
 }
@@ -49,12 +49,12 @@ MIDI_Play(
 	if (!native_midi_detect())
 		return;
 
-	if (native_midi_active(g_pMidi) && iNumRIX == g_iMidiCurrent)
+	if (native_midi_active() && iNumRIX == g_iMidiCurrent)
 	{
 		return;
 	}
 
-	native_midi_stop(g_pMidi);
+	native_midi_stop();
 	native_midi_freesong(g_pMidi);
 	g_pMidi = NULL;
 	g_iMidiCurrent = -1;
@@ -71,8 +71,7 @@ MIDI_Play(
 		auto rw = SDL_RWFromFile(midifile, "rb");
 		if (rw)
 		{
-			g_pMidi = native_midi_loadsong_RW(rw);
-			SDL_RWclose(rw);
+			g_pMidi = native_midi_loadsong_RW(rw, 1);
 		}
 		else
 			g_pMidi = NULL;
@@ -97,8 +96,7 @@ MIDI_Play(
 		if (buf)
 		{
 			SDL_RWops *rw = SDL_RWFromConstMem(buf, size);
-			g_pMidi = native_midi_loadsong_RW(rw);
-			SDL_RWclose(rw);
+			g_pMidi = native_midi_loadsong_RW(rw, 1);
 			free(buf);
 		}
 	}
