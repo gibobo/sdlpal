@@ -32,10 +32,10 @@
 #include <errno.h>
 #include <string>
 #include "resource.h"
-#include "../global.h"
-#include "../util.h"
-#include "../palcfg.h"
-#include "../resampler.h"
+#include "global.h"
+#include "util.h"
+#include "palcfg.h"
+#include "resampler.h"
 
 #ifndef GCLP_HICON
 # define GCLP_HICON (-14)

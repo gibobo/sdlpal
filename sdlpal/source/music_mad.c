@@ -24,7 +24,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "music_mad.h"
-#include "../resampler.h" /* SDLPAL */
+#include "resampler.h" /* SDLPAL */
 
 #ifndef SDL_AUDIO_BITSIZE
 # define SDL_AUDIO_BITSIZE(x)         (x & 0xFF)

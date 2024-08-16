@@ -36,7 +36,7 @@
 #include "native_midi/native_midi.h"
 #include "util.h"
 #include "palcfg.h"
-#include "../common.h"
+#include "common.h"
 
 #define CLIPLAYER_EXECUTABLE (which("timidity"))
 
