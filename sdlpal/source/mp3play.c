@@ -26,7 +26,7 @@
 #include "players.h"
 
 #if PAL_HAS_MP3
-#include "libmad/music_mad.h"
+#include "music_mad.h"
 #include "resampler.h"
 
 typedef struct tagMP3PLAYER

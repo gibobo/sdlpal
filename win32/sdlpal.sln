@@ -43,6 +43,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opus", "..\external\SDL_mix
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opusfile", "..\external\SDL_mixer\external\opusfile\win32\VS2015\opusfile.vcxproj", "{1A4B5203-52EB-4805-9511-84B1BD094FCA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmad", "libmad\libmad.vcxproj", "{D1F14356-FDE8-4C71-A52F-119BD359A9F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -313,6 +315,34 @@ Global
 		{1A4B5203-52EB-4805-9511-84B1BD094FCA}.Release-NoHTTP|Win32.Build.0 = Release-NoHTTP|Win32
 		{1A4B5203-52EB-4805-9511-84B1BD094FCA}.Release-NoHTTP|x64.ActiveCfg = Release-NoHTTP|x64
 		{1A4B5203-52EB-4805-9511-84B1BD094FCA}.Release-NoHTTP|x64.Build.0 = Release-NoHTTP|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Debug|Win32.Build.0 = Debug|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Debug|x64.ActiveCfg = Debug|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Debug|x64.Build.0 = Debug|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.DebugDLL_fixed|Win32.ActiveCfg = Debug|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.DebugDLL_fixed|Win32.Build.0 = Debug|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.DebugDLL_fixed|x64.ActiveCfg = Debug|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.DebugDLL_fixed|x64.Build.0 = Debug|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.DebugDLL|Win32.ActiveCfg = Debug|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.DebugDLL|Win32.Build.0 = Debug|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.DebugDLL|x64.ActiveCfg = Debug|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.DebugDLL|x64.Build.0 = Debug|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Release|Win32.ActiveCfg = Release|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Release|Win32.Build.0 = Release|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Release|x64.ActiveCfg = Release|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Release|x64.Build.0 = Release|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.ReleaseDLL_fixed|Win32.ActiveCfg = Release|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.ReleaseDLL_fixed|Win32.Build.0 = Release|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.ReleaseDLL_fixed|x64.ActiveCfg = Release|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.ReleaseDLL_fixed|x64.Build.0 = Release|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.ReleaseDLL|Win32.ActiveCfg = Release|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.ReleaseDLL|Win32.Build.0 = Release|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.ReleaseDLL|x64.ActiveCfg = Release|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.ReleaseDLL|x64.Build.0 = Release|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Release-NoHTTP|Win32.ActiveCfg = Release|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Release-NoHTTP|Win32.Build.0 = Release|Win32
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Release-NoHTTP|x64.ActiveCfg = Release|x64
+		{D1F14356-FDE8-4C71-A52F-119BD359A9F1}.Release-NoHTTP|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

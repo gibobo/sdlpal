@@ -119,7 +119,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
@@ -134,7 +134,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -144,7 +144,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
@@ -158,7 +158,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -168,7 +168,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
@@ -185,7 +185,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -195,7 +195,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
@@ -211,7 +211,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
@@ -222,7 +222,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -237,7 +237,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -247,7 +247,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;..\libopusfile\src;..\libopusfile\include;..\libopusfile\celt;..\libopusfile\silk;..\libopusfile\silk\float;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -261,7 +261,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -273,47 +273,6 @@
     <ClCompile Include="..\adplug\dosbox_opls.cpp" />
     <ClCompile Include="..\adplug\mame_opls.cpp" />
     <ClCompile Include="..\adplug\nuked_opl.c" />
-    <ClCompile Include="..\audio.c" />
-    <ClCompile Include="..\aviplay.c" />
-    <ClCompile Include="..\battle.c" />
-    <ClCompile Include="..\ending.c" />
-    <ClCompile Include="..\fight.c" />
-    <ClCompile Include="..\font.c" />
-    <ClCompile Include="..\game.c" />
-    <ClCompile Include="..\global.c" />
-    <ClCompile Include="..\glslp.c" />
-    <ClCompile Include="..\input.c" />
-    <ClCompile Include="..\itemmenu.c" />
-    <ClCompile Include="..\magicmenu.c" />
-    <ClCompile Include="..\main.c" />
-    <ClCompile Include="..\map.c" />
-    <ClCompile Include="..\midi.c" />
-    <ClCompile Include="..\midi_timidity.c" />
-    <ClCompile Include="..\midi_tsf.c" />
-    <ClCompile Include="..\mp3play.c" />
-    <ClCompile Include="..\oggplay.c" />
-    <ClCompile Include="..\opusplay.c" />
-    <ClCompile Include="..\overlay.c" />
-    <ClCompile Include="..\palcfg.c" />
-    <ClCompile Include="..\palcommon.c" />
-    <ClCompile Include="..\palette.c" />
-    <ClCompile Include="..\play.c" />
-    <ClCompile Include="..\res.c" />
-    <ClCompile Include="..\resampler.c" />
-    <ClCompile Include="..\rixplay.cpp" />
-    <ClCompile Include="..\rngplay.c" />
-    <ClCompile Include="..\scene.c" />
-    <ClCompile Include="..\script.c" />
-    <ClCompile Include="..\sound.c" />
-    <ClCompile Include="..\text.c" />
-    <ClCompile Include="..\ui.c" />
-    <ClCompile Include="..\uibattle.c" />
-    <ClCompile Include="..\uigame.c" />
-    <ClCompile Include="..\util.c" />
-    <ClCompile Include="..\video.c" />
-    <ClCompile Include="..\video_glsl.c" />
-    <ClCompile Include="..\mini_glloader.c" />
-    <ClCompile Include="..\yj1.c" />
     <ClCompile Include="..\adplug\binfile.cpp" />
     <ClCompile Include="..\adplug\binio.cpp" />
     <ClCompile Include="..\adplug\fprovide.cpp" />
@@ -321,17 +280,48 @@
     <ClCompile Include="..\adplug\rix.cpp" />
     <ClCompile Include="..\adplug\emuopls.cpp" />
     <ClCompile Include="..\adplug\surroundopl.cpp" />
-    <ClCompile Include="..\libmad\bit.c" />
-    <ClCompile Include="..\libmad\decoder.c" />
-    <ClCompile Include="..\libmad\fixed.c" />
-    <ClCompile Include="..\libmad\frame.c" />
-    <ClCompile Include="..\libmad\huffman.c" />
-    <ClCompile Include="..\libmad\layer12.c" />
-    <ClCompile Include="..\libmad\layer3.c" />
-    <ClCompile Include="..\libmad\music_mad.c" />
-    <ClCompile Include="..\libmad\stream.c" />
-    <ClCompile Include="..\libmad\synth.c" />
-    <ClCompile Include="..\libmad\timer.c" />
+    <ClCompile Include="..\sdlpal\source\audio.c" />
+    <ClCompile Include="..\sdlpal\source\aviplay.c" />
+    <ClCompile Include="..\sdlpal\source\battle.c" />
+    <ClCompile Include="..\sdlpal\source\ending.c" />
+    <ClCompile Include="..\sdlpal\source\fight.c" />
+    <ClCompile Include="..\sdlpal\source\font.c" />
+    <ClCompile Include="..\sdlpal\source\game.c" />
+    <ClCompile Include="..\sdlpal\source\global.c" />
+    <ClCompile Include="..\sdlpal\source\glslp.c" />
+    <ClCompile Include="..\sdlpal\source\input.c" />
+    <ClCompile Include="..\sdlpal\source\itemmenu.c" />
+    <ClCompile Include="..\sdlpal\source\magicmenu.c" />
+    <ClCompile Include="..\sdlpal\source\main.c" />
+    <ClCompile Include="..\sdlpal\source\map.c" />
+    <ClCompile Include="..\sdlpal\source\midi.c" />
+    <ClCompile Include="..\sdlpal\source\midi_timidity.c" />
+    <ClCompile Include="..\sdlpal\source\midi_tsf.c" />
+    <ClCompile Include="..\sdlpal\source\mini_glloader.c" />
+    <ClCompile Include="..\sdlpal\source\mp3play.c" />
+    <ClCompile Include="..\sdlpal\source\music_mad.c" />
+    <ClCompile Include="..\sdlpal\source\oggplay.c" />
+    <ClCompile Include="..\sdlpal\source\opusplay.c" />
+    <ClCompile Include="..\sdlpal\source\overlay.c" />
+    <ClCompile Include="..\sdlpal\source\palcfg.c" />
+    <ClCompile Include="..\sdlpal\source\palcommon.c" />
+    <ClCompile Include="..\sdlpal\source\palette.c" />
+    <ClCompile Include="..\sdlpal\source\play.c" />
+    <ClCompile Include="..\sdlpal\source\res.c" />
+    <ClCompile Include="..\sdlpal\source\resampler.c" />
+    <ClCompile Include="..\sdlpal\source\rixplay.cpp" />
+    <ClCompile Include="..\sdlpal\source\rngplay.c" />
+    <ClCompile Include="..\sdlpal\source\scene.c" />
+    <ClCompile Include="..\sdlpal\source\script.c" />
+    <ClCompile Include="..\sdlpal\source\sound.c" />
+    <ClCompile Include="..\sdlpal\source\text.c" />
+    <ClCompile Include="..\sdlpal\source\ui.c" />
+    <ClCompile Include="..\sdlpal\source\uibattle.c" />
+    <ClCompile Include="..\sdlpal\source\uigame.c" />
+    <ClCompile Include="..\sdlpal\source\util.c" />
+    <ClCompile Include="..\sdlpal\source\video.c" />
+    <ClCompile Include="..\sdlpal\source\video_glsl.c" />
+    <ClCompile Include="..\sdlpal\source\yj1.c" />
     <ClCompile Include="win32.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -353,8 +343,6 @@
     <ClInclude Include="..\adplug\nuked\opl3.h" />
     <ClInclude Include="..\adplug\nuked_opl.h" />
     <ClInclude Include="..\adplug\opltypes.h" />
-    <ClInclude Include="..\glslp.h" />
-    <ClInclude Include="..\mini_glloader.h" />
     <ClInclude Include="..\adplug\binfile.h" />
     <ClInclude Include="..\adplug\binio.h" />
     <ClInclude Include="..\adplug\fprovide.h" />
@@ -362,29 +350,7 @@
     <ClInclude Include="..\adplug\player.h" />
     <ClInclude Include="..\adplug\rix.h" />
     <ClInclude Include="..\adplug\surroundopl.h" />
-    <ClInclude Include="..\libmad\bit.h" />
-    <ClInclude Include="..\libmad\decoder.h" />
-    <ClInclude Include="..\libmad\fixed.h" />
-    <ClInclude Include="..\libmad\frame.h" />
-    <ClInclude Include="..\libmad\huffman.h" />
-    <ClInclude Include="..\libmad\layer12.h" />
-    <ClInclude Include="..\libmad\layer3.h" />
-    <ClInclude Include="..\libmad\libmad_config.h" />
-    <ClInclude Include="..\libmad\libmad_global.h" />
-    <ClInclude Include="..\libmad\mad.h" />
-    <ClInclude Include="..\libmad\music_mad.h" />
-    <ClInclude Include="..\libmad\stream.h" />
-    <ClInclude Include="..\libmad\synth.h" />
-    <ClInclude Include="..\libmad\timer.h" />
-    <ClInclude Include="..\video_glsl.h" />
     <ClInclude Include="pal_config.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\libmad\D.dat" />
-    <None Include="..\libmad\imdct_s.dat" />
-    <None Include="..\libmad\qc_table.dat" />
-    <None Include="..\libmad\rq_table.dat" />
-    <None Include="..\libmad\sf_table.dat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
