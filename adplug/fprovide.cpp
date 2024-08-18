@@ -18,8 +18,7 @@
  *
  * fprovide.cpp - File provider class framework, by Simon Peter <dn.tlp@gmx.net>
  */
-#include "common.h"
-
+#include <SDL.h>
 #include <string.h>
 #include "binio.h"
 #include "binfile.h"

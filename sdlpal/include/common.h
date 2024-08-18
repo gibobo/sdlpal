@@ -181,7 +181,50 @@ typedef const WCHAR        *LPCWSTR;
    named 'pal_config.h' that contains marco definitions & header includes into the directory.
    The example of this file can be found in directories of existing portings.
  */
+#include "opltypes.h"
 #include "pal_config.h"
+
+
+// #define PAL_PREFIX            "./"
+// #define PAL_SAVE_PREFIX       "./"
+
+// # if APPIMAGE
+// #  undef PAL_PREFIX
+// #  define PAL_PREFIX            PAL_va(PAL_MAX_GLOBAL_BUFFERS-1,"%s%s", SDL_getenv("HOME"),"/.config")
+// # endif
+
+// #define PAL_DEFAULT_WINDOW_WIDTH   640
+// #define PAL_DEFAULT_WINDOW_HEIGHT  400
+
+// #ifdef WIN32
+// #define PAL_FILESYSTEM_IGNORE_CASE 1
+// #endif // WIN32
+// #define PAL_FILESYSTEM_IGNORE_CASE 1
+
+// #define PAL_PLATFORM         NULL
+// #define PAL_CREDIT           NULL
+// #define PAL_PORTYEAR         NULL
+
+// #ifdef _M_ARM
+// # define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE)
+// #else
+// # ifndef PAL_HAS_JOYSTICKS
+// #  define PAL_HAS_JOYSTICKS    1
+// # endif
+// # if SDL_CDROM_DISABLED
+// #  define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
+// # else
+// #  define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
+// # endif
+// #endif
+
+// #if SDL_VERSION_ATLEAST(2,0,0)
+// # define PAL_VIDEO_INIT_FLAGS  (SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | (gConfig.fFullScreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0))
+// #else
+// # define PAL_VIDEO_INIT_FLAGS  (SDL_HWSURFACE | SDL_RESIZABLE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0))
+// # define PAL_FATAL_OUTPUT(s)   MessageBoxA(0, (s), "FATAL ERROR", MB_ICONERROR)
+// # define PAL_HAS_SDLCD         1
+// #endif
 
 #if !SDL_VERSION_ATLEAST(2,0,0)
 # if PAL_HAS_GLSL
@@ -294,7 +337,5 @@ typedef enum tagLOGLEVEL
 #ifndef PAL_IS_PATH_SEPARATOR
 # define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
 #endif
-
-#include "opltypes.h"
 
 #endif
