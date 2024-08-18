@@ -182,7 +182,7 @@ typedef const WCHAR        *LPCWSTR;
    The example of this file can be found in directories of existing portings.
  */
 #include "opltypes.h"
-#include "../../win32/pal_config.h"
+#include "pal_config.h"
 
 
 // #define PAL_PREFIX            "./"

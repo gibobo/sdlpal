@@ -29,7 +29,7 @@
 
 #include <stdint.h>
 extern "C" {
-#include "nuked/opl3.h"
+#include "opl3.h"
 }
 
 class NUKEDOPL3 : public OPLCORE

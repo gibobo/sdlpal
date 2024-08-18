@@ -5,23 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="標頭檔">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="資源檔">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="標頭檔\dosbox">
-      <UniqueIdentifier>{ab416c9a-12bb-47be-bb5b-bd4bffe29b05}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="標頭檔\mame">
-      <UniqueIdentifier>{39b562f2-8945-4284-bad0-cf681978a4b9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="標頭檔\nuked">
-      <UniqueIdentifier>{302ad3a2-ec03-4aa0-b72e-586bf49635c1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="來源檔案\nuked">
       <UniqueIdentifier>{48160be6-912b-415a-92d4-ff6cddcb0cd2}</UniqueIdentifier>
     </Filter>
@@ -33,16 +16,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dosbox_opls.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
     <ClCompile Include="emuopls.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
     <ClCompile Include="fprovide.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
-    <ClCompile Include="mame_opls.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
     <ClCompile Include="player.cpp">
@@ -57,62 +34,14 @@
     <ClCompile Include="..\external\Nuked\opl3.c">
       <Filter>來源檔案\nuked</Filter>
     </ClCompile>
+    <ClCompile Include="mame\mame_opls.cpp">
+      <Filter>來源檔案\mame</Filter>
+    </ClCompile>
+    <ClCompile Include="dosbox\dosbox_opls.cpp">
+      <Filter>來源檔案\dosbox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="convertopl.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="dosbox_opls.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="emuopls.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="fprovide.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="mame_opls.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="nuked_opl.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="opl.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="opltypes.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="player.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="rix.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="surroundopl.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="dosbox\dbopl.h">
-      <Filter>標頭檔\dosbox</Filter>
-    </ClInclude>
-    <ClInclude Include="dosbox\dosbox.h">
-      <Filter>標頭檔\dosbox</Filter>
-    </ClInclude>
-    <ClInclude Include="dosbox\opl.h">
-      <Filter>標頭檔\dosbox</Filter>
-    </ClInclude>
-    <ClInclude Include="mame\fmopl.h">
-      <Filter>標頭檔\mame</Filter>
-    </ClInclude>
-    <ClInclude Include="mame\mame.h">
-      <Filter>標頭檔\mame</Filter>
-    </ClInclude>
-    <ClInclude Include="mame\ymf262.h">
-      <Filter>標頭檔\mame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\Nuked\opl3.h">
-      <Filter>標頭檔\nuked</Filter>
-    </ClInclude>
     <ClInclude Include="mame\fmopl.cpp">
       <Filter>來源檔案\mame</Filter>
     </ClInclude>

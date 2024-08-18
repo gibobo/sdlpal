@@ -20,37 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\external\Nuked\opl3.c" />
-    <ClCompile Include="dosbox_opls.cpp" />
+    <ClCompile Include="dosbox\dosbox_opls.cpp" />
     <ClCompile Include="emuopls.cpp" />
     <ClCompile Include="fprovide.cpp" />
-    <ClCompile Include="mame_opls.cpp" />
+    <ClCompile Include="mame\mame_opls.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="rix.cpp" />
     <ClCompile Include="surroundopl.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\external\Nuked\opl3.h" />
-    <ClInclude Include="convertopl.h" />
     <ClInclude Include="dosbox\dbopl.cpp" />
-    <ClInclude Include="dosbox\dbopl.h" />
-    <ClInclude Include="dosbox\dosbox.h" />
     <ClInclude Include="dosbox\opl.cpp" />
-    <ClInclude Include="dosbox\opl.h" />
-    <ClInclude Include="dosbox_opls.h" />
-    <ClInclude Include="emuopls.h" />
-    <ClInclude Include="fprovide.h" />
     <ClInclude Include="mame\fmopl.cpp" />
-    <ClInclude Include="mame\fmopl.h" />
-    <ClInclude Include="mame\mame.h" />
     <ClInclude Include="mame\ymf262.cpp" />
-    <ClInclude Include="mame\ymf262.h" />
-    <ClInclude Include="mame_opls.h" />
-    <ClInclude Include="nuked_opl.h" />
-    <ClInclude Include="opl.h" />
-    <ClInclude Include="opltypes.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="rix.h" />
-    <ClInclude Include="surroundopl.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -121,7 +103,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,7 +117,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,7 +131,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,7 +145,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

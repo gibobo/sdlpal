@@ -40,8 +40,8 @@
  *
  */
 
-#include "dosbox_opls.h"
-#include "mame_opls.h"
+#include "dosbox/dosbox_opls.h"
+#include "mame/mame_opls.h"
 #include "nuked_opl.h"
 
 Copl* CEmuopl::CreateEmuopl(OPLCORE::TYPE core, Copl::ChipType type, int rate) {
