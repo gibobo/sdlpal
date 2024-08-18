@@ -30,10 +30,10 @@ namespace MAME
 {
 	namespace OPL2
 	{
-#		include "mame/fmopl.cpp.h"
+#		include "mame/fmopl.cpp"
 	}
 	namespace OPL3
 	{
-#		include "mame/ymf262.cpp.h"
+#		include "mame/ymf262.cpp"
 	}
 }

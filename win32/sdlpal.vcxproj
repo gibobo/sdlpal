@@ -119,9 +119,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>
-        HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -134,7 +133,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -144,9 +143,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>
-        HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -158,7 +156,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -168,9 +166,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>
-        HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -185,7 +182,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -195,9 +192,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>
-        HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -211,7 +207,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
@@ -222,9 +218,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>
-        HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -237,7 +232,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -247,9 +242,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>
-        HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\sdlpal\include;..\external\SDL\include;..\external\SDL_mixer\src\codecs\timidity;..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\src\codecs;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opusfile\include;..\external\libmad;..\adplug;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -261,7 +255,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -270,87 +264,7 @@
     <Bscmake />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\adplug\dosbox_opls.cpp" />
-    <ClCompile Include="..\adplug\mame_opls.cpp" />
-    <ClCompile Include="..\adplug\nuked_opl.c" />
-    <ClCompile Include="..\adplug\binfile.cpp" />
-    <ClCompile Include="..\adplug\binio.cpp" />
-    <ClCompile Include="..\adplug\fprovide.cpp" />
-    <ClCompile Include="..\adplug\player.cpp" />
-    <ClCompile Include="..\adplug\rix.cpp" />
-    <ClCompile Include="..\adplug\emuopls.cpp" />
-    <ClCompile Include="..\adplug\surroundopl.cpp" />
-    <ClCompile Include="..\sdlpal\source\audio.c" />
-    <ClCompile Include="..\sdlpal\source\aviplay.c" />
-    <ClCompile Include="..\sdlpal\source\battle.c" />
-    <ClCompile Include="..\sdlpal\source\ending.c" />
-    <ClCompile Include="..\sdlpal\source\fight.c" />
-    <ClCompile Include="..\sdlpal\source\font.c" />
-    <ClCompile Include="..\sdlpal\source\game.c" />
-    <ClCompile Include="..\sdlpal\source\global.c" />
-    <ClCompile Include="..\sdlpal\source\glslp.c" />
-    <ClCompile Include="..\sdlpal\source\input.c" />
-    <ClCompile Include="..\sdlpal\source\itemmenu.c" />
-    <ClCompile Include="..\sdlpal\source\magicmenu.c" />
-    <ClCompile Include="..\sdlpal\source\main.c" />
-    <ClCompile Include="..\sdlpal\source\map.c" />
-    <ClCompile Include="..\sdlpal\source\midi.c" />
-    <ClCompile Include="..\sdlpal\source\midi_timidity.c" />
-    <ClCompile Include="..\sdlpal\source\midi_tsf.c" />
-    <ClCompile Include="..\sdlpal\source\mini_glloader.c" />
-    <ClCompile Include="..\sdlpal\source\mp3play.c" />
-    <ClCompile Include="..\sdlpal\source\music_mad.c" />
-    <ClCompile Include="..\sdlpal\source\oggplay.c" />
-    <ClCompile Include="..\sdlpal\source\opusplay.c" />
-    <ClCompile Include="..\sdlpal\source\overlay.c" />
-    <ClCompile Include="..\sdlpal\source\palcfg.c" />
-    <ClCompile Include="..\sdlpal\source\palcommon.c" />
-    <ClCompile Include="..\sdlpal\source\palette.c" />
-    <ClCompile Include="..\sdlpal\source\play.c" />
-    <ClCompile Include="..\sdlpal\source\res.c" />
-    <ClCompile Include="..\sdlpal\source\resampler.c" />
-    <ClCompile Include="..\sdlpal\source\rixplay.cpp" />
-    <ClCompile Include="..\sdlpal\source\rngplay.c" />
-    <ClCompile Include="..\sdlpal\source\scene.c" />
-    <ClCompile Include="..\sdlpal\source\script.c" />
-    <ClCompile Include="..\sdlpal\source\sound.c" />
-    <ClCompile Include="..\sdlpal\source\text.c" />
-    <ClCompile Include="..\sdlpal\source\ui.c" />
-    <ClCompile Include="..\sdlpal\source\uibattle.c" />
-    <ClCompile Include="..\sdlpal\source\uigame.c" />
-    <ClCompile Include="..\sdlpal\source\util.c" />
-    <ClCompile Include="..\sdlpal\source\video.c" />
-    <ClCompile Include="..\sdlpal\source\video_glsl.c" />
-    <ClCompile Include="..\sdlpal\source\yj1.c" />
     <ClCompile Include="win32.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\adplug\dosbox\dbopl.cpp.h" />
-    <ClInclude Include="..\adplug\dosbox\dbopl.h" />
-    <ClInclude Include="..\adplug\dosbox\dosbox.h" />
-    <ClInclude Include="..\adplug\dosbox\opl.cpp.h" />
-    <ClInclude Include="..\adplug\dosbox_opls.h" />
-    <ClInclude Include="..\adplug\dosbox\opl.h" />
-    <ClInclude Include="..\adplug\mame\fmopl.cpp.h" />
-    <ClInclude Include="..\adplug\mame\ymf262.cpp.h" />
-    <ClInclude Include="..\adplug\mame_opls.h" />
-    <ClInclude Include="..\adplug\emuopls.h" />
-    <ClInclude Include="..\adplug\convertopl.h" />
-    <ClInclude Include="..\adplug\mame\fmopl.h" />
-    <ClInclude Include="..\adplug\mame\mame.h" />
-    <ClInclude Include="..\adplug\mame\ymf262.h" />
-    <ClInclude Include="..\adplug\nuked\opl3.c.h" />
-    <ClInclude Include="..\adplug\nuked\opl3.h" />
-    <ClInclude Include="..\adplug\nuked_opl.h" />
-    <ClInclude Include="..\adplug\opltypes.h" />
-    <ClInclude Include="..\adplug\binfile.h" />
-    <ClInclude Include="..\adplug\binio.h" />
-    <ClInclude Include="..\adplug\fprovide.h" />
-    <ClInclude Include="..\adplug\opl.h" />
-    <ClInclude Include="..\adplug\player.h" />
-    <ClInclude Include="..\adplug\rix.h" />
-    <ClInclude Include="..\adplug\surroundopl.h" />
-    <ClInclude Include="pal_config.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
