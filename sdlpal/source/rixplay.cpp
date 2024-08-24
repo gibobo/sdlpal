@@ -26,11 +26,11 @@
 #include "audio.h"
 
 #include "resampler.h"
-#include "opl.h"
 #include "emuopls.h"
-#include "surroundopl.h"
 #include "convertopl.h"
-#include "rix.h"
+#include "adplug/rix.h"
+#include "adplug/surroundopl.h"
+#include "adplug/opl.h"
 
 typedef struct tagRIXPLAYER :
 	public AUDIOPLAYER

@@ -19,20 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\external\Nuked\opl3.c" />
-    <ClCompile Include="..\adplug\dosbox\dosbox_opls.cpp" />
     <ClCompile Include="..\adplug\emuopls.cpp" />
-    <ClCompile Include="..\adplug\fprovide.cpp" />
-    <ClCompile Include="..\adplug\mame\mame_opls.cpp" />
-    <ClCompile Include="..\adplug\player.cpp" />
-    <ClCompile Include="..\adplug\rix.cpp" />
-    <ClCompile Include="..\adplug\surroundopl.cpp" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClCompile Include="..\adplug\adplug\fprovide.cpp" />
+    <ClCompile Include="..\adplug\adplug\player.cpp" />
+    <ClCompile Include="..\adplug\adplug\rix.cpp" />
+    <ClCompile Include="..\adplug\adplug\surroundopl.cpp" />
     <ClInclude Include="..\adplug\dosbox\dbopl.cpp" />
+    <ClCompile Include="..\adplug\dosbox\dosbox_opls.cpp" />
     <ClInclude Include="..\adplug\dosbox\opl.cpp" />
     <ClInclude Include="..\adplug\mame\fmopl.cpp" />
+    <ClCompile Include="..\adplug\mame\mame_opls.cpp" />
     <ClInclude Include="..\adplug\mame\ymf262.cpp" />
+    <ClCompile Include="..\external\Nuked\opl3.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -86,8 +84,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>Default</ConformanceMode>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\adplug;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -97,8 +94,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>Default</ConformanceMode>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\adplug;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -110,8 +106,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>Default</ConformanceMode>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\adplug;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -121,8 +116,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>Default</ConformanceMode>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\adplug;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
