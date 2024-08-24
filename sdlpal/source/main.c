@@ -489,8 +489,8 @@ main(
    // Platform-specific initialization
    //
    // TO FIX
-   //if (UTIL_Platform_Init(argc, argv) != 0)
-	  // return -1;
+   if (UTIL_Platform_Init(argc, argv) != 0)
+	   return -1;
 
    //
    // Should launch setting?
