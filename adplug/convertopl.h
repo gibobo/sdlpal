@@ -43,124 +43,124 @@
 #ifndef H_ADPLUG_CONVERTOPL
 #define H_ADPLUG_CONVERTOPL
 
-#include "adplug/opl.h"
+#include "src/opl.h"
 
-class CConvertopl: public Copl {
+class CConvertopl : public Copl {
 protected:
-	typedef void (CConvertopl::*Updater)(short* buf, int samples);
+    typedef void (CConvertopl::* Updater)(short* buf, int samples);
 
-	Copl*   opl;
-	Updater updater;
-	short*  buffer;
-	int     bufsamples;
+    Copl* opl;
+    Updater updater;
+    short* buffer;
+    int     bufsamples;
 
-	// Resize the internal buffer is necessary before update data into it
-	void update_to_internal_buffer(int samples) {
-		if (bufsamples < samples) {
-			if (buffer) delete[] buffer;
-			buffer = new short[(bufsamples = samples) * 2];
-		}
-		opl->update(buffer, samples);
-	}
+    // Resize the internal buffer is necessary before update data into it
+    void update_to_internal_buffer(int samples) {
+        if (bufsamples < samples) {
+            if (buffer) delete[] buffer;
+            buffer = new short[(bufsamples = samples) * 2];
+        }
+        opl->update(buffer, samples);
+    }
 
-	// Same specification
-	void update_direct(short* buf, int samples) {
-		opl->update(buf, samples);
-	}
+    // Same specification
+    void update_direct(short* buf, int samples) {
+        opl->update(buf, samples);
+    }
 
-	// 16bit, stereo -> 16bit, mono
-	void update_16s_16m(short* buf, int samples) {
-		update_to_internal_buffer(samples);
-		for (int i = 0, j = 0; i < samples; i++, j += 2) {
-			buf[i] = (buffer[j] >> 1) + (buffer[j + 1] >> 1);
-		}
-	}
+    // 16bit, stereo -> 16bit, mono
+    void update_16s_16m(short* buf, int samples) {
+        update_to_internal_buffer(samples);
+        for (int i = 0, j = 0; i < samples; i++, j += 2) {
+            buf[i] = (buffer[j] >> 1) + (buffer[j + 1] >> 1);
+        }
+    }
 
-	// 16bit, stereo -> 8bit, stereo
-	void update_16s_8s(short* buf, int samples) {
-		update_to_internal_buffer(samples);
-		for (int i = 0; i < samples * 2; i++) {
-			reinterpret_cast<char*>(buf)[i] = (buffer[i] >> 8) ^ 0x80;
-		}
-	}
+    // 16bit, stereo -> 8bit, stereo
+    void update_16s_8s(short* buf, int samples) {
+        update_to_internal_buffer(samples);
+        for (int i = 0; i < samples * 2; i++) {
+            reinterpret_cast<char*>(buf)[i] = (buffer[i] >> 8) ^ 0x80;
+        }
+    }
 
-	// 16bit, stereo -> 8bit, mono
-	void update_16s_8m(short* buf, int samples) {
-		update_to_internal_buffer(samples);
-		for (int i = 0, j = 0; i < samples; i++, j += 2) {
-			reinterpret_cast<char*>(buf)[i] = (((buffer[j] >> 1) + (buffer[j + 1] >> 1)) >> 8) ^ 0x80;
-		}
-	}
+    // 16bit, stereo -> 8bit, mono
+    void update_16s_8m(short* buf, int samples) {
+        update_to_internal_buffer(samples);
+        for (int i = 0, j = 0; i < samples; i++, j += 2) {
+            reinterpret_cast<char*>(buf)[i] = (((buffer[j] >> 1) + (buffer[j + 1] >> 1)) >> 8) ^ 0x80;
+        }
+    }
 
-	// 16bit, mono -> 16bit, stereo
-	void update_16m_16s(short* buf, int samples) {
-		opl->update(buf, samples);
-		for (int i = samples - 1, j = i * 2; i >= 0; i--, j -= 2) {
-			buf[j] = buf[j + 1] = buf[i];
-		}
-	}
+    // 16bit, mono -> 16bit, stereo
+    void update_16m_16s(short* buf, int samples) {
+        opl->update(buf, samples);
+        for (int i = samples - 1, j = i * 2; i >= 0; i--, j -= 2) {
+            buf[j] = buf[j + 1] = buf[i];
+        }
+    }
 
-	// 16bit, mono -> 8bit, stereo
-	void update_16m_8s(short* buf, int samples) {
-		opl->update(buf, samples);
-		for (int i = 0; i < samples; i++) {
-			buf[i] = (((buf[i] >> 8) & 0x00FF) | (buf[i] & 0xFF00)) ^ 0x8080;
-		}
-	}
+    // 16bit, mono -> 8bit, stereo
+    void update_16m_8s(short* buf, int samples) {
+        opl->update(buf, samples);
+        for (int i = 0; i < samples; i++) {
+            buf[i] = (((buf[i] >> 8) & 0x00FF) | (buf[i] & 0xFF00)) ^ 0x8080;
+        }
+    }
 
-	// 16bit, mono -> 8bit, mono
-	void update_16m_8m(short* buf, int samples) {
-		update_to_internal_buffer(samples);
-		for (int i = 0; i < samples; i++) {
-			reinterpret_cast<char*>(buf)[i] = (buffer[i] >> 8) ^ 0x80;
-		}
-	}
+    // 16bit, mono -> 8bit, mono
+    void update_16m_8m(short* buf, int samples) {
+        update_to_internal_buffer(samples);
+        for (int i = 0; i < samples; i++) {
+            reinterpret_cast<char*>(buf)[i] = (buffer[i] >> 8) ^ 0x80;
+        }
+    }
 
 public:
-	CConvertopl(Copl* opl, bool use16bit, bool stereo)
-		: Copl(opl->gettype()), opl(opl)
-		, buffer(NULL), bufsamples(0) {
-		if (opl->getstereo()) {
-			if (stereo && !use16bit) {
-				updater = &CConvertopl::update_16s_8s;
-			}
-			else if (!stereo && use16bit) {
-				updater = &CConvertopl::update_16s_16m;
-			}
-			else if (!stereo && !use16bit) {
-				updater = &CConvertopl::update_16s_8m;
-			}
-			else {
-				updater = &CConvertopl::update_direct;
-			}
-		}
-		else {
-			if (stereo && use16bit) {
-				updater = &CConvertopl::update_16m_16s;
-			}
-			else if (stereo && !use16bit) {
-				updater = &CConvertopl::update_16m_8s;
-			}
-			else if (!stereo && !use16bit) {
-				updater = &CConvertopl::update_16m_8m;
-			}
-			else {
-				updater = &CConvertopl::update_direct;
-			}
-		}
-	}
+    CConvertopl(Copl* opl, bool use16bit, bool stereo)
+        : Copl(opl->gettype()), opl(opl)
+        , buffer(NULL), bufsamples(0) {
+        if (opl->getstereo()) {
+            if (stereo && !use16bit) {
+                updater = &CConvertopl::update_16s_8s;
+            }
+            else if (!stereo && use16bit) {
+                updater = &CConvertopl::update_16s_16m;
+            }
+            else if (!stereo && !use16bit) {
+                updater = &CConvertopl::update_16s_8m;
+            }
+            else {
+                updater = &CConvertopl::update_direct;
+            }
+        }
+        else {
+            if (stereo && use16bit) {
+                updater = &CConvertopl::update_16m_16s;
+            }
+            else if (stereo && !use16bit) {
+                updater = &CConvertopl::update_16m_8s;
+            }
+            else if (!stereo && !use16bit) {
+                updater = &CConvertopl::update_16m_8m;
+            }
+            else {
+                updater = &CConvertopl::update_direct;
+            }
+        }
+    }
 
-	virtual ~CConvertopl() { delete[] buffer; delete opl; }
+    virtual ~CConvertopl() { delete[] buffer; delete opl; }
 
-	virtual void init() { opl->init(); }
+    virtual void init() { opl->init(); }
 
-	virtual void write(int reg, int val) { opl->write(reg, val); }
+    virtual void write(int reg, int val) { opl->write(reg, val); }
 
-	virtual void setchip(int n) { Copl::setchip(n); opl->setchip(n); }
+    virtual void setchip(int n) { Copl::setchip(n); opl->setchip(n); }
 
-	virtual void update(short *buf, int samples) { (this->*updater)(buf, samples); }
+    virtual void update(short* buf, int samples) { (this->*updater)(buf, samples); }
 
-	virtual bool getstereo() { return opl->getstereo(); }
+    virtual bool getstereo() { return opl->getstereo(); }
 };
 
 #endif

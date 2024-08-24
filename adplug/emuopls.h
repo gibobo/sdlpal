@@ -45,105 +45,89 @@
 
 
 #include <malloc.h>
-#include "adplug/opl.h"
+#include "src/opl.h"
 #include "opltypes.h"
 
-class OPLCORE
-{
+class OPLCORE {
 public:
-	enum TYPE
-	{
-		MAME = OPLCORE_MAME,
-		DBFLT = OPLCORE_DBFLT,
-		DBINT = OPLCORE_DBINT,
-		NUKED = OPLCORE_NUKED,
-	};
+    enum TYPE {
+        MAME = OPLCORE_MAME,
+        DBFLT = OPLCORE_DBFLT,
+        DBINT = OPLCORE_DBINT,
+        NUKED = OPLCORE_NUKED,
+    };
 
-	OPLCORE(uint32_t rate) : rate(rate) {}
-	virtual ~OPLCORE() {}
+    OPLCORE(uint32_t rate) : rate(rate) {}
+    virtual ~OPLCORE() {}
 
-	virtual void Reset() = 0;
-	virtual void Write(uint32_t reg, uint8_t val) = 0;
-	virtual void Generate(short *buf, int samples) = 0;
-	virtual OPLCORE *Duplicate() = 0;
+    virtual void Reset() = 0;
+    virtual void Write(uint32_t reg, uint8_t val) = 0;
+    virtual void Generate(short* buf, int samples) = 0;
+    virtual OPLCORE* Duplicate() = 0;
 
 protected:
-	uint32_t rate;
+    uint32_t rate;
 };
 
 // CEmuopl implements the base class of a OPL wrapper
 // The DUALOPL2 mode should be implemented by a OPL3 core
-class CEmuopl : public Copl
-{
+class CEmuopl : public Copl {
 public:
-	static Copl *CreateEmuopl(OPLCORE::TYPE core, ChipType type, int rate);
+    static Copl* CreateEmuopl(OPLCORE::TYPE core, ChipType type, int rate);
 
-	~CEmuopl()
-	{
-		if (currType == TYPE_DUAL_OPL2)
-		{
-			delete opl[1];
-		}
-		delete opl[0];
-	}
+    ~CEmuopl() {
+        if (currType == TYPE_DUAL_OPL2) {
+            delete opl[1];
+        }
+        delete opl[0];
+    }
 
-	// Assumes a 16-bit, mono output sample buffer @ OPL2 mode
-	// Assumes a 16-bit, stereo output sample buffer @ OPL3/DUAL_OPL2 mode
-	void update(short *buf, int samples)
-	{
-		if (currType == TYPE_DUAL_OPL2)
-		{
-			auto lbuf = (short *)alloca(sizeof(short) * samples);
-			opl[0]->Generate(lbuf, samples);
-			opl[1]->Generate(buf + samples, samples);
-			for (int i = 0, j = 0; i < samples; i++)
-			{
-				buf[j++] = lbuf[i];
-				buf[j++] = buf[i + samples];
-			}
-		}
-		else
-		{
-			opl[0]->Generate(buf, samples);
-		}
-	}
+    // Assumes a 16-bit, mono output sample buffer @ OPL2 mode
+    // Assumes a 16-bit, stereo output sample buffer @ OPL3/DUAL_OPL2 mode
+    void update(short* buf, int samples) {
+        if (currType == TYPE_DUAL_OPL2) {
+            auto lbuf = (short*)alloca(sizeof(short) * samples);
+            opl[0]->Generate(lbuf, samples);
+            opl[1]->Generate(buf + samples, samples);
+            for (int i = 0, j = 0; i < samples; i++) {
+                buf[j++] = lbuf[i];
+                buf[j++] = buf[i + samples];
+            }
+        }
+        else {
+            opl[0]->Generate(buf, samples);
+        }
+    }
 
-	void write(int reg, int val)
-	{
-		if (reg == 0x105 && currType == TYPE_OPL3)
-		{
-			opl3mode = ((val & 0x1) == 0x1);
-		}
-		else
-		{
-			reg &= opl3mode ? 0x1FF : 0xFF;
-		}
-		opl[currChip]->Write(reg, (uint8_t)val);
-	}
+    void write(int reg, int val) {
+        if (reg == 0x105 && currType == TYPE_OPL3) {
+            opl3mode = ((val & 0x1) == 0x1);
+        }
+        else {
+            reg &= opl3mode ? 0x1FF : 0xFF;
+        }
+        opl[currChip]->Write(reg, (uint8_t)val);
+    }
 
-	void init()
-	{
-		opl[0]->Reset();
-		if (currType == TYPE_DUAL_OPL2)
-		{
-			opl[1]->Reset();
-		}
-		if (opl3mode)
-		{
-			opl[0]->Write(0x105, 1);
-		}
-	}
+    void init() {
+        opl[0]->Reset();
+        if (currType == TYPE_DUAL_OPL2) {
+            opl[1]->Reset();
+        }
+        if (opl3mode) {
+            opl[0]->Write(0x105, 1);
+        }
+    }
 
 protected:
-	CEmuopl(OPLCORE *core, ChipType type) : Copl(type), opl3mode(false)
-	{
-		opl[0] = core;
-		opl[1] = (type == TYPE_DUAL_OPL2) ? core->Duplicate() : NULL;
-		init();
-	}
+    CEmuopl(OPLCORE* core, ChipType type) : Copl(type), opl3mode(false) {
+        opl[0] = core;
+        opl[1] = (type == TYPE_DUAL_OPL2) ? core->Duplicate() : NULL;
+        init();
+    }
 
-	OPLCORE *opl[2];
-	bool opl3mode;
+    OPLCORE* opl[2];
+    bool     opl3mode;
 };
 
 #endif
