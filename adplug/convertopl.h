@@ -43,7 +43,7 @@
 #ifndef H_ADPLUG_CONVERTOPL
 #define H_ADPLUG_CONVERTOPL
 
-#include "opl.h"
+#include "adplug/opl.h"
 
 class CConvertopl: public Copl {
 protected:

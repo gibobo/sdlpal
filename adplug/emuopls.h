@@ -45,7 +45,8 @@
 
 
 #include <malloc.h>
-#include "opl.h"
+#include "adplug/opl.h"
+#include "opltypes.h"
 
 class OPLCORE {
 public:
