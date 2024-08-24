@@ -44,7 +44,7 @@
 #define SDLPAL_EMUOPLS_H
 
 
-#include <SDL.h>
+#include <malloc.h>
 #include "opl.h"
 
 class OPLCORE

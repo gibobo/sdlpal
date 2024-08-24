@@ -1,7 +1,3 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ 生成的包含文件。
-// 供 sdlpal.rc 使用
-//
 #define APP_MANIFEST                    1
 #define IDI_SDLPAL                      101
 #define IDD_LAUNCHER                    101

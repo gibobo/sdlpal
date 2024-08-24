@@ -19,33 +19,33 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\external\libmad\bit.c" />
-    <ClCompile Include="..\..\external\libmad\decoder.c" />
-    <ClCompile Include="..\..\external\libmad\fixed.c" />
-    <ClCompile Include="..\..\external\libmad\frame.c" />
-    <ClCompile Include="..\..\external\libmad\huffman.c" />
-    <ClCompile Include="..\..\external\libmad\layer12.c" />
-    <ClCompile Include="..\..\external\libmad\layer3.c" />
-    <ClCompile Include="..\..\external\libmad\stream.c" />
-    <ClCompile Include="..\..\external\libmad\synth.c" />
-    <ClCompile Include="..\..\external\libmad\timer.c" />
-    <ClCompile Include="..\..\external\libmad\version.c" />
+    <ClCompile Include="..\external\libmad\bit.c" />
+    <ClCompile Include="..\external\libmad\decoder.c" />
+    <ClCompile Include="..\external\libmad\fixed.c" />
+    <ClCompile Include="..\external\libmad\frame.c" />
+    <ClCompile Include="..\external\libmad\huffman.c" />
+    <ClCompile Include="..\external\libmad\layer12.c" />
+    <ClCompile Include="..\external\libmad\layer3.c" />
+    <ClCompile Include="..\external\libmad\stream.c" />
+    <ClCompile Include="..\external\libmad\synth.c" />
+    <ClCompile Include="..\external\libmad\timer.c" />
+    <ClCompile Include="..\external\libmad\version.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\external\libmad\bit.h" />
-    <ClInclude Include="..\..\external\libmad\config.h" />
-    <ClInclude Include="..\..\external\libmad\decoder.h" />
-    <ClInclude Include="..\..\external\libmad\fixed.h" />
-    <ClInclude Include="..\..\external\libmad\frame.h" />
-    <ClInclude Include="..\..\external\libmad\global.h" />
-    <ClInclude Include="..\..\external\libmad\huffman.h" />
-    <ClInclude Include="..\..\external\libmad\layer12.h" />
-    <ClInclude Include="..\..\external\libmad\layer3.h" />
-    <ClInclude Include="..\..\external\libmad\mad.h" />
-    <ClInclude Include="..\..\external\libmad\stream.h" />
-    <ClInclude Include="..\..\external\libmad\synth.h" />
-    <ClInclude Include="..\..\external\libmad\timer.h" />
-    <ClInclude Include="..\..\external\libmad\version.h" />
+    <ClInclude Include="..\external\libmad\bit.h" />
+    <ClInclude Include="..\external\libmad\config.h" />
+    <ClInclude Include="..\external\libmad\decoder.h" />
+    <ClInclude Include="..\external\libmad\fixed.h" />
+    <ClInclude Include="..\external\libmad\frame.h" />
+    <ClInclude Include="..\external\libmad\global.h" />
+    <ClInclude Include="..\external\libmad\huffman.h" />
+    <ClInclude Include="..\external\libmad\layer12.h" />
+    <ClInclude Include="..\external\libmad\layer3.h" />
+    <ClInclude Include="..\external\libmad\mad.h" />
+    <ClInclude Include="..\external\libmad\stream.h" />
+    <ClInclude Include="..\external\libmad\synth.h" />
+    <ClInclude Include="..\external\libmad\timer.h" />
+    <ClInclude Include="..\external\libmad\version.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -59,7 +59,6 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -99,32 +98,17 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(PlatformName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)$(PlatformName)\$(Configuration)\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(PlatformName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)$(PlatformName)\$(Configuration)\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IntDir>$(PlatformName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)$(PlatformName)\$(Configuration)\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(PlatformName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)$(PlatformName)\$(Configuration)\</OutDir>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>HAVE_CONFIG_H;FPM_DEFAULT;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile />
+      <AdditionalIncludeDirectories>..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
