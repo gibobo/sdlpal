@@ -27,7 +27,6 @@
 
 #include "dosbox/dosbox.h"
 #include "emuopls.h"
-#include <SDL.h>
 
 namespace DBOPL2
 {

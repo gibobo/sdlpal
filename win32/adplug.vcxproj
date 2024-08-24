@@ -20,19 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\external\Nuked\opl3.c" />
-    <ClCompile Include="dosbox\dosbox_opls.cpp" />
-    <ClCompile Include="emuopls.cpp" />
-    <ClCompile Include="fprovide.cpp" />
-    <ClCompile Include="mame\mame_opls.cpp" />
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="rix.cpp" />
-    <ClCompile Include="surroundopl.cpp" />
+    <ClCompile Include="..\adplug\dosbox\dosbox_opls.cpp" />
+    <ClCompile Include="..\adplug\emuopls.cpp" />
+    <ClCompile Include="..\adplug\fprovide.cpp" />
+    <ClCompile Include="..\adplug\mame\mame_opls.cpp" />
+    <ClCompile Include="..\adplug\player.cpp" />
+    <ClCompile Include="..\adplug\rix.cpp" />
+    <ClCompile Include="..\adplug\surroundopl.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dosbox\dbopl.cpp" />
-    <ClInclude Include="dosbox\opl.cpp" />
-    <ClInclude Include="mame\fmopl.cpp" />
-    <ClInclude Include="mame\ymf262.cpp" />
+    <ClInclude Include="..\adplug\dosbox\dbopl.cpp" />
+    <ClInclude Include="..\adplug\dosbox\opl.cpp" />
+    <ClInclude Include="..\adplug\mame\fmopl.cpp" />
+    <ClInclude Include="..\adplug\mame\ymf262.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -46,27 +46,21 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -92,10 +86,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>.\;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\adplug;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -104,12 +97,9 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>.\;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\adplug;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,10 +110,9 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>.\;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\adplug;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,12 +121,9 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>.\;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\adplug;..\external\SDL\include;..\external\libbinio\src;..\external\libbinio\contrib\vs2015\libbinio;..\external\Nuked;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

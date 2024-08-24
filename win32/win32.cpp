@@ -455,12 +455,12 @@ extern "C" int UTIL_Platform_Init(int argc, char* argv[])
 			g_wLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
 	}
 	else
-		g_wLanguage = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
-	auto dlg = (LPCDLGTEMPLATE)LockResource(LoadResource(g_hInstance, FindResourceEx(g_hInstance, RT_DIALOG, MAKEINTRESOURCE(IDD_LAUNCHER), g_wLanguage)));
-	if (gConfig.fLaunchSetting && DialogBoxIndirect(GetModuleHandle(nullptr), dlg, nullptr, LauncherDialogProc) != IDOK)
-		return -1;
-	else
-		return 0;
+        g_wLanguage = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
+    auto dlg = (LPCDLGTEMPLATE)LockResource(LoadResource(g_hInstance, FindResourceEx(g_hInstance, RT_DIALOG, MAKEINTRESOURCE(IDD_LAUNCHER), g_wLanguage)));
+    if (dlg != NULL && gConfig.fLaunchSetting && DialogBoxIndirect(GetModuleHandle(nullptr), dlg, nullptr, LauncherDialogProc) != IDOK)
+        return -1;
+    else
+        return 0;
 }
 
 extern "C" VOID UTIL_Platform_Quit(VOID) {}

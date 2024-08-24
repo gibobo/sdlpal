@@ -284,3 +284,4 @@ emscripten/*.cpp
 *.DS_Store
 
 Pal98rqptw/
+*.bak

@@ -460,7 +460,7 @@ main(
    strncpy(gExecutablePath, argv[0], PAL_MAX_PATH);
 #endif
 
-#if PAL_HAS_PLATFORM_STARTUP
+#ifdef PAL_HAS_PLATFORM_STARTUP
    UTIL_Platform_Startup(argc,argv);
 #endif
 
@@ -488,8 +488,9 @@ main(
    //
    // Platform-specific initialization
    //
-   if (UTIL_Platform_Init(argc, argv) != 0)
-	   return -1;
+   // TO FIX
+   //if (UTIL_Platform_Init(argc, argv) != 0)
+	  // return -1;
 
    //
    // Should launch setting?
