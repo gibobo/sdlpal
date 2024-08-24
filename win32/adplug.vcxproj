@@ -20,10 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\adplug\emuopls.cpp" />
-    <ClCompile Include="..\adplug\adplug\fprovide.cpp" />
-    <ClCompile Include="..\adplug\adplug\player.cpp" />
-    <ClCompile Include="..\adplug\adplug\rix.cpp" />
-    <ClCompile Include="..\adplug\adplug\surroundopl.cpp" />
+    <ClCompile Include="..\adplug\src\fprovide.cpp" />
+    <ClCompile Include="..\adplug\src\player.cpp" />
+    <ClCompile Include="..\adplug\src\rix.cpp" />
+    <ClCompile Include="..\adplug\src\surroundopl.cpp" />
     <ClInclude Include="..\adplug\dosbox\dbopl.cpp" />
     <ClCompile Include="..\adplug\dosbox\dosbox_opls.cpp" />
     <ClInclude Include="..\adplug\dosbox\opl.cpp" />
