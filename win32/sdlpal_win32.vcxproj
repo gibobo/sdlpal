@@ -109,7 +109,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\sdlpal\include;..\external\SDL\include;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -121,7 +121,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;winmm.lib;comctl32.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -132,7 +132,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\sdlpal\include;..\external\SDL\include;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -143,7 +143,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;winmm.lib;comctl32.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -154,7 +154,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\sdlpal\include;..\external\SDL\include;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -168,7 +168,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;winmm.lib;comctl32.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -179,7 +179,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\sdlpal\include;..\external\SDL\include;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -193,7 +193,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;winmm.lib;comctl32.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
@@ -205,7 +205,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\sdlpal\include;..\external\SDL\include;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -217,7 +217,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;winmm.lib;comctl32.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -228,7 +228,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\sdlpal\include;..\external\SDL\include;..\adplug;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -240,7 +240,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;setupapi.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;winmm.lib;comctl32.lib;sdl2.lib;sdl2main.lib;native_midi.lib;libvorbis_static.lib;libogg.lib;timidity.lib;opus.lib;opusfile.lib;libmad.lib;libpal.lib;libbinio.lib;adplug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
