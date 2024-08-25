@@ -159,7 +159,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL_fixed|x64'" />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\external\SDL_mixer\external\opus;..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\opus\celt;..\external\SDL_mixer\external\opus\silk;..\external\SDL_mixer\external\opus\silk\float;..\external\SDL_mixer\external\opus\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\opus;..\external\opus\include;..\external\opus\celt;..\external\opus\silk;..\external\opus\silk\float;..\external\opus\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)'=='DebugDLL_fixed' or '$(Configuration)'=='ReleaseDLL_fixed'">HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;FIXED_POINT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions Condition="'$(Platform)'=='Win32'">/arch:IA32 %(AdditionalOptions)</AdditionalOptions>
@@ -172,227 +172,227 @@
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)..\external\SDL_mixer\external\opus\win32\genversion.bat" "$(ProjectDir)..\external\SDL_mixer\external\opus\win32\version.h" PACKAGE_VERSION</Command>
+      <Command>"$(ProjectDir)..\external\opus\win32\genversion.bat" "$(ProjectDir)..\external\opus\win32\version.h" PACKAGE_VERSION</Command>
       <Message>Generating version.h</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\arch.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\bands.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\celt.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\celt_lpc.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\cwrs.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\ecintrin.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\entcode.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\entdec.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\entenc.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\fixed_c5x.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\fixed_c6x.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\fixed_debug.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\fixed_generic.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\float_cast.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\kiss_fft.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\laplace.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\mathops.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\mdct.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\mfrngcod.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\modes.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\os_support.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\pitch.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\quant_bands.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\rate.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\stack_alloc.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\static_modes_fixed.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\static_modes_float.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\vq.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\x86\celt_lpc_sse.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\x86\pitch_sse.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\x86\vq_sse.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\x86\x86cpu.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\celt\_kiss_fft_guts.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\include\opus.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\include\opus_defines.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\include\opus_types.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\include\opus_multistream.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\include\opus_projection.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\API.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\control.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\debug.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\define.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\errors.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\float\main_FLP.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\float\SigProc_FLP.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\float\structs_FLP.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\Inlines.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\MacroCount.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\MacroDebug.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\macros.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\main.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\pitch_est_defines.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\PLC.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\resampler_private.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\resampler_rom.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\resampler_structs.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\structs.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\tables.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\tuning_parameters.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\typedef.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\silk\x86\main_sse.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\win32\config.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\src\analysis.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\src\mapping_matrix.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\src\mlp.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\src\opus_private.h" />
-    <ClInclude Include="..\external\SDL_mixer\external\opus\src\tansig_table.h" />
+    <ClInclude Include="..\external\opus\celt\arch.h" />
+    <ClInclude Include="..\external\opus\celt\bands.h" />
+    <ClInclude Include="..\external\opus\celt\celt.h" />
+    <ClInclude Include="..\external\opus\celt\celt_lpc.h" />
+    <ClInclude Include="..\external\opus\celt\cwrs.h" />
+    <ClInclude Include="..\external\opus\celt\ecintrin.h" />
+    <ClInclude Include="..\external\opus\celt\entcode.h" />
+    <ClInclude Include="..\external\opus\celt\entdec.h" />
+    <ClInclude Include="..\external\opus\celt\entenc.h" />
+    <ClInclude Include="..\external\opus\celt\fixed_c5x.h" />
+    <ClInclude Include="..\external\opus\celt\fixed_c6x.h" />
+    <ClInclude Include="..\external\opus\celt\fixed_debug.h" />
+    <ClInclude Include="..\external\opus\celt\fixed_generic.h" />
+    <ClInclude Include="..\external\opus\celt\float_cast.h" />
+    <ClInclude Include="..\external\opus\celt\kiss_fft.h" />
+    <ClInclude Include="..\external\opus\celt\laplace.h" />
+    <ClInclude Include="..\external\opus\celt\mathops.h" />
+    <ClInclude Include="..\external\opus\celt\mdct.h" />
+    <ClInclude Include="..\external\opus\celt\mfrngcod.h" />
+    <ClInclude Include="..\external\opus\celt\modes.h" />
+    <ClInclude Include="..\external\opus\celt\os_support.h" />
+    <ClInclude Include="..\external\opus\celt\pitch.h" />
+    <ClInclude Include="..\external\opus\celt\quant_bands.h" />
+    <ClInclude Include="..\external\opus\celt\rate.h" />
+    <ClInclude Include="..\external\opus\celt\stack_alloc.h" />
+    <ClInclude Include="..\external\opus\celt\static_modes_fixed.h" />
+    <ClInclude Include="..\external\opus\celt\static_modes_float.h" />
+    <ClInclude Include="..\external\opus\celt\vq.h" />
+    <ClInclude Include="..\external\opus\celt\x86\celt_lpc_sse.h" />
+    <ClInclude Include="..\external\opus\celt\x86\pitch_sse.h" />
+    <ClInclude Include="..\external\opus\celt\x86\vq_sse.h" />
+    <ClInclude Include="..\external\opus\celt\x86\x86cpu.h" />
+    <ClInclude Include="..\external\opus\celt\_kiss_fft_guts.h" />
+    <ClInclude Include="..\external\opus\include\opus.h" />
+    <ClInclude Include="..\external\opus\include\opus_defines.h" />
+    <ClInclude Include="..\external\opus\include\opus_types.h" />
+    <ClInclude Include="..\external\opus\include\opus_multistream.h" />
+    <ClInclude Include="..\external\opus\include\opus_projection.h" />
+    <ClInclude Include="..\external\opus\silk\API.h" />
+    <ClInclude Include="..\external\opus\silk\control.h" />
+    <ClInclude Include="..\external\opus\silk\debug.h" />
+    <ClInclude Include="..\external\opus\silk\define.h" />
+    <ClInclude Include="..\external\opus\silk\errors.h" />
+    <ClInclude Include="..\external\opus\silk\float\main_FLP.h" />
+    <ClInclude Include="..\external\opus\silk\float\SigProc_FLP.h" />
+    <ClInclude Include="..\external\opus\silk\float\structs_FLP.h" />
+    <ClInclude Include="..\external\opus\silk\Inlines.h" />
+    <ClInclude Include="..\external\opus\silk\MacroCount.h" />
+    <ClInclude Include="..\external\opus\silk\MacroDebug.h" />
+    <ClInclude Include="..\external\opus\silk\macros.h" />
+    <ClInclude Include="..\external\opus\silk\main.h" />
+    <ClInclude Include="..\external\opus\silk\pitch_est_defines.h" />
+    <ClInclude Include="..\external\opus\silk\PLC.h" />
+    <ClInclude Include="..\external\opus\silk\resampler_private.h" />
+    <ClInclude Include="..\external\opus\silk\resampler_rom.h" />
+    <ClInclude Include="..\external\opus\silk\resampler_structs.h" />
+    <ClInclude Include="..\external\opus\silk\structs.h" />
+    <ClInclude Include="..\external\opus\silk\tables.h" />
+    <ClInclude Include="..\external\opus\silk\tuning_parameters.h" />
+    <ClInclude Include="..\external\opus\silk\typedef.h" />
+    <ClInclude Include="..\external\opus\silk\x86\main_sse.h" />
+    <ClInclude Include="..\external\opus\win32\config.h" />
+    <ClInclude Include="..\external\opus\src\analysis.h" />
+    <ClInclude Include="..\external\opus\src\mapping_matrix.h" />
+    <ClInclude Include="..\external\opus\src\mlp.h" />
+    <ClInclude Include="..\external\opus\src\opus_private.h" />
+    <ClInclude Include="..\external\opus\src\tansig_table.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\bands.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\celt.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\celt_decoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\celt_encoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\celt_lpc.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\cwrs.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\entcode.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\entdec.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\entenc.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\kiss_fft.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\laplace.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\mathops.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\mdct.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\modes.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\pitch.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\quant_bands.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\rate.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\vq.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\x86\celt_lpc_sse4_1.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\x86\pitch_sse.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\x86\pitch_sse2.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\x86\pitch_sse4_1.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\x86\vq_sse2.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\x86\x86cpu.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\celt\x86\x86_celt_map.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\A2NLSF.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\ana_filt_bank_1.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\biquad_alt.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\bwexpander.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\bwexpander_32.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\check_control_input.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\CNG.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\code_signs.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\control_audio_bandwidth.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\control_codec.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\control_SNR.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\debug.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\decoder_set_fs.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\decode_core.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\decode_frame.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\decode_indices.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\decode_parameters.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\decode_pitch.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\decode_pulses.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\dec_API.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\encode_indices.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\encode_pulses.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\enc_API.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\gain_quant.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\HP_variable_cutoff.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\init_decoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\init_encoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\inner_prod_aligned.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\interpolate.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\lin2log.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\log2lin.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\LPC_analysis_filter.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\LPC_fit.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\LPC_inv_pred_gain.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\LP_variable_cutoff.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NLSF2A.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NLSF_decode.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NLSF_del_dec_quant.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NLSF_encode.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NLSF_stabilize.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NLSF_unpack.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NLSF_VQ.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NLSF_VQ_weights_laroia.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NSQ.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\NSQ_del_dec.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\pitch_est_tables.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\PLC.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\process_NLSFs.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\quant_LTP_gains.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\resampler.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\resampler_down2.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\resampler_down2_3.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\resampler_private_AR2.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\resampler_private_down_FIR.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\resampler_private_IIR_FIR.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\resampler_private_up2_HQ.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\resampler_rom.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\shell_coder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\sigm_Q15.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\sort.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\stereo_decode_pred.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\stereo_encode_pred.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\stereo_find_predictor.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\stereo_LR_to_MS.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\stereo_MS_to_LR.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\stereo_quant_pred.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\sum_sqr_shift.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\tables_gain.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\tables_LTP.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\tables_NLSF_CB_NB_MB.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\tables_NLSF_CB_WB.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\tables_other.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\tables_pitch_lag.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\tables_pulses_per_block.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\table_LSF_cos.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\VAD.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\VQ_WMat_EC.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\x86\NSQ_del_dec_sse4_1.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\x86\NSQ_sse4_1.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\x86\VAD_sse4_1.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\x86\VQ_WMat_EC_sse4_1.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\silk\x86\x86_silk_map.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\analysis.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\mapping_matrix.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\mlp.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\mlp_data.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus_compare.c">
+    <ClCompile Include="..\external\opus\celt\bands.c" />
+    <ClCompile Include="..\external\opus\celt\celt.c" />
+    <ClCompile Include="..\external\opus\celt\celt_decoder.c" />
+    <ClCompile Include="..\external\opus\celt\celt_encoder.c" />
+    <ClCompile Include="..\external\opus\celt\celt_lpc.c" />
+    <ClCompile Include="..\external\opus\celt\cwrs.c" />
+    <ClCompile Include="..\external\opus\celt\entcode.c" />
+    <ClCompile Include="..\external\opus\celt\entdec.c" />
+    <ClCompile Include="..\external\opus\celt\entenc.c" />
+    <ClCompile Include="..\external\opus\celt\kiss_fft.c" />
+    <ClCompile Include="..\external\opus\celt\laplace.c" />
+    <ClCompile Include="..\external\opus\celt\mathops.c" />
+    <ClCompile Include="..\external\opus\celt\mdct.c" />
+    <ClCompile Include="..\external\opus\celt\modes.c" />
+    <ClCompile Include="..\external\opus\celt\pitch.c" />
+    <ClCompile Include="..\external\opus\celt\quant_bands.c" />
+    <ClCompile Include="..\external\opus\celt\rate.c" />
+    <ClCompile Include="..\external\opus\celt\vq.c" />
+    <ClCompile Include="..\external\opus\celt\x86\celt_lpc_sse4_1.c" />
+    <ClCompile Include="..\external\opus\celt\x86\pitch_sse.c" />
+    <ClCompile Include="..\external\opus\celt\x86\pitch_sse2.c" />
+    <ClCompile Include="..\external\opus\celt\x86\pitch_sse4_1.c" />
+    <ClCompile Include="..\external\opus\celt\x86\vq_sse2.c" />
+    <ClCompile Include="..\external\opus\celt\x86\x86cpu.c" />
+    <ClCompile Include="..\external\opus\celt\x86\x86_celt_map.c" />
+    <ClCompile Include="..\external\opus\silk\A2NLSF.c" />
+    <ClCompile Include="..\external\opus\silk\ana_filt_bank_1.c" />
+    <ClCompile Include="..\external\opus\silk\biquad_alt.c" />
+    <ClCompile Include="..\external\opus\silk\bwexpander.c" />
+    <ClCompile Include="..\external\opus\silk\bwexpander_32.c" />
+    <ClCompile Include="..\external\opus\silk\check_control_input.c" />
+    <ClCompile Include="..\external\opus\silk\CNG.c" />
+    <ClCompile Include="..\external\opus\silk\code_signs.c" />
+    <ClCompile Include="..\external\opus\silk\control_audio_bandwidth.c" />
+    <ClCompile Include="..\external\opus\silk\control_codec.c" />
+    <ClCompile Include="..\external\opus\silk\control_SNR.c" />
+    <ClCompile Include="..\external\opus\silk\debug.c" />
+    <ClCompile Include="..\external\opus\silk\decoder_set_fs.c" />
+    <ClCompile Include="..\external\opus\silk\decode_core.c" />
+    <ClCompile Include="..\external\opus\silk\decode_frame.c" />
+    <ClCompile Include="..\external\opus\silk\decode_indices.c" />
+    <ClCompile Include="..\external\opus\silk\decode_parameters.c" />
+    <ClCompile Include="..\external\opus\silk\decode_pitch.c" />
+    <ClCompile Include="..\external\opus\silk\decode_pulses.c" />
+    <ClCompile Include="..\external\opus\silk\dec_API.c" />
+    <ClCompile Include="..\external\opus\silk\encode_indices.c" />
+    <ClCompile Include="..\external\opus\silk\encode_pulses.c" />
+    <ClCompile Include="..\external\opus\silk\enc_API.c" />
+    <ClCompile Include="..\external\opus\silk\gain_quant.c" />
+    <ClCompile Include="..\external\opus\silk\HP_variable_cutoff.c" />
+    <ClCompile Include="..\external\opus\silk\init_decoder.c" />
+    <ClCompile Include="..\external\opus\silk\init_encoder.c" />
+    <ClCompile Include="..\external\opus\silk\inner_prod_aligned.c" />
+    <ClCompile Include="..\external\opus\silk\interpolate.c" />
+    <ClCompile Include="..\external\opus\silk\lin2log.c" />
+    <ClCompile Include="..\external\opus\silk\log2lin.c" />
+    <ClCompile Include="..\external\opus\silk\LPC_analysis_filter.c" />
+    <ClCompile Include="..\external\opus\silk\LPC_fit.c" />
+    <ClCompile Include="..\external\opus\silk\LPC_inv_pred_gain.c" />
+    <ClCompile Include="..\external\opus\silk\LP_variable_cutoff.c" />
+    <ClCompile Include="..\external\opus\silk\NLSF2A.c" />
+    <ClCompile Include="..\external\opus\silk\NLSF_decode.c" />
+    <ClCompile Include="..\external\opus\silk\NLSF_del_dec_quant.c" />
+    <ClCompile Include="..\external\opus\silk\NLSF_encode.c" />
+    <ClCompile Include="..\external\opus\silk\NLSF_stabilize.c" />
+    <ClCompile Include="..\external\opus\silk\NLSF_unpack.c" />
+    <ClCompile Include="..\external\opus\silk\NLSF_VQ.c" />
+    <ClCompile Include="..\external\opus\silk\NLSF_VQ_weights_laroia.c" />
+    <ClCompile Include="..\external\opus\silk\NSQ.c" />
+    <ClCompile Include="..\external\opus\silk\NSQ_del_dec.c" />
+    <ClCompile Include="..\external\opus\silk\pitch_est_tables.c" />
+    <ClCompile Include="..\external\opus\silk\PLC.c" />
+    <ClCompile Include="..\external\opus\silk\process_NLSFs.c" />
+    <ClCompile Include="..\external\opus\silk\quant_LTP_gains.c" />
+    <ClCompile Include="..\external\opus\silk\resampler.c" />
+    <ClCompile Include="..\external\opus\silk\resampler_down2.c" />
+    <ClCompile Include="..\external\opus\silk\resampler_down2_3.c" />
+    <ClCompile Include="..\external\opus\silk\resampler_private_AR2.c" />
+    <ClCompile Include="..\external\opus\silk\resampler_private_down_FIR.c" />
+    <ClCompile Include="..\external\opus\silk\resampler_private_IIR_FIR.c" />
+    <ClCompile Include="..\external\opus\silk\resampler_private_up2_HQ.c" />
+    <ClCompile Include="..\external\opus\silk\resampler_rom.c" />
+    <ClCompile Include="..\external\opus\silk\shell_coder.c" />
+    <ClCompile Include="..\external\opus\silk\sigm_Q15.c" />
+    <ClCompile Include="..\external\opus\silk\sort.c" />
+    <ClCompile Include="..\external\opus\silk\stereo_decode_pred.c" />
+    <ClCompile Include="..\external\opus\silk\stereo_encode_pred.c" />
+    <ClCompile Include="..\external\opus\silk\stereo_find_predictor.c" />
+    <ClCompile Include="..\external\opus\silk\stereo_LR_to_MS.c" />
+    <ClCompile Include="..\external\opus\silk\stereo_MS_to_LR.c" />
+    <ClCompile Include="..\external\opus\silk\stereo_quant_pred.c" />
+    <ClCompile Include="..\external\opus\silk\sum_sqr_shift.c" />
+    <ClCompile Include="..\external\opus\silk\tables_gain.c" />
+    <ClCompile Include="..\external\opus\silk\tables_LTP.c" />
+    <ClCompile Include="..\external\opus\silk\tables_NLSF_CB_NB_MB.c" />
+    <ClCompile Include="..\external\opus\silk\tables_NLSF_CB_WB.c" />
+    <ClCompile Include="..\external\opus\silk\tables_other.c" />
+    <ClCompile Include="..\external\opus\silk\tables_pitch_lag.c" />
+    <ClCompile Include="..\external\opus\silk\tables_pulses_per_block.c" />
+    <ClCompile Include="..\external\opus\silk\table_LSF_cos.c" />
+    <ClCompile Include="..\external\opus\silk\VAD.c" />
+    <ClCompile Include="..\external\opus\silk\VQ_WMat_EC.c" />
+    <ClCompile Include="..\external\opus\silk\x86\NSQ_del_dec_sse4_1.c" />
+    <ClCompile Include="..\external\opus\silk\x86\NSQ_sse4_1.c" />
+    <ClCompile Include="..\external\opus\silk\x86\VAD_sse4_1.c" />
+    <ClCompile Include="..\external\opus\silk\x86\VQ_WMat_EC_sse4_1.c" />
+    <ClCompile Include="..\external\opus\silk\x86\x86_silk_map.c" />
+    <ClCompile Include="..\external\opus\src\analysis.c" />
+    <ClCompile Include="..\external\opus\src\mapping_matrix.c" />
+    <ClCompile Include="..\external\opus\src\mlp.c" />
+    <ClCompile Include="..\external\opus\src\mlp_data.c" />
+    <ClCompile Include="..\external\opus\src\opus.c" />
+    <ClCompile Include="..\external\opus\src\opus_compare.c">
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus_decoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus_encoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus_multistream.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus_multistream_decoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus_multistream_encoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus_projection_decoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\opus_projection_encoder.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opus\src\repacketizer.c" />
+    <ClCompile Include="..\external\opus\src\opus_decoder.c" />
+    <ClCompile Include="..\external\opus\src\opus_encoder.c" />
+    <ClCompile Include="..\external\opus\src\opus_multistream.c" />
+    <ClCompile Include="..\external\opus\src\opus_multistream_decoder.c" />
+    <ClCompile Include="..\external\opus\src\opus_multistream_encoder.c" />
+    <ClCompile Include="..\external\opus\src\opus_projection_decoder.c" />
+    <ClCompile Include="..\external\opus\src\opus_projection_encoder.c" />
+    <ClCompile Include="..\external\opus\src\repacketizer.c" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(Configuration)'=='DebugDLL_fixed' or '$(Configuration)'=='ReleaseDLL_fixed' or $(PreprocessorDefinitions.Contains('FIXED_POINT'))">
       <ItemGroup>
-        <ClCompile Include="..\external\SDL_mixer\external\opus\silk\fixed\*.c">
+        <ClCompile Include="..\external\opus\silk\fixed\*.c">
           <ExcludedFromBuild>false</ExcludedFromBuild>
         </ClCompile>
-        <ClCompile Include="..\external\SDL_mixer\external\opus\silk\fixed\x86\*.c">
+        <ClCompile Include="..\external\opus\silk\fixed\x86\*.c">
           <ExcludedFromBuild>false</ExcludedFromBuild>
         </ClCompile>
-        <ClCompile Include="..\external\SDL_mixer\external\opus\silk\float\*.c">
+        <ClCompile Include="..\external\opus\silk\float\*.c">
           <ExcludedFromBuild>true</ExcludedFromBuild>
         </ClCompile>
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <ClCompile Include="..\external\SDL_mixer\external\opus\silk\fixed\*.c">
+        <ClCompile Include="..\external\opus\silk\fixed\*.c">
           <ExcludedFromBuild>true</ExcludedFromBuild>
         </ClCompile>
-        <ClCompile Include="..\external\SDL_mixer\external\opus\silk\fixed\x86\*.c">
+        <ClCompile Include="..\external\opus\silk\fixed\x86\*.c">
           <ExcludedFromBuild>true</ExcludedFromBuild>
         </ClCompile>
-        <ClCompile Include="..\external\SDL_mixer\external\opus\silk\float\*.c">
+        <ClCompile Include="..\external\opus\silk\float\*.c">
           <ExcludedFromBuild>false</ExcludedFromBuild>
         </ClCompile>
       </ItemGroup>
