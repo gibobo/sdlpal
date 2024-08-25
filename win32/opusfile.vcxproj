@@ -27,12 +27,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\external\SDL_mixer\external\opusfile\src\http.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opusfile\src\info.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opusfile\src\internal.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opusfile\src\opusfile.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opusfile\src\stream.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\opusfile\src\wincerts.c" />
+    <ClCompile Include="..\external\opusfile\src\http.c" />
+    <ClCompile Include="..\external\opusfile\src\info.c" />
+    <ClCompile Include="..\external\opusfile\src\internal.c" />
+    <ClCompile Include="..\external\opusfile\src\opusfile.c" />
+    <ClCompile Include="..\external\opusfile\src\stream.c" />
+    <ClCompile Include="..\external\opusfile\src\wincerts.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1A4B5203-52EB-4805-9511-84B1BD094FCA}</ProjectGuid>
@@ -88,22 +88,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\external\openssl\inc32;..\external\SDL_mixer\external\openssl\$(Platform)\Release\include;..\external\SDL_mixer\external\opusfile\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\opus\include;..\external\ogg\include;..\external\SDL_mixer\external\openssl\inc32;..\external\SDL_mixer\external\openssl\$(Platform)\Release\include;..\external\opusfile\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\external\openssl\inc32;..\external\SDL_mixer\external\openssl\$(Platform)\Release\include;..\external\SDL_mixer\external\opusfile\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\opus\include;..\external\ogg\include;..\external\SDL_mixer\external\openssl\inc32;..\external\SDL_mixer\external\openssl\$(Platform)\Release\include;..\external\opusfile\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\external\openssl\inc32;..\external\SDL_mixer\external\openssl\$(Platform)\Release\include;..\external\SDL_mixer\external\opusfile\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\opus\include;..\external\ogg\include;..\external\SDL_mixer\external\openssl\inc32;..\external\SDL_mixer\external\openssl\$(Platform)\Release\include;..\external\opusfile\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-NoHTTP|Win32'">
-    <IncludePath>..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\external\opusfile\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\opus\include;..\external\ogg\include;..\external\opusfile\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\external\openssl\inc32;..\external\SDL_mixer\external\openssl\$(Platform)\Release\include;..\external\SDL_mixer\external\opusfile\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\opus\include;..\external\ogg\include;..\external\SDL_mixer\external\openssl\inc32;..\external\SDL_mixer\external\openssl\$(Platform)\Release\include;..\external\opusfile\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-NoHTTP|x64'">
-    <IncludePath>..\external\SDL_mixer\external\opus\include;..\external\SDL_mixer\external\ogg\include;..\external\SDL_mixer\external\opusfile\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\opus\include;..\external\ogg\include;..\external\opusfile\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile />

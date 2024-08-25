@@ -62,7 +62,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\vorbis\include;..\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -70,12 +70,12 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\vorbis\include;..\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\vorbis\include;..\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
     </ClCompile>
@@ -85,33 +85,33 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\external\SDL_mixer\external\vorbis\include;..\external\SDL_mixer\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\vorbis\include;..\external\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\analysis.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\bitrate.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\block.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\codebook.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\envelope.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\floor0.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\floor1.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\info.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\lookup.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\lpc.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\lsp.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\mapping0.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\mdct.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\psy.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\registry.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\res0.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\sharedbook.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\smallft.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\synthesis.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\vorbisenc.c" />
-    <ClCompile Include="..\external\SDL_mixer\external\vorbis\lib\window.c" />
+    <ClCompile Include="..\external\vorbis\lib\analysis.c" />
+    <ClCompile Include="..\external\vorbis\lib\bitrate.c" />
+    <ClCompile Include="..\external\vorbis\lib\block.c" />
+    <ClCompile Include="..\external\vorbis\lib\codebook.c" />
+    <ClCompile Include="..\external\vorbis\lib\envelope.c" />
+    <ClCompile Include="..\external\vorbis\lib\floor0.c" />
+    <ClCompile Include="..\external\vorbis\lib\floor1.c" />
+    <ClCompile Include="..\external\vorbis\lib\info.c" />
+    <ClCompile Include="..\external\vorbis\lib\lookup.c" />
+    <ClCompile Include="..\external\vorbis\lib\lpc.c" />
+    <ClCompile Include="..\external\vorbis\lib\lsp.c" />
+    <ClCompile Include="..\external\vorbis\lib\mapping0.c" />
+    <ClCompile Include="..\external\vorbis\lib\mdct.c" />
+    <ClCompile Include="..\external\vorbis\lib\psy.c" />
+    <ClCompile Include="..\external\vorbis\lib\registry.c" />
+    <ClCompile Include="..\external\vorbis\lib\res0.c" />
+    <ClCompile Include="..\external\vorbis\lib\sharedbook.c" />
+    <ClCompile Include="..\external\vorbis\lib\smallft.c" />
+    <ClCompile Include="..\external\vorbis\lib\synthesis.c" />
+    <ClCompile Include="..\external\vorbis\lib\vorbisenc.c" />
+    <ClCompile Include="..\external\vorbis\lib\window.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
