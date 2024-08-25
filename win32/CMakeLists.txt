@@ -18,6 +18,8 @@ target_link_libraries(${PROJECT_NAME}
   imm32
   winmm
   comctl32
+  setupapi
+  version
   sdl2
   sdl2main
   native_midi
