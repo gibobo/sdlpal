@@ -15,7 +15,6 @@ add_library(libbinio
 )
 target_include_directories(libbinio PRIVATE ../external/libbinio/contrib/vs2015/libbinio)
 
-
 add_library(adplug
   ../adplug/emuopls.cpp
   ../adplug/src/fprovide.cpp
@@ -30,15 +29,7 @@ add_library(adplug
   ../adplug/mame/ymf262.cpp
   ../external/nuked/opl3.c
   )
-target_include_directories(adplug
-  PRIVATE
-    ../adplug
-    ../external/SDL/include
-    ../external/libbinio/src
-    ../external/libbinio/contrib/vs2015/libbinio
-    ../external/nuked
-    )
-
+target_include_directories(adplug PRIVATE ../adplug;../external/SDL/include;../external/libbinio/src;../external/libbinio/contrib/vs2015/libbinio;../external/nuked)
 
 add_library(libmad
   ../external/libmad/bit.c
@@ -51,7 +42,7 @@ add_library(libmad
   ../external/libmad/stream.c
   ../external/libmad/synth.c
   ../external/libmad/timer.c
-  )
+)
 target_include_directories(libmad PRIVATE ../)
 target_compile_definitions(libmad PRIVATE HAVE_CONFIG_H;FPM_DEFAULT;WIN32;_DEBUG;_LIB)
 
@@ -60,7 +51,6 @@ add_library(libogg
   ../external/ogg/src/framing.c
   )
 target_include_directories(libogg PRIVATE ../external/ogg/include)
-
 
 add_library(libvorbis
   ../external/vorbis/lib/analysis.c
@@ -87,13 +77,11 @@ add_library(libvorbis
   )
 target_include_directories(libvorbis PRIVATE ../external/vorbis/include;../external/ogg/include)
 
-
 add_library(native_midi
   ../external/SDL_mixer/src/codecs/native_midi/native_midi_common.c
   ../external/SDL_mixer/src/codecs/native_midi/native_midi_win32.c
 )
 target_include_directories(native_midi PRIVATE ../external/SDL/include;../external/SDL_mixer/include;../external/SDL_mixer/src/codecs/native_midi;)
-
 
 add_library(opus
   ../external/opus/celt/bands.c
@@ -221,7 +209,6 @@ add_library(opus
 target_include_directories(opus PRIVATE ../external/opus;../external/opus/include;../external/opus/celt;../external/opus/silk;../external/opus/silk/float;../external/opus/win32)
 target_compile_definitions(opus PRIVATE HAVE_CONFIG_H)
 
-
 add_library(opusfile
   ../external/opusfile/src/http.c
   ../external/opusfile/src/info.c
@@ -231,6 +218,259 @@ add_library(opusfile
   ../external/opusfile/src/wincerts.c
 )
 target_include_directories(opusfile PRIVATE ../external/opus/include;../external/opusfile/include;../external/ogg/include)
+
+add_library(timidity
+  ../external/SDL_mixer/src/codecs/timidity/common.c
+  ../external/SDL_mixer/src/codecs/timidity/instrum.c
+  ../external/SDL_mixer/src/codecs/timidity/mix.c
+  ../external/SDL_mixer/src/codecs/timidity/output.c
+  ../external/SDL_mixer/src/codecs/timidity/playmidi.c
+  ../external/SDL_mixer/src/codecs/timidity/readmidi.c
+  ../external/SDL_mixer/src/codecs/timidity/resample.c
+  ../external/SDL_mixer/src/codecs/timidity/tables.c
+  ../external/SDL_mixer/src/codecs/timidity/timidity.c
+)
+target_include_directories(timidity PRIVATE ../external/SDL/include;../external/SDL_mixer/include)
+
+set(sdlpal_src
+  ../sdlpal/source/audio.c
+  ../sdlpal/source/aviplay.c
+  ../sdlpal/source/battle.c
+  ../sdlpal/source/ending.c
+  ../sdlpal/source/fight.c
+  ../sdlpal/source/font.c
+  ../sdlpal/source/game.c
+  ../sdlpal/source/global.c
+  ../sdlpal/source/glslp.c
+  ../sdlpal/source/input.c
+  ../sdlpal/source/itemmenu.c
+  ../sdlpal/source/magicmenu.c
+  ../sdlpal/source/main.c
+  ../sdlpal/source/map.c
+  ../sdlpal/source/midi.c
+  ../sdlpal/source/midi_timidity.c
+  ../sdlpal/source/midi_tsf.c
+  ../sdlpal/source/mini_glloader.c
+  ../sdlpal/source/mp3play.c
+  ../sdlpal/source/music_mad.c
+  ../sdlpal/source/oggplay.c
+  ../sdlpal/source/opusplay.c
+  ../sdlpal/source/overlay.c
+  ../sdlpal/source/palcfg.c
+  ../sdlpal/source/palcommon.c
+  ../sdlpal/source/palette.c
+  ../sdlpal/source/play.c
+  ../sdlpal/source/res.c
+  ../sdlpal/source/resampler.c
+  ../sdlpal/source/rixplay.cpp
+  ../sdlpal/source/rngplay.c
+  ../sdlpal/source/scene.c
+  ../sdlpal/source/script.c
+  ../sdlpal/source/sound.c
+  ../sdlpal/source/text.c
+  ../sdlpal/source/ui.c
+  ../sdlpal/source/uibattle.c
+  ../sdlpal/source/uigame.c
+  ../sdlpal/source/util.c
+  ../sdlpal/source/video.c
+  ../sdlpal/source/video_glsl.c
+  ../sdlpal/source/yj1.c)
+add_library(sdlpal ${sdlpal_src})
+target_include_directories(sdlpal PRIVATE ./;../sdlpal/include;../external/SDL/include;../external/SDL_mixer/src/codecs/timidity;../external/vorbis/include;../external/ogg/include;../external/SDL_mixer/src/codecs;../external/opus/include;../external/opusfile/include;../external/libmad;../adplug;../external/libbinio/src;../external/libbinio/contrib/vs2015/libbinio)
+target_compile_definitions(sdlpal PRIVATE PAL_HAS_PLATFORM_SPECIFIC_UTILS;_CONSOLE)
+
+set(sdl_src
+  ../external/SDL/src/SDL_guid.c
+  ../external/SDL/src/atomic/SDL_atomic.c
+  ../external/SDL/src/atomic/SDL_spinlock.c
+  ../external/SDL/src/audio/directsound/SDL_directsound.c
+  ../external/SDL/src/audio/disk/SDL_diskaudio.c
+  ../external/SDL/src/audio/dummy/SDL_dummyaudio.c
+  ../external/SDL/src/audio/SDL_audio.c
+  ../external/SDL/src/audio/SDL_audiocvt.c
+  ../external/SDL/src/audio/SDL_audiodev.c
+  ../external/SDL/src/audio/SDL_audiotypecvt.c
+  ../external/SDL/src/audio/SDL_mixer.c
+  ../external/SDL/src/audio/SDL_wave.c
+  ../external/SDL/src/audio/winmm/SDL_winmm.c
+  ../external/SDL/src/audio/wasapi/SDL_wasapi.c
+  ../external/SDL/src/audio/wasapi/SDL_wasapi_win32.c
+  ../external/SDL/src/core/windows/SDL_hid.c
+  ../external/SDL/src/core/windows/SDL_immdevice.c
+  ../external/SDL/src/core/windows/SDL_windows.c
+  ../external/SDL/src/core/windows/SDL_xinput.c
+  ../external/SDL/src/cpuinfo/SDL_cpuinfo.c
+  ../external/SDL/src/dynapi/SDL_dynapi.c
+  ../external/SDL/src/events/SDL_clipboardevents.c
+  ../external/SDL/src/events/SDL_displayevents.c
+  ../external/SDL/src/events/SDL_dropevents.c
+  ../external/SDL/src/events/SDL_events.c
+  ../external/SDL/src/events/SDL_gesture.c
+  ../external/SDL/src/events/SDL_keyboard.c
+  ../external/SDL/src/events/SDL_mouse.c
+  ../external/SDL/src/events/SDL_quit.c
+  ../external/SDL/src/events/SDL_touch.c
+  ../external/SDL/src/events/SDL_windowevents.c
+  ../external/SDL/src/file/SDL_rwops.c
+  ../external/SDL/src/filesystem/windows/SDL_sysfilesystem.c
+  ../external/SDL/src/haptic/dummy/SDL_syshaptic.c
+  ../external/SDL/src/haptic/SDL_haptic.c
+  ../external/SDL/src/haptic/windows/SDL_dinputhaptic.c
+  ../external/SDL/src/haptic/windows/SDL_windowshaptic.c
+  ../external/SDL/src/haptic/windows/SDL_xinputhaptic.c
+  ../external/SDL/src/hidapi/SDL_hidapi.c
+  ../external/SDL/src/joystick/controller_type.c
+  ../external/SDL/src/joystick/dummy/SDL_sysjoystick.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapijoystick.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_combined.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_gamecube.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_luna.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_ps3.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_ps4.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_ps5.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_rumble.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_shield.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_stadia.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_steam.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_steamdeck.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_switch.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_wii.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_xbox360.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_xbox360w.c
+  ../external/SDL/src/joystick/hidapi/SDL_hidapi_xboxone.c
+  ../external/SDL/src/joystick/SDL_gamecontroller.c
+  ../external/SDL/src/joystick/SDL_joystick.c
+  ../external/SDL/src/joystick/SDL_steam_virtual_gamepad.c
+  ../external/SDL/src/joystick/virtual/SDL_virtualjoystick.c
+  ../external/SDL/src/joystick/windows/SDL_dinputjoystick.c
+  ../external/SDL/src/joystick/windows/SDL_rawinputjoystick.c
+  ../external/SDL/src/joystick/windows/SDL_windowsjoystick.c
+  ../external/SDL/src/joystick/windows/SDL_windows_gaming_input.c
+  ../external/SDL/src/joystick/windows/SDL_xinputjoystick.c
+  ../external/SDL/src/libm/e_atan2.c
+  ../external/SDL/src/libm/e_exp.c
+  ../external/SDL/src/libm/e_fmod.c
+  ../external/SDL/src/libm/e_log.c
+  ../external/SDL/src/libm/e_log10.c
+  ../external/SDL/src/libm/e_pow.c
+  ../external/SDL/src/libm/e_rem_pio2.c
+  ../external/SDL/src/libm/e_sqrt.c
+  ../external/SDL/src/libm/k_cos.c
+  ../external/SDL/src/libm/k_rem_pio2.c
+  ../external/SDL/src/libm/k_sin.c
+  ../external/SDL/src/libm/k_tan.c
+  ../external/SDL/src/libm/s_atan.c
+  ../external/SDL/src/libm/s_copysign.c
+  ../external/SDL/src/libm/s_cos.c
+  ../external/SDL/src/libm/s_fabs.c
+  ../external/SDL/src/libm/s_floor.c
+  ../external/SDL/src/libm/s_scalbn.c
+  ../external/SDL/src/libm/s_sin.c
+  ../external/SDL/src/libm/s_tan.c
+  ../external/SDL/src/loadso/windows/SDL_sysloadso.c
+  ../external/SDL/src/locale/SDL_locale.c
+  ../external/SDL/src/locale/windows/SDL_syslocale.c
+  ../external/SDL/src/misc/SDL_url.c
+  ../external/SDL/src/misc/windows/SDL_sysurl.c
+  ../external/SDL/src/power/SDL_power.c
+  ../external/SDL/src/power/windows/SDL_syspower.c
+  ../external/SDL/src/render/direct3d11/SDL_shaders_d3d11.c
+  ../external/SDL/src/render/direct3d12/SDL_render_d3d12.c
+  ../external/SDL/src/render/direct3d12/SDL_shaders_d3d12.c
+  ../external/SDL/src/render/direct3d/SDL_render_d3d.c
+  ../external/SDL/src/render/direct3d11/SDL_render_d3d11.c
+  ../external/SDL/src/render/direct3d/SDL_shaders_d3d.c
+  ../external/SDL/src/render/opengl/SDL_render_gl.c
+  ../external/SDL/src/render/opengl/SDL_shaders_gl.c
+  ../external/SDL/src/render/opengles2/SDL_render_gles2.c
+  ../external/SDL/src/render/opengles2/SDL_shaders_gles2.c
+  ../external/SDL/src/render/SDL_d3dmath.c
+  ../external/SDL/src/render/SDL_render.c
+  ../external/SDL/src/render/SDL_yuv_sw.c
+  ../external/SDL/src/render/software/SDL_blendfillrect.c
+  ../external/SDL/src/render/software/SDL_blendline.c
+  ../external/SDL/src/render/software/SDL_blendpoint.c
+  ../external/SDL/src/render/software/SDL_drawline.c
+  ../external/SDL/src/render/software/SDL_drawpoint.c
+  ../external/SDL/src/render/software/SDL_render_sw.c
+  ../external/SDL/src/render/software/SDL_rotate.c
+  ../external/SDL/src/render/software/SDL_triangle.c
+  ../external/SDL/src/SDL.c
+  ../external/SDL/src/SDL_assert.c
+  ../external/SDL/src/SDL_dataqueue.c
+  ../external/SDL/src/SDL_list.c
+  ../external/SDL/src/SDL_error.c
+  ../external/SDL/src/SDL_hints.c
+  ../external/SDL/src/SDL_log.c
+  ../external/SDL/src/SDL_utils.c
+  ../external/SDL/src/sensor/dummy/SDL_dummysensor.c
+  ../external/SDL/src/sensor/SDL_sensor.c
+  ../external/SDL/src/sensor/windows/SDL_windowssensor.c
+  ../external/SDL/src/stdlib/SDL_crc16.c
+  ../external/SDL/src/stdlib/SDL_crc32.c
+  ../external/SDL/src/stdlib/SDL_getenv.c
+  ../external/SDL/src/stdlib/SDL_iconv.c
+  ../external/SDL/src/stdlib/SDL_malloc.c
+  ../external/SDL/src/stdlib/SDL_mslibc.c
+  ../external/SDL/src/stdlib/SDL_qsort.c
+  ../external/SDL/src/stdlib/SDL_stdlib.c
+  ../external/SDL/src/stdlib/SDL_string.c
+  ../external/SDL/src/stdlib/SDL_strtokr.c
+  ../external/SDL/src/thread/generic/SDL_syscond.c
+  ../external/SDL/src/thread/SDL_thread.c
+  ../external/SDL/src/thread/windows/SDL_syscond_cv.c
+  ../external/SDL/src/thread/windows/SDL_sysmutex.c
+  ../external/SDL/src/thread/windows/SDL_syssem.c
+  ../external/SDL/src/thread/windows/SDL_systhread.c
+  ../external/SDL/src/thread/windows/SDL_systls.c
+  ../external/SDL/src/timer/SDL_timer.c
+  ../external/SDL/src/timer/windows/SDL_systimer.c
+  ../external/SDL/src/video/dummy/SDL_nullevents.c
+  ../external/SDL/src/video/dummy/SDL_nullframebuffer.c
+  ../external/SDL/src/video/dummy/SDL_nullvideo.c
+  ../external/SDL/src/video/SDL_blit.c
+  ../external/SDL/src/video/SDL_blit_0.c
+  ../external/SDL/src/video/SDL_blit_1.c
+  ../external/SDL/src/video/SDL_blit_A.c
+  ../external/SDL/src/video/SDL_blit_auto.c
+  ../external/SDL/src/video/SDL_blit_copy.c
+  ../external/SDL/src/video/SDL_blit_N.c
+  ../external/SDL/src/video/SDL_blit_slow.c
+  ../external/SDL/src/video/SDL_bmp.c
+  ../external/SDL/src/video/SDL_clipboard.c
+  ../external/SDL/src/video/SDL_egl.c
+  ../external/SDL/src/video/SDL_fillrect.c
+  ../external/SDL/src/video/SDL_pixels.c
+  ../external/SDL/src/video/SDL_rect.c
+  ../external/SDL/src/video/SDL_RLEaccel.c
+  ../external/SDL/src/video/SDL_shape.c
+  ../external/SDL/src/video/SDL_stretch.c
+  ../external/SDL/src/video/SDL_surface.c
+  ../external/SDL/src/video/SDL_video.c
+  ../external/SDL/src/video/SDL_vulkan_utils.c
+  ../external/SDL/src/video/SDL_yuv.c
+  ../external/SDL/src/video/windows/SDL_windowsclipboard.c
+  ../external/SDL/src/video/windows/SDL_windowsevents.c
+  ../external/SDL/src/video/windows/SDL_windowsframebuffer.c
+  ../external/SDL/src/video/windows/SDL_windowskeyboard.c
+  ../external/SDL/src/video/windows/SDL_windowsmessagebox.c
+  ../external/SDL/src/video/windows/SDL_windowsmodes.c
+  ../external/SDL/src/video/windows/SDL_windowsmouse.c
+  ../external/SDL/src/video/windows/SDL_windowsopengl.c
+  ../external/SDL/src/video/windows/SDL_windowsopengles.c
+  ../external/SDL/src/video/windows/SDL_windowsshape.c
+  ../external/SDL/src/video/windows/SDL_windowsvideo.c
+  ../external/SDL/src/video/windows/SDL_windowsvulkan.c
+  ../external/SDL/src/video/windows/SDL_windowswindow.c
+  ../external/SDL/src/video/yuv2rgb/yuv_rgb_lsx.c
+  ../external/SDL/src/video/yuv2rgb/yuv_rgb_sse.c
+  ../external/SDL/src/video/yuv2rgb/yuv_rgb_std.c)
+add_library(sdl2 ${sdl_src})
+target_include_directories(sdl2 PRIVATE ../external/SDL/include)
+target_compile_definitions(sdl2 PRIVATE DLL_EXPORT)
+
+add_library(sdl2main ../external/SDL/src/main/windows/SDL_windows_main.c)
+target_include_directories(sdl2main PRIVATE ../external/SDL/include)
 
 
 # 將來源新增到此專案的可執行檔。
@@ -253,7 +493,7 @@ target_link_libraries(${PROJECT_NAME}
   opus
   opusfile
   libmad
-  libpal
+  sdlpal
   libbinio
   adplug
 )
