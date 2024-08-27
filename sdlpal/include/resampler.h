@@ -1,4 +1,4 @@
-#ifndef _RESAMPLER_H_
+﻿#ifndef _RESAMPLER_H_
 #define _RESAMPLER_H_
 
 // Ugglay

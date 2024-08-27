@@ -1,4 +1,4 @@
-/*
+﻿/*
  * A small header-only library to load an image into a RGB(A) SDL_Surface*,
  * like a stripped down version of SDL_Image, but using stb_image.h to decode
  * images and thus without any further external dependencies.

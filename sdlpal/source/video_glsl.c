@@ -1,4 +1,4 @@
-/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
+﻿/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -316,7 +316,7 @@ GLuint compileShader(const char* sourceOrFilename, GLuint shaderType, int is_sou
     lines++;
 #endif
     sprintf(pShaderBuffer, "%s#line %d\r\n", pShaderBuffer, lines);
-    // remove #pragma parameter from glsl, avoid glsl compiler（ I mean you, atom ) complains
+    // remove #pragma parameter from glsl, avoid glsl compiler嚗?I mean you, atom ) complains
     while((ptr = strstr(source, "#pragma parameter"))!= NULL) {
         char *ptrEnd = strchr(ptr, '\r');
         if( ptrEnd == NULL ) ptrEnd = strchr(ptr, '\n');

@@ -1,4 +1,4 @@
-// Based on libretro common-overlays.
+﻿// Based on libretro common-overlays.
 // https://github.com/libretro/common-overlays/
 //
 // Source file: overlay/overlay.xcf.

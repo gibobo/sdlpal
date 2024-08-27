@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Portions based on Public Domain fonts from GNU intlfonts:
  *
  * Generated from X font `taipei16' by getbdf
