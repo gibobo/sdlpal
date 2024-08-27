@@ -1,5 +1,3 @@
-set (TIMIDITY_DIR   ${SDL_MIXER_SOURCE_DIR}/timidity)
-
 add_library(timidity
     ${TIMIDITY_DIR}/common.c
     ${TIMIDITY_DIR}/instrum.c
@@ -14,7 +12,7 @@ add_library(timidity
 
 target_include_directories(timidity
     PRIVATE
-        ${SDL2_INCLUDE_DIR}
+        ${SDL2_SOURCE_DIR}/include
         ${SDL_MIXER_INCLUDE_DIR}
         ${TIMIDITY_DIR}
 )

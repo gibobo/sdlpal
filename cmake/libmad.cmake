@@ -1,5 +1,3 @@
-set (LIBMAD_DIR external/libmad)
-
 add_library(libmad
   ${LIBMAD_DIR}/bit.c
   ${LIBMAD_DIR}/decoder.c
