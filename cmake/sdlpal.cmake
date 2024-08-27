@@ -1,6 +1,3 @@
-set (SDLPAL_SOURCE_DIR  sdlpal/source)
-set (SDLPAL_INCLUDE_DIR sdlpal/include)
-
 set(SDLPAL_SOURCE_FILES
   ${SDLPAL_SOURCE_DIR}/audio.c
   ${SDLPAL_SOURCE_DIR}/aviplay.c
@@ -52,7 +49,7 @@ target_include_directories(sdlpal
     PRIVATE
         win32
         ${SDLPAL_INCLUDE_DIR}
-        ${SDL2_INCLUDE_DIR}
+        ${SDL2_SOURCE_DIR}/include
         ${SDL_MIXER_SOURCE_DIR}
         ${TIMIDITY_DIR}
         ${VORBIS_INCLUDE_DIR}

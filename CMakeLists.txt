@@ -18,20 +18,42 @@ project(sdlpal_win32)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
-set (SDL_MIXER_SOURCE_DIR   external/SDL_mixer/src/codecs)
+# add_subdirectory(external/SDL)
+# add_subdirectory(external/SDL_mixer)
+
+set (SDL2_SOURCE_DIR        external/SDL)
+set (ADPLUG_DIR             adplug)
+set (NUKED_DIR              external/nuked)
+set (LIBBINIO_SOURCE_DIR    external/libbinio/src)
+set (LIBBINIO_INCLUDE_DIR   external/libbinio/contrib/vs2015/libbinio)
+set (LIBMAD_DIR             external/libmad)
 set (SDL_MIXER_INCLUDE_DIR  external/SDL_mixer/include)
+set (SDL_MIXER_SOURCE_DIR   external/SDL_mixer/src/codecs)
+set (NATIVE_MIDI_DIR        external/SDL_mixer/src/codecs/native_midi)
+set (TIMIDITY_DIR           external/SDL_mixer/src/codecs/timidity)
+set (LIBOGG_SOURCE_DIR      external/SDL_mixer/external/ogg/src)
+set (LIBOGG_INCLUDE_DIR     external/SDL_mixer/external/ogg/include)
+set (OPUS_SOURCE_DIR        external/SDL_mixer/external/opus)
+set (OPUS_INCLUDE_DIR       external/SDL_mixer/external/opus/include)
+set (OPUSFILE_SOURCE_DIR    external/SDL_mixer/external/opusfile/src)
+set (OPUSFILE_INCLUDE_DIR   external/SDL_mixer/external/opusfile/include)
+set (VORBIS_SOURCE_DIR      external/SDL_mixer/external/vorbis/lib)
+set (VORBIS_INCLUDE_DIR     external/SDL_mixer/external/vorbis/include)
+set (SDLPAL_SOURCE_DIR      sdlpal/source)
+set (SDLPAL_INCLUDE_DIR     sdlpal/include)
 
 include(cmake/SDL2.cmake)
 include(cmake/SDL2main.cmake)
-include(cmake/libbinio.cmake)
-include(cmake/adplug.cmake)
-include(cmake/libmad.cmake)
 include(cmake/libogg.cmake)
 include(cmake/vorbis.cmake)
 include(cmake/opus.cmake)
 include(cmake/opusfile.cmake)
 include(cmake/timidity.cmake)
 include(cmake/native_midi.cmake)
+
+include(cmake/libbinio.cmake)
+include(cmake/libmad.cmake)
+include(cmake/adplug.cmake)
 include(cmake/sdlpal.cmake)
 
 add_executable (${PROJECT_NAME} win32/win32.cpp)
@@ -60,6 +82,6 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC
     win32
     ${SDLPAL_INCLUDE_DIR}
-    ${SDL2_INCLUDE_DIR}
+    ${SDL2_SOURCE_DIR}/include
     ${ADPLUG_DIR}
-    )
+)

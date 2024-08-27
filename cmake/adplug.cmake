@@ -1,6 +1,3 @@
-set (ADPLUG_DIR adplug)
-set (NUKED_DIR external/nuked)
-
 add_library(adplug
   ${ADPLUG_DIR}/emuopls.cpp
   ${ADPLUG_DIR}/src/fprovide.cpp
@@ -19,7 +16,7 @@ add_library(adplug
 target_include_directories(adplug 
   PRIVATE 
     ${ADPLUG_DIR}
-    ${SDL2_INCLUDE_DIR}    
+    ${SDL2_SOURCE_DIR}/include
     ${LIBBINIO_SOURCE_DIR}
     ${LIBBINIO_INCLUDE_DIR}
     ${NUKED_DIR}

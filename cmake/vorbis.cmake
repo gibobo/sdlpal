@@ -1,6 +1,3 @@
-set (VORBIS_SOURCE_DIR external/vorbis/lib)
-set (VORBIS_INCLUDE_DIR external/vorbis/include)
-
 add_library(vorbis
     ${VORBIS_SOURCE_DIR}/analysis.c
     ${VORBIS_SOURCE_DIR}/bitrate.c

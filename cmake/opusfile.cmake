@@ -1,6 +1,3 @@
-set (OPUSFILE_SOURCE_DIR external/opusfile/src)
-set (OPUSFILE_INCLUDE_DIR external/opusfile/include)
-
 add_library(opusfile
     ${OPUSFILE_SOURCE_DIR}/http.c
     ${OPUSFILE_SOURCE_DIR}/info.c
