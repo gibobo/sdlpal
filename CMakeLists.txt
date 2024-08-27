@@ -18,8 +18,8 @@ project(sdlpal_win32)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
-add_subdirectory(external/SDL)
-add_subdirectory(external/SDL_mixer)
+# add_subdirectory(external/SDL)
+# add_subdirectory(external/SDL_mixer)
 
 set (SDL2_SOURCE_DIR        external/SDL)
 set (SDL_MIXER_INCLUDE_DIR  external/SDL_mixer/include)
@@ -43,48 +43,47 @@ set (ADPLUG_DIR             adplug)
 set (SDLPAL_SOURCE_DIR      sdlpal/source)
 set (SDLPAL_INCLUDE_DIR     sdlpal/include)
 
-# include(cmake/SDL2.cmake)
-# include(cmake/SDL2main.cmake)
-# include(cmake/libogg.cmake)
-# include(cmake/vorbis.cmake)
-# include(cmake/opus.cmake)
-# include(cmake/opusfile.cmake)
-# include(cmake/timidity.cmake)
-# include(cmake/native_midi.cmake)
+include(cmake/SDL2.cmake)
+include(cmake/SDL2main.cmake)
+include(cmake/libogg.cmake)
+include(cmake/vorbis.cmake)
+include(cmake/opus.cmake)
+include(cmake/opusfile.cmake)
+include(cmake/timidity.cmake)
+include(cmake/native_midi.cmake)
 
-include(cmake/libbinio.cmake)
 include(cmake/libmad.cmake)
 include(cmake/adplug.cmake)
-# include(cmake/sdlpal.cmake)
+include(cmake/sdlpal.cmake)
 
-# add_executable (${PROJECT_NAME} win32/win32.cpp)
-# target_link_libraries(${PROJECT_NAME} 
-#   opengl32
-#   imm32
-#   winmm
-#   comctl32
-#   setupapi
-#   version
+add_executable (${PROJECT_NAME} win32/win32.cpp)
+target_link_libraries(${PROJECT_NAME} 
+    opengl32
+    imm32
+    winmm
+    comctl32
+    setupapi
+    version
 
-#   SDL2
-#   SDL2main
-#   native_midi
-#   vorbis
-#   libogg
-#   timidity
-#   opus
-#   opusfile
+    SDL2
+    SDL2main
+    # external/SDL_mixer/SDL2_mixerd
+    native_midi
+    timidity
+    vorbis
+    ogg
+    opus
+    opusfile
 
-#   libbinio
-#   libmad
-#   adplug
-#   sdlpal
-# )
+    libmad
+    adplug
+    sdlpal
+)
 
-# target_include_directories(${PROJECT_NAME}
-#   PUBLIC
-#     ${SDL2_SOURCE_DIR}/include
-#     ${ADPLUG_DIR}
-#     ${SDLPAL_INCLUDE_DIR}
-#     win32
-# )
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        ${SDL2_SOURCE_DIR}/include
+        ${ADPLUG_DIR}
+        ${SDLPAL_INCLUDE_DIR}
+        win32
+)

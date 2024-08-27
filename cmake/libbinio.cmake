@@ -1,8 +1,9 @@
 add_library(libbinio
-    ${LIBBINIO_SOURCE_DIR}/binfile.cpp
-    ${LIBBINIO_SOURCE_DIR}/binio.cpp
-    ${LIBBINIO_SOURCE_DIR}/binstr.cpp
-    ${LIBBINIO_SOURCE_DIR}/binwrap.cpp
+    STATIC
+        ${LIBBINIO_SOURCE_DIR}/binfile.cpp
+        ${LIBBINIO_SOURCE_DIR}/binio.cpp
+        ${LIBBINIO_SOURCE_DIR}/binstr.cpp
+        ${LIBBINIO_SOURCE_DIR}/binwrap.cpp
 )
 
 target_include_directories(libbinio
