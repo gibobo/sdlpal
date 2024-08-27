@@ -21,3 +21,7 @@ target_include_directories(adplug
     ${LIBBINIO_INCLUDE_DIR}
     ${NUKED_DIR}
 )
+
+target_link_libraries(adplug
+        libbinio
+)

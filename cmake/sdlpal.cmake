@@ -66,4 +66,5 @@ target_compile_definitions(sdlpal
     PRIVATE
         PAL_HAS_PLATFORM_SPECIFIC_UTILS
         _CONSOLE
+        FPM_DEFAULT
 )
