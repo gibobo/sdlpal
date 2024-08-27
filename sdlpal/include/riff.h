@@ -1,4 +1,4 @@
-#ifndef PAL_RIFF_H
+﻿#ifndef PAL_RIFF_H
 #define PAL_RIFF_H
 
 #include <stdint.h>

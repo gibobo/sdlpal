@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Based on:
  *
  * YH - Console Chinese Environment -

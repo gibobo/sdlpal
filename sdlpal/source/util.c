@@ -1,4 +1,4 @@
-/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
+﻿/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
@@ -998,7 +998,7 @@ char *UTIL_basename(const char *filename) {
     
     char *pos = NULL;
     int broked = 0;
-    for( int i=0;i<strlen(PAL_PATH_SEPARATORS);i++)
+    for( unsigned int i=0;i<strlen(PAL_PATH_SEPARATORS);i++)
         if( (pos = strrchr(basename_buf,PAL_PATH_SEPARATORS[i])) != NULL )
             *pos='\0', broked = 1;
     if( !broked )

@@ -1,4 +1,4 @@
-/* TinyMidiLoader - v0.7 - Minimalistic midi parsing library - https://github.com/schellingb/TinySoundFont
+﻿/* TinyMidiLoader - v0.7 - Minimalistic midi parsing library - https://github.com/schellingb/TinySoundFont
                                      no warranty implied; use at your own risk
    Do this:
       #define TML_IMPLEMENTATION

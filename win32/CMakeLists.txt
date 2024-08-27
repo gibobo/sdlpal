@@ -2,7 +2,7 @@
 # 專案專屬邏輯。
 #
 project(sdlpal_win32)
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8...3.30)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 

@@ -1,4 +1,4 @@
-/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
+﻿/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
@@ -1698,7 +1698,7 @@ PAL_ShowDialogText(
          TEXT_DisplayText(lpszText, PAL_X(pos) + 8 + ((len & 1) << 2), PAL_Y(pos) + 10, TRUE);
          VIDEO_UpdateScreen(&rect);
 
-         PAL_DialogWaitForKeyWithMaximumSeconds(1.4);
+         PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
 
          //
          // Delete the box
