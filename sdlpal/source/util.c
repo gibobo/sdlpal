@@ -700,9 +700,7 @@ UTIL_CheckResourceFiles(
 
   return retval;
 }
-
-#if !defined(PAL_HAS_PLATFORM_SPECIFIC_UTILS)
-
+#ifdef WIN32
 BOOL UTIL_GetScreenSize(
     DWORD *pdwScreenWidth,
     DWORD *pdwScreenHeight) {
@@ -724,9 +722,7 @@ INT UTIL_Platform_Init(
 VOID UTIL_Platform_Quit(
     VOID) {
 }
-
 #endif
-
 /*
 * Logging utilities
 */

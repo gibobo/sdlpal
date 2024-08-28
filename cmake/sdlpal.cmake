@@ -13,7 +13,6 @@ set(SDLPAL_SOURCE_FILES
     ${SDLPAL_SOURCE_DIR}/magicmenu.c
     ${SDLPAL_SOURCE_DIR}/map.c
     ${SDLPAL_SOURCE_DIR}/mini_glloader.c
-    ${SDLPAL_SOURCE_DIR}/music_mad.c
     ${SDLPAL_SOURCE_DIR}/overlay.c
     ${SDLPAL_SOURCE_DIR}/palcfg.c
     ${SDLPAL_SOURCE_DIR}/palcommon.c
@@ -47,7 +46,6 @@ target_include_directories(sdlpal
         win32
         ${SDLPAL_INCLUDE_DIR}
         ${SDL2_SOURCE_DIR}/include
-        ${MAD_DIR}
         ${ADPLUG_DIR}
         ${BINIO_SOURCE_DIR}
         ${BINIO_INCLUDE_DIR}
@@ -56,7 +54,6 @@ target_include_directories(sdlpal
 
 target_compile_definitions(sdlpal
     PRIVATE
-        PAL_HAS_PLATFORM_SPECIFIC_UTILS
         _CONSOLE
         FPM_DEFAULT
 )

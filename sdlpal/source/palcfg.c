@@ -555,7 +555,7 @@ PAL_LoadConfig(
 	gConfig.wAudioBufferSize = (WORD)values[PALCFG_AUDIOBUFFERSIZE].uValue;
 	gConfig.iMusicVolume = values[PALCFG_MUSICVOLUME].uValue;
 	gConfig.iSoundVolume = values[PALCFG_SOUNDVOLUME].uValue;
-	gConfig.pszShader = values[PALCFG_SHADER].uValue;
+	gConfig.pszShader = (char *)values[PALCFG_SHADER].uValue;
 	gConfig.dwTextureWidth  = values[PALCFG_TEXTUREWIDTH].uValue;
 	gConfig.dwTextureHeight = values[PALCFG_TEXTUREHEIGHT].uValue;
 
