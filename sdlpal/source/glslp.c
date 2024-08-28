@@ -22,7 +22,6 @@
 
 #include "main.h"
 
-#if PAL_HAS_GLSL
 #include "glslp.h"
 
 GLSLP gGLSLP;
@@ -572,5 +571,3 @@ void destroy_glslp(GLSLP *pGLSLP) {
     free(pGLSLP->uniform_params);
     memset(pGLSLP, 0, sizeof(GLSLP));
 }
-
-#endif // PAL_HAS_GLSL

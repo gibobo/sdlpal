@@ -22,7 +22,6 @@
 
 #include "main.h"
 
-#if PAL_HAS_GLSL
 #include "mini_glloader.h"
 
 PFNGLCREATESHADERPROC glCreateShader;
@@ -98,4 +97,4 @@ int initGLExtensions(int major) {
     glEnableVertexAttribArray && glVertexAttribPointer && glUniformMatrix4fv;
 }
 #endif
-#endif
+

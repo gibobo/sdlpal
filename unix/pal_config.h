@@ -29,10 +29,6 @@
 #  define PAL_HAS_JOYSTICKS    1
 # endif
 
-# if SDL_MAJOR_VERSION == 1 && SDL_MINOR_VERSION <= 2
-#  define PAL_HAS_SDLCD         1
-# endif
-
 # define PAL_PREFIX            "./"
 # define PAL_SAVE_PREFIX       "./"
 
@@ -66,9 +62,5 @@
 # define PAL_HAS_NATIVEMIDI 1
 
 #include <sys/time.h>
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-# define PAL_HAS_GLSL 1
-#endif
 
 #endif

@@ -12,14 +12,8 @@ set(SDLPAL_SOURCE_FILES
     ${SDLPAL_SOURCE_DIR}/itemmenu.c
     ${SDLPAL_SOURCE_DIR}/magicmenu.c
     ${SDLPAL_SOURCE_DIR}/map.c
-    ${SDLPAL_SOURCE_DIR}/midi.c
-    ${SDLPAL_SOURCE_DIR}/midi_timidity.c
-    ${SDLPAL_SOURCE_DIR}/midi_tsf.c
     ${SDLPAL_SOURCE_DIR}/mini_glloader.c
-    ${SDLPAL_SOURCE_DIR}/mp3play.c
     ${SDLPAL_SOURCE_DIR}/music_mad.c
-    ${SDLPAL_SOURCE_DIR}/oggplay.c
-    ${SDLPAL_SOURCE_DIR}/opusplay.c
     ${SDLPAL_SOURCE_DIR}/overlay.c
     ${SDLPAL_SOURCE_DIR}/palcfg.c
     ${SDLPAL_SOURCE_DIR}/palcommon.c
@@ -49,22 +43,15 @@ add_library(sdlpal
 
 target_include_directories(sdlpal
     PRIVATE
-        external/SDL_mixer/src/codecs
-        ${CMAKE_SOURCE_DIR}
+        # ${CMAKE_SOURCE_DIR}
         win32
         ${SDLPAL_INCLUDE_DIR}
         ${SDL2_SOURCE_DIR}/include
-        ${SDL_MIXER_SOURCE_DIR}
-        ${TIMIDITY_DIR}
-        ${VORBIS_INCLUDE_DIR}
-        ${OGG_DIR}/include
-        ${OPUS_INCLUDE_DIR}
-        ${OPUSFILE_INCLUDE_DIR}
         ${MAD_DIR}
         ${ADPLUG_DIR}
         ${BINIO_SOURCE_DIR}
         ${BINIO_INCLUDE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}/external/SDL_mixer/external/ogg/include
+        ${libogg_BINARY_DIR}/include
 )
 
 target_compile_definitions(sdlpal

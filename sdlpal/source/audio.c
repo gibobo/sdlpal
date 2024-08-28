@@ -26,7 +26,6 @@
 #include "players.h"
 #include "util.h"
 #include "resampler.h"
-#include "midi.h"
 #include "aviplay.h"
 #include <math.h>
 
@@ -42,9 +41,6 @@ typedef struct tagAUDIODEVICE
    SDL_AudioSpec             spec;		/* Actual-used sound specification */
    AUDIOPLAYER              *pMusPlayer;
    AUDIOPLAYER              *pCDPlayer;
-#if PAL_HAS_SDLCD
-   SDL_CD                   *pCD;
-#endif
    AUDIOPLAYER              *pSoundPlayer;
    void                     *pSoundBuffer;	/* The output buffer for sound */
 #if SDL_VERSION_ATLEAST(2,0,0)
@@ -220,8 +216,6 @@ AUDIO_OpenDevice(
    gAudioDevice.fSoundEnabled = TRUE;
    gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
-   if(gConfig.eMIDISynth == SYNTH_NATIVE)
-   MIDI_SetVolume(gConfig.iMusicVolume);
 
    //
    // Initialize the resampler module
@@ -283,74 +277,13 @@ AUDIO_OpenDevice(
    //
    // Initialize the music subsystem.
    //
-   switch (gConfig.eMusicType)
-   {
-   case MUSIC_RIX:
-       gAudioDevice.pMusPlayer = RIX_Init(UTIL_GetFullPathName(PAL_BUFFER_SIZE_ARGS(0), gConfig.pszGamePath, "mus.mkf"));
-	   break;
-   case MUSIC_MP3:
-	   gAudioDevice.pMusPlayer = MP3_Init();
-	   break;
-   case MUSIC_OGG:
-	   gAudioDevice.pMusPlayer = OGG_Init();
-	   break;
-   case MUSIC_OPUS:
-	   gAudioDevice.pMusPlayer = OPUS_Init();
-	   break;
-   case MUSIC_MIDI:
-	   if (gConfig.eMIDISynth == SYNTH_TIMIDITY)
-		   gAudioDevice.pMusPlayer = TIMIDITY_Init();
-	   else if (gConfig.eMIDISynth == SYNTH_TINYSOUNDFONT)
-		   gAudioDevice.pMusPlayer = TSF_Init();
-	   break;
-   default:
-	   break;
-   }
+   gAudioDevice.pMusPlayer = RIX_Init(UTIL_GetFullPathName(PAL_BUFFER_SIZE_ARGS(0), gConfig.pszGamePath, "mus.mkf"));
+
 
    //
    // Initialize the CD audio.
    //
-   switch (gConfig.eCDType)
-   {
-   case CD_SDLCD:
-   {
-#if PAL_HAS_SDLCD
-	   int i;
-	   gAudioDevice.pCD = NULL;
-
-	   for (i = 0; i < SDL_CDNumDrives(); i++)
-	   {
-		   gAudioDevice.pCD = SDL_CDOpen(i);
-		   if (gAudioDevice.pCD != NULL)
-		   {
-			   if (!CD_INDRIVE(SDL_CDStatus(gAudioDevice.pCD)))
-			   {
-				   SDL_CDClose(gAudioDevice.pCD);
-				   gAudioDevice.pCD = NULL;
-			   }
-			   else
-			   {
-				   break;
-			   }
-		   }
-	   }
-#endif
-	   gAudioDevice.pCDPlayer = NULL;
-	   break;
-   }
-   case CD_MP3:
-	   gAudioDevice.pCDPlayer = MP3_Init();
-	   break;
-   case CD_OGG:
-	   gAudioDevice.pCDPlayer = OGG_Init();
-	   break;
-   case CD_OPUS:
-	   gAudioDevice.pCDPlayer = OPUS_Init();
-	   break;
-   default:
-      gAudioDevice.pCDPlayer = NULL;
-	   break;
-   }
+   gAudioDevice.pCDPlayer = NULL;
 
    //
    // Let the callback function run so that musics will be played.
@@ -399,23 +332,10 @@ AUDIO_CloseDevice(
 	   gAudioDevice.pCDPlayer = NULL;
    }
 
-#if PAL_HAS_SDLCD
-   if (gAudioDevice.pCD != NULL)
-   {
-      AUDIO_PlayCDTrack(-1);
-      SDL_CDClose(gAudioDevice.pCD);
-   }
-#endif
-
    if (gAudioDevice.pSoundBuffer != NULL)
    {
       free(gAudioDevice.pSoundBuffer);
 	  gAudioDevice.pSoundBuffer = NULL;
-   }
-
-   if (gConfig.eMIDISynth == SYNTH_NATIVE && gConfig.eMusicType == MUSIC_MIDI)
-   {
-      MIDI_Play(0, FALSE);
    }
 
    gAudioDevice.fOpened = FALSE;
@@ -466,8 +386,6 @@ AUDIO_IncreaseVolume(
    AUDIO_ChangeVolumeByValue(&gConfig.iSoundVolume, 3);
    gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
-   if(gConfig.eMIDISynth == SYNTH_NATIVE)
-   MIDI_SetVolume(gConfig.iMusicVolume);
 }
 
 VOID
@@ -493,8 +411,6 @@ AUDIO_DecreaseVolume(
    AUDIO_ChangeVolumeByValue(&gConfig.iSoundVolume, -3);
    gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
-   if(gConfig.eMIDISynth == SYNTH_NATIVE)
-   MIDI_SetVolume(gConfig.iMusicVolume);
 }
 
 VOID
@@ -541,12 +457,6 @@ AUDIO_PlayMusic(
 		AUDIO_PlayCDTrack(-1);
 	}
 
-   if (gConfig.eMIDISynth == SYNTH_NATIVE && gConfig.eMusicType == MUSIC_MIDI)
-   {
-      MIDI_Play(iNumRIX, fLoop);
-      return;
-   }
-
    AUDIO_Lock();
    if (gAudioDevice.pMusPlayer)
    {
@@ -584,23 +494,6 @@ AUDIO_PlayCDTrack(
    {
        return TRUE;
    }
-#if PAL_HAS_SDLCD
-   if (gAudioDevice.pCD != NULL)
-   {
-      if (CD_INDRIVE(SDL_CDStatus(gAudioDevice.pCD)))
-      {
-         SDL_CDStop(gAudioDevice.pCD);
-
-         if (iNumTrack != -1)
-         {
-            if (SDL_CDPlayTracks(gAudioDevice.pCD, iNumTrack - 1, 0, 1, 0) == 0)
-            {
-               return TRUE;
-            }
-         }
-      }
-   }
-#endif
    AUDIO_Lock();
    if (gAudioDevice.pCDPlayer)
    {

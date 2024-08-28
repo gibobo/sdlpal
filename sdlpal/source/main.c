@@ -98,11 +98,7 @@ PAL_Init(
    VIDEO_SetWindowTitle(UTIL_va(UTIL_GlobalBuffer(0), PAL_GLOBAL_BUFFER_SIZE,
 	   "Pal %s%s%s%s",
 	   gConfig.fIsWIN95 ? "Win95" : "DOS",
-#if defined(_DEBUG) || defined(DEBUG)
-	   " (Debug) ",
-#else
 	   "",
-#endif
 	   ""
        ,(gConfig.fEnableGLSL && gConfig.pszShader ? gConfig.pszShader : "")
    ));

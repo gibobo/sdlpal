@@ -208,7 +208,6 @@ typedef struct tagCONFIGURATION
 	CDTYPE           eCDType;
 	OPLCORE_TYPE     eOPLCore;
 	OPLCHIP_TYPE     eOPLChip;
-	MIDISYNTHTYPE    eMIDISynth;
 	WORD             wAudioBufferSize;
 	BOOL             fIsWIN95;
 	BOOL             fUseSurroundOPL;

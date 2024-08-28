@@ -316,7 +316,6 @@ PAL_KeyboardEventFilter(
       {
          VIDEO_SaveScreenshot();
       }
-#if PAL_HAS_GLSL
       else if (lpEvent->key.keysym.sym == SDLK_z)
       {
          Filter_StepParamSlot(1);
@@ -333,7 +332,6 @@ PAL_KeyboardEventFilter(
       {
          Filter_StepCurrentParam(-1);
       }
-#endif
    }
 }
 

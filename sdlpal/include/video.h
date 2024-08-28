@@ -37,11 +37,8 @@ PAL_C_LINKAGE_BEGIN
 extern SDL_Surface *gpScreen;
 extern SDL_Surface *gpScreenBak;
 extern volatile BOOL g_bRenderPaused;
-
-#if PAL_HAS_GLSL
 void Filter_StepParamSlot(int step);
 void Filter_StepCurrentParam(int step);
-#endif
 
 INT
 VIDEO_Startup(

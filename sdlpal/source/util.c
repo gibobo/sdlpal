@@ -24,12 +24,8 @@
 #include "input.h"
 #include "palcfg.h"
 #include <errno.h>
-
-#include "midi.h"
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 #include "SDL_messagebox.h"
 #include "SDL_video.h"
-#endif
 
 static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
 #define INTERNAL_BUFFER_SIZE_ARGS internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE

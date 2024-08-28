@@ -23,32 +23,32 @@ project(sdlpal_win32)
 #
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(OPUS_BUILD_SHARED_LIBRARY OFF)
-set(OPUS_BUILD_TESTING OFF)
-set(OPUS_BUILD_PROGRAMS OFF)
-set(OP_DISABLE_HTTP ON)
-set(OP_DISABLE_EXAMPLES ON)
-set(OP_DISABLE_DOCS ON)
+# set(OPUS_BUILD_SHARED_LIBRARY OFF)
+# set(OPUS_BUILD_TESTING OFF)
+# set(OPUS_BUILD_PROGRAMS OFF)
+# set(OP_DISABLE_HTTP ON)
+# set(OP_DISABLE_EXAMPLES ON)
+# set(OP_DISABLE_DOCS ON)
 
 # add_subdirectory(external/SDL)
 # add_subdirectory(external/SDL_mixer)
-add_subdirectory(external/SDL_mixer/external/ogg)
-add_subdirectory(external/SDL_mixer/external/vorbis)
-add_subdirectory(external/SDL_mixer/external/opus)
-add_subdirectory(external/SDL_mixer/external/opusfile)
+# add_subdirectory(external/SDL_mixer/external/ogg)
+# add_subdirectory(external/SDL_mixer/external/vorbis)
+# add_subdirectory(external/SDL_mixer/external/opus)
+# add_subdirectory(external/SDL_mixer/external/opusfile)
 
 set (SDL2_SOURCE_DIR        external/SDL)
 set (SDL_MIXER_INCLUDE_DIR  external/SDL_mixer/include)
 set (SDL_MIXER_SOURCE_DIR   external/SDL_mixer/src/codecs)
 set (NATIVE_MIDI_DIR        external/SDL_mixer/src/codecs/native_midi)
 set (TIMIDITY_DIR           external/SDL_mixer/src/codecs/timidity)
-set (OGG_DIR                external/SDL_mixer/external/ogg)
+# set (OGG_DIR                external/SDL_mixer/external/ogg)
 # set (OPUS_SOURCE_DIR        external/SDL_mixer/external/opus)
-set (OPUS_INCLUDE_DIR       external/SDL_mixer/external/opus/include)
-set (OPUSFILE_SOURCE_DIR    external/SDL_mixer/external/opusfile/src)
-set (OPUSFILE_INCLUDE_DIR   external/SDL_mixer/external/opusfile/include)
-set (VORBIS_SOURCE_DIR      external/SDL_mixer/external/vorbis/lib)
-set (VORBIS_INCLUDE_DIR     external/SDL_mixer/external/vorbis/include)
+# set (OPUS_INCLUDE_DIR       external/SDL_mixer/external/opus/include)
+# set (OPUSFILE_SOURCE_DIR    external/SDL_mixer/external/opusfile/src)
+# set (OPUSFILE_INCLUDE_DIR   external/SDL_mixer/external/opusfile/include)
+# set (VORBIS_SOURCE_DIR      external/SDL_mixer/external/vorbis/lib)
+# set (VORBIS_INCLUDE_DIR     external/SDL_mixer/external/vorbis/include)
 
 set (BINIO_SOURCE_DIR       external/libbinio/src)
 set (BINIO_INCLUDE_DIR      external/libbinio/contrib/vs2015/libbinio)
@@ -89,15 +89,24 @@ target_link_libraries(${PROJECT_NAME}
     version
     SDL2
     SDL2main
-    native_midi
-    timidity
-    vorbis
-    Ogg::ogg
-    Opus::opus
-    opusfile
     mad
     adplug
     sdlpal
+)
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        ${SDL2_SOURCE_DIR}/include
+        ${ADPLUG_DIR}
+        ${SDLPAL_INCLUDE_DIR}
+        win32
+)
+else()
+find_package(OpenGL REQUIRED)
+
+add_executable (${PROJECT_NAME}
+    unix/unix.cpp
+    ${SDLPAL_SOURCE_DIR}/main.c
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -106,7 +115,23 @@ target_include_directories(${PROJECT_NAME}
         ${SDL2_SOURCE_DIR}/include
         ${ADPLUG_DIR}
         ${SDLPAL_INCLUDE_DIR}
-        win32
+        unix
 )
-else()
+
+target_link_libraries(${PROJECT_NAME}
+    ${OPENGL_LIBRARY}
+    fltk
+    SDL2
+    native_midi
+    timidity
+    vorbis
+    vorbisenc
+    Ogg::ogg
+    Opus::opus
+    OpusFile::opusfile
+    mad
+    sdlpal
+    adplug
+)
+
 endif()
