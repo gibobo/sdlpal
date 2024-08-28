@@ -23,8 +23,6 @@
 
 #include "main.h"
 
-#if PAL_HAS_GLSL
-
 #include "video_glsl.h"
 #include "video.h"
 
@@ -1175,4 +1173,3 @@ void Filter_StepCurrentParam(int step) {
     param->value = CLAMP( param->value + step * param->step, param->minimum, param->maximum);
     UTIL_LogOutput(LOGLEVEL_INFO, "[PARAM] slot:%s cur:%.2f range:[%.2f,%.2f]\n", param->parameter_name, param->value, param->minimum, param->maximum);
 }
-#endif

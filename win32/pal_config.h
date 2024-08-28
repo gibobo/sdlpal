@@ -24,20 +24,14 @@
 
 #pragma once
 
-#define PAL_PREFIX "C:/Users/23021/Downloads/Pal98rqptw/"
-#define PAL_SAVE_PREFIX "C:/Users/23021/Downloads/Pal98rqptw/"
+#define PAL_PREFIX "E:/Pal98rqptw/"
+#define PAL_SAVE_PREFIX "E:/Pal98rqptw/"
 
 #define PAL_DEFAULT_WINDOW_WIDTH 640
 #define PAL_DEFAULT_WINDOW_HEIGHT 400
 #define PAL_DEFAULT_FULLSCREEN_HEIGHT 480
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 #define PAL_VIDEO_INIT_FLAGS (SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | (gConfig.fFullScreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0))
-#else
-#define PAL_VIDEO_INIT_FLAGS (SDL_HWSURFACE | SDL_RESIZABLE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0))
-#define PAL_FATAL_OUTPUT(s) MessageBoxA(0, (s), "FATAL ERROR", MB_ICONERROR)
-#define PAL_HAS_SDLCD 1
-#endif
 
 #ifdef _M_ARM
 #define PAL_SDL_INIT_FLAGS (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE)
@@ -69,11 +63,6 @@
 #define strdup _strdup //https://msdn.microsoft.com/en-us/library/ms235454(v=vs.140).aspx
 #endif
 
-#if defined(_M_ARM64) || defined(_M_ARM)
-#define PAL_HAS_GLSL 0
-#else
-#define PAL_HAS_GLSL 1
-#endif
 
 // #define PAL_HAS_PLATFORM_STARTUP 1
 

@@ -218,21 +218,6 @@ typedef const WCHAR        *LPCWSTR;
 // # endif
 // #endif
 
-// #if SDL_VERSION_ATLEAST(2,0,0)
-// # define PAL_VIDEO_INIT_FLAGS  (SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | (gConfig.fFullScreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0))
-// #else
-// # define PAL_VIDEO_INIT_FLAGS  (SDL_HWSURFACE | SDL_RESIZABLE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0))
-// # define PAL_FATAL_OUTPUT(s)   MessageBoxA(0, (s), "FATAL ERROR", MB_ICONERROR)
-// # define PAL_HAS_SDLCD         1
-// #endif
-
-#if !SDL_VERSION_ATLEAST(2,0,0)
-# if PAL_HAS_GLSL
-#  undef PAL_HAS_GLSL
-# endif
-#define SDL_strcasecmp strcasecmp
-#define SDL_setenv(a,b,c) 
-#endif
 
 #ifndef PAL_DEFAULT_FULLSCREEN_HEIGHT
 # define PAL_DEFAULT_FULLSCREEN_HEIGHT PAL_DEFAULT_WINDOW_HEIGHT
@@ -251,13 +236,6 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_AUDIO_DEFAULT_BUFFER_SIZE   1024
 #endif
 
-#ifndef PAL_HAS_SDLCD
-# define PAL_HAS_SDLCD        0
-#endif
-
-#ifndef PAL_HAS_MP3
-# define PAL_HAS_MP3          1   /* Try always enable MP3. If compilation/run failed, please change this value to 0. */
-#endif
 #ifndef PAL_HAS_OGG
 # define PAL_HAS_OGG          1   /* Try always enable OGG. If compilation/run failed, please change this value to 0. */
 #endif

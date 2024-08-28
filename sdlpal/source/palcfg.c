@@ -46,7 +46,7 @@ static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
 	{ PALCFG_ENABLEKEYREPEAT,   PALCFG_BOOLEAN,  "EnableKeyRepeat",   15, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
 	{ PALCFG_USETOUCHOVERLAY,   PALCFG_BOOLEAN,  "UseTouchOverlay",   15, MAKE_BOOLEAN(PAL_HAS_TOUCH,                 FALSE,                 TRUE) },
 	{ PALCFG_ENABLEAVIPLAY,     PALCFG_BOOLEAN,  "EnableAviPlay",     13, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
-	{ PALCFG_ENABLEGLSL,        PALCFG_BOOLEAN,  "EnableGLSL",        10, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
+	{ PALCFG_ENABLEGLSL,        PALCFG_BOOLEAN,  "EnableGLSL",        10, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },
     { PALCFG_ENABLEHDR,         PALCFG_BOOLEAN,  "EnableHDR",          9, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
 
 	{ PALCFG_SURROUNDOPLOFFSET, PALCFG_INTEGER,  "SurroundOPLOffset", 17, MAKE_INTEGER(384,                           INT32_MIN,             INT32_MAX) },
@@ -79,7 +79,7 @@ static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
 	{ PALCFG_MIDICLIENT,        PALCFG_STRING,   "MIDIClient",        10, MAKE_STRING(NULL) },
 	{ PALCFG_SOUNDBANK,         PALCFG_STRING,   "SoundBank",          9, MAKE_STRING(NULL) },
 	{ PALCFG_SCALEQUALITY,      PALCFG_STRING,   "ScaleQuality",      12, MAKE_STRING("0") },
-	{ PALCFG_SHADER,            PALCFG_STRING,   "Shader",             6, MAKE_STRING(NULL) },
+	{ PALCFG_SHADER,            PALCFG_STRING,   "Shader",             6, MAKE_STRING("G:/sdlpal/shaders/plain.glsl") },
 };
 
 static const char *music_types[] = { "MIDI", "RIX", "MP3", "OGG", "OPUS", "RAW" };
@@ -293,7 +293,6 @@ PAL_LoadConfig(
 	FILE     *fp;
 	ConfigValue  values[PALCFG_ALL_MAX];
 	MUSICTYPE eMusicType = MUSIC_RIX;
-	MIDISYNTHTYPE eMIDISynthType = SYNTH_NATIVE;
 	CDTYPE eCDType = CD_NONE;
 	OPLCORE_TYPE eOPLCore = OPLCORE_DBFLT;
 	OPLCHIP_TYPE eOPLChip = OPLCHIP_OPL2;
@@ -430,41 +429,12 @@ PAL_LoadConfig(
 					gConfig.pszLogFile = ParseStringValue(value.sValue, gConfig.pszLogFile);
 					break;
 				case PALCFG_CD:
-				{
-					if (PAL_HAS_MP3 && SDL_strncasecmp(value.sValue, "MP3", slen) == 0)
-						eCDType = CD_MP3;
-					else if (PAL_HAS_OGG && SDL_strncasecmp(value.sValue, "OGG", slen) == 0)
-						eCDType = CD_OGG;
-					else if (PAL_HAS_OPUS && SDL_strncasecmp(value.sValue, "OPUS", slen) == 0)
-						eCDType = CD_OPUS;
-					else if (PAL_HAS_SDLCD && SDL_strncasecmp(value.sValue, "RAW", slen) == 0)
-						eCDType = CD_SDLCD;
 					break;
-				}
 				case PALCFG_MUSIC:
-				{
-					if (SDL_strncasecmp(value.sValue, "MIDI", slen) == 0)
-						eMusicType = MUSIC_MIDI;
-					else if (PAL_HAS_MP3 && SDL_strncasecmp(value.sValue, "MP3", slen) == 0)
-						eMusicType = MUSIC_MP3;
-					else if (PAL_HAS_OGG && SDL_strncasecmp(value.sValue, "OGG", slen) == 0)
-						eMusicType = MUSIC_OGG;
-					else if (PAL_HAS_OPUS && SDL_strncasecmp(value.sValue, "OPUS", slen) == 0)
-						eMusicType = MUSIC_OPUS;
-					else if (SDL_strncasecmp(value.sValue, "RIX", slen) == 0)
-						eMusicType = MUSIC_RIX;
+					eMusicType = MUSIC_RIX;
 					break;
-				}
 				case PALCFG_MIDISYNTH:
-				{
-					if (PAL_HAS_NATIVEMIDI && SDL_strncasecmp(value.sValue, "native", slen) == 0)
-						eMIDISynthType = SYNTH_NATIVE;
-					else if (SDL_strncasecmp(value.sValue, "timidity", slen) == 0)
-						eMIDISynthType = SYNTH_TIMIDITY;
-					else if (SDL_strncasecmp(value.sValue, "tinysoundfont", slen) == 0)
-						eMIDISynthType = SYNTH_TINYSOUNDFONT;
 					break;
-				}
 				case PALCFG_OPL_CORE:
 				{
 					if (SDL_strncasecmp(value.sValue, "DBINT", slen) == 0)
@@ -557,7 +527,6 @@ PAL_LoadConfig(
 	if (!gConfig.pszGamePath) gConfig.pszGamePath = strdup(PAL_PREFIX);
     if (!gConfig.pszShaderPath) gConfig.pszShaderPath = strdup(gConfig.pszGamePath);
 	gConfig.eMusicType = eMusicType;
-	gConfig.eMIDISynth = eMIDISynthType;
 	gConfig.eCDType = eCDType;
 	gConfig.eOPLCore = eOPLCore;
 	gConfig.eOPLChip = (eOPLCore == OPLCORE_NUKED ? OPLCHIP_OPL3 : eOPLChip);
@@ -586,7 +555,7 @@ PAL_LoadConfig(
 	gConfig.wAudioBufferSize = (WORD)values[PALCFG_AUDIOBUFFERSIZE].uValue;
 	gConfig.iMusicVolume = values[PALCFG_MUSICVOLUME].uValue;
 	gConfig.iSoundVolume = values[PALCFG_SOUNDVOLUME].uValue;
-
+	gConfig.pszShader = values[PALCFG_SHADER].uValue;
 	gConfig.dwTextureWidth  = values[PALCFG_TEXTUREWIDTH].uValue;
 	gConfig.dwTextureHeight = values[PALCFG_TEXTUREHEIGHT].uValue;
 
@@ -610,11 +579,6 @@ PAL_LoadConfig(
         UTIL_LogOutput(LOGLEVEL_ERROR, "Filter backend GLSL enabled but no valid effect file specified. Fallback to SDL default rendering\n");
         gConfig.fEnableGLSL = FALSE;
     }
-
-	if (gConfig.eMIDISynth != SYNTH_NATIVE && !UTIL_IsFileExist(gConfig.pszSoundBank)) {
-		UTIL_LogOutput(LOGLEVEL_ERROR, "SoftSynth enabled but no valid soundbank file specified. Fallback to native-midi");
-		gConfig.eMIDISynth = SYNTH_NATIVE;
-	}
 }
 
 
@@ -656,7 +620,6 @@ PAL_SaveConfig(
 
 		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_CD), cd_types[gConfig.eCDType]); fputs(buf, fp);
 		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_MUSIC), music_types[gConfig.eMusicType]); fputs(buf, fp);
-		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_MIDISYNTH), synth_types[gConfig.eMIDISynth]); fputs(buf, fp);
 		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_OPL_CORE), opl_cores[gConfig.eOPLCore]); fputs(buf, fp);
 		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_OPL_CHIP), opl_chips[gConfig.eOPLChip]); fputs(buf, fp);
 
