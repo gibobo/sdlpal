@@ -858,26 +858,6 @@ void UTIL_LogSetPrelude(
     strncpy(_log_prelude, prelude, sizeof(_log_prelude) - 1);
 }
 
-#if PAL_NEED_STRCASESTR
-PAL_FORCE_INLINE char *stoupper(const char *s) {
-  char *p = strdup(s);
-  char *p1 = p;
-  while (*p = toupper(*p))
-    p++;
-  return p1;
-}
-PAL_C_LINKAGE char *strcasestr(const char *a, const char *b) {
-  char *a1 = stoupper(a);
-  char *b1 = stoupper(b);
-  char *ptr = strstr(a1, b1);
-  if (ptr != NULL)
-    ptr = (char *)a + (ptr - a1);
-  free(a1);
-  free(b1);
-  return ptr;
-}
-#endif
-
 char basename_buf[256];
 
 char *UTIL_basename(const char *filename) {

@@ -69,9 +69,6 @@
 #define strdup _strdup //https://msdn.microsoft.com/en-us/library/ms235454(v=vs.140).aspx
 #endif
 
-PAL_C_LINKAGE char *strcasestr(const char *, const char *);
-#define PAL_NEED_STRCASESTR 1
-
 #if defined(_M_ARM64) || defined(_M_ARM)
 #define PAL_HAS_GLSL 0
 #else

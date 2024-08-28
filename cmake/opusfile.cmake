@@ -11,5 +11,5 @@ target_include_directories(opusfile
     PRIVATE
         ${OPUS_INCLUDE_DIR}
         ${OPUSFILE_INCLUDE_DIR}
-        ${LIBOGG_INCLUDE_DIR}
+        ${OGG_DIR}/include
 )
