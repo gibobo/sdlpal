@@ -12,16 +12,16 @@ add_library(adplug
         ${ADPLUG_DIR}/mame/mame_opls.cpp
         ${ADPLUG_DIR}/mame/ymf262.cpp
         ${NUKED_DIR}/opl3.c
-        ${LIBBINIO_SOURCE_DIR}/binfile.cpp
-        ${LIBBINIO_SOURCE_DIR}/binio.cpp
-        ${LIBBINIO_SOURCE_DIR}/binstr.cpp
-        ${LIBBINIO_SOURCE_DIR}/binwrap.cpp
+        ${BINIO_SOURCE_DIR}/binfile.cpp
+        ${BINIO_SOURCE_DIR}/binio.cpp
+        ${BINIO_SOURCE_DIR}/binstr.cpp
+        ${BINIO_SOURCE_DIR}/binwrap.cpp
 )
 
 target_include_directories(adplug 
     PRIVATE 
         ${ADPLUG_DIR}
-        ${LIBBINIO_SOURCE_DIR}
-        ${LIBBINIO_INCLUDE_DIR}
+        ${BINIO_SOURCE_DIR}
+        ${BINIO_INCLUDE_DIR}
         ${NUKED_DIR}
     )

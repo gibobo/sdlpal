@@ -287,3 +287,4 @@ Pal98rqptw/
 *.bak
 vc16/
 vc17/
+.build/

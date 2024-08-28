@@ -21,9 +21,10 @@ add_library(vorbis
     ${VORBIS_SOURCE_DIR}/vorbisenc.c
     ${VORBIS_SOURCE_DIR}/window.c
 )
-
+message("CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 target_include_directories(vorbis
     PRIVATE
         ${VORBIS_INCLUDE_DIR}
-        ${LIBOGG_INCLUDE_DIR}
+        ${OGG_DIR}/include
+        ${CMAKE_BINARY_DIR}/external/SDL_mixer/external/ogg/include
 )

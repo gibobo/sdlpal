@@ -25,6 +25,12 @@
 #include <string>
 #include <binio.h>
 
+#ifdef _WIN32
+#define stricmp(x,y) _stricmp(x,y)
+#else
+#define stricmp strcasecmp
+#endif
+
 class CFileProvider
 {
 public:

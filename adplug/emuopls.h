@@ -43,6 +43,23 @@
 #ifndef SDLPAL_EMUOPLS_H
 #define SDLPAL_EMUOPLS_H
 
+# ifdef _WIN32
+#  include <malloc.h>
+#  define VAR_STACK(type, var, size) type *var = ((type*)_alloca(sizeof(type)*(size)))
+# else
+#  ifdef HAVE_ALLOCA_H
+#   include <alloca.h>
+#  else
+#   include <stdlib.h>
+#  endif
+#  if defined(__AROS__) && defined(__GNUC__)
+ /* bypass __alloca_get_stack_limit() call in alloca.h
+   from old AROS SDKs, directly use __builtin_alloca(). */
+#   undef alloca
+#   define alloca __builtin_alloca
+#  endif
+#  define VAR_STACK(type, var, size) type *var = ((type*) alloca(sizeof(type)*(size)))
+# endif
 
 #include <malloc.h>
 #include "src/opl.h"

@@ -11,7 +11,6 @@ set(SDLPAL_SOURCE_FILES
     ${SDLPAL_SOURCE_DIR}/input.c
     ${SDLPAL_SOURCE_DIR}/itemmenu.c
     ${SDLPAL_SOURCE_DIR}/magicmenu.c
-    ${SDLPAL_SOURCE_DIR}/main.c
     ${SDLPAL_SOURCE_DIR}/map.c
     ${SDLPAL_SOURCE_DIR}/midi.c
     ${SDLPAL_SOURCE_DIR}/midi_timidity.c
@@ -50,6 +49,7 @@ add_library(sdlpal
 
 target_include_directories(sdlpal
     PRIVATE
+        external/SDL_mixer/src/codecs
         ${CMAKE_SOURCE_DIR}
         win32
         ${SDLPAL_INCLUDE_DIR}
@@ -57,13 +57,14 @@ target_include_directories(sdlpal
         ${SDL_MIXER_SOURCE_DIR}
         ${TIMIDITY_DIR}
         ${VORBIS_INCLUDE_DIR}
-        ${LIBOGG_INCLUDE_DIR}
+        ${OGG_DIR}/include
         ${OPUS_INCLUDE_DIR}
         ${OPUSFILE_INCLUDE_DIR}
-        ${LIBMAD_DIR}
+        ${MAD_DIR}
         ${ADPLUG_DIR}
-        ${LIBBINIO_SOURCE_DIR}
-        ${LIBBINIO_INCLUDE_DIR}
+        ${BINIO_SOURCE_DIR}
+        ${BINIO_INCLUDE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}/external/SDL_mixer/external/ogg/include
 )
 
 target_compile_definitions(sdlpal
