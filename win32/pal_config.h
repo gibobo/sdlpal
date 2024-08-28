@@ -63,9 +63,6 @@
 #define strdup _strdup //https://msdn.microsoft.com/en-us/library/ms235454(v=vs.140).aspx
 #endif
 
-
-// #define PAL_HAS_PLATFORM_STARTUP 1
-
 #ifdef __MINGW__
 #define PAL_CONVERT_UTF8 SDL_iconv_utf8_locale
 #endif
