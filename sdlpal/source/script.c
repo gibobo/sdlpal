@@ -3019,14 +3019,7 @@ PAL_InterpretInstruction(
       // Play CD music. Use the RIX music for fallback.
       //
       gpGlobals->wNumMusic = pScript->rgwOperand[1];
-      if (AUDIO_CD_Available())
-      {
-         int numTrack = (SHORT)pScript->rgwOperand[0];
-         if (!AUDIO_PlayCDTrack(numTrack == -1 ? -2 : numTrack))
-            AUDIO_PlayMusic(pScript->rgwOperand[1], TRUE, 0);
-      }
-      else
-         AUDIO_PlayMusic(pScript->rgwOperand[1], TRUE, 0);
+      AUDIO_PlayMusic(pScript->rgwOperand[1], TRUE, 0);
       break;
 
    case 0x00A4:

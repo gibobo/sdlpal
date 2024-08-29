@@ -1,6 +1,5 @@
 set(SDLPAL_SOURCE_FILES
     ${SDLPAL_SOURCE_DIR}/audio.c
-    ${SDLPAL_SOURCE_DIR}/aviplay.c
     ${SDLPAL_SOURCE_DIR}/battle.c
     ${SDLPAL_SOURCE_DIR}/ending.c
     ${SDLPAL_SOURCE_DIR}/fight.c
@@ -13,7 +12,6 @@ set(SDLPAL_SOURCE_FILES
     ${SDLPAL_SOURCE_DIR}/magicmenu.c
     ${SDLPAL_SOURCE_DIR}/map.c
     ${SDLPAL_SOURCE_DIR}/mini_glloader.c
-    ${SDLPAL_SOURCE_DIR}/overlay.c
     ${SDLPAL_SOURCE_DIR}/palcfg.c
     ${SDLPAL_SOURCE_DIR}/palcommon.c
     ${SDLPAL_SOURCE_DIR}/palette.c
@@ -47,13 +45,11 @@ target_include_directories(sdlpal
         ${SDLPAL_INCLUDE_DIR}
         ${SDL2_SOURCE_DIR}/include
         ${ADPLUG_DIR}
-        ${BINIO_SOURCE_DIR}
         ${BINIO_INCLUDE_DIR}
-        ${libogg_BINARY_DIR}/include
 )
 
-target_compile_definitions(sdlpal
-    PRIVATE
-        _CONSOLE
-        FPM_DEFAULT
-)
+# target_compile_definitions(sdlpal
+#     PRIVATE
+#     PAL_CLASSIC
+#     ENABLE_REVISIED_BATTLE
+# )

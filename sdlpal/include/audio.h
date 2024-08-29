@@ -31,11 +31,6 @@ AUDIO_OpenDevice(
    VOID
 );
 
-BOOL
-AUDIO_CD_Available(
-   VOID
-);
-
 VOID
 AUDIO_CloseDevice(
    VOID
@@ -61,11 +56,6 @@ AUDIO_PlayMusic(
    INT       iNumRIX,
    BOOL      fLoop,
    FLOAT     flFadeTime
-);
-
-BOOL
-AUDIO_PlayCDTrack(
-   INT    iNumTrack
 );
 
 VOID

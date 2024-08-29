@@ -54,8 +54,6 @@ static uint32_t gEBOId;
 static uint32_t gPassID = -1;
 static int gMVPSlots[MAX_INDEX];
 static int gHDRSlot = -1;
-static int gUseTouchOverlaySlot = -1;
-static int gTouchOverlaySlot = -1;
 static int VAOSupported = 1;
 static int glversion_major, glversion_minor;
 static int glslversion_major, glslversion_minor;
@@ -447,14 +445,6 @@ void setupShaderParams(int pass){
         gHDRSlot = glGetUniformLocation(gProgramIds[pass], "HDR");
         if(gHDRSlot < 0)
             UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform HDR not exist\n");
-
-        gUseTouchOverlaySlot = glGetUniformLocation(gProgramIds[pass], "useTouchOverlay");
-        if (gUseTouchOverlaySlot < 0)
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform useTouchOverlay not exist\n");
-
-        gTouchOverlaySlot = glGetUniformLocation(gProgramIds[pass], "TouchOverlay");
-        if(gTouchOverlaySlot < 0)
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform TouchOverlay not exist\n");
     }
 }
 
@@ -634,10 +624,7 @@ int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const SD
     
     if( pass == 0 ) {
         GLint HDR = gConfig.fEnableHDR;
-        GLint useTouchOverlay = gConfig.fUseTouchOverlay;
         glUniform1i(gHDRSlot, HDR);
-        glUniform1i(gUseTouchOverlaySlot, useTouchOverlay);
-        glUniform1i(gTouchOverlaySlot, touchoverlay_texture_slot);
     }
 
     //global

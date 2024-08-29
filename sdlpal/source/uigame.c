@@ -157,11 +157,6 @@ PAL_OpeningMenu(
    AUDIO_PlayMusic(0, FALSE, 1);
    PAL_FadeOut(1);
 
-   if (wItemSelected == 0)
-   {
-      PAL_PlayAVI("3.avi");
-   }
-
    return (INT)wItemSelected;
 }
 

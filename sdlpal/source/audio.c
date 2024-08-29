@@ -26,7 +26,6 @@
 #include "players.h"
 #include "util.h"
 #include "resampler.h"
-#include "aviplay.h"
 #include <math.h>
 
 /* WASAPI need fewer samples for less gapping */
@@ -40,7 +39,6 @@ typedef struct tagAUDIODEVICE
 {
    SDL_AudioSpec             spec;		/* Actual-used sound specification */
    AUDIOPLAYER              *pMusPlayer;
-   AUDIOPLAYER              *pCDPlayer;
    AUDIOPLAYER              *pSoundPlayer;
    void                     *pSoundBuffer;	/* The output buffer for sound */
 #if SDL_VERSION_ATLEAST(2,0,0)
@@ -137,11 +135,6 @@ AUDIO_FillBuffer(
          gAudioDevice.pMusPlayer->FillBuffer(gAudioDevice.pMusPlayer, stream, len);
       }
 
-      if (gAudioDevice.pCDPlayer)
-      {
-         gAudioDevice.pCDPlayer->FillBuffer(gAudioDevice.pCDPlayer, stream, len);
-      }
-
       //
       // Adjust volume for music
       //
@@ -167,19 +160,6 @@ AUDIO_FillBuffer(
 	   //
 	   AUDIO_MixNative((short *)stream, gAudioDevice.pSoundBuffer, len >> 1);
    }
-
-   //
-   // Play sound for AVI
-   //
-   AVI_FillAudioBuffer(AVI_GetPlayState(), (LPBYTE)stream, len);
-}
-
-BOOL
-AUDIO_CD_Available(
-   VOID
-)
-{
-   return gConfig.eCDType != CD_NONE;
 }
 
 INT
@@ -279,12 +259,6 @@ AUDIO_OpenDevice(
    //
    gAudioDevice.pMusPlayer = RIX_Init(UTIL_GetFullPathName(PAL_BUFFER_SIZE_ARGS(0), gConfig.pszGamePath, "mus.mkf"));
 
-
-   //
-   // Initialize the CD audio.
-   //
-   gAudioDevice.pCDPlayer = NULL;
-
    //
    // Let the callback function run so that musics will be played.
    //
@@ -324,12 +298,6 @@ AUDIO_CloseDevice(
    {
 	   gAudioDevice.pMusPlayer->Shutdown(gAudioDevice.pMusPlayer);
 	   gAudioDevice.pMusPlayer = NULL;
-   }
-
-   if (gAudioDevice.pCDPlayer)
-   {
-	   gAudioDevice.pCDPlayer->Shutdown(gAudioDevice.pCDPlayer);
-	   gAudioDevice.pCDPlayer = NULL;
    }
 
    if (gAudioDevice.pSoundBuffer != NULL)
@@ -449,66 +417,12 @@ AUDIO_PlayMusic(
    FLOAT     flFadeTime
 )
 {
-	if (iNumRIX > 0)
-	{
-		//
-		// Stop the current CD music.
-		//
-		AUDIO_PlayCDTrack(-1);
-	}
-
    AUDIO_Lock();
    if (gAudioDevice.pMusPlayer)
    {
       gAudioDevice.pMusPlayer->Play(gAudioDevice.pMusPlayer, iNumRIX, fLoop, flFadeTime);
    }
    AUDIO_Unlock();
-}
-
-BOOL
-AUDIO_PlayCDTrack(
-   INT    iNumTrack
-)
-/*++
-  Purpose:
-
-    Play a CD Audio Track.
-
-  Parameters:
-
-    [IN]  iNumTrack - number of the CD Audio Track.
-                      special case: -2: do NOTHING
-
-  Return value:
-
-    TRUE if the track can be played, FALSE if not.
-
---*/
-{
-	BOOL ret = FALSE;
-	if (iNumTrack > 0)
-	{
-		AUDIO_PlayMusic(-1, FALSE, 0);
-	}
-   if (iNumTrack == -2 && gAudioDevice.pCDPlayer->iMusic > PAL_CDTRACK_BASE )
-   {
-       return TRUE;
-   }
-   AUDIO_Lock();
-   if (gAudioDevice.pCDPlayer)
-   {
-	   if (iNumTrack != -1)
-	   {
-		   ret = gAudioDevice.pCDPlayer->Play(gAudioDevice.pCDPlayer, PAL_CDTRACK_BASE + iNumTrack, TRUE, 0);
-	   }
-	   else
-	   {
-		   ret = gAudioDevice.pCDPlayer->Play(gAudioDevice.pCDPlayer, -1, FALSE, 0);
-	   }
-   }
-   AUDIO_Unlock();
-
-   return ret;
 }
 
 VOID

@@ -415,19 +415,16 @@ PAL_EndingScreen(
     // Use AVI & WIN95's music if we can
 	// Otherwise, simulate the ending of DOS version
 	//
-	BOOL avi_played = PAL_PlayAVI("4.avi");
-
-	if (!(avi_played = PAL_PlayAVI("5.avi")))
 	{
-		BOOL win_music = AUDIO_PlayCDTrack(12);
-
-		if (!win_music) AUDIO_PlayMusic(0x1a, TRUE, 0);
+      AUDIO_PlayMusic(-1, FALSE, 0);
+		AUDIO_PlayMusic(0x1a, TRUE, 0);
 		PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 110, 150, 7);
 		PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 151, -1, 9);
 
 		PAL_FadeOut(2);
 
-		if (!win_music) AUDIO_PlayMusic(0x19, TRUE, 0);
+      AUDIO_PlayMusic(-1, FALSE, 0);
+		AUDIO_PlayMusic(0x19, TRUE, 0);
 
 		PAL_ShowFBP(75, 0);
 		PAL_FadeIn(5, FALSE, 1);
@@ -440,13 +437,12 @@ PAL_EndingScreen(
 		gpGlobals->fNeedToFadeIn = TRUE;
 		PAL_EndingAnimation();
 
-		if (!win_music) AUDIO_PlayMusic(0, FALSE, 2);
+      AUDIO_PlayMusic(-1, FALSE, 0);
+		AUDIO_PlayMusic(0, FALSE, 2);
 		PAL_ColorFade(7, 15, FALSE);
 
-		if (!win_music && !AUDIO_PlayCDTrack(2))
-		{
-			AUDIO_PlayMusic(0x11, TRUE, 0);
-		}
+      AUDIO_PlayMusic(-1, FALSE, 0);
+      AUDIO_PlayMusic(0x11, TRUE, 0);
 
 		SDL_FillRect(gpScreen, NULL, 0);
 		PAL_SetPalette(0, FALSE);
@@ -482,20 +478,9 @@ PAL_EndingScreen(
 		UTIL_Delay(500);
 	}
 
-	if (!PAL_PlayAVI("6.avi"))
 	{
-		if (avi_played)
-		{
-			gpGlobals->fNeedToFadeIn = FALSE;
-			PAL_SetPalette(5, FALSE);
-			PAL_EndingSetEffectSprite(0);
-		}
-
-		if (!AUDIO_PlayCDTrack(13))
-		{
-			AUDIO_PlayMusic(9, TRUE, 0);
-		}
-
+      AUDIO_PlayMusic(-1, FALSE, 0);
+      AUDIO_PlayMusic(9, TRUE, 0);
 		PAL_ScrollFBP(67, 0xf, TRUE);
 		PAL_ScrollFBP(66, 0xf, TRUE);
 		PAL_ScrollFBP(65, 0xf, TRUE);
