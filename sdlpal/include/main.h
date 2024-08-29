@@ -49,7 +49,6 @@
 #include "fight.h"
 #include "play.h"
 #include "game.h"
-#include "aviplay.h"
 
 VOID
 PAL_Shutdown(

@@ -1,9 +1,6 @@
 [submodule "external/SDL"]
 	path = external/SDL
 	url = https://github.com/libsdl-org/SDL.git
-[submodule "external/libmad"]
-	path = external/libmad
-	url = https://github.com/markjeee/libmad.git
 [submodule "external/adplug"]
 	path = external/adplug
 	url = https://github.com/adplug/adplug.git
@@ -13,6 +10,3 @@
 [submodule "external/nuked"]
 	path = external/nuked
 	url = https://github.com/nukeykt/Nuked-OPL3.git
-[submodule "external/SDL_mixer"]
-	path = external/SDL_mixer
-	url = https://github.com/libsdl-org/SDL_mixer.git

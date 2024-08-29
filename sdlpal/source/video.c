@@ -228,30 +228,7 @@ VIDEO_Startup(
       return -2;
    }
 
-   //
-   // Create texture for overlay.
-   //
-   if (gConfig.fUseTouchOverlay)
-   {
-      extern const unsigned char bmpData[];
-      extern unsigned int bmpLen;
-
-      void *bmp = UTIL_malloc(bmpLen);
-      YJ1_Decompress(bmpData, bmp, bmpLen);
-      SDL_Surface *overlay = SDL_LoadBMP_RW(SDL_RWFromConstMem(bmp, bmpLen), 1);
-      free(bmp);
-
-      if (overlay != NULL)
-      {
-         SDL_SetColorKey(overlay, SDL_RLEACCEL, SDL_MapRGB(overlay->format, 255, 0, 255));
-         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, gConfig.pszScaleQuality);
-         gpTouchOverlay = SDL_CreateTextureFromSurface(gpRenderer, overlay);
-         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-         SDL_SetTextureAlphaMod(gpTouchOverlay, TOUCHOVERLAY_ALPHAMOD );
-         SDL_FreeSurface(overlay);
-      }
-   }
-	// notice: power of 2
+   // notice: power of 2
 #  define PIXELS 1
 	// We need a total empty texture in case of not using touch overlay.
 	// Or GL runtime will pick the previous texture - the main screen itself
@@ -433,10 +410,6 @@ VIDEO_RenderCopy(
 
 	SDL_RenderClear(gpRenderer);
 	SDL_RenderCopy(gpRenderer, gpTexture, NULL, NULL);
-	if (gConfig.fUseTouchOverlay)
-	{
-		SDL_RenderCopy(gpRenderer, gpTouchOverlay, NULL, &gOverlayRect);
-	}
 	SDL_RenderPresent(gpRenderer);
 }
 #endif

@@ -27,17 +27,15 @@ static int g_exit_code = 0;
 
 char gExecutablePath[PAL_MAX_PATH];
 
-#define BITMAPNUM_SPLASH_UP         (gConfig.fIsWIN95 ? 0x03 : 0x26)
-#define BITMAPNUM_SPLASH_DOWN       (gConfig.fIsWIN95 ? 0x04 : 0x27)
-#define SPRITENUM_SPLASH_TITLE      0x47
-#define SPRITENUM_SPLASH_CRANE      0x49
-#define NUM_RIX_TITLE               0x05
-
+#define BITMAPNUM_SPLASH_UP (gConfig.fIsWIN95 ? 0x03 : 0x26)
+#define BITMAPNUM_SPLASH_DOWN (gConfig.fIsWIN95 ? 0x04 : 0x27)
+#define SPRITENUM_SPLASH_TITLE 0x47
+#define SPRITENUM_SPLASH_CRANE 0x49
+#define NUM_RIX_TITLE 0x05
 
 static VOID
 PAL_Init(
-   VOID
-)
+    VOID)
 /*++
   Purpose:
 
@@ -53,7 +51,7 @@ PAL_Init(
 
 --*/
 {
-   int           e;
+   int e;
 
    //
    // Initialize subsystems.
@@ -61,7 +59,7 @@ PAL_Init(
    e = PAL_InitGlobals();
    if (e != 0)
    {
-	   TerminateOnError("Could not initialize global data: %d.\n", e);
+      TerminateOnError("Could not initialize global data: %d.\n", e);
    }
 
    e = VIDEO_Startup();
@@ -93,21 +91,16 @@ PAL_Init(
    PAL_InitInput();
    PAL_InitResources();
    AUDIO_OpenDevice();
-   PAL_AVIInit();
 
    VIDEO_SetWindowTitle(UTIL_va(UTIL_GlobalBuffer(0), PAL_GLOBAL_BUFFER_SIZE,
-	   "Pal %s%s%s%s",
-	   gConfig.fIsWIN95 ? "Win95" : "DOS",
-	   "",
-	   ""
-       ,(gConfig.fEnableGLSL && gConfig.pszShader ? gConfig.pszShader : "")
-   ));
+                                "Pal %s%s%s%s",
+                                gConfig.fIsWIN95 ? "Win95" : "DOS",
+                                "",
+                                "", (gConfig.fEnableGLSL && gConfig.pszShader ? gConfig.pszShader : "")));
 }
 
-VOID
-PAL_Shutdown(
-   int exit_code
-)
+VOID PAL_Shutdown(
+    int exit_code)
 /*++
   Purpose:
 
@@ -124,14 +117,13 @@ PAL_Shutdown(
 --*/
 {
    AUDIO_CloseDevice();
-   PAL_AVIShutdown();
    PAL_FreeFont();
    PAL_FreeResources();
    PAL_FreeUI();
    PAL_FreeText();
    PAL_ShutdownInput();
    VIDEO_Shutdown();
-   
+
    //
    // global needs be free in last
    // since subsystems may needs config content during destroy
@@ -149,10 +141,8 @@ PAL_Shutdown(
 #endif
 }
 
-VOID
-PAL_TrademarkScreen(
-   VOID
-)
+VOID PAL_TrademarkScreen(
+    VOID)
 /*++
   Purpose:
 
@@ -168,18 +158,14 @@ PAL_TrademarkScreen(
 
 --*/
 {
-   if (PAL_PlayAVI("1.avi")) return;
-
    PAL_SetPalette(3, FALSE);
    PAL_RNGPlay(6, 0, -1, 25);
    UTIL_Delay(1000);
    PAL_FadeOut(1);
 }
 
-VOID
-PAL_SplashScreen(
-   VOID
-)
+VOID PAL_SplashScreen(
+    VOID)
 /*++
   Purpose:
 
@@ -195,18 +181,15 @@ PAL_SplashScreen(
 
 --*/
 {
-   SDL_Color     *palette = PAL_GetPalette(1, FALSE);
-   SDL_Color      rgCurrentPalette[256];
-   SDL_Surface   *lpBitmapDown, *lpBitmapUp;
-   SDL_Rect       srcrect, dstrect;
-   LPSPRITE       lpSpriteCrane;
-   LPBITMAPRLE    lpBitmapTitle;
-   LPBYTE         buf, buf2;
-   int            cranepos[9][3], i, iImgPos = 200, iCraneFrame = 0, iTitleHeight;
-   DWORD          dwTime, dwBeginTime;
-   BOOL           fUseCD = TRUE;
-
-   if (PAL_PlayAVI("2.avi")) return;
+   SDL_Color *palette = PAL_GetPalette(1, FALSE);
+   SDL_Color rgCurrentPalette[256];
+   SDL_Surface *lpBitmapDown, *lpBitmapUp;
+   SDL_Rect srcrect, dstrect;
+   LPSPRITE lpSpriteCrane;
+   LPBITMAPRLE lpBitmapTitle;
+   LPBYTE buf, buf2;
+   int cranepos[9][3], i, iImgPos = 200, iCraneFrame = 0, iTitleHeight;
+   DWORD dwTime, dwBeginTime;
 
    if (palette == NULL)
    {
@@ -259,11 +242,8 @@ PAL_SplashScreen(
    //
    // Play the title music
    //
-   if (!AUDIO_PlayCDTrack(7))
-   {
-      fUseCD = FALSE;
-      AUDIO_PlayMusic(NUM_RIX_TITLE, TRUE, 2);
-   }
+   AUDIO_PlayMusic(-1, FALSE, 0);
+   AUDIO_PlayMusic(NUM_RIX_TITLE, TRUE, 2);
 
    //
    // Clear all of the events and key states
@@ -317,7 +297,7 @@ PAL_SplashScreen(
       dstrect.y = 0;
       dstrect.h = srcrect.h;
 
-	  VIDEO_CopySurface(lpBitmapUp, &srcrect, gpScreen, &dstrect);
+      VIDEO_CopySurface(lpBitmapUp, &srcrect, gpScreen, &dstrect);
 
       //
       // The lower part...
@@ -328,7 +308,7 @@ PAL_SplashScreen(
       dstrect.y = 200 - iImgPos;
       dstrect.h = srcrect.h;
 
-	  VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
+      VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
 
       //
       // Draw the cranes...
@@ -336,10 +316,10 @@ PAL_SplashScreen(
       for (i = 0; i < 9; i++)
       {
          LPCBITMAPRLE lpFrame = PAL_SpriteGetFrame(lpSpriteCrane,
-            cranepos[i][2] = (cranepos[i][2] + (iCraneFrame & 1)) % 8);
+                                                   cranepos[i][2] = (cranepos[i][2] + (iCraneFrame & 1)) % 8);
          cranepos[i][1] += ((iImgPos > 1) && (iImgPos & 1)) ? 1 : 0;
          PAL_RLEBlitToSurface(lpFrame, gpScreen,
-            PAL_XY(cranepos[i][0], cranepos[i][1]));
+                              PAL_XY(cranepos[i][0], cranepos[i][1]));
          cranepos[i][0]--;
       }
       iCraneFrame++;
@@ -419,21 +399,14 @@ PAL_SplashScreen(
    VIDEO_FreeSurface(lpBitmapUp);
    free(buf);
 
-   if (!fUseCD)
-   {
-      AUDIO_PlayMusic(0, FALSE, 1);
-   }
+   AUDIO_PlayMusic(0, FALSE, 1);
 
    PAL_FadeOut(1);
 }
 
-
-
-int
-main(
-   int      argc,
-   char    *argv[]
-)
+int main(
+    int argc,
+    char *argv[])
 /*++
   Purpose:
 
@@ -451,18 +424,18 @@ main(
 
 --*/
 {
-#if !defined( __EMSCRIPTEN__ ) && !defined(__WINRT__) && !defined(__N3DS__)
-   memset(gExecutablePath,0,PAL_MAX_PATH);
+#if !defined(__EMSCRIPTEN__) && !defined(__WINRT__) && !defined(__N3DS__)
+   memset(gExecutablePath, 0, PAL_MAX_PATH);
    strncpy(gExecutablePath, argv[0], PAL_MAX_PATH);
 #endif
 
 #if !__EMSCRIPTEN__
    if (setjmp(g_exit_jmp_buf) != 0)
    {
-	   // A longjmp is made, should exit here
-	   SDL_Quit();
-	   UTIL_Platform_Quit();
-	   return g_exit_code;
+      // A longjmp is made, should exit here
+      SDL_Quit();
+      UTIL_Platform_Quit();
+      return g_exit_code;
    }
 #endif
 
@@ -472,7 +445,7 @@ main(
    //
    if (SDL_Init(PAL_SDL_INIT_FLAGS) == -1)
    {
-	   TerminateOnError("Could not initialize SDL: %s.\n", SDL_GetError());
+      TerminateOnError("Could not initialize SDL: %s.\n", SDL_GetError());
    }
 
    PAL_LoadConfig(TRUE);
@@ -481,7 +454,7 @@ main(
    // If user requests a file-based log, then add it after the system-specific one.
    //
    if (gConfig.pszLogFile)
-	   UTIL_LogAddOutputCallback(UTIL_LogToFile, gConfig.iLogLevel);
+      UTIL_LogAddOutputCallback(UTIL_LogToFile, gConfig.iLogLevel);
 
    //
    // Initialize everything
