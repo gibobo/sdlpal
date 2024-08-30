@@ -48,8 +48,9 @@ target_include_directories(sdlpal
         ${BINIO_INCLUDE_DIR}
 )
 
-# target_compile_definitions(sdlpal
-#     PRIVATE
-#     PAL_CLASSIC
-#     ENABLE_REVISIED_BATTLE
-# )
+target_compile_definitions(sdlpal
+    PRIVATE
+        PAL_HAS_PLATFORM_SPECIFIC_UTILS
+        # PAL_CLASSIC
+        # ENABLE_REVISIED_BATTLE
+)
