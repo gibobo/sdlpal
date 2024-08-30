@@ -42,7 +42,10 @@ include(cmake/sdlpal.cmake)
 
 if(WIN32)
 
-add_executable (${PROJECT_NAME} ${SDLPAL_DIR}/main.c)
+add_executable (${PROJECT_NAME}
+    ${SDLPAL_DIR}/main.c
+    win32/win32.cpp
+)
 
 target_link_libraries(${PROJECT_NAME}
     opengl32
@@ -58,10 +61,10 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
+        win32
         ${SDL2_SOURCE_DIR}/include
         ${ADPLUG_DIR}
         ${SDLPAL_DIR}
-        win32
 )
 else()
 find_package(OpenGL REQUIRED)
