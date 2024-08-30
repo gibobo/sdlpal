@@ -30,8 +30,7 @@ set (BINIO_SOURCE_DIR       external/libbinio/src)
 set (BINIO_INCLUDE_DIR      external/libbinio/contrib/vs2015/libbinio)
 set (NUKED_DIR              external/nuked)
 set (ADPLUG_DIR             adplug)
-set (SDLPAL_SOURCE_DIR      sdlpal/source)
-set (SDLPAL_INCLUDE_DIR     sdlpal/include)
+set (SDLPAL_DIR             sdlpal/)
 
 if(WIN32)
 include(cmake/SDL2.cmake)
@@ -43,7 +42,7 @@ include(cmake/sdlpal.cmake)
 
 if(WIN32)
 
-add_executable (${PROJECT_NAME} ${SDLPAL_SOURCE_DIR}/main.c)
+add_executable (${PROJECT_NAME} ${SDLPAL_DIR}/main.c)
 
 target_link_libraries(${PROJECT_NAME}
     opengl32
@@ -61,7 +60,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
         ${SDL2_SOURCE_DIR}/include
         ${ADPLUG_DIR}
-        ${SDLPAL_INCLUDE_DIR}
+        ${SDLPAL_DIR}
         win32
 )
 else()
@@ -69,7 +68,7 @@ find_package(OpenGL REQUIRED)
 
 add_executable (${PROJECT_NAME}
     unix/unix.cpp
-    ${SDLPAL_SOURCE_DIR}/main.c
+    ${SDLPAL_DIR}/main.c
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -77,7 +76,7 @@ target_include_directories(${PROJECT_NAME}
         external/SDL_mixer/src/codecs
         ${SDL2_SOURCE_DIR}/include
         ${ADPLUG_DIR}
-        ${SDLPAL_INCLUDE_DIR}
+        ${SDLPAL_DIR}
         ${OPENGL_INCLUDE_DIR}
         unix
 )
