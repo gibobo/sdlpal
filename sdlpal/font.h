@@ -22,14 +22,15 @@
 #ifndef FONT_H
 #define FONT_H
 
-#include "common.h"
-#include "palcommon.h"
+// #include "palcommon.h"
 #include "palcfg.h"
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern char *font_offset_x;
-extern char *font_offset_y;
+// extern char *font_offset_x;
+// extern char *font_offset_y;
 
 /*++
   Purpose:
@@ -121,6 +122,8 @@ PAL_FontHeight(
 	void
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -22,8 +22,8 @@
 #ifndef BATTLE_H
 #define BATTLE_H
 
-#include "global.h"
-#include "uibattle.h"
+// #include "global.h"
+// #include "uibattle.h"
 
 #define       BATTLE_FPS               25
 #define       BATTLE_FRAME_TIME        (1000 / BATTLE_FPS)
@@ -226,7 +226,9 @@ typedef struct tagBATTLE
 #endif
 } BATTLE;
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern BATTLE g_Battle;
 
@@ -329,6 +331,8 @@ PAL_StartBattle(
    BOOL        fIsBoss
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

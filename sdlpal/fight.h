@@ -22,9 +22,9 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-#include "common.h"
-
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 INT
 PAL_BattleSelectAutoTargetFrom(
@@ -116,6 +116,8 @@ PAL_BattleSimulateMagic(
    WORD       wBaseDamage
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

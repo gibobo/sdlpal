@@ -22,7 +22,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include "common.h"
 #include "palcommon.h"
 #include "map.h"
 #include "ui.h"
@@ -550,7 +549,9 @@ typedef struct tagGLOBALVARS
    DWORD            dwFrameNum;
 } GLOBALVARS, *LPGLOBALVARS;
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern GLOBALVARS * const gpGlobals;
 
@@ -752,6 +753,8 @@ PAL_PlayerLevelUp(
    WORD          wNumLevel
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

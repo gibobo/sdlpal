@@ -25,7 +25,9 @@
 #include "common.h"
 #include "palcommon.h"
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void
 UTIL_MsgBox(
@@ -362,6 +364,8 @@ UTIL_LogSetPrelude(
     const char    *prelude
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -48,19 +48,13 @@
 #  define PAL_FATAL_OUTPUT(s)   system(PAL_va(0, "beep; xmessage -center \"FATAL ERROR: %s\"", (s)))
 # endif
 
-# if SDL_CDROM_DISABLED
 #  define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
-# else
-#  define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
-# endif
 
 # define PAL_PLATFORM         NULL
 # define PAL_CREDIT           NULL
 # define PAL_PORTYEAR         NULL
 
 # define PAL_HAS_CONFIG_PAGE  1
-# define PAL_HAS_NATIVEMIDI 1
-
 #include <sys/time.h>
 
 #endif

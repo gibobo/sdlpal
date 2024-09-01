@@ -22,10 +22,11 @@
 #ifndef UIGAME_H
 #define UIGAME_H
 
-#include "common.h"
 #include "ui.h"
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 VOID
 PAL_DrawOpeningMenuBackground(
@@ -97,6 +98,8 @@ PAL_QuitGame(
    VOID
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -23,6 +23,7 @@
 //
 
 #include "main.h"
+#include "pal_config.h"
 #include <errno.h>
 #include <wctype.h>
 

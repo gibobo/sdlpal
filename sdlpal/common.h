@@ -26,11 +26,8 @@
 # define PAL_CLASSIC        1
 #endif
 
-#include "defines.h"
+// #include "defines.h"
 
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
 
 #include <wchar.h>
 #include <stdio.h>
@@ -69,10 +66,6 @@
 // For SDL 1.2 compatibility
 #ifndef SDL_TICKS_PASSED
 #define SDL_TICKS_PASSED(A, B)  ((Sint32)((B) - (A)) <= 0)
-#endif
-
-#ifndef SDL_INIT_CDROM
-# define SDL_INIT_CDROM       0	  /* Compatibility with SDL 1.2 */
 #endif
 
 #ifndef SDL_AUDIO_BITSIZE
@@ -167,57 +160,12 @@ typedef const WCHAR        *LPCWSTR;
 
 #endif
 
-#ifdef __cplusplus
-# define PAL_C_LINKAGE       extern "C"
-# define PAL_C_LINKAGE_BEGIN PAL_C_LINKAGE {
-# define PAL_C_LINKAGE_END   }
-#else
-# define PAL_C_LINKAGE
-# define PAL_C_LINKAGE_BEGIN
-# define PAL_C_LINKAGE_END
-#endif
-
 /* When porting SDLPAL to a new platform, please make a separate directory and put a file 
    named 'pal_config.h' that contains marco definitions & header includes into the directory.
    The example of this file can be found in directories of existing portings.
  */
 #include "opltypes.h"
-#include "pal_config.h"
-
-
-// #define PAL_PREFIX            "./"
-// #define PAL_SAVE_PREFIX       "./"
-
-// # if APPIMAGE
-// #  undef PAL_PREFIX
-// #  define PAL_PREFIX            PAL_va(PAL_MAX_GLOBAL_BUFFERS-1,"%s%s", SDL_getenv("HOME"),"/.config")
-// # endif
-
-// #define PAL_DEFAULT_WINDOW_WIDTH   640
-// #define PAL_DEFAULT_WINDOW_HEIGHT  400
-
-// #ifdef WIN32
-// #define PAL_FILESYSTEM_IGNORE_CASE 1
-// #endif // WIN32
-// #define PAL_FILESYSTEM_IGNORE_CASE 1
-
-// #define PAL_PLATFORM         NULL
-// #define PAL_CREDIT           NULL
-// #define PAL_PORTYEAR         NULL
-
-// #ifdef _M_ARM
-// # define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE)
-// #else
-// # ifndef PAL_HAS_JOYSTICKS
-// #  define PAL_HAS_JOYSTICKS    1
-// # endif
-// # if SDL_CDROM_DISABLED
-// #  define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
-// # else
-// #  define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
-// # endif
-// #endif
-
+// #include "pal_config.h"
 
 #ifndef PAL_DEFAULT_FULLSCREEN_HEIGHT
 # define PAL_DEFAULT_FULLSCREEN_HEIGHT PAL_DEFAULT_WINDOW_HEIGHT
@@ -236,32 +184,17 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_AUDIO_DEFAULT_BUFFER_SIZE   1024
 #endif
 
-#ifndef PAL_HAS_OGG
-# define PAL_HAS_OGG          1   /* Try always enable OGG. If compilation/run failed, please change this value to 0. */
-#endif
-#ifndef PAL_HAS_OPUS
-# define PAL_HAS_OPUS         1   /* Try always enable OPUS. If compilation/run failed, please change this value to 0. */
-#endif
-
 #ifndef PAL_CONFIG_PREFIX
 # define PAL_CONFIG_PREFIX "./"
-#endif
-
-#ifndef PAL_HAS_NATIVEMIDI
-# define PAL_HAS_NATIVEMIDI  0
 #endif
 
 #ifndef PAL_LARGE
 # define PAL_LARGE
 #endif
 
-#ifndef PAL_SCALE_SCREEN
 # define PAL_SCALE_SCREEN   TRUE
-#endif
 
-#ifndef PAL_IS_VALID_JOYSTICK
 # define PAL_IS_VALID_JOYSTICK(s)  TRUE
-#endif
 
 #ifndef PAL_FATAL_OUTPUT
 # define PAL_FATAL_OUTPUT(s)
