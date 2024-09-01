@@ -22,15 +22,20 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "common.h"
-
 #define    FPS             10
 #define    FRAME_TIME      (1000 / FPS)
 
-PAL_C_LINKAGE
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 VOID
 PAL_GameMain(
    VOID
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -22,7 +22,6 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "common.h"
 #include "palcommon.h"
 
 typedef struct tagPALINPUTSTATE
@@ -60,7 +59,9 @@ enum PALKEY
    kKeyEnd         = (1 << 17),
 };
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 VOID
 PAL_ClearKeyState(
@@ -100,6 +101,8 @@ extern volatile PALINPUTSTATE g_InputState;
 
 extern BOOL g_fUseJoystick;
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

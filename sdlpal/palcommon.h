@@ -154,7 +154,9 @@ typedef enum tagPALFILE {
 #define PAL_MISSING_SOUND(x) (((x) & PALFILE_SOUND_MASK) == PALFILE_SOUND_MASK)
 #define PAL_MISSING_MUSIC(x) (((x) & PALFILE_MUSIC_MASK) == PALFILE_MUSIC_MASK)
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 INT
 PAL_RLEBlitToSurface(
@@ -270,7 +272,9 @@ YJ2_Decompress(
    INT          DestSize
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #define PAL_DelayUntil(t) \
    PAL_ProcessEvent(); \

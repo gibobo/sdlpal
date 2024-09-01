@@ -26,6 +26,7 @@
 #include "palcfg.h"
 #include "util.h"
 #include "resampler.h"
+#include "pal_config.h"
 #include <stdint.h>
 
 #if !defined(PAL_HAS_TOUCH)

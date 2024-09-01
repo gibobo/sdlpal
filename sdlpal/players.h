@@ -25,8 +25,6 @@
 #ifndef PLAYERS_H
 #define PLAYERS_H
 
-#include "common.h"
-
 typedef struct tagAUDIOPLAYER
 {
 #define AUDIOPLAYER_COMMONS \
@@ -39,7 +37,9 @@ typedef struct tagAUDIOPLAYER
 	AUDIOPLAYER_COMMONS;
 } AUDIOPLAYER, *LPAUDIOPLAYER;
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* RIX */
 
@@ -52,6 +52,8 @@ SOUND_Init(
 	VOID
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -23,6 +23,7 @@
 #include "global.h"
 #include "input.h"
 #include "palcfg.h"
+#include "pal_config.h"
 #include <errno.h>
 #include "SDL_messagebox.h"
 #include "SDL_video.h"
@@ -932,17 +933,23 @@ PAL_FORCE_INLINE char *stoupper(const char *s)
 		p++;
 	return p1;
 }
-PAL_C_LINKAGE char *strcasestr(const char *a, const char *b)
-{
-	char *a1 = stoupper(a);
-	char *b1 = stoupper(b);
-	char *ptr = strstr(a1, b1);
-	if (ptr != NULL)
-		ptr = (char *)a + (ptr - a1);
-	free(a1);
-	free(b1);
-	return ptr;
+#ifdef __cplusplus
+extern "C" {
+#endif
+	char *strcasestr(const char *a, const char *b)
+	{
+		char *a1 = stoupper(a);
+		char *b1 = stoupper(b);
+		char *ptr = strstr(a1, b1);
+		if (ptr != NULL)
+			ptr = (char *)a + (ptr - a1);
+		free(a1);
+		free(b1);
+		return ptr;
+	}
+#ifdef __cplusplus
 }
+#endif
 #endif
 
 char basename_buf[256];

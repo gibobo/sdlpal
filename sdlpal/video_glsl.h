@@ -28,7 +28,9 @@
 #include "main.h"
 # include "mini_glloader.h"
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height);
 extern void VIDEO_GLSL_RenderCopy();
@@ -38,6 +40,8 @@ extern void VIDEO_GLSL_Setup();
 
 extern void VIDEO_GLSL_Destroy();
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* video_glsl_h */

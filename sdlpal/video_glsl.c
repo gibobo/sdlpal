@@ -27,7 +27,7 @@
 #include "video.h"
 
 #include "glslp.h"
-
+#include "pal_config.h"
 #define SDL_STBIMAGE_IMPLEMENTATION
 #include "SDL_stbimage.h"
 

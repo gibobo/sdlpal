@@ -22,9 +22,9 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#include "common.h"
-
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 INT
 AUDIO_OpenDevice(
@@ -93,8 +93,8 @@ AUDIO_Unlock(
 	void
 );
 
-PAL_C_LINKAGE_END
-
-#define AUDIO_IsIntegerConversion(a) (((a) % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % (a)) == 0)
+#ifdef __cplusplus
+}
+#endif
 
 #endif

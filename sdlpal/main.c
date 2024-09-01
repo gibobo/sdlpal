@@ -20,6 +20,7 @@
 //
 
 #include "main.h"
+#include "pal_config.h"
 #include <setjmp.h>
 
 static jmp_buf g_exit_jmp_buf;

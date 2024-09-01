@@ -22,8 +22,6 @@
 #ifndef RES_H
 #define RES_H
 
-#include "common.h"
-
 typedef enum tagLOADRESFLAG
 {
    kLoadGlobalData     = (1 << 0),    // load global data
@@ -31,7 +29,9 @@ typedef enum tagLOADRESFLAG
    kLoadPlayerSprite   = (1 << 2),    // load player sprites
 } LOADRESFLAG, *LPLOADRESFLAG;
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 VOID
 PAL_InitResources(
@@ -73,6 +73,8 @@ PAL_GetEventObjectSprite(
    WORD      wEventObjectID
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

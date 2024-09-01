@@ -22,8 +22,6 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#include "common.h"
-
 #define TOUCHOVERLAY_ALPHAMOD           120
 
 #define VIDEO_CopySurface(s, sr, t, tr) SDL_BlitSurface((s), (sr), (t), (tr))
@@ -32,7 +30,9 @@
 #define VIDEO_RestoreScreen(t)          SDL_BlitSurface(gpScreenBak, NULL, (t), NULL)
 #define VIDEO_FreeSurface(s)            SDL_FreeSurface(s)
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern SDL_Surface *gpScreen;
 extern SDL_Surface *gpScreenBak;
@@ -147,6 +147,8 @@ VIDEO_SetupTouchArea(
     int draw_h
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

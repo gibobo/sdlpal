@@ -34,19 +34,18 @@
 #define PAL_VIDEO_INIT_FLAGS (SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | (gConfig.fFullScreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0))
 
 #ifdef _M_ARM
-#define PAL_SDL_INIT_FLAGS (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE)
+#define PAL_SDL_INIT_FLAGS (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE)
 #else
 #ifndef PAL_HAS_JOYSTICKS
 #define PAL_HAS_JOYSTICKS 1
 #endif
-#define PAL_SDL_INIT_FLAGS (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
+#define PAL_SDL_INIT_FLAGS (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
 #endif
 
 #define PAL_PLATFORM NULL
 #define PAL_CREDIT NULL
 #define PAL_PORTYEAR NULL
 
-#define PAL_HAS_NATIVEMIDI 1
 
 // #define PAL_HAS_CONFIG_PAGE 1
 
@@ -56,16 +55,14 @@
 
 #define PAL_IS_PATH_SEPARATOR(x) ((x) == '\\' || (x) == '/')
 
-#ifndef __MINGW__
+#ifdef __MINGW__
+#define PAL_CONVERT_UTF8 SDL_iconv_utf8_locale
+#else
 #define strtok_r strtok_s
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #define strdup _strdup //https://msdn.microsoft.com/en-us/library/ms235454(v=vs.140).aspx
 #endif
 
-#ifdef __MINGW__
-#define PAL_CONVERT_UTF8 SDL_iconv_utf8_locale
-#endif
-
-#include <malloc.h>
-#include <stdbool.h>
+// #include <malloc.h>
+// #include <stdbool.h>

@@ -22,8 +22,6 @@
 #ifndef _TEXT_H
 #define _TEXT_H
 
-#include "common.h"
-
 typedef enum tagDIALOGPOSITION
 {
    kDialogUpper       = 0,
@@ -41,7 +39,9 @@ typedef enum tagFONTFLAVOR
    kFontFlavorJapanese,
 } FONTFLAVOR;
 
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct tagTEXTLIB
 {
@@ -236,6 +236,8 @@ PAL_swprintf(
 	...
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif

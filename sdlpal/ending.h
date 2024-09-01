@@ -22,9 +22,9 @@
 #ifndef ENDGAME_H
 #define ENDGAME_H
 
-#include "common.h"
-
-PAL_C_LINKAGE_BEGIN
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 VOID
 PAL_EndingSetEffectSprite(
@@ -54,6 +54,8 @@ PAL_EndingScreen(
    VOID
 );
 
-PAL_C_LINKAGE_END
+#ifdef __cplusplus
+}
+#endif
 
 #endif
