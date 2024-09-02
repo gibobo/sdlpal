@@ -80,7 +80,7 @@ static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
 	{ PALCFG_MIDICLIENT,        PALCFG_STRING,   "MIDIClient",        10, MAKE_STRING(NULL) },
 	{ PALCFG_SOUNDBANK,         PALCFG_STRING,   "SoundBank",          9, MAKE_STRING(NULL) },
 	{ PALCFG_SCALEQUALITY,      PALCFG_STRING,   "ScaleQuality",      12, MAKE_STRING("0") },
-	{ PALCFG_SHADER,            PALCFG_STRING,   "Shader",             6, MAKE_STRING("G:/sdlpal/shaders/plain.glsl") },
+	{ PALCFG_SHADER,            PALCFG_STRING,   "Shader",             6, MAKE_STRING(NULL) },
 };
 
 static const char *music_types[] = { "MIDI", "RIX", "MP3", "OGG", "OPUS", "RAW" };
