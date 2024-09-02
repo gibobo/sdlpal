@@ -1,22 +1,12 @@
-add_library(adplug
-    STATIC
-        ${ADPLUG_DIR}/emuopls.cpp
-        ${ADPLUG_DIR}/src/fprovide.cpp
-        ${ADPLUG_DIR}/src/player.cpp
-        ${ADPLUG_DIR}/src/rix.cpp
-        ${ADPLUG_DIR}/src/surroundopl.cpp
-        ${ADPLUG_DIR}/dosbox/dbopl.cpp
-        ${ADPLUG_DIR}/dosbox/dosbox_opls.cpp
-        ${ADPLUG_DIR}/dosbox/opl.cpp
-        ${ADPLUG_DIR}/mame/fmopl.cpp
-        ${ADPLUG_DIR}/mame/mame_opls.cpp
-        ${ADPLUG_DIR}/mame/ymf262.cpp
-        ${NUKED_DIR}/opl3.c
-        ${BINIO_SOURCE_DIR}/binfile.cpp
-        ${BINIO_SOURCE_DIR}/binio.cpp
-        ${BINIO_SOURCE_DIR}/binstr.cpp
-        ${BINIO_SOURCE_DIR}/binwrap.cpp
+file(GLOB ADPLUG_FILES
+    ${ADPLUG_DIR}/*.cpp
+    ${ADPLUG_DIR}/*/*.cpp
+    ${NUKED_DIR}/*.c
+    ${BINIO_SOURCE_DIR}/*.cpp
 )
+
+
+add_library(adplug STATIC ${ADPLUG_FILES})
 
 target_include_directories(adplug 
     PRIVATE 

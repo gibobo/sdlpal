@@ -24,8 +24,8 @@
 
 #pragma once
 
-#define PAL_PREFIX "E:/Pal98rqptw/"
-#define PAL_SAVE_PREFIX "E:/Pal98rqptw/"
+#define PAL_PREFIX "C:/Users/23021/Downloads/Pal98rqptw/"
+#define PAL_SAVE_PREFIX "C:/Users/23021/Downloads/Pal98rqptw/"
 
 #define PAL_DEFAULT_WINDOW_WIDTH 640
 #define PAL_DEFAULT_WINDOW_HEIGHT 400
@@ -57,11 +57,6 @@
 
 #ifdef __MINGW__
 #define PAL_CONVERT_UTF8 SDL_iconv_utf8_locale
-#else
-#define strtok_r strtok_s
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#define strdup _strdup //https://msdn.microsoft.com/en-us/library/ms235454(v=vs.140).aspx
 #endif
 
 // #include <malloc.h>

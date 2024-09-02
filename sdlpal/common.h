@@ -99,7 +99,10 @@
 #   define vsnprintf _vsnprintf
 #   define snprintf _snprintf
 #  endif
-#  define strdup _strdup
+#  define strtok_r strtok_s
+#  define strcasecmp _stricmp
+#  define strncasecmp _strnicmp
+#  define strdup _strdup //https://msdn.microsoft.com/en-us/library/ms235454(v=vs.140).aspx
 #  define access _access
 #  pragma warning (disable:4244)
 # endif
@@ -165,7 +168,7 @@ typedef const WCHAR        *LPCWSTR;
    The example of this file can be found in directories of existing portings.
  */
 #include "opltypes.h"
-// #include "pal_config.h"
+#include "pal_config.h"
 
 #ifndef PAL_DEFAULT_FULLSCREEN_HEIGHT
 # define PAL_DEFAULT_FULLSCREEN_HEIGHT PAL_DEFAULT_WINDOW_HEIGHT

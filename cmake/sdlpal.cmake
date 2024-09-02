@@ -9,8 +9,8 @@ add_library(sdlpal
 
 target_include_directories(sdlpal
     PRIVATE
-        win32
-        ${SDL2_SOURCE_DIR}/include
+        ${PLATFORM_DIR}
+        ${SDL2_DIR}/include
         ${ADPLUG_DIR}
         ${BINIO_INCLUDE_DIR}
 )

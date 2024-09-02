@@ -30,7 +30,7 @@
 # endif
 
 # define PAL_PREFIX            "./"
-# define PAL_SAVE_PREFIX       "./"
+# define PAL_SAVE_PREFIX       PAL_PREFIX
 
 # if APPIMAGE
 #  undef PAL_PREFIX

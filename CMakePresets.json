@@ -1,4 +1,4 @@
-﻿{
+{
     "version": 3,
     "configurePresets": [
         {
@@ -55,6 +55,18 @@
             "inherits": "x86-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "使用工具鏈檔案設定預設",
+            "displayName": "使用工具鏈檔案設定預設",
+            "description": "設定 Ninja 產生器、建置和安裝目錄",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_TOOLCHAIN_FILE": "",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
             }
         }
     ]
