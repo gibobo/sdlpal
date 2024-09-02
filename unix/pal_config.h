@@ -29,8 +29,8 @@
 #  define PAL_HAS_JOYSTICKS    1
 # endif
 
-# define PAL_PREFIX            "./"
-# define PAL_SAVE_PREFIX       PAL_PREFIX
+# define PAL_PREFIX             SOURCE_DIR "/Pal98rqptw/"
+# define PAL_SAVE_PREFIX        PAL_PREFIX
 
 # if APPIMAGE
 #  undef PAL_PREFIX
@@ -54,7 +54,7 @@
 # define PAL_CREDIT           NULL
 # define PAL_PORTYEAR         NULL
 
-# define PAL_HAS_CONFIG_PAGE  1
-#include <sys/time.h>
+// # define PAL_HAS_CONFIG_PAGE  1
+// #include <sys/time.h>
 
 #endif

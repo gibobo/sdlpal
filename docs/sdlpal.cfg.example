@@ -11,13 +11,6 @@
 #           Significant if the GamePath cannot write.
 #SavePath=.
 
-# CD: Indicates which type of CD audio source to use. Valid types include 'RAW',
-#     'OGG' and 'MP3'. 'RAW' means use the SDL 1.2's CDAudio API (default when
-#     compiled with SDL 1.2), 'OGG' means use files named as '100xx.ogg' inside
-#     the 'ogg' directory (default when compiled with SDL 2.0), while 'MP3'
-#     means use files named as '100xx.mp3' inside the 'mp3' directory.
-#CD=OGG
-
 # MUSIC: Indicates which type of music source to use. Valid types include 
 #        'RIX', 'MIDI', 'OGG' and 'MP3'. 'RIX' means use the RIX music (default),
 #        'MIDI' means midi (either in 'mus.mkf' or inside 'musics' directory),
@@ -29,13 +22,6 @@
 #               ENSURE YOU KNOW WHAT YOU'RE DOING.
 #               NOT AVAILABLE IN OFFICIAL BUILDS.
 #RIXExtraInit=168,87,184,9,167,3,183,15,
-
-# MIDIClient: Indicate MIDI Client Setting.
-#             on iOS/Win32/UWP/ANGLE no setting needed, so forget this setting.
-#             on *nix that have alsa devel library compiled, specify ALSA MIDI Port here.
-#             otherwise, specify any midiplayer or wrapper here, that accept
-#               `CLI midifile` syntax.
-#MIDIClient=14.0
 
 # OPLCore: Indicates the OPL emulator core to use. Valid types include 'DBFLT'
 #          (default), 'MAME', 'DBINT' and 'NUKED'.
@@ -102,10 +88,6 @@
 
 # UseTouchOverlay: Indicates whether show touch overlay. Only significant for mobile usage.
 #UseTouchOverlay=0
-
-# EnableAviPlay: Indicates whether enable AVI playback. AVI only exist in the Win95 game distribution.
-#                Note: SDLPal only support the codec the original distribution uses.
-#EnableAviPlay=0
 
 # ScaleQuality: Indicates whether use bilinear filtering when stretching, only avilable when EnableGLSL=0
 #               In other case the shader handles it.

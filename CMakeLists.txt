@@ -12,7 +12,7 @@ find_package(OpenGL REQUIRED)
 # find_package(GLES)
 find_package (GLUT)
 
-# 如果支援，則為 MSVC 編譯器啟用熱重新載入。
+add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(WIN32)
     set(PLATFORM_DIR win32)
@@ -22,9 +22,6 @@ if(WIN32)
 else()
     set(PLATFORM_DIR unix)
 endif()
-
-# CMakeList.txt: cmake 的 CMake 專案，在此包含來源及定義
-# 專案專屬邏輯。
 #
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
