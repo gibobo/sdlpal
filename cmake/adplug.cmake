@@ -5,7 +5,6 @@ file(GLOB ADPLUG_FILES
     ${BINIO_SOURCE_DIR}/*.cpp
 )
 
-
 add_library(adplug STATIC ${ADPLUG_FILES})
 
 target_include_directories(adplug 

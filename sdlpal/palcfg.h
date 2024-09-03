@@ -72,15 +72,11 @@ typedef enum tagPALCFG_ITEM
 
 	PALCFG_STRING_MIN = PALCFG_UNSIGNED_MAX,
 	/* Strings */
-	PALCFG_GAMEPATH,
+	PALCFG_GAMEPATH = PALCFG_STRING_MIN,
     PALCFG_SAVEPATH,
     PALCFG_SHADERPATH,
 	PALCFG_MESSAGEFILE,
 	PALCFG_FONTFILE,
-	PALCFG_MUSIC,
-	PALCFG_MIDISYNTH,
-	PALCFG_OPL_CORE,
-	PALCFG_OPL_CHIP,
 	PALCFG_LOGFILE,
 	PALCFG_RIXEXTRAINIT,
 	PALCFG_SOUNDBANK,
@@ -198,9 +194,6 @@ typedef struct tagCONFIGURATION
 	INT              iMusicVolume;
 	INT              iSoundVolume;
 	LOGLEVEL         iLogLevel;
-	MUSICTYPE        eMusicType;
-	OPLCORE_TYPE     eOPLCore;
-	OPLCHIP_TYPE     eOPLChip;
 	WORD             wAudioBufferSize;
 	BOOL             fIsWIN95;
 	BOOL             fUseSurroundOPL;

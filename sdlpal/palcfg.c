@@ -68,18 +68,14 @@ static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
     { PALCFG_SHADERPATH,        PALCFG_STRING,   "ShaderPath",        10, MAKE_STRING(NULL) },
 	{ PALCFG_MESSAGEFILE,       PALCFG_STRING,   "MessageFileName",   15, MAKE_STRING(NULL) },
 	{ PALCFG_FONTFILE,          PALCFG_STRING,   "FontFileName",      12, MAKE_STRING(NULL) },
-	{ PALCFG_MUSIC,             PALCFG_STRING,   "Music",              5, MAKE_STRING("RIX") },
-	{ PALCFG_OPL_CORE,          PALCFG_STRING,   "OPLCore",            7, MAKE_STRING("NUKED") },
-	{ PALCFG_OPL_CHIP,          PALCFG_STRING,   "OPLChip",            7, MAKE_STRING("OPL3") },
 	{ PALCFG_LOGFILE,           PALCFG_STRING,   "LogFileName",       11, MAKE_STRING(NULL) },
 	{ PALCFG_RIXEXTRAINIT,      PALCFG_STRING,   "RIXExtraInit",      12, MAKE_STRING(NULL) },
 	{ PALCFG_SOUNDBANK,         PALCFG_STRING,   "SoundBank",          9, MAKE_STRING(NULL) },
 	{ PALCFG_SCALEQUALITY,      PALCFG_STRING,   "ScaleQuality",      12, MAKE_STRING("0") },
-	{ PALCFG_SHADER,            PALCFG_STRING,   "Shader",             6, MAKE_STRING(NULL) },
+	{ PALCFG_SHADER,            PALCFG_STRING,   "Shader",             6, MAKE_STRING(SOURCE_DIR"/shaders/plain.glsl") },
 };
 
 static const char *music_types[] = { "MIDI", "RIX", "MP3", "OGG", "OPUS", "RAW" };
-static const char *opl_cores[] = { "MAME", "DBFLT", "DBINT", "NUKED" };
 static const char *opl_chips[] = { "OPL2", "OPL3" };
 
 static char * ParseStringValue(const char *sValue, char *original)
@@ -286,9 +282,6 @@ PAL_LoadConfig(
 {
 	FILE     *fp;
 	ConfigValue  values[PALCFG_ALL_MAX];
-	MUSICTYPE eMusicType = MUSIC_RIX;
-	OPLCORE_TYPE eOPLCore = OPLCORE_NUKED;
-	OPLCHIP_TYPE eOPLChip = OPLCHIP_OPL3;
 	static const SCREENLAYOUT screen_layout = {
 		// Equipment Screen
 		.EquipImageBox     = PAL_XY(8, 8),
@@ -421,29 +414,6 @@ PAL_LoadConfig(
 				case PALCFG_LOGFILE:
 					gConfig.pszLogFile = ParseStringValue(value.sValue, gConfig.pszLogFile);
 					break;
-				case PALCFG_MUSIC:
-					eMusicType = MUSIC_RIX;
-					break;
-				case PALCFG_OPL_CORE:
-				{
-					if (SDL_strncasecmp(value.sValue, "DBINT", slen) == 0)
-						eOPLCore = OPLCORE_DBINT;
-					else if (SDL_strncasecmp(value.sValue, "DBFLT", slen) == 0)
-						eOPLCore = OPLCORE_DBFLT;
-					else if (SDL_strncasecmp(value.sValue, "MAME", slen) == 0)
-						eOPLCore = OPLCORE_MAME;
-					else if (SDL_strncasecmp(value.sValue, "NUKED", slen) == 0)
-						eOPLCore = OPLCORE_NUKED;
-					break;
-				}
-				case PALCFG_OPL_CHIP:
-				{
-					if (SDL_strncasecmp(value.sValue, "OPL2", slen) == 0)
-						eOPLChip = OPLCHIP_OPL2;
-					else if (SDL_strncasecmp(value.sValue, "OPL3", slen) == 0)
-						eOPLChip = OPLCHIP_OPL3;
-					break;
-				}
 				case PALCFG_RIXEXTRAINIT:
 				{
 #if USE_RIX_EXTRA_INIT
@@ -512,9 +482,6 @@ PAL_LoadConfig(
 	if (!gConfig.pszSavePath) gConfig.pszSavePath = gConfig.pszGamePath ? strdup(gConfig.pszGamePath) : strdup(PAL_SAVE_PREFIX);
 	if (!gConfig.pszGamePath) gConfig.pszGamePath = strdup(PAL_PREFIX);
     if (!gConfig.pszShaderPath) gConfig.pszShaderPath = strdup(gConfig.pszGamePath);
-	gConfig.eMusicType = eMusicType;
-	gConfig.eOPLCore = eOPLCore;
-	gConfig.eOPLChip = (eOPLCore == OPLCORE_NUKED ? OPLCHIP_OPL3 : eOPLChip);
 	gConfig.dwWordLength = 10;	// This is the default value for Chinese version
 	gConfig.ScreenLayout = screen_layout;
 
@@ -538,7 +505,7 @@ PAL_LoadConfig(
 	gConfig.wAudioBufferSize = (WORD)values[PALCFG_AUDIOBUFFERSIZE].uValue;
 	gConfig.iMusicVolume = values[PALCFG_MUSICVOLUME].uValue;
 	gConfig.iSoundVolume = values[PALCFG_SOUNDVOLUME].uValue;
-	gConfig.pszShader = (char *)values[PALCFG_SHADER].uValue;
+	gConfig.pszShader = (char *)values[PALCFG_SHADER].sValue;
 	gConfig.dwTextureWidth  = values[PALCFG_TEXTUREWIDTH].uValue;
 	gConfig.dwTextureHeight = values[PALCFG_TEXTUREHEIGHT].uValue;
 
@@ -598,9 +565,6 @@ PAL_SaveConfig(
         sprintf(buf, "%s=%u\n", PAL_ConfigName(PALCFG_WINDOWWIDTH), gConfig.dwScreenWidth); fputs(buf, fp);
         sprintf(buf, "%s=%u\n", PAL_ConfigName(PALCFG_TEXTUREHEIGHT), gConfig.dwTextureHeight); fputs(buf, fp);
         sprintf(buf, "%s=%u\n", PAL_ConfigName(PALCFG_TEXTUREWIDTH), gConfig.dwTextureWidth); fputs(buf, fp);
-
-		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_OPL_CORE), opl_cores[gConfig.eOPLCore]); fputs(buf, fp);
-		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_OPL_CHIP), opl_chips[gConfig.eOPLChip]); fputs(buf, fp);
 
 		if (gConfig.pszGamePath && *gConfig.pszGamePath && strcmp(gConfig.pszGamePath, PAL_PREFIX) != 0) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_GAMEPATH), gConfig.pszGamePath); fputs(buf, fp); }
 		if (gConfig.pszSavePath && *gConfig.pszSavePath && strcmp(gConfig.pszSavePath, PAL_SAVE_PREFIX) != 0) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_SAVEPATH), gConfig.pszSavePath); fputs(buf, fp); }
@@ -662,8 +626,6 @@ PAL_GetConfigItem(
 		case PALCFG_SOUNDBANK:         value.sValue = gConfig.pszSoundBank; break;
 		case PALCFG_SCALEQUALITY:      value.sValue = gConfig.pszScaleQuality; break;
 		case PALCFG_SHADER:            value.sValue = gConfig.pszShader; break;
-		case PALCFG_OPL_CORE:          value.sValue = opl_cores[gConfig.eOPLCore]; break;
-		case PALCFG_OPL_CHIP:          value.sValue = opl_chips[gConfig.eOPLChip]; break;
 		case PALCFG_TEXTUREHEIGHT:     value.uValue = gConfig.dwTextureHeight; break;
 		case PALCFG_TEXTUREWIDTH:      value.uValue = gConfig.dwTextureWidth; break;
 		default:                       break;
@@ -739,36 +701,6 @@ PAL_SetConfigItem(
 	case PALCFG_SHADER:
 		if (gConfig.pszShader) free(gConfig.pszShader);
 		gConfig.pszShader = value.sValue && value.sValue[0] ? strdup(value.sValue) : NULL;
-		break;
-	case PALCFG_MUSIC:
-		for (int i = 0; i < sizeof(music_types) / sizeof(music_types[0]); i++)
-		{
-			if (SDL_strcasecmp(value.sValue, music_types[i]) == 0)
-			{
-				gConfig.eMusicType = (MUSICTYPE)i;
-				return;
-			}
-		}
-		break;
-	case PALCFG_OPL_CORE:
-		for (int i = 0; i < sizeof(opl_cores) / sizeof(opl_cores[0]); i++)
-		{
-			if (SDL_strcasecmp(value.sValue, opl_cores[i]) == 0)
-			{
-				gConfig.eOPLCore = (OPLCORE_TYPE)i;
-				return;
-			}
-		}
-		break;
-	case PALCFG_OPL_CHIP:
-		for (int i = 0; i < sizeof(opl_chips) / sizeof(opl_chips[0]); i++)
-		{
-			if (SDL_strcasecmp(value.sValue, opl_chips[i]) == 0)
-			{
-				gConfig.eOPLChip = (OPLCHIP_TYPE)i;
-				return;
-			}
-		}
 		break;
 	default:
 		break;
