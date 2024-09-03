@@ -41,12 +41,10 @@
 static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
 	{ PALCFG_FULLSCREEN,        PALCFG_BOOLEAN,  "FullScreen",        10, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
 	{ PALCFG_KEEPASPECTRATIO,   PALCFG_BOOLEAN,  "KeepAspectRatio",   15, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },
-	{ PALCFG_LAUNCHSETTING,     PALCFG_BOOLEAN,  "LaunchSetting",     13, MAKE_BOOLEAN(PAL_HAS_CONFIG_PAGE,           FALSE,                 TRUE) },
 	{ PALCFG_STEREO,            PALCFG_BOOLEAN,  "Stereo",             6, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },                  // Default for stereo audio
 	{ PALCFG_USESURROUNDOPL,    PALCFG_BOOLEAN,  "UseSurroundOPL",    14, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },                  // Default for using surround opl
 	{ PALCFG_ENABLEKEYREPEAT,   PALCFG_BOOLEAN,  "EnableKeyRepeat",   15, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
 	{ PALCFG_USETOUCHOVERLAY,   PALCFG_BOOLEAN,  "UseTouchOverlay",   15, MAKE_BOOLEAN(PAL_HAS_TOUCH,                 FALSE,                 TRUE) },
-	{ PALCFG_ENABLEAVIPLAY,     PALCFG_BOOLEAN,  "EnableAviPlay",     13, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
 	{ PALCFG_ENABLEGLSL,        PALCFG_BOOLEAN,  "EnableGLSL",        10, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },
     { PALCFG_ENABLEHDR,         PALCFG_BOOLEAN,  "EnableHDR",          9, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
 
@@ -65,28 +63,19 @@ static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
     { PALCFG_TEXTUREHEIGHT,     PALCFG_UNSIGNED, "TextureHeight",     13, MAKE_UNSIGNED(PAL_DEFAULT_TEXTURE_HEIGHT,    0,                     UINT32_MAX) },
     { PALCFG_TEXTUREWIDTH,      PALCFG_UNSIGNED, "TextureWidth",      12, MAKE_UNSIGNED(PAL_DEFAULT_TEXTURE_WIDTH,     0,                     UINT32_MAX) },
 
-	{ PALCFG_CD,                PALCFG_STRING,   "CD",                 2, MAKE_STRING("NONE") },
 	{ PALCFG_GAMEPATH,          PALCFG_STRING,   "GamePath",           8, MAKE_STRING(NULL) },
     { PALCFG_SAVEPATH,          PALCFG_STRING,   "SavePath",           8, MAKE_STRING(NULL) },
     { PALCFG_SHADERPATH,        PALCFG_STRING,   "ShaderPath",        10, MAKE_STRING(NULL) },
 	{ PALCFG_MESSAGEFILE,       PALCFG_STRING,   "MessageFileName",   15, MAKE_STRING(NULL) },
 	{ PALCFG_FONTFILE,          PALCFG_STRING,   "FontFileName",      12, MAKE_STRING(NULL) },
-	{ PALCFG_MUSIC,             PALCFG_STRING,   "Music",              5, MAKE_STRING("RIX") },
-	{ PALCFG_MIDISYNTH,         PALCFG_STRING,   "MIDISynth",          9, MAKE_STRING("native") },
-	{ PALCFG_OPL_CORE,          PALCFG_STRING,   "OPLCore",            7, MAKE_STRING("DBFLT") },
-	{ PALCFG_OPL_CHIP,          PALCFG_STRING,   "OPLChip",            7, MAKE_STRING("OPL2") },
 	{ PALCFG_LOGFILE,           PALCFG_STRING,   "LogFileName",       11, MAKE_STRING(NULL) },
 	{ PALCFG_RIXEXTRAINIT,      PALCFG_STRING,   "RIXExtraInit",      12, MAKE_STRING(NULL) },
-	{ PALCFG_MIDICLIENT,        PALCFG_STRING,   "MIDIClient",        10, MAKE_STRING(NULL) },
 	{ PALCFG_SOUNDBANK,         PALCFG_STRING,   "SoundBank",          9, MAKE_STRING(NULL) },
 	{ PALCFG_SCALEQUALITY,      PALCFG_STRING,   "ScaleQuality",      12, MAKE_STRING("0") },
-	{ PALCFG_SHADER,            PALCFG_STRING,   "Shader",             6, MAKE_STRING(NULL) },
+	{ PALCFG_SHADER,            PALCFG_STRING,   "Shader",             6, MAKE_STRING(SOURCE_DIR"/shaders/plain.glsl") },
 };
 
 static const char *music_types[] = { "MIDI", "RIX", "MP3", "OGG", "OPUS", "RAW" };
-static const char* synth_types[] = { "native", "timidity", "tinysoundfont" };
-static const char *cd_types[] = { "NONE", "MP3", "OGG", "OPUS", "RAW" };
-static const char *opl_cores[] = { "MAME", "DBFLT", "DBINT", "NUKED" };
 static const char *opl_chips[] = { "OPL2", "OPL3" };
 
 static char * ParseStringValue(const char *sValue, char *original)
@@ -293,10 +282,6 @@ PAL_LoadConfig(
 {
 	FILE     *fp;
 	ConfigValue  values[PALCFG_ALL_MAX];
-	MUSICTYPE eMusicType = MUSIC_RIX;
-	CDTYPE eCDType = CD_NONE;
-	OPLCORE_TYPE eOPLCore = OPLCORE_DBFLT;
-	OPLCHIP_TYPE eOPLChip = OPLCHIP_OPL2;
 	static const SCREENLAYOUT screen_layout = {
 		// Equipment Screen
 		.EquipImageBox     = PAL_XY(8, 8),
@@ -429,33 +414,6 @@ PAL_LoadConfig(
 				case PALCFG_LOGFILE:
 					gConfig.pszLogFile = ParseStringValue(value.sValue, gConfig.pszLogFile);
 					break;
-				case PALCFG_CD:
-					break;
-				case PALCFG_MUSIC:
-					eMusicType = MUSIC_RIX;
-					break;
-				case PALCFG_MIDISYNTH:
-					break;
-				case PALCFG_OPL_CORE:
-				{
-					if (SDL_strncasecmp(value.sValue, "DBINT", slen) == 0)
-						eOPLCore = OPLCORE_DBINT;
-					else if (SDL_strncasecmp(value.sValue, "DBFLT", slen) == 0)
-						eOPLCore = OPLCORE_DBFLT;
-					else if (SDL_strncasecmp(value.sValue, "MAME", slen) == 0)
-						eOPLCore = OPLCORE_MAME;
-					else if (SDL_strncasecmp(value.sValue, "NUKED", slen) == 0)
-						eOPLCore = OPLCORE_NUKED;
-					break;
-				}
-				case PALCFG_OPL_CHIP:
-				{
-					if (SDL_strncasecmp(value.sValue, "OPL2", slen) == 0)
-						eOPLChip = OPLCHIP_OPL2;
-					else if (SDL_strncasecmp(value.sValue, "OPL3", slen) == 0)
-						eOPLChip = OPLCHIP_OPL3;
-					break;
-				}
 				case PALCFG_RIXEXTRAINIT:
 				{
 #if USE_RIX_EXTRA_INIT
@@ -499,9 +457,6 @@ PAL_LoadConfig(
 #endif
 					break;
 				}
-				case PALCFG_MIDICLIENT:
-					gConfig.pszMIDIClient = ParseStringValue(value.sValue, gConfig.pszMIDIClient);
-					break;
 				case PALCFG_SOUNDBANK:
 					gConfig.pszSoundBank = ParseStringValue(value.sValue, gConfig.pszSoundBank);
 					break;
@@ -527,21 +482,15 @@ PAL_LoadConfig(
 	if (!gConfig.pszSavePath) gConfig.pszSavePath = gConfig.pszGamePath ? strdup(gConfig.pszGamePath) : strdup(PAL_SAVE_PREFIX);
 	if (!gConfig.pszGamePath) gConfig.pszGamePath = strdup(PAL_PREFIX);
     if (!gConfig.pszShaderPath) gConfig.pszShaderPath = strdup(gConfig.pszGamePath);
-	gConfig.eMusicType = eMusicType;
-	gConfig.eCDType = eCDType;
-	gConfig.eOPLCore = eOPLCore;
-	gConfig.eOPLChip = (eOPLCore == OPLCORE_NUKED ? OPLCHIP_OPL3 : eOPLChip);
 	gConfig.dwWordLength = 10;	// This is the default value for Chinese version
 	gConfig.ScreenLayout = screen_layout;
 
 	gConfig.fIsWIN95 = FALSE;	// Default for DOS version
 	gConfig.fUseSurroundOPL = values[PALCFG_STEREO].bValue && values[PALCFG_USESURROUNDOPL].bValue;
-	gConfig.fLaunchSetting = values[PALCFG_LAUNCHSETTING].bValue;
 	gConfig.fEnableKeyRepeat = values[PALCFG_ENABLEKEYREPEAT].bValue;
 	gConfig.fUseTouchOverlay = values[PALCFG_USETOUCHOVERLAY].bValue;
 	gConfig.fKeepAspectRatio = values[PALCFG_KEEPASPECTRATIO].bValue;
 	gConfig.fFullScreen = values[PALCFG_FULLSCREEN].bValue;
-	gConfig.fEnableAviPlay = values[PALCFG_ENABLEAVIPLAY].bValue;
 	gConfig.fEnableGLSL = values[PALCFG_ENABLEGLSL].bValue;
     gConfig.fEnableHDR = values[PALCFG_ENABLEHDR].bValue;
 	gConfig.iAudioChannels = values[PALCFG_STEREO].bValue ? 2 : 1;
@@ -556,7 +505,7 @@ PAL_LoadConfig(
 	gConfig.wAudioBufferSize = (WORD)values[PALCFG_AUDIOBUFFERSIZE].uValue;
 	gConfig.iMusicVolume = values[PALCFG_MUSICVOLUME].uValue;
 	gConfig.iSoundVolume = values[PALCFG_SOUNDVOLUME].uValue;
-	gConfig.pszShader = (char *)values[PALCFG_SHADER].uValue;
+	gConfig.pszShader = (char *)values[PALCFG_SHADER].sValue;
 	gConfig.dwTextureWidth  = values[PALCFG_TEXTUREWIDTH].uValue;
 	gConfig.dwTextureHeight = values[PALCFG_TEXTUREHEIGHT].uValue;
 
@@ -595,12 +544,10 @@ PAL_SaveConfig(
 	{
 		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_KEEPASPECTRATIO), gConfig.fKeepAspectRatio); fputs(buf, fp);
 		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_FULLSCREEN), gConfig.fFullScreen); fputs(buf, fp);
-		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_LAUNCHSETTING), gConfig.fLaunchSetting); fputs(buf, fp);
 		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_STEREO), gConfig.iAudioChannels == 2 ? TRUE : FALSE); fputs(buf, fp);
 		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_USESURROUNDOPL), gConfig.fUseSurroundOPL); fputs(buf, fp);
 		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_ENABLEKEYREPEAT), gConfig.fEnableKeyRepeat); fputs(buf, fp);
 		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_USETOUCHOVERLAY), gConfig.fUseTouchOverlay); fputs(buf, fp);
-		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_ENABLEAVIPLAY), gConfig.fEnableAviPlay); fputs(buf, fp);
 		sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_ENABLEGLSL), gConfig.fEnableGLSL); fputs(buf, fp);
         sprintf(buf, "%s=%d\n", PAL_ConfigName(PALCFG_ENABLEHDR), gConfig.fEnableHDR); fputs(buf, fp);
 
@@ -619,18 +566,12 @@ PAL_SaveConfig(
         sprintf(buf, "%s=%u\n", PAL_ConfigName(PALCFG_TEXTUREHEIGHT), gConfig.dwTextureHeight); fputs(buf, fp);
         sprintf(buf, "%s=%u\n", PAL_ConfigName(PALCFG_TEXTUREWIDTH), gConfig.dwTextureWidth); fputs(buf, fp);
 
-		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_CD), cd_types[gConfig.eCDType]); fputs(buf, fp);
-		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_MUSIC), music_types[gConfig.eMusicType]); fputs(buf, fp);
-		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_OPL_CORE), opl_cores[gConfig.eOPLCore]); fputs(buf, fp);
-		sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_OPL_CHIP), opl_chips[gConfig.eOPLChip]); fputs(buf, fp);
-
 		if (gConfig.pszGamePath && *gConfig.pszGamePath && strcmp(gConfig.pszGamePath, PAL_PREFIX) != 0) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_GAMEPATH), gConfig.pszGamePath); fputs(buf, fp); }
 		if (gConfig.pszSavePath && *gConfig.pszSavePath && strcmp(gConfig.pszSavePath, PAL_SAVE_PREFIX) != 0) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_SAVEPATH), gConfig.pszSavePath); fputs(buf, fp); }
         if (gConfig.pszShaderPath && *gConfig.pszShaderPath && gConfig.pszGamePath && strcmp(gConfig.pszShaderPath, gConfig.pszGamePath) != 0) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_SHADERPATH), gConfig.pszShaderPath); fputs(buf, fp); }
 		if (gConfig.pszMsgFile && *gConfig.pszMsgFile) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_MESSAGEFILE), gConfig.pszMsgFile); fputs(buf, fp); }
 		if (gConfig.pszFontFile && *gConfig.pszFontFile) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_FONTFILE), gConfig.pszFontFile); fputs(buf, fp); }
 		if (gConfig.pszLogFile && *gConfig.pszLogFile) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_LOGFILE), gConfig.pszLogFile); fputs(buf, fp); }
-		if (gConfig.pszMIDIClient && *gConfig.pszMIDIClient) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_MIDICLIENT), gConfig.pszMIDIClient); fputs(buf, fp); }
 		if (gConfig.pszSoundBank && *gConfig.pszSoundBank) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_SOUNDBANK), gConfig.pszSoundBank); fputs(buf, fp); }
 		if (gConfig.pszScaleQuality && *gConfig.pszScaleQuality) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_SCALEQUALITY), gConfig.pszScaleQuality); fputs(buf, fp); }
 		if (gConfig.pszShader && *gConfig.pszShader) { sprintf(buf, "%s=%s\n", PAL_ConfigName(PALCFG_SHADER), gConfig.pszShader); fputs(buf, fp); }
@@ -657,12 +598,10 @@ PAL_GetConfigItem(
 		{
 		case PALCFG_FULLSCREEN:        value.bValue = gConfig.fFullScreen; break;
 		case PALCFG_KEEPASPECTRATIO:   value.bValue = gConfig.fKeepAspectRatio; break;
-		case PALCFG_LAUNCHSETTING:     value.bValue = gConfig.fLaunchSetting; break;
 		case PALCFG_STEREO:            value.bValue = (gConfig.iAudioChannels == 2); break;
 		case PALCFG_USESURROUNDOPL:    value.bValue = gConfig.fUseSurroundOPL; break;
 		case PALCFG_ENABLEKEYREPEAT:   value.bValue = gConfig.fEnableKeyRepeat; break;
 		case PALCFG_USETOUCHOVERLAY:   value.bValue = gConfig.fUseTouchOverlay; break;
-		case PALCFG_ENABLEAVIPLAY:     value.bValue = gConfig.fEnableAviPlay; break;
 		case PALCFG_ENABLEGLSL:        value.bValue = gConfig.fEnableGLSL; break;
 		case PALCFG_ENABLEHDR:        value.bValue = gConfig.fEnableHDR; break;
 		case PALCFG_SURROUNDOPLOFFSET: value.iValue = gConfig.iSurroundOPLOffset; break;
@@ -678,20 +617,15 @@ PAL_GetConfigItem(
 		case PALCFG_WINDOWHEIGHT:      value.uValue = gConfig.dwScreenHeight; break;
 		case PALCFG_WINDOWWIDTH:       value.uValue = gConfig.dwScreenWidth; break;
 
-		case PALCFG_CD:                value.sValue = cd_types[gConfig.eCDType]; break;
 		case PALCFG_GAMEPATH:          value.sValue = gConfig.pszGamePath; break;
 		case PALCFG_SAVEPATH:          value.sValue = gConfig.pszSavePath; break;
         case PALCFG_SHADERPATH:        value.sValue = gConfig.pszShaderPath; break;
 		case PALCFG_MESSAGEFILE:       value.sValue = gConfig.pszMsgFile; break;
 		case PALCFG_FONTFILE:          value.sValue = gConfig.pszFontFile; break;
 		case PALCFG_LOGFILE:           value.sValue = gConfig.pszLogFile; break;
-		case PALCFG_MIDICLIENT:        value.sValue = gConfig.pszMIDIClient; break;
 		case PALCFG_SOUNDBANK:         value.sValue = gConfig.pszSoundBank; break;
 		case PALCFG_SCALEQUALITY:      value.sValue = gConfig.pszScaleQuality; break;
 		case PALCFG_SHADER:            value.sValue = gConfig.pszShader; break;
-		case PALCFG_MUSIC:             value.sValue = music_types[gConfig.eMusicType]; break;
-		case PALCFG_OPL_CORE:          value.sValue = opl_cores[gConfig.eOPLCore]; break;
-		case PALCFG_OPL_CHIP:          value.sValue = opl_chips[gConfig.eOPLChip]; break;
 		case PALCFG_TEXTUREHEIGHT:     value.uValue = gConfig.dwTextureHeight; break;
 		case PALCFG_TEXTUREWIDTH:      value.uValue = gConfig.dwTextureWidth; break;
 		default:                       break;
@@ -711,12 +645,10 @@ PAL_SetConfigItem(
 	{
 	case PALCFG_FULLSCREEN:        gConfig.fFullScreen = value.bValue; break;
 	case PALCFG_KEEPASPECTRATIO:   gConfig.fKeepAspectRatio = value.bValue; break;
-	case PALCFG_LAUNCHSETTING:     gConfig.fLaunchSetting = value.bValue; break;
 	case PALCFG_STEREO:            gConfig.iAudioChannels = value.bValue ? 2 : 1; break;
 	case PALCFG_USESURROUNDOPL:    gConfig.fUseSurroundOPL = value.bValue; break;
 	case PALCFG_ENABLEKEYREPEAT:   gConfig.fEnableKeyRepeat = value.bValue; break;
 	case PALCFG_USETOUCHOVERLAY:   gConfig.fUseTouchOverlay = value.bValue; break;
-	case PALCFG_ENABLEAVIPLAY:     gConfig.fEnableAviPlay = value.bValue; break;
 	case PALCFG_ENABLEGLSL:        gConfig.fEnableGLSL = value.bValue; break;
 	case PALCFG_ENABLEHDR:         gConfig.fEnableHDR = value.bValue; break;
 	case PALCFG_SURROUNDOPLOFFSET: gConfig.iSurroundOPLOffset = value.iValue; break;
@@ -758,10 +690,6 @@ PAL_SetConfigItem(
 		if (gConfig.pszLogFile) free(gConfig.pszLogFile);
 		gConfig.pszLogFile = value.sValue && value.sValue[0] ? strdup(value.sValue) : NULL;
 		break;
-	case PALCFG_MIDICLIENT:
-		if (gConfig.pszMIDIClient) free(gConfig.pszMIDIClient);
-		gConfig.pszMIDIClient = value.sValue && value.sValue[0] ? strdup(value.sValue) : NULL;
-		break;
 	case PALCFG_SOUNDBANK:
 		if (gConfig.pszSoundBank) free(gConfig.pszSoundBank);
 		gConfig.pszSoundBank = value.sValue && value.sValue[0] ? strdup(value.sValue) : NULL;
@@ -773,46 +701,6 @@ PAL_SetConfigItem(
 	case PALCFG_SHADER:
 		if (gConfig.pszShader) free(gConfig.pszShader);
 		gConfig.pszShader = value.sValue && value.sValue[0] ? strdup(value.sValue) : NULL;
-		break;
-	case PALCFG_CD:
-		for (int i = 0; i < sizeof(cd_types) / sizeof(cd_types[0]); i++)
-		{
-			if (SDL_strcasecmp(value.sValue, cd_types[i]) == 0)
-			{
-				gConfig.eCDType = (CDTYPE)i;
-				return;
-			}
-		}
-		break;
-	case PALCFG_MUSIC:
-		for (int i = 0; i < sizeof(music_types) / sizeof(music_types[0]); i++)
-		{
-			if (SDL_strcasecmp(value.sValue, music_types[i]) == 0)
-			{
-				gConfig.eMusicType = (MUSICTYPE)i;
-				return;
-			}
-		}
-		break;
-	case PALCFG_OPL_CORE:
-		for (int i = 0; i < sizeof(opl_cores) / sizeof(opl_cores[0]); i++)
-		{
-			if (SDL_strcasecmp(value.sValue, opl_cores[i]) == 0)
-			{
-				gConfig.eOPLCore = (OPLCORE_TYPE)i;
-				return;
-			}
-		}
-		break;
-	case PALCFG_OPL_CHIP:
-		for (int i = 0; i < sizeof(opl_chips) / sizeof(opl_chips[0]); i++)
-		{
-			if (SDL_strcasecmp(value.sValue, opl_chips[i]) == 0)
-			{
-				gConfig.eOPLChip = (OPLCHIP_TYPE)i;
-				return;
-			}
-		}
 		break;
 	default:
 		break;

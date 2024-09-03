@@ -397,13 +397,7 @@ RIX_Init(
 		pRixPlayer->Play = RIX_Play;
 	}
 
-	auto chip = (Copl::ChipType)gConfig.eOPLChip;
-	if (chip == Copl::TYPE_OPL2 && gConfig.fUseSurroundOPL)
-	{
-		chip = Copl::TYPE_DUAL_OPL2;
-	}
-
-	Copl* opl = CEmuopl::CreateEmuopl((OPLCORE::TYPE)gConfig.eOPLCore, chip, gConfig.iOPLSampleRate);
+	Copl* opl = CEmuopl::CreateEmuopl(gConfig.iOPLSampleRate);
 	if (NULL == opl)
 	{
 		delete pRixPlayer;

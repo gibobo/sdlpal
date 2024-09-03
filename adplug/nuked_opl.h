@@ -26,7 +26,6 @@
 #define SDLPAL_NUKED_OPL_H
 
 #include "emuopls.h"
-
 #include <stdint.h>
 extern "C" {
 #include "opl3.h"

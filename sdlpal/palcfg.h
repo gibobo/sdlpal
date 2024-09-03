@@ -38,12 +38,10 @@ typedef enum tagPALCFG_ITEM
 	/* Booleans */
 	PALCFG_FULLSCREEN = PALCFG_BOOLEAN_MIN,
 	PALCFG_KEEPASPECTRATIO,
-	PALCFG_LAUNCHSETTING,
 	PALCFG_STEREO,
 	PALCFG_USESURROUNDOPL,
 	PALCFG_ENABLEKEYREPEAT,
 	PALCFG_USETOUCHOVERLAY,
-	PALCFG_ENABLEAVIPLAY,
     PALCFG_ENABLEGLSL,
     PALCFG_ENABLEHDR,
 	/* Booleans */
@@ -74,19 +72,13 @@ typedef enum tagPALCFG_ITEM
 
 	PALCFG_STRING_MIN = PALCFG_UNSIGNED_MAX,
 	/* Strings */
-	PALCFG_CD = PALCFG_STRING_MIN,
-	PALCFG_GAMEPATH,
+	PALCFG_GAMEPATH = PALCFG_STRING_MIN,
     PALCFG_SAVEPATH,
     PALCFG_SHADERPATH,
 	PALCFG_MESSAGEFILE,
 	PALCFG_FONTFILE,
-	PALCFG_MUSIC,
-	PALCFG_MIDISYNTH,
-	PALCFG_OPL_CORE,
-	PALCFG_OPL_CHIP,
 	PALCFG_LOGFILE,
 	PALCFG_RIXEXTRAINIT,
-	PALCFG_MIDICLIENT,
 	PALCFG_SOUNDBANK,
 	PALCFG_SCALEQUALITY,
 	PALCFG_SHADER,
@@ -184,7 +176,6 @@ typedef struct tagCONFIGURATION
     char            *pszShaderPath;
 	char            *pszMsgFile;
 	char            *pszFontFile;
-	char            *pszMIDIClient;
 	char            *pszSoundBank;
 	char            *pszLogFile;
 	char            *pszScaleQuality;
@@ -203,10 +194,6 @@ typedef struct tagCONFIGURATION
 	INT              iMusicVolume;
 	INT              iSoundVolume;
 	LOGLEVEL         iLogLevel;
-	MUSICTYPE        eMusicType;
-	CDTYPE           eCDType;
-	OPLCORE_TYPE     eOPLCore;
-	OPLCHIP_TYPE     eOPLChip;
 	WORD             wAudioBufferSize;
 	BOOL             fIsWIN95;
 	BOOL             fUseSurroundOPL;
@@ -217,7 +204,6 @@ typedef struct tagCONFIGURATION
 	BOOL             fLaunchSetting;
 	BOOL             fEnableKeyRepeat;
 	BOOL             fUseTouchOverlay;
-	BOOL             fEnableAviPlay;
 	BOOL             fEnableGLSL;
     BOOL             fEnableHDR;
 #if USE_RIX_EXTRA_INIT

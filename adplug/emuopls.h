@@ -62,18 +62,12 @@
 # endif
 
 #include <malloc.h>
+#include <stdint.h>
 #include "src/opl.h"
 #include "opltypes.h"
 
 class OPLCORE {
 public:
-    enum TYPE {
-        MAME = OPLCORE_MAME,
-        DBFLT = OPLCORE_DBFLT,
-        DBINT = OPLCORE_DBINT,
-        NUKED = OPLCORE_NUKED,
-    };
-
     OPLCORE(uint32_t rate) : rate(rate) {}
     virtual ~OPLCORE() {}
 
@@ -90,30 +84,16 @@ protected:
 // The DUALOPL2 mode should be implemented by a OPL3 core
 class CEmuopl : public Copl {
 public:
-    static Copl* CreateEmuopl(OPLCORE::TYPE core, ChipType type, int rate);
+    static Copl* CreateEmuopl(int rate);
 
     ~CEmuopl() {
-        if (currType == TYPE_DUAL_OPL2) {
-            delete opl[1];
-        }
         delete opl[0];
     }
 
     // Assumes a 16-bit, mono output sample buffer @ OPL2 mode
     // Assumes a 16-bit, stereo output sample buffer @ OPL3/DUAL_OPL2 mode
     void update(short* buf, int samples) {
-        if (currType == TYPE_DUAL_OPL2) {
-            auto lbuf = (short*)alloca(sizeof(short) * samples);
-            opl[0]->Generate(lbuf, samples);
-            opl[1]->Generate(buf + samples, samples);
-            for (int i = 0, j = 0; i < samples; i++) {
-                buf[j++] = lbuf[i];
-                buf[j++] = buf[i + samples];
-            }
-        }
-        else {
-            opl[0]->Generate(buf, samples);
-        }
+        opl[0]->Generate(buf, samples);
     }
 
     void write(int reg, int val) {
@@ -128,9 +108,6 @@ public:
 
     void init() {
         opl[0]->Reset();
-        if (currType == TYPE_DUAL_OPL2) {
-            opl[1]->Reset();
-        }
         if (opl3mode) {
             opl[0]->Write(0x105, 1);
         }
@@ -139,7 +116,7 @@ public:
 protected:
     CEmuopl(OPLCORE* core, ChipType type) : Copl(type), opl3mode(false) {
         opl[0] = core;
-        opl[1] = (type == TYPE_DUAL_OPL2) ? core->Duplicate() : NULL;
+        opl[1] = NULL;
         init();
     }
 
