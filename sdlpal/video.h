@@ -77,11 +77,6 @@ VIDEO_ToggleFullscreen(
 );
 
 VOID
-VIDEO_ChangeDepth(
-   INT             bpp
-);
-
-VOID
 VIDEO_SaveScreenshot(
    VOID
 );
@@ -137,14 +132,6 @@ VIDEO_DrawSurfaceToScreen(
 VOID
 VIDEO_RenderCopy(
     VOID
-);
-
-VOID
-VIDEO_SetupTouchArea(
-    int window_w,
-    int window_h,
-    int draw_w,
-    int draw_h
 );
 
 #ifdef __cplusplus

@@ -26,11 +26,9 @@
 
 class Copl {
 public:
-   typedef enum {
-      TYPE_OPL2 = OPLCHIP_OPL2,
-	  TYPE_OPL3 = OPLCHIP_OPL3,
-	  TYPE_DUAL_OPL2 = OPLCHIP_DUAL_OPL2,
-   } ChipType;
+  typedef enum {
+    TYPE_OPL2, TYPE_OPL3, TYPE_DUAL_OPL2
+  } ChipType;
 
    Copl() : currChip(0), currType(TYPE_OPL2) { }
    Copl(ChipType type) : currChip(0), currType(type) { }

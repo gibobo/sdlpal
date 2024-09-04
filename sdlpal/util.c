@@ -31,19 +31,6 @@
 static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
 #define INTERNAL_BUFFER_SIZE_ARGS internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE
 
-void UTIL_MsgBox(char *string)
-{
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	extern SDL_Window *gpWindow;
-	char buffer[300];
-	SDL_MessageBoxButtonData buttons[] = {{0, 0, "OK"}};
-	SDL_MessageBoxData mbd = {SDL_MESSAGEBOX_WARNING, gpWindow, "Alert", buffer, 1, buttons, NULL};
-	int btnid;
-	sprintf(buffer, "%s\n", string);
-	SDL_ShowMessageBox(&mbd, &btnid);
-#endif
-}
-
 long flength(
 	FILE *fp)
 {
@@ -301,7 +288,6 @@ void TerminateOnError(
 
 	fprintf(stderr, "\nFATAL ERROR: %s\n", string);
 
-#if SDL_VERSION_ATLEAST(2, 0, 0)
 	{
 		extern SDL_Window *gpWindow;
 		char buffer[300];
@@ -313,9 +299,6 @@ void TerminateOnError(
 		SDL_ShowMessageBox(&mbd, &btnid);
 		PAL_Shutdown(255);
 	}
-#else
-	PAL_FATAL_OUTPUT(string);
-#endif
 
 #ifdef _DEBUG
 	assert(!"TerminateOnError()"); // allows jumping to debugger

@@ -40,11 +40,8 @@
  *
  */
 
-// #include "dosbox/dosbox_opls.h"
-// #include "mame/mame_opls.h"
 #include "nuked_opl.h"
-#include "src/opl.h"
-// #include "emuopls.h"
+#include "emuopls.h"
 
 Copl* CEmuopl::CreateEmuopl(int rate) {
     return new CEmuopl(new NUKEDOPL3(rate), TYPE_OPL3);

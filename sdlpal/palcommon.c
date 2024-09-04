@@ -22,6 +22,7 @@
 #include "palcommon.h"
 #include "global.h"
 #include "palcfg.h"
+#include <SDL.h>
 
 PAL_FORCE_INLINE
 BYTE

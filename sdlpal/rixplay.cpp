@@ -406,7 +406,7 @@ RIX_Init(
 
 	if (gConfig.fUseSurroundOPL)
 	{
-		Copl* tmpopl = new CSurroundopl(gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset, opl);
+		Copl* tmpopl = new CSurroundopl(gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset, opl, nullptr);
 		if (NULL == tmpopl)
 		{
 			delete opl;

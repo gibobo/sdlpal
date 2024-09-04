@@ -26,6 +26,7 @@
 //
 
 #include "common.h"
+#include <SDL.h>
 
 typedef struct _YJ1_TreeNode
 {

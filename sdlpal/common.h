@@ -26,9 +26,6 @@
 # define PAL_CLASSIC        1
 #endif
 
-// #include "defines.h"
-
-
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,9 +36,6 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#include <SDL.h>
-#include <SDL_endian.h>
 
 #define __WIDETEXT(quote) L##quote
 #define WIDETEXT(quote) __WIDETEXT(quote)
@@ -61,15 +55,6 @@
 
 #ifndef min
 # define min fmin
-#endif
-
-// For SDL 1.2 compatibility
-#ifndef SDL_TICKS_PASSED
-#define SDL_TICKS_PASSED(A, B)  ((Sint32)((B) - (A)) <= 0)
-#endif
-
-#ifndef SDL_AUDIO_BITSIZE
-# define SDL_AUDIO_BITSIZE(x)         (x & 0xFF)
 #endif
 
 /* This is need when compiled with SDL 1.2 */
@@ -167,7 +152,6 @@ typedef const WCHAR        *LPCWSTR;
    named 'pal_config.h' that contains marco definitions & header includes into the directory.
    The example of this file can be found in directories of existing portings.
  */
-#include "opltypes.h"
 #include "pal_config.h"
 
 #ifndef PAL_DEFAULT_FULLSCREEN_HEIGHT

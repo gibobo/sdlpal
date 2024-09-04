@@ -21,8 +21,14 @@
 
 #ifndef INPUT_H
 #define INPUT_H
-
-#include "palcommon.h"
+typedef enum tagPALDIRECTION
+{
+   kDirSouth = 0,
+   kDirWest,
+   kDirNorth,
+   kDirEast,
+   kDirUnknown
+} PALDIRECTION, *LPPALDIRECTION;
 
 typedef struct tagPALINPUTSTATE
 {
