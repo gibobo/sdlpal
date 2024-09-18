@@ -54,6 +54,8 @@
 //  d & 0x2000
 //
 
+#include <SDL.h>
+
 typedef struct tagPALMAP
 {
    DWORD          Tiles[128][64][2];

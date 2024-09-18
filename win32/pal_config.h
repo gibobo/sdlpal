@@ -24,8 +24,8 @@
 
 #pragma once
 
-#define PAL_PREFIX "C:/Users/23021/Downloads/Pal98rqptw/"
-#define PAL_SAVE_PREFIX "C:/Users/23021/Downloads/Pal98rqptw/"
+#define PAL_PREFIX SOURCE_DIR "/Pal98rqptw/"
+#define PAL_SAVE_PREFIX PAL_PREFIX
 
 #define PAL_DEFAULT_WINDOW_WIDTH 640
 #define PAL_DEFAULT_WINDOW_HEIGHT 400

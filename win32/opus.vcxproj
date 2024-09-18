@@ -81,75 +81,6 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\external\opus\celt\arch.h" />
-    <ClInclude Include="..\external\opus\celt\bands.h" />
-    <ClInclude Include="..\external\opus\celt\celt.h" />
-    <ClInclude Include="..\external\opus\celt\celt_lpc.h" />
-    <ClInclude Include="..\external\opus\celt\cwrs.h" />
-    <ClInclude Include="..\external\opus\celt\ecintrin.h" />
-    <ClInclude Include="..\external\opus\celt\entcode.h" />
-    <ClInclude Include="..\external\opus\celt\entdec.h" />
-    <ClInclude Include="..\external\opus\celt\entenc.h" />
-    <ClInclude Include="..\external\opus\celt\fixed_c5x.h" />
-    <ClInclude Include="..\external\opus\celt\fixed_c6x.h" />
-    <ClInclude Include="..\external\opus\celt\fixed_debug.h" />
-    <ClInclude Include="..\external\opus\celt\fixed_generic.h" />
-    <ClInclude Include="..\external\opus\celt\float_cast.h" />
-    <ClInclude Include="..\external\opus\celt\kiss_fft.h" />
-    <ClInclude Include="..\external\opus\celt\laplace.h" />
-    <ClInclude Include="..\external\opus\celt\mathops.h" />
-    <ClInclude Include="..\external\opus\celt\mdct.h" />
-    <ClInclude Include="..\external\opus\celt\mfrngcod.h" />
-    <ClInclude Include="..\external\opus\celt\modes.h" />
-    <ClInclude Include="..\external\opus\celt\os_support.h" />
-    <ClInclude Include="..\external\opus\celt\pitch.h" />
-    <ClInclude Include="..\external\opus\celt\quant_bands.h" />
-    <ClInclude Include="..\external\opus\celt\rate.h" />
-    <ClInclude Include="..\external\opus\celt\stack_alloc.h" />
-    <ClInclude Include="..\external\opus\celt\static_modes_fixed.h" />
-    <ClInclude Include="..\external\opus\celt\static_modes_float.h" />
-    <ClInclude Include="..\external\opus\celt\vq.h" />
-    <ClInclude Include="..\external\opus\celt\x86\celt_lpc_sse.h" />
-    <ClInclude Include="..\external\opus\celt\x86\pitch_sse.h" />
-    <ClInclude Include="..\external\opus\celt\x86\vq_sse.h" />
-    <ClInclude Include="..\external\opus\celt\x86\x86cpu.h" />
-    <ClInclude Include="..\external\opus\celt\_kiss_fft_guts.h" />
-    <ClInclude Include="..\external\opus\include\opus.h" />
-    <ClInclude Include="..\external\opus\include\opus_defines.h" />
-    <ClInclude Include="..\external\opus\include\opus_types.h" />
-    <ClInclude Include="..\external\opus\include\opus_multistream.h" />
-    <ClInclude Include="..\external\opus\include\opus_projection.h" />
-    <ClInclude Include="..\external\opus\silk\API.h" />
-    <ClInclude Include="..\external\opus\silk\control.h" />
-    <ClInclude Include="..\external\opus\silk\debug.h" />
-    <ClInclude Include="..\external\opus\silk\define.h" />
-    <ClInclude Include="..\external\opus\silk\errors.h" />
-    <ClInclude Include="..\external\opus\silk\float\main_FLP.h" />
-    <ClInclude Include="..\external\opus\silk\float\SigProc_FLP.h" />
-    <ClInclude Include="..\external\opus\silk\float\structs_FLP.h" />
-    <ClInclude Include="..\external\opus\silk\Inlines.h" />
-    <ClInclude Include="..\external\opus\silk\MacroCount.h" />
-    <ClInclude Include="..\external\opus\silk\MacroDebug.h" />
-    <ClInclude Include="..\external\opus\silk\macros.h" />
-    <ClInclude Include="..\external\opus\silk\main.h" />
-    <ClInclude Include="..\external\opus\silk\pitch_est_defines.h" />
-    <ClInclude Include="..\external\opus\silk\PLC.h" />
-    <ClInclude Include="..\external\opus\silk\resampler_private.h" />
-    <ClInclude Include="..\external\opus\silk\resampler_rom.h" />
-    <ClInclude Include="..\external\opus\silk\resampler_structs.h" />
-    <ClInclude Include="..\external\opus\silk\structs.h" />
-    <ClInclude Include="..\external\opus\silk\tables.h" />
-    <ClInclude Include="..\external\opus\silk\tuning_parameters.h" />
-    <ClInclude Include="..\external\opus\silk\typedef.h" />
-    <ClInclude Include="..\external\opus\silk\x86\main_sse.h" />
-    <ClInclude Include="..\external\opus\win32\config.h" />
-    <ClInclude Include="..\external\opus\src\analysis.h" />
-    <ClInclude Include="..\external\opus\src\mapping_matrix.h" />
-    <ClInclude Include="..\external\opus\src\mlp.h" />
-    <ClInclude Include="..\external\opus\src\opus_private.h" />
-    <ClInclude Include="..\external\opus\src\tansig_table.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\external\opus\celt\bands.c" />
     <ClCompile Include="..\external\opus\celt\celt.c" />
     <ClCompile Include="..\external\opus\celt\celt_decoder.c" />
@@ -262,9 +193,7 @@
     <ClCompile Include="..\external\opus\src\mlp.c" />
     <ClCompile Include="..\external\opus\src\mlp_data.c" />
     <ClCompile Include="..\external\opus\src\opus.c" />
-    <ClCompile Include="..\external\opus\src\opus_compare.c">
-      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-    </ClCompile>
+    <ClCompile Include="..\external\opus\src\opus_compare.c" />
     <ClCompile Include="..\external\opus\src\opus_decoder.c" />
     <ClCompile Include="..\external\opus\src\opus_encoder.c" />
     <ClCompile Include="..\external\opus\src\opus_multistream.c" />
@@ -274,34 +203,6 @@
     <ClCompile Include="..\external\opus\src\opus_projection_encoder.c" />
     <ClCompile Include="..\external\opus\src\repacketizer.c" />
   </ItemGroup>
-  <Choose>
-    <When Condition="'$(Configuration)'=='DebugDLL_fixed' or '$(Configuration)'=='ReleaseDLL_fixed' or $(PreprocessorDefinitions.Contains('FIXED_POINT'))">
-      <ItemGroup>
-        <ClCompile Include="..\external\opus\silk\fixed\*.c">
-          <ExcludedFromBuild>false</ExcludedFromBuild>
-        </ClCompile>
-        <ClCompile Include="..\external\opus\silk\fixed\x86\*.c">
-          <ExcludedFromBuild>false</ExcludedFromBuild>
-        </ClCompile>
-        <ClCompile Include="..\external\opus\silk\float\*.c">
-          <ExcludedFromBuild>true</ExcludedFromBuild>
-        </ClCompile>
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <ClCompile Include="..\external\opus\silk\fixed\*.c">
-          <ExcludedFromBuild>true</ExcludedFromBuild>
-        </ClCompile>
-        <ClCompile Include="..\external\opus\silk\fixed\x86\*.c">
-          <ExcludedFromBuild>true</ExcludedFromBuild>
-        </ClCompile>
-        <ClCompile Include="..\external\opus\silk\float\*.c">
-          <ExcludedFromBuild>false</ExcludedFromBuild>
-        </ClCompile>
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

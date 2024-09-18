@@ -22,8 +22,8 @@
 #ifndef FONT_H
 #define FONT_H
 
-// #include "palcommon.h"
 #include "palcfg.h"
+#include <SDL.h>
 
 #ifdef __cplusplus
 extern "C" {

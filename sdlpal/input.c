@@ -27,23 +27,6 @@ volatile PALINPUTSTATE   g_InputState;
 static SDL_Joystick     *g_pJoy = NULL;
 #endif
 
-#if !SDL_VERSION_ATLEAST(2,0,0)
-# define SDLK_KP_1     SDLK_KP1
-# define SDLK_KP_2     SDLK_KP2
-# define SDLK_KP_3     SDLK_KP3
-# define SDLK_KP_4     SDLK_KP4
-# define SDLK_KP_5     SDLK_KP5
-# define SDLK_KP_6     SDLK_KP6
-# define SDLK_KP_7     SDLK_KP7
-# define SDLK_KP_8     SDLK_KP8
-# define SDLK_KP_9     SDLK_KP9
-# define SDLK_KP_0     SDLK_KP0
-
-# define SDL_JoystickNameForIndex    SDL_JoystickName
-# define SDL_GetKeyboardState        SDL_GetKeyState
-# define SDL_GetScancodeFromKey(x)   (x)
-#endif
-
 BOOL                     g_fUseJoystick = TRUE;
 
 static void _default_init_filter() {}
@@ -1013,7 +996,6 @@ PAL_EventFilter(
 {
    switch (lpEvent->type)
    {
-#if SDL_VERSION_ATLEAST(2,0,0)
    case SDL_WINDOWEVENT:
       if (lpEvent->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
       {
@@ -1032,14 +1014,6 @@ PAL_EventFilter(
       g_bRenderPaused = FALSE;
       VIDEO_UpdateScreen(NULL);
       break;
-#else
-   case SDL_VIDEORESIZE:
-      //
-      // resized the window
-      //
-      VIDEO_Resize(lpEvent->resize.w, lpEvent->resize.h);
-      break;
-#endif
 
    case SDL_QUIT:
       //

@@ -1,6 +1,6 @@
 /*
  * Adplug - Replayer for many OPL2/OPL3 audio file formats.
- * Copyright (C) 1999 - 2006 Simon Peter, <dn.tlp@gmx.net>, et al.
+ * Copyright (C) 1999 - 2005 Simon Peter, <dn.tlp@gmx.net>, et al.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,35 +16,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * fprovide.h - File provider class framework, by Simon Peter <dn.tlp@gmx.net>
+ * silentopl.h - Silent OPL device, by Simon Peter (dn.tlp@gmx.net)
  */
 
-#ifndef H_ADPLUG_FILEPROVIDER
-#define H_ADPLUG_FILEPROVIDER
+#include "opl.h"
 
-#include <string>
-#include <binio.h>
-
-class CFileProvider
+class CSilentopl: public Copl
 {
 public:
-  virtual ~CFileProvider()
-    {
-    }
-
-  virtual binistream *open(std::string) const = 0;
-  virtual void close(binistream *) const = 0;
-
-  static bool extension(const std::string &filename,
-			const std::string &extension);
-  static unsigned long filesize(binistream *f);
+	void write(int reg, int val) {}
+	void init() {}
 };
-
-class CProvider_Filesystem: public CFileProvider
-{
-public:
-  virtual binistream *open(std::string filename) const;
-  virtual void close(binistream *f) const;
-};
-
-#endif

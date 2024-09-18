@@ -25,6 +25,12 @@
 
 #include "fprovide.h"
 
+#ifdef _WIN32
+#define stricmp(x,y) _stricmp(x,y)
+#else
+#define stricmp strcasecmp
+#endif
+
 /***** CFileProvider *****/
 
 bool CFileProvider::extension(const std::string &filename,
