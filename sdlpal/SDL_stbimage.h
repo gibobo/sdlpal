@@ -247,18 +247,10 @@ static SDL_Surface *STBIMG__CreateSurfaceImpl(STBIMG__image img, int freeWithSur
 	// ok, the following is pretty stupid.. SDL_CreateRGBSurfaceFrom() pretends to use
 	// a void* for the data, but it's really treated as endian-specific Uint32*
 	// and there isn't even an SDL_PIXELFORMAT_* for 32bit byte-wise RGBA
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	int shift = (img.format == STBI_rgb) ? 8 : 0;
-	rmask = 0xff000000 >> shift;
-	gmask = 0x00ff0000 >> shift;
-	bmask = 0x0000ff00 >> shift;
-	amask = 0x000000ff >> shift;
-#else // little endian, like x86
 	rmask = 0x000000ff;
 	gmask = 0x0000ff00;
 	bmask = 0x00ff0000;
 	amask = (img.format == STBI_rgb) ? 0 : 0xff000000;
-#endif
 
 	surf = SDL_CreateRGBSurfaceFrom((void *)img.data, img.w, img.h,
 									img.format * 8, img.format * img.w,

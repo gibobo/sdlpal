@@ -30,7 +30,7 @@ static WORD GetSavedTimes(int iSaveSlot)
 	if (fp != NULL)
 	{
 		if (fread(&wSavedTimes, sizeof(WORD), 1, fp) == 1)
-			wSavedTimes = SDL_SwapLE16(wSavedTimes);
+			wSavedTimes = wSavedTimes;
 		else
 			wSavedTimes = 0;
 		fclose(fp);
@@ -2054,8 +2054,6 @@ PAL_QuitGame(
 	WORD wReturnValue = PAL_ConfirmMenu(); // No config menu available
 	if (wReturnValue == 1 || wReturnValue == 2)
 	{
-		if (wReturnValue == 2) gConfig.fLaunchSetting = TRUE;
-		PAL_SaveConfig();		// Keep the fullscreen state
 		AUDIO_PlayMusic(0, FALSE, 2);
 		PAL_FadeOut(2);
 		PAL_Shutdown(0);

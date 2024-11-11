@@ -351,27 +351,6 @@ UTIL_calloc(
 }
 
 FILE *
-UTIL_OpenRequiredFile(
-	LPCSTR lpszFileName)
-/*++
-  Purpose:
-
-	Open a required file. If fails, quit the program.
-
-  Parameters:
-
-	[IN]  lpszFileName - file name to open.
-
-  Return value:
-
-	Pointer to the file.
-
---*/
-{
-	return UTIL_OpenRequiredFileForMode(lpszFileName, "rb");
-}
-
-FILE *
 UTIL_OpenRequiredFileForMode(
 	LPCSTR lpszFileName,
 	LPCSTR szMode)
@@ -561,41 +540,6 @@ UTIL_GetFullPathName(
 		result = internal_buffer[PAL_MAX_GLOBAL_BUFFERS];
 	}
 
-#ifndef __EMSCRIPTEN__
-#if !defined(PAL_FILESYSTEM_IGNORE_CASE) || !PAL_FILESYSTEM_IGNORE_CASE
-	if (result == NULL)
-	{
-		size_t pos = strspn(_sub, PAL_PATH_SEPARATORS);
-
-		if (pos < sublen)
-		{
-			char *start = _sub + pos;
-			char *end = strpbrk(start, PAL_PATH_SEPARATORS);
-			if (end)
-				*end = '\0';
-
-			//
-			// try to find the matching file in the directory.
-			//
-			struct dirent **list;
-			int n = scandir(_base, &list, 0, alphasort);
-			while (n-- > 0)
-			{
-				if (!result && SDL_strcasecmp(list[n]->d_name, start) == 0)
-				{
-					result = UTIL_CombinePath(INTERNAL_BUFFER_SIZE_ARGS, 2, _base, list[n]->d_name);
-					if (end)
-						result = UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, result, end + 1);
-					else if (access(result, 0) != 0)
-						result = NULL;
-				}
-				free(list[n]);
-			}
-			free(list);
-		}
-	}
-#endif
-#endif
 	if (result != NULL)
 	{
 		size_t dstlen = min(buflen - 1, strlen(result));
@@ -675,89 +619,6 @@ UTIL_GlobalBuffer(
 	return (index >= 0 && index < PAL_MAX_GLOBAL_BUFFERS) ? internal_buffer[index] : NULL;
 }
 
-PALFILE
-UTIL_CheckResourceFiles(
-	const char *path,
-	const char *msgfile)
-{
-	const char *common_files[] = {
-		"abc.mkf", "ball.mkf", "data.mkf", "f.mkf",
-		"fbp.mkf", "fire.mkf", "gop.mkf", "map.mkf",
-		"mgo.mkf", "pat.mkf", "rgm.mkf", "rng.mkf",
-		"sss.mkf"};
-	const char *msg_files[][2] = {
-		{msgfile, "m.msg"},
-		{msgfile, "word.dat"}};
-	const char *sound_files[2] = {"voc.mkf", "sounds.mkf"};
-	const char *music_files[2] = {"midi.mkf", "mus.mkf"};
-	int msgidx = !(msgfile && *msgfile);
-	PALFILE retval = (PALFILE)0;
-
-	for (int i = 0; i < sizeof(common_files) / sizeof(common_files[0]); i++)
-	{
-		if (!UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, path, common_files[i]))
-		{
-			retval |= (PALFILE)(1 << i);
-		}
-	}
-
-	for (int i = 0; i < sizeof(msg_files[0]) / sizeof(msg_files[0][0]); i++)
-	{
-		if (!UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, path, msg_files[i][msgidx]))
-		{
-			retval |= (PALFILE)(1 << ((i + 1) * msgidx + 13));
-		}
-	}
-
-	for (int i = 0; i < sizeof(sound_files) / sizeof(sound_files[0]); i++)
-	{
-		if (!UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, path, sound_files[i]))
-		{
-			retval |= (PALFILE)(1 << (i + 16));
-		}
-	}
-
-	for (int i = 0; i < sizeof(music_files) / sizeof(music_files[0]); i++)
-	{
-		if (!UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, path, music_files[i]))
-		{
-			retval |= (PALFILE)(1 << (i + 18));
-		}
-	}
-
-	return retval;
-}
-
-#if !defined(PAL_HAS_PLATFORM_SPECIFIC_UTILS)
-
-BOOL UTIL_GetScreenSize(
-	DWORD *pdwScreenWidth,
-	DWORD *pdwScreenHeight)
-{
-	return FALSE;
-}
-
-BOOL UTIL_IsAbsolutePath(
-	LPCSTR lpszFileName)
-{
-	return FALSE;
-}
-
-INT UTIL_Platform_Init(
-	int argc,
-	char *argv[])
-{
-	gConfig.fLaunchSetting = FALSE;
-	return 0;
-}
-
-VOID UTIL_Platform_Quit(
-	VOID)
-{
-}
-
-#endif
-
 /*
  * Logging utilities
  */
@@ -781,30 +642,6 @@ static const char *const _loglevel_str[] = {
 	"  [ERROR]",
 	"  [FATAL]",
 };
-
-int UTIL_LogAddOutputCallback(
-	LOGCALLBACK callback,
-	LOGLEVEL loglevel)
-{
-	if (!callback)
-		return -1;
-
-	// De-duplication
-	for (int i = 0; i < PAL_LOG_MAX_OUTPUTS; i++)
-	{
-		if (!_log_callbacks[i])
-		{
-			_log_callbacks[i] = callback;
-		}
-		if (_log_callbacks[i] == callback)
-		{
-			_log_callback_levels[i] = loglevel;
-			return i;
-		}
-	}
-
-	return -1;
-}
 
 void UTIL_LogRemoveOutputCallback(
 	int id)
@@ -877,19 +714,6 @@ void UTIL_LogSetLevel(
 		gConfig.iLogLevel = minlevel;
 }
 
-void UTIL_LogToFile(
-	LOGLEVEL _,
-	const char *string,
-	const char *__)
-{
-	FILE *fp = UTIL_OpenFileForMode(gConfig.pszLogFile, "a");
-	if (fp)
-	{
-		fputs(string, fp);
-		fclose(fp);
-	}
-}
-
 void UTIL_LogSetPrelude(
 	const char *prelude)
 {
@@ -897,34 +721,6 @@ void UTIL_LogSetPrelude(
 	if (prelude)
 		strncpy(_log_prelude, prelude, sizeof(_log_prelude) - 1);
 }
-
-#if PAL_NEED_STRCASESTR
-PAL_FORCE_INLINE char *stoupper(const char *s)
-{
-	char *p = strdup(s);
-	char *p1 = p;
-	while (*p = toupper(*p))
-		p++;
-	return p1;
-}
-#ifdef __cplusplus
-extern "C" {
-#endif
-	char *strcasestr(const char *a, const char *b)
-	{
-		char *a1 = stoupper(a);
-		char *b1 = stoupper(b);
-		char *ptr = strstr(a1, b1);
-		if (ptr != NULL)
-			ptr = (char *)a + (ptr - a1);
-		free(a1);
-		free(b1);
-		return ptr;
-	}
-#ifdef __cplusplus
-}
-#endif
-#endif
 
 char basename_buf[256];
 

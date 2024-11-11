@@ -454,13 +454,6 @@ RIX_Init(
 		}
 	}
 
-#if USE_RIX_EXTRA_INIT
-	if (gConfig.pExtraFMRegs && gConfig.pExtraFMVals)
-	{
-		pRixPlayer->rix->set_extra_init(gConfig.pExtraFMRegs, gConfig.pExtraFMVals, gConfig.dwExtraLength);
-	}
-#endif
-
 	//
 	// Success.
 	//

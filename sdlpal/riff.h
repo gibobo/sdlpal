@@ -42,7 +42,7 @@ typedef union RIFFBlockHeader
 typedef struct WAVEFormatPCM
 {
 	uint16_t wFormatTag;      /* format type */
-	uint16_t nChannels;       /* number of channels (i.e. mono, stereo, etc.) */
+	uint8_t  nChannels;       /* number of channels (i.e. mono, stereo, etc.) */
 	uint32_t nSamplesPerSec;  /* sample rate */
 	uint32_t nAvgBytesPerSec; /* for buffer estimation */
 	uint16_t nBlockAlign;     /* block size of data */

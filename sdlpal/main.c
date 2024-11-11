@@ -97,7 +97,8 @@ PAL_Init(
                                 "Pal %s%s%s%s",
                                 gConfig.fIsWIN95 ? "Win95" : "DOS",
                                 "",
-                                "", (gConfig.fEnableGLSL && gConfig.pszShader ? gConfig.pszShader : "")));
+                                "",
+                                ""));
 }
 
 VOID PAL_Shutdown(
@@ -118,7 +119,6 @@ VOID PAL_Shutdown(
 --*/
 {
    AUDIO_CloseDevice();
-   PAL_FreeFont();
    PAL_FreeResources();
    PAL_FreeUI();
    PAL_FreeText();
@@ -440,7 +440,6 @@ int main(
    }
 #endif
 
-#if !defined(UNIT_TEST) || defined(UNIT_TEST_GAME_INIT)
    //
    // Initialize SDL
    //
@@ -449,21 +448,13 @@ int main(
       TerminateOnError("Could not initialize SDL: %s.\n", SDL_GetError());
    }
 
-   PAL_LoadConfig(TRUE);
-
-   //
-   // If user requests a file-based log, then add it after the system-specific one.
-   //
-   if (gConfig.pszLogFile)
-      UTIL_LogAddOutputCallback(UTIL_LogToFile, gConfig.iLogLevel);
+   PAL_LoadConfig();
 
    //
    // Initialize everything
    //
    PAL_Init();
-#endif
 
-#if !defined(UNIT_TEST)
    //
    // Show the trademark screen and splash screen
    //
@@ -480,8 +471,4 @@ int main(
    //
    assert(FALSE);
    return 255;
-#else
-   extern int testmain(int argc, char *argv[]);
-   return testmain(argc, argv);
-#endif
 }

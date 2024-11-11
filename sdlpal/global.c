@@ -28,23 +28,9 @@ GLOBALVARS * const  gpGlobals = &_gGlobals;
 
 CONFIGURATION gConfig;
 
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-#define DO_BYTESWAP(buf, size)
-#else
-#define DO_BYTESWAP(buf, size)                                   \
-   do {                                                          \
-      int i;                                                     \
-      for (i = 0; i < (size) / 2; i++)                           \
-      {                                                          \
-         ((LPWORD)(buf))[i] = SDL_SwapLE16(((LPWORD)(buf))[i]);  \
-      }                                                          \
-   } while(0)
-#endif
-
 #define LOAD_DATA(buf, size, chunknum, fp)                       \
    do {                                                          \
       PAL_MKFReadChunk((LPBYTE)(buf), (size), (chunknum), (fp)); \
-      DO_BYTESWAP(buf, size);                                    \
    } while(0)
 
 BOOL
@@ -52,7 +38,7 @@ PAL_IsWINVersion(
 	BOOL *pfIsWIN95
 )
 {
-	FILE *fps[] = { UTIL_OpenRequiredFile("abc.mkf"), UTIL_OpenRequiredFile("map.mkf"), gpGlobals->f.fpF, gpGlobals->f.fpFBP, gpGlobals->f.fpFIRE, gpGlobals->f.fpMGO };
+	FILE *fps[] = { UTIL_OpenRequiredFileForMode("abc.mkf", "rb"), UTIL_OpenRequiredFileForMode("map.mkf", "rb"), gpGlobals->f.fpF, gpGlobals->f.fpFBP, gpGlobals->f.fpFIRE, gpGlobals->f.fpMGO };
 	uint8_t *data = NULL;
 	int data_size = 0, dos_score = 0, win_score = 0;
 	BOOL result = FALSE;
@@ -172,14 +158,14 @@ PAL_InitGlobals(
    //
    // Open files
    //
-   gpGlobals->f.fpFBP = UTIL_OpenRequiredFile("fbp.mkf");
-   gpGlobals->f.fpMGO = UTIL_OpenRequiredFile("mgo.mkf");
-   gpGlobals->f.fpBALL = UTIL_OpenRequiredFile("ball.mkf");
-   gpGlobals->f.fpDATA = UTIL_OpenRequiredFile("data.mkf");
-   gpGlobals->f.fpF = UTIL_OpenRequiredFile("f.mkf");
-   gpGlobals->f.fpFIRE = UTIL_OpenRequiredFile("fire.mkf");
-   gpGlobals->f.fpRGM = UTIL_OpenRequiredFile("rgm.mkf");
-   gpGlobals->f.fpSSS = UTIL_OpenRequiredFile("sss.mkf");
+   gpGlobals->f.fpFBP = UTIL_OpenRequiredFileForMode("fbp.mkf", "rb");
+   gpGlobals->f.fpMGO = UTIL_OpenRequiredFileForMode("mgo.mkf", "rb");
+   gpGlobals->f.fpBALL = UTIL_OpenRequiredFileForMode("ball.mkf", "rb");
+   gpGlobals->f.fpDATA = UTIL_OpenRequiredFileForMode("data.mkf", "rb");
+   gpGlobals->f.fpF = UTIL_OpenRequiredFileForMode("f.mkf", "rb");
+   gpGlobals->f.fpFIRE = UTIL_OpenRequiredFileForMode("fire.mkf", "rb");
+   gpGlobals->f.fpRGM = UTIL_OpenRequiredFileForMode("rgm.mkf", "rb");
+   gpGlobals->f.fpSSS = UTIL_OpenRequiredFileForMode("sss.mkf", "rb");
 
    //
    // Retrieve game resource version
@@ -189,14 +175,14 @@ PAL_InitGlobals(
    //
    // Detect game language only when no message file specified
    //
-   if (!gConfig.pszMsgFile) PAL_SetCodePage(PAL_DetectCodePage("word.dat"));
+   PAL_SetCodePage(PAL_DetectCodePage("word.dat"));
 
    //
    // Set decompress function
    //
    Decompress = gConfig.fIsWIN95 ? YJ2_Decompress : YJ1_Decompress;
 
-   gpGlobals->lpObjectDesc = gConfig.fIsWIN95 ? NULL : PAL_LoadObjectDesc("desc.dat");
+   gpGlobals->lpObjectDesc = NULL;
    gpGlobals->bCurrentSaveSlot = 1;
 
    return 0;
@@ -297,10 +283,8 @@ PAL_ReadGlobalGameData(
       11, gpGlobals->f.fpDATA);
    PAL_MKFReadChunk((LPBYTE)&(p->EnemyPos), sizeof(p->EnemyPos),
       13, gpGlobals->f.fpDATA);
-   DO_BYTESWAP(&(p->EnemyPos), sizeof(p->EnemyPos));
    PAL_MKFReadChunk((LPBYTE)(p->rgLevelUpExp), sizeof(p->rgLevelUpExp),
       14, gpGlobals->f.fpDATA);
-   DO_BYTESWAP(p->rgLevelUpExp, sizeof(p->rgLevelUpExp));
 }
 
 static VOID
@@ -397,17 +381,14 @@ PAL_LoadDefaultGame(
    LOAD_DATA(p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT),
       0, gpGlobals->f.fpSSS);
    PAL_MKFReadChunk((LPBYTE)(p->rgScene), sizeof(p->rgScene), 1, gpGlobals->f.fpSSS);
-   DO_BYTESWAP(p->rgScene, sizeof(p->rgScene));
    if (gConfig.fIsWIN95)
    {
       PAL_MKFReadChunk((LPBYTE)(p->rgObject), sizeof(p->rgObject), 2, gpGlobals->f.fpSSS);
-      DO_BYTESWAP(p->rgObject, sizeof(p->rgObject));
    }
    else
    {
       OBJECT_DOS objects[MAX_OBJECTS];
 	  PAL_MKFReadChunk((LPBYTE)(objects), sizeof(objects), 2, gpGlobals->f.fpSSS);
-	  DO_BYTESWAP(objects, sizeof(objects));
       //
       // Convert the DOS-style data structure to WIN-style data structure
       //
@@ -421,7 +402,6 @@ PAL_LoadDefaultGame(
 
    PAL_MKFReadChunk((LPBYTE)(&(p->PlayerRoles)), sizeof(PLAYERROLES),
       3, gpGlobals->f.fpDATA);
-   DO_BYTESWAP(&(p->PlayerRoles), sizeof(PLAYERROLES));
 
    //
    // Set some other default data.
@@ -578,18 +558,6 @@ PAL_LoadGame_Common(
 	{
 		return FALSE;
 	}
-
-	//
-	// Adjust endianness
-	//
-	DO_BYTESWAP(s, size);
-
-	//
-	// Cash amount is in DWORD, so do a wordswap in Big-Endian.
-	//
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	s->dwCash = ((s->dwCash >> 16) | (s->dwCash << 16));
-#endif
 
 	//
 	// Get common data from the saved game struct.
@@ -767,18 +735,6 @@ PAL_SaveGame_Common(
 	memcpy(s->rgPoisonStatus, gpGlobals->rgPoisonStatus, sizeof(gpGlobals->rgPoisonStatus));
 	memcpy(s->rgInventory, gpGlobals->rgInventory, sizeof(gpGlobals->rgInventory));
 	memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
-
-	//
-	// Adjust endianness
-	//
-	DO_BYTESWAP(s, size);
-
-	//
-	// Cash amount is in DWORD, so do a wordswap in Big-Endian.
-	//
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	s->dwCash = ((s->dwCash >> 16) | (s->dwCash << 16));
-#endif
 
 	//
 	// Try writing to file

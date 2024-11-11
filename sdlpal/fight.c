@@ -3135,6 +3135,8 @@ PAL_BattleShowPlayerSummonMagicAnim(
    j = gpGlobals->g.lprgMagic[wMagicNum].rgSpecific.wSummonEffect + 10;
    i = PAL_MKFGetDecompressedSize(j, gpGlobals->f.fpF);
 
+   if (g_Battle.lpSummonSprite)
+      free(g_Battle.lpSummonSprite);
    g_Battle.lpSummonSprite = UTIL_malloc(i);
 
    PAL_MKFDecompressChunk(g_Battle.lpSummonSprite, i, j, gpGlobals->f.fpF);
@@ -4612,8 +4614,8 @@ PAL_BattleEnemyPerformAction(
       }
 
       DWORD dwTime = SDL_GetTicks() + BATTLE_FRAME_TIME;
-      x = (PAL_X(g_Battle.rgEnemy[wEnemyIndex].pos)+PAL_X(g_Battle.rgEnemy[iTarget].pos))/2;
-      y = PAL_Y(g_Battle.rgEnemy[iTarget].pos)-PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.rgEnemy[iTarget].lpSprite,0))/3+10;
+      x = (PAL_X(g_Battle.rgEnemy[wEnemyIndex].pos) + PAL_X(g_Battle.rgEnemy[iTarget].pos)) / 2;
+      y = PAL_Y(g_Battle.rgEnemy[iTarget].pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.rgEnemy[iTarget].lpSprite, 0)) / 3 + 10;
       for( i=9; i<12; i++ )
       {
          LPCBITMAPRLE b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, i);

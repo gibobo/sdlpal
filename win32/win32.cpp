@@ -37,24 +37,7 @@
 #include "palcfg.h"
 // #include "resampler.h"
 
-typedef LANGID(__stdcall *GETLANGUAGEID)(void);
-
-extern "C" int UTIL_Platform_Init(int argc, char *argv[])
-{
-	gConfig.fLaunchSetting = FALSE;
-	return 0;
-}
-
 extern "C" VOID UTIL_Platform_Quit(VOID) {}
-
-extern "C" BOOL
-UTIL_GetScreenSize(
-	DWORD *pdwScreenWidth,
-	DWORD *pdwScreenHeight
-)
-{
-	return (pdwScreenWidth && pdwScreenHeight && *pdwScreenWidth && *pdwScreenHeight);
-}
 
 extern "C"
 BOOL UTIL_IsAbsolutePath(LPCSTR  lpszFileName)

@@ -33,30 +33,11 @@
 #include <syslog.h>
 
 BOOL
-UTIL_GetScreenSize(
-   DWORD *pdwScreenWidth,
-   DWORD *pdwScreenHeight
-)
-{
-   return pdwScreenWidth && pdwScreenHeight && *pdwScreenWidth && *pdwScreenHeight;
-}
-
-BOOL
 UTIL_IsAbsolutePath(
    LPCSTR lpszFileName
 )
 {
    return lpszFileName && *lpszFileName == '/';
-}
-
-INT
-UTIL_Platform_Init(
-   int argc,
-   char* argv[]
-)
-{
-   gConfig.fLaunchSetting = FALSE;
-   return 0;
 }
 
 VOID

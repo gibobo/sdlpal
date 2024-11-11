@@ -52,7 +52,6 @@ static uint32_t gVBOIds[MAX_INDEX];
 static uint32_t gEBOId;
 static uint32_t gPassID = -1;
 static int gMVPSlots[MAX_INDEX];
-static int gHDRSlot = -1;
 static int VAOSupported = 1;
 static int glversion_major, glversion_minor;
 static int glslversion_major, glslversion_minor;
@@ -251,12 +250,13 @@ filter_linear0 = %s    \r\n\
 ";
 
 char *readShaderFile(const char *filename, GLuint type) {
-    FILE *fp = UTIL_OpenRequiredFile(get_glslp_path(filename));
+    FILE *fp = UTIL_OpenRequiredFileForMode(get_glslp_path(filename), "rb");
     fseek(fp,0,SEEK_END);
     long filesize = ftell(fp);
     char *buf = (char*)malloc(filesize+1);
     fseek(fp,0,SEEK_SET);
     fread(buf,filesize,1,fp);
+    fclose(fp);
     buf[filesize]='\0';
     return buf;
 }
@@ -439,20 +439,10 @@ void setupShaderParams(int pass){
         if(gGLSLP.shader_params[shader].self_slots.frame_count_uniform_location < 0)
             UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform FrameCount not exist\n");
     }
-    
-    if( pass == 0 ) {
-        gHDRSlot = glGetUniformLocation(gProgramIds[pass], "HDR");
-        if(gHDRSlot < 0)
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform HDR not exist\n");
-    }
 }
 
 GLint get_gl_clamp_to_border() {
-#ifdef __IOS__
-    return GL_CLAMP_TO_EDGE;
-#else
     return GL_CLAMP_TO_BORDER;
-#endif
 }
 
 GLint get_gl_wrap_mode(enum wrap_mode mode, enum scale_type type) {
@@ -620,11 +610,6 @@ int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const SD
 
     // set uniforms
     glUniformMatrix4fv(gMVPSlots[pass], 1, GL_FALSE, gOrthoMatrixes[pass].m);
-    
-    if( pass == 0 ) {
-        GLint HDR = gConfig.fEnableHDR;
-        glUniform1i(gHDRSlot, HDR);
-    }
 
     //global
     if( gGLSLP.textures > 0 ) {
@@ -753,6 +738,7 @@ PAL_FORCE_INLINE int CORE_RenderCopy(SDL_Renderer * renderer, SDL_Texture * text
     glViewport(0, 0, w, h);
     return VIDEO_RenderTexture(renderer, texture, srcrect, dstrect, gPassID);
 }
+
 SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height)
 {
     gRendererWidth = width;
@@ -1015,10 +1001,6 @@ void VIDEO_GLSL_Setup() {
     if(!strncmp(glslversion, "OpenGL ES GLSL ES", 17)) {
         SDL_sscanf(glslversion, "OpenGL ES GLSL ES %d.%d", &glslversion_major, &glslversion_minor);
     }
-#ifdef __EMSCRIPTEN__
-    // EDGE even on GLES3 does not support VAO. Since hard to detect, disabled totally
-    VAOSupported = 0;
-#endif
 #endif
     
     struct VertexDataFormat vData[ 4 ];
@@ -1107,7 +1089,6 @@ void VIDEO_GLSL_Setup() {
     }
     Filter_StepParamSlot(0);
 
-#if !__IOS__
     // in case of GL2/GLES2(except iOS), the LACK of the belowing snippit makes keepaspectratio a mess.
     // Unsure what happened.
     if( glversion_major <= 2 ) {
@@ -1118,7 +1099,6 @@ void VIDEO_GLSL_Setup() {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gEBOId );
         setupShaderParams(id);
     }
-#endif
     
     if(VAOSupported) glBindVertexArray(0);
 
@@ -1141,14 +1121,14 @@ void VIDEO_GLSL_Destroy() {
 static int slot = 0;
 #define CLAMP(x,a,b) (min(max(x,a),b))
 void Filter_StepParamSlot(int step) {
-    if( !gConfig.fEnableGLSL || gGLSLP.uniform_parameters <= 0 )
+    if( gGLSLP.uniform_parameters <= 0 )
         return;
     slot = (gGLSLP.uniform_parameters + slot + step) % gGLSLP.uniform_parameters;
     uniform_param *param = &gGLSLP.uniform_params[slot];
     UTIL_LogOutput(LOGLEVEL_INFO, "[PARAM] slot:%s cur:%.2f range:[%.2f,%.2f]\n", param->parameter_name, param->value, param->minimum, param->maximum);
 }
 void Filter_StepCurrentParam(int step) {
-    if( !gConfig.fEnableGLSL || gGLSLP.uniform_parameters <= 0 )
+    if( gGLSLP.uniform_parameters <= 0 )
         return;
     uniform_param *param = &gGLSLP.uniform_params[slot];
     param->value = CLAMP( param->value + step * param->step, param->minimum, param->maximum);

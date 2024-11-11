@@ -48,7 +48,7 @@ PAL_GetPalette(
    INT                   i;
    FILE                 *fp;
 
-   fp = UTIL_OpenRequiredFile("pat.mkf");
+   fp = UTIL_OpenRequiredFileForMode("pat.mkf", "rb");
 
    //
    // Read the palette data from the pat.mkf file

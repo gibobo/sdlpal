@@ -42,22 +42,6 @@
 #define PAL_SDL_INIT_FLAGS (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
 #endif
 
-#define PAL_PLATFORM NULL
-#define PAL_CREDIT NULL
-#define PAL_PORTYEAR NULL
-
-
 // #define PAL_HAS_CONFIG_PAGE 1
 
 #define PAL_FILESYSTEM_IGNORE_CASE 1
-
-#define PAL_PATH_SEPARATORS "\\/"
-
-#define PAL_IS_PATH_SEPARATOR(x) ((x) == '\\' || (x) == '/')
-
-#ifdef __MINGW__
-#define PAL_CONVERT_UTF8 SDL_iconv_utf8_locale
-#endif
-
-// #include <malloc.h>
-// #include <stdbool.h>

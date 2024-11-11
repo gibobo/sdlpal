@@ -88,7 +88,6 @@ typedef DWORD           PAL_POS;
 #define PAL_RLEBUFSIZE	64000
 
 typedef enum tagCODEPAGE {
-	CP_MIN = 0,
 	CP_BIG5 = 0,
 	CP_GBK = 1,
 	//CP_SHIFTJIS = 2,

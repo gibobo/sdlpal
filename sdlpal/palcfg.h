@@ -41,9 +41,7 @@ typedef enum tagPALCFG_ITEM
 	PALCFG_STEREO,
 	PALCFG_USESURROUNDOPL,
 	PALCFG_ENABLEKEYREPEAT,
-	PALCFG_USETOUCHOVERLAY,
     PALCFG_ENABLEGLSL,
-    PALCFG_ENABLEHDR,
 	/* Booleans */
 	PALCFG_BOOLEAN_MAX,
 
@@ -75,11 +73,6 @@ typedef enum tagPALCFG_ITEM
 	PALCFG_GAMEPATH = PALCFG_STRING_MIN,
     PALCFG_SAVEPATH,
     PALCFG_SHADERPATH,
-	PALCFG_MESSAGEFILE,
-	PALCFG_FONTFILE,
-	PALCFG_LOGFILE,
-	PALCFG_RIXEXTRAINIT,
-	PALCFG_SOUNDBANK,
 	PALCFG_SCALEQUALITY,
 	PALCFG_SHADER,
 	/* Strings */
@@ -174,11 +167,6 @@ typedef struct tagCONFIGURATION
 	char            *pszGamePath;
 	char            *pszSavePath;
     char            *pszShaderPath;
-	char            *pszMsgFile;
-	char            *pszFontFile;
-	char            *pszSoundBank;
-	char            *pszLogFile;
-	char            *pszScaleQuality;
 	char            *pszShader;
 	DWORD            dwWordLength;
 	DWORD            dwScreenWidth;
@@ -203,14 +191,6 @@ typedef struct tagCONFIGURATION
 	BOOL             fUseCustomScreenLayout;
 	BOOL             fLaunchSetting;
 	BOOL             fEnableKeyRepeat;
-	BOOL             fUseTouchOverlay;
-	BOOL             fEnableGLSL;
-    BOOL             fEnableHDR;
-#if USE_RIX_EXTRA_INIT
-	uint32_t        *pExtraFMRegs;
-	uint8_t         *pExtraFMVals;
-	uint32_t         dwExtraLength;
-#endif
 } CONFIGURATION, *LPCONFIGURATION;
 
 #ifdef __cplusplus
@@ -221,110 +201,12 @@ extern CONFIGURATION gConfig;
 
 void
 PAL_LoadConfig(
-	BOOL fFromFile
-);
-
-BOOL
-PAL_SaveConfig(
 	void
 );
 
 void
 PAL_FreeConfig(
 	void
-);
-
-const char *
-PAL_ConfigName(
-	PALCFG_ITEM item
-);
-
-PALCFG_ITEM
-PAL_ConfigIndex(
-	const char *name
-);
-
-PALCFG_TYPE
-PAL_ConfigType(
-	PALCFG_ITEM item
-);
-
-BOOL
-PAL_LimitConfig(
-	PALCFG_ITEM item,
-	ConfigValue * pValue
-);
-
-ConfigValue
-PAL_GetConfigItem(
-	PALCFG_ITEM   item,
-	BOOL default_value
-);
-
-void
-PAL_SetConfigItem(
-	PALCFG_ITEM       item,
-	const ConfigValue value
-);
-
-BOOL
-PAL_GetConfigBoolean(
-	PALCFG_ITEM item,
-	BOOL        default_value
-);
-
-long
-PAL_GetConfigNumber(
-	PALCFG_ITEM item,
-	BOOL        default_value
-);
-
-int
-PAL_GetConfigInteger(
-	PALCFG_ITEM item,
-	BOOL        default_value
-);
-
-unsigned int
-PAL_GetConfigUnsigned(
-	PALCFG_ITEM item,
-	BOOL        default_value
-);
-
-const char *
-PAL_GetConfigString(
-	PALCFG_ITEM item,
-	BOOL        default_value
-);
-
-BOOL
-PAL_SetConfigBoolean(
-	PALCFG_ITEM item,
-	BOOL        value
-);
-
-BOOL
-PAL_SetConfigNumber(
-	PALCFG_ITEM item,
-	long        value
-);
-
-BOOL
-PAL_SetConfigInteger(
-	PALCFG_ITEM item,
-	int         value
-);
-
-BOOL
-PAL_SetConfigUnsigned(
-	PALCFG_ITEM  item,
-	unsigned int value
-);
-
-BOOL
-PAL_SetConfigString(
-	PALCFG_ITEM item,
-	const char *value
 );
 
 #ifdef __cplusplus

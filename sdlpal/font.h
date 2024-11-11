@@ -29,9 +29,6 @@
 extern "C" {
 #endif
 
-// extern char *font_offset_x;
-// extern char *font_offset_y;
-
 /*++
   Purpose:
 
@@ -50,10 +47,6 @@ PAL_InitFont(
 	const CONFIGURATION* cfg
 );
 
-void
-PAL_FreeFont(
-	void
-);
 
 /*++
   Purpose:

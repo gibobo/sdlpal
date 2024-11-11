@@ -230,8 +230,8 @@ PAL_LoadResources(
    {
       FILE              *fpMAP, *fpGOP;
 
-      fpMAP = UTIL_OpenRequiredFile("map.mkf");
-      fpGOP = UTIL_OpenRequiredFile("gop.mkf");
+      fpMAP = UTIL_OpenRequiredFileForMode("map.mkf", "rb");
+      fpGOP = UTIL_OpenRequiredFileForMode("gop.mkf", "rb");
 
       if (gpGlobals->fEnteringScene)
       {

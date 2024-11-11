@@ -132,11 +132,6 @@ UTIL_calloc(
 );
 
 FILE *
-UTIL_OpenRequiredFile(
-   LPCSTR               lpszFileName
-);
-
-FILE *
 UTIL_OpenRequiredFileForMode(
    LPCSTR               lpszFileName,
    LPCSTR               szMode
@@ -229,12 +224,6 @@ UTIL_GetFullPathName(
 	const char *subpath
 );
 
-PALFILE
-UTIL_CheckResourceFiles(
-	const char *path,
-	const char *msgfile
-);
-
 char *UTIL_basename(const char *path);
 
 /*
@@ -242,20 +231,8 @@ char *UTIL_basename(const char *path);
  */
 
 BOOL
-UTIL_GetScreenSize(
-	DWORD *pdwScreenWidth,
-	DWORD *pdwScreenHeight
-);
-
-BOOL
 UTIL_IsAbsolutePath(
 	const char *lpszFileName
-);
-
-int
-UTIL_Platform_Init(
-	int   argc,
-	char *argv[]
 );
 
 void
@@ -304,11 +281,6 @@ typedef void(*LOGCALLBACK)(LOGLEVEL level, const char *full_log, const char *use
     The slot id (>= 0), -1 if all slots are used or callback is NULL.
 
 --*/
-int
-UTIL_LogAddOutputCallback(
-	LOGCALLBACK    callback,
-	LOGLEVEL       loglevel
-);
 
 /*++
   Purpose:
@@ -371,13 +343,6 @@ UTIL_LogOutput(
 void
 UTIL_LogSetLevel(
 	LOGLEVEL       minlevel
-);
-
-void
-UTIL_LogToFile(
-	LOGLEVEL       _,
-	const char    *string,
-	const char    *__
 );
 
 void

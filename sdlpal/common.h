@@ -75,37 +75,15 @@
 #endif
 
 #ifdef _WIN32
-
-# include <windows.h>
-# include <io.h>
-
-# if defined(_MSC_VER)
-#  if _MSC_VER < 1900
-#   define vsnprintf _vsnprintf
-#   define snprintf _snprintf
-#  endif
-#  define strtok_r strtok_s
-#  define strcasecmp _stricmp
-#  define strncasecmp _strnicmp
-#  define strdup _strdup //https://msdn.microsoft.com/en-us/library/ms235454(v=vs.140).aspx
-#  define access _access
-#  pragma warning (disable:4244)
-# endif
-
-# ifndef _LPCBYTE_DEFINED
-#  define _LPCBYTE_DEFINED
-typedef const BYTE *LPCBYTE;
-# endif
-
-# define PAL_MAX_PATH  MAX_PATH
-
+// # include <windows.h>
+// # include <io.h>
 #else
-
 # include <unistd.h>
 # include <dirent.h>
 # ifdef __APPLE__
 #  include <objc/objc.h>
 # endif
+#endif
 
 # ifndef FALSE
 #  define FALSE               0
@@ -118,17 +96,13 @@ typedef char                CHAR;
 typedef wchar_t             WCHAR;
 typedef short               SHORT;
 typedef long                LONG;
-
 typedef unsigned long       ULONG, *PULONG;
 typedef unsigned short      USHORT, *PUSHORT;
 typedef unsigned char       UCHAR, *PUCHAR;
-
 typedef unsigned short      WORD, *LPWORD;
 typedef unsigned int        DWORD, *LPDWORD;
 typedef int                 INT, *LPINT;
-# if !defined( __APPLE__ ) && !defined( GEKKO )
 typedef int                 BOOL, *LPBOOL;
-# endif
 typedef unsigned int        UINT, *PUINT, UINT32, *PUINT32;
 typedef unsigned char       BYTE, *LPBYTE;
 typedef const BYTE         *LPCBYTE;
@@ -144,8 +118,6 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_MAX_PATH  PATH_MAX
 #else
 # define PAL_MAX_PATH  1024
-#endif
-
 #endif
 
 /* When porting SDLPAL to a new platform, please make a separate directory and put a file 
@@ -183,14 +155,6 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_SCALE_SCREEN   TRUE
 
 # define PAL_IS_VALID_JOYSTICK(s)  TRUE
-
-#ifndef PAL_FATAL_OUTPUT
-# define PAL_FATAL_OUTPUT(s)
-#endif
-
-#ifndef PAL_CONVERT_UTF8
-# define PAL_CONVERT_UTF8(s) s
-#endif
 
 #ifndef PAL_NATIVE_PATH_SEPARATOR
 # define PAL_NATIVE_PATH_SEPARATOR "/"

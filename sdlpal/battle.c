@@ -822,33 +822,24 @@ PAL_FreeBattleSprites(
 
 --*/
 {
-   int         i;
+   int i;
 
    //
    // Free all the loaded sprites
    //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
-      if (g_Battle.rgPlayer[i].lpSprite != NULL)
-      {
-         free(g_Battle.rgPlayer[i].lpSprite);
-      }
+      free(g_Battle.rgPlayer[i].lpSprite);
       g_Battle.rgPlayer[i].lpSprite = NULL;
    }
 
    for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
    {
-      if (g_Battle.rgEnemy[i].lpSprite != NULL)
-      {
-         free(g_Battle.rgEnemy[i].lpSprite);
-      }
+      free(g_Battle.rgEnemy[i].lpSprite);
       g_Battle.rgEnemy[i].lpSprite = NULL;
    }
 
-   if (g_Battle.lpSummonSprite != NULL)
-   {
-      free(g_Battle.lpSummonSprite);
-   }
+   free(g_Battle.lpSummonSprite);
    g_Battle.lpSummonSprite = NULL;
 }
 
@@ -876,7 +867,7 @@ PAL_LoadBattleSprites(
 
    PAL_FreeBattleSprites();
 
-   fp = UTIL_OpenRequiredFile("abc.mkf");
+   fp = UTIL_OpenRequiredFileForMode("abc.mkf", "rb");
 
    //
    // Load battle sprites for players
@@ -891,7 +882,8 @@ PAL_LoadBattleSprites(
       {
          continue;
       }
-
+      if (g_Battle.rgPlayer[i].lpSprite)
+         free(g_Battle.rgPlayer[i].lpSprite);
       g_Battle.rgPlayer[i].lpSprite = UTIL_calloc(l, 1);
 
       PAL_MKFDecompressChunk(g_Battle.rgPlayer[i].lpSprite, l,
@@ -924,7 +916,8 @@ PAL_LoadBattleSprites(
       {
          continue;
       }
-
+      if (g_Battle.rgEnemy[i].lpSprite)
+         free(g_Battle.rgEnemy[i].lpSprite);
       g_Battle.rgEnemy[i].lpSprite = UTIL_calloc(l, 1);
 
       PAL_MKFDecompressChunk(g_Battle.rgEnemy[i].lpSprite, l,

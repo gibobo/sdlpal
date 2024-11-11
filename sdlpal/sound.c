@@ -95,8 +95,8 @@ SOUND_LoadWAVEData(
 	const uint8_t         *lpWaveData = NULL;
 	uint32_t len,type;
 
-	if (dwLen < sizeof(RIFFHeader) || SDL_SwapLE32(lpRiff->signature) != RIFF_RIFF ||
-		SDL_SwapLE32(lpRiff->type) != RIFF_WAVE || dwLen < SDL_SwapLE32(lpRiff->length) + 8)
+	if (dwLen < sizeof(RIFFHeader) || lpRiff->signature != RIFF_RIFF ||
+		lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8))
 	{
 		return NULL;
 	}
@@ -104,8 +104,8 @@ SOUND_LoadWAVEData(
 	lpChunk = (const RIFFChunkHeader *)(lpRiff + 1); dwLen -= sizeof(RIFFHeader);
 	while (dwLen >= sizeof(RIFFChunkHeader))
 	{
-        len = SDL_SwapLE32(lpChunk->length);
-        type = SDL_SwapLE32(lpChunk->type);
+        len = lpChunk->length;
+        type = lpChunk->type;
 		if (dwLen >= sizeof(RIFFChunkHeader) + len)
 			dwLen -= sizeof(RIFFChunkHeader) + len;
 		else
@@ -115,7 +115,7 @@ SOUND_LoadWAVEData(
 		{
 		case WAVE_fmt:
 			lpFormat = (const WAVEFormatPCM *)(lpChunk + 1);
-			if (len != sizeof(WAVEFormatPCM) || lpFormat->wFormatTag != SDL_SwapLE16(0x0001))
+			if (len != sizeof(WAVEFormatPCM) || lpFormat->wFormatTag != 0x0001)
 			{
 				return NULL;
 			}
@@ -133,11 +133,11 @@ SOUND_LoadWAVEData(
 		return NULL;
 	}
 
-	lpSpec->channels = SDL_SwapLE16(lpFormat->nChannels);
-	lpSpec->format = (SDL_SwapLE16(lpFormat->wBitsPerSample) == 16) ? AUDIO_S16 : AUDIO_U8;
-	lpSpec->freq = SDL_SwapLE32(lpFormat->nSamplesPerSec);
+	lpSpec->channels = lpFormat->nChannels;
+	lpSpec->format = (lpFormat->wBitsPerSample == 16) ? AUDIO_S16 : AUDIO_U8;
+	lpSpec->freq = lpFormat->nSamplesPerSec;
 	lpSpec->size = len;
-	lpSpec->align = SDL_SwapLE16(lpFormat->nChannels) * SDL_SwapLE16(lpFormat->wBitsPerSample) >> 3;
+	lpSpec->align = (lpFormat->nChannels * lpFormat->wBitsPerSample) >> 3;
 
 	return lpWaveData;
 }
@@ -180,13 +180,13 @@ SOUND_LoadVOCData(
 {
 	LPCVOCHEADER lpVOC = (LPCVOCHEADER)lpData;
 
-	if (dwLen < sizeof(VOCHEADER) || memcmp(lpVOC->signature, "Creative Voice File\x1A", 0x14) || SDL_SwapLE16(lpVOC->data_offset) >= dwLen)
+	if (dwLen < sizeof(VOCHEADER) || memcmp(lpVOC->signature, "Creative Voice File\x1A", 0x14) || lpVOC->data_offset >= dwLen)
 	{
 		return NULL;
 	}
 
-	lpData += SDL_SwapLE16(lpVOC->data_offset);
-	dwLen -= SDL_SwapLE16(lpVOC->data_offset);
+	lpData += lpVOC->data_offset;
+	dwLen -= lpVOC->data_offset;
 
 	while (dwLen && *lpData)
 	{
@@ -515,7 +515,7 @@ SOUND_ResampleMix_S16_Mono_Mono(
 		int j, to_write = resampler_get_free_count(resampler[0]);
 		if (to_write > src_samples) to_write = src_samples;
 		for (j = 0; j < to_write; j++)
-			resampler_write_sample(resampler[0], SDL_SwapLE16(*src++));
+			resampler_write_sample(resampler[0], *src++);
 		src_samples -= to_write;
 		while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
 		{
@@ -574,7 +574,7 @@ SOUND_ResampleMix_S16_Mono_Stereo(
 		int j, to_write = resampler_get_free_count(resampler[0]);
 		if (to_write > src_samples) to_write = src_samples;
 		for (j = 0; j < to_write; j++)
-			resampler_write_sample(resampler[0], SDL_SwapLE16(*src++));
+			resampler_write_sample(resampler[0], *src++);
 		src_samples -= to_write;
 		while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
 		{
@@ -634,8 +634,8 @@ SOUND_ResampleMix_S16_Stereo_Mono(
 		if (to_write > src_samples) to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 		{
-			resampler_write_sample(resampler[0], SDL_SwapLE16(*src++));
-			resampler_write_sample(resampler[1], SDL_SwapLE16(*src++));
+			resampler_write_sample(resampler[0], *src++);
+			resampler_write_sample(resampler[1], *src++);
 		}
 		src_samples -= to_write;
 		while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
@@ -697,8 +697,8 @@ SOUND_ResampleMix_S16_Stereo_Stereo(
 		if (to_write > src_samples) to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 		{
-			resampler_write_sample(resampler[0], SDL_SwapLE16(*src++));
-			resampler_write_sample(resampler[1], SDL_SwapLE16(*src++));
+			resampler_write_sample(resampler[0], *src++);
+			resampler_write_sample(resampler[1], *src++);
 		}
 		src_samples -= to_write;
 		while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)

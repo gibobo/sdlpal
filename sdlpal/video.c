@@ -124,60 +124,29 @@ VIDEO_Startup(
 
 --*/
 {
-	extern SDL_Surface* STBIMG_Load(const char* file);
-	extern char *dirname(char *path);
-#if APPIMAGE
-   extern char gExecutablePath[PAL_MAX_PATH];
-	SDL_Surface *surf = STBIMG_Load( PAL_va(0, "%s%s", dirname(dirname(dirname(gExecutablePath))), "/usr/share/icons/hicolor/256x256/apps/sdlpal.png" ) );
-#endif
-
    int render_w, render_h;
-
-   gRenderBackend.Init = NullFunc;
-   gRenderBackend.Setup = NullFunc;
-   gRenderBackend.CreateTexture = VIDEO_CreateTexture;
-   gRenderBackend.RenderCopy = VIDEO_RenderCopy;
-
-   if( gConfig.fEnableGLSL) {
-	   gRenderBackend.Init = VIDEO_GLSL_Init;
-	   gRenderBackend.Setup = VIDEO_GLSL_Setup;
-	   gRenderBackend.CreateTexture = VIDEO_GLSL_CreateTexture;
-	   gRenderBackend.RenderCopy = VIDEO_GLSL_RenderCopy;
-   }
-	
+   gRenderBackend.Init = VIDEO_GLSL_Init;
+   gRenderBackend.Setup = VIDEO_GLSL_Setup;
+   gRenderBackend.CreateTexture = VIDEO_GLSL_CreateTexture;
+   gRenderBackend.RenderCopy = VIDEO_GLSL_RenderCopy;
    gRenderBackend.Init();
 
    //
    // Before we can render anything, we need a window and a renderer.
    //
    if (gpWindow == NULL)
-   gpWindow = SDL_CreateWindow("Pal", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                               gConfig.dwScreenWidth, gConfig.dwScreenHeight, PAL_VIDEO_INIT_FLAGS);
-
-   if (gpWindow == NULL)
    {
       return -1;
    }
 
-# if APPIMAGE
-	if(surf){
-		SDL_SetWindowIcon(gpWindow, surf);
-	}
-# endif
-
    gpRenderer = SDL_CreateRenderer(gpWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-   gRenderBackend.Setup();
 
    if (gpRenderer == NULL)
    {
       return -1;
    }
 
-#if defined (__IOS__)
-   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-   SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 1);
-#endif
+   gRenderBackend.Setup();
 
    //
    // Create the screen buffer and the backup screen buffer.
@@ -191,11 +160,8 @@ VIDEO_Startup(
    // Create texture for screen.
    //
    SDL_GetRendererOutputSize(gpRenderer, &render_w, &render_h);
-   if(!gConfig.fEnableGLSL)
-      SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, gConfig.pszScaleQuality);
    gpTexture = gRenderBackend.CreateTexture(render_w, render_h);
-   if(gConfig.fEnableGLSL)
-      SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
    //
    // Create palette object
@@ -216,20 +182,11 @@ VIDEO_Startup(
 	// We need a total empty texture in case of not using touch overlay.
 	// Or GL runtime will pick the previous texture - the main screen itself
 	// and reuse it - that makes color seems overexposed
-	else if( gConfig.fEnableGLSL )
-	{
-		BYTE pixels[4*PIXELS*PIXELS];
-		memset(pixels, 0, sizeof(pixels));
-		SDL_Surface *temp = SDL_CreateRGBSurfaceFrom(pixels, PIXELS, PIXELS, 32, 4*PIXELS, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-		gpTouchOverlay = SDL_CreateTextureFromSurface(gpRenderer, temp);
-		SDL_FreeSurface(temp);
-	}
-
-
-#if APPIMAGE
-	if(surf)
-		SDL_FreeSurface(surf);
-#endif
+   BYTE pixels[4 * PIXELS * PIXELS];
+   memset(pixels, 0, sizeof(pixels));
+   SDL_Surface *temp = SDL_CreateRGBSurfaceFrom(pixels, PIXELS, PIXELS, 32, 4 * PIXELS, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+   gpTouchOverlay = SDL_CreateTextureFromSurface(gpRenderer, temp);
+   SDL_FreeSurface(temp);
 
    return 0;
 }
@@ -307,35 +264,6 @@ VIDEO_Shutdown(
    }
    gpScreenReal = NULL;
 }
-
-VOID
-VIDEO_RenderCopy(
-   VOID
-)
-{
-	void *texture_pixels;
-	int texture_pitch;
-
-	SDL_LockTexture(gpTexture, NULL, &texture_pixels, &texture_pitch);
-	memset(texture_pixels, 0, gTextureRect.y * texture_pitch);
-	uint8_t *pixels = (uint8_t *)texture_pixels + gTextureRect.y * texture_pitch;
-	uint8_t *src = (uint8_t *)gpScreenReal->pixels;
-	int left_pitch = gTextureRect.x << 2;
-	int right_pitch = texture_pitch - ((gTextureRect.x + gTextureRect.w) << 2);
-	for (int y = 0; y < gTextureRect.h; y++, src += gpScreenReal->pitch)
-	{
-		memset(pixels, 0, left_pitch); pixels += left_pitch;
-		memcpy(pixels, src, 320 << 2); pixels += 320 << 2;
-		memset(pixels, 0, right_pitch); pixels += right_pitch;
-	}
-	memset(pixels, 0, gTextureRect.y * texture_pitch);
-	SDL_UnlockTexture(gpTexture);
-
-	SDL_RenderClear(gpRenderer);
-	SDL_RenderCopy(gpRenderer, gpTexture, NULL, NULL);
-	SDL_RenderPresent(gpRenderer);
-}
-
 
 VOID
 VIDEO_UpdateScreen(
@@ -933,7 +861,7 @@ VIDEO_SetWindowTitle(
 
 --*/
 {
-	SDL_SetWindowTitle(gpWindow, PAL_CONVERT_UTF8(pszTitle));
+	SDL_SetWindowTitle(gpWindow, pszTitle);
 }
 
 SDL_Surface *

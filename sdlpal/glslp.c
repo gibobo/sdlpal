@@ -340,7 +340,7 @@ char *get_glslp_path(const char *filename) {
 bool parse_glslp(const char *filename, GLSLP *pGLSLP) {
     destroy_glslp(pGLSLP);
     
-    FILE *fp = UTIL_OpenRequiredFile(filename);
+    FILE *fp = UTIL_OpenRequiredFileForMode(filename, "rb");
     char *basedir = UTIL_basename(filename);
 
     if (fp)

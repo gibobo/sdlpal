@@ -500,89 +500,6 @@ PAL_MonsterChasePlayer(
    PAL_NPCWalkOneStep(wEventObjectID, wMonsterSpeed);
 }
 
-VOID
-PAL_AdditionalCredits(
-   VOID
-)
-/*++
-  Purpose:
-
-    Show the additional credits.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-   LPCWSTR rgszcps[][CP_MAX] = {
-	   // Traditional Chinese, Simplified Chinese
-	   { L"", L"", /*L""*/ },
-	   { L"         經典特別篇   ",
-	     L"         经典特别篇   ",
-	     //L"   \x30AF\x30E9\x30B7\x30C3\x30AF\x7279\x5225\x7DE8  "
-	   },
-	   { L"", L"", /*L""*/ },
-	   { L"", L"", /*L""*/ },
-	   { L"", L"", /*L""*/ },
-	   { L"", L"", /*L""*/ },
-	   { L"", L"", /*L""*/ },
-	   { L"", L"", /*L""*/ },
-	   { L"   本程式是自由軟體，按照 GNU General",
-	     L"   本程序是自由软件，按照 GNU General",
-		 //L" \x3053\x306E\x30D7\x30ED\x30B0\x30E9\x30E0\x306F\x81EA\x7531\x30BD\x30D5\x30C8\x30A6\x30A7\x30A2\x3067\x3059\x3001"
-	   },
-	   { L"   Public License v3 或更高版本發佈",
-	     L"   Public License v3 或更高版本发布",
-	     //L" GNU General Public License v3 \x306E\x4E0B\x3067"
-	   },
-	   { L"", L"", /*L" \x914D\x5E03\x3055\x308C\x3066\x3044\x307E\x3059\x3002"*/ },
-	   { L"                    ...按 Enter 結束",
-	     L"                    ...按 Enter 结束",
-	     //L"      ...Enter\x30AD\x30FC\x3092\x62BC\x3057\x3066\x7D42\x4E86\x3057\x307E\x3059"
-	   },
-   };
-
-   LPCWSTR rgszStrings[] = {
-      L"  SDLPAL (http://sdlpal.github.io/)",
-#ifdef PAL_CLASSIC
-	  L"%ls(" WIDETEXT(__DATE__) L")",
-#else
-	  L"                        (" WIDETEXT(__DATE__) L")",
-#endif
-      L" ",
-	  L"    (c) 2009-2011, Wei Mingzhi",
-	  L"        <whistler_wmz@users.sf.net>.",
-      L"    (c) 2011-2024, SDLPAL Team",
-	  L"%ls",  // Porting information line 1
-	  L"%ls",  // Porting information line 2
-	  L"%ls",  // GNU line 1
-	  L"%ls",  // GNU line 2
-	  L"%ls",  // GNU line 3
-      L"%ls",  // Press Enter to continue
-   };
-
-   int        i = 0;
-
-   PAL_DrawOpeningMenuBackground();
-
-   for (i = 0; i < 12; i++)
-   {
-      WCHAR buffer[48];
-      PAL_swprintf(buffer, sizeof(buffer) / sizeof(WCHAR), rgszStrings[i], gConfig.pszMsgFile ? g_rcCredits[i] : rgszcps[i][PAL_GetCodePage()]);
-      PAL_DrawText(buffer, PAL_XY(0, 2 + i * 16), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
-   }
-
-   PAL_SetPalette(0, FALSE);
-   VIDEO_UpdateScreen(NULL);
-
-   PAL_WaitForKey(0);
-}
-
 static WORD
 PAL_InterpretInstruction(
    WORD           wScriptEntry,
@@ -2985,7 +2902,6 @@ PAL_InterpretInstruction(
       //
       if (gConfig.fIsWIN95)
          PAL_EndingScreen();
-      PAL_AdditionalCredits();
       PAL_Shutdown(0);
       break;
 
@@ -3426,30 +3342,8 @@ PAL_RunTriggerScript(
          //
          // Print dialog text
          //
-         if (gConfig.pszMsgFile)
-         {
-            int msgSpan = MESSAGE_GetSpan(&wScriptEntry);
-            int idx = 0, iMsg;
-            while ((iMsg = PAL_GetMsgNum(pScript->rgwOperand[0], msgSpan, idx++)) >= 0)
-			   {
-               if (iMsg == 0)
-               {
-                  //
-                  // Restore the screen
-                  //
-                  PAL_ClearDialog(TRUE);
-                  VIDEO_RestoreScreen(gpScreen);
-                  VIDEO_UpdateScreen(NULL);
-               }
-			   else
-                  PAL_ShowDialogText(PAL_GetMsg(iMsg));
-            }
-         }
-		 else
-         {
-            PAL_ShowDialogText(PAL_GetMsg(pScript->rgwOperand[0]));
-            wScriptEntry++;
-         }
+         PAL_ShowDialogText(PAL_GetMsg(pScript->rgwOperand[0]));
+         wScriptEntry++;
          break;
 
       default:
@@ -3597,25 +3491,8 @@ begin:
 		   int XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : gConfig.ScreenLayout.MagicDescMsgPos;
 		   int YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 - gConfig.ScreenLayout.ExtraItemDescLines * 16 : 3;
 		   int iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
-
-		   if (gConfig.pszMsgFile)
-		   {
-            int msgSpan = MESSAGE_GetSpan(&wScriptEntry);
-			   int idx = 0, iMsg;
-			   while ((iMsg = PAL_GetMsgNum(pScript->rgwOperand[0], msgSpan, idx++)) >= 0)
-			   {
-				   if (iMsg > 0)
-				   {
-					   PAL_DrawText(PAL_GetMsg(iMsg), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
-					   iDescLine++;
-				   }
-			   }
-		   }
-		   else
-		   {
-			   PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
-			   wScriptEntry++;
-		   }
+         PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
+         wScriptEntry++;
 	   }
 	   else
 	   {

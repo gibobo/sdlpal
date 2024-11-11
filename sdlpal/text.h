@@ -30,15 +30,6 @@ typedef enum tagDIALOGPOSITION
    kDialogCenterWindow
 } DIALOGLOCATION;
 
-typedef enum tagFONTFLAVOR
-{
-   kFontFlavorAuto     = 0,
-   kFontFlavorUnifont,
-   kFontFlavorSimpChin,
-   kFontFlavorTradChin,
-   kFontFlavorJapanese,
-} FONTFLAVOR;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,14 +38,6 @@ typedef struct tagTEXTLIB
 {
     LPWSTR         *lpWordBuf;
     LPWSTR         *lpMsgBuf;
-    int           ***lpIndexBuf; 
-	
-	int            *indexMaxCounter;
-	// The variable indexMaxCounter stores the value of (item->indexEnd - item->index), 
-	// which means the span between eid and sid. 
-		
-    BOOL            fUseISOFont;
-	int             iFontFlavor;
 
     int             nWords;
     int             nMsgs;
@@ -97,13 +80,6 @@ PAL_GetWord(
 LPCWSTR
 PAL_GetMsg(
    int        iNumMsg
-);
-
-int
-PAL_GetMsgNum(
-   int        iIndex,
-   int        iSpan,
-   int        iOrder
 );
 
 LPWSTR
@@ -204,11 +180,6 @@ PAL_MultiByteToWideCharCP(
 	LPWSTR        wcs,
 	size_t        wcslength
 	);
-
-WCHAR
-PAL_GetInvalidChar(
-   CODEPAGE      uCodePage
-);
 
 CODEPAGE
 PAL_GetCodePage(

@@ -129,11 +129,6 @@ VIDEO_DrawSurfaceToScreen(
     SDL_Surface    *pSurface
 );
 
-VOID
-VIDEO_RenderCopy(
-    VOID
-);
-
 #ifdef __cplusplus
 }
 #endif

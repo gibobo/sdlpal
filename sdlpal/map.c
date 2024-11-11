@@ -113,18 +113,6 @@ PAL_LoadMap(
    free(buf);
 
    //
-   // Adjust the endianness of the decompressed data.
-   //
-   for (i = 0; i < 128; i++)
-   {
-      for (j = 0; j < 64; j++)
-      {
-         map->Tiles[i][j][0] = SDL_SwapLE32(map->Tiles[i][j][0]);
-         map->Tiles[i][j][1] = SDL_SwapLE32(map->Tiles[i][j][1]);
-      }
-   }
-
-   //
    // Load the tile bitmaps.
    //
    size = PAL_MKFGetChunkSize(iMapNum, fpGopMKF);
