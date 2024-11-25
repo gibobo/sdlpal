@@ -23,7 +23,7 @@
 #define UTIL_H
 
 #include "common.h"
-#include "palcommon.h"
+// #include "palcommon.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -55,7 +55,6 @@ PFNGLACTIVETEXTUREPROC glActiveTexture;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 PFNGLGETSTRINGIPROC glGetStringi;
 
-#if !defined(__APPLE__)
 int initGLExtensions(int major) {
     glCreateShader = (PFNGLCREATESHADERPROC)SDL_GL_GetProcAddress("glCreateShader");
     glShaderSource = (PFNGLSHADERSOURCEPROC)SDL_GL_GetProcAddress("glShaderSource");
@@ -96,5 +95,3 @@ int initGLExtensions(int major) {
     glBindBuffer && glBufferData && glBufferSubData && glGetAttribLocation &&
     glEnableVertexAttribArray && glVertexAttribPointer && glUniformMatrix4fv;
 }
-#endif
-

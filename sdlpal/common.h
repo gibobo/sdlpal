@@ -58,21 +58,15 @@
 #endif
 
 /* This is need when compiled with SDL 1.2 */
-#ifndef SDL_FORCE_INLINE
+#ifndef PAL_FORCE_INLINE
 #if defined(_MSC_VER)
-#define SDL_FORCE_INLINE __forceinline
-#elif ( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
-#define SDL_FORCE_INLINE __attribute__((always_inline)) static __inline__
+#define PAL_FORCE_INLINE static __forceinline
+#if defined( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
+#define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
 #else
-#define SDL_FORCE_INLINE static SDL_INLINE
+#define PAL_FORCE_INLINE static SDL_INLINE
 #endif
-#endif /* SDL_FORCE_INLINE not defined */
-
-#if defined(_MSC_VER)
-# define PAL_FORCE_INLINE static SDL_FORCE_INLINE
-#else
-# define PAL_FORCE_INLINE SDL_FORCE_INLINE
-#endif
+#endif /* PAL_FORCE_INLINE not defined */
 
 #ifdef _WIN32
 // # include <windows.h>
@@ -80,9 +74,6 @@
 #else
 # include <unistd.h>
 # include <dirent.h>
-# ifdef __APPLE__
-#  include <objc/objc.h>
-# endif
 #endif
 
 # ifndef FALSE
