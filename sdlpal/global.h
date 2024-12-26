@@ -39,11 +39,7 @@
 typedef enum tagSTATUS
 {
    kStatusConfused = 0,  // attack friends randomly
-#ifdef PAL_CLASSIC
    kStatusParalyzed,     // paralyzed
-#else
-   kStatusSlow,          // slower
-#endif
    kStatusSleep,         // not allowed to move
    kStatusSilence,       // cannot use magic
    kStatusPuppet,        // for dead players only, continue attacking
@@ -53,10 +49,6 @@ typedef enum tagSTATUS
    kStatusDualAttack,    // dual attack
    kStatusAll
 } STATUS;
-
-#ifndef PAL_CLASSIC
-#define kStatusParalyzed kStatusSleep
-#endif
 
 // body parts of equipments
 typedef enum tagBODYPART
@@ -512,16 +504,13 @@ typedef struct tagGLOBALVARS
    BOOL             fNeedToFadeIn;       // TRUE if need to fade in when drawing scene
    BOOL             fInBattle;           // TRUE if in battle
    BOOL             fAutoBattle;         // TRUE if auto-battle
-#ifndef PAL_CLASSIC
-   BYTE             bBattleSpeed;        // Battle Speed (1 = Fastest, 5 = Slowest)
-#endif
    WORD             wLastUnequippedItem; // last unequipped item
 
    PLAYERROLES      rgEquipmentEffect[MAX_PLAYER_EQUIPMENTS + 1]; // equipment effects
    WORD             rgPlayerStatus[MAX_PLAYER_ROLES][kStatusAll]; // player status
 
-   PAL_POS          viewport;            // viewport coordination
-   PAL_POS          partyoffset;
+   DWORD          viewport;            // viewport coordination
+   DWORD          partyoffset;
    WORD             wLayer;
    WORD             wMaxPartyMemberIndex;// max index of members in party (0 to MAX_PLAYERS_IN_PARTY - 1)
    PARTY            rgParty[MAX_PLAYABLE_PLAYER_ROLES]; // player party

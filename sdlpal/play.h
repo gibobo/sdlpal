@@ -22,6 +22,8 @@
 #ifndef PLAY_H
 #define PLAY_H
 
+#include "common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

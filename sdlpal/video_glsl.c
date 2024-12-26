@@ -27,7 +27,7 @@
 #include "video.h"
 
 #include "glslp.h"
-#include "pal_config.h"
+// #include "pal_config.h"
 #define SDL_STBIMAGE_IMPLEMENTATION
 #include "SDL_stbimage.h"
 
@@ -72,7 +72,7 @@ static SDL_Texture *framePrevTextures[MAX_TEXTURES] = {NULL};
 static int frame_prev_texture_units[MAX_TEXTURES] = {-1};
 
 static GLint frames = 0;
-static bool frames_passed_limit = false;
+static char frames_passed_limit = false;
 
 struct AttrTexCoord
 {
@@ -466,7 +466,7 @@ GLint get_gl_wrap_mode(enum wrap_mode mode, enum scale_type type) {
     return gl_wrap_mode;
 }
 
-SDL_Texture *load_texture(char *name, char *filename, bool filter_linear, enum wrap_mode mode, enum scale_type type) {
+SDL_Texture *load_texture(char *name, char *filename, char filter_linear, enum wrap_mode mode, enum scale_type type) {
     SDL_Surface *surf = STBIMG_Load(get_glslp_path(filename));
     if( !surf )
         TerminateOnError("Texture %s cannot be open!", get_glslp_path(filename));
@@ -494,7 +494,7 @@ void GetMultiPassUniformLocations(pass_uniform_locations *pSlot, int programID, 
 //
 //#define glUniform1i fake_glUniform1i
 
-void SetGroupUniforms(pass_uniform_locations *pSlot, int shaderID, int texture_unit, bool is_pass) {
+void SetGroupUniforms(pass_uniform_locations *pSlot, int shaderID, int texture_unit, char is_pass) {
     glUniform1i(pSlot->texture_uniform_location, texture_unit);
 
     GLfloat size[2];

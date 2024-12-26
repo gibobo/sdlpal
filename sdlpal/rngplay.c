@@ -22,7 +22,13 @@
 // Copyright (c) 2006-2007, Lou Yihua.
 //
 
-#include "main.h"
+#include "rngplay.h"
+#include "global.h"
+#include "input.h"
+#include "palcommon.h"
+#include "palette.h"
+#include "util.h"
+#include "video.h"
 
 static INT
 PAL_RNGReadFrame(
@@ -392,12 +398,12 @@ PAL_RNGPlay(
 
 --*/
 {
-   double         iDelay = (double)SDL_GetPerformanceFrequency() / (iSpeed == 0 ? 16 : iSpeed);
+   uint64_t       iDelay = (uint64_t)SDL_GetPerformanceFrequency() / (iSpeed == 0 ? 16 : iSpeed);
    uint8_t        *rng = (uint8_t *)malloc(65000);
    uint8_t        *buf = (uint8_t *)malloc(65000);
    FILE           *fp = UTIL_OpenRequiredFileForMode("rng.mkf", "rb");
 
-   for (double iTime = SDL_GetPerformanceCounter(); rng && buf && iStartFrame != iEndFrame; iStartFrame++)
+   for (uint64_t iTime = SDL_GetPerformanceCounter(); rng && buf && iStartFrame != iEndFrame; iStartFrame++)
    {
 	  iTime += iDelay;
       //

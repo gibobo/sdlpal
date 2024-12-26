@@ -19,15 +19,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "palcommon.h"
+#include "audio.h"
 #include "global.h"
 #include "palcfg.h"
-#include "audio.h"
+#include "palcommon.h"
 #include "players.h"
-#include "util.h"
 #include "resampler.h"
+#include "util.h"
 #include <math.h>
-#include <SDL.h>
 
 /* WASAPI need fewer samples for less gapping */
 #ifndef PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI

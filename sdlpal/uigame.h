@@ -22,7 +22,8 @@
 #ifndef UIGAME_H
 #define UIGAME_H
 
-#include "ui.h"
+// #include "ui.h"
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {

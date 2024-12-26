@@ -22,36 +22,34 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "util.h"
-#include "palcommon.h"
-#include "font.h"
-#include "global.h"
-#include "palcfg.h"
-#include "map.h"
-#include "res.h"
-#include "scene.h"
-#include "players.h"
 #include "audio.h"
-#include "video.h"
+#include "battle.h"
+#include "ending.h"
+#include "fight.h"
+#include "font.h"
+#include "game.h"
+#include "global.h"
 #include "input.h"
+#include "itemmenu.h"
+#include "magicmenu.h"
+#include "map.h"
+#include "palcfg.h"
+#include "palcommon.h"
+#include "palette.h"
+#include "play.h"
+#include "players.h"
+#include "res.h"
+#include "rngplay.h"
+#include "scene.h"
+#include "script.h"
 #include "text.h"
 #include "ui.h"
-#include "uigame.h"
 #include "uibattle.h"
-#include "magicmenu.h"
-#include "itemmenu.h"
-#include "palette.h"
-#include "rngplay.h"
-#include "ending.h"
-#include "script.h"
-#include "battle.h"
-#include "fight.h"
-#include "play.h"
-#include "game.h"
+#include "uigame.h"
+#include "util.h"
+#include "video.h"
 
-VOID
-PAL_Shutdown(
-   int exit_code
-);
+VOID PAL_Shutdown(
+    int exit_code);
 
 #endif

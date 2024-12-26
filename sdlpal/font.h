@@ -23,7 +23,6 @@
 #define FONT_H
 
 #include "palcfg.h"
-#include <SDL.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,7 +71,7 @@ void
 PAL_DrawCharOnSurface(
 	uint16_t                 wChar,
 	SDL_Surface             *lpSurface,
-	PAL_POS                  pos,
+	DWORD                  pos,
 	uint8_t                  bColor,
 	BOOL                     fUse8x8Font
 );

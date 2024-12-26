@@ -22,6 +22,9 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
+#include "common.h"
+#include <SDL_pixels.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

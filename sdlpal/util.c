@@ -23,13 +23,16 @@
 #include "global.h"
 #include "input.h"
 #include "palcfg.h"
-#include "pal_config.h"
+// #include "pal_config.h"
 #include <errno.h>
 #include "SDL_messagebox.h"
 #include "SDL_video.h"
 
-static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
+#define PAL_PATH_SEPARATORS "/"
+#define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
+#define PAL_MAX_GLOBAL_BUFFERS 4
 #define INTERNAL_BUFFER_SIZE_ARGS internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE
+static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
 
 long flength(
 	FILE *fp)
@@ -528,7 +531,7 @@ UTIL_GetFullPathName(
 	if (!buffer || !basepath || !subpath || buflen == 0)
 		return NULL;
 
-	int sublen = strlen(subpath);
+	size_t sublen = strlen(subpath);
 	if (sublen == 0)
 		return NULL;
 
@@ -569,10 +572,10 @@ UTIL_CombinePath(
 		for (int i = 0; i < numentry && buflen > 1; i++)
 		{
 			const char *path = va_arg(argptr, const char *);
-			int path_len = path ? strlen(path) : 0;
+			size_t path_len = path ? strlen(path) : 0;
 			int append_delim = (i < numentry - 1 && path_len > 0 && !PAL_IS_PATH_SEPARATOR(path[path_len - 1]));
 
-			for (int is_sep = 0, j = 0; j < path_len && buflen > (size_t)append_delim + 1; j++)
+			for (size_t is_sep = 0, j = 0; j < path_len && buflen > (size_t)append_delim + 1; j++)
 			{
 				//
 				// Skip continuous path separators

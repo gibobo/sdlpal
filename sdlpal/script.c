@@ -22,7 +22,15 @@
 // Copyright (c) 2006-2008, Pal Lockheart <palxex@gmail.com>.
 //
 
-#include "main.h"
+#include "script.h"
+#include "battle.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
+#include "palcfg.h"
+#include "res.h"
+#include "text.h"
+#include "video.h"
 
 BOOL            g_fScriptSuccess = TRUE;
 static int      g_iCurEquipPart = -1;
@@ -1288,12 +1296,7 @@ PAL_InterpretInstruction(
       // Set the status for enemy
       //
       w = g_Battle.rgEnemy[wEventObjectID].wObjectID;
-
-#ifdef PAL_CLASSIC
       i = 9;
-#else
-      i = ((pScript->rgwOperand[0] == kStatusSlow) ? 14 : 9);
-#endif
 
       if (RandomLong(0, i) > gpGlobals->g.rgObject[w].enemy.wResistanceToSorcery)
       {
@@ -1366,19 +1369,11 @@ PAL_InterpretInstruction(
       {
          WCHAR s[256];
 
-#ifdef PAL_CLASSIC
          i = RandomLong(1, gpGlobals->wCollectValue);
          if (i > 9)
          {
             i = 9;
          }
-#else
-         i = RandomLong(1, 9);
-         if (i > gpGlobals->wCollectValue)
-         {
-            i = gpGlobals->wCollectValue;
-         }
-#endif
 
          gpGlobals->wCollectValue -= i;
          i--;
@@ -1392,7 +1387,7 @@ PAL_InterpretInstruction(
          LPCBITMAPRLE pBG = PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX);
          INT iBGWidth = PAL_RLEGetWidth(pBG), iBGHeight = PAL_RLEGetHeight(pBG);
          INT iBG_X = (320 - iBGWidth) / 2, iBG_Y = (200 - iBGHeight) / 2;
-         PAL_POS pos = PAL_XY(iBG_X, iBG_Y);
+         DWORD pos = PAL_XY(iBG_X, iBG_Y);
          SDL_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
          PAL_RLEBlitToSurface(pBG, gpScreen, pos);
          

@@ -22,6 +22,8 @@
 #ifndef _SCENE_H
 #define	_SCENE_H
 
+#include "palcommon.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,15 +40,15 @@ PAL_MakeScene(
 
 BOOL
 PAL_CheckObstacleWithRange(
-	PAL_POS         pos,
+	DWORD           pos,
 	BOOL            fCheckEventObjects,
 	WORD            wSelfObject,
-	BOOL			fCheckRange
+	BOOL			    fCheckRange
 );
 
 BOOL
 PAL_CheckObstacle(
-   PAL_POS         pos,
+   DWORD           pos,
    BOOL            fCheckEventObjects,
    WORD            wSelfObject
 );

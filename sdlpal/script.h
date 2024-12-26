@@ -22,6 +22,8 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
+#include "common.h"
+
 #define PAL_ITEM_DESC_BOTTOM	(1 << 15)
 
 #ifdef __cplusplus

@@ -19,7 +19,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "play.h"
+#include "global.h"
+#include "input.h"
+#include "itemmenu.h"
+#include "scene.h"
+#include "script.h"
+#include "uigame.h"
+#include "util.h"
+#include "video.h"
 
 VOID
 PAL_GameUpdate(
@@ -43,7 +51,6 @@ PAL_GameUpdate(
    WORD            wEventObjectID, wDir;
    int             i;
    LPEVENTOBJECT   p;
-   WORD            wResult;
 
    //
    // Check for trigger events
@@ -205,7 +212,7 @@ PAL_GameUpdate(
          for (i = 0; i < 4; i++)
          {
             int              x, y;
-            PAL_POS          pos;
+            DWORD            pos;
 
             x = PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset);
             y = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
@@ -379,7 +386,7 @@ PAL_Search(
 {
    int                x, y, xOffset, yOffset, dx, dy, dh, ex, ey, eh, i, k, l;
    LPEVENTOBJECT      p;
-   PAL_POS            rgPos[13];
+   DWORD              rgPos[13];
 
    //
    // Get the party location

@@ -55,7 +55,7 @@ PAL_ItemSelectMenuUpdate(
    const int          iAmountXOffset = gConfig.dwWordLength * 8 + 1;
    const int          iPageLineOffset = (iLinesPerPage + 1) / 2;
    const int          iPictureYOffset = (gConfig.ScreenLayout.ExtraItemDescLines > 1) ? (gConfig.ScreenLayout.ExtraItemDescLines - 1) * 16 : 0;
-   PAL_POS            cursorPos = PAL_XY(15 + iCursorXOffset, 22);;
+   DWORD            cursorPos = PAL_XY(15 + iCursorXOffset, 22);;
 
    //
    // Process input

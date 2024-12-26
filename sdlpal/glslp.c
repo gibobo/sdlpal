@@ -20,9 +20,11 @@
 // glslp.c: retroarch-style shader preset parser by palxex, 2018
 //
 
-#include "main.h"
-
+#include "common.h"
+#include "palcfg.h"
 #include "glslp.h"
+#include "util.h"
+#include <ctype.h>
 
 GLSLP gGLSLP;
 char glslp_commonbuf[MAX_PARAMETERS*PAL_MAX_PATH];
@@ -337,7 +339,7 @@ char *get_glslp_path(const char *filename) {
     return path;
 }
 
-bool parse_glslp(const char *filename, GLSLP *pGLSLP) {
+char parse_glslp(const char *filename, GLSLP *pGLSLP) {
     destroy_glslp(pGLSLP);
     
     FILE *fp = UTIL_OpenRequiredFileForMode(filename, "rb");

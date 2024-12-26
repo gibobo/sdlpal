@@ -18,9 +18,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "main.h"
-#include "pal_config.h"
-#include <float.h>
+
+#include "video.h"
+#include "palcfg.h"
+#include "util.h"
 
 // Screen buffer
 SDL_Surface              *gpScreen           = NULL;
@@ -31,7 +32,7 @@ SDL_Surface              *gpScreenBak        = NULL;
 // The global palette
 static SDL_Palette       *gpPalette          = NULL;
 
-SDL_Window               *gpWindow           = NULL;
+SDL_Window        *gpWindow           = NULL;
 SDL_Renderer      *gpRenderer         = NULL;
 SDL_Texture       *gpTexture          = NULL;
 SDL_Texture       *gpTouchOverlay     = NULL;
@@ -57,50 +58,6 @@ static WORD               g_wShakeTime       = 0;
 static WORD               g_wShakeLevel      = 0;
 
 #include "video_glsl.h"
-
-#define SDL_SoftStretch SDL_UpperBlit
-static SDL_Texture *VIDEO_CreateTexture(int width, int height)
-{
-	int texture_width, texture_height;
-	double ratio = (double)width / (double)height;
-	ratio *= 1.6f * (double)gConfig.dwTextureHeight / (float)gConfig.dwTextureWidth;
-	//
-	// Check whether to keep the aspect ratio
-	//
-	if (gConfig.fKeepAspectRatio && fabs(ratio - 1.6f) > FLT_EPSILON)
-	{
-		if (ratio > 1.6f)
-		{
-			texture_height = 200;
-			texture_width = (int)(200 * ratio) & ~0x3;
-			ratio = (float)height / 200.0f;
-		}
-		else
-		{
-			texture_width = 320;
-			texture_height = (int)(320 / ratio) & ~0x3;
-			ratio = (float)width / 320.0f;
-		}
-
-		WORD w = (WORD)(ratio * 320.0f) & ~0x3;
-		WORD h = (WORD)(ratio * 200.0f) & ~0x3;
-		gTextureRect.x = (texture_width - 320) / 2;
-		gTextureRect.y = (texture_height - 200) / 2;
-		gTextureRect.w = 320; gTextureRect.h = 200;
-	}
-	else
-	{
-		texture_width = 320;
-		texture_height = 200;
-		gTextureRect.x = gTextureRect.y = 0;
-		gTextureRect.w = 320; gTextureRect.h = 200;
-	}
-
-	//
-	// Create texture for screen.
-	//
-	return SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texture_width, texture_height);
-}
 
 void NullFunc() {}
 
@@ -316,7 +273,7 @@ VIDEO_UpdateScreen(
       dstrect.w = (WORD)((DWORD)(lpRect->w) * gpScreenReal->w / gpScreen->w);
       dstrect.h = (WORD)((DWORD)(lpRect->h) * screenRealHeight / gpScreen->h);
 
-      SDL_SoftStretch(gpScreen, (SDL_Rect *)lpRect, gpScreenReal, &dstrect);
+      SDL_UpperBlit(gpScreen, (SDL_Rect *)lpRect, gpScreenReal, &dstrect);
    }
    else if (g_wShakeTime != 0)
    {
@@ -342,7 +299,7 @@ VIDEO_UpdateScreen(
          dstrect.y = (screenRealY + g_wShakeLevel) * screenRealHeight / gpScreen->h;
       }
 
-      SDL_SoftStretch(gpScreen, &srcrect, gpScreenReal, &dstrect);
+      SDL_UpperBlit(gpScreen, &srcrect, gpScreenReal, &dstrect);
 
       if (g_wShakeTime & 1)
       {
@@ -371,7 +328,7 @@ VIDEO_UpdateScreen(
       dstrect.w = gpScreenReal->w;
       dstrect.h = screenRealHeight;
 
-      SDL_SoftStretch(gpScreen, NULL, gpScreenReal, &dstrect);
+      SDL_UpperBlit(gpScreen, NULL, gpScreenReal, &dstrect);
 
 #if SDL_MAJOR_VERSION == 1 && SDL_MINOR_VERSION <= 2
       dstrect.x = dstrect.y = 0;
@@ -674,7 +631,7 @@ VIDEO_SwitchScreen(
 			  return;
 	  }
 
-      SDL_SoftStretch(gpScreenBak, NULL, gpScreenReal, &dstrect);
+      SDL_UpperBlit(gpScreenBak, NULL, gpScreenReal, &dstrect);
 
       gRenderBackend.RenderCopy();
 
@@ -801,7 +758,7 @@ VIDEO_FadeScreen(
                dstrect.y = (screenRealY + g_wShakeLevel) * screenRealHeight / gpScreen->h;
             }
 
-            SDL_SoftStretch(gpScreenBak, &srcrect, gpScreenReal, &dstrect);
+            SDL_UpperBlit(gpScreenBak, &srcrect, gpScreenReal, &dstrect);
 
             if (g_wShakeTime & 1)
             {
@@ -825,7 +782,7 @@ VIDEO_FadeScreen(
             dstrect.w = gpScreenReal->w;
             dstrect.h = screenRealHeight;
 
-            SDL_SoftStretch(gpScreenBak, NULL, gpScreenReal, &dstrect);
+            SDL_UpperBlit(gpScreenBak, NULL, gpScreenReal, &dstrect);
             gRenderBackend.RenderCopy();
          }
       }

@@ -23,7 +23,7 @@
 #ifndef glslp_h
 #define glslp_h
 
-#include "main.h"
+#include <SDL_render.h>
 
 #define MAX_INDEX 26
 
@@ -60,7 +60,7 @@ typedef struct tagTEXTUREUNITSLOTS {
 }pass_uniform_locations;
 
 typedef struct tagFBOPARAM {
-    bool valid;
+    char valid;
     double width, height;
     double pow_width, pow_height;
 }fbo_params;
@@ -69,13 +69,13 @@ typedef struct tagSHADERPARAM {
     //by defination
     char *shader;
     char *alias;
-    bool filter_linear;
+    char filter_linear;
     enum wrap_mode wrap_mode;
     enum scale_type scale_type_x, scale_type_y;
     double scale_x, scale_y;
-    bool mipmap_input;
-    bool float_framebuffer;
-    bool srgb_framebuffer;
+    char mipmap_input;
+    char float_framebuffer;
+    char srgb_framebuffer;
     int frame_count_mod;
     
     //by implementation
@@ -94,8 +94,8 @@ typedef struct tagTEXTUREPARAMS {
     char *texture_name;
     char *texture_path;
     enum wrap_mode wrap_mode;
-    bool linear;
-    bool mipmap;
+    char linear;
+    char mipmap;
     
     //by implementation
     SDL_Texture *sdl_texture;
@@ -131,7 +131,7 @@ extern GLSLP gGLSLP;
 
 char *get_glslp_path(const char *filename);
 
-bool parse_glslp(const char *, GLSLP *);
+char parse_glslp(const char *, GLSLP *);
 char *serialize_glslp(const GLSLP *);
 
 void glslp_add_parameter(char *line, size_t len, GLSLP *);

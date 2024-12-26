@@ -22,8 +22,14 @@
 // Copyright (c) 2006-2008, Pal Lockheart <palxex@gmail.com>.
 //
 
-#include "main.h"
-#include "pal_config.h"
+#include "text.h"
+#include "global.h"
+#include "input.h"
+#include "palcfg.h"
+#include "video.h"
+#include "util.h"
+#include "font.h"
+#include "palette.h"
 #include <errno.h>
 #include <wctype.h>
 
@@ -42,16 +48,6 @@ static wchar_t internal_wbuffer[PAL_GLOBAL_BUFFER_SIZE];
 
 #define INCLUDE_CODEPAGE_H
 #include "codepage.h"
-
-#ifndef PAL_CLASSIC
-# define ATB_WORD_COUNT             6
-static LPWSTR gc_rgszAdditionalWords[CP_MAX][ATB_WORD_COUNT] = {
-   { L"\x6230\x9B25\x901F\x5EA6", L"\x4E00", L"\x4E8C", L"\x4E09", L"\x56DB", L"\x4E94" },
-   { L"\x6218\x6597\x901F\x5EA6", L"\x4E00", L"\x4E8C", L"\x4E09", L"\x56DB", L"\x4E94" },
-   //{ L"\x6226\x95D8\x901F\x5EA6", L"\x4E00", L"\x4E8C", L"\x4E09", L"\x56DB", L"\x4E94" },
-};
-static LPWSTR gc_rgszDefaultAdditionalWords[ATB_WORD_COUNT] = { NULL, L"\xFF11", L"\xFF12", L"\xFF13", L"\xFF14", L"\xFF15" };
-#endif
 
 #define SDLPAL_EXTRA_WORD_COUNT     1
 static LPWSTR gc_rgszSDLPalWords[CP_MAX][SDLPAL_EXTRA_WORD_COUNT] = {
@@ -333,10 +329,6 @@ PAL_InitText(
 	free(offsets);
 	memcpy(g_TextLib.lpWordBuf + SYSMENU_LABEL_LAUNCHSETTING, gc_rgszSDLPalWords[PAL_GetCodePage()], SDLPAL_EXTRA_WORD_COUNT * sizeof(LPCWSTR));
 
-#ifndef PAL_CLASSIC
-	memcpy(g_TextLib.lpWordBuf + SYSMENU_LABEL_BATTLEMODE, gc_rgszAdditionalWords[PAL_GetCodePage()], ATB_WORD_COUNT * sizeof(LPCWSTR));
-#endif
-
    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
    g_TextLib.bIcon = 0;
    g_TextLib.posIcon = 0;
@@ -468,7 +460,7 @@ PAL_UnescapeText(
 VOID
 PAL_DrawText(
    LPCWSTR    lpszText,
-   PAL_POS    pos,
+   DWORD      pos,
    BYTE       bColor,
    BOOL       fShadow,
    BOOL       fUpdate,
@@ -481,7 +473,7 @@ PAL_DrawText(
 VOID
 PAL_DrawTextUnescape(
    LPCWSTR    lpszText,
-   PAL_POS    pos,
+   DWORD      pos,
    BYTE       bColor,
    BOOL       fShadow,
    BOOL       fUpdate,
@@ -1059,17 +1051,10 @@ PAL_ShowDialogText(
       //
       // The text should be shown in a small window at the center of the screen
       //
-#ifndef PAL_CLASSIC
-      if (gpGlobals->fInBattle && g_Battle.BattleResult == kBattleResultOnGoing)
       {
-         PAL_BattleUIShowText(lpszText, 1400);
-      }
-      else
-#endif
-      {
-         PAL_POS    pos;
+         DWORD      pos;
          LPBOX      lpBox;
-		 int        i, w = wcslen(lpszText), len = 0;
+		 size_t     i, w = wcslen(lpszText), len = 0;
 
 		 for (i = 0; i < w; i++)
             len += PAL_CharWidth(lpszText[i]) >> 3;

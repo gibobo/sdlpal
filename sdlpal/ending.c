@@ -19,7 +19,17 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "ending.h"
+#include "audio.h"
+#include "global.h"
+#include "palcfg.h"
+#include "palcommon.h"
+#include "palette.h"
+#include "play.h"
+#include "rngplay.h"
+#include "scene.h"
+#include "util.h"
+#include "video.h"
 
 static WORD g_wCurEffectSprite = 0;
 

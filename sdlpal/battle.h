@@ -22,8 +22,9 @@
 #ifndef BATTLE_H
 #define BATTLE_H
 
-// #include "global.h"
-// #include "uibattle.h"
+#include "global.h"
+#include "palcommon.h"
+#include "uibattle.h"
 
 #define       BATTLE_FPS               25
 #define       BATTLE_FRAME_TIME        (1000 / BATTLE_FPS)
@@ -75,16 +76,10 @@ typedef struct tagBATTLEENEMY
    FLOAT              flTimeMeter;            // time-charging meter (0 = empty, 100 = full).
    POISONSTATUS       rgPoisons[MAX_POISONS]; // poisons
    LPSPRITE           lpSprite;
-   PAL_POS            pos;                    // current position on the screen
-   PAL_POS            posOriginal;            // original position on the screen
+   DWORD            pos;                    // current position on the screen
+   DWORD            posOriginal;            // original position on the screen
    WORD               wCurrentFrame;          // current frame number
    FIGHTERSTATE       state;                  // state of this enemy
-
-#ifndef PAL_CLASSIC
-   BOOL               fTurnStart;
-   BOOL               fFirstMoveDone;
-   BOOL               fDualMove;
-#endif
 
    WORD               wScriptOnTurnStart;
    WORD               wScriptOnBattleEnd;
@@ -103,8 +98,8 @@ typedef struct tagBATTLEPLAYER
    FLOAT              flTimeSpeedModifier;
    WORD               wHidingTime;          // remaining hiding time
    LPSPRITE           lpSprite;
-   PAL_POS            pos;                  // current position on the screen
-   PAL_POS            posOriginal;          // original position on the screen
+   DWORD            pos;                  // current position on the screen
+   DWORD            posOriginal;          // original position on the screen
    WORD               wCurrentFrame;        // current frame number
    FIGHTERSTATE       state;                // state of this player
    BATTLEACTION       action;               // action to perform
@@ -113,9 +108,6 @@ typedef struct tagBATTLEPLAYER
    BOOL               fSecondAttack;           // FALSE for the first full attack, TRUE for the second full attack
    WORD               wPrevHP;              // HP value prior to action
    WORD               wPrevMP;              // MP value prior to action
-#ifndef PAL_CLASSIC
-   SHORT              sTurnOrder;           // turn order
-#endif
 } BATTLEPLAYER;
 
 typedef enum tagBATTLESPRITETYPE
@@ -130,7 +122,7 @@ typedef struct tagBATTLESPRITESEQ
 {
    WORD               wType;
    WORD               wObjectIndex;
-   PAL_POS            pos;
+   DWORD            pos;
    SHORT              sLayerOffset;
    BOOL               fHaveColorShift;
 } BATTLESPRITESEQ;
@@ -146,8 +138,6 @@ typedef struct tagSUMMON
 
 #define MAX_BATTLE_ACTIONS    256
 #define MAX_KILLED_ENEMIES    256
-
-#ifdef PAL_CLASSIC
 
 typedef enum tabBATTLEPHASE
 {
@@ -165,8 +155,6 @@ typedef struct tagACTIONQUEUE
 
 #define MAX_ACTIONQUEUE_ITEMS (MAX_PLAYERS_IN_PARTY + MAX_ENEMIES_IN_TEAM * 2)
 
-#endif
-
 typedef struct tagBATTLE
 {
    BATTLEPLAYER     rgPlayer[MAX_PLAYERS_IN_PARTY];
@@ -180,7 +168,7 @@ typedef struct tagBATTLE
    SHORT            sBackgroundColorShift;
 
    LPSPRITE         lpSummonSprite;       // sprite of summoned god
-   PAL_POS          posSummon;
+   DWORD          posSummon;
    INT              iSummonFrame;         // current frame of the summoned god
    BOOL             fSummonColorShift;
 
@@ -211,7 +199,6 @@ typedef struct tagBATTLE
    WORD             wMaxSpriteDrawSeqIndex;
    BOOL             fSpriteAddLock;
 
-#ifdef PAL_CLASSIC
    BATTLEPHASE      Phase;
    ACTIONQUEUE      ActionQueue[MAX_ACTIONQUEUE_ITEMS];
    int              iCurAction;
@@ -223,7 +210,6 @@ typedef struct tagBATTLE
 
    WORD             coopContributors[MAX_PLAYERS_IN_PARTY];
    BOOL             fThisTurnCoop;
-#endif
 } BATTLE;
 
 #ifdef __cplusplus
@@ -258,7 +244,7 @@ VOID
 PAL_BattleDrawMagicSprites(
    INT               iMagicNum,
    SDL_Surface      *lpDstSurface,
-   PAL_POS           pos
+   DWORD           pos
 );
 
 VOID
@@ -275,7 +261,7 @@ VOID
 PAL_BattleAddSpriteObject(
    WORD               wType,
    WORD               wObjectIndex,
-   PAL_POS            pos,
+   DWORD            pos,
    SHORT              sLayerOffset,
    BOOL               fHaveColorShift
 );

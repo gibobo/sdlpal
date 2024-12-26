@@ -22,6 +22,8 @@
 #ifndef RNGPLAY_H
 #define RNGPLAY_H
 
+#include "common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

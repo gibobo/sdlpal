@@ -19,18 +19,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <math.h>
-#include "global.h"
+#include "audio.h"
+#include "convertopl.h"
+#include "emuopls.h"
 #include "palcfg.h"
 #include "players.h"
-#include "audio.h"
-
 #include "resampler.h"
-#include "emuopls.h"
-#include "convertopl.h"
 #include "src/rix.h"
 #include "src/surroundopl.h"
-#include "src/opl.h"
 
 typedef struct tagRIXPLAYER :
 	public AUDIOPLAYER
@@ -166,7 +162,7 @@ RIX_FillBuffer(
 		// Fill the buffer with sound data
 		//
 		int buf_max_len = gConfig.iSampleRate / 70 * gConfig.iAudioChannels * sizeof(short);
-		bool fContinue = true;
+		char fContinue = true;
 		while (len > 0 && fContinue)
 		{
 			if (pRixPlayer->pos == NULL || pRixPlayer->pos - pRixPlayer->buf >= buf_max_len)

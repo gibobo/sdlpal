@@ -51,7 +51,7 @@ PAL_LoadMap(
 --*/
 {
    LPBYTE                     buf;
-   INT                        size, i, j;
+   INT                        size;
    LPPALMAP                   map;
 
    //

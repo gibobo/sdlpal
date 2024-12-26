@@ -18,6 +18,4 @@ target_include_directories(sdlpal
 target_compile_definitions(sdlpal
     PRIVATE
         _CRT_SECURE_NO_WARNINGS
-        # PAL_CLASSIC
-        # ENABLE_REVISIED_BATTLE
 )

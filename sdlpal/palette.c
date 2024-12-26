@@ -19,7 +19,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "palette.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
+#include "palcommon.h"
+#include "play.h"
+#include "scene.h"
+#include "util.h"
+#include "video.h"
+#include <SDL_timer.h>
 
 SDL_Color *
 PAL_GetPalette(

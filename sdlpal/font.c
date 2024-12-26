@@ -22,7 +22,7 @@
 #include "font.h"
 #include "util.h"
 #include "text.h"
-#include "pal_config.h"
+// #include "pal_config.h"
 
 
 #define _FONT_C
@@ -71,7 +71,7 @@ void
 PAL_DrawCharOnSurface(
 	uint16_t                 wChar,
 	SDL_Surface             *lpSurface,
-	PAL_POS                  pos,
+	DWORD                  pos,
 	uint8_t                  bColor,
 	BOOL                     fUse8x8Font
 )

@@ -22,7 +22,8 @@
 #ifndef UIBATTLE_H
 #define UIBATTLE_H
 
-// #include "ui.h"
+#include "ui.h"
+#include "common.h"
 
 typedef enum tagBATTLEUISTATE
 {
@@ -82,7 +83,7 @@ typedef enum tagBATTLEUIACTION
 typedef struct tagSHOWNUM
 {
    WORD             wNum;
-   PAL_POS          pos;
+   DWORD            pos;
    DWORD            dwTime;
    NUMCOLOR         color;
 } SHOWNUM;
@@ -116,7 +117,7 @@ extern "C" {
 
 VOID
 PAL_PlayerInfoBox(
-   PAL_POS         pos,
+   DWORD           pos,
    WORD            wPlayerRole,
    INT             iTimeMeter,
    BYTE            bTimeMeterColor,
@@ -142,7 +143,7 @@ PAL_BattleUIUpdate(
 VOID
 PAL_BattleUIShowNum(
    WORD           wNum,
-   PAL_POS        pos,
+   DWORD          pos,
    NUMCOLOR       color
 );
 

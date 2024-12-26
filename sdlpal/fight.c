@@ -311,24 +311,6 @@ PAL_GetEnemyDexterity(
    s = (g_Battle.rgEnemy[wEnemyIndex].e.wLevel + 6) * 3;
    s += (SHORT)g_Battle.rgEnemy[wEnemyIndex].e.wDexterity;
 
-#ifndef PAL_CLASSIC
-   if (s < 20)
-   {
-      s = 20;
-   }
-
-   if (g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusHaste] != 0)
-   {
-      s *= 6;
-      s /= 5;
-   }
-   else if (g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusSlow] != 0)
-   {
-      s *= 2;
-      s /= 3;
-   }
-#endif
-
    return s;
 }
 
@@ -355,115 +337,16 @@ PAL_GetPlayerActualDexterity(
 
    if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusHaste] != 0)
    {
-#ifdef PAL_CLASSIC
       wDexterity *= 3;
-#else
-      wDexterity *= 6;
-      wDexterity /= 5;
-#endif
-   }
-#ifndef PAL_CLASSIC
-   else if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSlow] != 0)
-   {
-      wDexterity *= 2;
-      wDexterity /= 3;
    }
 
-   if (PAL_IsPlayerDying(wPlayerRole))
-   {
-      //
-      // player who is low of HP should be slower
-      //
-      wDexterity *= 4;
-      wDexterity /= 5;
-   }
-#endif
-
-#ifdef PAL_CLASSIC
    if (wDexterity > 999)
    {
       wDexterity = 999;
    }
-#endif
 
    return wDexterity;
 }
-
-#ifndef PAL_CLASSIC
-
-VOID
-PAL_UpdateTimeChargingUnit(
-   VOID
-)
-/*++
-  Purpose:
-
-    Update the base time unit of time-charging.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-   g_Battle.flTimeChargingUnit = (FLOAT)(pow(PAL_GetPlayerDexterity(0) + 5, 0.3));
-   g_Battle.flTimeChargingUnit /= PAL_GetPlayerDexterity(0);
-
-   if (gpGlobals->bBattleSpeed > 1)
-   {
-      g_Battle.flTimeChargingUnit /= 1 + (gpGlobals->bBattleSpeed - 1) * 0.5;
-   }
-   else
-   {
-      g_Battle.flTimeChargingUnit /= 1.2f;
-   }
-}
-
-FLOAT
-PAL_GetTimeChargingSpeed(
-   WORD           wDexterity
-)
-/*++
-  Purpose:
-
-    Calculate the time charging speed.
-
-  Parameters:
-
-    [IN]  wDexterity - the dexterity value of player or enemy.
-
-  Return value:
-
-    The time-charging speed of the player or enemy.
-
---*/
-{
-   if ((g_Battle.UI.state == kBattleUISelectMove &&
-      g_Battle.UI.MenuState != kBattleMenuMain) ||
-      !SDL_TICKS_PASSED(SDL_GetTicks(), g_Battle.UI.dwMsgShowTime))
-   {
-      //
-      // Pause the time when there are submenus or text messages
-      //
-      return 0;
-   }
-
-   //
-   // The battle should be faster when using Auto-Battle
-   //
-   if (gpGlobals->fAutoBattle)
-   {
-      wDexterity *= 3;
-   }
-
-   return g_Battle.flTimeChargingUnit * wDexterity;
-}
-
-#endif
 
 VOID
 PAL_BattleDelay(
@@ -963,17 +846,6 @@ PAL_BattleUpdateFighters(
          {
             g_Battle.rgPlayer[i].wCurrentFrame = 1;
          }
-#ifndef PAL_CLASSIC
-         else if (g_Battle.rgPlayer[i].state == kFighterAct &&
-            g_Battle.rgPlayer[i].action.ActionType == kBattleActionMagic &&
-            !g_Battle.fEnemyCleared)
-         {
-            //
-            // Player is using a magic
-            //
-            g_Battle.rgPlayer[i].wCurrentFrame = 5;
-         }
-#endif
          else if (g_Battle.rgPlayer[i].fDefending && !g_Battle.fEnemyCleared)
          {
             g_Battle.rgPlayer[i].wCurrentFrame = 3;
@@ -1093,12 +965,6 @@ PAL_BattleStartFrame(
    WORD                     wDexterity;
    BOOL                     fOnlyPuppet = TRUE;
 
-#ifndef PAL_CLASSIC
-   FLOAT                    flMax;
-   BOOL                     fMoved = FALSE;
-   SHORT                    sMax, sMaxIndex;
-#endif
-
    if (!g_Battle.fEnemyCleared)
    {
       PAL_BattleUpdateFighters();
@@ -1152,237 +1018,6 @@ PAL_BattleStartFrame(
       }
    }
 
-#ifndef PAL_CLASSIC
-   //
-   // Check for hiding status
-   //
-   if (g_Battle.iHidingTime > 0)
-   {
-      if (PAL_GetTimeChargingSpeed(9999) > 0)
-      {
-         g_Battle.iHidingTime--;
-      }
-
-      if (g_Battle.iHidingTime == 0)
-      {
-         VIDEO_BackupScreen(g_Battle.lpSceneBuf);
-         PAL_BattleMakeScene();
-         PAL_BattleFadeScene();
-      }
-   }
-
-   //
-   // Run the logic for all enemies
-   //
-   for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
-   {
-      if (g_Battle.rgEnemy[i].wObjectID == 0)
-      {
-         continue;
-      }
-
-      if (g_Battle.rgEnemy[i].fTurnStart)
-      {
-         g_Battle.rgEnemy[i].wScriptOnTurnStart =
-            PAL_RunTriggerScript(g_Battle.rgEnemy[i].wScriptOnTurnStart, i);
-
-         g_Battle.rgEnemy[i].fTurnStart = FALSE;
-         fMoved = TRUE;
-      }
-   }
-
-   for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
-   {
-      if (g_Battle.rgEnemy[i].wObjectID == 0)
-      {
-         continue;
-      }
-
-      switch (g_Battle.rgEnemy[i].state)
-      {
-      case kFighterWait:
-         flMax = PAL_GetTimeChargingSpeed(PAL_GetEnemyDexterity(i));
-         flMax /= (gpGlobals->fAutoBattle ? 2 : 1);
-
-         if (flMax != 0)
-         {
-            g_Battle.rgEnemy[i].flTimeMeter += flMax;
-
-            if (g_Battle.rgEnemy[i].flTimeMeter > 100 && flMax > 0)
-            {
-               if (g_Battle.iHidingTime == 0)
-               {
-                  g_Battle.rgEnemy[i].state = kFighterCom;
-               }
-               else
-               {
-                  g_Battle.rgEnemy[i].flTimeMeter = 0;
-               }
-            }
-         }
-         break;
-
-      case kFighterCom:
-         g_Battle.rgEnemy[i].wScriptOnReady =
-            PAL_RunTriggerScript(g_Battle.rgEnemy[i].wScriptOnReady, i);
-         g_Battle.rgEnemy[i].state = kFighterAct;
-         fMoved = TRUE;
-         break;
-
-      case kFighterAct:
-         if (!fMoved && (PAL_GetTimeChargingSpeed(9999) > 0 || g_Battle.rgEnemy[i].fDualMove) && !fOnlyPuppet)
-         {
-            fMoved = TRUE;
-
-            g_Battle.fEnemyMoving = TRUE;
-
-            g_Battle.rgEnemy[i].fDualMove =
-               (!g_Battle.rgEnemy[i].fFirstMoveDone &&
-                  (g_Battle.rgEnemy[i].e.wDualMove >= 2 ||
-                     (g_Battle.rgEnemy[i].e.wDualMove != 0 && RandomLong(0, 1))));
-
-            PAL_BattleEnemyPerformAction(i);
-
-            g_Battle.rgEnemy[i].flTimeMeter = 0;
-            g_Battle.rgEnemy[i].state = kFighterWait;
-            g_Battle.fEnemyMoving = FALSE;
-
-            if (g_Battle.rgEnemy[i].fDualMove)
-            {
-               g_Battle.rgEnemy[i].flTimeMeter = 100;
-               g_Battle.rgEnemy[i].state = kFighterCom;
-               g_Battle.rgEnemy[i].fFirstMoveDone = TRUE;
-            }
-            else
-            {
-               g_Battle.rgEnemy[i].fFirstMoveDone = FALSE;
-               g_Battle.rgEnemy[i].fTurnStart = TRUE;
-            }
-         }
-         break;
-      }
-   }
-
-   //
-   // Update the battle UI
-   //
-   PAL_BattleUIUpdate();
-
-   //
-   // Run the logic for all players
-   //
-   for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
-   {
-      wPlayerRole = gpGlobals->rgParty[i].wPlayerRole;
-
-      //
-      // Skip dead players
-      //
-      if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] == 0 &&
-         gpGlobals->rgPlayerStatus[wPlayerRole][kStatusPuppet] == 0)
-      {
-         g_Battle.rgPlayer[i].state = kFighterWait;
-         g_Battle.rgPlayer[i].flTimeMeter = 0;
-         g_Battle.rgPlayer[i].flTimeSpeedModifier = 1.0f;
-         g_Battle.rgPlayer[i].sTurnOrder = -1;
-         continue;
-      }
-
-      switch (g_Battle.rgPlayer[i].state)
-      {
-      case kFighterWait:
-         wDexterity = PAL_GetPlayerActualDexterity(wPlayerRole);
-         g_Battle.rgPlayer[i].flTimeMeter +=
-            PAL_GetTimeChargingSpeed(wDexterity) * g_Battle.rgPlayer[i].flTimeSpeedModifier;
-         break;
-
-      case kFighterCom:
-         break;
-
-      case kFighterAct:
-         if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSleep] > 0)
-         {
-            g_Battle.rgPlayer[i].action.ActionType = kBattleActionPass;
-            g_Battle.rgPlayer[i].action.flRemainingTime = 0;
-         }
-         else if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusConfused] > 0)
-         {
-            g_Battle.rgPlayer[i].action.ActionType =
-               (PAL_IsPlayerDying(wPlayerRole) ? kBattleActionPass : kBattleActionAttackMate);
-            g_Battle.rgPlayer[i].action.flRemainingTime = 0;
-         }
-         else if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSilence] > 0 &&
-            g_Battle.rgPlayer[i].action.ActionType == kBattleActionMagic)
-         {
-            g_Battle.rgPlayer[i].action.flRemainingTime = 0;
-         }
-
-         wDexterity = PAL_GetPlayerActualDexterity(wPlayerRole);
-         g_Battle.rgPlayer[i].action.flRemainingTime -= PAL_GetTimeChargingSpeed(wDexterity);
-
-         if (g_Battle.rgPlayer[i].action.flRemainingTime <= 0 &&
-            g_Battle.rgPlayer[i].sTurnOrder == -1)
-         {
-	        sMax = -1;
-
-	        for (j = 0; j <= gpGlobals->wMaxPartyMemberIndex; j++)
-	        {
-		       if (g_Battle.rgPlayer[j].sTurnOrder > sMax)
-		       {
-			      sMax = g_Battle.rgPlayer[j].sTurnOrder;
-		       }
-	        }
-
-	        g_Battle.rgPlayer[i].sTurnOrder = sMax + 1;
-         }
-
-         break;
-      }
-   }
-
-   //
-   // Preform action for player
-   //
-   if (!fMoved)
-   {
-      sMax = 9999;
-      sMaxIndex = -1;
-
-      for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
-      {
-         wPlayerRole = gpGlobals->rgParty[i].wPlayerRole;
-
-         //
-         // Skip dead players
-         //
-         if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] == 0 &&
-            gpGlobals->rgPlayerStatus[wPlayerRole][kStatusPuppet] == 0)
-         {
-            continue;
-         }
-
-         if (g_Battle.rgPlayer[i].state == kFighterAct &&
-            g_Battle.rgPlayer[i].sTurnOrder != -1 &&
-            g_Battle.rgPlayer[i].sTurnOrder < sMax)
-         {
-	        sMax = g_Battle.rgPlayer[i].sTurnOrder;
-	        sMaxIndex = i;
-         }
-      }
-
-      if (sMaxIndex != -1)
-      {
-         //
-         // Perform the action for this player.
-         //
-         PAL_BattlePlayerPerformAction(sMaxIndex);
-
-         g_Battle.rgPlayer[sMaxIndex].flTimeMeter = 0;
-         g_Battle.rgPlayer[sMaxIndex].flTimeSpeedModifier = 1.0f;
-         g_Battle.rgPlayer[sMaxIndex].sTurnOrder = -1;
-      }
-   }
-#else
    if (g_Battle.Phase == kBattlePhaseSelectAction)
    {
       if (g_Battle.UI.state == kBattleUIWait)
@@ -1703,9 +1338,7 @@ PAL_BattleStartFrame(
          // Proceed to next turn...
          //
          g_Battle.Phase = kBattlePhaseSelectAction;
-#ifdef PAL_CLASSIC
          g_Battle.fThisTurnCoop = FALSE;
-#endif
       }
       else
       {
@@ -1804,7 +1437,7 @@ PAL_BattleStartFrame(
    //
    PAL_BattleUIUpdate();
 
-#endif
+
 }
 
 VOID
@@ -1847,10 +1480,6 @@ PAL_BattleCommitAction(
          g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.wActionID =
             g_Battle.UI.wObjectID;
 	  }
-#ifndef PAL_CLASSIC
-      g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].prevAction =
-         g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action;
-#endif
    }
    else
    {
@@ -1897,7 +1526,6 @@ PAL_BattleCommitAction(
       }
       break;
 
-#ifdef PAL_CLASSIC
    case kBattleActionUseItem:
       if ((gpGlobals->g.rgObject[g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.wActionID].item.wFlags & kItemFlagConsuming) == 0)
       {
@@ -1914,94 +1542,19 @@ PAL_BattleCommitAction(
          }
       }
       break;
-#endif
 
    default:
       break;
    }
 
-#ifndef PAL_CLASSIC
-   //
-   // Calculate the waiting time for the action
-   //
-   switch (g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.ActionType)
-   {
-   case kBattleActionMagic:
-      {
-         LPMAGIC      p;
-         WORD         wCostMP;
-
-         //
-         // The base casting time of magic is set to the MP costed
-         //
-         w = g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.wActionID;
-         p = &(gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[w].magic.wMagicNumber]);
-         wCostMP = p->wCostMP;
-
-         if (wCostMP == 1)
-         {
-            if (p->wType == kMagicTypeSummon)
-            {
-               //
-               // The Wine God is an ultimate move which should take long
-               //
-               wCostMP = 175;
-            }
-         }
-         else if (p->wType == kMagicTypeApplyToPlayer || p->wType == kMagicTypeApplyToParty ||
-            p->wType == kMagicTypeTrance)
-         {
-            //
-            // Healing magics should take shorter
-            //
-            wCostMP /= 3;
-         }
-
-         g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.flRemainingTime = wCostMP + 5;
-      }
-      break;
-
-   case kBattleActionAttack:
-   case kBattleActionFlee:
-   case kBattleActionUseItem:
-   case kBattleActionThrowItem:
-   default:
-      //
-      // Other actions take no time
-      //
-      g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.flRemainingTime = 0;
-      break;
-   }
-#else
    if (g_Battle.UI.wActionType == kBattleActionFlee)
    {
       g_Battle.fFlee = TRUE;
    }
-#endif
 
    g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].state = kFighterAct;
    g_Battle.UI.state = kBattleUIWait;
 
-#ifndef PAL_CLASSIC
-   if (g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.flRemainingTime <= 0)
-   {
-	  SHORT sMax = -1;
-
-	  for (w = 0; w <= gpGlobals->wMaxPartyMemberIndex; w++)
-	  {
-		 if (g_Battle.rgPlayer[w].sTurnOrder > sMax)
-		 {
-			sMax = g_Battle.rgPlayer[w].sTurnOrder;
-		 }
-	  }
-
-	  g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].sTurnOrder = sMax + 1;
-   }
-   else
-   {
-	  g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].sTurnOrder = -1;
-   }
-#endif
 }
 
 static VOID
@@ -3208,7 +2761,7 @@ PAL_BattleShowPostMagicAnim(
 --*/
 {
    int         i, j, x, y, dist = 8;
-   PAL_POS     rgEnemyPosBak[MAX_ENEMIES_IN_TEAM];
+   DWORD     rgEnemyPosBak[MAX_ENEMIES_IN_TEAM];
 
    for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
    {
@@ -3363,7 +2916,6 @@ PAL_BattlePlayerValidateAction(
    case kBattleActionCoopMagic:
       fToEnemy = TRUE;
 
-#ifdef PAL_CLASSIC
       {
          int iTotalHealthy = 0;
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
@@ -3379,24 +2931,6 @@ PAL_BattlePlayerValidateAction(
             g_Battle.rgPlayer[wPlayerIndex].action.wActionID = 0;
          }
       }
-#else
-     for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
-      {
-         w = gpGlobals->rgParty[i].wPlayerRole;
-
-         if (PAL_IsPlayerDying(w) ||
-            gpGlobals->rgPlayerStatus[w][kStatusSilence] > 0 ||
-            gpGlobals->rgPlayerStatus[w][kStatusSleep] > 0 ||
-            gpGlobals->rgPlayerStatus[w][kStatusConfused] > 0 ||
-            g_Battle.rgPlayer[i].flTimeMeter < 100 ||
-            (g_Battle.rgPlayer[i].state == kFighterAct && i != wPlayerIndex))
-         {
-            g_Battle.rgPlayer[wPlayerIndex].action.ActionType = kBattleActionAttack;
-            g_Battle.rgPlayer[wPlayerIndex].action.wActionID = 0;
-            break;
-         }
-      }
-#endif
 
       if (g_Battle.rgPlayer[wPlayerIndex].action.ActionType == kBattleActionCoopMagic)
       {
@@ -3530,20 +3064,7 @@ PAL_BattleCheckHidingEffect(
 {
    if (g_Battle.iHidingTime < 0)
    {
-#ifdef PAL_CLASSIC
       g_Battle.iHidingTime = -g_Battle.iHidingTime;
-#else
-      g_Battle.iHidingTime = -g_Battle.iHidingTime * 20;
-
-      if (gpGlobals->bBattleSpeed > 1)
-      {
-         g_Battle.iHidingTime *= 1 + (gpGlobals->bBattleSpeed - 1) * 0.5;
-      }
-      else
-      {
-         g_Battle.iHidingTime *= 1.2;
-      }
-#endif
       VIDEO_BackupScreen(g_Battle.lpSceneBuf);
       PAL_BattleMakeScene();
       PAL_BattleFadeScene();
@@ -3602,9 +3123,6 @@ PAL_BattlePlayerPerformAction(
    WORD     str, def, res, wObject, wMagicNum;
    BOOL     fCritical;
    WORD     rgwCoopPos[3][2] = {{208, 157}, {234, 170}, {260, 183}};
-#ifndef PAL_CLASSIC
-   BOOL     fPoisoned, fCheckPoison;
-#endif
 
    g_Battle.wMovingPlayerIndex = wPlayerIndex;
    g_Battle.iBlow = 0;
@@ -3618,10 +3136,9 @@ PAL_BattlePlayerPerformAction(
    switch (g_Battle.rgPlayer[wPlayerIndex].action.ActionType)
    {
    case kBattleActionAttack:
-#ifdef PAL_CLASSIC
       if(g_Battle.fThisTurnCoop)
          break;
-#endif
+
       if (sTarget != -1)
       {
          //
@@ -3760,10 +3277,8 @@ PAL_BattlePlayerPerformAction(
       break;
 
    case kBattleActionAttackMate:
-#ifdef PAL_CLASSIC
       if(g_Battle.fThisTurnCoop)
          break;
-#endif
       //
       // Check if there is someone else who is alive
       //
@@ -3856,9 +3371,7 @@ PAL_BattlePlayerPerformAction(
       break;
 
    case kBattleActionCoopMagic:
-#ifdef PAL_CLASSIC
       g_Battle.fThisTurnCoop = TRUE;
-#endif
       wObject = PAL_GetPlayerCooperativeMagic(gpGlobals->rgParty[wPlayerIndex].wPlayerRole);
       wMagicNum = gpGlobals->g.rgObject[wObject].magic.wMagicNumber;
 
@@ -3906,10 +3419,8 @@ PAL_BattlePlayerPerformAction(
 
                t++;
 
-#ifdef PAL_CLASSIC
                if( g_Battle.coopContributors[j] == FALSE )
                   continue;
-#endif
 
                x = PAL_X(g_Battle.rgPlayer[j].posOriginal) * (6 - i);
                y = PAL_Y(g_Battle.rgPlayer[j].posOriginal) * (6 - i);
@@ -3932,10 +3443,8 @@ PAL_BattlePlayerPerformAction(
             {
                continue;
             }
-#ifdef PAL_CLASSIC
             if( g_Battle.coopContributors[i] == FALSE )
                continue;
-#endif
 
             g_Battle.rgPlayer[i].wCurrentFrame = 5;
 
@@ -3955,10 +3464,8 @@ PAL_BattlePlayerPerformAction(
 
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
-#ifdef PAL_CLASSIC
          if( g_Battle.coopContributors[i] == FALSE )
             continue;
-#endif
 
          gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[i].wPlayerRole] -=
             gpGlobals->g.lprgMagic[wMagicNum].wCostMP;
@@ -3971,12 +3478,7 @@ PAL_BattlePlayerPerformAction(
          //
          // Reset the time meter for everyone when using coopmagic
          //
-#ifdef PAL_CLASSIC
          g_Battle.rgPlayer[i].state = kFighterWait;
-#else
-         g_Battle.rgPlayer[i].flTimeMeter = 0;
-         g_Battle.rgPlayer[i].flTimeSpeedModifier = 2;
-#endif
       }
 
       PAL_BattleBackupStat(); // so that "damages" to players won't be shown
@@ -3985,10 +3487,8 @@ PAL_BattlePlayerPerformAction(
 
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
-#ifdef PAL_CLASSIC
          if( g_Battle.coopContributors[i] == FALSE )
             continue;
-#endif
 
          str += PAL_GetPlayerAttackStrength(gpGlobals->rgParty[i].wPlayerRole);
          str += PAL_GetPlayerMagicStrength(gpGlobals->rgParty[i].wPlayerRole);
@@ -4078,10 +3578,8 @@ PAL_BattlePlayerPerformAction(
 
             for (j = 0; j <= gpGlobals->wMaxPartyMemberIndex; j++)
             {
-#ifdef PAL_CLASSIC
                if( g_Battle.coopContributors[j] == FALSE )
                   continue;
-#endif
 
                g_Battle.rgPlayer[j].wCurrentFrame = 0;
 
@@ -4110,19 +3608,17 @@ PAL_BattlePlayerPerformAction(
       break;
 
    case kBattleActionDefend:
-#ifdef PAL_CLASSIC
       if(g_Battle.fThisTurnCoop)
          break;
-#endif
+
       g_Battle.rgPlayer[wPlayerIndex].fDefending = TRUE;
       gpGlobals->Exp.rgDefenseExp[wPlayerRole].wCount += 2;
       break;
 
    case kBattleActionFlee:
-#ifdef PAL_CLASSIC
       if(g_Battle.fThisTurnCoop)
          break;
-#endif
+
       str = PAL_GetPlayerFleeRate(wPlayerRole);
       def = 0;
 
@@ -4174,10 +3670,9 @@ PAL_BattlePlayerPerformAction(
       break;
 
    case kBattleActionMagic:
-#ifdef PAL_CLASSIC
       if(g_Battle.fThisTurnCoop)
          break;
-#endif
+
       wObject = g_Battle.rgPlayer[wPlayerIndex].action.wActionID;
       wMagicNum = gpGlobals->g.rgObject[wObject].magic.wMagicNumber;
 
@@ -4332,10 +3827,8 @@ PAL_BattlePlayerPerformAction(
       break;
 
    case kBattleActionThrowItem:
-#ifdef PAL_CLASSIC
       if(g_Battle.fThisTurnCoop)
          break;
-#endif
       wObject = g_Battle.rgPlayer[wPlayerIndex].action.wActionID;
 
       for (i = 0; i < 4; i++)
@@ -4378,10 +3871,9 @@ PAL_BattlePlayerPerformAction(
       break;
 
    case kBattleActionUseItem:
-#ifdef PAL_CLASSIC
       if(g_Battle.fThisTurnCoop)
          break;
-#endif
+
       wObject = g_Battle.rgPlayer[wPlayerIndex].action.wActionID;
 
       PAL_BattleShowPlayerUseItemAnim(wPlayerIndex, wObject, sTarget);
@@ -4425,66 +3917,6 @@ PAL_BattlePlayerPerformAction(
    //
    g_Battle.rgPlayer[wPlayerIndex].action.sTarget = origTarget;
 
-#ifndef PAL_CLASSIC
-   //
-   // Only check for poisons when the battle is not ended
-   //
-   fCheckPoison = FALSE;
-
-   if (g_Battle.BattleResult == kBattleResultOnGoing)
-   {
-      for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
-      {
-         if (g_Battle.rgEnemy[i].wObjectID != 0)
-         {
-            fCheckPoison = TRUE;
-            break;
-         }
-      }
-   }
-
-   //
-   // Check for poisons
-   //
-   if (fCheckPoison)
-   {
-      fPoisoned = FALSE;
-      PAL_BattleBackupStat();
-
-      for (i = 0; i < MAX_POISONS; i++)
-      {
-         wObject = gpGlobals->rgPoisonStatus[i][wPlayerIndex].wPoisonID;
-
-         if (wObject != 0)
-         {
-            fPoisoned = TRUE;
-            gpGlobals->rgPoisonStatus[i][wPlayerIndex].wPoisonScript =
-               PAL_RunTriggerScript(gpGlobals->rgPoisonStatus[i][wPlayerIndex].wPoisonScript, wPlayerRole);
-         }
-      }
-
-      if (fPoisoned)
-      {
-         PAL_BattleDelay(3, 0, TRUE);
-         PAL_BattleUpdateFighters();
-         if (PAL_BattleDisplayStatChange())
-         {
-            PAL_BattleDelay(6, 0, TRUE);
-         }
-      }
-   }
-
-   //
-   // Update statuses
-   //
-   for (i = 0; i < kStatusAll; i++)
-   {
-      if (gpGlobals->rgPlayerStatus[wPlayerRole][i] > 0)
-      {
-         gpGlobals->rgPlayerStatus[wPlayerRole][i]--;
-      }
-   }
-#endif
 }
 
 static INT
@@ -4727,11 +4159,7 @@ PAL_BattleEnemyPerformAction(
             w = gpGlobals->rgParty[i].wPlayerRole;
 
             if (gpGlobals->rgPlayerStatus[w][kStatusSleep] == 0 &&
-#ifdef PAL_CLASSIC
                gpGlobals->rgPlayerStatus[w][kStatusParalyzed] == 0 &&
-#else
-               gpGlobals->rgPlayerStatus[w][kStatusSlow] == 0 &&
-#endif
                gpGlobals->rgPlayerStatus[w][kStatusConfused] == 0 &&
                RandomLong(0, 2) == 0 &&
                gpGlobals->g.PlayerRoles.rgwHP[w] != 0)
@@ -4746,11 +4174,7 @@ PAL_BattleEnemyPerformAction(
          }
       }
       else if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSleep] == 0 &&
-#ifdef PAL_CLASSIC
          gpGlobals->rgPlayerStatus[wPlayerRole][kStatusParalyzed] == 0 &&
-#else
-         gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSlow] == 0 &&
-#endif
          gpGlobals->rgPlayerStatus[wPlayerRole][kStatusConfused] == 0 &&
          RandomLong(0, 2) == 0)
       {
@@ -4977,11 +4401,7 @@ PAL_BattleEnemyPerformAction(
       if (iCoverIndex == -1 &&
          (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusConfused] > 0 ||
          gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSleep] > 0 ||
-#ifdef PAL_CLASSIC
          gpGlobals->rgPlayerStatus[wPlayerRole][kStatusParalyzed] > 0))
-#else
-         gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSlow] > 0))
-#endif
       {
          fAutoDefend = FALSE;
       }
@@ -5151,44 +4571,8 @@ PAL_BattleEnemyPerformAction(
    }
 
 end:
-#ifndef PAL_CLASSIC
-   //
-   // Check poisons
-   //
-   if (!g_Battle.rgEnemy[wEnemyIndex].fDualMove)
-   {
-      PAL_BattleBackupStat();
 
-      for (i = 0; i < MAX_POISONS; i++)
-      {
-         if (g_Battle.rgEnemy[wEnemyIndex].rgPoisons[i].wPoisonID != 0)
-         {
-            g_Battle.rgEnemy[wEnemyIndex].rgPoisons[i].wPoisonScript =
-               PAL_RunTriggerScript(g_Battle.rgEnemy[wEnemyIndex].rgPoisons[i].wPoisonScript, wEnemyIndex);
-         }
-      }
-
-      if (PAL_BattleDisplayStatChange())
-      {
-         PAL_BattleDelay(6, 0, FALSE);
-      }
-   }
-
-   PAL_BattlePostActionCheck(FALSE);
-
-   //
-   // Update statuses
-   //
-   for (i = 0; i < kStatusAll; i++)
-   {
-      if (g_Battle.rgEnemy[wEnemyIndex].rgwStatus[i] > 0)
-      {
-         g_Battle.rgEnemy[wEnemyIndex].rgwStatus[i]--;
-      }
-   }
-#else
    i = 0; // do nothing
-#endif
 }
 
 VOID
@@ -5266,11 +4650,7 @@ PAL_BattleStealFromEnemy(
 
          if (c > 0)
          {
-#ifdef PAL_CLASSIC
             PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"@%ls @%d @%ls@", PAL_GetWord(34), c, PAL_GetWord(10));
-#else
-            PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"%ls %d %ls", PAL_GetWord(34), c, PAL_GetWord(10));
-#endif
          }
       }
       else
@@ -5280,21 +4660,13 @@ PAL_BattleStealFromEnemy(
          //
          g_Battle.rgEnemy[wTarget].e.nStealItem--;
          PAL_AddItemToInventory(g_Battle.rgEnemy[wTarget].e.wStealItem, 1);
-#ifdef PAL_CLASSIC
          PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"%ls@%ls@", PAL_GetWord(34), PAL_GetWord(g_Battle.rgEnemy[wTarget].e.wStealItem));
-#else
-         PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"%ls %ls", PAL_GetWord(34), PAL_GetWord(g_Battle.rgEnemy[wTarget].e.wStealItem));
-#endif
 	  }
 
       if (s[0] != '\0')
       {
-#ifdef PAL_CLASSIC
          PAL_StartDialog(kDialogCenterWindow, 0, 0, FALSE);
          PAL_ShowDialogText(s);
-#else
-         PAL_BattleUIShowText(s, 800);
-#endif
       }
    }
 }

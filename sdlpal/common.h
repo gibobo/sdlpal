@@ -22,10 +22,6 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
-#ifndef ENABLE_REVISIED_BATTLE
-# define PAL_CLASSIC        1
-#endif
-
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,14 +53,11 @@
 # define min fmin
 #endif
 
-/* This is need when compiled with SDL 1.2 */
 #ifndef PAL_FORCE_INLINE
 #if defined(_MSC_VER)
 #define PAL_FORCE_INLINE static __forceinline
-#if defined( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
-#define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
 #else
-#define PAL_FORCE_INLINE static SDL_INLINE
+#define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
 #endif
 #endif /* PAL_FORCE_INLINE not defined */
 
@@ -115,7 +108,7 @@ typedef const WCHAR        *LPCWSTR;
    named 'pal_config.h' that contains marco definitions & header includes into the directory.
    The example of this file can be found in directories of existing portings.
  */
-#include "opltypes.h"
+
 #include "pal_config.h"
 
 #ifndef PAL_DEFAULT_FULLSCREEN_HEIGHT
@@ -173,19 +166,6 @@ typedef enum tagLOGLEVEL
 # define PAL_DEFAULT_LOGLEVEL  LOGLEVEL_MAX
 #endif
 
-#define PAL_MAX_GLOBAL_BUFFERS 4
 #define PAL_GLOBAL_BUFFER_SIZE 1024
-
-//
-// PAL_PATH_SEPARATORS contains all vaild path separators under a specific OS
-// If you define this constant, please put the default separator at first.
-//
-#ifndef PAL_PATH_SEPARATORS
-# define PAL_PATH_SEPARATORS "/"
-#endif
-
-#ifndef PAL_IS_PATH_SEPARATOR
-# define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
-#endif
 
 #endif

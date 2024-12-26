@@ -19,7 +19,22 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "uigame.h"
+#include "audio.h"
+#include "common.h"
+#include "global.h"
+#include "input.h"
+#include "itemmenu.h"
+#include "magicmenu.h"
+#include "palcfg.h"
+#include "palette.h"
+#include "play.h"
+#include "script.h"
+#include "text.h"
+#include "uibattle.h"
+#include "util.h"
+#include "video.h"
+// #include "main.h"
 
 static BOOL __buymenu_firsttime_render;
 
@@ -264,7 +279,7 @@ PAL_SelectionMenu(
 		(nWords >= 3 && wItems[2]) ? PAL_WordWidth(wItems[2]) : 1,
 		(nWords >= 4 && wItems[3]) ? PAL_WordWidth(wItems[3]) : 1 };
 	int             dx[4] = { (w[0] - 1) * 16, (w[1] - 1) * 16, (w[2] - 1) * 16, (w[3] - 1) * 16 }, i;
-	PAL_POS         pos[4] = { PAL_XY(145, 110), PAL_XY(220 + dx[0], 110), PAL_XY(145, 160), PAL_XY(220 + dx[2], 160) };
+	DWORD           pos[4] = { PAL_XY(145, 110), PAL_XY(220 + dx[0], 110), PAL_XY(145, 160), PAL_XY(220 + dx[2], 160) };
 	WORD            wReturnValue;
 
 	const SDL_Rect  rect = { 130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100 };
@@ -383,65 +398,6 @@ PAL_SwitchMenu(
    return (wReturnValue == MENUITEM_VALUE_CANCELLED) ? fEnabled : ((wReturnValue == 0) ? FALSE : TRUE);
 }
 
-#ifndef PAL_CLASSIC
-
-static VOID
-PAL_BattleSpeedMenu(
-   VOID
-)
-/*++
-  Purpose:
-
-    Show the Battle Speed selection box.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-   LPBOX           lpBox;
-   WORD            wReturnValue;
-   const SDL_Rect  rect = {131, 100, 165, 50};
-
-   MENUITEM        rgMenuItem[5] = {
-      { 1,   BATTLESPEEDMENU_LABEL_1,       TRUE,   PAL_XY(145, 110) },
-      { 2,   BATTLESPEEDMENU_LABEL_2,       TRUE,   PAL_XY(170, 110) },
-      { 3,   BATTLESPEEDMENU_LABEL_3,       TRUE,   PAL_XY(195, 110) },
-      { 4,   BATTLESPEEDMENU_LABEL_4,       TRUE,   PAL_XY(220, 110) },
-      { 5,   BATTLESPEEDMENU_LABEL_5,       TRUE,   PAL_XY(245, 110) },
-   };
-
-   //
-   // Create the boxes
-   //
-   lpBox = PAL_CreateSingleLineBox(PAL_XY(131, 100), 8, TRUE);
-
-   //
-   // Activate the menu
-   //
-   wReturnValue = PAL_ReadMenu(NULL, rgMenuItem, 5, gpGlobals->bBattleSpeed - 1,
-      MENUITEM_COLOR);
-
-   //
-   // Delete the boxes
-   //
-   PAL_DeleteBox(lpBox);
-
-   VIDEO_UpdateScreen(&rect);
-
-   if (wReturnValue != MENUITEM_VALUE_CANCELLED)
-   {
-      gpGlobals->bBattleSpeed = wReturnValue;
-   }
-}
-
-#endif
-
 LPBOX
 PAL_ShowCash(
    DWORD      dwCash
@@ -542,9 +498,6 @@ PAL_SystemMenu(
       { 3,      SYSMENU_LABEL_MUSIC,         TRUE,     PAL_XY(53, 72 + 36) },
       { 4,      SYSMENU_LABEL_SOUND,         TRUE,     PAL_XY(53, 72 + 54) },
       { 5,      SYSMENU_LABEL_QUIT,          TRUE,     PAL_XY(53, 72 + 72) },
-#if !defined(PAL_CLASSIC)
-      { 6,      SYSMENU_LABEL_BATTLEMODE,    TRUE,     PAL_XY(53, 72 + 90) },
-#endif
    };
    const int           nSystemMenuItem = sizeof(rgSystemMenuItem) / sizeof(MENUITEM);
 
@@ -626,15 +579,6 @@ PAL_SystemMenu(
       //
       PAL_QuitGame();
       break;
-
-#if !defined(PAL_CLASSIC)
-   case 6:
-      //
-      // Battle Mode
-      //
-      PAL_BattleSpeedMenu();
-      break;
-#endif
    }
 
    PAL_DeleteBox(lpMenuBox);

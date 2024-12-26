@@ -19,15 +19,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "palcommon.h"
-#include "global.h"
-#include "palcfg.h"
 #include "audio.h"
+#include "palcfg.h"
+#include "palcommon.h"
 #include "players.h"
-#include "util.h"
 #include "resampler.h"
 #include "riff.h"
-#include <math.h>
+#include "util.h"
 
 typedef struct tagWAVESPEC
 {

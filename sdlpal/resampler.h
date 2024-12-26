@@ -1,27 +1,6 @@
 ﻿#ifndef _RESAMPLER_H_
 #define _RESAMPLER_H_
 
-// Ugglay
-#ifdef RESAMPLER_DECORATE
-#define PASTE(a,b) a ## b
-#define EVALUATE(a,b) PASTE(a,b)
-#define resampler_init EVALUATE(RESAMPLER_DECORATE,_resampler_init)
-#define resampler_create EVALUATE(RESAMPLER_DECORATE,_resampler_create)
-#define resampler_delete EVALUATE(RESAMPLER_DECORATE,_resampler_delete)
-#define resampler_dup EVALUATE(RESAMPLER_DECORATE,_resampler_dup)
-#define resampler_dup_inplace EVALUATE(RESAMPLER_DECORATE,_resampler_dup_inplace)
-#define resampler_set_quality EVALUATE(RESAMPLER_DECORATE,_resampler_set_quality)
-#define resampler_get_free_count EVALUATE(RESAMPLER_DECORATE,_resampler_get_free_count)
-#define resampler_write_sample EVALUATE(RESAMPLER_DECORATE,_resampler_write_sample)
-#define resampler_write_sample_fixed EVALUATE(RESAMPLER_DECORATE,_resampler_write_sample_fixed)
-#define resampler_set_rate EVALUATE(RESAMPLER_DECORATE,_resampler_set_rate)
-#define resampler_ready EVALUATE(RESAMPLER_DECORATE,_resampler_ready)
-#define resampler_clear EVALUATE(RESAMPLER_DECORATE,_resampler_clear)
-#define resampler_get_sample_count EVALUATE(RESAMPLER_DECORATE,_resampler_get_sample_count)
-#define resampler_get_sample EVALUATE(RESAMPLER_DECORATE,_resampler_get_sample)
-#define resampler_remove_sample EVALUATE(RESAMPLER_DECORATE,_resampler_remove_sample)
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

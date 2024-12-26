@@ -22,6 +22,9 @@
 #ifndef RES_H
 #define RES_H
 
+#include "map.h"
+#include "palcommon.h"
+
 typedef enum tagLOADRESFLAG
 {
    kLoadGlobalData     = (1 << 0),    // load global data

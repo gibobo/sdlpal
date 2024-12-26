@@ -22,6 +22,8 @@
 #ifndef _MAP_H
 #define _MAP_H
 
+#include "palcommon.h"
+
 //
 // Map format:
 //
@@ -53,8 +55,6 @@
 // Block flag (player cannot walk through this tile):
 //  d & 0x2000
 //
-
-#include <SDL.h>
 
 typedef struct tagPALMAP
 {
@@ -123,7 +123,7 @@ PAL_MapBlitToSurface(
 // Convert map location to the real location
 //
 #define PAL_XYH_TO_POS(x, y, h)                       \
-   PAL_POS((x) * 32 + (h) * 16, (y) * 16 + (h) * 8)
+   DWORD((x) * 32 + (h) * 16, (y) * 16 + (h) * 8)
 
 //
 // Convert real location to map location

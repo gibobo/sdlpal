@@ -110,58 +110,58 @@ typedef struct tagConfigItem
 
 typedef struct tagSCREENLAYOUT
 {
-	PAL_POS          EquipImageBox;
-	PAL_POS          EquipRoleListBox;
-	PAL_POS          EquipItemName;
-	PAL_POS          EquipItemAmount;
-	PAL_POS          EquipLabels[MAX_PLAYER_EQUIPMENTS];
-	PAL_POS          EquipNames[MAX_PLAYER_EQUIPMENTS];
-	PAL_POS          EquipStatusLabels[5];
-	PAL_POS          EquipStatusValues[5];
+	DWORD          EquipImageBox;
+	DWORD          EquipRoleListBox;
+	DWORD          EquipItemName;
+	DWORD          EquipItemAmount;
+	DWORD          EquipLabels[MAX_PLAYER_EQUIPMENTS];
+	DWORD          EquipNames[MAX_PLAYER_EQUIPMENTS];
+	DWORD          EquipStatusLabels[5];
+	DWORD          EquipStatusValues[5];
 
-	PAL_POS          RoleName;
-	PAL_POS          RoleImage;
-	PAL_POS          RoleExpLabel;
-	PAL_POS          RoleLevelLabel;
-	PAL_POS          RoleHPLabel;
-	PAL_POS          RoleMPLabel;
-	PAL_POS          RoleStatusLabels[5];
-	PAL_POS          RoleCurrExp;
-	PAL_POS          RoleNextExp;
-	PAL_POS          RoleExpSlash;
-	PAL_POS          RoleLevel;
-	PAL_POS          RoleCurHP;
-	PAL_POS          RoleMaxHP;
-	PAL_POS          RoleHPSlash;
-	PAL_POS          RoleCurMP;
-	PAL_POS          RoleMaxMP;
-	PAL_POS          RoleMPSlash;
-	PAL_POS          RoleStatusValues[5];
-	PAL_POS          RoleEquipImageBoxes[MAX_PLAYER_EQUIPMENTS];
-	PAL_POS          RoleEquipNames[MAX_PLAYER_EQUIPMENTS];
-	PAL_POS          RolePoisonNames[MAX_POISONS];
+	DWORD          RoleName;
+	DWORD          RoleImage;
+	DWORD          RoleExpLabel;
+	DWORD          RoleLevelLabel;
+	DWORD          RoleHPLabel;
+	DWORD          RoleMPLabel;
+	DWORD          RoleStatusLabels[5];
+	DWORD          RoleCurrExp;
+	DWORD          RoleNextExp;
+	DWORD          RoleExpSlash;
+	DWORD          RoleLevel;
+	DWORD          RoleCurHP;
+	DWORD          RoleMaxHP;
+	DWORD          RoleHPSlash;
+	DWORD          RoleCurMP;
+	DWORD          RoleMaxMP;
+	DWORD          RoleMPSlash;
+	DWORD          RoleStatusValues[5];
+	DWORD          RoleEquipImageBoxes[MAX_PLAYER_EQUIPMENTS];
+	DWORD          RoleEquipNames[MAX_PLAYER_EQUIPMENTS];
+	DWORD          RolePoisonNames[MAX_POISONS];
 
-	PAL_POS          ExtraItemDescLines;
-	PAL_POS          ExtraMagicDescLines;
+	DWORD          ExtraItemDescLines;
+	DWORD          ExtraMagicDescLines;
 
-	PAL_POS			 MagicMPDescLines;
-	PAL_POS			 MagicMPSlashPos;
-	PAL_POS			 MagicMPNeededPos;
-	PAL_POS			 MagicMPCurrentPos;
+	DWORD			 MagicMPDescLines;
+	DWORD			 MagicMPSlashPos;
+	DWORD			 MagicMPNeededPos;
+	DWORD			 MagicMPCurrentPos;
 
-	PAL_POS			 MagicDescMsgPos;
+	DWORD			 MagicDescMsgPos;
 } SCREENLAYOUT;
 
 typedef struct tagCONFIGURATION
 {
 	union {
 		SCREENLAYOUT     ScreenLayout;
-		PAL_POS          ScreenLayoutArray[sizeof(SCREENLAYOUT) / sizeof(PAL_POS)];
+		DWORD          ScreenLayoutArray[sizeof(SCREENLAYOUT) / sizeof(DWORD)];
 	};
 	enum {
 		USE_8x8_FONT = 1,
 		DISABLE_SHADOW = 2,
-	}                ScreenLayoutFlag[sizeof(SCREENLAYOUT) / sizeof(PAL_POS)];
+	}                ScreenLayoutFlag[sizeof(SCREENLAYOUT) / sizeof(DWORD)];
 
 	/* Configurable options */
 	char            *pszGamePath;

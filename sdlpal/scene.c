@@ -22,14 +22,20 @@
 // Copyright (c) 2006, Pal Lockheart <palxex@gmail.com>.
 //
 
-#include "main.h"
+#include "scene.h"
+#include "global.h"
+#include "input.h"
+#include "map.h"
+#include "palette.h"
+#include "res.h"
+#include "video.h"
 
 #define MAX_SPRITE_TO_DRAW         2048
 
 typedef struct tagSPRITE_TO_DRAW
 {
    LPCBITMAPRLE     lpSpriteFrame; // pointer to the frame bitmap
-   PAL_POS          pos;           // position on the scene
+   DWORD            pos;           // position on the scene
    int              iLayer;        // logical layer
 } SPRITE_TO_DRAW;
 
@@ -503,7 +509,7 @@ PAL_MakeScene(
 
 BOOL
 PAL_CheckObstacle(
-    PAL_POS         pos,
+    DWORD           pos,
     BOOL            fCheckEventObjects,
     WORD            wSelfObject
 )
@@ -513,10 +519,10 @@ PAL_CheckObstacle(
 
 BOOL
 PAL_CheckObstacleWithRange(
-    PAL_POS         pos,
+    DWORD           pos,
     BOOL            fCheckEventObjects,
     WORD            wSelfObject,
-    BOOL			fCheckRange
+    BOOL            fCheckRange
 )
 /*++
    Purpose:

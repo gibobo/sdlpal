@@ -22,7 +22,8 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#include <SDL.h>
+#include <SDL_audio.h>
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {

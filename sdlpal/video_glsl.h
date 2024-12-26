@@ -25,7 +25,6 @@
 #ifndef video_glsl_h
 #define video_glsl_h
 
-#include "main.h"
 # include "mini_glloader.h"
 
 #ifdef __cplusplus

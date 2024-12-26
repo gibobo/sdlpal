@@ -21,6 +21,11 @@
 
 #ifndef INPUT_H
 #define INPUT_H
+
+#include "common.h"
+#include <SDL_events.h>
+#include <SDL_rect.h>
+
 typedef enum tagPALDIRECTION
 {
    kDirSouth = 0,
@@ -105,7 +110,7 @@ PAL_RegisterInputFilter(
 
 extern volatile PALINPUTSTATE g_InputState;
 
-extern BOOL g_fUseJoystick;
+// extern BOOL g_fUseJoystick;
 
 #ifdef __cplusplus
 }

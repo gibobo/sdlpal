@@ -22,6 +22,8 @@
 #ifndef ENDGAME_H
 #define ENDGAME_H
 
+#include "common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

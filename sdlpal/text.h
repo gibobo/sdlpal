@@ -22,6 +22,8 @@
 #ifndef _TEXT_H
 #define _TEXT_H
 
+#include "palcommon.h"
+
 typedef enum tagDIALOGPOSITION
 {
    kDialogUpper       = 0,
@@ -45,9 +47,9 @@ typedef struct tagTEXTLIB
 
     int             nCurrentDialogLine;
     BYTE            bCurrentFontColor;
-    PAL_POS         posIcon;
-    PAL_POS         posDialogTitle;
-    PAL_POS         posDialogText;
+    DWORD           posIcon;
+    DWORD           posDialogTitle;
+    DWORD           posDialogText;
     BYTE            bDialogPosition;
     BYTE            bIcon;
     int             iDelayTime;
@@ -90,7 +92,7 @@ PAL_UnescapeText(
 VOID
 PAL_DrawText(
    LPCWSTR    lpszText,
-   PAL_POS    pos,
+   DWORD      pos,
    BYTE       bColor,
    BOOL       fShadow,
    BOOL       fUpdate,
@@ -100,7 +102,7 @@ PAL_DrawText(
 VOID
 PAL_DrawTextUnescape(
    LPCWSTR    lpszText,
-   PAL_POS    pos,
+   DWORD      pos,
    BYTE       bColor,
    BOOL       fShadow,
    BOOL       fUpdate,

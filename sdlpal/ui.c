@@ -19,7 +19,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "ui.h"
+#include "font.h"
+#include "global.h"
+#include "input.h"
+#include "text.h"
+#include "util.h"
+#include "video.h"
 
 LPSPRITE      gpSpriteUI = NULL;
 
@@ -117,7 +123,7 @@ PAL_FreeUI(
 
 LPBOX
 PAL_CreateBox(
-   PAL_POS        pos,
+   DWORD          pos,
    INT            nRows,
    INT            nColumns,
    INT            iStyle,
@@ -129,7 +135,7 @@ PAL_CreateBox(
 
 LPBOX
 PAL_CreateBoxWithShadow(
-   PAL_POS        pos,
+   DWORD          pos,
    INT            nRows,
    INT            nColumns,
    INT            iStyle,
@@ -240,7 +246,7 @@ PAL_CreateBoxWithShadow(
 
 LPBOX
 PAL_CreateSingleLineBox(
-   PAL_POS        pos,
+   DWORD          pos,
    INT            nLen,
    BOOL           fSaveScreen
 )
@@ -250,7 +256,7 @@ PAL_CreateSingleLineBox(
 
 LPBOX
 PAL_CreateSingleLineBoxWithShadow(
-   PAL_POS        pos,
+   DWORD          pos,
    INT            nLen,
    BOOL           fSaveScreen,
    INT            nShadowOffset
@@ -640,7 +646,7 @@ VOID
 PAL_DrawNumber(
    UINT            iNum,
    UINT            nLength,
-   PAL_POS         pos,
+   DWORD           pos,
    NUMCOLOR        color,
    NUMALIGN        align
 )
@@ -745,11 +751,10 @@ PAL_DrawNumber(
 		text width.
 
 --*/
-INT
+size_t
 PAL_TextWidth(
    LPCWSTR lpszItemText
 )
-
 {
     size_t l = wcslen(lpszItemText), j = 0, w = 0;
     for (j = 0; j < l; j++)
@@ -780,11 +785,11 @@ PAL_MenuTextMaxWidth(
 
 --*/
 {
-	int i, r = 0;
+	size_t i, r = 0;
 	for (i = 0; i < nMenuItem; i++)
 	{
 		LPCWSTR itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
-		int w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4;
+		size_t w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4;
 		if (r < w)
 		{
 			r = w;

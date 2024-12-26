@@ -20,9 +20,7 @@
 //
 
 #include "palcommon.h"
-#include "global.h"
 #include "palcfg.h"
-#include <SDL.h>
 
 PAL_FORCE_INLINE
 BYTE
@@ -37,7 +35,7 @@ INT
 PAL_RLEBlitToSurface(
    LPCBITMAPRLE      lpBitmapRLE,
    SDL_Surface      *lpDstSurface,
-   PAL_POS           pos
+   DWORD             pos
 )
 {
     return PAL_RLEBlitToSurfaceWithShadow ( lpBitmapRLE, lpDstSurface, pos, FALSE );
@@ -47,7 +45,7 @@ INT
 PAL_RLEBlitToSurfaceWithShadow(
    LPCBITMAPRLE      lpBitmapRLE,
    SDL_Surface      *lpDstSurface,
-   PAL_POS           pos,
+   DWORD             pos,
    BOOL              bShadow
 )
 /*++
@@ -246,7 +244,7 @@ INT
 PAL_RLEBlitWithColorShift(
    LPCBITMAPRLE      lpBitmapRLE,
    SDL_Surface      *lpDstSurface,
-   PAL_POS           pos,
+   DWORD             pos,
    INT               iColorShift
 )
 /*++
@@ -447,7 +445,7 @@ INT
 PAL_RLEBlitMonoColor(
    LPCBITMAPRLE      lpBitmapRLE,
    SDL_Surface      *lpDstSurface,
-   PAL_POS           pos,
+   DWORD             pos,
    BYTE              bColor,
    INT               iColorShift
 )

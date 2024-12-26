@@ -22,6 +22,8 @@
 #ifndef UI_H
 #define UI_H
 
+#include "palcommon.h"
+
 #define CHUNKNUM_SPRITEUI                  9
 
 #define MENUITEM_COLOR                     0x4F
@@ -129,7 +131,7 @@
 
 typedef struct tagBOX
 {
-   PAL_POS        pos;
+   DWORD          pos;
    WORD           wWidth, wHeight;
    SDL_Surface   *lpSavedArea;
 } BOX, *LPBOX;
@@ -139,7 +141,7 @@ typedef struct tagMENUITEM
    WORD          wValue;
    WORD          wNumWord;
    BOOL          fEnabled;
-   PAL_POS       pos;
+   DWORD         pos;
 } MENUITEM, *LPMENUITEM;
 typedef const MENUITEM* LPCMENUITEM;
 
@@ -184,7 +186,7 @@ PAL_FreeUI(
 
 LPBOX
 PAL_CreateBox(
-   PAL_POS        pos,
+   DWORD          pos,
    INT            nRows,
    INT            nColumns,
    INT            iStyle,
@@ -193,7 +195,7 @@ PAL_CreateBox(
     
 LPBOX
 PAL_CreateBoxWithShadow(
-   PAL_POS        pos,
+   DWORD          pos,
    INT            nRows,
    INT            nColumns,
    INT            iStyle,
@@ -203,14 +205,14 @@ PAL_CreateBoxWithShadow(
 
 LPBOX
 PAL_CreateSingleLineBox(
-   PAL_POS        pos,
+   DWORD          pos,
    INT            nLen,
    BOOL           fSaveScreen
 );
     
 LPBOX
 PAL_CreateSingleLineBoxWithShadow(
-   PAL_POS        pos,
+   DWORD          pos,
    INT            nLen,
    BOOL           fSaveScreen,
    INT            nShadowOffset
@@ -234,12 +236,12 @@ VOID
 PAL_DrawNumber(
    UINT            iNum,
    UINT            nLength,
-   PAL_POS         pos,
+   DWORD           pos,
    NUMCOLOR        color,
    NUMALIGN        align
 );
     
-INT
+size_t
 PAL_TextWidth(
    LPCWSTR        lpszItemText
 );

@@ -22,6 +22,9 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include "common.h"
+#include <SDL_render.h>
+
 #define TOUCHOVERLAY_ALPHAMOD           120
 
 #define VIDEO_CopySurface(s, sr, t, tr) SDL_BlitSurface((s), (sr), (t), (tr))
