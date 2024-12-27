@@ -30,12 +30,13 @@
 #include "scene.h"
 #include "util.h"
 #include "video.h"
+#include <SDL_timer.h>
 
-static WORD g_wCurEffectSprite = 0;
+static unsigned short g_wCurEffectSprite = 0;
 
-VOID
+void
 PAL_EndingSetEffectSprite(
-   WORD         wSpriteNum
+   unsigned short         wSpriteNum
 )
 /*++
   Purpose:
@@ -55,10 +56,10 @@ PAL_EndingSetEffectSprite(
    g_wCurEffectSprite = wSpriteNum;
 }
 
-VOID
+void
 PAL_ShowFBP(
-   WORD         wChunkNum,
-   WORD         wFade
+   unsigned short         wChunkNum,
+   unsigned short         wFade
 )
 /*++
   Purpose:
@@ -113,8 +114,8 @@ PAL_ShowFBP(
             //
             for (k = rgIndex[j]; k < gpScreen->pitch * gpScreen->h; k += 6)
             {
-               a = ((LPBYTE)(p->pixels))[k];
-               b = ((LPBYTE)(gpScreenBak->pixels))[k];
+               a = ((unsigned char *)(p->pixels))[k];
+               b = ((unsigned char *)(gpScreenBak->pixels))[k];
 
                if (i > 0)
                {
@@ -128,7 +129,7 @@ PAL_ShowFBP(
                   }
                }
 
-               ((LPBYTE)(gpScreenBak->pixels))[k] = ((a & 0xF0) | (b & 0x0F));
+               ((unsigned char *)(gpScreenBak->pixels))[k] = ((a & 0xF0) | (b & 0x0F));
             }
 
 			VIDEO_RestoreScreen(gpScreen);
@@ -159,10 +160,10 @@ PAL_ShowFBP(
    VIDEO_UpdateScreen(NULL);
 }
 
-VOID
+void
 PAL_ScrollFBP(
-   WORD         wChunkNum,
-   WORD         wScrollSpeed,
+   unsigned short         wChunkNum,
+   unsigned short         wScrollSpeed,
    BOOL         fScrollDown
 )
 /*++
@@ -288,9 +289,9 @@ PAL_ScrollFBP(
    VIDEO_UpdateScreen(NULL);
 }
 
-VOID
+void
 PAL_EndingAnimation(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -307,8 +308,8 @@ PAL_EndingAnimation(
 
 --*/
 {
-   LPBYTE            buf;
-   LPBYTE            bufGirl;
+   unsigned char *            buf;
+   unsigned char *            bufGirl;
    SDL_Surface      *pUpper;
    SDL_Surface      *pLower;
    SDL_Rect          srcrect, dstrect;
@@ -316,8 +317,8 @@ PAL_EndingAnimation(
    int               yPosGirl = 180;
    int               i;
 
-   buf = (LPBYTE)UTIL_calloc(1, 64000);
-   bufGirl = (LPBYTE)UTIL_calloc(1, 6000);
+   buf = (unsigned char *)malloc(64000);
+   bufGirl = (unsigned char *)malloc(6000);
 
    pUpper = VIDEO_CreateCompatibleSurface(gpScreen);
    pLower = VIDEO_CreateCompatibleSurface(gpScreen);
@@ -402,9 +403,9 @@ PAL_EndingAnimation(
    free(bufGirl);
 }
 
-VOID
+void
 PAL_EndingScreen(
-   VOID
+   void
 )
 /*++
  Purpose:

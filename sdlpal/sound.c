@@ -36,7 +36,7 @@ typedef struct tagWAVESPEC
 	uint8_t             align;
 } WAVESPEC;
 
-typedef const void * (*SoundLoader)(LPCBYTE, DWORD, WAVESPEC *);
+typedef const void * (*SoundLoader)(const unsigned char*, unsigned int, WAVESPEC *);
 typedef int(*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, int, const void **);
 
 typedef struct tagWAVEDATA
@@ -64,8 +64,8 @@ typedef struct tagSOUNDPLAYER
 
 static const void *
 SOUND_LoadWAVEData(
-	LPCBYTE                lpData,
-	DWORD                  dwLen,
+	const unsigned char*                lpData,
+	unsigned int                  dwLen,
 	WAVESPEC              *lpSpec
 )
 /*++
@@ -143,16 +143,16 @@ SOUND_LoadWAVEData(
 typedef struct tagVOCHEADER
 {
 	char    signature[0x14];	/* "Creative Voice File\x1A" */
-	WORD    data_offset;		/* little endian */
-	WORD	version;
-	WORD	version_checksum;
+	unsigned short    data_offset;		/* little endian */
+	unsigned short	version;
+	unsigned short	version_checksum;
 } VOCHEADER, *LPVOCHEADER;
 typedef const VOCHEADER *LPCVOCHEADER;
 
 static const void *
 SOUND_LoadVOCData(
-	LPCBYTE                lpData,
-	DWORD                  dwLen,
+	const unsigned char*                lpData,
+	unsigned int                  dwLen,
 	WAVESPEC              *lpSpec
 )
 /*++
@@ -188,7 +188,7 @@ SOUND_LoadVOCData(
 
 	while (dwLen && *lpData)
 	{
-		DWORD len;
+		unsigned int len;
 		if (dwLen >= 4)
 		{
 			len = lpData[1] | (lpData[2] << 8) | (lpData[3] << 16);
@@ -719,10 +719,10 @@ SOUND_ResampleMix_S16_Stereo_Stereo(
 
 static BOOL
 SOUND_Play(
-   VOID  *object,
-   INT    iSoundNum,
+   void  *object,
+   int    iSoundNum,
    BOOL   fLoop,
-   FLOAT  flFadeTime
+   float  flFadeTime
 )
 /*++
   Purpose:
@@ -840,9 +840,9 @@ SOUND_Play(
 	return TRUE;
 }
 
-VOID
+void
 SOUND_Shutdown(
-	VOID     *object
+	void     *object
 )
 /*++
   Purpose:
@@ -880,11 +880,11 @@ SOUND_Shutdown(
 	}
 }
 
-static VOID
+static void
 SOUND_FillBuffer(
-	VOID      *object,
-	LPBYTE     stream,
-	INT        len
+	void      *object,
+	unsigned char *stream,
+	int        len
 )
 /*++
   Purpose:
@@ -931,7 +931,7 @@ SOUND_FillBuffer(
 
 LPAUDIOPLAYER
 SOUND_Init(
-	VOID
+	void
 )
 /*++
   Purpose:

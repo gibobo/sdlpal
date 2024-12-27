@@ -54,26 +54,9 @@
  * it would be appreciated, of course.
  */
 
-#if 0 // Usage Example:
-#define SDL_STBIMAGE_IMPLEMENTATION
-#include "SDL_stbimage.h"
-
-  void yourFunction(const char* imageFilePath)
-  {
-    SDL_Surface* surf = STBIMG_Load(imageFilePath);
-    if(surf == NULL) {
-      printf("ERROR: Couldn't load %s, reason: %s\n", imageFilePath, SDL_GetError());
-      exit(1);
-    }
-
-    // ... do something with surf ...
-
-    SDL_FreeSurface(surf);
-  }
-#endif // 0 (usage example)
-
 #ifndef SDL__STBIMAGE_H
 #define SDL__STBIMAGE_H
+#include <SDL_render.h>
 
 #ifndef SDL_STBIMG_ALLOW_STDIO
 #define STBI_NO_STDIO // don't need STDIO, will use SDL_RWops to open files
@@ -116,7 +99,6 @@ extern "C"
 	SDL_STBIMG_DEF SDL_Surface *STBIMG_CreateSurface(unsigned char *pixelData, int width, int height,
 													 int bytesPerPixel, SDL_bool freeWithSurface);
 
-#if SDL_MAJOR_VERSION > 1
 	// loads the image file at the given path into a RGB(A) SDL_Texture
 	// Returns NULL on error, use SDL_GetError() to get more information.
 	SDL_STBIMG_DEF SDL_Texture *
@@ -141,7 +123,7 @@ extern "C"
 	SDL_STBIMG_DEF SDL_Texture *
 	STBIMG_CreateTexture(SDL_Renderer *renderer, const unsigned char *pixelData,
 						 int width, int height, int bytesPerPixel);
-#endif // SDL_MAJOR_VERSION > 1
+
 
 	typedef struct
 	{
@@ -159,40 +141,6 @@ extern "C"
 	//       inbetween the uses!
 	SDL_STBIMG_DEF SDL_bool STBIMG_stbi_callback_from_RW(SDL_RWops *src, STBIMG_stbio_RWops *out);
 
-#if 0  //  Use STBIMG_stbi_callback_from_RW() like this:
-  SDL_RWops* src = ...; // wherever it's from
-  STBIMG_stbio_RWops io;
-  if(!STBIMG_stbi_callback_from_RW(src, &io)) {
-    printf("ERROR creating stbio callbacks: %s\n", SDL_GetError());
-    exit(1);
-  }
-  Sint64 origSrcPosition = SDL_RWtell(src);
-  int w, h, fmt;
-  if(!stbi_info_from_callbacks(&io.stb_cbs, &io, &w, &h, &fmt)) {
-     printf("stbi_info_from_callbacks() failed, reason: %s\n", stbi_failure_reason());
-     exit(1);
-  }
-  printf("image is %d x %d pixels with %d bytes per pixel\n", w, h, fmt);
-
-  // rewind src before using it again in stbi_load_from_callbacks()
-  if(SDL_RWseek(src, origSrcPosition, RW_SEEK_SET) < 0)
-  {
-    printf("ERROR: src not be seekable!\n");
-    exit(1);
-  }
-  io.atEOF = 0; // remember to reset atEOF, too!
-
-  unsigned char* data;
-  data = stbi_load_from_callbacks(&io.stb_cbs, &io, &w, &h, &fmt, 0);
-  if(data == NULL) {
-    printf("stbi_load_from_callbacks() failed, reason: %s\n", stbi_failure_reason());
-    exit(1);
-  }
-  // ... do something with data ...
-  stbi_image_free(data);
-#endif // 0 (STBIMG_stbi_callback_from_RW() example)
-
-#if SDL_MAJOR_VERSION > 1
 	// loads an image file into a RGB(A) SDL_Surface from a SDL_RWops (src)
 	// - without using SDL_RWseek(), for streams that don't support or are slow
 	//   at seeking. It reads everything into a buffer and calls STBIMG_LoadFromMemory()
@@ -202,10 +150,6 @@ extern "C"
 	// if you set freesrc to non-zero, SDL_RWclose(src) will be executed after reading.
 	// Returns NULL on error, use SDL_GetError() to get more information.
 	SDL_STBIMG_DEF SDL_Surface *STBIMG_Load_RW_noSeek(SDL_RWops *src, int freesrc);
-
-	// the same for textures (you should probably not use this one, either..)
-	SDL_STBIMG_DEF SDL_Texture *STBIMG_LoadTexture_RW_noSeek(SDL_Renderer *renderer, SDL_RWops *src, int freesrc);
-#endif // SDL_MAJOR_VERSION > 1
 
 #ifdef __cplusplus
 } // extern "C"
@@ -324,7 +268,7 @@ static int STBIMG__io_read(void *user, char *data, int size)
 {
 	STBIMG_stbio_RWops *io = (STBIMG_stbio_RWops *)user;
 
-	int ret = SDL_RWread(io->src, data, sizeof(char), size);
+	size_t ret = SDL_RWread(io->src, data, sizeof(char), size);
 	if (ret == 0)
 	{
 		// we're at EOF or some error happend
@@ -462,7 +406,6 @@ end:
 	return ret;
 }
 
-#if SDL_MAJOR_VERSION > 1
 SDL_STBIMG_DEF SDL_Surface *STBIMG_Load_RW_noSeek(SDL_RWops *src, int freesrc)
 {
 	unsigned char *buf = NULL;
@@ -504,7 +447,7 @@ SDL_STBIMG_DEF SDL_Surface *STBIMG_Load_RW_noSeek(SDL_RWops *src, int freesrc)
 	{
 		// if that fails, STBIMG_LoadFromMemory() has set an SDL error
 		// and ret is NULL, so nothing special to do for us
-		ret = STBIMG_LoadFromMemory(buf, fileSize);
+		ret = STBIMG_LoadFromMemory(buf, (int)fileSize);
 	}
 
 end:
@@ -516,7 +459,7 @@ end:
 	SDL_free(buf);
 	return ret;
 }
-#endif // SDL_MAJOR_VERSION > 1
+
 
 SDL_STBIMG_DEF SDL_Surface *STBIMG_Load(const char *file)
 {
@@ -554,7 +497,6 @@ SDL_STBIMG_DEF SDL_Surface *STBIMG_CreateSurface(unsigned char *pixelData, int w
 	return STBIMG__CreateSurfaceImpl(img, freeWithSurface);
 }
 
-#if SDL_MAJOR_VERSION > 1
 static SDL_Texture *STBIMG__SurfToTex(SDL_Renderer *renderer, SDL_Surface *surf)
 {
 	SDL_Texture *ret = NULL;
@@ -595,12 +537,5 @@ STBIMG_CreateTexture(SDL_Renderer *renderer, const unsigned char *pixelData,
 	SDL_Surface *surf = STBIMG_CreateSurface((unsigned char *)pixelData, width, height, bytesPerPixel, SDL_FALSE);
 	return STBIMG__SurfToTex(renderer, surf);
 }
-
-SDL_STBIMG_DEF SDL_Texture *
-STBIMG_LoadTexture_RW_noSeek(SDL_Renderer *renderer, SDL_RWops *src, int freesrc)
-{
-	return STBIMG__SurfToTex(renderer, STBIMG_Load_RW_noSeek(src, freesrc));
-}
-#endif // SDL_MAJOR_VERSION > 1
 
 #endif // SDL_STBIMAGE_IMPLEMENTATION

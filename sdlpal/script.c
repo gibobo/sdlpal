@@ -23,25 +23,37 @@
 //
 
 #include "script.h"
+#include "audio.h"
 #include "battle.h"
+#include "ending.h"
+#include "fight.h"
 #include "game.h"
 #include "global.h"
 #include "input.h"
+#include "main.h"
 #include "palcfg.h"
+#include "palcommon.h"
+#include "palette.h"
+#include "play.h"
 #include "res.h"
+#include "rngplay.h"
+#include "scene.h"
 #include "text.h"
+#include "uigame.h"
+#include "util.h"
 #include "video.h"
+#include <SDL_timer.h>
 
 BOOL            g_fScriptSuccess = TRUE;
 static int      g_iCurEquipPart = -1;
 
 static BOOL
 PAL_NPCWalkTo(
-   WORD           wEventObjectID,
-   INT            x,
-   INT            y,
-   INT            h,
-   INT            iSpeed
+   unsigned short           wEventObjectID,
+   int            x,
+   int            y,
+   int            h,
+   int            iSpeed
 )
 /*++
   Purpose:
@@ -105,12 +117,12 @@ PAL_NPCWalkTo(
    return FALSE;
 }
 
-static VOID
+static void
 PAL_PartyWalkTo(
-   INT            x,
-   INT            y,
-   INT            h,
-   INT            iSpeed
+   int            x,
+   int            y,
+   int            h,
+   int            iSpeed
 )
 /*++
   Purpose:
@@ -136,7 +148,7 @@ PAL_PartyWalkTo(
 --*/
 {
    int           xOffset, yOffset, i, dx, dy;
-   DWORD         t;
+   unsigned int         t;
 
    xOffset = x * 32 + h * 16 - PAL_X(gpGlobals->viewport) - PAL_X(gpGlobals->partyoffset);
    yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
@@ -207,13 +219,13 @@ PAL_PartyWalkTo(
    PAL_UpdatePartyGestures(FALSE);
 }
 
-static VOID
+static void
 PAL_PartyRideEventObject(
-   WORD           wEventObjectID,
-   INT            x,
-   INT            y,
-   INT            h,
-   INT            iSpeed
+   unsigned short           wEventObjectID,
+   int            x,
+   int            y,
+   int            h,
+   int            iSpeed
 )
 /*++
   Purpose:
@@ -241,7 +253,7 @@ PAL_PartyRideEventObject(
 --*/
 {
    int              xOffset, yOffset, dx, dy, i;
-   DWORD            t;
+   unsigned int            t;
    LPEVENTOBJECT    p;
 
    p = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
@@ -314,11 +326,11 @@ PAL_PartyRideEventObject(
    }
 }
 
-static VOID
+static void
 PAL_MonsterChasePlayer(
-   WORD         wEventObjectID,
-   WORD         wSpeed,
-   WORD         wChaseRange,
+   unsigned short         wEventObjectID,
+   unsigned short         wSpeed,
+   unsigned short         wChaseRange,
    BOOL         fFloating
 )
 /*++
@@ -343,7 +355,7 @@ PAL_MonsterChasePlayer(
 --*/
 {
    LPEVENTOBJECT    pEvtObj = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
-   WORD             wMonsterSpeed = 0, prevx, prevy;
+   unsigned short             wMonsterSpeed = 0, prevx, prevy;
    int              x, y, i, j, l;
 
    if (gpGlobals->wChaseRange != 0)
@@ -508,10 +520,10 @@ PAL_MonsterChasePlayer(
    PAL_NPCWalkOneStep(wEventObjectID, wMonsterSpeed);
 }
 
-static WORD
+static unsigned short
 PAL_InterpretInstruction(
-   WORD           wScriptEntry,
-   WORD           wEventObjectID
+   unsigned short           wScriptEntry,
+   unsigned short           wEventObjectID
 )
 /*++
   Purpose:
@@ -533,7 +545,7 @@ PAL_InterpretInstruction(
    LPEVENTOBJECT          pEvtObj, pCurrent;
    LPSCRIPTENTRY          pScript;
    int                    iPlayerRole, i, j, x, y;
-   WORD                   w, wCurEventObjectID;
+   unsigned short                   w, wCurEventObjectID;
 
    pScript = &(gpGlobals->g.lprgScriptEntry[wScriptEntry]);
 
@@ -679,14 +691,14 @@ PAL_InterpretInstruction(
       // set the player's extra attribute
       //
       {
-         WORD *p;
+         unsigned short *p;
 
          i = pScript->rgwOperand[0] - 0xB;
 
-         p = (WORD *)(&gpGlobals->rgEquipmentEffect[i]); // HACKHACK
+         p = (unsigned short *)(&gpGlobals->rgEquipmentEffect[i]); // HACKHACK
 
          p[pScript->rgwOperand[1] * MAX_PLAYER_ROLES + wEventObjectID] =
-            (SHORT)pScript->rgwOperand[2];
+            pScript->rgwOperand[2];
       }
       break;
 
@@ -740,7 +752,7 @@ PAL_InterpretInstruction(
       // Increase/decrease the player's attribute
       //
       {
-         WORD *p = (WORD *)(&gpGlobals->g.PlayerRoles); // HACKHACK
+         unsigned short *p = (unsigned short *)(&gpGlobals->g.PlayerRoles); // HACKHACK
 
          if (pScript->rgwOperand[2] == 0)
          {
@@ -752,7 +764,7 @@ PAL_InterpretInstruction(
          }
 
          p[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] +=
-            (SHORT)pScript->rgwOperand[1];
+            pScript->rgwOperand[1];
       }
       break;
 
@@ -761,14 +773,14 @@ PAL_InterpretInstruction(
       // Set player's stat
       //
       {
-         WORD *p = (WORD *)(&gpGlobals->g.PlayerRoles); // HACKHACK
+         unsigned short *p = (unsigned short *)(&gpGlobals->g.PlayerRoles); // HACKHACK
 
          if (g_iCurEquipPart != -1)
          {
             //
             // In the progress of equipping items
             //
-            p = (WORD *)&(gpGlobals->rgEquipmentEffect[g_iCurEquipPart]);
+            p = (unsigned short *)&(gpGlobals->rgEquipmentEffect[g_iCurEquipPart]);
          }
 
          if (pScript->rgwOperand[2] == 0)
@@ -785,7 +797,7 @@ PAL_InterpretInstruction(
          }
 
          p[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] =
-            (SHORT)pScript->rgwOperand[1];
+            pScript->rgwOperand[1];
       }
       break;
 
@@ -802,7 +814,7 @@ PAL_InterpretInstruction(
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
-            if (PAL_IncreaseHPMP(w, (SHORT)(pScript->rgwOperand[1]), 0))
+            if (PAL_IncreaseHPMP(w, pScript->rgwOperand[1], 0))
                g_fScriptSuccess = TRUE;
          }
       }
@@ -811,7 +823,7 @@ PAL_InterpretInstruction(
          //
          // Apply to one player. The wEventObjectID parameter should indicate the player role.
          //
-         if (!PAL_IncreaseHPMP(wEventObjectID, (SHORT)(pScript->rgwOperand[1]), 0))
+         if (!PAL_IncreaseHPMP(wEventObjectID, pScript->rgwOperand[1], 0))
          {
             g_fScriptSuccess = FALSE;
          }
@@ -830,7 +842,7 @@ PAL_InterpretInstruction(
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
-            PAL_IncreaseHPMP(w, 0, (SHORT)(pScript->rgwOperand[1]));
+            PAL_IncreaseHPMP(w, 0, (pScript->rgwOperand[1]));
          }
       }
       else
@@ -838,7 +850,7 @@ PAL_InterpretInstruction(
          //
          // Apply to one player. The wEventObjectID parameter should indicate the player role.
          //
-         if (!PAL_IncreaseHPMP(wEventObjectID, 0, (SHORT)(pScript->rgwOperand[1])))
+         if (!PAL_IncreaseHPMP(wEventObjectID, 0, (pScript->rgwOperand[1])))
          {
             g_fScriptSuccess = FALSE;
          }
@@ -858,7 +870,7 @@ PAL_InterpretInstruction(
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
             PAL_IncreaseHPMP(w,
-               (SHORT)(pScript->rgwOperand[1]), (SHORT)(pScript->rgwOperand[1]));
+               (pScript->rgwOperand[1]), (pScript->rgwOperand[1]));
          }
       }
       else
@@ -867,7 +879,7 @@ PAL_InterpretInstruction(
          // Apply to one player. The wEventObjectID parameter should indicate the player role.
          //
          if (!PAL_IncreaseHPMP(wEventObjectID,
-            (SHORT)(pScript->rgwOperand[1]), (SHORT)(pScript->rgwOperand[1])))
+            (pScript->rgwOperand[1]), (pScript->rgwOperand[1])))
          {
             g_fScriptSuccess = FALSE;
          }
@@ -878,8 +890,8 @@ PAL_InterpretInstruction(
       //
       // Increase or decrease cash by the specified amount
       //
-      if ((SHORT)(pScript->rgwOperand[0]) < 0 &&
-         gpGlobals->dwCash < (WORD)(-(SHORT)(pScript->rgwOperand[0])))
+      if ((pScript->rgwOperand[0]) < 0 &&
+         gpGlobals->dwCash < (unsigned short)(-(pScript->rgwOperand[0])))
       {
          //
          // not enough cash
@@ -888,7 +900,7 @@ PAL_InterpretInstruction(
       }
       else
       {
-         gpGlobals->dwCash += (SHORT)(pScript->rgwOperand[0]);
+         gpGlobals->dwCash += (pScript->rgwOperand[0]);
       }
       break;
 
@@ -896,7 +908,7 @@ PAL_InterpretInstruction(
       //
       // Add item to inventory
       //
-      PAL_AddItemToInventory(pScript->rgwOperand[0], (SHORT)(pScript->rgwOperand[1]));
+      PAL_AddItemToInventory(pScript->rgwOperand[0], (pScript->rgwOperand[1]));
       break;
 
    case 0x0020:
@@ -1320,8 +1332,8 @@ PAL_InterpretInstruction(
       // Increase player's stat temporarily by percent
       //
       {
-         WORD *p = (WORD *)(&gpGlobals->rgEquipmentEffect[kBodyPartExtra]); // HACKHACK
-         WORD *p1 = (WORD *)(&gpGlobals->g.PlayerRoles);
+         unsigned short *p = (unsigned short *)(&gpGlobals->rgEquipmentEffect[kBodyPartExtra]); // HACKHACK
+         unsigned short *p1 = (unsigned short *)(&gpGlobals->g.PlayerRoles);
 
          if (pScript->rgwOperand[2] == 0)
          {
@@ -1334,7 +1346,7 @@ PAL_InterpretInstruction(
 
          p[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] =
             p1[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] *
-               (SHORT)pScript->rgwOperand[1] / 100;
+               pScript->rgwOperand[1] / 100;
       }
       break;
 
@@ -1367,7 +1379,7 @@ PAL_InterpretInstruction(
       //
       if (gpGlobals->wCollectValue > 0)
       {
-         WCHAR s[256];
+         unsigned short s[256];
 
          i = RandomLong(1, gpGlobals->wCollectValue);
          if (i > 9)
@@ -1382,17 +1394,17 @@ PAL_InterpretInstruction(
 
          g_TextLib.iDialogShadow = 5;
          PAL_StartDialogWithOffset(kDialogCenterWindow, 0, 0, FALSE, 0, -10);
-         PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"%ls@%ls@", PAL_GetWord(42),
+         PAL_swprintf(s, sizeof(s) / sizeof(unsigned short), L"%ls@%ls@", PAL_GetWord(42),
             PAL_GetWord(gpGlobals->g.lprgStore[0].rgwItems[i]));
-         LPCBITMAPRLE pBG = PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX);
-         INT iBGWidth = PAL_RLEGetWidth(pBG), iBGHeight = PAL_RLEGetHeight(pBG);
-         INT iBG_X = (320 - iBGWidth) / 2, iBG_Y = (200 - iBGHeight) / 2;
-         DWORD pos = PAL_XY(iBG_X, iBG_Y);
+         const unsigned char* pBG = PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX);
+         int iBGWidth = PAL_RLEGetWidth(pBG), iBGHeight = PAL_RLEGetHeight(pBG);
+         int iBG_X = (320 - iBGWidth) / 2, iBG_Y = (200 - iBGHeight) / 2;
+         unsigned int pos = PAL_XY(iBG_X, iBG_Y);
          SDL_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
          PAL_RLEBlitToSurface(pBG, gpScreen, pos);
          
-         WORD wObject = gpGlobals->g.lprgStore[0].rgwItems[i];
-         static WORD wPrevImageIndex = 0xFFFF;
+         unsigned short wObject = gpGlobals->g.lprgStore[0].rgwItems[i];
+         static unsigned short wPrevImageIndex = 0xFFFF;
          static BYTE bufImage[2048];
          if (gpGlobals->g.rgObject[wObject].item.wBitmap != wPrevImageIndex)
          {
@@ -1535,7 +1547,7 @@ PAL_InterpretInstruction(
       //
       // Simulate a magic for player
       //
-      i = (SHORT)(pScript->rgwOperand[2]) - 1;
+      i = (pScript->rgwOperand[2]) - 1;
       if (i < 0)
       {
          i = wEventObjectID;
@@ -1691,7 +1703,7 @@ PAL_InterpretInstruction(
       //
       VIDEO_UpdateScreen(NULL);
       PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
-         ((SHORT)(pScript->rgwOperand[0]) > 0) ? pScript->rgwOperand[0] : 1);
+         ((pScript->rgwOperand[0]) > 0) ? pScript->rgwOperand[0] : 1);
       gpGlobals->fNeedToFadeIn = FALSE;
       break;
 
@@ -1765,7 +1777,7 @@ PAL_InterpretInstruction(
       // Jump if there is less than the specified number of the specified items
       // in the inventory
       //
-      if (PAL_GetItemAmount(pScript->rgwOperand[0]) < (SHORT)(pScript->rgwOperand[1]))
+      if (PAL_GetItemAmount(pScript->rgwOperand[0]) < (pScript->rgwOperand[1]))
       {
          wScriptEntry = pScript->rgwOperand[2] - 1;
       }
@@ -1812,7 +1824,7 @@ PAL_InterpretInstruction(
       //
       // Hide for a while
       //
-      g_Battle.iHidingTime = -(INT)(pScript->rgwOperand[0]);
+      g_Battle.iHidingTime = -(int)(pScript->rgwOperand[0]);
       break;
 
    case 0x005D:
@@ -1889,8 +1901,8 @@ PAL_InterpretInstruction(
       // Jump if enemy's HP is more than the specified percentage
       //
       i = gpGlobals->g.rgObject[g_Battle.rgEnemy[wEventObjectID].wObjectID].enemy.wEnemyID;
-      if ((INT)(g_Battle.rgEnemy[wEventObjectID].e.wHealth) * 100 >
-         (INT)(gpGlobals->g.lprgEnemy[i].wHealth) * pScript->rgwOperand[0])
+      if ((int)(g_Battle.rgEnemy[wEventObjectID].e.wHealth) * 100 >
+         (int)(gpGlobals->g.lprgEnemy[i].wHealth) * pScript->rgwOperand[0])
       {
          wScriptEntry = pScript->rgwOperand[1] - 1;
       }
@@ -1913,8 +1925,8 @@ PAL_InterpretInstruction(
       // Throw weapon to enemy
       //
       w = pScript->rgwOperand[1] * 5;
-      w += gpGlobals->g.PlayerRoles.rgwAttackStrength[gpGlobals->rgParty[g_Battle.wMovingPlayerIndex].wPlayerRole] * RandomFloat(0, 4);
-      PAL_BattleSimulateMagic((SHORT)wEventObjectID, pScript->rgwOperand[0], w);
+      w += (unsigned short)(gpGlobals->g.PlayerRoles.rgwAttackStrength[gpGlobals->rgParty[g_Battle.wMovingPlayerIndex].wPlayerRole] * RandomFloat(0, 4));
+      PAL_BattleSimulateMagic(wEventObjectID, pScript->rgwOperand[0], w);
       break;
 
    case 0x0067:
@@ -1954,15 +1966,15 @@ PAL_InterpretInstruction(
       //
       // Blow away enemies
       //
-      g_Battle.iBlow = (SHORT)(pScript->rgwOperand[0]);
+      g_Battle.iBlow = (pScript->rgwOperand[0]);
       break;
 
    case 0x006C:
       //
       // Walk the NPC in one step
       //
-      pCurrent->x += (SHORT)(pScript->rgwOperand[1]);
-      pCurrent->y += (SHORT)(pScript->rgwOperand[2]);
+      pCurrent->x += (pScript->rgwOperand[1]);
+      pCurrent->y += (pScript->rgwOperand[2]);
       PAL_NPCWalkOneStep(wCurEventObjectID, 0);
       break;
 
@@ -2005,8 +2017,8 @@ PAL_InterpretInstruction(
       gpGlobals->rgTrail[0].y = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
 
       gpGlobals->viewport = PAL_XY(
-         PAL_X(gpGlobals->viewport) + (SHORT)(pScript->rgwOperand[0]),
-         PAL_Y(gpGlobals->viewport) + (SHORT)(pScript->rgwOperand[1]));
+         PAL_X(gpGlobals->viewport) + (pScript->rgwOperand[0]),
+         PAL_Y(gpGlobals->viewport) + (pScript->rgwOperand[1]));
 
       gpGlobals->wLayer = pScript->rgwOperand[2] * 8;
 
@@ -2020,9 +2032,9 @@ PAL_InterpretInstruction(
       //
       // Sync the state of current event object with another event object
       //
-      if (pCurrent->sState == (SHORT)(pScript->rgwOperand[1]))
+      if (pCurrent->sState == (pScript->rgwOperand[1]))
       {
-         pEvtObj->sState = (SHORT)(pScript->rgwOperand[1]);
+         pEvtObj->sState = (pScript->rgwOperand[1]);
       }
       break;
 
@@ -2038,7 +2050,7 @@ PAL_InterpretInstruction(
       // Wave the screen
       //
       gpGlobals->wScreenWave = pScript->rgwOperand[0];
-      gpGlobals->sWaveProgression = (SHORT)(pScript->rgwOperand[1]);
+      gpGlobals->sWaveProgression = (pScript->rgwOperand[1]);
       break;
 
    case 0x0073:
@@ -2121,7 +2133,7 @@ PAL_InterpretInstruction(
       // Stop current playing music
       //
       AUDIO_PlayMusic(0, FALSE,
-         (pScript->rgwOperand[0] == 0) ? 2.0f : (FLOAT)(pScript->rgwOperand[0]) * 3);
+         (pScript->rgwOperand[0] == 0) ? 2.0f : (float)(pScript->rgwOperand[0]) * 3);
       gpGlobals->wNumMusic = 0;
       break;
 
@@ -2182,15 +2194,15 @@ PAL_InterpretInstruction(
       //
       // Move the event object
       //
-      pCurrent->x += (SHORT)(pScript->rgwOperand[1]);
-      pCurrent->y += (SHORT)(pScript->rgwOperand[2]);
+      pCurrent->x += (pScript->rgwOperand[1]);
+      pCurrent->y += (pScript->rgwOperand[2]);
       break;
 
    case 0x007E:
       //
       // Set the layer of event object
       //
-      pCurrent->sLayer = (SHORT)(pScript->rgwOperand[1]);
+      pCurrent->sLayer = (pScript->rgwOperand[1]);
       break;
 
    case 0x007F:
@@ -2209,7 +2221,7 @@ PAL_InterpretInstruction(
             PAL_XY(PAL_X(gpGlobals->viewport) + x, PAL_Y(gpGlobals->viewport) + y);
          gpGlobals->partyoffset = PAL_XY(160, 112);
 
-         for (i = 0; i <= (short)gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; i++)
+         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; i++)
          {
             gpGlobals->rgParty[i].x -= x;
             gpGlobals->rgParty[i].y -= y;
@@ -2223,12 +2235,12 @@ PAL_InterpretInstruction(
       }
       else
       {
-         DWORD time;
+         unsigned int time;
 
          i = 0;
 
-         x = (SHORT)(pScript->rgwOperand[0]);
-         y = (SHORT)(pScript->rgwOperand[1]);
+         x = (pScript->rgwOperand[0]);
+         y = (pScript->rgwOperand[1]);
 
          time = SDL_GetTicks() + FRAME_TIME;
 
@@ -2245,7 +2257,7 @@ PAL_InterpretInstruction(
                x -= PAL_X(gpGlobals->viewport);
                y -= PAL_Y(gpGlobals->viewport);
 
-               for (j = 0; j <= (short)gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; j++)
+               for (j = 0; j <= gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; j++)
                {
                   gpGlobals->rgParty[j].x += x;
                   gpGlobals->rgParty[j].y += y;
@@ -2258,7 +2270,7 @@ PAL_InterpretInstruction(
                gpGlobals->partyoffset =
                   PAL_XY(PAL_X(gpGlobals->partyoffset) - x, PAL_Y(gpGlobals->partyoffset) - y);
 
-               for (j = 0; j <= (short)gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; j++)
+               for (j = 0; j <= gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; j++)
                {
                   gpGlobals->rgParty[j].x -= x;
                   gpGlobals->rgParty[j].y -= y;
@@ -2278,7 +2290,7 @@ PAL_InterpretInstruction(
             //
 			PAL_DelayUntil(time);
             time = SDL_GetTicks() + FRAME_TIME;
-         } while (++i < (SHORT)(pScript->rgwOperand[2]));
+         } while (++i < (pScript->rgwOperand[2]));
       }
       break;
 
@@ -2408,7 +2420,7 @@ PAL_InterpretInstruction(
       {
          pCurrent->x = x;
          pCurrent->y = y;
-         pCurrent->sState = (SHORT)(pScript->rgwOperand[1]);
+         pCurrent->sState = (pScript->rgwOperand[1]);
       }
       break;
 
@@ -2572,15 +2584,15 @@ PAL_InterpretInstruction(
       // Fade the screen. Update scene in the process.
       //
       PAL_SceneFade(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
-         (SHORT)(pScript->rgwOperand[0]));
-      gpGlobals->fNeedToFadeIn = ((SHORT)(pScript->rgwOperand[0]) < 0);
+         (pScript->rgwOperand[0]));
+      gpGlobals->fNeedToFadeIn = ((pScript->rgwOperand[0]) < 0);
       break;
 
    case 0x0094:
       //
       // Jump if the state of event object is the specified one
       //
-      if (pCurrent->sState == (SHORT)(pScript->rgwOperand[1]))
+      if (pCurrent->sState == (pScript->rgwOperand[1]))
       {
          wScriptEntry = pScript->rgwOperand[2] - 1;
       }
@@ -2786,7 +2798,7 @@ PAL_InterpretInstruction(
 
       x = 0;
       w = pScript->rgwOperand[0];
-      y = (((SHORT)(pScript->rgwOperand[1]) <= 0) ? 1 : (SHORT)pScript->rgwOperand[1]);
+      y = (((pScript->rgwOperand[1]) <= 0) ? 1 : pScript->rgwOperand[1]);
 
       if (w == 0 || w == 0xFFFF)
       {
@@ -2982,9 +2994,9 @@ PAL_InterpretInstruction(
 }
 
 PAL_FORCE_INLINE
-INT
+int
 MESSAGE_GetSpan(
-    WORD *pwScriptEntry
+    unsigned short *pwScriptEntry
 )
 /*++
  Purpose:
@@ -3034,10 +3046,10 @@ MESSAGE_GetSpan(
     return result;
 }
 
-WORD
+unsigned short
 PAL_RunTriggerScript(
-   WORD           wScriptEntry,
-   WORD           wEventObjectID
+   unsigned short           wScriptEntry,
+   unsigned short           wEventObjectID
 )
 /*++
   Purpose:
@@ -3056,9 +3068,9 @@ PAL_RunTriggerScript(
 
 --*/
 {
-   static WORD       wLastEventObject = 0;
+   static unsigned short       wLastEventObject = 0;
 
-   WORD              wNextScriptEntry;
+   unsigned short              wNextScriptEntry;
    BOOL              fEnded;
    LPSCRIPTENTRY     pScript;
    LPEVENTOBJECT     pEvtObj = NULL;
@@ -3243,7 +3255,7 @@ PAL_RunTriggerScript(
          // wait for the specified number of frames
          //
          {
-            DWORD        time;
+            unsigned int        time;
 
             PAL_ClearDialog(TRUE);
 
@@ -3354,10 +3366,10 @@ PAL_RunTriggerScript(
    return wNextScriptEntry;
 }
 
-WORD
+unsigned short
 PAL_RunAutoScript(
-   WORD           wScriptEntry,
-   WORD           wEventObjectID
+   unsigned short           wScriptEntry,
+   unsigned short           wEventObjectID
 )
 /*++
   Purpose:

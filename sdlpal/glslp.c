@@ -20,9 +20,9 @@
 // glslp.c: retroarch-style shader preset parser by palxex, 2018
 //
 
+#include "glslp.h"
 #include "common.h"
 #include "palcfg.h"
-#include "glslp.h"
 #include "util.h"
 #include <ctype.h>
 
@@ -48,7 +48,7 @@ typedef enum tagLineType {
     TOKEN_SHADER_SCALE,
     TOKEN_SHADER_SCALE_X,
     TOKEN_SHADER_SCALE_Y,
-    TOKEN_SHADER_FLOAT_FRAMEBUFFER,
+    TOKEN_SHADER_float_FRAMEBUFFER,
     TOKEN_SHADER_SRGB_FRAMEBUFFER,
     TOKEN_SHADER_MIPMAP_INPUT,
     TOKEN_SHADER_FRAME_COUNT_MOD,
@@ -121,7 +121,7 @@ static int token_conform( const char *name, LineType type, GLSLP *pGLSLP ) {
         case TOKEN_SHADER_SCALE:
         case TOKEN_SHADER_SCALE_X:
         case TOKEN_SHADER_SCALE_Y:
-        case TOKEN_SHADER_FLOAT_FRAMEBUFFER:
+        case TOKEN_SHADER_float_FRAMEBUFFER:
         case TOKEN_SHADER_SRGB_FRAMEBUFFER:
         case TOKEN_SHADER_MIPMAP_INPUT:
         case TOKEN_SHADER_FRAME_COUNT_MOD:
@@ -365,7 +365,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         break;
                     case TOKEN_SHADERS: {
                         pGLSLP->shaders = SDL_atoi(value);
-                        pGLSLP->shader_params = UTIL_calloc(pGLSLP->shaders, sizeof(shader_param));
+                        pGLSLP->shader_params = calloc(pGLSLP->shaders, sizeof(shader_param));
                         for( int i = 0; i < pGLSLP->shaders; i++ ) {
                             shader_param *param = &pGLSLP->shader_params[i];
                             clear_shader_slots(param);
@@ -398,15 +398,15 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         s_param->scale_type_y = string_to_scale_type(value);
                         break;
                     case TOKEN_SHADER_SCALE:
-                        s_param->scale_x = s_param->scale_y = SDL_atof(value);
+                        s_param->scale_x = s_param->scale_y = (float)SDL_atof(value);
                         break;
                     case TOKEN_SHADER_SCALE_X:
-                        s_param->scale_x = SDL_atof(value);
+                        s_param->scale_x = (float)SDL_atof(value);
                         break;
                     case TOKEN_SHADER_SCALE_Y:
-                        s_param->scale_y = SDL_atof(value);
+                        s_param->scale_y = (float)SDL_atof(value);
                         break;
-                    case TOKEN_SHADER_FLOAT_FRAMEBUFFER:
+                    case TOKEN_SHADER_float_FRAMEBUFFER:
                         s_param->float_framebuffer = SDL_strcasecmp(value, "true") == 0;
                         break;
                     case TOKEN_SHADER_SRGB_FRAMEBUFFER:
@@ -421,7 +421,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                     case TOKEN_TEXTURES: {
                         pGLSLP->textures = split_with(value, ';');
                         if( pGLSLP->textures > 0 ) {
-                            pGLSLP->texture_params = UTIL_calloc(pGLSLP->textures, sizeof(texture_param));
+                            pGLSLP->texture_params = calloc(pGLSLP->textures, sizeof(texture_param));
                             for( int i = 0; i < pGLSLP->textures; i++ ) {
                                 texture_param *param = &pGLSLP->texture_params[i];
                                 memset(param->slots_pass,-1,sizeof(param->slots_pass));
@@ -447,7 +447,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                     case TOKEN_PARAMETERS: {
                         pGLSLP->uniform_parameters = split_with(value, ';');
                         if( pGLSLP->uniform_parameters > 0 ) {
-                            pGLSLP->uniform_params = UTIL_calloc(pGLSLP->uniform_parameters, sizeof(uniform_param));
+                            pGLSLP->uniform_params = calloc(pGLSLP->uniform_parameters, sizeof(uniform_param));
                             for( int i = 0; i < pGLSLP->uniform_parameters; i++ ) {
                                 uniform_param *param = &pGLSLP->uniform_params[i];
                                 memset(param->uniform_ids,-1,sizeof(param->uniform_ids));
@@ -457,7 +457,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         break;
                     }
                     case TOKEN_PARAMETER_NAME:
-                        u_param->value = SDL_atof(value);
+                        u_param->value = (float)SDL_atof(value);
                         break;
                     default:
                         break;
@@ -470,7 +470,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
 }
 
 char *serialize_glslp(const GLSLP *pGLSLP){
-    char *output = UTIL_calloc( 1, 65535 );
+    char *output = malloc(65535);
     sprintf(output, "%s\r\n%s = %s", output, tokens[TOKEN_ORIGFILTER], pGLSLP->orig_filter ? pGLSLP->orig_filter : gConfig.pszShader);
     sprintf(output, "%s\r\n\r\n%s = %d", output, tokens[TOKEN_SHADERS], pGLSLP->shaders);
     for( int i = 0; i < pGLSLP->shaders; i++ ) {
@@ -483,7 +483,7 @@ char *serialize_glslp(const GLSLP *pGLSLP){
         sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_SCALE_TYPE_Y], i),       scale_type_to_string(param->scale_type_y));
         sprintf(output, "%s\r\n%s = %.1f", output, PAL_va(0, tokens[TOKEN_SHADER_SCALE_X], i),          param->scale_x );
         sprintf(output, "%s\r\n%s = %.1f", output, PAL_va(0, tokens[TOKEN_SHADER_SCALE_Y], i),          param->scale_y );
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_FLOAT_FRAMEBUFFER], i),  param->float_framebuffer ? "true" : "false");
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_float_FRAMEBUFFER], i),  param->float_framebuffer ? "true" : "false");
         sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_SRGB_FRAMEBUFFER], i),   param->srgb_framebuffer ? "true" : "false");
         sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_MIPMAP_INPUT], i),       param->mipmap_input ? "true" : "false");
         sprintf(output, "%s\r\n%s = %d", output, PAL_va(0, tokens[TOKEN_SHADER_FRAME_COUNT_MOD], i),    param->frame_count_mod);
@@ -506,8 +506,8 @@ char *serialize_glslp(const GLSLP *pGLSLP){
 
 void glslp_add_parameter(char *line, size_t len, GLSLP *pGLSLP) {
     uniform_param tempParam;
-    tempParam.parameter_name = UTIL_calloc(1, PAL_MAX_PATH);
-    tempParam.desc = UTIL_calloc(1, PAL_MAX_PATH);
+    tempParam.parameter_name = malloc(PAL_MAX_PATH);
+    tempParam.desc = malloc(PAL_MAX_PATH);
     int found = -1, nfound = 0;
     sscanf(line, "#pragma parameter %63s \"%63[^\"]\" %lf %lf %lf %lf", tempParam.parameter_name, tempParam.desc, &tempParam.value_default, &tempParam.minimum, &tempParam.maximum, &tempParam.step);
     UTIL_LogOutput(LOGLEVEL_INFO, "Found #pragma parameter %s (%s) %.6f %.6f %.6f %.6f\n", tempParam.desc, tempParam.parameter_name, tempParam.value_default, tempParam.minimum, tempParam.maximum, tempParam.step);

@@ -29,61 +29,61 @@
 extern "C" {
 #endif
 
-INT
+int
 AUDIO_OpenDevice(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_CloseDevice(
-   VOID
+   void
 );
 
 SDL_AudioSpec*
 AUDIO_GetDeviceSpec(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_IncreaseVolume(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_DecreaseVolume(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_PlayMusic(
-   INT       iNumRIX,
+   int       iNumRIX,
    BOOL      fLoop,
-   FLOAT     flFadeTime
+   float     flFadeTime
 );
 
-VOID
+void
 AUDIO_PlaySound(
-   INT    iSoundNum
+   int    iSoundNum
 );
 
-VOID
+void
 AUDIO_EnableMusic(
    BOOL   fEnable
 );
 
 BOOL
 AUDIO_MusicEnabled(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_EnableSound(
    BOOL   fEnable
 );
 
 BOOL
 AUDIO_SoundEnabled(
-   VOID
+   void
 );
 
 void

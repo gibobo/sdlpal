@@ -22,11 +22,13 @@
 #include "util.h"
 #include "global.h"
 #include "input.h"
+#include "main.h"
 #include "palcfg.h"
-// #include "pal_config.h"
-#include <errno.h>
-#include "SDL_messagebox.h"
-#include "SDL_video.h"
+#include <SDL_messagebox.h>
+#include <SDL_timer.h>
+#include <io.h>
+// #include "SDL_video.h"
+// #include <errno.h>
 
 #define PAL_PATH_SEPARATORS "/"
 #define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
@@ -282,7 +284,7 @@ void TerminateOnError(
 {
 	va_list argptr;
 	char string[256];
-	extern VOID PAL_Shutdown(int);
+	extern void PAL_Shutdown(int);
 
 	// concatenate all the arguments in one string
 	va_start(argptr, fmt);
@@ -355,8 +357,8 @@ UTIL_calloc(
 
 FILE *
 UTIL_OpenRequiredFileForMode(
-	LPCSTR lpszFileName,
-	LPCSTR szMode)
+	const char* lpszFileName,
+	const char* szMode)
 /*++
   Purpose:
 
@@ -390,7 +392,7 @@ UTIL_OpenRequiredFileForMode(
 
 FILE *
 UTIL_OpenFile(
-	LPCSTR lpszFileName)
+	const char* lpszFileName)
 /*++
   Purpose:
 
@@ -411,8 +413,8 @@ UTIL_OpenFile(
 
 FILE *
 UTIL_OpenFileForMode(
-	LPCSTR lpszFileName,
-	LPCSTR szMode)
+	const char* lpszFileName,
+	const char* szMode)
 /*++
   Purpose:
 
@@ -452,17 +454,17 @@ UTIL_OpenFileForMode(
 
 FILE *
 UTIL_OpenFileAtPath(
-	LPCSTR lpszPath,
-	LPCSTR lpszFileName)
+	const char* lpszPath,
+	const char* lpszFileName)
 {
 	return UTIL_OpenFileAtPathForMode(lpszPath, lpszFileName, "rb");
 }
 
 FILE *
 UTIL_OpenFileAtPathForMode(
-	LPCSTR lpszPath,
-	LPCSTR lpszFileName,
-	LPCSTR szMode)
+	const char* lpszPath,
+	const char* lpszFileName,
+	const char* szMode)
 {
 	if (!lpszPath || !lpszFileName || !szMode)
 		return NULL;
@@ -489,7 +491,7 @@ UTIL_OpenFileAtPathForMode(
 	}
 }
 
-VOID UTIL_CloseFile(
+void UTIL_CloseFile(
 	FILE *fp)
 /*++
   Purpose:

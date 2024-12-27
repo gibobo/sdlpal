@@ -23,13 +23,15 @@
 //
 
 #include "text.h"
+#include "font.h"
 #include "global.h"
 #include "input.h"
 #include "palcfg.h"
-#include "video.h"
-#include "util.h"
-#include "font.h"
+#include "palcommon.h"
 #include "palette.h"
+#include "util.h"
+#include "video.h"
+#include <SDL_timer.h>
 #include <errno.h>
 #include <wctype.h>
 
@@ -50,12 +52,12 @@ static wchar_t internal_wbuffer[PAL_GLOBAL_BUFFER_SIZE];
 #include "codepage.h"
 
 #define SDLPAL_EXTRA_WORD_COUNT     1
-static LPWSTR gc_rgszSDLPalWords[CP_MAX][SDLPAL_EXTRA_WORD_COUNT] = {
+static unsigned short* gc_rgszSDLPalWords[CP_MAX][SDLPAL_EXTRA_WORD_COUNT] = {
 	{ L"\x8FD4\x56DE\x8A2D\x5B9A" },
 	{ L"\x8FD4\x56DE\x8BBE\x7F6E" },
 };
 
-LPWSTR g_rcCredits[12];
+unsigned short* g_rcCredits[12];
 
 TEXTLIB         g_TextLib;
 
@@ -79,13 +81,13 @@ PAL_ParseLine(
 		//
 		// Split the index and value
 		//
-		LPSTR val = strchr(line, '=');
+		char* val = strchr(line, '=');
 		if (val)
 		{
 			//
 			// Remove the trailing spaces
 			//
-			LPSTR end = line + strlen(line);
+			char* end = line + strlen(line);
 			int index;
 			if (end > line && end[-1] == '\n') *(--end) = 0;
 			if (deltrail) while (end > line && iswspace(end[-1])) *(--end) = 0;
@@ -147,9 +149,9 @@ PAL_ReadOneLine(
 		return NULL;
 }
 
-INT
+int
 PAL_InitText(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -167,10 +169,11 @@ PAL_InitText(
 
 --*/
 {
-	FILE       *fpMsg, *fpWord;
-	DWORD      *offsets;
-	LPWSTR      tmp;
-	LPBYTE      temp;
+	FILE       		*fpMsg;
+	FILE           	*fpWord;
+	unsigned int      *offsets;
+	unsigned short 	*tmp;
+	unsigned char  	*temp;
 	int         wpos, wlen, i;
 
 	//
@@ -189,12 +192,12 @@ PAL_InitText(
 	// Each word has 10 bytes
 	//
 	g_TextLib.nWords = (i + (gConfig.dwWordLength - 1)) / gConfig.dwWordLength;
-	if (g_TextLib.nWords < MINIMAL_WORD_COUNT) g_TextLib.nWords = MINIMAL_WORD_COUNT;
+	if (g_TextLib.nWords < (MAX_OBJECTS + 13)) g_TextLib.nWords = (MAX_OBJECTS + 13);
 
 	//
 	// Read the words
 	//
-	temp = (LPBYTE)malloc(gConfig.dwWordLength * g_TextLib.nWords);
+	temp = (unsigned char *)malloc(gConfig.dwWordLength * g_TextLib.nWords);
 	if (temp == NULL)
 	{
 		fclose(fpWord);
@@ -221,16 +224,16 @@ PAL_InitText(
 		int base = i * gConfig.dwWordLength;
 		int pos = base + gConfig.dwWordLength - 1;
 		while (pos >= base && temp[pos] == ' ') temp[pos--] = 0;
-		wlen += PAL_MultiByteToWideChar((LPCSTR)temp + base, gConfig.dwWordLength, NULL, 0) + 1;
+		wlen += PAL_MultiByteToWideChar((const char*)temp + base, gConfig.dwWordLength, NULL, 0) + 1;
 	}
-	g_TextLib.lpWordBuf = (LPWSTR*)malloc(g_TextLib.nWords * sizeof(LPWSTR));
+	g_TextLib.lpWordBuf = (unsigned short**)malloc(g_TextLib.nWords * sizeof(unsigned short*));
 	if (g_TextLib.lpWordBuf == NULL)
 	{
 		free(temp);
 		fclose(fpMsg);
 		return -1;
 	}
-	tmp = (LPWSTR)malloc(wlen * sizeof(WCHAR));
+	tmp = (unsigned short*)malloc(wlen * sizeof(unsigned short));
 	if (tmp == NULL)
 	{
 		free(g_TextLib.lpWordBuf);
@@ -242,7 +245,7 @@ PAL_InitText(
 	{
 		int l;
 		g_TextLib.lpWordBuf[i] = tmp + wpos;
-		l = PAL_MultiByteToWideChar((LPCSTR)temp + i * gConfig.dwWordLength, gConfig.dwWordLength, g_TextLib.lpWordBuf[i], wlen - wpos);
+		l = PAL_MultiByteToWideChar((const char*)temp + i * gConfig.dwWordLength, gConfig.dwWordLength, g_TextLib.lpWordBuf[i], wlen - wpos);
 		if (l > 0 && g_TextLib.lpWordBuf[i][l - 1] == '1')
 			g_TextLib.lpWordBuf[i][l - 1] = 0;
 		g_TextLib.lpWordBuf[i][l] = 0;
@@ -253,10 +256,10 @@ PAL_InitText(
 	//
 	// Read the message offsets. The message offsets are in SSS.MKF #3
 	//
-	i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(DWORD);
+	i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
 	g_TextLib.nMsgs = i - 1;
 
-	offsets = (LPDWORD)malloc(i * sizeof(DWORD));
+	offsets = (unsigned int*)malloc(i * sizeof(unsigned int));
 	if (offsets == NULL)
 	{
 		free(g_TextLib.lpWordBuf[0]);
@@ -265,7 +268,7 @@ PAL_InitText(
 		return -1;
 	}
 
-	PAL_MKFReadChunk((LPBYTE)(offsets), i * sizeof(DWORD), 3, gpGlobals->f.fpSSS);
+	PAL_MKFReadChunk((unsigned char *)offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
 	//
 	// Read the messages.
@@ -273,7 +276,7 @@ PAL_InitText(
 	fseek(fpMsg, 0, SEEK_END);
 	i = ftell(fpMsg);
 
-	temp = (LPBYTE)malloc(i);
+	temp = (unsigned char *)malloc(i);
 	if (temp == NULL)
 	{
 		free(offsets);
@@ -298,9 +301,9 @@ PAL_InitText(
 	// Split messages and do code page conversion here
 	for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++)
 	{
-		wlen += PAL_MultiByteToWideChar((LPCSTR)temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
+		wlen += PAL_MultiByteToWideChar((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
 	}
-	g_TextLib.lpMsgBuf = (LPWSTR*)malloc(g_TextLib.nMsgs * sizeof(LPWSTR));
+	g_TextLib.lpMsgBuf = (unsigned short**)malloc(g_TextLib.nMsgs * sizeof(unsigned short*));
 	if (g_TextLib.lpMsgBuf == NULL)
 	{
 		free(g_TextLib.lpWordBuf[0]);
@@ -308,7 +311,7 @@ PAL_InitText(
 		free(offsets);
 		return -1;
 	}
-	tmp = (LPWSTR)malloc(wlen * sizeof(WCHAR));
+	tmp = (unsigned short*)malloc(wlen * sizeof(unsigned short));
 	if (tmp == NULL)
 	{
 		free(g_TextLib.lpMsgBuf);
@@ -321,13 +324,13 @@ PAL_InitText(
 	{
 		int l;
 		g_TextLib.lpMsgBuf[i] = tmp + wpos;
-		l = PAL_MultiByteToWideChar((LPCSTR)temp + offsets[i], offsets[i + 1] - offsets[i], g_TextLib.lpMsgBuf[i], wlen - wpos);
+		l = PAL_MultiByteToWideChar((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], g_TextLib.lpMsgBuf[i], wlen - wpos);
 		g_TextLib.lpMsgBuf[i][l] = 0;
 		wpos += l + 1;
 	}
 	free(temp);
 	free(offsets);
-	memcpy(g_TextLib.lpWordBuf + SYSMENU_LABEL_LAUNCHSETTING, gc_rgszSDLPalWords[PAL_GetCodePage()], SDLPAL_EXTRA_WORD_COUNT * sizeof(LPCWSTR));
+	memcpy(g_TextLib.lpWordBuf + SYSMENU_LABEL_LAUNCHSETTING, gc_rgszSDLPalWords[PAL_GetCodePage()], SDLPAL_EXTRA_WORD_COUNT * sizeof(const unsigned short*));
 
    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
    g_TextLib.bIcon = 0;
@@ -344,9 +347,9 @@ PAL_InitText(
    return 0;
 }
 
-VOID
+void
 PAL_FreeText(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -377,7 +380,7 @@ PAL_FreeText(
    }
 }
 
-LPCWSTR
+const unsigned short*
 PAL_GetWord(
    int        iNumWord
 )
@@ -399,7 +402,7 @@ PAL_GetWord(
    return (iNumWord >= g_TextLib.nWords || !g_TextLib.lpWordBuf[iNumWord]) ? L"" : g_TextLib.lpWordBuf[iNumWord];
 }
 
-LPCWSTR
+const unsigned short*
 PAL_GetMsg(
    int        iNumMsg
 )
@@ -421,15 +424,15 @@ PAL_GetMsg(
    return (iNumMsg >= g_TextLib.nMsgs || !g_TextLib.lpMsgBuf[iNumMsg]) ? L"" : g_TextLib.lpMsgBuf[iNumMsg];
 }
 
-LPWSTR
+unsigned short*
 PAL_UnescapeText(
-   LPCWSTR    lpszText
+   const unsigned short*    lpszText
 )
 {
-   WCHAR *buf = internal_wbuffer;
+   unsigned short *buf = internal_wbuffer;
    
    if(wcsstr(lpszText, L"\\") == NULL)
-      return (LPWSTR)lpszText;
+      return (unsigned short*)lpszText;
    
    memset(internal_wbuffer, 0, sizeof(internal_wbuffer));
 
@@ -457,10 +460,10 @@ PAL_UnescapeText(
    return internal_wbuffer;
 }
 
-VOID
+void
 PAL_DrawText(
-   LPCWSTR    lpszText,
-   DWORD      pos,
+   const unsigned short*    lpszText,
+   unsigned int      pos,
    BYTE       bColor,
    BOOL       fShadow,
    BOOL       fUpdate,
@@ -470,10 +473,10 @@ PAL_DrawText(
     PAL_DrawTextUnescape(lpszText, pos, bColor, fShadow, fUpdate, fUse8x8Font, TRUE);
 }
 
-VOID
+void
 PAL_DrawTextUnescape(
-   LPCWSTR    lpszText,
-   DWORD      pos,
+   const unsigned short*    lpszText,
+   unsigned int      pos,
    BYTE       bColor,
    BOOL       fShadow,
    BOOL       fUpdate,
@@ -568,9 +571,9 @@ PAL_DrawTextUnescape(
    }
 }
 
-VOID
+void
 PAL_DialogSetDelayTime(
-   INT          iDelayTime
+   int          iDelayTime
 )
 /*++
   Purpose:
@@ -590,25 +593,25 @@ PAL_DialogSetDelayTime(
    g_TextLib.iDelayTime = iDelayTime;
 }
 
-VOID
+void
 PAL_StartDialog(
    BYTE         bDialogLocation,
    BYTE         bFontColor,
-   INT          iNumCharFace,
+   int          iNumCharFace,
    BOOL         fPlayingRNG
 )
 {
    PAL_StartDialogWithOffset(bDialogLocation, bFontColor, iNumCharFace, fPlayingRNG, 0, 0);
 }
 
-VOID
+void
 PAL_StartDialogWithOffset(
    BYTE         bDialogLocation,
    BYTE         bFontColor,
-   INT          iNumCharFace,
+   int          iNumCharFace,
    BOOL         fPlayingRNG,
-   INT          xOff,
-   INT          yOff
+   int          xOff,
+   int          yOff
 )
 /*++
   Purpose:
@@ -670,8 +673,8 @@ PAL_StartDialogWithOffset(
          //
          if (PAL_MKFReadChunk(buf, PAL_RLEBUFSIZE, iNumCharFace, gpGlobals->f.fpRGM) > 0)
          {
-            rect.w = PAL_RLEGetWidth((LPCBITMAPRLE)buf);
-            rect.h = PAL_RLEGetHeight((LPCBITMAPRLE)buf);
+            rect.w = PAL_RLEGetWidth((const unsigned char*)buf);
+            rect.h = PAL_RLEGetHeight((const unsigned char*)buf);
             rect.x = 48 - rect.w / 2 + xOff;
             rect.y = 55 - rect.h / 2 + yOff;
 
@@ -685,7 +688,7 @@ PAL_StartDialogWithOffset(
                rect.y = 0;
             }
 
-            PAL_RLEBlitToSurface((LPCBITMAPRLE)buf, gpScreen, PAL_XY(rect.x, rect.y));
+            PAL_RLEBlitToSurface((const unsigned char*)buf, gpScreen, PAL_XY(rect.x, rect.y));
 
             if (rect.x < 0)
             {
@@ -715,10 +718,10 @@ PAL_StartDialogWithOffset(
          //
          if (PAL_MKFReadChunk(buf, PAL_RLEBUFSIZE, iNumCharFace, gpGlobals->f.fpRGM) > 0)
          {
-            rect.x = 270 - PAL_RLEGetWidth((LPCBITMAPRLE)buf) / 2 + xOff;
-            rect.y = 144 - PAL_RLEGetHeight((LPCBITMAPRLE)buf) / 2 + yOff;
+            rect.x = 270 - PAL_RLEGetWidth((const unsigned char*)buf) / 2 + xOff;
+            rect.y = 144 - PAL_RLEGetHeight((const unsigned char*)buf) / 2 + yOff;
 
-            PAL_RLEBlitToSurface((LPCBITMAPRLE)buf, gpScreen, PAL_XY(rect.x, rect.y));
+            PAL_RLEBlitToSurface((const unsigned char*)buf, gpScreen, PAL_XY(rect.x, rect.y));
 
             VIDEO_UpdateScreen(NULL);
          }
@@ -738,9 +741,9 @@ PAL_StartDialogWithOffset(
    g_TextLib.bDialogPosition = bDialogLocation;
 }
 
-static VOID
+static void
 PAL_DialogWaitForKeyWithMaximumSeconds(
-   FLOAT fMaxSeconds
+   float fMaxSeconds
 )
 /*++
   Purpose:
@@ -774,7 +777,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
       //
       // show the icon
       //
-      LPCBITMAPRLE p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
+      const unsigned char* p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
       if (p != NULL)
       {
          SDL_Rect rect;
@@ -833,9 +836,9 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
    g_TextLib.fUserSkip = FALSE;
 }
 
-static VOID
+static void
 PAL_DialogWaitForKey(
-   VOID
+   void
 )
 {
    PAL_DialogWaitForKeyWithMaximumSeconds(0);
@@ -843,7 +846,7 @@ PAL_DialogWaitForKey(
 
 int
 TEXT_DisplayText(
-   LPCWSTR        lpszText,
+   const unsigned short*        lpszText,
    int            x,
    int            y,
    BOOL           isDialog
@@ -852,7 +855,7 @@ TEXT_DisplayText(
    //
    // normal texts
    //
-   WCHAR text[2];
+   unsigned short text[2];
    BYTE color, isNumber=0;
    
    while (lpszText != NULL && *lpszText != '\0')
@@ -998,9 +1001,9 @@ TEXT_DisplayText(
    return x;
 }
 
-VOID
+void
 PAL_ShowDialogText(
-   LPCWSTR      lpszText
+   const unsigned short*      lpszText
 )
 /*++
   Purpose:
@@ -1052,7 +1055,7 @@ PAL_ShowDialogText(
       // The text should be shown in a small window at the center of the screen
       //
       {
-         DWORD      pos;
+         unsigned int      pos;
          LPBOX      lpBox;
 		 size_t     i, w = wcslen(lpszText), len = 0;
 
@@ -1127,7 +1130,7 @@ PAL_ShowDialogText(
    }
 }
 
-VOID
+void
 PAL_ClearDialog(
    BOOL       fWaitForKey
 )
@@ -1162,9 +1165,9 @@ PAL_ClearDialog(
    }
 }
 
-VOID
+void
 PAL_EndDialog(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -1197,7 +1200,7 @@ PAL_EndDialog(
 
 BOOL
 PAL_IsInDialog(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -1219,7 +1222,7 @@ PAL_IsInDialog(
 
 BOOL
 PAL_DialogIsPlayingRNG(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -1287,7 +1290,7 @@ PAL_DetectCodePageForString(
 		for (CODEPAGE i = CP_BIG5; i <= CP_GBK; i++)
 		{
 			int invalids, length = PAL_MultiByteToWideCharCP(i, text, text_len, NULL, 0);
-			WCHAR *wbuf = (WCHAR *)malloc(length * sizeof(WCHAR));
+			unsigned short *wbuf = (unsigned short *)malloc(length * sizeof(unsigned short));
 			PAL_MultiByteToWideCharCP(i, text, text_len, wbuf, length);
 			for (int j = invalids = 0; j < length; j++)
 			{
@@ -1323,12 +1326,12 @@ PAL_DetectCodePageForString(
 	return default_cp;
 }
 
-INT
+int
 PAL_MultiByteToWideCharCP(
    CODEPAGE      cp,
-   LPCSTR        mbs,
+   const char*        mbs,
    size_t        mbslength,
-   LPWSTR        wcs,
+   unsigned short*        wcs,
    size_t        wcslength
 )
 /*++
@@ -1443,7 +1446,7 @@ PAL_MultiByteToWideCharCP(
 	}
 	else
 	{
-		WCHAR invalid_char;
+		unsigned short invalid_char;
 		switch (cp)
 		{
 		//case CP_SHIFTJIS:
@@ -1591,11 +1594,11 @@ PAL_MultiByteToWideCharCP(
 	}
 }
 
-INT
+int
 PAL_MultiByteToWideChar(
-   LPCSTR        mbs,
+   const char*        mbs,
    int           mbslength,
-   LPWSTR        wcs,
+   unsigned short*        wcs,
    int           wcslength
 )
 /*++
@@ -1622,11 +1625,11 @@ PAL_MultiByteToWideChar(
 	return PAL_MultiByteToWideCharCP(g_codepage, mbs, mbslength, wcs, wcslength);
 }
 
-INT
+int
 PAL_swprintf(
-	LPWSTR buffer,
+	unsigned short* buffer,
 	size_t count,
-	LPCWSTR format,
+	const unsigned short* format,
 	...
 )
 /*++
@@ -1656,11 +1659,11 @@ PAL_swprintf(
 --*/
 {
 	va_list ap;
-	const WCHAR * const format_end = format + wcslen(format);
-	const WCHAR * const buffer_end = buffer + count - 1;
-	WCHAR chr_buf[2] = { 0, 0 };
-	LPCWSTR fmt_start = NULL;
-	LPWSTR cur_fmt = NULL;
+	const unsigned short * const format_end = format + wcslen(format);
+	const unsigned short * const buffer_end = buffer + count - 1;
+	unsigned short chr_buf[2] = { 0, 0 };
+	const unsigned short* fmt_start = NULL;
+	unsigned short* cur_fmt = NULL;
 	size_t fmt_len = 0;
 	int state, precision = 0, width = 0;
 	int left_aligned = 0, wide = 0, narrow = 0;
@@ -1781,7 +1784,7 @@ PAL_swprintf(
 			if (*format == 'c' || *format == 's')
 			{
 				// We handle char & str specially
-				LPWSTR buf;
+				unsigned short* buf;
 				size_t len;
 				int i;
 
@@ -1806,20 +1809,20 @@ PAL_swprintf(
 					// actual conversion later directly into the output buffer
 					if (wide)
 					{
-						buf = va_arg(ap, LPWSTR);
+						buf = va_arg(ap, unsigned short*);
 						len = wcslen(buf);
 					}
 					else
 					{
-						buf = (LPWSTR)va_arg(ap, LPSTR);
-						len = PAL_MultiByteToWideChar((LPCSTR)buf, -1, NULL, 0) - 1;
+						buf = (unsigned short*)va_arg(ap, char*);
+						len = PAL_MultiByteToWideChar((const char*)buf, -1, NULL, 0) - 1;
 					}
 				}
 				else
 				{
 					// For ANSI character, put it into the internal buffer
 					if (wide)
-						chr_buf[0] = va_arg(ap, WCHAR);
+						chr_buf[0] = va_arg(ap, unsigned short);
 					else
 						chr_buf[0] = va_arg(ap, int);
 					buf = chr_buf; len = 1;
@@ -1839,7 +1842,7 @@ PAL_swprintf(
 
 				// Convert or copy string (char) into output buffer
 				if (*format == 's' && !wide)
-					PAL_MultiByteToWideChar((LPCSTR)buf, -1, buffer, precision);
+					PAL_MultiByteToWideChar((const char*)buf, -1, buffer, precision);
 				else
 					wcsncpy(buffer, buf, precision);
 				buffer += precision; count += precision;
@@ -1856,7 +1859,7 @@ PAL_swprintf(
 
 				// We copy this argument's format string into internal buffer
 				if (fmt_len < (size_t)(format - fmt_start + 1))
-					cur_fmt = realloc(cur_fmt, ((fmt_len = format - fmt_start + 1) + 1) * sizeof(WCHAR));
+					cur_fmt = realloc(cur_fmt, ((fmt_len = format - fmt_start + 1) + 1) * sizeof(unsigned short));
 				wcsncpy(cur_fmt, fmt_start, fmt_len);
 				cur_fmt[fmt_len] = L'\0';
 				// And pass it into vswprintf to get the output

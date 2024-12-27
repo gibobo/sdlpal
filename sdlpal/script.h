@@ -30,16 +30,16 @@
 extern "C" {
 #endif
 
-WORD
+unsigned short
 PAL_RunTriggerScript(
-   WORD           wScriptEntry,
-   WORD           wEventObjectID
+   unsigned short           wScriptEntry,
+   unsigned short           wEventObjectID
 );
 
-WORD
+unsigned short
 PAL_RunAutoScript(
-   WORD           wScriptEntry,
-   WORD           wEventObjectID
+   unsigned short           wScriptEntry,
+   unsigned short           wEventObjectID
 );
 
 extern BOOL       g_fScriptSuccess;

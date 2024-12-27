@@ -23,7 +23,7 @@
 #define RES_H
 
 #include "map.h"
-#include "palcommon.h"
+#include "common.h"
 
 typedef enum tagLOADRESFLAG
 {
@@ -36,44 +36,44 @@ typedef enum tagLOADRESFLAG
 extern "C" {
 #endif
 
-VOID
+void
 PAL_InitResources(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_FreeResources(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_SetLoadFlags(
    BYTE       bFlags
 );
 
-VOID
+void
 PAL_LoadResources(
-   VOID
+   void
 );
 
 LPPALMAP
 PAL_GetCurrentMap(
-   VOID
+   void
 );
 
-LPSPRITE
+unsigned char *
 PAL_GetPlayerSprite(
    BYTE      bPlayerIndex
 );
 
-LPSPRITE
+unsigned char *
 PAL_GetBattleSprite(
    BYTE      bPlayerIndex
 );
 
-LPSPRITE
+unsigned char *
 PAL_GetEventObjectSprite(
-   WORD      wEventObjectID
+   unsigned short      wEventObjectID
 );
 
 #ifdef __cplusplus

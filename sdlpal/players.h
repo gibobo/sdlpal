@@ -28,11 +28,11 @@
 typedef struct tagAUDIOPLAYER
 {
 #define AUDIOPLAYER_COMMONS \
-    INT                        iMusic;  \
+    int                        iMusic;  \
     BOOL                       fLoop; \
-	VOID (*Shutdown)(VOID*); \
-	BOOL (*Play)(VOID*, INT, BOOL, FLOAT); \
-	VOID (*FillBuffer)(VOID*, LPBYTE, INT)
+	void (*Shutdown)(void*); \
+	BOOL (*Play)(void*, int, BOOL, float); \
+	void (*FillBuffer)(void*, unsigned char *, int)
 
 	AUDIOPLAYER_COMMONS;
 } AUDIOPLAYER, *LPAUDIOPLAYER;
@@ -45,11 +45,11 @@ extern "C" {
 
 LPAUDIOPLAYER
 RIX_Init(
-   LPCSTR     szFileName
+   const char*     szFileName
 );
 LPAUDIOPLAYER
 SOUND_Init(
-	VOID
+	void
 );
 
 #ifdef __cplusplus

@@ -43,61 +43,61 @@ extern volatile BOOL g_bRenderPaused;
 void Filter_StepParamSlot(int step);
 void Filter_StepCurrentParam(int step);
 
-INT
+int
 VIDEO_Startup(
-   VOID
+   void
 );
 
-VOID
+void
 VIDEO_Shutdown(
-   VOID
+   void
 );
 
-VOID
+void
 VIDEO_UpdateScreen(
    const SDL_Rect  *lpRect
 );
 
-VOID
+void
 VIDEO_SetPalette(
    SDL_Color        rgPalette[256]
 );
 
-VOID
+void
 VIDEO_Resize(
-   INT             w,
-   INT             h
+   int             w,
+   int             h
 );
 
 SDL_Color *
 VIDEO_GetPalette(
-   VOID
+   void
 );
 
-VOID
+void
 VIDEO_ToggleFullscreen(
-   VOID
+   void
 );
 
-VOID
+void
 VIDEO_SaveScreenshot(
-   VOID
+   void
 );
 
-VOID
+void
 VIDEO_ShakeScreen(
-   WORD           wShakeTime,
-   WORD           wShakeLevel
+   unsigned short           wShakeTime,
+   unsigned short           wShakeLevel
 );
 
-VOID
+void
 VIDEO_SwitchScreen(
-   WORD           wSpeed
+   unsigned short           wSpeed
 );
 
-VOID
+void
 VIDEO_FadeScreen(
-   WORD           wSpeed
+   unsigned short           wSpeed
 );
 
 void
@@ -127,7 +127,7 @@ VIDEO_UpdateSurfacePalette(
 	SDL_Surface    *pSurface
 );
 
-VOID
+void
 VIDEO_DrawSurfaceToScreen(
     SDL_Surface    *pSurface
 );

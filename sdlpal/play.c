@@ -28,8 +28,10 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
+#include "palcommon.h"
+#include <SDL_timer.h>
 
-VOID
+void
 PAL_GameUpdate(
    BOOL       fTrigger
 )
@@ -48,7 +50,7 @@ PAL_GameUpdate(
 
 --*/
 {
-   WORD            wEventObjectID, wDir;
+   unsigned short            wEventObjectID, wDir;
    int             i;
    LPEVENTOBJECT   p;
 
@@ -184,7 +186,7 @@ PAL_GameUpdate(
 
       if (p->sState > 0 && p->sVanishTime == 0)
       {
-         WORD wScriptEntry = p->wAutoScript;
+         unsigned short wScriptEntry = p->wAutoScript;
          if (wScriptEntry != 0)
          {
             p->wAutoScript = PAL_RunAutoScript(wScriptEntry, wEventObjectID);
@@ -212,7 +214,7 @@ PAL_GameUpdate(
          for (i = 0; i < 4; i++)
          {
             int              x, y;
-            DWORD            pos;
+            unsigned int            pos;
 
             x = PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset);
             y = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
@@ -247,9 +249,9 @@ PAL_GameUpdate(
    gpGlobals->dwFrameNum++;
 }
 
-VOID
+void
 PAL_GameUseItem(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -266,7 +268,7 @@ PAL_GameUseItem(
 
 --*/
 {
-   WORD         wObject;
+   unsigned short         wObject;
 
    while (TRUE)
    {
@@ -282,7 +284,7 @@ PAL_GameUseItem(
          //
          // Select the player to use the item on
          //
-         WORD     wPlayer = 0;
+         unsigned short     wPlayer = 0;
 
          while (TRUE)
          {
@@ -331,9 +333,9 @@ PAL_GameUseItem(
    }
 }
 
-VOID
+void
 PAL_GameEquipItem(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -350,7 +352,7 @@ PAL_GameEquipItem(
 
 --*/
 {
-   WORD      wObject;
+   unsigned short      wObject;
 
    while (TRUE)
    {
@@ -365,9 +367,9 @@ PAL_GameEquipItem(
    }
 }
 
-VOID
+void
 PAL_Search(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -386,7 +388,7 @@ PAL_Search(
 {
    int                x, y, xOffset, yOffset, dx, dy, dh, ex, ey, eh, i, k, l;
    LPEVENTOBJECT      p;
-   DWORD              rgPos[13];
+   unsigned int              rgPos[13];
 
    //
    // Get the party location
@@ -488,9 +490,9 @@ PAL_Search(
    }
 }
 
-VOID
+void
 PAL_StartFrame(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -578,9 +580,9 @@ PAL_StartFrame(
    }
 }
 
-static inline VOID
+static inline void
 PAL_WaitForKeyInternal(
-   WORD      wTimeOut,
+   unsigned short      wTimeOut,
    BOOL      fAllowAnyKey
 )
 /*++
@@ -600,7 +602,7 @@ PAL_WaitForKeyInternal(
 
 --*/
 {
-   DWORD     dwTimeOut = SDL_GetTicks() + wTimeOut;
+   unsigned int     dwTimeOut = SDL_GetTicks() + wTimeOut;
 
    PAL_ClearKeyState();
 
@@ -616,9 +618,9 @@ PAL_WaitForKeyInternal(
    }
 }
 
-VOID
+void
 PAL_WaitForKey(
-   WORD      wTimeOut
+   unsigned short      wTimeOut
 )
 /*++
   Purpose:
@@ -638,9 +640,9 @@ PAL_WaitForKey(
    PAL_WaitForKeyInternal(wTimeOut, FALSE);
 }
 
-VOID
+void
 PAL_WaitForAnyKey(
-   WORD      wTimeOut
+   unsigned short      wTimeOut
 )
 /*++
   Purpose:

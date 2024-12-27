@@ -22,7 +22,8 @@
 #ifndef _MAP_H
 #define _MAP_H
 
-#include "palcommon.h"
+#include "common.h"
+#include <SDL_surface.h>
 
 //
 // Map format:
@@ -42,7 +43,7 @@
 //
 // Tiles are in diamond shape (32x15).
 //
-// Each tile is represented with a DWORD value, which contains information
+// Each tile is represented with a unsigned int value, which contains information
 // about the tile bitmap, block flag, height, etc.
 //
 // Bottom layer sprite index:
@@ -58,9 +59,9 @@
 
 typedef struct tagPALMAP
 {
-   DWORD          Tiles[128][64][2];
-   LPSPRITE       pTileSprite;
-   INT            iMapNum;
+   unsigned int          Tiles[128][64][2];
+   unsigned char         *pTileSprite;
+   int            iMapNum;
 } PALMAP, *LPPALMAP;
 
 typedef const PALMAP *LPCPALMAP;
@@ -71,17 +72,17 @@ extern "C" {
 
 LPPALMAP
 PAL_LoadMap(
-   INT               iMapNum,
+   int               iMapNum,
    FILE             *fpMapMKF,
    FILE             *fpGopMKF
 );
 
-VOID
+void
 PAL_FreeMap(
    LPPALMAP          lpMap
 );
 
-LPCBITMAPRLE
+const unsigned char*
 PAL_MapGetTileBitmap(
    BYTE       x,
    BYTE       y,
@@ -107,7 +108,7 @@ PAL_MapGetTileHeight(
    LPCPALMAP  lpMap
 );
 
-VOID
+void
 PAL_MapBlitToSurface(
    LPCPALMAP             lpMap,
    SDL_Surface          *lpSurface,
@@ -123,7 +124,7 @@ PAL_MapBlitToSurface(
 // Convert map location to the real location
 //
 #define PAL_XYH_TO_POS(x, y, h)                       \
-   DWORD((x) * 32 + (h) * 16, (y) * 16 + (h) * 8)
+   unsigned int((x) * 32 + (h) * 16, (y) * 16 + (h) * 8)
 
 //
 // Convert real location to map location

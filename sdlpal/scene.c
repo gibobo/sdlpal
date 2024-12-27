@@ -29,22 +29,23 @@
 #include "palette.h"
 #include "res.h"
 #include "video.h"
+#include "palcommon.h"
 
 #define MAX_SPRITE_TO_DRAW         2048
 
 typedef struct tagSPRITE_TO_DRAW
 {
-   LPCBITMAPRLE     lpSpriteFrame; // pointer to the frame bitmap
-   DWORD            pos;           // position on the scene
+   const unsigned char*     lpSpriteFrame; // pointer to the frame bitmap
+   unsigned int            pos;           // position on the scene
    int              iLayer;        // logical layer
 } SPRITE_TO_DRAW;
 
 static SPRITE_TO_DRAW    g_rgSpriteToDraw[MAX_SPRITE_TO_DRAW];
 static int               g_nSpriteToDraw;
 
-static VOID
+static void
 PAL_AddSpriteToDraw(
-   LPCBITMAPRLE     lpSpriteFrame,
+   const unsigned char*     lpSpriteFrame,
    int              x,
    int              y,
    int              iLayer
@@ -79,7 +80,7 @@ PAL_AddSpriteToDraw(
    g_nSpriteToDraw++;
 }
 
-static VOID
+static void
 PAL_CalcCoverTiles(
    SPRITE_TO_DRAW         *lpSpriteToDraw
 )
@@ -100,7 +101,7 @@ PAL_CalcCoverTiles(
 --*/
 {
    int             x, y, i, l, iTileHeight;
-   LPCBITMAPRLE    lpTile;
+   const unsigned char*    lpTile;
 
    const int       sx = PAL_X(gpGlobals->viewport) + PAL_X(lpSpriteToDraw->pos) - lpSpriteToDraw->iLayer/2;
    const int       sy = PAL_Y(gpGlobals->viewport) + PAL_Y(lpSpriteToDraw->pos) - lpSpriteToDraw->iLayer;
@@ -183,9 +184,9 @@ PAL_CalcCoverTiles(
    }
 }
 
-static VOID
+static void
 PAL_SceneDrawSprites(
-   VOID
+   void
 )
 /*++
    Purpose:
@@ -215,7 +216,7 @@ PAL_SceneDrawSprites(
    //
    for (i = 0; i <= (short)gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; i++)
    {
-      LPCBITMAPRLE lpBitmap =
+      const unsigned char* lpBitmap =
          PAL_SpriteGetFrame(PAL_GetPlayerSprite((BYTE)i), gpGlobals->rgParty[i].wFrame);
 
       if (lpBitmap == NULL)
@@ -243,8 +244,8 @@ PAL_SceneDrawSprites(
    for (i = gpGlobals->g.rgScene[gpGlobals->wNumScene - 1].wEventObjectIndex;
       i < gpGlobals->g.rgScene[gpGlobals->wNumScene].wEventObjectIndex; i++)
    {
-      LPCBITMAPRLE     lpFrame;
-      LPCSPRITE        lpSprite;
+      const unsigned char*     lpFrame;
+      const unsigned char*        lpSprite;
 
       LPEVENTOBJECT    lpEvtObj = &(gpGlobals->g.lprgEventObject[i]);
 
@@ -259,7 +260,7 @@ PAL_SceneDrawSprites(
       //
       // Get the sprite
       //
-      lpSprite = PAL_GetEventObjectSprite((WORD)i + 1);
+      lpSprite = PAL_GetEventObjectSprite((unsigned short)i + 1);
       if (lpSprite == NULL)
       {
          continue;
@@ -293,7 +294,7 @@ PAL_SceneDrawSprites(
       //
       // Calculate the coordinate and check if outside the screen
       //
-      x = (SHORT)lpEvtObj->x - PAL_X(gpGlobals->viewport);
+      x = (short)lpEvtObj->x - PAL_X(gpGlobals->viewport);
       x -= PAL_RLEGetWidth(lpFrame) / 2;
 
       if (x >= 320 || x < -(int)PAL_RLEGetWidth(lpFrame))
@@ -304,7 +305,7 @@ PAL_SceneDrawSprites(
          continue;
       }
 
-      y = (SHORT)lpEvtObj->y - PAL_Y(gpGlobals->viewport);
+      y = (short)lpEvtObj->y - PAL_Y(gpGlobals->viewport);
       y += lpEvtObj->sLayer * 8 + 9;
 
       vy = y - PAL_RLEGetHeight(lpFrame) - lpEvtObj->sLayer * 8 + 2;
@@ -367,7 +368,7 @@ PAL_SceneDrawSprites(
    }
 }
 
-VOID
+void
 PAL_ApplyWave(
    SDL_Surface         *lpSurface
 )
@@ -389,7 +390,7 @@ PAL_ApplyWave(
    int                  wave[32];
    int                  i, a, b;
    static int           index = 0;
-   LPBYTE               p;
+   unsigned char        *p;
    BYTE                 buf[320];
 
    gpGlobals->wScreenWave += gpGlobals->sWaveProgression;
@@ -427,7 +428,7 @@ PAL_ApplyWave(
    // WARNING: only works with 320x200 8-bit surface.
    //
    a = index;
-   p = (LPBYTE)(lpSurface->pixels);
+   p = (unsigned char *)lpSurface->pixels;
 
    //
    // Loop through all lines in the screen buffer.
@@ -455,9 +456,9 @@ PAL_ApplyWave(
    index = (index + 1) % 32;
 }
 
-VOID
+void
 PAL_MakeScene(
-   VOID
+   void
 )
 /*++
    Purpose:
@@ -509,9 +510,9 @@ PAL_MakeScene(
 
 BOOL
 PAL_CheckObstacle(
-    DWORD           pos,
+    unsigned int           pos,
     BOOL            fCheckEventObjects,
-    WORD            wSelfObject
+    unsigned short            wSelfObject
 )
 {
     return PAL_CheckObstacleWithRange(pos, fCheckEventObjects, wSelfObject, FALSE);
@@ -519,9 +520,9 @@ PAL_CheckObstacle(
 
 BOOL
 PAL_CheckObstacleWithRange(
-    DWORD           pos,
+    unsigned int           pos,
     BOOL            fCheckEventObjects,
-    WORD            wSelfObject,
+    unsigned short            wSelfObject,
     BOOL            fCheckRange
 )
 /*++
@@ -631,7 +632,7 @@ PAL_CheckObstacleWithRange(
    return FALSE;
 }
 
-VOID
+void
 PAL_UpdatePartyGestures(
    BOOL             fWalking
 )
@@ -774,9 +775,9 @@ PAL_UpdatePartyGestures(
    }
 }
 
-VOID
+void
 PAL_UpdateParty(
-   VOID
+   void
 )
 /*++
    Purpose:
@@ -846,10 +847,10 @@ PAL_UpdateParty(
    PAL_UpdatePartyGestures(FALSE);
 }
 
-VOID
+void
 PAL_NPCWalkOneStep(
-   WORD          wEventObjectID,
-   INT           iSpeed
+   unsigned short          wEventObjectID,
+   int           iSpeed
 )
 /*++
   Purpose:

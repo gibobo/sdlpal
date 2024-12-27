@@ -22,27 +22,29 @@
 #ifndef MAGICMENU_H
 #define MAGICMENU_H
 
+#include "common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-WORD
+unsigned short
 PAL_MagicSelectionMenuUpdate(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_MagicSelectionMenuInit(
-   WORD         wPlayerRole,
+   unsigned short         wPlayerRole,
    BOOL         fInBattle,
-   WORD         wDefaultMagic
+   unsigned short         wDefaultMagic
 );
 
-WORD
+unsigned short
 PAL_MagicSelectionMenu(
-   WORD         wPlayerRole,
+   unsigned short         wPlayerRole,
    BOOL         fInBattle,
-   WORD         wDefaultMagic
+   unsigned short         wDefaultMagic
 );
 
 #ifdef __cplusplus

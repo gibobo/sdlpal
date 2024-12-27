@@ -71,7 +71,7 @@ void
 PAL_DrawCharOnSurface(
 	uint16_t                 wChar,
 	SDL_Surface             *lpSurface,
-	DWORD                  pos,
+	unsigned int                  pos,
 	uint8_t                  bColor,
 	BOOL                     fUse8x8Font
 );

@@ -19,12 +19,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "palcommon.h"
 #include "map.h"
+#include "palcommon.h"
 
 LPPALMAP
 PAL_LoadMap(
-   INT               iMapNum,
+   int               iMapNum,
    FILE             *fpMapMKF,
    FILE             *fpGopMKF
 )
@@ -50,8 +50,8 @@ PAL_LoadMap(
 
 --*/
 {
-   LPBYTE                     buf;
-   INT                        size;
+   unsigned char              *buf;
+   int                        size;
    LPPALMAP                   map;
 
    //
@@ -72,7 +72,7 @@ PAL_LoadMap(
    //
    // Allocate a temporary buffer for the compressed data.
    //
-   buf = (LPBYTE)malloc(size);
+   buf = (unsigned char *)malloc(size);
    if (buf == NULL)
    {
       return NULL;
@@ -100,7 +100,7 @@ PAL_LoadMap(
    //
    // Decompress the tile data.
    //
-   if (Decompress(buf, (LPBYTE)(map->Tiles), sizeof(map->Tiles)) < 0)
+   if (Decompress(buf, (unsigned char *)(map->Tiles), sizeof(map->Tiles)) < 0)
    {
       free(map);
       free(buf);
@@ -121,7 +121,7 @@ PAL_LoadMap(
       free(map);
       return NULL;
    }
-   map->pTileSprite = (LPSPRITE)malloc(size);
+   map->pTileSprite = (unsigned char *)malloc(size);
    if (map->pTileSprite == NULL)
    {
       free(map);
@@ -141,7 +141,7 @@ PAL_LoadMap(
    return map;
 }
 
-VOID
+void
 PAL_FreeMap(
    LPPALMAP          lpMap
 )
@@ -182,7 +182,7 @@ PAL_FreeMap(
    free(lpMap);
 }
 
-LPCBITMAPRLE
+const unsigned char*
 PAL_MapGetTileBitmap(
    BYTE       x,
    BYTE       y,
@@ -214,7 +214,7 @@ PAL_MapGetTileBitmap(
 
 --*/
 {
-   DWORD d;
+   unsigned int d;
 
    //
    // Check for invalid parameters.
@@ -319,7 +319,7 @@ PAL_MapGetTileHeight(
 
 --*/
 {
-   DWORD      d;
+   unsigned int      d;
 
    //
    // Check for invalid parameters.
@@ -340,7 +340,7 @@ PAL_MapGetTileHeight(
    return (BYTE)(d & 0xf);
 }
 
-VOID
+void
 PAL_MapBlitToSurface(
    LPCPALMAP             lpMap,
    SDL_Surface          *lpSurface,
@@ -369,7 +369,7 @@ PAL_MapBlitToSurface(
 --*/
 {
    int              sx, sy, dx, dy, x, y, h, xPos, yPos;
-   LPCBITMAPRLE     lpBitmap = NULL;
+   const unsigned char*     lpBitmap = NULL;
 
    //
    // Convert the coordinate

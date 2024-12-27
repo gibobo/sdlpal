@@ -37,12 +37,15 @@
 #include "palcfg.h"
 // #include "resampler.h"
 
-extern "C" VOID UTIL_Platform_Quit(VOID) {}
+extern "C" void UTIL_Platform_Quit(void) {}
 
-extern "C"
-BOOL UTIL_IsAbsolutePath(LPCSTR  lpszFileName)
+extern "C" 
+BOOL UTIL_IsAbsolutePath(const char *lpszFileName) 
 {
-	char szDrive[_MAX_DRIVE], szDir[_MAX_DIR], szFname[_MAX_FNAME], szExt[_MAX_EXT];
+	char szDrive[_MAX_DRIVE];
+	char szDir[_MAX_DIR];
+	char szFname[_MAX_FNAME];
+	char szExt[_MAX_EXT];
 	if (lpszFileName == NULL)
 		return FALSE;
 #if !defined(__MINGW32__) // MinGW Distro's win32 api lacks this...Anyway, winxp lacks this too

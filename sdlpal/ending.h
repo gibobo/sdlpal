@@ -28,32 +28,32 @@
 extern "C" {
 #endif
 
-VOID
+void
 PAL_EndingSetEffectSprite(
-   WORD         wSpriteNum
+   unsigned short         wSpriteNum
 );
 
-VOID
+void
 PAL_ShowFBP(
-   WORD         wChunkNum,
-   WORD         wFade
+   unsigned short         wChunkNum,
+   unsigned short         wFade
 );
 
-VOID
+void
 PAL_ScrollFBP(
-   WORD         wChunkNum,
-   WORD         wScrollSpeed,
+   unsigned short         wChunkNum,
+   unsigned short         wScrollSpeed,
    BOOL         fScrollDown
 );
 
-VOID
+void
 PAL_EndingAnimation(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_EndingScreen(
-   VOID
+   void
 );
 
 #ifdef __cplusplus

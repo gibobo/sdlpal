@@ -19,22 +19,33 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "magicmenu.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
+#include "palcfg.h"
+#include "palcommon.h"
+#include "scene.h"
+#include "script.h"
+#include "text.h"
+#include "uibattle.h"
+#include "video.h"
+#include <SDL_timer.h>
 
 static struct MAGICITEM
 {
-   WORD         wMagic;
-   WORD         wMP;
+   unsigned short         wMagic;
+   unsigned short         wMP;
    BOOL         fEnabled;
 } rgMagicItem[MAX_PLAYER_MAGICS];
 
 static int     g_iNumMagic = 0;
 static int     g_iCurrentItem = 0;
-static WORD    g_wPlayerMP = 0;
+static unsigned short    g_wPlayerMP = 0;
 
-WORD
+unsigned short
 PAL_MagicSelectionMenuUpdate(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -53,7 +64,7 @@ PAL_MagicSelectionMenuUpdate(
 {
    int         i, j, k, line, item_delta;
    BYTE        bColor;
-   WORD        wScript;
+   unsigned short        wScript;
    const int   iItemsPerLine = 32 / gConfig.dwWordLength;
    const int   iItemTextWidth = 8 * gConfig.dwWordLength + 7;
    const int   iLinesPerPage = 5 - gConfig.ScreenLayout.ExtraMagicDescLines;
@@ -143,8 +154,8 @@ PAL_MagicSelectionMenuUpdate(
       }
       else
       {
-         WCHAR szDesc[512], *next;
-         const WCHAR *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, rgMagicItem[g_iCurrentItem].wMagic);
+         unsigned short szDesc[512], *next;
+         const unsigned short *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, rgMagicItem[g_iCurrentItem].wMagic);
 
          //
          // Draw the magic description.
@@ -298,11 +309,11 @@ PAL_MagicSelectionMenuUpdate(
    return 0xFFFF;
 }
 
-VOID
+void
 PAL_MagicSelectionMenuInit(
-   WORD         wPlayerRole,
+   unsigned short         wPlayerRole,
    BOOL         fInBattle,
-   WORD         wDefaultMagic
+   unsigned short         wDefaultMagic
 )
 /*++
   Purpose:
@@ -323,7 +334,7 @@ PAL_MagicSelectionMenuInit(
 
 --*/
 {
-   WORD       w;
+   unsigned short       w;
    int        i, j;
 
    g_iCurrentItem = 0;
@@ -409,11 +420,11 @@ PAL_MagicSelectionMenuInit(
    }
 }
 
-WORD
+unsigned short
 PAL_MagicSelectionMenu(
-   WORD         wPlayerRole,
+   unsigned short         wPlayerRole,
    BOOL         fInBattle,
-   WORD         wDefaultMagic
+   unsigned short         wDefaultMagic
 )
 /*++
   Purpose:
@@ -434,9 +445,9 @@ PAL_MagicSelectionMenu(
 
 --*/
 {
-   WORD            w;
+   unsigned short            w;
    int             i;
-   DWORD           dwTime;
+   unsigned int           dwTime;
 
    PAL_MagicSelectionMenuInit(wPlayerRole, fInBattle, wDefaultMagic);
    PAL_ClearKeyState();

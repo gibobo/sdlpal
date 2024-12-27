@@ -22,7 +22,7 @@
 #ifndef _TEXT_H
 #define _TEXT_H
 
-#include "palcommon.h"
+#include "common.h"
 
 typedef enum tagDIALOGPOSITION
 {
@@ -32,14 +32,24 @@ typedef enum tagDIALOGPOSITION
    kDialogCenterWindow
 } DIALOGLOCATION;
 
+typedef enum tagCODEPAGE {
+   CP_BIG5 = 0,
+   CP_GBK = 1,
+   //CP_SHIFTJIS = 2,
+   //CP_JISX0208 = 3,
+   CP_MAX = CP_GBK + 1,
+   CP_UTF_8 = CP_MAX + 1,
+   CP_UCS = CP_UTF_8 + 1,
+} CODEPAGE;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct tagTEXTLIB
 {
-    LPWSTR         *lpWordBuf;
-    LPWSTR         *lpMsgBuf;
+    unsigned short*         *lpWordBuf;
+    unsigned short*         *lpMsgBuf;
 
     int             nWords;
     int             nMsgs;
@@ -47,13 +57,13 @@ typedef struct tagTEXTLIB
 
     int             nCurrentDialogLine;
     BYTE            bCurrentFontColor;
-    DWORD           posIcon;
-    DWORD           posDialogTitle;
-    DWORD           posDialogText;
+    unsigned int           posIcon;
+    unsigned int           posDialogTitle;
+    unsigned int           posDialogText;
     BYTE            bDialogPosition;
     BYTE            bIcon;
     int             iDelayTime;
-    INT             iDialogShadow;
+    int             iDialogShadow;
     BOOL            fUserSkip;
     BOOL            fPlayingRNG;
 
@@ -62,47 +72,47 @@ typedef struct tagTEXTLIB
 
 extern TEXTLIB         g_TextLib;
 
-extern LPWSTR g_rcCredits[12];
+extern unsigned short* g_rcCredits[12];
 
-INT
+int
 PAL_InitText(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_FreeText(
-   VOID
+   void
 );
 
-LPCWSTR
+const unsigned short*
 PAL_GetWord(
    int        iNumWord
 );
 
-LPCWSTR
+const unsigned short*
 PAL_GetMsg(
    int        iNumMsg
 );
 
-LPWSTR
+unsigned short*
 PAL_UnescapeText(
-   LPCWSTR    lpszText
+   const unsigned short*    lpszText
 );
 
-VOID
+void
 PAL_DrawText(
-   LPCWSTR    lpszText,
-   DWORD      pos,
+   const unsigned short*    lpszText,
+   unsigned int      pos,
    BYTE       bColor,
    BOOL       fShadow,
    BOOL       fUpdate,
    BOOL       fUse8x8Font
 );
 
-VOID
+void
 PAL_DrawTextUnescape(
-   LPCWSTR    lpszText,
-   DWORD      pos,
+   const unsigned short*    lpszText,
+   unsigned int      pos,
    BYTE       bColor,
    BOOL       fShadow,
    BOOL       fUpdate,
@@ -110,76 +120,76 @@ PAL_DrawTextUnescape(
    BOOL       fUnescape
 );
 
-VOID
+void
 PAL_DialogSetDelayTime(
-   INT          iDelayTime
+   int          iDelayTime
 );
 
-VOID
+void
 PAL_StartDialog(
    BYTE         bDialogLocation,
    BYTE         bFontColor,
-   INT          iNumCharFace,
+   int          iNumCharFace,
    BOOL         fPlayingRNG
 );
 
-VOID
+void
 PAL_StartDialogWithOffset(
    BYTE         bDialogLocation,
    BYTE         bFontColor,
-   INT          iNumCharFace,
+   int          iNumCharFace,
    BOOL         fPlayingRNG,
-   INT          xOff,
-   INT          yOff
+   int          xOff,
+   int          yOff
 );
 
 int
 TEXT_DisplayText(
-   LPCWSTR        lpszText,
+   const unsigned short*        lpszText,
    int            x,
    int            y,
    BOOL           isDialog
 );
 
-VOID
+void
 PAL_ShowDialogText(
-   LPCWSTR    lpszText
+   const unsigned short*    lpszText
 );
 
-VOID
+void
 PAL_ClearDialog(
    BOOL         fWaitForKey
 );
 
-VOID
+void
 PAL_EndDialog(
-   VOID
+   void
 );
 
 BOOL
 PAL_IsInDialog(
-   VOID
+   void
 );
 
 BOOL
 PAL_DialogIsPlayingRNG(
-   VOID
+   void
 );
 
-INT
+int
 PAL_MultiByteToWideChar(
-   LPCSTR        mbs,
+   const char*        mbs,
    int           mbslength,
-   LPWSTR        wcs,
+   unsigned short*        wcs,
    int           wcslength
 );
 
-INT
+int
 PAL_MultiByteToWideCharCP(
 	CODEPAGE      cp,
-	LPCSTR        mbs,
+	const char*        mbs,
 	size_t        mbslength,
-	LPWSTR        wcs,
+	unsigned short*        wcs,
 	size_t        wcslength
 	);
 
@@ -201,11 +211,11 @@ PAL_DetectCodePageForString(
 	int *          probability
 );
 
-INT
+int
 PAL_swprintf(
-	LPWSTR buffer,
+	unsigned short* buffer,
 	size_t count,
-	LPCWSTR format,
+	const unsigned short* format,
 	...
 );
 

@@ -32,17 +32,18 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
+#include <SDL_timer.h>
 
-extern WORD g_rgPlayerPos[3][3][2];
+extern unsigned short g_rgPlayerPos[3][3][2];
 
 static int g_iCurMiscMenuItem = 0;
 static int g_iCurSubMenuItem = 0;
 
-VOID
+void
 PAL_PlayerInfoBox(
-   DWORD           pos,
-   WORD            wPlayerRole,
-   INT             iTimeMeter,
+   unsigned int           pos,
+   unsigned short            wPlayerRole,
+   int             iTimeMeter,
    BYTE            bTimeMeterColor,
    BOOL            fUpdate
 )
@@ -72,7 +73,7 @@ PAL_PlayerInfoBox(
    SDL_Rect        rect;
    BYTE            bPoisonColor;
    int             i, iPartyIndex;
-   WORD            wMaxLevel, w;
+   unsigned short            wMaxLevel, w;
 
    const BYTE      rgStatusPos[kStatusAll][2] =
    {
@@ -87,7 +88,7 @@ PAL_PlayerInfoBox(
       {0, 0},    // dualattack
    };
 
-   const WORD      rgwStatusWord[kStatusAll] =
+   const unsigned short      rgwStatusWord[kStatusAll] =
    {
       0x1D,  // confused
       0x1B,  // slow
@@ -239,7 +240,7 @@ PAL_BattleUIIsActionValid(
 
 --*/
 {
-   WORD     wPlayerRole;
+   unsigned short     wPlayerRole;
    int      i;
 
    wPlayerRole = gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole;
@@ -275,9 +276,9 @@ PAL_BattleUIIsActionValid(
    return TRUE;
 }
 
-static VOID
+static void
 PAL_BattleUIDrawMiscMenu(
-   WORD       wCurrentItem,
+   unsigned short       wCurrentItem,
    BOOL       fConfirmed
 )
 /*++
@@ -337,9 +338,9 @@ PAL_BattleUIDrawMiscMenu(
    }
 }
 
-static WORD
+static unsigned short
 PAL_BattleUIMiscMenuUpdate(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -392,9 +393,9 @@ PAL_BattleUIMiscMenuUpdate(
    return 0xFFFF;
 }
 
-static WORD
+static unsigned short
 PAL_BattleUIMiscItemSubMenuUpdate(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -464,10 +465,10 @@ PAL_BattleUIMiscItemSubMenuUpdate(
    return 0xFFFF;
 }
 
-VOID
+void
 PAL_BattleUIShowText(
-   LPCWSTR       lpszText,
-   WORD          wDuration
+   const unsigned short*       lpszText,
+   unsigned short          wDuration
 )
 /*++
   Purpose:
@@ -498,9 +499,9 @@ PAL_BattleUIShowText(
    }
 }
 
-VOID
+void
 PAL_BattleUIPlayerReady(
-   WORD          wPlayerIndex
+   unsigned short          wPlayerIndex
 )
 /*++
   Purpose:
@@ -523,9 +524,9 @@ PAL_BattleUIPlayerReady(
    g_Battle.UI.MenuState = kBattleMenuMain;
 }
 
-static VOID
+static void
 PAL_BattleUIUseItem(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -542,7 +543,7 @@ PAL_BattleUIUseItem(
 
 --*/
 {
-   WORD       wSelectedItem;
+   unsigned short       wSelectedItem;
 
    wSelectedItem = PAL_ItemSelectMenuUpdate();
 
@@ -570,9 +571,9 @@ PAL_BattleUIUseItem(
    }
 }
 
-static VOID
+static void
 PAL_BattleUIThrowItem(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -589,7 +590,7 @@ PAL_BattleUIThrowItem(
 
 --*/
 {
-   WORD wSelectedItem = PAL_ItemSelectMenuUpdate();
+   unsigned short wSelectedItem = PAL_ItemSelectMenuUpdate();
 
    if (wSelectedItem != 0xFFFF)
    {
@@ -617,10 +618,10 @@ PAL_BattleUIThrowItem(
    }
 }
 
-static WORD
+static unsigned short
 PAL_BattleUIPickAutoMagic(
-   WORD          wPlayerRole,
-   WORD          wRandomRange
+   unsigned short          wPlayerRole,
+   unsigned short          wRandomRange
 )
 /*++
   Purpose:
@@ -639,7 +640,7 @@ PAL_BattleUIPickAutoMagic(
 
 --*/
 {
-   WORD             wMagic = 0, w, wMagicNum;
+   unsigned short             wMagic = 0, w, wMagicNum;
    int              i, iMaxPower = 0, iPower;
 
    if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSilence] != 0)
@@ -662,12 +663,12 @@ PAL_BattleUIPickAutoMagic(
       //
       if (gpGlobals->g.lprgMagic[wMagicNum].wCostMP == 1 ||
          gpGlobals->g.lprgMagic[wMagicNum].wCostMP > gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] ||
-         (SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) <= 0)
+         (short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) <= 0)
       {
          continue;
       }
 
-      iPower = (SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) +
+      iPower = (short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) +
          RandomLong(0, wRandomRange);
 
       if (iPower > iMaxPower)
@@ -680,9 +681,9 @@ PAL_BattleUIPickAutoMagic(
    return wMagic;
 }
 
-VOID
+void
 PAL_BattleUIUpdate(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -700,12 +701,12 @@ PAL_BattleUIUpdate(
 --*/
 {
    int              i, j, x, y;
-   WORD             wPlayerRole, w;
+   unsigned short             wPlayerRole, w;
    static int       s_iFrame = 0;
 
    struct {
       int               iSpriteNum;
-      DWORD           pos;
+      unsigned int           pos;
       BATTLEUIACTION    action;
    } rgItems[] =
    {
@@ -729,7 +730,7 @@ PAL_BattleUIUpdate(
       }
       else
       {
-         LPCWSTR itemText = PAL_GetWord(BATTLEUI_LABEL_AUTO);
+         const unsigned short* itemText = PAL_GetWord(BATTLEUI_LABEL_AUTO);
          PAL_DrawText(itemText, PAL_XY(312-PAL_TextWidth(itemText), 10),
             MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
       }
@@ -797,7 +798,7 @@ PAL_BattleUIUpdate(
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          wPlayerRole = gpGlobals->rgParty[i].wPlayerRole;
-         w = (WORD)(g_Battle.rgPlayer[i].flTimeMeter);
+         w = (unsigned short)(g_Battle.rgPlayer[i].flTimeMeter);
 
          j = TIMEMETER_COLOR_DEFAULT;
 
@@ -1443,7 +1444,7 @@ PAL_BattleUIUpdate(
       //
       // Don't bother selecting
       //
-      g_Battle.UI.iSelectedIndex = (WORD)-1;
+      g_Battle.UI.iSelectedIndex = (unsigned short)-1;
       PAL_BattleCommitAction(FALSE);
       break;
 
@@ -1451,7 +1452,7 @@ PAL_BattleUIUpdate(
       //
       // Don't bother selecting
       //
-      g_Battle.UI.iSelectedIndex = (WORD)-1;
+      g_Battle.UI.iSelectedIndex = (unsigned short)-1;
       PAL_BattleCommitAction(FALSE);
       break;
    }
@@ -1481,10 +1482,10 @@ end:
    PAL_ClearKeyState();
 }
 
-VOID
+void
 PAL_BattleUIShowNum(
-   WORD           wNum,
-   DWORD          pos,
+   unsigned short           wNum,
+   unsigned int          pos,
    NUMCOLOR       color
 )
 /*++

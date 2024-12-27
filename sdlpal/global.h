@@ -22,8 +22,9 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include "palcommon.h"
+#include "common.h"
 #include "map.h"
+#include "text.h"
 #include "ui.h"
 
 //
@@ -34,6 +35,49 @@
 // Trigger scripts are only executed when the event is triggered (player touched
 // an event object, player triggered an event script by pressing Spacebar).
 //
+
+// maximum number of players in party
+#define     MAX_PLAYERS_IN_PARTY         3
+
+// total number of possible player roles
+#define     MAX_PLAYER_ROLES             6
+
+// totally number of playable player roles
+#define     MAX_PLAYABLE_PLAYER_ROLES    5
+
+// maximum entries of inventory
+#define     MAX_INVENTORY                256
+
+// maximum items in a store
+#define     MAX_STORE_ITEM               9
+
+// total number of magic attributes
+#define     NUM_MAGIC_ELEMENTAL          5
+
+// maximum number of enemies in a team
+#define     MAX_ENEMIES_IN_TEAM          5
+
+// maximum number of equipments for a player
+#define     MAX_PLAYER_EQUIPMENTS        6
+
+// maximum number of magics for a player
+#define     MAX_PLAYER_MAGICS            32
+
+// maximum number of scenes
+#define     MAX_SCENES                   300
+
+// maximum number of objects
+#define     MAX_OBJECTS                  600
+
+// maximum number of event objects (should be somewhat more than the original,
+// as there are some modified versions which has more)
+#define     MAX_EVENT_OBJECTS            5500
+
+// maximum number of effective poisons to players
+#define     MAX_POISONS                  16
+
+// maximum number of level
+#define     MAX_LEVELS                   99
 
 // status of characters
 typedef enum tagSTATUS
@@ -85,30 +129,30 @@ typedef enum tagTRIGGERMODE
 
 typedef struct tagEVENTOBJECT
 {
-   SHORT        sVanishTime;         // vanish time (?)
-   WORD         x;                   // X coordinate on the map
-   WORD         y;                   // Y coordinate on the map
-   SHORT        sLayer;              // layer value
-   WORD         wTriggerScript;      // Trigger script entry
-   WORD         wAutoScript;         // Auto script entry
-   SHORT        sState;              // state of this object
-   WORD         wTriggerMode;        // trigger mode
-   WORD         wSpriteNum;          // number of the sprite
-   USHORT       nSpriteFrames;       // total number of frames of the sprite
-   WORD         wDirection;          // direction
-   WORD         wCurrentFrameNum;    // current frame number
-   USHORT       nScriptIdleFrame;    // count of idle frames, used by trigger script
-   WORD         wSpritePtrOffset;    // FIXME: ???
-   USHORT       nSpriteFramesAuto;   // total number of frames of the sprite, used by auto script
-   WORD         wScriptIdleFrameCountAuto;     // count of idle frames, used by auto script
+   short        sVanishTime;         // vanish time (?)
+   unsigned short         x;                   // X coordinate on the map
+   unsigned short         y;                   // Y coordinate on the map
+   short        sLayer;              // layer value
+   unsigned short         wTriggerScript;      // Trigger script entry
+   unsigned short         wAutoScript;         // Auto script entry
+   short        sState;              // state of this object
+   unsigned short         wTriggerMode;        // trigger mode
+   unsigned short         wSpriteNum;          // number of the sprite
+   unsigned short       nSpriteFrames;       // total number of frames of the sprite
+   unsigned short         wDirection;          // direction
+   unsigned short         wCurrentFrameNum;    // current frame number
+   unsigned short       nScriptIdleFrame;    // count of idle frames, used by trigger script
+   unsigned short         wSpritePtrOffset;    // FIXME: ???
+   unsigned short       nSpriteFramesAuto;   // total number of frames of the sprite, used by auto script
+   unsigned short         wScriptIdleFrameCountAuto;     // count of idle frames, used by auto script
 } EVENTOBJECT, *LPEVENTOBJECT;
 
 typedef struct tagSCENE
 {
-   WORD         wMapNum;         // number of the map
-   WORD         wScriptOnEnter;  // when entering this scene, execute script from here
-   WORD         wScriptOnTeleport;  // when teleporting out of this scene, execute script from here
-   WORD         wEventObjectIndex;  // event objects in this scene begins from number wEventObjectIndex + 1
+   unsigned short         wMapNum;         // number of the map
+   unsigned short         wScriptOnEnter;  // when entering this scene, execute script from here
+   unsigned short         wScriptOnTeleport;  // when teleporting out of this scene, execute script from here
+   unsigned short         wEventObjectIndex;  // event objects in this scene begins from number wEventObjectIndex + 1
 } SCENE, *LPSCENE;
 
 // object including system strings, players, items, magics, enemies and poison scripts.
@@ -116,9 +160,9 @@ typedef struct tagSCENE
 // system strings and players
 typedef struct tagOBJECT_PLAYER
 {
-   WORD         wReserved[2];    // always zero
-   WORD         wScriptOnFriendDeath; // when friends in party dies, execute script from here
-   WORD         wScriptOnDying;  // when dying, execute script from here
+   unsigned short         wReserved[2];    // always zero
+   unsigned short         wScriptOnFriendDeath; // when friends in party dies, execute script from here
+   unsigned short         wScriptOnDying;  // when dying, execute script from here
 } OBJECT_PLAYER;
 
 typedef enum tagITEMFLAG
@@ -135,24 +179,24 @@ typedef enum tagITEMFLAG
 // items
 typedef struct tagOBJECT_ITEM_DOS
 {
-   WORD         wBitmap;         // bitmap number in BALL.MKF
-   WORD         wPrice;          // price
-   WORD         wScriptOnUse;    // script executed when using this item
-   WORD         wScriptOnEquip;  // script executed when equipping this item
-   WORD         wScriptOnThrow;  // script executed when throwing this item to enemy
-   WORD         wFlags;          // flags
+   unsigned short         wBitmap;         // bitmap number in BALL.MKF
+   unsigned short         wPrice;          // price
+   unsigned short         wScriptOnUse;    // script executed when using this item
+   unsigned short         wScriptOnEquip;  // script executed when equipping this item
+   unsigned short         wScriptOnThrow;  // script executed when throwing this item to enemy
+   unsigned short         wFlags;          // flags
 } OBJECT_ITEM_DOS;
 
 // items
 typedef struct tagOBJECT_ITEM
 {
-	WORD         wBitmap;         // bitmap number in BALL.MKF
-	WORD         wPrice;          // price
-	WORD         wScriptOnUse;    // script executed when using this item
-	WORD         wScriptOnEquip;  // script executed when equipping this item
-	WORD         wScriptOnThrow;  // script executed when throwing this item to enemy
-	WORD         wScriptDesc;     // description script
-	WORD         wFlags;          // flags
+	unsigned short         wBitmap;         // bitmap number in BALL.MKF
+	unsigned short         wPrice;          // price
+	unsigned short         wScriptOnUse;    // script executed when using this item
+	unsigned short         wScriptOnEquip;  // script executed when equipping this item
+	unsigned short         wScriptOnThrow;  // script executed when throwing this item to enemy
+	unsigned short         wScriptDesc;     // description script
+	unsigned short         wFlags;          // flags
 } OBJECT_ITEM;
 
 typedef enum tagMAGICFLAG
@@ -166,50 +210,50 @@ typedef enum tagMAGICFLAG
 // magics
 typedef struct tagOBJECT_MAGIC_DOS
 {
-   WORD         wMagicNumber;      // magic number, according to DATA.MKF #3
-   WORD         wReserved1;        // always zero
-   WORD         wScriptOnSuccess;  // when magic succeed, execute script from here
-   WORD         wScriptOnUse;      // when use this magic, execute script from here
-   WORD         wReserved2;        // always zero
-   WORD         wFlags;            // flags
+   unsigned short         wMagicNumber;      // magic number, according to DATA.MKF #3
+   unsigned short         wReserved1;        // always zero
+   unsigned short         wScriptOnSuccess;  // when magic succeed, execute script from here
+   unsigned short         wScriptOnUse;      // when use this magic, execute script from here
+   unsigned short         wReserved2;        // always zero
+   unsigned short         wFlags;            // flags
 } OBJECT_MAGIC_DOS;
 
 // magics
 typedef struct tagOBJECT_MAGIC
 {
-	WORD         wMagicNumber;      // magic number, according to DATA.MKF #3
-	WORD         wReserved1;        // always zero
-	WORD         wScriptOnSuccess;  // when magic succeed, execute script from here
-	WORD         wScriptOnUse;      // when use this magic, execute script from here
-	WORD         wScriptDesc;       // description script
-	WORD         wReserved2;        // always zero
-	WORD         wFlags;            // flags
+	unsigned short         wMagicNumber;      // magic number, according to DATA.MKF #3
+	unsigned short         wReserved1;        // always zero
+	unsigned short         wScriptOnSuccess;  // when magic succeed, execute script from here
+	unsigned short         wScriptOnUse;      // when use this magic, execute script from here
+	unsigned short         wScriptDesc;       // description script
+	unsigned short         wReserved2;        // always zero
+	unsigned short         wFlags;            // flags
 } OBJECT_MAGIC;
 
 // enemies
 typedef struct tagOBJECT_ENEMY
 {
-   WORD         wEnemyID;        // ID of the enemy, according to DATA.MKF #1.
+   unsigned short         wEnemyID;        // ID of the enemy, according to DATA.MKF #1.
                                  // Also indicates the bitmap number in ABC.MKF.
-   WORD         wResistanceToSorcery;  // resistance to sorcery and poison (0 min, 10 max)
-   WORD         wScriptOnTurnStart;    // script executed when turn starts
-   WORD         wScriptOnBattleEnd;    // script executed when battle ends
-   WORD         wScriptOnReady;        // script executed when the enemy is ready
+   unsigned short         wResistanceToSorcery;  // resistance to sorcery and poison (0 min, 10 max)
+   unsigned short         wScriptOnTurnStart;    // script executed when turn starts
+   unsigned short         wScriptOnBattleEnd;    // script executed when battle ends
+   unsigned short         wScriptOnReady;        // script executed when the enemy is ready
 } OBJECT_ENEMY;
 
 // poisons (scripts executed in each round)
 typedef struct tagOBJECT_POISON
 {
-   WORD         wPoisonLevel;    // level of the poison
-   WORD         wColor;          // color of avatars
-   WORD         wPlayerScript;   // script executed when player has this poison (per round)
-   WORD         wReserved;       // always zero
-   WORD         wEnemyScript;    // script executed when enemy has this poison (per round)
+   unsigned short         wPoisonLevel;    // level of the poison
+   unsigned short         wColor;          // color of avatars
+   unsigned short         wPlayerScript;   // script executed when player has this poison (per round)
+   unsigned short         wReserved;       // always zero
+   unsigned short         wEnemyScript;    // script executed when enemy has this poison (per round)
 } OBJECT_POISON;
 
 typedef union tagOBJECT_DOS
 {
-	WORD              rgwData[6];
+	unsigned short              rgwData[6];
 	OBJECT_PLAYER     player;
 	OBJECT_ITEM_DOS   item;
 	OBJECT_MAGIC_DOS  magic;
@@ -219,7 +263,7 @@ typedef union tagOBJECT_DOS
 
 typedef union tagOBJECT
 {
-	WORD              rgwData[7];
+	unsigned short              rgwData[7];
 	OBJECT_PLAYER     player;
 	OBJECT_ITEM       item;
 	OBJECT_MAGIC      magic;
@@ -229,70 +273,70 @@ typedef union tagOBJECT
 
 typedef struct tagSCRIPTENTRY
 {
-   WORD          wOperation;     // operation code
-   WORD          rgwOperand[3];  // operands
+   unsigned short          wOperation;     // operation code
+   unsigned short          rgwOperand[3];  // operands
 } SCRIPTENTRY, *LPSCRIPTENTRY;
 
 typedef struct tagINVENTORY
 {
-   WORD          wItem;             // item object code
-   USHORT        nAmount;           // amount of this item
-   USHORT        nAmountInUse;      // in-use amount of this item
+   unsigned short          wItem;             // item object code
+   unsigned short        nAmount;           // amount of this item
+   unsigned short        nAmountInUse;      // in-use amount of this item
 } INVENTORY, *LPINVENTORY;
 
 typedef struct tagSTORE
 {
-   WORD          rgwItems[MAX_STORE_ITEM];
+   unsigned short          rgwItems[MAX_STORE_ITEM];
 } STORE, *LPSTORE;
 
 typedef struct tagENEMY
 {
-   WORD        wIdleFrames;         // total number of frames when idle
-   WORD        wMagicFrames;        // total number of frames when using magics
-   WORD        wAttackFrames;       // total number of frames when doing normal attack
-   WORD        wIdleAnimSpeed;      // speed of the animation when idle
-   WORD        wActWaitFrames;      // FIXME: ???
-   WORD        wYPosOffset;
-   SHORT       wAttackSound;        // sound played when this enemy uses normal attack
-   SHORT       wActionSound;        // FIXME: ???
-   SHORT       wMagicSound;         // sound played when this enemy uses magic
-   SHORT       wDeathSound;         // sound played when this enemy dies
-   SHORT       wCallSound;          // sound played when entering the battle
-   WORD        wHealth;             // total HP of the enemy
-   WORD        wExp;                // How many EXPs we'll get for beating this enemy
-   WORD        wCash;               // how many cashes we'll get for beating this enemy
-   WORD        wLevel;              // this enemy's level
-   WORD        wMagic;              // this enemy's magic number
-   WORD        wMagicRate;          // chance for this enemy to use magic
-   WORD        wAttackEquivItem;    // equivalence item of this enemy's normal attack
-   WORD        wAttackEquivItemRate;// chance for equivalence item
-   WORD        wStealItem;          // which item we'll get when stealing from this enemy
-   WORD        nStealItem;          // total amount of the items which can be stolen
-   WORD        wAttackStrength;     // normal attack strength
-   WORD        wMagicStrength;      // magical attack strength
-   WORD        wDefense;            // resistance to all kinds of attacking
-   WORD        wDexterity;          // dexterity
-   WORD        wFleeRate;           // chance for successful fleeing
-   WORD        wPoisonResistance;   // resistance to poison
-   WORD        wElemResistance[NUM_MAGIC_ELEMENTAL]; // resistance to elemental magics
-   WORD        wPhysicalResistance; // resistance to physical attack
-   WORD        wDualMove;           // whether this enemy can do dual move or not
-   WORD        wCollectValue;       // value for collecting this enemy for items
+   unsigned short        wIdleFrames;         // total number of frames when idle
+   unsigned short        wMagicFrames;        // total number of frames when using magics
+   unsigned short        wAttackFrames;       // total number of frames when doing normal attack
+   unsigned short        wIdleAnimSpeed;      // speed of the animation when idle
+   unsigned short        wActWaitFrames;      // FIXME: ???
+   unsigned short        wYPosOffset;
+   short       wAttackSound;        // sound played when this enemy uses normal attack
+   short       wActionSound;        // FIXME: ???
+   short       wMagicSound;         // sound played when this enemy uses magic
+   short       wDeathSound;         // sound played when this enemy dies
+   short       wCallSound;          // sound played when entering the battle
+   unsigned short        wHealth;             // total HP of the enemy
+   unsigned short        wExp;                // How many EXPs we'll get for beating this enemy
+   unsigned short        wCash;               // how many cashes we'll get for beating this enemy
+   unsigned short        wLevel;              // this enemy's level
+   unsigned short        wMagic;              // this enemy's magic number
+   unsigned short        wMagicRate;          // chance for this enemy to use magic
+   unsigned short        wAttackEquivItem;    // equivalence item of this enemy's normal attack
+   unsigned short        wAttackEquivItemRate;// chance for equivalence item
+   unsigned short        wStealItem;          // which item we'll get when stealing from this enemy
+   unsigned short        nStealItem;          // total amount of the items which can be stolen
+   unsigned short        wAttackStrength;     // normal attack strength
+   unsigned short        wMagicStrength;      // magical attack strength
+   unsigned short        wDefense;            // resistance to all kinds of attacking
+   unsigned short        wDexterity;          // dexterity
+   unsigned short        wFleeRate;           // chance for successful fleeing
+   unsigned short        wPoisonResistance;   // resistance to poison
+   unsigned short        wElemResistance[NUM_MAGIC_ELEMENTAL]; // resistance to elemental magics
+   unsigned short        wPhysicalResistance; // resistance to physical attack
+   unsigned short        wDualMove;           // whether this enemy can do dual move or not
+   unsigned short        wCollectValue;       // value for collecting this enemy for items
 } ENEMY, *LPENEMY;
 
 typedef struct tagENEMYTEAM
 {
-   WORD        rgwEnemy[MAX_ENEMIES_IN_TEAM];
+   unsigned short        rgwEnemy[MAX_ENEMIES_IN_TEAM];
 } ENEMYTEAM, *LPENEMYTEAM;
 
-typedef WORD PLAYERS[MAX_PLAYER_ROLES];
+typedef unsigned short PLAYERS[MAX_PLAYER_ROLES];
 
 typedef struct tagPLAYERROLES
 {
    PLAYERS            rgwAvatar;             // avatar (shown in status view)
    PLAYERS            rgwSpriteNumInBattle;  // sprite displayed in battle (in F.MKF)
    PLAYERS            rgwSpriteNum;          // sprite displayed in normal scene (in MGO.MKF)
-   PLAYERS            rgwName;               // name of player class (in WORD.DAT)
+   PLAYERS            rgwName;               // name of player class (in unsigned short.DAT)
    PLAYERS            rgwAttackAll;          // whether player can attack everyone in a bulk or not
    PLAYERS            rgwUnknown1;           // FIXME: ???
    PLAYERS            rgwLevel;              // level
@@ -300,19 +344,19 @@ typedef struct tagPLAYERROLES
    PLAYERS            rgwMaxMP;              // maximum MP
    PLAYERS            rgwHP;                 // current HP
    PLAYERS            rgwMP;                 // current MP
-   WORD               rgwEquipment[MAX_PLAYER_EQUIPMENTS][MAX_PLAYER_ROLES]; // equipments
+   unsigned short               rgwEquipment[MAX_PLAYER_EQUIPMENTS][MAX_PLAYER_ROLES]; // equipments
    PLAYERS            rgwAttackStrength;     // normal attack strength
    PLAYERS            rgwMagicStrength;      // magical attack strength
    PLAYERS            rgwDefense;            // resistance to all kinds of attacking
    PLAYERS            rgwDexterity;          // dexterity
    PLAYERS            rgwFleeRate;           // chance of successful fleeing
    PLAYERS            rgwPoisonResistance;   // resistance to poison
-   WORD               rgwElementalResistance[NUM_MAGIC_ELEMENTAL][MAX_PLAYER_ROLES]; // resistance to elemental magics
+   unsigned short               rgwElementalResistance[NUM_MAGIC_ELEMENTAL][MAX_PLAYER_ROLES]; // resistance to elemental magics
    PLAYERS            rgwUnknown2;           // FIXME: ???
    PLAYERS            rgwUnknown3;           // FIXME: ???
    PLAYERS            rgwUnknown4;           // FIXME: ???
    PLAYERS            rgwCoveredBy;          // who will cover me when I am low of HP or not sane
-   WORD               rgwMagic[MAX_PLAYER_MAGICS][MAX_PLAYER_ROLES]; // magics
+   unsigned short               rgwMagic[MAX_PLAYER_MAGICS][MAX_PLAYER_ROLES]; // magics
    PLAYERS            rgwWalkFrames;         // walk frame (???)
    PLAYERS            rgwCooperativeMagic;   // cooperative magic
    PLAYERS            rgwUnknown5;           // FIXME: ???
@@ -340,42 +384,42 @@ typedef enum tagMAGIC_TYPE
 
 typedef union tagMAGIC_SPECIAL
 {
-   WORD               wSummonEffect;         // summon effect sprite (in F.MKF)
-   SHORT              sLayerOffset;          // limited to non-summon magic.
+   unsigned short               wSummonEffect;         // summon effect sprite (in F.MKF)
+   short              sLayerOffset;          // limited to non-summon magic.
                                              // actual layer: PAL_Y(pos) + wYOffset + wMagicLayerOffset
 } MAGIC_SPECIAL, * LPMAGIC_SPECIAL;
 
 typedef struct tagMAGIC
 {
-   WORD               wEffect;               // effect sprite
-   WORD               wType;                 // type of this magic
-   WORD               wXOffset;
-   WORD               wYOffset;
+   unsigned short               wEffect;               // effect sprite
+   unsigned short               wType;                 // type of this magic
+   unsigned short               wXOffset;
+   unsigned short               wYOffset;
    MAGIC_SPECIAL      rgSpecific;            // have multiple meanings
-   SHORT              wSpeed;                // speed of the effect
-   WORD               wKeepEffect;           // FIXME: ???
-   WORD               wFireDelay;            // start frame of the magic fire stage
-   WORD               wEffectTimes;          // total times of effect
-   WORD               wShake;                // shake screen
-   WORD               wWave;                 // wave screen
-   WORD               wUnknown;              // FIXME: ???
-   WORD               wCostMP;               // MP cost
-   WORD               wBaseDamage;           // base damage
-   WORD               wElemental;            // elemental (0 = No Elemental, last = poison)
-   SHORT              wSound;                // sound played when using this magic
+   short              wSpeed;                // speed of the effect
+   unsigned short               wKeepEffect;           // FIXME: ???
+   unsigned short               wFireDelay;            // start frame of the magic fire stage
+   unsigned short               wEffectTimes;          // total times of effect
+   unsigned short               wShake;                // shake screen
+   unsigned short               wWave;                 // wave screen
+   unsigned short               wUnknown;              // FIXME: ???
+   unsigned short               wCostMP;               // MP cost
+   unsigned short               wBaseDamage;           // base damage
+   unsigned short               wElemental;            // elemental (0 = No Elemental, last = poison)
+   short              wSound;                // sound played when using this magic
 } MAGIC, *LPMAGIC;
 
 typedef struct tagBATTLEFIELD
 {
-   WORD               wScreenWave;                      // level of screen waving
-   SHORT              rgsMagicEffect[NUM_MAGIC_ELEMENTAL]; // effect of attributed magics
+   unsigned short               wScreenWave;                      // level of screen waving
+   short              rgsMagicEffect[NUM_MAGIC_ELEMENTAL]; // effect of attributed magics
 } BATTLEFIELD, *LPBATTLEFIELD;
 
 // magics learned when level up
 typedef struct tagLEVELUPMAGIC
 {
-   WORD               wLevel;    // level reached
-   WORD               wMagic;    // magic learned
+   unsigned short               wLevel;    // level reached
+   unsigned short               wMagic;    // magic learned
 } LEVELUPMAGIC, *LPLEVELUPMAGIC;
 
 typedef struct tagLEVELUPMAGIC_ALL
@@ -385,8 +429,8 @@ typedef struct tagLEVELUPMAGIC_ALL
 
 typedef struct tagPALPOS
 {
-	WORD      x;
-	WORD      y;
+	unsigned short      x;
+	unsigned short      y;
 } PALPOS;
 
 typedef struct tagENEMYPOS
@@ -395,7 +439,7 @@ typedef struct tagENEMYPOS
 } ENEMYPOS, *LPENEMYPOS;
 
 // Exp. points needed for the next level
-typedef WORD LEVELUPEXP, *LPLEVELUPEXP;
+typedef unsigned short LEVELUPEXP, *LPLEVELUPEXP;
 
 // game data which is available in data files.
 typedef struct tagGAMEDATA
@@ -432,7 +476,7 @@ typedef struct tagGAMEDATA
    ENEMYPOS                EnemyPos;
    LEVELUPEXP              rgLevelUpExp[MAX_LEVELS + 1];
 
-   WORD                    rgwBattleEffectIndex[10][2];
+   unsigned short                    rgwBattleEffectIndex[10][2];
 } GAMEDATA, *LPGAMEDATA;
 
 typedef struct tagFILES
@@ -450,25 +494,25 @@ typedef struct tagFILES
 // player party
 typedef struct tagPARTY
 {
-   WORD             wPlayerRole;         // player role
-   SHORT            x, y;                // position
-   WORD             wFrame;              // current frame number
-   WORD             wImageOffset;        // FIXME: ???
+   unsigned short             wPlayerRole;         // player role
+   short            x, y;                // position
+   unsigned short             wFrame;              // current frame number
+   unsigned short             wImageOffset;        // FIXME: ???
 } PARTY, *LPPARTY;
 
 // player trail, used for other party members to follow the main party member
 typedef struct tagTRAIL
 {
-   WORD             x, y;          // position
-   WORD             wDirection;    // direction
+   unsigned short             x, y;          // position
+   unsigned short             wDirection;    // direction
 } TRAIL, *LPTRAIL;
 
 typedef struct tagEXPERIENCE
 {
-   WORD         wExp;                // current experience points
-   WORD         wReserved;
-   WORD         wLevel;              // current level
-   WORD         wCount;
+   unsigned short         wExp;                // current experience points
+   unsigned short         wReserved;
+   unsigned short         wLevel;              // current level
+   unsigned short         wCount;
 } EXPERIENCE, *LPEXPERIENCE;
 
 typedef struct tagALLEXPERIENCE
@@ -485,8 +529,8 @@ typedef struct tagALLEXPERIENCE
 
 typedef struct tagPOISONSTATUS
 {
-   WORD              wPoisonID;       // kind of the poison
-   WORD              wPoisonScript;   // script entry
+   unsigned short              wPoisonID;       // kind of the poison
+   unsigned short              wPoisonScript;   // script entry
 } POISONSTATUS, *LPPOISONSTATUS;
 
 typedef struct tagGLOBALVARS
@@ -504,38 +548,38 @@ typedef struct tagGLOBALVARS
    BOOL             fNeedToFadeIn;       // TRUE if need to fade in when drawing scene
    BOOL             fInBattle;           // TRUE if in battle
    BOOL             fAutoBattle;         // TRUE if auto-battle
-   WORD             wLastUnequippedItem; // last unequipped item
+   unsigned short             wLastUnequippedItem; // last unequipped item
 
    PLAYERROLES      rgEquipmentEffect[MAX_PLAYER_EQUIPMENTS + 1]; // equipment effects
-   WORD             rgPlayerStatus[MAX_PLAYER_ROLES][kStatusAll]; // player status
+   unsigned short             rgPlayerStatus[MAX_PLAYER_ROLES][kStatusAll]; // player status
 
-   DWORD          viewport;            // viewport coordination
-   DWORD          partyoffset;
-   WORD             wLayer;
-   WORD             wMaxPartyMemberIndex;// max index of members in party (0 to MAX_PLAYERS_IN_PARTY - 1)
+   unsigned int          viewport;            // viewport coordination
+   unsigned int          partyoffset;
+   unsigned short             wLayer;
+   unsigned short             wMaxPartyMemberIndex;// max index of members in party (0 to MAX_PLAYERS_IN_PARTY - 1)
    PARTY            rgParty[MAX_PLAYABLE_PLAYER_ROLES]; // player party
    TRAIL            rgTrail[MAX_PLAYABLE_PLAYER_ROLES]; // player trail
-   WORD             wPartyDirection;     // direction of the party
-   WORD             wNumScene;           // current scene number
-   WORD             wNumPalette;         // current palette number
+   unsigned short             wPartyDirection;     // direction of the party
+   unsigned short             wNumScene;           // current scene number
+   unsigned short             wNumPalette;         // current palette number
    BOOL             fNightPalette;       // TRUE if use the darker night palette
-   WORD             wNumMusic;           // current music number
-   WORD             wNumBattleMusic;     // current music number in battle
-   WORD             wNumBattleField;     // current battle field number
-   WORD             wCollectValue;       // value of "collected" items
-   WORD             wScreenWave;         // level of screen waving
-   SHORT            sWaveProgression;
-   WORD             wChaseRange;
-   WORD             wChasespeedChangeCycles;
-   USHORT           nFollower;
+   unsigned short             wNumMusic;           // current music number
+   unsigned short             wNumBattleMusic;     // current music number in battle
+   unsigned short             wNumBattleField;     // current battle field number
+   unsigned short             wCollectValue;       // value of "collected" items
+   unsigned short             wScreenWave;         // level of screen waving
+   short            sWaveProgression;
+   unsigned short             wChaseRange;
+   unsigned short             wChasespeedChangeCycles;
+   unsigned short           nFollower;
 
-   DWORD            dwCash;              // amount of cash
+   unsigned int            dwCash;              // amount of cash
 
    ALLEXPERIENCE    Exp;                 // experience status
    POISONSTATUS     rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
    INVENTORY        rgInventory[MAX_INVENTORY];  // inventory status
    LPOBJECTDESC     lpObjectDesc;
-   DWORD            dwFrameNum;
+   unsigned int            dwFrameNum;
 } GLOBALVARS, *LPGLOBALVARS;
 
 #ifdef __cplusplus
@@ -554,192 +598,192 @@ PAL_DetectCodePage(
 	const char *   filename
 );
 
-INT
+int
 PAL_InitGlobals(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_FreeGlobals(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_SaveGame(
    int           iSaveSlot,
-   WORD          wSavedTimes
+   unsigned short          wSavedTimes
 );
 
-VOID
+void
 PAL_InitGameData(
-   INT           iSaveSlot
+   int           iSaveSlot
 );
 
-VOID
+void
 PAL_ReloadInNextTick(
-	INT           iSaveSlot
+	int           iSaveSlot
 );
 
-INT
+int
 PAL_CountItem(
-   WORD          wObjectID
+   unsigned short          wObjectID
 );
 
 BOOL
 PAL_GetItemIndexToInventory(
-   WORD          wObjectID,
-   INT* index
+   unsigned short          wObjectID,
+   int* index
 );
 
 BOOL
 PAL_AddItemToInventory(
-   WORD          wObjectID,
-   INT           iNum
+   unsigned short          wObjectID,
+   int           iNum
 );
 
 BOOL
 PAL_IncreaseHPMP(
-   WORD          wPlayerRole,
-   SHORT         sHP,
-   SHORT         sMP
+   unsigned short          wPlayerRole,
+   short         sHP,
+   short         sMP
 );
 
-INT
+int
 PAL_GetItemAmount(
-   WORD        wItem
+   unsigned short        wItem
 );
 
-VOID
+void
 PAL_UpdateEquipments(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_CompressInventory(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_RemoveEquipmentEffect(
-   WORD         wPlayerRole,
-   WORD         wEquipPart
+   unsigned short         wPlayerRole,
+   unsigned short         wEquipPart
 );
 
-VOID
+void
 PAL_AddPoisonForPlayer(
-   WORD           wPlayerRole,
-   WORD           wPoisonID
+   unsigned short           wPlayerRole,
+   unsigned short           wPoisonID
 );
 
-VOID
+void
 PAL_CurePoisonByKind(
-   WORD           wPlayerRole,
-   WORD           wPoisonID
+   unsigned short           wPlayerRole,
+   unsigned short           wPoisonID
 );
 
-VOID
+void
 PAL_CurePoisonByLevel(
-   WORD           wPlayerRole,
-   WORD           wMaxLevel
+   unsigned short           wPlayerRole,
+   unsigned short           wMaxLevel
 );
 
 BOOL
 PAL_IsPlayerPoisonedByLevel(
-   WORD           wPlayerRole,
-   WORD           wMinLevel
+   unsigned short           wPlayerRole,
+   unsigned short           wMinLevel
 );
 
 BOOL
 PAL_IsPlayerPoisonedByKind(
-   WORD           wPlayerRole,
-   WORD           wPoisonID
+   unsigned short           wPlayerRole,
+   unsigned short           wPoisonID
 );
 
-WORD
+unsigned short
 PAL_GetPlayerAttackStrength(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
-WORD
+unsigned short
 PAL_GetPlayerMagicStrength(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
-WORD
+unsigned short
 PAL_GetPlayerDefense(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
-WORD
+unsigned short
 PAL_GetPlayerDexterity(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
-WORD
+unsigned short
 PAL_GetPlayerFleeRate(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
-WORD
+unsigned short
 PAL_GetPlayerPoisonResistance(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
-WORD
+unsigned short
 PAL_GetPlayerElementalResistance(
-   WORD           wPlayerRole,
-   INT            iAttrib
+   unsigned short           wPlayerRole,
+   int            iAttrib
 );
 
-WORD
+unsigned short
 PAL_GetPlayerBattleSprite(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
-WORD
+unsigned short
 PAL_GetPlayerCooperativeMagic(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
 BOOL
 PAL_PlayerCanAttackAll(
-   WORD           wPlayerRole
+   unsigned short           wPlayerRole
 );
 
 BOOL
 PAL_AddMagic(
-   WORD           wPlayerRole,
-   WORD           wMagic
+   unsigned short           wPlayerRole,
+   unsigned short           wMagic
 );
 
-VOID
+void
 PAL_RemoveMagic(
-   WORD           wPlayerRole,
-   WORD           wMagic
+   unsigned short           wPlayerRole,
+   unsigned short           wMagic
 );
 
 BOOL
 PAL_SetPlayerStatus(
-   WORD         wPlayerRole,
-   WORD         wStatusID,
-   WORD         wNumRound
+   unsigned short         wPlayerRole,
+   unsigned short         wStatusID,
+   unsigned short         wNumRound
 );
 
-VOID
+void
 PAL_RemovePlayerStatus(
-   WORD         wPlayerRole,
-   WORD         wStatusID
+   unsigned short         wPlayerRole,
+   unsigned short         wStatusID
 );
 
-VOID
+void
 PAL_ClearAllPlayerStatus(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_PlayerLevelUp(
-   WORD          wPlayerRole,
-   WORD          wNumLevel
+   unsigned short          wPlayerRole,
+   unsigned short          wNumLevel
 );
 
 #ifdef __cplusplus

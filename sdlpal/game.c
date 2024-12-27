@@ -19,11 +19,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
+#include "play.h"
+#include "res.h"
+#include "uigame.h"
+#include "palcommon.h"
+#include <SDL_timer.h>
 
-VOID
+void
 PAL_GameMain(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -40,7 +47,7 @@ PAL_GameMain(
 
 --*/
 {
-   DWORD       dwTime;
+   unsigned int       dwTime;
 
    //
    // Show the opening menu.

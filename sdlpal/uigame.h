@@ -29,29 +29,29 @@
 extern "C" {
 #endif
 
-VOID
+void
 PAL_DrawOpeningMenuBackground(
-   VOID
+   void
 );
 
-INT
+int
 PAL_OpeningMenu(
-   VOID
+   void
 );
 
-INT
+int
 PAL_SaveSlotMenu(
-   WORD        wDefaultSlot
+   unsigned short        wDefaultSlot
 );
 
-WORD
+unsigned short
 PAL_TripleMenu(
-   WORD  wThirdWord
+   unsigned short  wThirdWord
 );
 
 BOOL
 PAL_ConfirmMenu(
-   VOID
+   void
 );
 
 BOOL
@@ -59,44 +59,44 @@ PAL_SwitchMenu(
    BOOL      fEnabled
 );
 
-VOID
+void
 PAL_InGameMagicMenu(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_InGameMenu(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_PlayerStatus(
-   VOID
+   void
 );
 
-WORD
+unsigned short
 PAL_ItemUseMenu(
-   WORD           wItemToUse
+   unsigned short           wItemToUse
 );
 
-VOID
+void
 PAL_BuyMenu(
-   WORD           wStoreNum
+   unsigned short           wStoreNum
 );
 
-VOID
+void
 PAL_SellMenu(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_EquipItemMenu(
-   WORD           wItem
+   unsigned short           wItem
 );
 
-VOID
+void
 PAL_QuitGame(
-   VOID
+   void
 );
 
 #ifdef __cplusplus

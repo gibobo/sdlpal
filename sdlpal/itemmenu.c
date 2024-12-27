@@ -19,15 +19,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "itemmenu.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
+#include "palcfg.h"
+#include "palcommon.h"
+#include "scene.h"
+#include "script.h"
+#include "text.h"
+#include "video.h"
+#include <SDL_timer.h>
 
 static int     g_iNumInventory = 0;
-static WORD    g_wItemFlags = 0;
+static unsigned short    g_wItemFlags = 0;
 static BOOL    g_fNoDesc = FALSE;
 
-WORD
+unsigned short
 PAL_ItemSelectMenuUpdate(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -45,7 +55,7 @@ PAL_ItemSelectMenuUpdate(
 --*/
 {
    int                i, j, k, line, item_delta;
-   WORD               wObject, wScript;
+   unsigned short               wObject, wScript;
    BYTE               bColor;
    static BYTE        bufImage[2048];
    const int          iItemsPerLine = 32 / gConfig.dwWordLength;
@@ -55,7 +65,7 @@ PAL_ItemSelectMenuUpdate(
    const int          iAmountXOffset = gConfig.dwWordLength * 8 + 1;
    const int          iPageLineOffset = (iLinesPerPage + 1) / 2;
    const int          iPictureYOffset = (gConfig.ScreenLayout.ExtraItemDescLines > 1) ? (gConfig.ScreenLayout.ExtraItemDescLines - 1) * 16 : 0;
-   DWORD            cursorPos = PAL_XY(15 + iCursorXOffset, 22);;
+   unsigned int            cursorPos = PAL_XY(15 + iCursorXOffset, 22);;
 
    //
    // Process input
@@ -146,7 +156,7 @@ PAL_ItemSelectMenuUpdate(
          if (i == gpGlobals->iCurInvMenuItem)
          {
             if (!(gpGlobals->g.rgObject[wObject].item.wFlags & g_wItemFlags) ||
-               (SHORT)gpGlobals->rgInventory[i].nAmount <= (SHORT)gpGlobals->rgInventory[i].nAmountInUse)
+               (short)gpGlobals->rgInventory[i].nAmount <= (short)gpGlobals->rgInventory[i].nAmountInUse)
             {
                //
                // This item is not selectable
@@ -169,7 +179,7 @@ PAL_ItemSelectMenuUpdate(
             }
          }
          else if (!(gpGlobals->g.rgObject[wObject].item.wFlags & g_wItemFlags) ||
-            (SHORT)gpGlobals->rgInventory[i].nAmount <= (SHORT)gpGlobals->rgInventory[i].nAmountInUse)
+            (short)gpGlobals->rgInventory[i].nAmount <= (short)gpGlobals->rgInventory[i].nAmountInUse)
          {
             //
             // This item is not selectable
@@ -208,7 +218,7 @@ PAL_ItemSelectMenuUpdate(
          //
          // Draw the amount of this item
          //
-         if ((SHORT)gpGlobals->rgInventory[i].nAmount - (SHORT)gpGlobals->rgInventory[i].nAmountInUse > 1)
+         if ((short)gpGlobals->rgInventory[i].nAmount - (short)gpGlobals->rgInventory[i].nAmountInUse > 1)
          {
             PAL_DrawNumber(gpGlobals->rgInventory[i].nAmount - gpGlobals->rgInventory[i].nAmountInUse,
                2, PAL_XY(15 + iAmountXOffset + k * iItemTextWidth, 17 + j * 18), kNumColorCyan, kNumAlignRight);
@@ -232,8 +242,8 @@ PAL_ItemSelectMenuUpdate(
    {
       if (!g_fNoDesc && gpGlobals->lpObjectDesc != NULL)
 	  {
-         WCHAR szDesc[512], *next;
-         const WCHAR *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, wObject);
+         unsigned short szDesc[512], *next;
+         const unsigned short *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, wObject);
 
          if (d != NULL)
          {
@@ -287,8 +297,8 @@ PAL_ItemSelectMenuUpdate(
    if (g_InputState.dwKeyPress & kKeySearch)
    {
       if ((gpGlobals->g.rgObject[wObject].item.wFlags & g_wItemFlags) &&
-         (SHORT)gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmount >
-         (SHORT)gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmountInUse)
+         (short)gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmount >
+         (short)gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmountInUse)
       {
          if (gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmount > 0)
          {
@@ -310,9 +320,9 @@ PAL_ItemSelectMenuUpdate(
    return 0xFFFF;
 }
 
-VOID
+void
 PAL_ItemSelectMenuInit(
-   WORD                      wItemFlags
+   unsigned short                      wItemFlags
 )
 /*++
   Purpose:
@@ -330,7 +340,7 @@ PAL_ItemSelectMenuInit(
 --*/
 {
    int           i, j;
-   WORD          w;
+   unsigned short          w;
 
    g_wItemFlags = wItemFlags;
 
@@ -366,7 +376,7 @@ PAL_ItemSelectMenuInit(
                {
                   gpGlobals->rgInventory[g_iNumInventory].wItem = gpGlobals->g.PlayerRoles.rgwEquipment[j][w];
                   gpGlobals->rgInventory[g_iNumInventory].nAmount = 0;
-                  gpGlobals->rgInventory[g_iNumInventory].nAmountInUse = (WORD)-1;
+                  gpGlobals->rgInventory[g_iNumInventory].nAmountInUse = (unsigned short)-1;
 
                   g_iNumInventory++;
                }
@@ -376,10 +386,10 @@ PAL_ItemSelectMenuInit(
    }
 }
 
-WORD
+unsigned short
 PAL_ItemSelectMenu(
    LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
-   WORD                      wItemFlags
+   unsigned short                      wItemFlags
 )
 /*++
   Purpose:
@@ -400,8 +410,8 @@ PAL_ItemSelectMenu(
 --*/
 {
    int              iPrevIndex;
-   WORD             w;
-   DWORD            dwTime;
+   unsigned short             w;
+   unsigned int            dwTime;
 
    PAL_ItemSelectMenuInit(wItemFlags);
    iPrevIndex = gpGlobals->iCurInvMenuItem;

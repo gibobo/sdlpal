@@ -38,9 +38,9 @@ typedef enum tagPALDIRECTION
 typedef struct tagPALINPUTSTATE
 {
    PALDIRECTION           dir, prevdir;
-   DWORD                  dwKeyPress;
-   DWORD                  dwKeyOrder[4];
-   DWORD                  dwKeyMaxCount;
+   unsigned int                  dwKeyPress;
+   unsigned int                  dwKeyOrder[4];
+   unsigned int                  dwKeyMaxCount;
 #if PAL_HAS_JOYSTICKS
    int                    axisX,axisY;
    BOOL                   joystickNeedUpdate;
@@ -74,34 +74,34 @@ enum PALKEY
 extern "C" {
 #endif
 
-VOID
+void
 PAL_ClearKeyState(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_InitInput(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_ProcessEvent(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_ShutdownInput(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_SetTouchBounds(
-   DWORD dwScreenWidth,
-   DWORD dwScreenHeight,
+   unsigned int dwScreenWidth,
+   unsigned int dwScreenHeight,
    SDL_Rect renderRect
 );
 
-VOID
+void
 PAL_RegisterInputFilter(
    void (*init_filter)(),
    int (*event_filter)(const SDL_Event *, volatile PALINPUTSTATE *),

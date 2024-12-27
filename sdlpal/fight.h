@@ -22,84 +22,86 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
+#include "common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-INT
+int
 PAL_BattleSelectAutoTargetFrom(
-   INT
+   int
 );
 
 BOOL
 PAL_IsPlayerDying(
-   WORD
+   unsigned short
 );
 
 BOOL
 PAL_IsPlayerHealthy(
-   WORD     wPlayerRole
+   unsigned short     wPlayerRole
 );
 
-INT
+int
 PAL_BattleSelectAutoTarget(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_BattleUpdateFighters(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_BattlePlayerCheckReady(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_BattleStartFrame(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_BattleCommitAction(
    BOOL         fRepeat
 );
 
-VOID
+void
 PAL_BattlePlayerPerformAction(
-   WORD         wPlayerIndex
+   unsigned short         wPlayerIndex
 );
 
-VOID
+void
 PAL_BattleEnemyPerformAction(
-   WORD         wEnemyIndex
+   unsigned short         wEnemyIndex
 );
 
-VOID
+void
 PAL_BattleShowPlayerPreMagicAnim(
-   WORD         wPlayerIndex,
+   unsigned short         wPlayerIndex,
    BOOL         fSummon
 );
 
-VOID
+void
 PAL_BattleDelay(
-   WORD       wDuration,
-   WORD       wObjectID,
+   unsigned short       wDuration,
+   unsigned short       wObjectID,
    BOOL       fUpdateGesture
 );
 
-VOID
+void
 PAL_BattleStealFromEnemy(
-   WORD           wTarget,
-   WORD           wStealRate
+   unsigned short           wTarget,
+   unsigned short           wStealRate
 );
 
-VOID
+void
 PAL_BattleSimulateMagic(
-   SHORT      sTarget,
-   WORD       wMagicObjectID,
-   WORD       wBaseDamage
+   short      sTarget,
+   unsigned short       wMagicObjectID,
+   unsigned short       wBaseDamage
 );
 
 #ifdef __cplusplus

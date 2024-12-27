@@ -26,7 +26,9 @@
 #include "input.h"
 #include "itemmenu.h"
 #include "magicmenu.h"
+#include "main.h"
 #include "palcfg.h"
+#include "palcommon.h"
 #include "palette.h"
 #include "play.h"
 #include "script.h"
@@ -34,17 +36,17 @@
 #include "uibattle.h"
 #include "util.h"
 #include "video.h"
-// #include "main.h"
+#include <SDL_timer.h>
 
 static BOOL __buymenu_firsttime_render;
 
-static WORD GetSavedTimes(int iSaveSlot)
+static unsigned short GetSavedTimes(int iSaveSlot)
 {
 	FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, PAL_va(0, "%d.rpg", iSaveSlot));
-	WORD wSavedTimes = 0;
+	unsigned short wSavedTimes = 0;
 	if (fp != NULL)
 	{
-		if (fread(&wSavedTimes, sizeof(WORD), 1, fp) == 1)
+		if (fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
 			wSavedTimes = wSavedTimes;
 		else
 			wSavedTimes = 0;
@@ -53,9 +55,9 @@ static WORD GetSavedTimes(int iSaveSlot)
 	return wSavedTimes;
 }
 
-VOID
+void
 PAL_DrawOpeningMenuBackground(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -72,9 +74,9 @@ PAL_DrawOpeningMenuBackground(
 
 --*/
 {
-   LPBYTE        buf;
+   unsigned char *buf;
 
-   buf = (LPBYTE)malloc(320 * 200);
+   buf = (unsigned char *)malloc(320 * 200);
    if (buf == NULL)
    {
       return;
@@ -94,9 +96,9 @@ PAL_DrawOpeningMenuBackground(
    free(buf);
 }
 
-INT
+int
 PAL_OpeningMenu(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -113,9 +115,9 @@ PAL_OpeningMenu(
 
 --*/
 {
-   WORD          wItemSelected;
-   WORD          wDefaultItem     = 0;
-   INT           w[2] = { PAL_WordWidth(MAINMENU_LABEL_NEWGAME), PAL_WordWidth(MAINMENU_LABEL_LOADGAME) };
+   unsigned short          wItemSelected;
+   unsigned short          wDefaultItem     = 0;
+   int           w[2] = { PAL_WordWidth(MAINMENU_LABEL_NEWGAME), PAL_WordWidth(MAINMENU_LABEL_LOADGAME) };
 
    MENUITEM      rgMainMenuItem[2] = {
       // value   label                     enabled   position
@@ -172,12 +174,12 @@ PAL_OpeningMenu(
    AUDIO_PlayMusic(0, FALSE, 1);
    PAL_FadeOut(1);
 
-   return (INT)wItemSelected;
+   return (int)wItemSelected;
 }
 
-INT
+int
 PAL_SaveSlotMenu(
-   WORD        wDefaultSlot
+   unsigned short        wDefaultSlot
 )
 /*++
   Purpose:
@@ -197,7 +199,7 @@ PAL_SaveSlotMenu(
    LPBOX           rgpBox[5];
    int             i, w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5);
    int             dx = (w > 4) ? (w - 4) * 16 : 0;
-   WORD            wItemSelected;
+   unsigned short            wItemSelected;
 
    MENUITEM        rgMenuItem[5];
 
@@ -225,7 +227,7 @@ PAL_SaveSlotMenu(
       //
       // Draw the number
       //
-      PAL_DrawNumber((UINT)GetSavedTimes(i), 4, PAL_XY(270, 38 * i - 17),
+      PAL_DrawNumber((unsigned int)GetSavedTimes(i), 4, PAL_XY(270, 38 * i - 17),
          kNumColorYellow, kNumAlignRight);
    }
 
@@ -248,11 +250,11 @@ PAL_SaveSlotMenu(
 }
 
 static
-WORD
+unsigned short
 PAL_SelectionMenu(
 	int   nWords,
 	int   nDefault,
-	WORD  wItems[]
+	unsigned short  wItems[]
 )
 /*++
   Purpose:
@@ -279,8 +281,8 @@ PAL_SelectionMenu(
 		(nWords >= 3 && wItems[2]) ? PAL_WordWidth(wItems[2]) : 1,
 		(nWords >= 4 && wItems[3]) ? PAL_WordWidth(wItems[3]) : 1 };
 	int             dx[4] = { (w[0] - 1) * 16, (w[1] - 1) * 16, (w[2] - 1) * 16, (w[3] - 1) * 16 }, i;
-	DWORD           pos[4] = { PAL_XY(145, 110), PAL_XY(220 + dx[0], 110), PAL_XY(145, 160), PAL_XY(220 + dx[2], 160) };
-	WORD            wReturnValue;
+	unsigned int           pos[4] = { PAL_XY(145, 110), PAL_XY(220 + dx[0], 110), PAL_XY(145, 160), PAL_XY(220 + dx[2], 160) };
+	unsigned short            wReturnValue;
 
 	const SDL_Rect  rect = { 130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100 };
 
@@ -326,9 +328,9 @@ PAL_SelectionMenu(
 	return wReturnValue;
 }
 
-WORD
+unsigned short
 PAL_TripleMenu(
-   WORD  wThirdWord
+   unsigned short  wThirdWord
 )
 /*++
   Purpose:
@@ -345,13 +347,13 @@ PAL_TripleMenu(
 
 --*/
 {
-   WORD wItems[3] = { CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES, wThirdWord };
+   unsigned short wItems[3] = { CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES, wThirdWord };
    return PAL_SelectionMenu(3, 0, wItems);
 }
 
 BOOL
 PAL_ConfirmMenu(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -368,8 +370,8 @@ PAL_ConfirmMenu(
 
 --*/
 {
-   WORD wItems[2] = { CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES };
-   WORD wReturnValue = PAL_SelectionMenu(2, 0, wItems);
+   unsigned short wItems[2] = { CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES };
+   unsigned short wReturnValue = PAL_SelectionMenu(2, 0, wItems);
 
    return (wReturnValue == MENUITEM_VALUE_CANCELLED || wReturnValue == 0) ? FALSE : TRUE;
 }
@@ -393,14 +395,14 @@ PAL_SwitchMenu(
 
 --*/
 {
-   WORD wItems[2] = { SWITCHMENU_LABEL_DISABLE, SWITCHMENU_LABEL_ENABLE };
-   WORD wReturnValue = PAL_SelectionMenu(2, fEnabled ? 1 : 0, wItems);
+   unsigned short wItems[2] = { SWITCHMENU_LABEL_DISABLE, SWITCHMENU_LABEL_ENABLE };
+   unsigned short wReturnValue = PAL_SelectionMenu(2, fEnabled ? 1 : 0, wItems);
    return (wReturnValue == MENUITEM_VALUE_CANCELLED) ? fEnabled : ((wReturnValue == 0) ? FALSE : TRUE);
 }
 
 LPBOX
 PAL_ShowCash(
-   DWORD      dwCash
+   unsigned int      dwCash
 )
 /*++
   Purpose:
@@ -441,9 +443,9 @@ PAL_ShowCash(
    return lpBox;
 }
 
-static VOID
+static void
 PAL_SystemMenu_OnItemChange(
-   WORD        wCurrentItem
+   unsigned short        wCurrentItem
 )
 /*++
   Purpose:
@@ -465,7 +467,7 @@ PAL_SystemMenu_OnItemChange(
 
 static BOOL
 PAL_SystemMenu(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -483,7 +485,7 @@ PAL_SystemMenu(
 --*/
 {
    LPBOX               lpMenuBox;
-   WORD                wReturnValue;
+   unsigned short                wReturnValue;
    int                 iSlot, i;
    const SDL_Rect      rect = {40, 60, 280, 135};
 
@@ -531,12 +533,12 @@ PAL_SystemMenu(
 
       if (iSlot != MENUITEM_VALUE_CANCELLED)
       {
-         WORD wSavedTimes = 0;
+         unsigned short wSavedTimes = 0;
          gpGlobals->bCurrentSaveSlot = (BYTE)iSlot;
 
          for (i = 1; i <= 5; i++)
          {
-            WORD curSavedTimes = GetSavedTimes(i);
+            unsigned short curSavedTimes = GetSavedTimes(i);
             if (curSavedTimes > wSavedTimes)
             {
                wSavedTimes = curSavedTimes;
@@ -585,9 +587,9 @@ PAL_SystemMenu(
    return TRUE;
 }
 
-VOID
+void
 PAL_InGameMagicMenu(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -606,8 +608,8 @@ PAL_InGameMagicMenu(
 {
    MENUITEM         rgMenuItem[MAX_PLAYERS_IN_PARTY];
    int              i, y;
-   static WORD      w;
-   WORD             wMagic;
+   static unsigned short      w;
+   unsigned short             wMagic;
 
    if (gpGlobals->wMaxPartyMemberIndex == 0)
    {
@@ -698,7 +700,7 @@ start_magicmenu:
          //
          // Need to select which player to use the magic on.
          //
-         WORD       wPlayer = 0;
+         unsigned short       wPlayer = 0;
          SDL_Rect   rect;
 
          while (wPlayer != MENUITEM_VALUE_CANCELLED)
@@ -809,9 +811,9 @@ start_magicmenu:
    }
 }
 
-static VOID
+static void
 PAL_InventoryMenu(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -828,7 +830,7 @@ PAL_InventoryMenu(
 
 --*/
 {
-   static WORD      w = 0;
+   static unsigned short      w = 0;
 
    MENUITEM        rgMenuItem[2] =
    {
@@ -853,9 +855,9 @@ PAL_InventoryMenu(
    }
 }
 
-static VOID
+static void
 PAL_InGameMenu_OnItemChange(
-   WORD        wCurrentItem
+   unsigned short        wCurrentItem
 )
 /*++
   Purpose:
@@ -875,9 +877,9 @@ PAL_InGameMenu_OnItemChange(
    gpGlobals->iCurMainMenuItem = wCurrentItem - 1;
 }
 
-VOID
+void
 PAL_InGameMenu(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -895,7 +897,7 @@ PAL_InGameMenu(
 --*/
 {
    LPBOX                lpCashBox, lpMenuBox;
-   WORD                 wReturnValue;
+   unsigned short                 wReturnValue;
    
    // Fix render problem with shadow
    VIDEO_BackupScreen(gpScreen);
@@ -982,9 +984,9 @@ out:
    VIDEO_RestoreScreen(gpScreen);
 }
 
-VOID
+void
 PAL_PlayerStatus(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -1019,7 +1021,7 @@ PAL_PlayerStatus(
    int              iCurrent;
    int              iPlayerRole;
    int              i, j;
-   WORD             w;
+   unsigned short             w;
 
    PAL_MKFDecompressChunk(bufBackground, 320 * 200, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
    iCurrent = 0;
@@ -1105,7 +1107,7 @@ PAL_PlayerStatus(
          {
             offset = 0;
          }
-         int index = &gConfig.ScreenLayout.RoleEquipNames[i] - gConfig.ScreenLayoutArray;
+         unsigned int index = &gConfig.ScreenLayout.RoleEquipNames[i] - gConfig.ScreenLayoutArray;
          BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
          BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
          PAL_DrawText(PAL_GetWord(w), PAL_XY_OFFSET(gConfig.ScreenLayout.RoleEquipNames[i], offset, 0), STATUS_COLOR_EQUIPMENT, fShadow, FALSE, fUse8x8Font);
@@ -1123,7 +1125,7 @@ PAL_PlayerStatus(
       }
       for (i = 0; i < sizeof(labels) / sizeof(int); i++)
       {
-         int index = &gConfig.ScreenLayout.RoleStatusLabels[i] - gConfig.ScreenLayoutArray;
+         unsigned int index = &gConfig.ScreenLayout.RoleStatusLabels[i] - gConfig.ScreenLayoutArray;
          BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
          BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
          PAL_DrawText(PAL_GetWord(labels[i]), gConfig.ScreenLayout.RoleStatusLabels[i], MENUITEM_COLOR, fShadow, FALSE, fUse8x8Font);
@@ -1220,9 +1222,9 @@ PAL_PlayerStatus(
    }
 }
 
-WORD
+unsigned short
 PAL_ItemUseMenu(
-   WORD           wItemToUse
+   unsigned short           wItemToUse
 )
 /*++
   Purpose:
@@ -1242,8 +1244,8 @@ PAL_ItemUseMenu(
 {
    BYTE           bColor, bSelectedColor;
    PAL_LARGE BYTE bufImage[2048];
-   DWORD          dwColorChangeTime;
-   static SHORT   sSelectedPlayer = 0;
+   unsigned int          dwColorChangeTime;
+   static short   sSelectedPlayer = 0;
    SDL_Rect       rect = {110, 2, 200, 180};
    int            i;
 
@@ -1370,8 +1372,8 @@ PAL_ItemUseMenu(
          //
          if (SDL_TICKS_PASSED(SDL_GetTicks(), dwColorChangeTime))
          {
-            if ((WORD)bSelectedColor + 1 >=
-               (WORD)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
+            if ((unsigned short)bSelectedColor + 1 >=
+               (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
             {
                bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
             }
@@ -1434,9 +1436,9 @@ PAL_ItemUseMenu(
    return MENUITEM_VALUE_CANCELLED;
 }
 
-static VOID
+static void
 PAL_BuyMenu_OnItemChange(
-   WORD           wCurrentItem
+   unsigned short           wCurrentItem
 )
 /*++
   Purpose:
@@ -1546,9 +1548,9 @@ PAL_BuyMenu_OnItemChange(
    __buymenu_firsttime_render = FALSE;
 }
 
-VOID
+void
 PAL_BuyMenu(
-   WORD           wStoreNum
+   unsigned short           wStoreNum
 )
 /*++
   Purpose:
@@ -1567,7 +1569,7 @@ PAL_BuyMenu(
 {
    MENUITEM        rgMenuItem[MAX_STORE_ITEM];
    int             i, y;
-   WORD            w;
+   unsigned short            w;
 
    //
    // create the menu items
@@ -1641,9 +1643,9 @@ PAL_BuyMenu(
    }
 }
 
-static VOID
+static void
 PAL_SellMenu_OnItemChange(
-   WORD         wCurrentItem
+   unsigned short         wCurrentItem
 )
 /*++
   Purpose:
@@ -1662,7 +1664,7 @@ PAL_SellMenu_OnItemChange(
 
 --*/
 {
-   WORD x = 100, y = 150;
+   unsigned short x = 100, y = 150;
 
    //
    // Draw the cash amount
@@ -1686,9 +1688,9 @@ PAL_SellMenu_OnItemChange(
    }
 }
 
-VOID
+void
 PAL_SellMenu(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -1705,7 +1707,7 @@ PAL_SellMenu(
 
 --*/
 {
-   WORD      w;
+   unsigned short      w;
 
    while (TRUE)
    {
@@ -1725,9 +1727,9 @@ PAL_SellMenu(
    }
 }
 
-VOID
+void
 PAL_EquipItemMenu(
-   WORD        wItem
+   unsigned short        wItem
 )
 /*++
   Purpose:
@@ -1747,10 +1749,10 @@ PAL_EquipItemMenu(
    PAL_LARGE BYTE   bufBackground[320 * 200];
    PAL_LARGE BYTE   bufImageBox[72 * 72];
    PAL_LARGE BYTE   bufImage[2048];
-   WORD             w;
+   unsigned short             w;
    int              iCurrentPlayer, i;
    BYTE             bColor, bSelectedColor;
-   DWORD            dwColorChangeTime;
+   unsigned int            dwColorChangeTime;
 
    gpGlobals->wLastUnequippedItem = wItem;
 
@@ -1813,14 +1815,14 @@ PAL_EquipItemMenu(
          int labels2[] = { EQUIP_LABEL_HEAD, EQUIP_LABEL_SHOULDER, EQUIP_LABEL_BODY, EQUIP_LABEL_HAND, EQUIP_LABEL_FOOT, EQUIP_LABEL_NECK };
 		 for (i = 0; i < sizeof(labels1) / sizeof(int); i++)
          {
-            int index = &gConfig.ScreenLayout.EquipStatusLabels[i] - gConfig.ScreenLayoutArray;
+            unsigned int index = &gConfig.ScreenLayout.EquipStatusLabels[i] - gConfig.ScreenLayoutArray;
             BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
             BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
             PAL_DrawText(PAL_GetWord(labels1[i]), gConfig.ScreenLayoutArray[index], MENUITEM_COLOR, fShadow, FALSE, fUse8x8Font);
          }
 		 for (i = 0; i < sizeof(labels2) / sizeof(int); i++)
          {
-            int index = &gConfig.ScreenLayout.EquipLabels[i] - gConfig.ScreenLayoutArray;
+            unsigned int index = &gConfig.ScreenLayout.EquipLabels[i] - gConfig.ScreenLayoutArray;
             BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
             BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
             PAL_DrawText(PAL_GetWord(labels2[i]), gConfig.ScreenLayoutArray[index], MENUITEM_COLOR, fShadow, FALSE, fUse8x8Font);
@@ -1916,8 +1918,8 @@ PAL_EquipItemMenu(
          //
          if (SDL_TICKS_PASSED(SDL_GetTicks(), dwColorChangeTime))
          {
-            if ((WORD)bSelectedColor + 1 >=
-               (WORD)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
+            if ((unsigned short)bSelectedColor + 1 >=
+               (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
             {
                bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
             }
@@ -1990,12 +1992,12 @@ PAL_EquipItemMenu(
    }
 }
 
-VOID
+void
 PAL_QuitGame(
-   VOID
+   void
 )
 {
-	WORD wReturnValue = PAL_ConfirmMenu(); // No config menu available
+	unsigned short wReturnValue = PAL_ConfirmMenu(); // No config menu available
 	if (wReturnValue == 1 || wReturnValue == 2)
 	{
 		AUDIO_PlayMusic(0, FALSE, 2);

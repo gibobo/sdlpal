@@ -20,10 +20,9 @@
 //
 
 #include "font.h"
-#include "util.h"
+#include "palcommon.h"
 #include "text.h"
-// #include "pal_config.h"
-
+#include "util.h"
 
 #define _FONT_C
 
@@ -71,7 +70,7 @@ void
 PAL_DrawCharOnSurface(
 	uint16_t                 wChar,
 	SDL_Surface             *lpSurface,
-	DWORD                  pos,
+	unsigned int                  pos,
 	uint8_t                  bColor,
 	BOOL                     fUse8x8Font
 )
@@ -101,8 +100,8 @@ PAL_DrawCharOnSurface(
 	//
 	// Draw the character to the surface.
 	//
-	LPBYTE dest = (LPBYTE)lpSurface->pixels + (int)max(y + y_offset, 0) * lpSurface->pitch + x;
-	LPBYTE top = (LPBYTE)lpSurface->pixels + lpSurface->h * lpSurface->pitch;
+	unsigned char * dest = (unsigned char *)lpSurface->pixels + (int)max(y + y_offset, 0) * lpSurface->pitch + x;
+	unsigned char * top = (unsigned char *)lpSurface->pixels + lpSurface->h * lpSurface->pitch;
 	if (fUse8x8Font)
 	{
 		for (i = 0; i < 8 && dest < top; i++, dest += lpSurface->pitch)

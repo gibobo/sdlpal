@@ -22,7 +22,9 @@
 #ifndef UI_H
 #define UI_H
 
-#include "palcommon.h"
+#include "common.h"
+#include <SDL_surface.h>
+#include <SDL_timer.h>
 
 #define CHUNKNUM_SPRITEUI                  9
 
@@ -131,28 +133,28 @@
 
 typedef struct tagBOX
 {
-   DWORD          pos;
-   WORD           wWidth, wHeight;
+   unsigned int          pos;
+   unsigned short           wWidth, wHeight;
    SDL_Surface   *lpSavedArea;
 } BOX, *LPBOX;
 
 typedef struct tagMENUITEM
 {
-   WORD          wValue;
-   WORD          wNumWord;
+   unsigned short          wValue;
+   unsigned short          wNumWord;
    BOOL          fEnabled;
-   DWORD         pos;
+   unsigned int         pos;
 } MENUITEM, *LPMENUITEM;
 typedef const MENUITEM* LPCMENUITEM;
 
 typedef struct tagOBJECTDESC
 {
-   WORD                        wObjectID;
-   LPWSTR                      lpDesc;
+   unsigned short                        wObjectID;
+   unsigned short*                      lpDesc;
    struct tagOBJECTDESC       *next;
 } OBJECTDESC, *LPOBJECTDESC;
 
-typedef VOID (*LPITEMCHANGED_CALLBACK)(WORD);
+typedef void (*LPITEMCHANGED_CALLBACK)(unsigned short);
 
 #define MENUITEM_VALUE_CANCELLED      0xFFFF
 
@@ -174,112 +176,112 @@ typedef enum tagNUMALIGN
 extern "C" {
 #endif
 
-INT
+int
 PAL_InitUI(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_FreeUI(
-   VOID
+   void
 );
 
 LPBOX
 PAL_CreateBox(
-   DWORD          pos,
-   INT            nRows,
-   INT            nColumns,
-   INT            iStyle,
+   unsigned int          pos,
+   int            nRows,
+   int            nColumns,
+   int            iStyle,
    BOOL           fSaveScreen
 );
     
 LPBOX
 PAL_CreateBoxWithShadow(
-   DWORD          pos,
-   INT            nRows,
-   INT            nColumns,
-   INT            iStyle,
+   unsigned int          pos,
+   int            nRows,
+   int            nColumns,
+   int            iStyle,
    BOOL           fSaveScreen,
-   INT            nShadowOffset
+   int            nShadowOffset
 );
 
 LPBOX
 PAL_CreateSingleLineBox(
-   DWORD          pos,
-   INT            nLen,
+   unsigned int          pos,
+   int            nLen,
    BOOL           fSaveScreen
 );
     
 LPBOX
 PAL_CreateSingleLineBoxWithShadow(
-   DWORD          pos,
-   INT            nLen,
+   unsigned int          pos,
+   int            nLen,
    BOOL           fSaveScreen,
-   INT            nShadowOffset
+   int            nShadowOffset
 );
     
-VOID
+void
 PAL_DeleteBox(
    LPBOX          lpBox
 );
 
-WORD
+unsigned short
 PAL_ReadMenu(
    LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
    LPCMENUITEM               rgMenuItem,
-   INT                       nMenuItem,
-   WORD                      wDefaultItem,
+   int                       nMenuItem,
+   unsigned short                      wDefaultItem,
    BYTE                      bLabelColor
 );
 
-VOID
+void
 PAL_DrawNumber(
-   UINT            iNum,
-   UINT            nLength,
-   DWORD           pos,
+   unsigned int            iNum,
+   unsigned int            nLength,
+   unsigned int           pos,
    NUMCOLOR        color,
    NUMALIGN        align
 );
     
 size_t
 PAL_TextWidth(
-   LPCWSTR        lpszItemText
+   const unsigned short*        lpszItemText
 );
 
-INT
+int
 PAL_MenuTextMaxWidth(
    LPCMENUITEM    rgMenuItem,
-   INT            nMenuItem
+   int            nMenuItem
 );
 
-INT
+int
 PAL_WordMaxWidth(
-   INT            nFirstWord,
-   INT            nWordNum
+   int            nFirstWord,
+   int            nWordNum
 );
 
-INT
+int
 PAL_WordWidth(
-   INT            nWordIndex
+   int            nWordIndex
 );
 
 LPOBJECTDESC
 PAL_LoadObjectDesc(
-   LPCSTR          lpszFileName
+   const char*          lpszFileName
 );
 
-VOID
+void
 PAL_FreeObjectDesc(
    LPOBJECTDESC    lpObjectDesc
 );
 
-LPCWSTR
+const unsigned short*
 PAL_GetObjectDesc(
    LPOBJECTDESC   lpObjectDesc,
-   WORD           wObjectID
+   unsigned short           wObjectID
 );
 
-extern LPSPRITE gpSpriteUI;
+extern unsigned char *gpSpriteUI;
 
 #ifdef __cplusplus
 }

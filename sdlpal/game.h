@@ -22,6 +22,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "common.h"
+
 #define    FPS             10
 #define    FRAME_TIME      (1000 / FPS)
 
@@ -29,9 +31,9 @@
 extern "C" {
 #endif
 
-VOID
+void
 PAL_GameMain(
-   VOID
+   void
 );
 
 #ifdef __cplusplus

@@ -22,11 +22,11 @@
 //  @Author: Lou Yihua <louyihua@21cn.com>, 2016.
 //
 
-#include "global.h"
 #include "palcfg.h"
-#include "util.h"
-#include "resampler.h"
+#include "global.h"
 #include "pal_config.h"
+#include "palcommon.h"
+#include "resampler.h"
 #include <stdint.h>
 
 #define MAKE_BOOLEAN(defv, minv, maxv)  { .bValue = defv }, { .bValue = minv }, { .bValue = maxv }
@@ -197,7 +197,7 @@ PAL_LoadConfig(
 	gConfig.iSampleRate = values[PALCFG_SAMPLERATE].uValue;
 	gConfig.iOPLSampleRate = values[PALCFG_OPLSAMPLERATE].uValue;
 	gConfig.iResampleQuality = values[PALCFG_RESAMPLEQUALITY].uValue;
-	gConfig.wAudioBufferSize = (WORD)values[PALCFG_AUDIOBUFFERSIZE].uValue;
+	gConfig.wAudioBufferSize = (unsigned short)values[PALCFG_AUDIOBUFFERSIZE].uValue;
 	gConfig.iMusicVolume = values[PALCFG_MUSICVOLUME].uValue;
 	gConfig.iSoundVolume = values[PALCFG_SOUNDVOLUME].uValue;
 	gConfig.pszShader = (char *)values[PALCFG_SHADER].sValue;

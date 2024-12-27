@@ -23,23 +23,24 @@
 #include "audio.h"
 #include "global.h"
 #include "util.h"
+#include "palcommon.h"
 
 typedef struct tagRESOURCES
 {
    BYTE             bLoadFlags;
 
    LPPALMAP         lpMap;                                      // current loaded map
-   LPSPRITE        *lppEventObjectSprites;                      // event object sprites
+   unsigned char    **lppEventObjectSprites;                    // event object sprites
    int              nEventObject;                               // number of event objects
 
-   LPSPRITE         rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
+   unsigned char    *rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
 } RESOURCES, *LPRESOURCES;
 
 static LPRESOURCES gpResources = NULL;
 
-static VOID
+static void
 PAL_FreeEventObjectSprites(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -72,9 +73,9 @@ PAL_FreeEventObjectSprites(
    }
 }
 
-static VOID
+static void
 PAL_FreePlayerSprites(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -100,9 +101,9 @@ PAL_FreePlayerSprites(
    }
 }
 
-VOID
+void
 PAL_InitResources(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -119,12 +120,12 @@ PAL_InitResources(
 
 --*/
 {
-   gpResources = (LPRESOURCES)UTIL_calloc(1, sizeof(RESOURCES));
+   gpResources = (LPRESOURCES)malloc(sizeof(RESOURCES));
 }
 
-VOID
+void
 PAL_FreeResources(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -163,7 +164,7 @@ PAL_FreeResources(
    gpResources = NULL;
 }
 
-VOID
+void
 PAL_SetLoadFlags(
    BYTE       bFlags
 )
@@ -190,9 +191,9 @@ PAL_SetLoadFlags(
    gpResources->bLoadFlags |= bFlags;
 }
 
-VOID
+void
 PAL_LoadResources(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -210,7 +211,7 @@ PAL_LoadResources(
 --*/
 {
    int                i, index, l, n;
-   WORD               wPlayerID, wSpriteNum;
+   unsigned short               wPlayerID, wSpriteNum;
 
    if (gpResources == NULL || gpResources->bLoadFlags == 0)
    {
@@ -274,7 +275,7 @@ PAL_LoadResources(
       if (gpResources->nEventObject > 0)
       {
          gpResources->lppEventObjectSprites =
-            (LPSPRITE *)UTIL_calloc(gpResources->nEventObject, sizeof(LPSPRITE));
+            (unsigned char **)calloc(gpResources->nEventObject, sizeof(unsigned char *));
       }
 
       for (i = 0; i < gpResources->nEventObject; i++, index++)
@@ -291,7 +292,7 @@ PAL_LoadResources(
 
          l = PAL_MKFGetDecompressedSize(n, gpGlobals->f.fpMGO);
 
-         gpResources->lppEventObjectSprites[i] = (LPSPRITE)UTIL_malloc(l);
+         gpResources->lppEventObjectSprites[i] = (unsigned char *)UTIL_malloc(l);
 
          if (PAL_MKFDecompressChunk(gpResources->lppEventObjectSprites[i], l,
             n, gpGlobals->f.fpMGO) > 0)
@@ -329,7 +330,7 @@ PAL_LoadResources(
 
          l = PAL_MKFGetDecompressedSize(wSpriteNum, gpGlobals->f.fpMGO);
 
-         gpResources->rglpPlayerSprite[i] = (LPSPRITE)UTIL_malloc(l);
+         gpResources->rglpPlayerSprite[i] = (unsigned char *)UTIL_malloc(l);
 
          PAL_MKFDecompressChunk(gpResources->rglpPlayerSprite[i], l, wSpriteNum,
             gpGlobals->f.fpMGO);
@@ -344,7 +345,7 @@ PAL_LoadResources(
 
          l = PAL_MKFGetDecompressedSize(wSpriteNum, gpGlobals->f.fpMGO);
 
-         gpResources->rglpPlayerSprite[(short)gpGlobals->wMaxPartyMemberIndex+i] = (LPSPRITE)UTIL_malloc(l);
+         gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex+i] = (unsigned char *)UTIL_malloc(l);
 
          PAL_MKFDecompressChunk(gpResources->rglpPlayerSprite[(short)gpGlobals->wMaxPartyMemberIndex+i], l, wSpriteNum,
             gpGlobals->f.fpMGO);
@@ -359,7 +360,7 @@ PAL_LoadResources(
 
 LPPALMAP
 PAL_GetCurrentMap(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -384,7 +385,7 @@ PAL_GetCurrentMap(
    return gpResources->lpMap;
 }
 
-LPSPRITE
+unsigned char *
 PAL_GetPlayerSprite(
    BYTE      bPlayerIndex
 )
@@ -411,9 +412,9 @@ PAL_GetPlayerSprite(
    return gpResources->rglpPlayerSprite[bPlayerIndex];
 }
 
-LPSPRITE
+unsigned char *
 PAL_GetEventObjectSprite(
-   WORD      wEventObjectID
+   unsigned short      wEventObjectID
 )
 /*++
   Purpose:

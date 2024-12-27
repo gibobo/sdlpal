@@ -32,7 +32,7 @@
 
 SDL_Color *
 PAL_GetPalette(
-   INT         iPaletteNum,
+   int         iPaletteNum,
    BOOL        fNight
 )
 /*++
@@ -54,7 +54,7 @@ PAL_GetPalette(
 {
    static SDL_Color      palette[256];
    PAL_LARGE BYTE        buf[1536];
-   INT                   i;
+   int                   i;
    FILE                 *fp;
 
    fp = UTIL_OpenRequiredFileForMode("pat.mkf", "rb");
@@ -96,9 +96,9 @@ PAL_GetPalette(
    return palette;
 }
 
-VOID
+void
 PAL_SetPalette(
-   INT         iPaletteNum,
+   int         iPaletteNum,
    BOOL        fNight
 )
 /*++
@@ -126,9 +126,9 @@ PAL_SetPalette(
    }
 }
 
-VOID
+void
 PAL_FadeOut(
-   INT         iDelay
+   int         iDelay
 )
 /*++
   Purpose:
@@ -150,7 +150,7 @@ PAL_FadeOut(
 --*/
 {
    int                      i, j;
-   UINT                     time;
+   unsigned int                     time;
    PAL_LARGE SDL_Color      palette[256];
    PAL_LARGE SDL_Color      newpalette[256];
 
@@ -194,11 +194,11 @@ PAL_FadeOut(
    VIDEO_SetPalette(newpalette);
 }
 
-VOID
+void
 PAL_FadeIn(
-   INT         iPaletteNum,
+   int         iPaletteNum,
    BOOL        fNight,
-   INT         iDelay
+   int         iDelay
 )
 /*++
   Purpose:
@@ -220,7 +220,7 @@ PAL_FadeIn(
 --*/
 {
    int                      i, j;
-   UINT                     time;
+   unsigned int                     time;
    SDL_Color               *palette;
    PAL_LARGE SDL_Color      newpalette[256];
 
@@ -261,11 +261,11 @@ PAL_FadeIn(
    VIDEO_SetPalette(palette);
 }
 
-VOID
+void
 PAL_SceneFade(
-   INT         iPaletteNum,
+   int         iPaletteNum,
    BOOL        fNight,
-   INT         iStep
+   int         iStep
 )
 /*++
   Purpose:
@@ -288,7 +288,7 @@ PAL_SceneFade(
 {
    SDL_Color            *palette, newpalette[256];
    int                   i, j;
-   DWORD                 time;
+   unsigned int                 time;
 
    palette = PAL_GetPalette(iPaletteNum, fNight);
 
@@ -378,9 +378,9 @@ PAL_SceneFade(
    }
 }
 
-VOID
+void
 PAL_PaletteFade(
-   INT         iPaletteNum,
+   int         iPaletteNum,
    BOOL        fNight,
    BOOL        fUpdateScene
 )
@@ -404,7 +404,7 @@ PAL_PaletteFade(
 --*/
 {
    int            i, j;
-   UINT           time;
+   unsigned int           time;
    SDL_Color     *newpalette = PAL_GetPalette(iPaletteNum, fNight);
    PAL_LARGE SDL_Color      palette[256];
    PAL_LARGE SDL_Color		t[256];
@@ -429,11 +429,11 @@ PAL_PaletteFade(
       for (j = 0; j < 256; j++)
       {
          t[j].r =
-            (BYTE)(((INT)(palette[j].r) * (31 - i) + (INT)(newpalette[j].r) * i) / 31);
+            (BYTE)(((int)(palette[j].r) * (31 - i) + (int)(newpalette[j].r) * i) / 31);
          t[j].g =
-            (BYTE)(((INT)(palette[j].g) * (31 - i) + (INT)(newpalette[j].g) * i) / 31);
+            (BYTE)(((int)(palette[j].g) * (31 - i) + (int)(newpalette[j].g) * i) / 31);
          t[j].b =
-            (BYTE)(((INT)(palette[j].b) * (31 - i) + (INT)(newpalette[j].b) * i) / 31);
+            (BYTE)(((int)(palette[j].b) * (31 - i) + (int)(newpalette[j].b) * i) / 31);
       }
       VIDEO_SetPalette(t);
 
@@ -457,9 +457,9 @@ PAL_PaletteFade(
    }
 }
 
-VOID
+void
 PAL_ColorFade(
-   INT        iDelay,
+   int        iDelay,
    BYTE       bColor,
    BOOL       fFrom
 )
@@ -588,9 +588,9 @@ PAL_ColorFade(
    }
 }
 
-VOID
+void
 PAL_FadeToRed(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -617,9 +617,9 @@ PAL_FadeToRed(
 
    for (i = 0; i < gpScreen->pitch * gpScreen->h; i++)
    {
-      if (((LPBYTE)(gpScreen->pixels))[i] == 0x4F)
+      if (((unsigned char *)(gpScreen->pixels))[i] == 0x4F)
       {
-         ((LPBYTE)(gpScreen->pixels))[i] = 0x4E; // HACKHACK
+         ((unsigned char *)(gpScreen->pixels))[i] = 0x4E; // HACKHACK
       }
    }
 
@@ -634,7 +634,7 @@ PAL_FadeToRed(
             continue; // so that texts will not be affected
          }
 
-         color = ((INT)palette[j].r + (INT)palette[j].g + (INT)palette[j].b) / 4 + 64;
+         color = ((int)palette[j].r + (int)palette[j].g + (int)palette[j].b) / 4 + 64;
 
          if (newpalette[j].r > color)
          {

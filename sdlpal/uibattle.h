@@ -82,9 +82,9 @@ typedef enum tagBATTLEUIACTION
 
 typedef struct tagSHOWNUM
 {
-   WORD             wNum;
-   DWORD            pos;
-   DWORD            dwTime;
+   unsigned short             wNum;
+   unsigned int            pos;
+   unsigned int            dwTime;
    NUMCOLOR         color;
 } SHOWNUM;
 
@@ -93,18 +93,18 @@ typedef struct tagBATTLEUI
    BATTLEUISTATE    state;
    BATTLEMENUSTATE  MenuState;
 
-   WCHAR            szMsg[256];           // message to be shown on the screen
-   WCHAR            szNextMsg[256];       // next message to be shown on the screen
-   DWORD            dwMsgShowTime;        // the end time of showing the message
-   WORD             wNextMsgDuration;     // duration of the next message
+   unsigned short            szMsg[256];           // message to be shown on the screen
+   unsigned short            szNextMsg[256];       // next message to be shown on the screen
+   unsigned int            dwMsgShowTime;        // the end time of showing the message
+   unsigned short             wNextMsgDuration;     // duration of the next message
 
-   WORD             wCurPlayerIndex;      // index of the current player
-   WORD             wSelectedAction;      // current selected action
-   INT              iSelectedIndex;       // current selected index of player or enemy
-   INT              iPrevEnemyTarget;     // previous enemy target
+   unsigned short             wCurPlayerIndex;      // index of the current player
+   unsigned short             wSelectedAction;      // current selected action
+   int              iSelectedIndex;       // current selected index of player or enemy
+   int              iPrevEnemyTarget;     // previous enemy target
 
-   WORD             wActionType;          // type of action to be performed
-   WORD             wObjectID;            // object ID of the item or magic to use
+   unsigned short             wActionType;          // type of action to be performed
+   unsigned short             wObjectID;            // object ID of the item or magic to use
 
    BOOL             fAutoAttack;          // TRUE if auto attack
 
@@ -115,35 +115,35 @@ typedef struct tagBATTLEUI
 extern "C" {
 #endif
 
-VOID
+void
 PAL_PlayerInfoBox(
-   DWORD           pos,
-   WORD            wPlayerRole,
-   INT             iTimeMeter,
+   unsigned int           pos,
+   unsigned short            wPlayerRole,
+   int             iTimeMeter,
    BYTE            bTimeMeterColor,
    BOOL            fUpdate
 );
 
-VOID
+void
 PAL_BattleUIShowText(
-   LPCWSTR       lpszText,
-   WORD          wDuration
+   const unsigned short*       lpszText,
+   unsigned short          wDuration
 );
 
-VOID
+void
 PAL_BattleUIPlayerReady(
-   WORD          wPlayerIndex
+   unsigned short          wPlayerIndex
 );
 
-VOID
+void
 PAL_BattleUIUpdate(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_BattleUIShowNum(
-   WORD           wNum,
-   DWORD          pos,
+   unsigned short           wNum,
+   unsigned int          pos,
    NUMCOLOR       color
 );
 

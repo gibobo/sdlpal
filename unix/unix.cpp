@@ -34,15 +34,15 @@
 
 BOOL
 UTIL_IsAbsolutePath(
-   LPCSTR lpszFileName
+   const char* lpszFileName
 )
 {
    return lpszFileName && *lpszFileName == '/';
 }
 
-VOID
+void
 UTIL_Platform_Quit(
-   VOID
+   void
 )
 {
 	closelog();

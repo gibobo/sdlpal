@@ -75,28 +75,10 @@
 # ifndef TRUE
 #  define TRUE                1
 # endif
-# define VOID                void
-typedef char                CHAR;
-typedef wchar_t             WCHAR;
-typedef short               SHORT;
-typedef long                LONG;
-typedef unsigned long       ULONG, *PULONG;
-typedef unsigned short      USHORT, *PUSHORT;
-typedef unsigned char       UCHAR, *PUCHAR;
-typedef unsigned short      WORD, *LPWORD;
-typedef unsigned int        DWORD, *LPDWORD;
-typedef int                 INT, *LPINT;
-typedef int                 BOOL, *LPBOOL;
-typedef unsigned int        UINT, *PUINT, UINT32, *PUINT32;
-typedef unsigned char       BYTE, *LPBYTE;
-typedef const BYTE         *LPCBYTE;
-typedef float               FLOAT, *LPFLOAT;
-typedef void               *LPVOID;
-typedef const void         *LPCVOID;
-typedef CHAR               *LPSTR;
-typedef const CHAR         *LPCSTR;
-typedef WCHAR              *LPWSTR;
-typedef const WCHAR        *LPCWSTR;
+
+typedef long LONG;
+typedef int BOOL;
+typedef unsigned char BYTE, *LPBYTE;
 
 #ifdef PATH_MAX
 # define PAL_MAX_PATH  PATH_MAX

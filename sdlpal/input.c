@@ -19,8 +19,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "input.h"
+#include "global.h"
+#include "input.h"
 #include "main.h"
-#include <math.h>
+#include "palcfg.h"
+#include "video.h"
+#include <SDL_timer.h>
 
 volatile PALINPUTSTATE   g_InputState;
 #if PAL_HAS_JOYSTICKS
@@ -73,9 +78,9 @@ static const int g_KeyMap[][2] = {
    { SDLK_s,         kKeyStatus }
 };
 
-static INT
+static int
 PAL_GetCurrDirection(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -92,7 +97,7 @@ PAL_GetCurrDirection(
 
 --*/
 {
-   INT i, iCurrDir = kDirSouth;
+   int i, iCurrDir = kDirSouth;
 
    for (i = 1; i < sizeof(g_InputState.dwKeyOrder) / sizeof(g_InputState.dwKeyOrder[0]); i++)
       if (g_InputState.dwKeyOrder[iCurrDir] < g_InputState.dwKeyOrder[i]) iCurrDir = i;
@@ -102,9 +107,9 @@ PAL_GetCurrDirection(
    return iCurrDir;
 }
 
-static VOID
+static void
 PAL_KeyDown(
-   INT         key,
+   int         key,
    BOOL        fRepeat
 )
 /*++
@@ -122,7 +127,7 @@ PAL_KeyDown(
 
 --*/
 {
-   INT iCurrDir = kDirUnknown;
+   int iCurrDir = kDirUnknown;
 
    if (!fRepeat)
    {
@@ -154,9 +159,9 @@ PAL_KeyDown(
    g_InputState.dwKeyPress |= key;
 }
 
-static VOID
+static void
 PAL_KeyUp(
-   INT         key
+   int         key
 )
 /*++
   Purpose:
@@ -173,7 +178,7 @@ PAL_KeyUp(
 
 --*/
 {
-   INT iCurrDir = kDirUnknown;
+   int iCurrDir = kDirUnknown;
 
    if (key & kKeyDown)
    {
@@ -201,9 +206,9 @@ PAL_KeyUp(
    }
 }
 
-static VOID
+static void
 PAL_UpdateKeyboardState(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -220,10 +225,10 @@ PAL_UpdateKeyboardState(
 
 --*/
 {
-   static DWORD   rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
-   LPCBYTE        keyState = (LPCBYTE)SDL_GetKeyboardState(NULL);
+   static unsigned int   rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
+   const unsigned char*        keyState = (const unsigned char*)SDL_GetKeyboardState(NULL);
    int            i;
-   DWORD          dwCurrentTime = SDL_GetTicks();
+   unsigned int          dwCurrentTime = SDL_GetTicks();
 
    for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++)
    {
@@ -253,7 +258,7 @@ PAL_UpdateKeyboardState(
    }
 }
 
-static VOID
+static void
 PAL_KeyboardEventFilter(
    const SDL_Event       *lpEvent
 )
@@ -318,7 +323,7 @@ PAL_KeyboardEventFilter(
    }
 }
 
-static VOID
+static void
 PAL_JoystickEventFilter(
    const SDL_Event       *lpEvent
 )
@@ -448,9 +453,9 @@ PAL_JoystickEventFilter(
 
 #if PAL_HAS_JOYSTICKS
 
-static VOID
+static void
 PAL_UpdateJoyStickState(
-VOID
+void
 )
 /*++
  Purpose:
@@ -560,9 +565,9 @@ PAL_EventFilter(
    return 0;
 }
 
-VOID
+void
 PAL_ClearKeyState(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -582,9 +587,9 @@ PAL_ClearKeyState(
    g_InputState.dwKeyPress = 0;
 }
 
-VOID
+void
 PAL_InitInput(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -631,9 +636,9 @@ PAL_InitInput(
    input_init_filter();
 }
 
-VOID
+void
 PAL_ShutdownInput(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -695,9 +700,9 @@ PAL_PollEvent(
    return ret;
 }
 
-VOID
+void
 PAL_ProcessEvent(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -726,7 +731,7 @@ PAL_ProcessEvent(
 #endif
 }
 
-VOID
+void
 PAL_RegisterInputFilter(
    void (*init_filter)(),
    int (*event_filter)(const SDL_Event *, volatile PALINPUTSTATE *),

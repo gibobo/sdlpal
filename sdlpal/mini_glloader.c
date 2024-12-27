@@ -20,8 +20,7 @@
 // mini_glloader.c: quick&dirty OpenGL extension loader by palxex, 2018
 //
 
-#include "main.h"
-
+#include <SDL_video.h>
 #include "mini_glloader.h"
 
 PFNGLCREATESHADERPROC glCreateShader;

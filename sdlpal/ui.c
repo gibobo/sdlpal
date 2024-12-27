@@ -23,18 +23,19 @@
 #include "font.h"
 #include "global.h"
 #include "input.h"
+#include "palcommon.h"
 #include "text.h"
 #include "util.h"
 #include "video.h"
 
-LPSPRITE      gpSpriteUI = NULL;
+unsigned char *gpSpriteUI = NULL;
 
 static LPBOX
 PAL_CreateBoxInternal(
 	const SDL_Rect *rect
 )
 {
-	LPBOX lpBox = (LPBOX)calloc(1, sizeof(BOX));
+	LPBOX lpBox = (LPBOX)malloc(sizeof(BOX));
 	if (lpBox == NULL)
 	{
 		return NULL;
@@ -42,8 +43,8 @@ PAL_CreateBoxInternal(
 
 	lpBox->pos = PAL_XY(rect->x, rect->y);
 	lpBox->lpSavedArea = VIDEO_DuplicateSurface(gpScreen, rect);
-	lpBox->wHeight = (WORD)rect->w;
-	lpBox->wWidth = (WORD)rect->h;
+	lpBox->wHeight = (unsigned short)rect->w;
+	lpBox->wWidth = (unsigned short)rect->h;
 
 	if (lpBox->lpSavedArea == NULL)
 	{
@@ -54,9 +55,9 @@ PAL_CreateBoxInternal(
 	return lpBox;
 }
 
-INT
+int
 PAL_InitUI(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -84,7 +85,7 @@ PAL_InitUI(
       return -1;
    }
 
-   gpSpriteUI = (LPSPRITE)calloc(1, iSize);
+   gpSpriteUI = (unsigned char *)malloc(iSize);
    if (gpSpriteUI == NULL)
    {
       return -1;
@@ -95,9 +96,9 @@ PAL_InitUI(
    return 0;
 }
 
-VOID
+void
 PAL_FreeUI(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -123,10 +124,10 @@ PAL_FreeUI(
 
 LPBOX
 PAL_CreateBox(
-   DWORD          pos,
-   INT            nRows,
-   INT            nColumns,
-   INT            iStyle,
+   unsigned int          pos,
+   int            nRows,
+   int            nColumns,
+   int            iStyle,
    BOOL           fSaveScreen
 )
 {
@@ -135,12 +136,12 @@ PAL_CreateBox(
 
 LPBOX
 PAL_CreateBoxWithShadow(
-   DWORD          pos,
-   INT            nRows,
-   INT            nColumns,
-   INT            iStyle,
+   unsigned int          pos,
+   int            nRows,
+   int            nColumns,
+   int            iStyle,
    BOOL           fSaveScreen,
-   INT            nShadowOffset
+   int            nShadowOffset
 )
 /*++
   Purpose:
@@ -167,7 +168,7 @@ PAL_CreateBoxWithShadow(
 --*/
 {
    int              i, j, x, m, n;
-   LPCBITMAPRLE     rglpBorderBitmap[3][3];
+   const unsigned char*     rglpBorderBitmap[3][3];
    LPBOX            lpBox = NULL;
    SDL_Rect         rect;
 
@@ -246,8 +247,8 @@ PAL_CreateBoxWithShadow(
 
 LPBOX
 PAL_CreateSingleLineBox(
-   DWORD          pos,
-   INT            nLen,
+   unsigned int          pos,
+   int            nLen,
    BOOL           fSaveScreen
 )
 {
@@ -256,10 +257,10 @@ PAL_CreateSingleLineBox(
 
 LPBOX
 PAL_CreateSingleLineBoxWithShadow(
-   DWORD          pos,
-   INT            nLen,
+   unsigned int          pos,
+   int            nLen,
    BOOL           fSaveScreen,
-   INT            nShadowOffset
+   int            nShadowOffset
 )
 /*++
   Purpose:
@@ -285,9 +286,9 @@ PAL_CreateSingleLineBoxWithShadow(
    static const int      iNumMidSprite    = 45;
    static const int      iNumRightSprite  = 46;
 
-   LPCBITMAPRLE          lpBitmapLeft;
-   LPCBITMAPRLE          lpBitmapMid;
-   LPCBITMAPRLE          lpBitmapRight;
+   const unsigned char*          lpBitmapLeft;
+   const unsigned char*          lpBitmapMid;
+   const unsigned char*          lpBitmapRight;
    SDL_Rect              rect;
    LPBOX                 lpBox = NULL;
    int                   i;
@@ -357,7 +358,7 @@ PAL_CreateSingleLineBoxWithShadow(
    return lpBox;
 }
 
-VOID
+void
 PAL_DeleteBox(
    LPBOX          lpBox
 )
@@ -403,12 +404,12 @@ PAL_DeleteBox(
    free(lpBox);
 }
 
-WORD
+unsigned short
 PAL_ReadMenu(
    LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
    LPCMENUITEM               rgMenuItem,
-   INT                       nMenuItem,
-   WORD                      wDefaultItem,
+   int                       nMenuItem,
+   unsigned short                      wDefaultItem,
    BYTE                      bLabelColor
 )
 /*++
@@ -436,7 +437,7 @@ PAL_ReadMenu(
 --*/
 {
    int               i;
-   WORD              wCurrentItem    = (wDefaultItem < nMenuItem) ? wDefaultItem : 0;
+   unsigned short              wCurrentItem    = (wDefaultItem < nMenuItem) ? wDefaultItem : 0;
 
    //
    // Fix issue #166
@@ -642,11 +643,11 @@ PAL_ReadMenu(
    return MENUITEM_VALUE_CANCELLED;
 }
 
-VOID
+void
 PAL_DrawNumber(
-   UINT            iNum,
-   UINT            nLength,
-   DWORD           pos,
+   unsigned int            iNum,
+   unsigned int            nLength,
+   unsigned int           pos,
    NUMCOLOR        color,
    NUMALIGN        align
 )
@@ -673,9 +674,9 @@ PAL_DrawNumber(
 
 --*/
 {
-   UINT          nActualLength, i;
+   unsigned int          nActualLength, i;
    int           x, y;
-   LPCBITMAPRLE  rglpBitmap[10];
+   const unsigned char*  rglpBitmap[10];
 
    //
    // Get the bitmaps. Blue starts from 29, Cyan from 56, Yellow from 19.
@@ -684,7 +685,7 @@ PAL_DrawNumber(
 
    for (i = 0; i < 10; i++)
    {
-      rglpBitmap[i] = PAL_SpriteGetFrame(gpSpriteUI, (UINT)x + i);
+      rglpBitmap[i] = PAL_SpriteGetFrame(gpSpriteUI, (unsigned int)x + i);
    }
 
    i = iNum;
@@ -753,7 +754,7 @@ PAL_DrawNumber(
 --*/
 size_t
 PAL_TextWidth(
-   LPCWSTR lpszItemText
+   const unsigned short* lpszItemText
 )
 {
     size_t l = wcslen(lpszItemText), j = 0, w = 0;
@@ -764,10 +765,10 @@ PAL_TextWidth(
     return w;
 }
 
-INT
+int
 PAL_MenuTextMaxWidth(
    LPCMENUITEM    rgMenuItem,
-   INT            nMenuItem
+   int            nMenuItem
 )
 /*++
   Purpose:
@@ -788,7 +789,7 @@ PAL_MenuTextMaxWidth(
 	size_t i, r = 0;
 	for (i = 0; i < nMenuItem; i++)
 	{
-		LPCWSTR itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
+		const unsigned short* itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
 		size_t w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4;
 		if (r < w)
 		{
@@ -798,10 +799,10 @@ PAL_MenuTextMaxWidth(
 	return r;
 }
 
-INT
+int
 PAL_WordMaxWidth(
-   INT            nFirstWord,
-   INT            nWordNum
+   int            nFirstWord,
+   int            nWordNum
 )
 /*++
   Purpose:
@@ -822,7 +823,7 @@ PAL_WordMaxWidth(
 	int i, r = 0;
 	for (i = 0; i < nWordNum; i++)
 	{
-		LPCWSTR itemText = PAL_GetWord(nFirstWord + i);
+		const unsigned short* itemText = PAL_GetWord(nFirstWord + i);
 		int j = 0, l = wcslen(itemText), w = 0;
 		for (j = 0; j < l; j++)
 		{
@@ -837,9 +838,9 @@ PAL_WordMaxWidth(
 	return r;
 }
 
-INT
+int
 PAL_WordWidth(
-   INT            nWordIndex
+   int            nWordIndex
 )
 /*++
   Purpose:
@@ -856,7 +857,7 @@ PAL_WordWidth(
 
 --*/
 {
-	LPCWSTR itemText = PAL_GetWord(nWordIndex);
+	const unsigned short* itemText = PAL_GetWord(nWordIndex);
 	int i, l = wcslen(itemText), w = 0;
 	for (i = 0; i < l; i++)
 	{
@@ -867,7 +868,7 @@ PAL_WordWidth(
 
 LPOBJECTDESC
 PAL_LoadObjectDesc(
-   LPCSTR         lpszFileName
+   const char*         lpszFileName
 )
 /*++
   Purpose:
@@ -887,7 +888,8 @@ PAL_LoadObjectDesc(
    FILE                      *fp;
    PAL_LARGE char             buf[512];
    char                      *p;
-   LPOBJECTDESC               lpDesc = NULL, pNew = NULL;
+   LPOBJECTDESC               lpDesc = NULL;
+   LPOBJECTDESC               pNew = NULL;
    unsigned int               i;
    CODEPAGE cp = PAL_DetectCodePage(lpszFileName);
 
@@ -917,11 +919,11 @@ PAL_LoadObjectDesc(
       }
       wlen = PAL_MultiByteToWideCharCP(cp, p, -1, NULL, 0);
 
-      pNew = UTIL_calloc(1, sizeof(OBJECTDESC));
+      pNew = malloc(sizeof(OBJECTDESC));
 
       sscanf(buf, "%x", &i);
       pNew->wObjectID = i;
-      pNew->lpDesc = (LPWSTR)UTIL_malloc(wlen * sizeof(WCHAR));
+      pNew->lpDesc = (unsigned short*)UTIL_malloc(wlen * sizeof(unsigned short));
       PAL_MultiByteToWideCharCP(cp, p, -1, pNew->lpDesc, wlen);
 
       pNew->next = lpDesc;
@@ -932,7 +934,7 @@ PAL_LoadObjectDesc(
    return lpDesc;
 }
 
-VOID
+void
 PAL_FreeObjectDesc(
    LPOBJECTDESC   lpObjectDesc
 )
@@ -962,10 +964,10 @@ PAL_FreeObjectDesc(
    }
 }
 
-LPCWSTR
+const unsigned short*
 PAL_GetObjectDesc(
    LPOBJECTDESC   lpObjectDesc,
-   WORD           wObjectID
+   unsigned short           wObjectID
 )
 /*++
   Purpose:
