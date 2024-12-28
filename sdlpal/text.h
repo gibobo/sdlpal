@@ -22,6 +22,8 @@
 #ifndef _TEXT_H
 #define _TEXT_H
 
+#include "common.h"
+
 typedef enum tagDIALOGPOSITION
 {
     kDialogUpper = 0,
@@ -48,8 +50,8 @@ extern "C"
 
     typedef struct tagTEXTLIB
     {
-        unsigned short **lpWordBuf;
-        unsigned short **lpMsgBuf;
+        wchar_t **lpWordBuf;
+        wchar_t **lpMsgBuf;
 
         int nWords;
         int nMsgs;
@@ -72,7 +74,7 @@ extern "C"
 
     extern TEXTLIB g_TextLib;
 
-    extern unsigned short *g_rcCredits[12];
+    extern wchar_t *g_rcCredits[12];
 
     int
     PAL_InitText(
@@ -82,21 +84,21 @@ extern "C"
     PAL_FreeText(
         void);
 
-    const unsigned short *
+    const wchar_t*
     PAL_GetWord(
         int iNumWord);
 
-    const unsigned short *
+    const wchar_t*
     PAL_GetMsg(
         int iNumMsg);
 
-    unsigned short *
+    wchar_t*
     PAL_UnescapeText(
-        const unsigned short *lpszText);
+        const wchar_t *lpszText);
 
     void
     PAL_DrawText(
-        const unsigned short *lpszText,
+        const wchar_t *lpszText,
         unsigned int pos,
         unsigned char bColor,
         int fShadow,
@@ -105,7 +107,7 @@ extern "C"
 
     void
     PAL_DrawTextUnescape(
-        const unsigned short *lpszText,
+        const wchar_t *lpszText,
         unsigned int pos,
         unsigned char bColor,
         int fShadow,
@@ -135,14 +137,14 @@ extern "C"
 
     int
     TEXT_DisplayText(
-        const unsigned short *lpszText,
+        const wchar_t *lpszText,
         int x,
         int y,
         int isDialog);
 
     void
     PAL_ShowDialogText(
-        const unsigned short *lpszText);
+	    const wchar_t *lpszText);
 
     void
     PAL_ClearDialog(
@@ -164,7 +166,7 @@ extern "C"
     PAL_MultiByteToWideChar(
         const char *mbs,
         int mbslength,
-        unsigned short *wcs,
+        wchar_t *wcs,
         int wcslength);
 
     int
@@ -172,7 +174,7 @@ extern "C"
         CODEPAGE cp,
         const char *mbs,
         int mbslength,
-        unsigned short *wcs,
+        wchar_t *wcs,
         int wcslength);
 
     CODEPAGE
@@ -192,9 +194,9 @@ extern "C"
 
     int
     PAL_swprintf(
-        unsigned short *buffer,
+        wchar_t *buffer,
         int count,
-        const unsigned short *format,
+        const wchar_t *format,
         ...);
 
 #ifdef __cplusplus

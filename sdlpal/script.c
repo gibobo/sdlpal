@@ -1372,7 +1372,7 @@ PAL_InterpretInstruction(
       //
       if (gpGlobals->wCollectValue > 0)
       {
-         unsigned short s[256];
+         wchar_t s[256];
 
          i = RandomLong(1, gpGlobals->wCollectValue);
          if (i > 9)
@@ -1387,8 +1387,7 @@ PAL_InterpretInstruction(
 
          g_TextLib.iDialogShadow = 5;
          PAL_StartDialogWithOffset(kDialogCenterWindow, 0, 0, FALSE, 0, -10);
-         PAL_swprintf(s, sizeof(s) / sizeof(unsigned short), L"%ls@%ls@", PAL_GetWord(42),
-                      PAL_GetWord(gpGlobals->g.lprgStore[0].rgwItems[i]));
+         PAL_swprintf(s, sizeof(s) / sizeof(wchar_t), L"%ls@%ls@", PAL_GetWord(42), PAL_GetWord(gpGlobals->g.lprgStore[0].rgwItems[i]));
          const unsigned char *pBG = PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX);
          int iBGWidth = PAL_RLEGetWidth(pBG), iBGHeight = PAL_RLEGetHeight(pBG);
          int iBG_X = (320 - iBGWidth) / 2, iBG_Y = (200 - iBGHeight) / 2;

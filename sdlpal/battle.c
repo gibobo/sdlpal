@@ -1098,8 +1098,8 @@ PAL_BattleWon(
          PAL_CreateSingleLineBox(PAL_XY(offsetX + 80, 0), propertyLength + 10, FALSE);
          PAL_CreateBox(PAL_XY(offsetX + 82, 32), 7, propertyLength + 8, 1, FALSE);
 
-         unsigned short buffer[256] = L"";
-         PAL_swprintf(buffer, sizeof(buffer) / sizeof(unsigned short), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_GetWord(STATUS_LABEL_LEVEL), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL));
+         wchar_t buffer[256] = L"";
+         PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_GetWord(STATUS_LABEL_LEVEL), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL));
          PAL_DrawText(buffer, PAL_XY(110, 10), 0, FALSE, FALSE, FALSE);
 
          for (j = 0; j < 8; j++)
@@ -1233,8 +1233,8 @@ PAL_BattleWon(
                                                                                                                                                                                                   \
       if (gpGlobals->g.PlayerRoles.statname[w] != OrigPlayerRoles.statname[w])                                                                                                                    \
       {                                                                                                                                                                                           \
-         unsigned short buffer[256] = L"";                                                                                                                                                        \
-         PAL_swprintf(buffer, sizeof(buffer) / sizeof(unsigned short), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_GetWord(label), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)); \
+         wchar_t buffer[256] = L"";                                                                                                                                                        \
+         PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_GetWord(label), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)); \
          PAL_CreateSingleLineBox(PAL_XY(offsetX + 78, 60), maxNameWidth + maxPropertyWidth + PAL_TextWidth(PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)) / 32 + 4, FALSE);                                \
          PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, FALSE, FALSE, FALSE);                                                                                                                  \
          PAL_DrawNumber(gpGlobals->g.PlayerRoles.statname[w] - OrigPlayerRoles.statname[w], 5, PAL_XY(183 + (maxNameWidth + maxPropertyWidth - 3) * 8, 74), kNumColorYellow, kNumAlignRight);     \

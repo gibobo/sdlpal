@@ -27,9 +27,7 @@
 #include "common.h"
 #include <SDL_messagebox.h>
 #include <SDL_timer.h>
-#include <io.h>
-// #include "SDL_video.h"
-// #include <errno.h>
+#include <errno.h>
 
 #define PAL_PATH_SEPARATORS "/"
 #define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')

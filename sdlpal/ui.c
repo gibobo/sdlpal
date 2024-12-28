@@ -905,7 +905,7 @@ PAL_LoadObjectDesc(
 
       sscanf(buf, "%x", &i);
       pNew->wObjectID = i;
-      pNew->lpDesc = (unsigned short *)UTIL_malloc(wlen * sizeof(unsigned short));
+      pNew->lpDesc = (wchar_t*)UTIL_malloc(wlen * sizeof(wchar_t));
       PAL_MultiByteToWideCharCP(cp, p, -1, pNew->lpDesc, wlen);
 
       pNew->next = lpDesc;

@@ -243,8 +243,8 @@ PAL_ItemSelectMenuUpdate(
    {
       if (!g_fNoDesc && gpGlobals->lpObjectDesc != NULL)
       {
-         unsigned short szDesc[512], *next;
-         const unsigned short *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, wObject);
+         wchar_t szDesc[512], *next;
+         const wchar_t *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, wObject);
 
          if (d != NULL)
          {

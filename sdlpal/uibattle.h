@@ -92,8 +92,8 @@ typedef struct tagBATTLEUI
    BATTLEUISTATE state;
    BATTLEMENUSTATE MenuState;
 
-   unsigned short szMsg[256];       // message to be shown on the screen
-   unsigned short szNextMsg[256];   // next message to be shown on the screen
+   wchar_t szMsg[256];       // message to be shown on the screen
+   wchar_t szNextMsg[256];   // next message to be shown on the screen
    unsigned int dwMsgShowTime;      // the end time of showing the message
    unsigned short wNextMsgDuration; // duration of the next message
 

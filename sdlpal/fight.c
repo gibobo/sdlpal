@@ -4609,7 +4609,7 @@ PAL_BattleStealFromEnemy(
 {
    int   iPlayerIndex = g_Battle.wMovingPlayerIndex;
    int   offset, x, y, i;
-   unsigned short s[256] = L"";
+   wchar_t s[256] = L"";
 
    g_Battle.rgPlayer[iPlayerIndex].wCurrentFrame = 10;
    offset = ((int)wTarget - iPlayerIndex) * 8;
@@ -4660,7 +4660,7 @@ PAL_BattleStealFromEnemy(
 
          if (c > 0)
          {
-            PAL_swprintf(s, sizeof(s) / sizeof(unsigned short), L"@%ls @%d @%ls@", PAL_GetWord(34), c, PAL_GetWord(10));
+            PAL_swprintf(s, sizeof(s) / sizeof(wchar_t), L"@%ls @%d @%ls@", PAL_GetWord(34), c, PAL_GetWord(10));
          }
       }
       else
@@ -4670,7 +4670,7 @@ PAL_BattleStealFromEnemy(
          //
          g_Battle.rgEnemy[wTarget].e.nStealItem--;
          PAL_AddItemToInventory(g_Battle.rgEnemy[wTarget].e.wStealItem, 1);
-         PAL_swprintf(s, sizeof(s) / sizeof(unsigned short), L"%ls@%ls@", PAL_GetWord(34), PAL_GetWord(g_Battle.rgEnemy[wTarget].e.wStealItem));
+         PAL_swprintf(s, sizeof(s) / sizeof(wchar_t), L"%ls@%ls@", PAL_GetWord(34), PAL_GetWord(g_Battle.rgEnemy[wTarget].e.wStealItem));
 	  }
 
       if (s[0] != '\0')

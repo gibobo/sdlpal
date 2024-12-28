@@ -156,13 +156,9 @@ typedef struct tagSCREENLAYOUT
 typedef struct tagCONFIGURATION
 {
 	union {
-		SCREENLAYOUT     ScreenLayout;
-		unsigned int          ScreenLayoutArray[sizeof(SCREENLAYOUT) / sizeof(unsigned int)];
+		SCREENLAYOUT ScreenLayout;
+		unsigned int ScreenLayoutArray[sizeof(SCREENLAYOUT) / sizeof(unsigned int)];
 	};
-	enum {
-		USE_8x8_FONT = 1,
-		DISABLE_SHADOW = 2,
-	}                ScreenLayoutFlag[sizeof(SCREENLAYOUT) / sizeof(unsigned int)];
 
 	/* Configurable options */
 	char            *pszGamePath;

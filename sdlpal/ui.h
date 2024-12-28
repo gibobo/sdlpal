@@ -148,7 +148,7 @@ typedef const MENUITEM *LPCMENUITEM;
 typedef struct tagOBJECTDESC
 {
     unsigned short wObjectID;
-    unsigned short *lpDesc;
+    wchar_t *lpDesc;
     struct tagOBJECTDESC *next;
 } OBJECTDESC, *LPOBJECTDESC;
 

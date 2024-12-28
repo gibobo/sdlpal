@@ -154,8 +154,8 @@ PAL_MagicSelectionMenuUpdate(
       }
       else
       {
-         unsigned short szDesc[512], *next;
-         const unsigned short *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, rgMagicItem[g_iCurrentItem].wMagic);
+         wchar_t szDesc[512], *next;
+         const wchar_t *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, rgMagicItem[g_iCurrentItem].wMagic);
 
          //
          // Draw the magic description.

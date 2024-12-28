@@ -23,6 +23,7 @@
 #define _PALUTILS_H
 
 #include <stdio.h>
+#include <SDL_surface.h>
 #include <SDL_timer.h>
 
 #define PAL_XY(x, y) (unsigned int)(((((unsigned short)(y)) << 16) & 0xFFFF0000) | (((unsigned short)(x)) & 0xFFFF))
