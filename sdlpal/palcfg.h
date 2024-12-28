@@ -25,7 +25,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "palcommon.h"
+#include "global.h"
+#include "util.h"
 
 #define     PAL_MAX_SAMPLERATE           49716
 #define     PAL_MAX_VOLUME               100
@@ -91,10 +92,10 @@ typedef enum tagPALCFG_TYPE
 
 typedef union tagConfigValue
 {
-	LPCSTR   sValue;
-	DWORD    uValue;
-	INT      iValue;
-	BOOL     bValue;
+	const char*   sValue;
+	unsigned int    uValue;
+	int      iValue;
+	int     bValue;
 } ConfigValue;
 
 typedef struct tagConfigItem
@@ -110,87 +111,87 @@ typedef struct tagConfigItem
 
 typedef struct tagSCREENLAYOUT
 {
-	DWORD          EquipImageBox;
-	DWORD          EquipRoleListBox;
-	DWORD          EquipItemName;
-	DWORD          EquipItemAmount;
-	DWORD          EquipLabels[MAX_PLAYER_EQUIPMENTS];
-	DWORD          EquipNames[MAX_PLAYER_EQUIPMENTS];
-	DWORD          EquipStatusLabels[5];
-	DWORD          EquipStatusValues[5];
+	unsigned int          EquipImageBox;
+	unsigned int          EquipRoleListBox;
+	unsigned int          EquipItemName;
+	unsigned int          EquipItemAmount;
+	unsigned int          EquipLabels[MAX_PLAYER_EQUIPMENTS];
+	unsigned int          EquipNames[MAX_PLAYER_EQUIPMENTS];
+	unsigned int          EquipStatusLabels[5];
+	unsigned int          EquipStatusValues[5];
 
-	DWORD          RoleName;
-	DWORD          RoleImage;
-	DWORD          RoleExpLabel;
-	DWORD          RoleLevelLabel;
-	DWORD          RoleHPLabel;
-	DWORD          RoleMPLabel;
-	DWORD          RoleStatusLabels[5];
-	DWORD          RoleCurrExp;
-	DWORD          RoleNextExp;
-	DWORD          RoleExpSlash;
-	DWORD          RoleLevel;
-	DWORD          RoleCurHP;
-	DWORD          RoleMaxHP;
-	DWORD          RoleHPSlash;
-	DWORD          RoleCurMP;
-	DWORD          RoleMaxMP;
-	DWORD          RoleMPSlash;
-	DWORD          RoleStatusValues[5];
-	DWORD          RoleEquipImageBoxes[MAX_PLAYER_EQUIPMENTS];
-	DWORD          RoleEquipNames[MAX_PLAYER_EQUIPMENTS];
-	DWORD          RolePoisonNames[MAX_POISONS];
+	unsigned int          RoleName;
+	unsigned int          RoleImage;
+	unsigned int          RoleExpLabel;
+	unsigned int          RoleLevelLabel;
+	unsigned int          RoleHPLabel;
+	unsigned int          RoleMPLabel;
+	unsigned int          RoleStatusLabels[5];
+	unsigned int          RoleCurrExp;
+	unsigned int          RoleNextExp;
+	unsigned int          RoleExpSlash;
+	unsigned int          RoleLevel;
+	unsigned int          RoleCurHP;
+	unsigned int          RoleMaxHP;
+	unsigned int          RoleHPSlash;
+	unsigned int          RoleCurMP;
+	unsigned int          RoleMaxMP;
+	unsigned int          RoleMPSlash;
+	unsigned int          RoleStatusValues[5];
+	unsigned int          RoleEquipImageBoxes[MAX_PLAYER_EQUIPMENTS];
+	unsigned int          RoleEquipNames[MAX_PLAYER_EQUIPMENTS];
+	unsigned int          RolePoisonNames[MAX_POISONS];
 
-	DWORD          ExtraItemDescLines;
-	DWORD          ExtraMagicDescLines;
+	unsigned int          ExtraItemDescLines;
+	unsigned int          ExtraMagicDescLines;
 
-	DWORD			 MagicMPDescLines;
-	DWORD			 MagicMPSlashPos;
-	DWORD			 MagicMPNeededPos;
-	DWORD			 MagicMPCurrentPos;
+	unsigned int			 MagicMPDescLines;
+	unsigned int			 MagicMPSlashPos;
+	unsigned int			 MagicMPNeededPos;
+	unsigned int			 MagicMPCurrentPos;
 
-	DWORD			 MagicDescMsgPos;
+	unsigned int			 MagicDescMsgPos;
 } SCREENLAYOUT;
 
 typedef struct tagCONFIGURATION
 {
 	union {
 		SCREENLAYOUT     ScreenLayout;
-		DWORD          ScreenLayoutArray[sizeof(SCREENLAYOUT) / sizeof(DWORD)];
+		unsigned int          ScreenLayoutArray[sizeof(SCREENLAYOUT) / sizeof(unsigned int)];
 	};
 	enum {
 		USE_8x8_FONT = 1,
 		DISABLE_SHADOW = 2,
-	}                ScreenLayoutFlag[sizeof(SCREENLAYOUT) / sizeof(DWORD)];
+	}                ScreenLayoutFlag[sizeof(SCREENLAYOUT) / sizeof(unsigned int)];
 
 	/* Configurable options */
 	char            *pszGamePath;
 	char            *pszSavePath;
     char            *pszShaderPath;
 	char            *pszShader;
-	DWORD            dwWordLength;
-	DWORD            dwScreenWidth;
-	DWORD            dwScreenHeight;
-    DWORD            dwTextureWidth;
-    DWORD            dwTextureHeight;
-	INT              iAudioDevice;
-	INT              iSurroundOPLOffset;
-	INT              iAudioChannels;
-	INT              iSampleRate;
-	INT              iOPLSampleRate;
-	INT              iResampleQuality;
-	INT              iMusicVolume;
-	INT              iSoundVolume;
+	unsigned int            dwWordLength;
+	unsigned int            dwScreenWidth;
+	unsigned int            dwScreenHeight;
+    unsigned int            dwTextureWidth;
+    unsigned int            dwTextureHeight;
+	int              iAudioDevice;
+	int              iSurroundOPLOffset;
+	int              iAudioChannels;
+	int              iSampleRate;
+	int              iOPLSampleRate;
+	int              iResampleQuality;
+	int              iMusicVolume;
+	int              iSoundVolume;
 	LOGLEVEL         iLogLevel;
-	WORD             wAudioBufferSize;
-	BOOL             fIsWIN95;
-	BOOL             fUseSurroundOPL;
-	BOOL             fKeepAspectRatio;
-	BOOL             fFullScreen;
-	BOOL             fEnableJoyStick;
-	BOOL             fUseCustomScreenLayout;
-	BOOL             fLaunchSetting;
-	BOOL             fEnableKeyRepeat;
+	unsigned short             wAudioBufferSize;
+	int             fIsWIN95;
+	int             fUseSurroundOPL;
+	int             fKeepAspectRatio;
+	int             fFullScreen;
+	int             fEnableJoyStick;
+	int             fUseCustomScreenLayout;
+	int             fLaunchSetting;
+	int             fEnableKeyRepeat;
 } CONFIGURATION, *LPCONFIGURATION;
 
 #ifdef __cplusplus

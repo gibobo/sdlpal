@@ -28,20 +28,20 @@
 extern "C" {
 #endif
 
-WORD
+unsigned short
 PAL_ItemSelectMenuUpdate(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_ItemSelectMenuInit(
-   WORD                      wItemFlags
+   unsigned short                      wItemFlags
 );
 
-WORD
+unsigned short
 PAL_ItemSelectMenu(
    LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
-   WORD                      wItemFlags
+   unsigned short                      wItemFlags
 );
 
 #ifdef __cplusplus

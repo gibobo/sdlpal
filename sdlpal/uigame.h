@@ -22,81 +22,78 @@
 #ifndef UIGAME_H
 #define UIGAME_H
 
-// #include "ui.h"
-#include "common.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-VOID
+void
 PAL_DrawOpeningMenuBackground(
-   VOID
+   void
 );
 
-INT
+int
 PAL_OpeningMenu(
-   VOID
+   void
 );
 
-INT
+int
 PAL_SaveSlotMenu(
-   WORD        wDefaultSlot
+   unsigned short        wDefaultSlot
 );
 
-WORD
+unsigned short
 PAL_TripleMenu(
-   WORD  wThirdWord
+   unsigned short  wThirdWord
 );
 
-BOOL
+int
 PAL_ConfirmMenu(
-   VOID
+   void
 );
 
-BOOL
+int
 PAL_SwitchMenu(
-   BOOL      fEnabled
+   int      fEnabled
 );
 
-VOID
+void
 PAL_InGameMagicMenu(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_InGameMenu(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_PlayerStatus(
-   VOID
+   void
 );
 
-WORD
+unsigned short
 PAL_ItemUseMenu(
-   WORD           wItemToUse
+   unsigned short           wItemToUse
 );
 
-VOID
+void
 PAL_BuyMenu(
-   WORD           wStoreNum
+   unsigned short           wStoreNum
 );
 
-VOID
+void
 PAL_SellMenu(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_EquipItemMenu(
-   WORD           wItem
+   unsigned short           wItem
 );
 
-VOID
+void
 PAL_QuitGame(
-   VOID
+   void
 );
 
 #ifdef __cplusplus

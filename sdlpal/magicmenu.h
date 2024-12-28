@@ -26,23 +26,23 @@
 extern "C" {
 #endif
 
-WORD
+unsigned short
 PAL_MagicSelectionMenuUpdate(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_MagicSelectionMenuInit(
-   WORD         wPlayerRole,
-   BOOL         fInBattle,
-   WORD         wDefaultMagic
+   unsigned short         wPlayerRole,
+   int         fInBattle,
+   unsigned short         wDefaultMagic
 );
 
-WORD
+unsigned short
 PAL_MagicSelectionMenu(
-   WORD         wPlayerRole,
-   BOOL         fInBattle,
-   WORD         wDefaultMagic
+   unsigned short         wPlayerRole,
+   int         fInBattle,
+   unsigned short         wDefaultMagic
 );
 
 #ifdef __cplusplus

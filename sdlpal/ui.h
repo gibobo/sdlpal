@@ -22,264 +22,249 @@
 #ifndef UI_H
 #define UI_H
 
-#include "palcommon.h"
+#include <SDL_surface.h>
+#include <SDL_timer.h>
 
-#define CHUNKNUM_SPRITEUI                  9
+#define CHUNKNUM_SPRITEUI 9
 
-#define MENUITEM_COLOR                     0x4F
-#define MENUITEM_COLOR_INACTIVE            0x18
-#define MENUITEM_COLOR_CONFIRMED           0x2C
-#define MENUITEM_COLOR_SELECTED_INACTIVE   0x1C
-#define MENUITEM_COLOR_SELECTED_FIRST      0xF9
-#define MENUITEM_COLOR_SELECTED_TOTALNUM   6
+#define MENUITEM_COLOR 0x4F
+#define MENUITEM_COLOR_INACTIVE 0x18
+#define MENUITEM_COLOR_CONFIRMED 0x2C
+#define MENUITEM_COLOR_SELECTED_INACTIVE 0x1C
+#define MENUITEM_COLOR_SELECTED_FIRST 0xF9
+#define MENUITEM_COLOR_SELECTED_TOTALNUM 6
 
-#define MENUITEM_COLOR_SELECTED                                    \
-   (MENUITEM_COLOR_SELECTED_FIRST +                                \
-      SDL_GetTicks() / (600 / MENUITEM_COLOR_SELECTED_TOTALNUM)    \
-      % MENUITEM_COLOR_SELECTED_TOTALNUM)
+#define MENUITEM_COLOR_SELECTED      \
+    (MENUITEM_COLOR_SELECTED_FIRST + \
+     SDL_GetTicks() / (600 / MENUITEM_COLOR_SELECTED_TOTALNUM) % MENUITEM_COLOR_SELECTED_TOTALNUM)
 
-#define MENUITEM_COLOR_EQUIPPEDITEM        0xC8
+#define MENUITEM_COLOR_EQUIPPEDITEM 0xC8
 
-#define DESCTEXT_COLOR                     0x3C
+#define DESCTEXT_COLOR 0x3C
 
-#define MAINMENU_BACKGROUND_FBPNUM         (gConfig.fIsWIN95 ? 2 :60)
+#define MAINMENU_BACKGROUND_FBPNUM (gConfig.fIsWIN95 ? 2 : 60)
 
-#define RIX_NUM_OPENINGMENU                4
-#define MAINMENU_LABEL_NEWGAME             7
-#define MAINMENU_LABEL_LOADGAME            8
+#define RIX_NUM_OPENINGMENU 4
+#define MAINMENU_LABEL_NEWGAME 7
+#define MAINMENU_LABEL_LOADGAME 8
 
-#define LOADMENU_LABEL_SLOT_FIRST          43
+#define LOADMENU_LABEL_SLOT_FIRST 43
 
-#define CONFIRMMENU_LABEL_NO               19
-#define CONFIRMMENU_LABEL_YES              20
+#define CONFIRMMENU_LABEL_NO 19
+#define CONFIRMMENU_LABEL_YES 20
 
-#define CASH_LABEL                         21
+#define CASH_LABEL 21
 
-#define SWITCHMENU_LABEL_DISABLE           17
-#define SWITCHMENU_LABEL_ENABLE            18
+#define SWITCHMENU_LABEL_DISABLE 17
+#define SWITCHMENU_LABEL_ENABLE 18
 
-#define GAMEMENU_LABEL_STATUS              3
-#define GAMEMENU_LABEL_MAGIC               4
-#define GAMEMENU_LABEL_INVENTORY           5
-#define GAMEMENU_LABEL_SYSTEM              6
+#define GAMEMENU_LABEL_STATUS 3
+#define GAMEMENU_LABEL_MAGIC 4
+#define GAMEMENU_LABEL_INVENTORY 5
+#define GAMEMENU_LABEL_SYSTEM 6
 
-#define SYSMENU_LABEL_SAVE                 11
-#define SYSMENU_LABEL_LOAD                 12
-#define SYSMENU_LABEL_MUSIC                13
-#define SYSMENU_LABEL_SOUND                14
-#define SYSMENU_LABEL_QUIT                 15
-#define SYSMENU_LABEL_BATTLEMODE           606
-#define SYSMENU_LABEL_LAUNCHSETTING        612
+#define SYSMENU_LABEL_SAVE 11
+#define SYSMENU_LABEL_LOAD 12
+#define SYSMENU_LABEL_MUSIC 13
+#define SYSMENU_LABEL_SOUND 14
+#define SYSMENU_LABEL_QUIT 15
+#define SYSMENU_LABEL_BATTLEMODE 606
+#define SYSMENU_LABEL_LAUNCHSETTING 612
 
-#define BATTLESPEEDMENU_LABEL_1            (SYSMENU_LABEL_BATTLEMODE + 1)
-#define BATTLESPEEDMENU_LABEL_2            (SYSMENU_LABEL_BATTLEMODE + 2)
-#define BATTLESPEEDMENU_LABEL_3            (SYSMENU_LABEL_BATTLEMODE + 3)
-#define BATTLESPEEDMENU_LABEL_4            (SYSMENU_LABEL_BATTLEMODE + 4)
-#define BATTLESPEEDMENU_LABEL_5            (SYSMENU_LABEL_BATTLEMODE + 5)
+#define BATTLESPEEDMENU_LABEL_1 (SYSMENU_LABEL_BATTLEMODE + 1)
+#define BATTLESPEEDMENU_LABEL_2 (SYSMENU_LABEL_BATTLEMODE + 2)
+#define BATTLESPEEDMENU_LABEL_3 (SYSMENU_LABEL_BATTLEMODE + 3)
+#define BATTLESPEEDMENU_LABEL_4 (SYSMENU_LABEL_BATTLEMODE + 4)
+#define BATTLESPEEDMENU_LABEL_5 (SYSMENU_LABEL_BATTLEMODE + 5)
 
-#define INVMENU_LABEL_USE                  23
-#define INVMENU_LABEL_EQUIP                22
+#define INVMENU_LABEL_USE 23
+#define INVMENU_LABEL_EQUIP 22
 
-#define STATUS_BACKGROUND_FBPNUM           0
-#define STATUS_LABEL_EXP                   2
-#define STATUS_LABEL_LEVEL                 48
-#define STATUS_LABEL_HP                    49
-#define STATUS_LABEL_MP                    50
-#define STATUS_LABEL_EXP_LAYOUT            29
-#define STATUS_LABEL_LEVEL_LAYOUT          30
-#define STATUS_LABEL_HP_LAYOUT             31
-#define STATUS_LABEL_MP_LAYOUT             32
-#define STATUS_LABEL_ATTACKPOWER           51
-#define STATUS_LABEL_MAGICPOWER            52
-#define STATUS_LABEL_RESISTANCE            53
-#define STATUS_LABEL_DEXTERITY             54
-#define STATUS_LABEL_FLEERATE              55
-#define STATUS_COLOR_EQUIPMENT             0xBE
+#define STATUS_BACKGROUND_FBPNUM 0
+#define STATUS_LABEL_EXP 2
+#define STATUS_LABEL_LEVEL 48
+#define STATUS_LABEL_HP 49
+#define STATUS_LABEL_MP 50
+#define STATUS_LABEL_EXP_LAYOUT 29
+#define STATUS_LABEL_LEVEL_LAYOUT 30
+#define STATUS_LABEL_HP_LAYOUT 31
+#define STATUS_LABEL_MP_LAYOUT 32
+#define STATUS_LABEL_ATTACKPOWER 51
+#define STATUS_LABEL_MAGICPOWER 52
+#define STATUS_LABEL_RESISTANCE 53
+#define STATUS_LABEL_DEXTERITY 54
+#define STATUS_LABEL_FLEERATE 55
+#define STATUS_COLOR_EQUIPMENT 0xBE
 
-#define EQUIP_LABEL_HEAD                   600
-#define EQUIP_LABEL_SHOULDER               601
-#define EQUIP_LABEL_BODY                   602
-#define EQUIP_LABEL_HAND                   603
-#define EQUIP_LABEL_FOOT                   604
-#define EQUIP_LABEL_NECK                   605
+#define EQUIP_LABEL_HEAD 600
+#define EQUIP_LABEL_SHOULDER 601
+#define EQUIP_LABEL_BODY 602
+#define EQUIP_LABEL_HAND 603
+#define EQUIP_LABEL_FOOT 604
+#define EQUIP_LABEL_NECK 605
 
-#define BUYMENU_LABEL_CURRENT              35
-#define SELLMENU_LABEL_PRICE               25
+#define BUYMENU_LABEL_CURRENT 35
+#define SELLMENU_LABEL_PRICE 25
 
-#define SPRITENUM_SLASH                    39
-#define SPRITENUM_ITEMBOX                  70
-#define SPRITENUM_CURSOR_YELLOW_UP         66
-#define SPRITENUM_CURSOR_UP                67
-#define SPRITENUM_CURSOR_YELLOW            68
-#define SPRITENUM_CURSOR                   69
-#define SPRITENUM_PLAYERINFOBOX            18
-#define SPRITENUM_PLAYERFACE_FIRST         48
+#define SPRITENUM_SLASH 39
+#define SPRITENUM_ITEMBOX 70
+#define SPRITENUM_CURSOR_YELLOW_UP 66
+#define SPRITENUM_CURSOR_UP 67
+#define SPRITENUM_CURSOR_YELLOW 68
+#define SPRITENUM_CURSOR 69
+#define SPRITENUM_PLAYERINFOBOX 18
+#define SPRITENUM_PLAYERFACE_FIRST 48
 
-#define EQUIPMENU_BACKGROUND_FBPNUM        1
+#define EQUIPMENU_BACKGROUND_FBPNUM 1
 
-#define ITEMUSEMENU_COLOR_STATLABEL        0xBB
+#define ITEMUSEMENU_COLOR_STATLABEL 0xBB
 
-#define BATTLEWIN_GETEXP_LABEL             30
-#define BATTLEWIN_BEATENEMY_LABEL          9
-#define BATTLEWIN_DOLLAR_LABEL             10
-#define BATTLEWIN_LEVELUP_LABEL            32
-#define BATTLEWIN_ADDMAGIC_LABEL           33
-#define BATTLEWIN_LEVELUP_LABEL_COLOR      0xBB
-#define SPRITENUM_ARROW                    47
+#define BATTLEWIN_GETEXP_LABEL 30
+#define BATTLEWIN_BEATENEMY_LABEL 9
+#define BATTLEWIN_DOLLAR_LABEL 10
+#define BATTLEWIN_LEVELUP_LABEL 32
+#define BATTLEWIN_ADDMAGIC_LABEL 33
+#define BATTLEWIN_LEVELUP_LABEL_COLOR 0xBB
+#define SPRITENUM_ARROW 47
 
-#define BATTLE_LABEL_ESCAPEFAIL            31
+#define BATTLE_LABEL_ESCAPEFAIL 31
 
 typedef struct tagBOX
 {
-   DWORD          pos;
-   WORD           wWidth, wHeight;
-   SDL_Surface   *lpSavedArea;
+    unsigned int pos;
+    unsigned short wWidth, wHeight;
+    SDL_Surface *lpSavedArea;
 } BOX, *LPBOX;
 
 typedef struct tagMENUITEM
 {
-   WORD          wValue;
-   WORD          wNumWord;
-   BOOL          fEnabled;
-   DWORD         pos;
+    unsigned short wValue;
+    unsigned short wNumWord;
+    int fEnabled;
+    unsigned int pos;
 } MENUITEM, *LPMENUITEM;
-typedef const MENUITEM* LPCMENUITEM;
+typedef const MENUITEM *LPCMENUITEM;
 
 typedef struct tagOBJECTDESC
 {
-   WORD                        wObjectID;
-   LPWSTR                      lpDesc;
-   struct tagOBJECTDESC       *next;
+    unsigned short wObjectID;
+    unsigned short *lpDesc;
+    struct tagOBJECTDESC *next;
 } OBJECTDESC, *LPOBJECTDESC;
 
-typedef VOID (*LPITEMCHANGED_CALLBACK)(WORD);
+typedef void (*LPITEMCHANGED_CALLBACK)(unsigned short);
 
-#define MENUITEM_VALUE_CANCELLED      0xFFFF
+#define MENUITEM_VALUE_CANCELLED 0xFFFF
 
 typedef enum tagNUMCOLOR
 {
-   kNumColorYellow,
-   kNumColorBlue,
-   kNumColorCyan
+    kNumColorYellow,
+    kNumColorBlue,
+    kNumColorCyan
 } NUMCOLOR;
 
 typedef enum tagNUMALIGN
 {
-   kNumAlignLeft,
-   kNumAlignMid,
-   kNumAlignRight
+    kNumAlignLeft,
+    kNumAlignMid,
+    kNumAlignRight
 } NUMALIGN;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-INT
-PAL_InitUI(
-   VOID
-);
+    int
+    PAL_InitUI(
+        void);
 
-VOID
-PAL_FreeUI(
-   VOID
-);
+    void
+    PAL_FreeUI(
+        void);
 
-LPBOX
-PAL_CreateBox(
-   DWORD          pos,
-   INT            nRows,
-   INT            nColumns,
-   INT            iStyle,
-   BOOL           fSaveScreen
-);
-    
-LPBOX
-PAL_CreateBoxWithShadow(
-   DWORD          pos,
-   INT            nRows,
-   INT            nColumns,
-   INT            iStyle,
-   BOOL           fSaveScreen,
-   INT            nShadowOffset
-);
+    LPBOX
+    PAL_CreateBox(
+        unsigned int pos,
+        int nRows,
+        int nColumns,
+        int iStyle,
+        int fSaveScreen);
 
-LPBOX
-PAL_CreateSingleLineBox(
-   DWORD          pos,
-   INT            nLen,
-   BOOL           fSaveScreen
-);
-    
-LPBOX
-PAL_CreateSingleLineBoxWithShadow(
-   DWORD          pos,
-   INT            nLen,
-   BOOL           fSaveScreen,
-   INT            nShadowOffset
-);
-    
-VOID
-PAL_DeleteBox(
-   LPBOX          lpBox
-);
+    LPBOX
+    PAL_CreateBoxWithShadow(
+        unsigned int pos,
+        int nRows,
+        int nColumns,
+        int iStyle,
+        int fSaveScreen,
+        int nShadowOffset);
 
-WORD
-PAL_ReadMenu(
-   LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
-   LPCMENUITEM               rgMenuItem,
-   INT                       nMenuItem,
-   WORD                      wDefaultItem,
-   BYTE                      bLabelColor
-);
+    LPBOX
+    PAL_CreateSingleLineBox(
+        unsigned int pos,
+        int nLen,
+        int fSaveScreen);
 
-VOID
-PAL_DrawNumber(
-   UINT            iNum,
-   UINT            nLength,
-   DWORD           pos,
-   NUMCOLOR        color,
-   NUMALIGN        align
-);
-    
-size_t
-PAL_TextWidth(
-   LPCWSTR        lpszItemText
-);
+    LPBOX
+    PAL_CreateSingleLineBoxWithShadow(
+        unsigned int pos,
+        int nLen,
+        int fSaveScreen,
+        int nShadowOffset);
 
-INT
-PAL_MenuTextMaxWidth(
-   LPCMENUITEM    rgMenuItem,
-   INT            nMenuItem
-);
+    void
+    PAL_DeleteBox(
+        LPBOX lpBox);
 
-INT
-PAL_WordMaxWidth(
-   INT            nFirstWord,
-   INT            nWordNum
-);
+    unsigned short
+    PAL_ReadMenu(
+        LPITEMCHANGED_CALLBACK lpfnMenuItemChanged,
+        LPCMENUITEM rgMenuItem,
+        int nMenuItem,
+        unsigned short wDefaultItem,
+        unsigned char bLabelColor);
 
-INT
-PAL_WordWidth(
-   INT            nWordIndex
-);
+    void
+    PAL_DrawNumber(
+        unsigned int iNum,
+        unsigned int nLength,
+        unsigned int pos,
+        NUMCOLOR color,
+        NUMALIGN align);
 
-LPOBJECTDESC
-PAL_LoadObjectDesc(
-   LPCSTR          lpszFileName
-);
+    size_t
+    PAL_TextWidth(
+        const unsigned short *lpszItemText);
 
-VOID
-PAL_FreeObjectDesc(
-   LPOBJECTDESC    lpObjectDesc
-);
+    int
+    PAL_MenuTextMaxWidth(
+        LPCMENUITEM rgMenuItem,
+        int nMenuItem);
 
-LPCWSTR
-PAL_GetObjectDesc(
-   LPOBJECTDESC   lpObjectDesc,
-   WORD           wObjectID
-);
+    int
+    PAL_WordMaxWidth(
+        int nFirstWord,
+        int nWordNum);
 
-extern LPSPRITE gpSpriteUI;
+    int
+    PAL_WordWidth(
+        int nWordIndex);
+
+    LPOBJECTDESC
+    PAL_LoadObjectDesc(
+        const char *lpszFileName);
+
+    void
+    PAL_FreeObjectDesc(
+        LPOBJECTDESC lpObjectDesc);
+
+    const unsigned short *
+    PAL_GetObjectDesc(
+        LPOBJECTDESC lpObjectDesc,
+        unsigned short wObjectID);
+
+    extern unsigned char *gpSpriteUI;
 
 #ifdef __cplusplus
 }

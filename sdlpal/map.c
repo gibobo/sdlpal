@@ -19,15 +19,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "palcommon.h"
 #include "map.h"
+#include "palcommon.h"
 
 LPPALMAP
 PAL_LoadMap(
-   INT               iMapNum,
-   FILE             *fpMapMKF,
-   FILE             *fpGopMKF
-)
+    int iMapNum,
+    FILE *fpMapMKF,
+    FILE *fpGopMKF)
 /*++
   Purpose:
 
@@ -50,16 +49,16 @@ PAL_LoadMap(
 
 --*/
 {
-   LPBYTE                     buf;
-   INT                        size;
-   LPPALMAP                   map;
+   unsigned char *buf;
+   int size;
+   LPPALMAP map;
 
    //
    // Check for invalid map number.
    //
    if (iMapNum >= PAL_MKFGetChunkCount(fpMapMKF) ||
-      iMapNum >= PAL_MKFGetChunkCount(fpGopMKF) ||
-      iMapNum <= 0)
+       iMapNum >= PAL_MKFGetChunkCount(fpGopMKF) ||
+       iMapNum <= 0)
    {
       return NULL;
    }
@@ -72,7 +71,7 @@ PAL_LoadMap(
    //
    // Allocate a temporary buffer for the compressed data.
    //
-   buf = (LPBYTE)malloc(size);
+   buf = (unsigned char *)malloc(size);
    if (buf == NULL)
    {
       return NULL;
@@ -100,7 +99,7 @@ PAL_LoadMap(
    //
    // Decompress the tile data.
    //
-   if (Decompress(buf, (LPBYTE)(map->Tiles), sizeof(map->Tiles)) < 0)
+   if (Decompress(buf, (unsigned char *)(map->Tiles), sizeof(map->Tiles)) < 0)
    {
       free(map);
       free(buf);
@@ -121,7 +120,7 @@ PAL_LoadMap(
       free(map);
       return NULL;
    }
-   map->pTileSprite = (LPSPRITE)malloc(size);
+   map->pTileSprite = (unsigned char *)malloc(size);
    if (map->pTileSprite == NULL)
    {
       free(map);
@@ -141,10 +140,8 @@ PAL_LoadMap(
    return map;
 }
 
-VOID
-PAL_FreeMap(
-   LPPALMAP          lpMap
-)
+void PAL_FreeMap(
+    LPPALMAP lpMap)
 /*++
   Purpose:
 
@@ -182,14 +179,13 @@ PAL_FreeMap(
    free(lpMap);
 }
 
-LPCBITMAPRLE
+const unsigned char *
 PAL_MapGetTileBitmap(
-   BYTE       x,
-   BYTE       y,
-   BYTE       h,
-   BYTE       ucLayer,
-   LPCPALMAP  lpMap
-)
+    unsigned char x,
+    unsigned char y,
+    unsigned char h,
+    unsigned char ucLayer,
+    LPCPALMAP lpMap)
 /*++
   Purpose:
 
@@ -214,7 +210,7 @@ PAL_MapGetTileBitmap(
 
 --*/
 {
-   DWORD d;
+   unsigned int d;
 
    //
    // Check for invalid parameters.
@@ -246,13 +242,11 @@ PAL_MapGetTileBitmap(
    }
 }
 
-BOOL
-PAL_MapTileIsBlocked(
-   BYTE       x,
-   BYTE       y,
-   BYTE       h,
-   LPCPALMAP  lpMap
-)
+int PAL_MapTileIsBlocked(
+    unsigned char x,
+    unsigned char y,
+    unsigned char h,
+    LPCPALMAP lpMap)
 /*++
   Purpose:
 
@@ -280,20 +274,19 @@ PAL_MapTileIsBlocked(
    //
    if (x >= 64 || y >= 128 || h > 1 || lpMap == NULL)
    {
-      return TRUE;
+      return 1;
    }
 
    return (lpMap->Tiles[y][x][h] & 0x2000) >> 13;
 }
 
-BYTE
+unsigned char
 PAL_MapGetTileHeight(
-   BYTE       x,
-   BYTE       y,
-   BYTE       h,
-   BYTE       ucLayer,
-   LPCPALMAP  lpMap
-)
+    unsigned char x,
+    unsigned char y,
+    unsigned char h,
+    unsigned char ucLayer,
+    LPCPALMAP lpMap)
 /*++
   Purpose:
 
@@ -319,7 +312,7 @@ PAL_MapGetTileHeight(
 
 --*/
 {
-   DWORD      d;
+   unsigned int d;
 
    //
    // Check for invalid parameters.
@@ -337,16 +330,14 @@ PAL_MapGetTileHeight(
    }
 
    d >>= 8;
-   return (BYTE)(d & 0xf);
+   return (unsigned char)(d & 0xf);
 }
 
-VOID
-PAL_MapBlitToSurface(
-   LPCPALMAP             lpMap,
-   SDL_Surface          *lpSurface,
-   const SDL_Rect       *lpSrcRect,
-   BYTE                  ucLayer
-)
+void PAL_MapBlitToSurface(
+    LPCPALMAP lpMap,
+    SDL_Surface *lpSurface,
+    const SDL_Rect *lpSrcRect,
+    unsigned char ucLayer)
 /*++
   Purpose:
 
@@ -368,8 +359,8 @@ PAL_MapBlitToSurface(
 
 --*/
 {
-   int              sx, sy, dx, dy, x, y, h, xPos, yPos;
-   LPCBITMAPRLE     lpBitmap = NULL;
+   int sx, sy, dx, dy, x, y, h, xPos, yPos;
+   const unsigned char *lpBitmap = NULL;
 
    //
    // Convert the coordinate
@@ -390,7 +381,7 @@ PAL_MapBlitToSurface(
          xPos = sx * 32 + h * 16 - 16 - lpSrcRect->x;
          for (x = sx; x < dx; x++, xPos += 32)
          {
-            lpBitmap = PAL_MapGetTileBitmap((BYTE)x, (BYTE)y, (BYTE)h, ucLayer, lpMap);
+            lpBitmap = PAL_MapGetTileBitmap((unsigned char)x, (unsigned char)y, (unsigned char)h, ucLayer, lpMap);
             if (lpBitmap == NULL)
             {
                if (ucLayer)

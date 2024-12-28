@@ -22,62 +22,54 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
-#include "common.h"
 #include <SDL_pixels.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-SDL_Color *
-PAL_GetPalette(
-   INT         iPaletteNum,
-   BOOL        fNight
-);
+    SDL_Color *
+    PAL_GetPalette(
+        int iPaletteNum,
+        int fNight);
 
-VOID
-PAL_SetPalette(
-   INT         iPaletteNum,
-   BOOL        fNight
-);
+    void
+    PAL_SetPalette(
+        int iPaletteNum,
+        int fNight);
 
-VOID
-PAL_FadeOut(
-   INT         iDelay
-);
+    void
+    PAL_FadeOut(
+        int iDelay);
 
-VOID
-PAL_FadeIn(
-   INT         iPaletteNum,
-   BOOL        fNight,
-   INT         iDelay
-);
+    void
+    PAL_FadeIn(
+        int iPaletteNum,
+        int fNight,
+        int iDelay);
 
-VOID
-PAL_SceneFade(
-   INT         iPaletteNum,
-   BOOL        fNight,
-   INT         iStep
-);
+    void
+    PAL_SceneFade(
+        int iPaletteNum,
+        int fNight,
+        int iStep);
 
-VOID
-PAL_PaletteFade(
-   INT         iPaletteNum,
-   BOOL        fNight,
-   BOOL        fUpdateScene
-);
+    void
+    PAL_PaletteFade(
+        int iPaletteNum,
+        int fNight,
+        int fUpdateScene);
 
-VOID
-PAL_ColorFade(
-   INT        iDelay,
-   BYTE       bColor,
-   BOOL       fFrom
-);
+    void
+    PAL_ColorFade(
+        int iDelay,
+        unsigned char bColor,
+        int fFrom);
 
-VOID
-PAL_FadeToRed(
-   VOID
-);
+    void
+    PAL_FadeToRed(
+        void);
 
 #ifdef __cplusplus
 }

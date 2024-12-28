@@ -30,13 +30,13 @@
 #include "scene.h"
 #include "util.h"
 #include "video.h"
+#include "common.h"
+#include <SDL_timer.h>
 
-static WORD g_wCurEffectSprite = 0;
+static unsigned short g_wCurEffectSprite = 0;
 
-VOID
-PAL_EndingSetEffectSprite(
-   WORD         wSpriteNum
-)
+void PAL_EndingSetEffectSprite(
+    unsigned short wSpriteNum)
 /*++
   Purpose:
 
@@ -55,11 +55,9 @@ PAL_EndingSetEffectSprite(
    g_wCurEffectSprite = wSpriteNum;
 }
 
-VOID
-PAL_ShowFBP(
-   WORD         wChunkNum,
-   WORD         wFade
-)
+void PAL_ShowFBP(
+    unsigned short wChunkNum,
+    unsigned short wFade)
 /*++
   Purpose:
 
@@ -77,11 +75,11 @@ PAL_ShowFBP(
 
 --*/
 {
-   PAL_LARGE BYTE            buf[320 * 200];
-   PAL_LARGE BYTE            bufSprite[320 * 200];
-   const int                 rgIndex[6] = {0, 3, 1, 5, 2, 4};
-   int                       i, j, k;
-   BYTE                      a, b;
+   PAL_LARGE unsigned char buf[320 * 200];
+   PAL_LARGE unsigned char bufSprite[320 * 200];
+   const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
+   int i, j, k;
+   unsigned char a, b;
 
    if (PAL_MKFDecompressChunk(buf, 320 * 200, wChunkNum, gpGlobals->f.fpFBP) <= 0)
    {
@@ -113,8 +111,8 @@ PAL_ShowFBP(
             //
             for (k = rgIndex[j]; k < gpScreen->pitch * gpScreen->h; k += 6)
             {
-               a = ((LPBYTE)(p->pixels))[k];
-               b = ((LPBYTE)(gpScreenBak->pixels))[k];
+               a = ((unsigned char *)(p->pixels))[k];
+               b = ((unsigned char *)(gpScreenBak->pixels))[k];
 
                if (i > 0)
                {
@@ -128,16 +126,16 @@ PAL_ShowFBP(
                   }
                }
 
-               ((LPBYTE)(gpScreenBak->pixels))[k] = ((a & 0xF0) | (b & 0x0F));
+               ((unsigned char *)(gpScreenBak->pixels))[k] = ((a & 0xF0) | (b & 0x0F));
             }
 
-			VIDEO_RestoreScreen(gpScreen);
+            VIDEO_RestoreScreen(gpScreen);
 
             if (g_wCurEffectSprite != 0)
             {
                int f = SDL_GetTicks() / 150;
                PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
-                  gpScreen, PAL_XY(0, 0));
+                                    gpScreen, PAL_XY(0, 0));
             }
 
             VIDEO_UpdateScreen(NULL);
@@ -145,7 +143,7 @@ PAL_ShowFBP(
          }
       }
 
-	  VIDEO_FreeSurface(p);
+      VIDEO_FreeSurface(p);
    }
 
    //
@@ -159,12 +157,10 @@ PAL_ShowFBP(
    VIDEO_UpdateScreen(NULL);
 }
 
-VOID
-PAL_ScrollFBP(
-   WORD         wChunkNum,
-   WORD         wScrollSpeed,
-   BOOL         fScrollDown
-)
+void PAL_ScrollFBP(
+    unsigned short wChunkNum,
+    unsigned short wScrollSpeed,
+    int fScrollDown)
 /*++
   Purpose:
 
@@ -184,11 +180,11 @@ PAL_ScrollFBP(
 
 --*/
 {
-   SDL_Surface          *p;
-   PAL_LARGE BYTE        buf[320 * 200];
-   PAL_LARGE BYTE        bufSprite[320 * 200];
-   int                   i, l;
-   SDL_Rect              rect, dstrect;
+   SDL_Surface *p;
+   PAL_LARGE unsigned char buf[320 * 200];
+   PAL_LARGE unsigned char bufSprite[320 * 200];
+   int i, l;
+   SDL_Rect rect, dstrect;
 
    if (PAL_MKFDecompressChunk(buf, 320 * 200, wChunkNum, gpGlobals->f.fpFBP) <= 0)
    {
@@ -260,7 +256,7 @@ PAL_ScrollFBP(
          dstrect.h = i;
       }
 
-	  VIDEO_CopySurface(p, &rect, gpScreen, &dstrect);
+      VIDEO_CopySurface(p, &rect, gpScreen, &dstrect);
 
       PAL_ApplyWave(gpScreen);
 
@@ -268,7 +264,7 @@ PAL_ScrollFBP(
       {
          int f = SDL_GetTicks() / 150;
          PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
-            gpScreen, PAL_XY(0, 0));
+                              gpScreen, PAL_XY(0, 0));
       }
 
       VIDEO_UpdateScreen(NULL);
@@ -288,10 +284,8 @@ PAL_ScrollFBP(
    VIDEO_UpdateScreen(NULL);
 }
 
-VOID
-PAL_EndingAnimation(
-   VOID
-)
+void PAL_EndingAnimation(
+    void)
 /*++
   Purpose:
 
@@ -307,17 +301,17 @@ PAL_EndingAnimation(
 
 --*/
 {
-   LPBYTE            buf;
-   LPBYTE            bufGirl;
-   SDL_Surface      *pUpper;
-   SDL_Surface      *pLower;
-   SDL_Rect          srcrect, dstrect;
+   unsigned char *buf;
+   unsigned char *bufGirl;
+   SDL_Surface *pUpper;
+   SDL_Surface *pLower;
+   SDL_Rect srcrect, dstrect;
 
-   int               yPosGirl = 180;
-   int               i;
+   int yPosGirl = 180;
+   int i;
 
-   buf = (LPBYTE)UTIL_calloc(1, 64000);
-   bufGirl = (LPBYTE)UTIL_calloc(1, 6000);
+   buf = (unsigned char *)UTIL_calloc(1, 64000);
+   bufGirl = (unsigned char *)UTIL_calloc(1, 6000);
 
    pUpper = VIDEO_CreateCompatibleSurface(gpScreen);
    pLower = VIDEO_CreateCompatibleSurface(gpScreen);
@@ -349,7 +343,7 @@ PAL_EndingAnimation(
       dstrect.y = i / 2;
       dstrect.h = 200 - i / 2;
 
-	  VIDEO_CopySurface(pLower, &srcrect, gpScreen, &dstrect);
+      VIDEO_CopySurface(pLower, &srcrect, gpScreen, &dstrect);
 
       srcrect.y = 200 - i / 2;
       srcrect.h = i / 2;
@@ -357,7 +351,7 @@ PAL_EndingAnimation(
       dstrect.y = 0;
       dstrect.h = i / 2;
 
-	  VIDEO_CopySurface(pUpper, &srcrect, gpScreen, &dstrect);
+      VIDEO_CopySurface(pUpper, &srcrect, gpScreen, &dstrect);
 
       PAL_ApplyWave(gpScreen);
 
@@ -365,7 +359,7 @@ PAL_EndingAnimation(
       // Draw the beast
       //
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(buf, 0), gpScreen, PAL_XY(0, -400 + i));
-	  PAL_RLEBlitToSurface(PAL_SpriteGetFrame(buf, 1), gpScreen, PAL_XY(0, -200 + i));
+      PAL_RLEBlitToSurface(PAL_SpriteGetFrame(buf, 1), gpScreen, PAL_XY(0, -200 + i));
       //
       // Draw the girl
       //
@@ -376,7 +370,7 @@ PAL_EndingAnimation(
       }
 
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (SDL_GetTicks() / 50) % 4),
-         gpScreen, PAL_XY(220, yPosGirl));
+                           gpScreen, PAL_XY(220, yPosGirl));
 
       //
       // Update the screen
@@ -402,13 +396,11 @@ PAL_EndingAnimation(
    free(bufGirl);
 }
 
-VOID
-PAL_EndingScreen(
-   VOID
-)
+void PAL_EndingScreen(
+    void)
 /*++
  Purpose:
- 
+
    Show the ending screen for Win95 version.
 
  Parameters:
@@ -421,87 +413,87 @@ PAL_EndingScreen(
 
 --*/
 {
-    //
-    // Use AVI & WIN95's music if we can
-	// Otherwise, simulate the ending of DOS version
-	//
-	{
+   //
+   // Use AVI & WIN95's music if we can
+   // Otherwise, simulate the ending of DOS version
+   //
+   {
       AUDIO_PlayMusic(-1, FALSE, 0);
-		AUDIO_PlayMusic(0x1a, TRUE, 0);
-		PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 110, 150, 7);
-		PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 151, -1, 9);
+      AUDIO_PlayMusic(0x1a, TRUE, 0);
+      PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 110, 150, 7);
+      PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 151, -1, 9);
 
-		PAL_FadeOut(2);
-
-      AUDIO_PlayMusic(-1, FALSE, 0);
-		AUDIO_PlayMusic(0x19, TRUE, 0);
-
-		PAL_ShowFBP(75, 0);
-		PAL_FadeIn(5, FALSE, 1);
-		PAL_ScrollFBP(74, 0xf, TRUE);
-
-		PAL_FadeOut(1);
-
-		SDL_FillRect(gpScreen, NULL, 0);
-		gpGlobals->wNumPalette = 4;
-		gpGlobals->fNeedToFadeIn = TRUE;
-		PAL_EndingAnimation();
+      PAL_FadeOut(2);
 
       AUDIO_PlayMusic(-1, FALSE, 0);
-		AUDIO_PlayMusic(0, FALSE, 2);
-		PAL_ColorFade(7, 15, FALSE);
+      AUDIO_PlayMusic(0x19, TRUE, 0);
+
+      PAL_ShowFBP(75, 0);
+      PAL_FadeIn(5, FALSE, 1);
+      PAL_ScrollFBP(74, 0xf, TRUE);
+
+      PAL_FadeOut(1);
+
+      SDL_FillRect(gpScreen, NULL, 0);
+      gpGlobals->wNumPalette = 4;
+      gpGlobals->fNeedToFadeIn = TRUE;
+      PAL_EndingAnimation();
+
+      AUDIO_PlayMusic(-1, FALSE, 0);
+      AUDIO_PlayMusic(0, FALSE, 2);
+      PAL_ColorFade(7, 15, FALSE);
 
       AUDIO_PlayMusic(-1, FALSE, 0);
       AUDIO_PlayMusic(0x11, TRUE, 0);
 
-		SDL_FillRect(gpScreen, NULL, 0);
-		PAL_SetPalette(0, FALSE);
-		PAL_RNGPlay(0xb, 0, -1, 7);
+      SDL_FillRect(gpScreen, NULL, 0);
+      PAL_SetPalette(0, FALSE);
+      PAL_RNGPlay(0xb, 0, -1, 7);
 
-		PAL_FadeOut(2);
+      PAL_FadeOut(2);
 
-		SDL_FillRect(gpScreen, NULL, 0);
-		gpGlobals->wNumPalette = 8;
-		gpGlobals->fNeedToFadeIn = TRUE;
-		PAL_RNGPlay(10, 0, -1, 6);
+      SDL_FillRect(gpScreen, NULL, 0);
+      gpGlobals->wNumPalette = 8;
+      gpGlobals->fNeedToFadeIn = TRUE;
+      PAL_RNGPlay(10, 0, -1, 6);
 
-		PAL_EndingSetEffectSprite(0);
-		PAL_ShowFBP(77, 10);
+      PAL_EndingSetEffectSprite(0);
+      PAL_ShowFBP(77, 10);
 
-		VIDEO_BackupScreen(gpScreen);
+      VIDEO_BackupScreen(gpScreen);
 
-		PAL_EndingSetEffectSprite(0x27b);
-		PAL_ShowFBP(76, 7);
+      PAL_EndingSetEffectSprite(0x27b);
+      PAL_ShowFBP(76, 7);
 
-		PAL_SetPalette(5, FALSE);
-		PAL_ShowFBP(73, 7);
-		PAL_ScrollFBP(72, 0xf, TRUE);
+      PAL_SetPalette(5, FALSE);
+      PAL_ShowFBP(73, 7);
+      PAL_ScrollFBP(72, 0xf, TRUE);
 
-		PAL_ShowFBP(71, 7);
-		PAL_ShowFBP(68, 7);
+      PAL_ShowFBP(71, 7);
+      PAL_ShowFBP(68, 7);
 
-		PAL_EndingSetEffectSprite(0);
-		PAL_ShowFBP(68, 6);
+      PAL_EndingSetEffectSprite(0);
+      PAL_ShowFBP(68, 6);
 
-		PAL_WaitForKey(0);
-		AUDIO_PlayMusic(0, FALSE, 1);
-		UTIL_Delay(500);
-	}
+      PAL_WaitForKey(0);
+      AUDIO_PlayMusic(0, FALSE, 1);
+      UTIL_Delay(500);
+   }
 
-	{
+   {
       AUDIO_PlayMusic(-1, FALSE, 0);
       AUDIO_PlayMusic(9, TRUE, 0);
-		PAL_ScrollFBP(67, 0xf, TRUE);
-		PAL_ScrollFBP(66, 0xf, TRUE);
-		PAL_ScrollFBP(65, 0xf, TRUE);
-		PAL_ScrollFBP(64, 0xf, TRUE);
-		PAL_ScrollFBP(63, 0xf, TRUE);
-		PAL_ScrollFBP(62, 0xf, TRUE);
-		PAL_ScrollFBP(61, 0xf, TRUE);
-		PAL_ScrollFBP(60, 0xf, TRUE);
-		PAL_ScrollFBP(59, 0xf, TRUE);
+      PAL_ScrollFBP(67, 0xf, TRUE);
+      PAL_ScrollFBP(66, 0xf, TRUE);
+      PAL_ScrollFBP(65, 0xf, TRUE);
+      PAL_ScrollFBP(64, 0xf, TRUE);
+      PAL_ScrollFBP(63, 0xf, TRUE);
+      PAL_ScrollFBP(62, 0xf, TRUE);
+      PAL_ScrollFBP(61, 0xf, TRUE);
+      PAL_ScrollFBP(60, 0xf, TRUE);
+      PAL_ScrollFBP(59, 0xf, TRUE);
 
-		AUDIO_PlayMusic(0, FALSE, 6);
-		PAL_FadeOut(3);
-	}
+      AUDIO_PlayMusic(0, FALSE, 6);
+      PAL_FadeOut(3);
+   }
 }

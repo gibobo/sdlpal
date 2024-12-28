@@ -22,11 +22,10 @@
 #include "audio.h"
 #include "global.h"
 #include "palcfg.h"
-#include "palcommon.h"
 #include "players.h"
 #include "resampler.h"
 #include "util.h"
-#include <math.h>
+#include "common.h"
 
 /* WASAPI need fewer samples for less gapping */
 #ifndef PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI
@@ -42,11 +41,11 @@ typedef struct tagAUDIODEVICE
    AUDIOPLAYER              *pSoundPlayer;
    void                     *pSoundBuffer;	/* The output buffer for sound */
    SDL_AudioDeviceID         id;
-   INT                       iMusicVolume;	/* The BGM volume ranged in [0, 128] for better performance */
-   INT                       iSoundVolume;	/* The sound effect volume ranged in [0, 128] for better performance */
-   BOOL                      fMusicEnabled; /* Is BGM enabled? */
-   BOOL                      fSoundEnabled; /* Is sound effect enabled? */
-   BOOL                      fOpened;       /* Is the audio device opened? */
+   int                       iMusicVolume;	/* The BGM volume ranged in [0, 128] for better performance */
+   int                       iSoundVolume;	/* The sound effect volume ranged in [0, 128] for better performance */
+   int                      fMusicEnabled; /* Is BGM enabled? */
+   int                      fSoundEnabled; /* Is sound effect enabled? */
+   int                      fOpened;       /* Is the audio device opened? */
 } AUDIODEVICE;
 
 static AUDIODEVICE gAudioDevice;
@@ -94,11 +93,11 @@ AUDIO_AdjustVolume(
 	}
 }
 
-static VOID SDLCALL
+static void SDLCALL
 AUDIO_FillBuffer(
-   LPVOID          udata,
-   LPBYTE          stream,
-   INT             len
+   void            *udata,
+   unsigned char *          stream,
+   int             len
 )
 /*++
   Purpose:
@@ -158,9 +157,9 @@ AUDIO_FillBuffer(
    }
 }
 
-INT
+int
 AUDIO_OpenDevice(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -251,7 +250,7 @@ AUDIO_OpenDevice(
    //
    // Initialize the music subsystem.
    //
-   gAudioDevice.pMusPlayer = RIX_Init(UTIL_GetFullPathName(PAL_BUFFER_SIZE_ARGS(0), gConfig.pszGamePath, "mus.mkf"));
+   gAudioDevice.pMusPlayer = RIX_Init(UTIL_GetFullPathName(UTIL_GlobalBuffer(0), PAL_GLOBAL_BUFFER_SIZE, gConfig.pszGamePath, "mus.mkf"));
 
    //
    // Let the callback function run so that musics will be played.
@@ -261,9 +260,9 @@ AUDIO_OpenDevice(
    return 0;
 }
 
-VOID
+void
 AUDIO_CloseDevice(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -305,16 +304,16 @@ AUDIO_CloseDevice(
 
 SDL_AudioSpec*
 AUDIO_GetDeviceSpec(
-	VOID
+	void
 )
 {
 	return &gAudioDevice.spec;
 }
 
-static INT
+static int
 AUDIO_ChangeVolumeByValue(
-   INT   *iVolume,
-   INT    iValue
+   int   *iVolume,
+   int    iValue
 )
 {
    *iVolume += iValue;
@@ -325,9 +324,9 @@ AUDIO_ChangeVolumeByValue(
    return *iVolume;
 }
 
-VOID
+void
 AUDIO_IncreaseVolume(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -350,9 +349,9 @@ AUDIO_IncreaseVolume(
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
 }
 
-VOID
+void
 AUDIO_DecreaseVolume(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -375,9 +374,9 @@ AUDIO_DecreaseVolume(
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
 }
 
-VOID
+void
 AUDIO_PlaySound(
-   INT    iSoundNum
+   int    iSoundNum
 )
 /*++
   Purpose:
@@ -404,11 +403,11 @@ AUDIO_PlaySound(
    }
 }
 
-VOID
+void
 AUDIO_PlayMusic(
-   INT       iNumRIX,
-   BOOL      fLoop,
-   FLOAT     flFadeTime
+   int       iNumRIX,
+   int      fLoop,
+   float     flFadeTime
 )
 {
    AUDIO_Lock();
@@ -419,33 +418,33 @@ AUDIO_PlayMusic(
    AUDIO_Unlock();
 }
 
-VOID
+void
 AUDIO_EnableMusic(
-   BOOL   fEnable
+   int   fEnable
 )
 {
    gAudioDevice.fMusicEnabled = fEnable;
 }
 
-BOOL
+int
 AUDIO_MusicEnabled(
-   VOID
+   void
 )
 {
    return gAudioDevice.fMusicEnabled;
 }
 
-VOID
+void
 AUDIO_EnableSound(
-   BOOL   fEnable
+   int   fEnable
 )
 {
 	gAudioDevice.fSoundEnabled = fEnable;
 }
 
-BOOL
+int
 AUDIO_SoundEnabled(
-   VOID
+   void
 )
 {
    return gAudioDevice.fSoundEnabled;

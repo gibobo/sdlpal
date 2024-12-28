@@ -22,192 +22,180 @@
 #ifndef _TEXT_H
 #define _TEXT_H
 
-#include "palcommon.h"
-
 typedef enum tagDIALOGPOSITION
 {
-   kDialogUpper       = 0,
-   kDialogCenter,
-   kDialogLower,
-   kDialogCenterWindow
+    kDialogUpper = 0,
+    kDialogCenter,
+    kDialogLower,
+    kDialogCenterWindow
 } DIALOGLOCATION;
 
+typedef enum tagCODEPAGE
+{
+    CP_BIG5 = 0,
+    CP_GBK = 1,
+    // CP_SHIFTJIS = 2,
+    // CP_JISX0208 = 3,
+    CP_MAX = CP_GBK + 1,
+    CP_UTF_8 = CP_MAX + 1,
+    CP_UCS = CP_UTF_8 + 1,
+} CODEPAGE;
+
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef struct tagTEXTLIB
-{
-    LPWSTR         *lpWordBuf;
-    LPWSTR         *lpMsgBuf;
+    typedef struct tagTEXTLIB
+    {
+        unsigned short **lpWordBuf;
+        unsigned short **lpMsgBuf;
 
-    int             nWords;
-    int             nMsgs;
-    int             nIndices;
+        int nWords;
+        int nMsgs;
+        int nIndices;
 
-    int             nCurrentDialogLine;
-    BYTE            bCurrentFontColor;
-    DWORD           posIcon;
-    DWORD           posDialogTitle;
-    DWORD           posDialogText;
-    BYTE            bDialogPosition;
-    BYTE            bIcon;
-    int             iDelayTime;
-    INT             iDialogShadow;
-    BOOL            fUserSkip;
-    BOOL            fPlayingRNG;
+        int nCurrentDialogLine;
+        unsigned char bCurrentFontColor;
+        unsigned int posIcon;
+        unsigned int posDialogTitle;
+        unsigned int posDialogText;
+        unsigned char bDialogPosition;
+        unsigned char bIcon;
+        int iDelayTime;
+        int iDialogShadow;
+        int fUserSkip;
+        int fPlayingRNG;
 
-    BYTE            bufDialogIcons[282];
-} TEXTLIB, *LPTEXTLIB;
+        unsigned char bufDialogIcons[282];
+    } TEXTLIB, *LPTEXTLIB;
 
-extern TEXTLIB         g_TextLib;
+    extern TEXTLIB g_TextLib;
 
-extern LPWSTR g_rcCredits[12];
+    extern unsigned short *g_rcCredits[12];
 
-INT
-PAL_InitText(
-   VOID
-);
+    int
+    PAL_InitText(
+        void);
 
-VOID
-PAL_FreeText(
-   VOID
-);
+    void
+    PAL_FreeText(
+        void);
 
-LPCWSTR
-PAL_GetWord(
-   int        iNumWord
-);
+    const unsigned short *
+    PAL_GetWord(
+        int iNumWord);
 
-LPCWSTR
-PAL_GetMsg(
-   int        iNumMsg
-);
+    const unsigned short *
+    PAL_GetMsg(
+        int iNumMsg);
 
-LPWSTR
-PAL_UnescapeText(
-   LPCWSTR    lpszText
-);
+    unsigned short *
+    PAL_UnescapeText(
+        const unsigned short *lpszText);
 
-VOID
-PAL_DrawText(
-   LPCWSTR    lpszText,
-   DWORD      pos,
-   BYTE       bColor,
-   BOOL       fShadow,
-   BOOL       fUpdate,
-   BOOL       fUse8x8Font
-);
+    void
+    PAL_DrawText(
+        const unsigned short *lpszText,
+        unsigned int pos,
+        unsigned char bColor,
+        int fShadow,
+        int fUpdate,
+        int fUse8x8Font);
 
-VOID
-PAL_DrawTextUnescape(
-   LPCWSTR    lpszText,
-   DWORD      pos,
-   BYTE       bColor,
-   BOOL       fShadow,
-   BOOL       fUpdate,
-   BOOL       fUse8x8Font,
-   BOOL       fUnescape
-);
+    void
+    PAL_DrawTextUnescape(
+        const unsigned short *lpszText,
+        unsigned int pos,
+        unsigned char bColor,
+        int fShadow,
+        int fUpdate,
+        int fUse8x8Font,
+        int fUnescape);
 
-VOID
-PAL_DialogSetDelayTime(
-   INT          iDelayTime
-);
+    void
+    PAL_DialogSetDelayTime(
+        int iDelayTime);
 
-VOID
-PAL_StartDialog(
-   BYTE         bDialogLocation,
-   BYTE         bFontColor,
-   INT          iNumCharFace,
-   BOOL         fPlayingRNG
-);
+    void
+    PAL_StartDialog(
+        unsigned char bDialogLocation,
+        unsigned char bFontColor,
+        int iNumCharFace,
+        int fPlayingRNG);
 
-VOID
-PAL_StartDialogWithOffset(
-   BYTE         bDialogLocation,
-   BYTE         bFontColor,
-   INT          iNumCharFace,
-   BOOL         fPlayingRNG,
-   INT          xOff,
-   INT          yOff
-);
+    void
+    PAL_StartDialogWithOffset(
+        unsigned char bDialogLocation,
+        unsigned char bFontColor,
+        int iNumCharFace,
+        int fPlayingRNG,
+        int xOff,
+        int yOff);
 
-int
-TEXT_DisplayText(
-   LPCWSTR        lpszText,
-   int            x,
-   int            y,
-   BOOL           isDialog
-);
+    int
+    TEXT_DisplayText(
+        const unsigned short *lpszText,
+        int x,
+        int y,
+        int isDialog);
 
-VOID
-PAL_ShowDialogText(
-   LPCWSTR    lpszText
-);
+    void
+    PAL_ShowDialogText(
+        const unsigned short *lpszText);
 
-VOID
-PAL_ClearDialog(
-   BOOL         fWaitForKey
-);
+    void
+    PAL_ClearDialog(
+        int fWaitForKey);
 
-VOID
-PAL_EndDialog(
-   VOID
-);
+    void
+    PAL_EndDialog(
+        void);
 
-BOOL
-PAL_IsInDialog(
-   VOID
-);
+    int
+    PAL_IsInDialog(
+        void);
 
-BOOL
-PAL_DialogIsPlayingRNG(
-   VOID
-);
+    int
+    PAL_DialogIsPlayingRNG(
+        void);
 
-INT
-PAL_MultiByteToWideChar(
-   LPCSTR        mbs,
-   int           mbslength,
-   LPWSTR        wcs,
-   int           wcslength
-);
+    int
+    PAL_MultiByteToWideChar(
+        const char *mbs,
+        int mbslength,
+        unsigned short *wcs,
+        int wcslength);
 
-INT
-PAL_MultiByteToWideCharCP(
-	CODEPAGE      cp,
-	LPCSTR        mbs,
-	size_t        mbslength,
-	LPWSTR        wcs,
-	size_t        wcslength
-	);
+    int
+    PAL_MultiByteToWideCharCP(
+        CODEPAGE cp,
+        const char *mbs,
+        int mbslength,
+        unsigned short *wcs,
+        int wcslength);
 
-CODEPAGE
-PAL_GetCodePage(
-	void
-);
+    CODEPAGE
+    PAL_GetCodePage(
+        void);
 
-void
-PAL_SetCodePage(
-	CODEPAGE    uCodePage
-);
+    void
+    PAL_SetCodePage(
+        CODEPAGE uCodePage);
 
-CODEPAGE
-PAL_DetectCodePageForString(
-	const char *   text,
-	size_t         text_len,
-	CODEPAGE       default_cp,
-	int *          probability
-);
+    CODEPAGE
+    PAL_DetectCodePageForString(
+        const char *text,
+        int text_len,
+        CODEPAGE default_cp,
+        int *probability);
 
-INT
-PAL_swprintf(
-	LPWSTR buffer,
-	size_t count,
-	LPCWSTR format,
-	...
-);
+    int
+    PAL_swprintf(
+        unsigned short *buffer,
+        int count,
+        const unsigned short *format,
+        ...);
 
 #ifdef __cplusplus
 }

@@ -18,15 +18,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+#include <SDL.h>
 
+#include "audio.h"
+#include "font.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
 #include "main.h"
-// #include "pal_config.h"
+#include "pal_config.h"
+#include "palcfg.h"
+#include "palcommon.h"
+#include "palette.h"
+#include "res.h"
+#include "rngplay.h"
+#include "text.h"
+#include "util.h"
+#include "video.h"
+#include "common.h"
+#include <SDL_timer.h>
 #include <setjmp.h>
 
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;
-
-char gExecutablePath[PAL_MAX_PATH];
 
 #define BITMAPNUM_SPLASH_UP (gConfig.fIsWIN95 ? 0x03 : 0x26)
 #define BITMAPNUM_SPLASH_DOWN (gConfig.fIsWIN95 ? 0x04 : 0x27)
@@ -34,9 +48,9 @@ char gExecutablePath[PAL_MAX_PATH];
 #define SPRITENUM_SPLASH_CRANE 0x49
 #define NUM_RIX_TITLE 0x05
 
-static VOID
+static void
 PAL_Init(
-    VOID)
+    void)
 /*++
   Purpose:
 
@@ -93,15 +107,14 @@ PAL_Init(
    PAL_InitResources();
    AUDIO_OpenDevice();
 
-   VIDEO_SetWindowTitle(UTIL_va(UTIL_GlobalBuffer(0), PAL_GLOBAL_BUFFER_SIZE,
-                                "Pal %s%s%s%s",
-                                gConfig.fIsWIN95 ? "Win95" : "DOS",
-                                "",
-                                "",
-                                ""));
+   VIDEO_SetWindowTitle(
+       UTIL_va(UTIL_GlobalBuffer(0),
+               128,
+               "Pal %s",
+               gConfig.fIsWIN95 ? "Win95" : "DOS"));
 }
 
-VOID PAL_Shutdown(
+void PAL_Shutdown(
     int exit_code)
 /*++
   Purpose:
@@ -142,8 +155,8 @@ VOID PAL_Shutdown(
 #endif
 }
 
-VOID PAL_TrademarkScreen(
-    VOID)
+void PAL_TrademarkScreen(
+    void)
 /*++
   Purpose:
 
@@ -165,8 +178,8 @@ VOID PAL_TrademarkScreen(
    PAL_FadeOut(1);
 }
 
-VOID PAL_SplashScreen(
-    VOID)
+void PAL_SplashScreen(
+    void)
 /*++
   Purpose:
 
@@ -186,11 +199,12 @@ VOID PAL_SplashScreen(
    SDL_Color rgCurrentPalette[256];
    SDL_Surface *lpBitmapDown, *lpBitmapUp;
    SDL_Rect srcrect, dstrect;
-   LPSPRITE lpSpriteCrane;
-   LPBITMAPRLE lpBitmapTitle;
-   LPBYTE buf, buf2;
+   unsigned char *lpSpriteCrane;
+   unsigned char *lpBitmapTitle;
+   unsigned char *buf;
+   unsigned char *buf2;
    int cranepos[9][3], i, iImgPos = 200, iCraneFrame = 0, iTitleHeight;
-   DWORD dwTime, dwBeginTime;
+   unsigned int dwTime, dwBeginTime;
 
    if (palette == NULL)
    {
@@ -201,9 +215,9 @@ VOID PAL_SplashScreen(
    //
    // Allocate all the needed memory at once for simplification
    //
-   buf = (LPBYTE)UTIL_calloc(1, 320 * 200 * 2);
-   buf2 = (LPBYTE)(buf + 320 * 200);
-   lpSpriteCrane = (LPSPRITE)buf2 + 32000;
+   buf = (unsigned char *)UTIL_calloc(1, 320 * 200 * 2);
+   buf2 = &buf[320 * 200];
+   lpSpriteCrane = (unsigned char *)buf2 + 32000;
 
    //
    // Create the surfaces
@@ -222,7 +236,7 @@ VOID PAL_SplashScreen(
    PAL_FBPBlitToSurface(buf2, lpBitmapDown);
    PAL_MKFReadChunk(buf, 32000, SPRITENUM_SPLASH_TITLE, gpGlobals->f.fpMGO);
    Decompress(buf, buf2, 32000);
-   lpBitmapTitle = (LPBITMAPRLE)PAL_SpriteGetFrame(buf2, 0);
+   lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(buf2, 0);
    PAL_MKFReadChunk(buf, 32000, SPRITENUM_SPLASH_CRANE, gpGlobals->f.fpMGO);
    Decompress(buf, lpSpriteCrane, 32000);
 
@@ -271,9 +285,9 @@ VOID PAL_SplashScreen(
       {
          for (i = 0; i < 256; i++)
          {
-            rgCurrentPalette[i].r = (BYTE)(palette[i].r * ((float)dwTime / 15000));
-            rgCurrentPalette[i].g = (BYTE)(palette[i].g * ((float)dwTime / 15000));
-            rgCurrentPalette[i].b = (BYTE)(palette[i].b * ((float)dwTime / 15000));
+            rgCurrentPalette[i].r = (unsigned char)(palette[i].r * ((float)dwTime / 15000));
+            rgCurrentPalette[i].g = (unsigned char)(palette[i].g * ((float)dwTime / 15000));
+            rgCurrentPalette[i].b = (unsigned char)(palette[i].b * ((float)dwTime / 15000));
          }
       }
 
@@ -316,8 +330,8 @@ VOID PAL_SplashScreen(
       //
       for (i = 0; i < 9; i++)
       {
-         LPCBITMAPRLE lpFrame = PAL_SpriteGetFrame(lpSpriteCrane,
-                                                   cranepos[i][2] = (cranepos[i][2] + (iCraneFrame & 1)) % 8);
+         const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane,
+                                                           cranepos[i][2] = (cranepos[i][2] + (iCraneFrame & 1)) % 8);
          cranepos[i][1] += ((iImgPos > 1) && (iImgPos & 1)) ? 1 : 0;
          PAL_RLEBlitToSurface(lpFrame, gpScreen,
                               PAL_XY(cranepos[i][0], cranepos[i][1]));
@@ -333,7 +347,7 @@ VOID PAL_SplashScreen(
          //
          // HACKHACK
          //
-         WORD w = lpBitmapTitle[2] | (lpBitmapTitle[3] << 8);
+         unsigned short w = lpBitmapTitle[2] | (lpBitmapTitle[3] << 8);
          w++;
          lpBitmapTitle[2] = (w & 0xFF);
          lpBitmapTitle[3] = (w >> 8);
@@ -366,9 +380,9 @@ VOID PAL_SplashScreen(
             {
                for (i = 0; i < 256; i++)
                {
-                  rgCurrentPalette[i].r = (BYTE)(palette[i].r * ((float)dwTime / 15000));
-                  rgCurrentPalette[i].g = (BYTE)(palette[i].g * ((float)dwTime / 15000));
-                  rgCurrentPalette[i].b = (BYTE)(palette[i].b * ((float)dwTime / 15000));
+                  rgCurrentPalette[i].r = (unsigned char)(palette[i].r * ((float)dwTime / 15000));
+                  rgCurrentPalette[i].g = (unsigned char)(palette[i].g * ((float)dwTime / 15000));
+                  rgCurrentPalette[i].b = (unsigned char)(palette[i].b * ((float)dwTime / 15000));
                }
                VIDEO_SetPalette(rgCurrentPalette);
                VIDEO_UpdateSurfacePalette(lpBitmapDown);
@@ -425,10 +439,6 @@ int main(
 
 --*/
 {
-#if !defined(__EMSCRIPTEN__) && !defined(__WINRT__) && !defined(__N3DS__)
-   memset(gExecutablePath, 0, PAL_MAX_PATH);
-   strncpy(gExecutablePath, argv[0], PAL_MAX_PATH);
-#endif
 
 #if !__EMSCRIPTEN__
    if (setjmp(g_exit_jmp_buf) != 0)

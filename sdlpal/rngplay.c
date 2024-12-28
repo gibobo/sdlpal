@@ -30,13 +30,15 @@
 #include "util.h"
 #include "video.h"
 
-static INT
+#define PAL_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1
+
+static int
 PAL_RNGReadFrame(
-   LPBYTE          lpBuffer,
-   UINT            uiBufferSize,
-   UINT            uiRngNum,
-   UINT            uiFrameNum,
-   FILE           *fpRngMKF
+   unsigned char           *lpBuffer,
+   unsigned int            uiBufferSize,
+   unsigned int            uiRngNum,
+   unsigned int            uiFrameNum,
+   FILE                    *fpRngMKF
 )
 /*++
   Purpose:
@@ -63,11 +65,11 @@ PAL_RNGReadFrame(
 
 --*/
 {
-   UINT         uiOffset       = 0;
-   UINT         uiSubOffset    = 0;
-   UINT         uiNextOffset   = 0;
-   UINT         uiChunkCount   = 0;
-   INT          iChunkLen      = 0;
+   unsigned int         uiOffset       = 0;
+   unsigned int         uiSubOffset    = 0;
+   unsigned int         uiNextOffset   = 0;
+   unsigned int         uiChunkCount   = 0;
+   int          iChunkLen      = 0;
 
    if (lpBuffer == NULL || fpRngMKF == NULL || uiBufferSize == 0)
    {
@@ -87,8 +89,8 @@ PAL_RNGReadFrame(
    // Get the offset of the chunk.
    //
    fseek(fpRngMKF, 4 * uiRngNum, SEEK_SET);
-   PAL_fread(&uiOffset, sizeof(UINT), 1, fpRngMKF);
-   PAL_fread(&uiNextOffset, sizeof(UINT), 1, fpRngMKF);
+   PAL_fread(&uiOffset, sizeof(unsigned int), 1, fpRngMKF);
+   PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
 
    //
    // Get the length of the chunk.
@@ -106,7 +108,7 @@ PAL_RNGReadFrame(
    //
    // Get the number of sub chunks.
    //
-   PAL_fread(&uiChunkCount, sizeof(UINT), 1, fpRngMKF);
+   PAL_fread(&uiChunkCount, sizeof(unsigned int), 1, fpRngMKF);
    uiChunkCount = (uiChunkCount >> 2) - 1;
    if (uiFrameNum >= uiChunkCount)
    {
@@ -117,14 +119,14 @@ PAL_RNGReadFrame(
    // Get the offset of the sub chunk.
    //
    fseek(fpRngMKF, uiOffset + 4 * uiFrameNum, SEEK_SET);
-   PAL_fread(&uiSubOffset, sizeof(UINT), 1, fpRngMKF);
-   PAL_fread(&uiNextOffset, sizeof(UINT), 1, fpRngMKF);
+   PAL_fread(&uiSubOffset, sizeof(unsigned int), 1, fpRngMKF);
+   PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
 
    //
    // Get the length of the sub chunk.
    //
    iChunkLen = uiNextOffset - uiSubOffset;
-   if ((UINT)iChunkLen > uiBufferSize)
+   if ((unsigned int)iChunkLen > uiBufferSize)
    {
       return -2;
    }
@@ -138,7 +140,7 @@ PAL_RNGReadFrame(
    return -1;
 }
 
-static INT
+static int
 PAL_RNGBlitToSurface(
    const uint8_t   *rng,
    int              length,
@@ -214,61 +216,61 @@ PAL_RNGBlitToSurface(
       case 0x0a:
          x = dst_ptr % 320;
          y = dst_ptr / 320;
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          if (++x >= 320)
          {
             x = 0;
             ++y;
          }
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          dst_ptr += 2;
 
       case 0x09:
          x = dst_ptr % 320;
          y = dst_ptr / 320;
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          if (++x >= 320)
          {
             x = 0;
             ++y;
          }
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          dst_ptr += 2;
 
       case 0x08:
          x = dst_ptr % 320;
          y = dst_ptr / 320;
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          if (++x >= 320)
          {
             x = 0;
             ++y;
          }
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          dst_ptr += 2;
 
       case 0x07:
          x = dst_ptr % 320;
          y = dst_ptr / 320;
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          if (++x >= 320)
          {
             x = 0;
             ++y;
          }
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          dst_ptr += 2;
 
       case 0x06:
          x = dst_ptr % 320;
          y = dst_ptr / 320;
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          if (++x >= 320)
          {
             x = 0;
             ++y;
          }
-         ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+         ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
          dst_ptr += 2;
          break;
 
@@ -278,13 +280,13 @@ PAL_RNGBlitToSurface(
          {
             x = dst_ptr % 320;
             y = dst_ptr / 320;
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
             if (++x >= 320)
             {
                x = 0;
                ++y;
             }
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
             dst_ptr += 2;
          }
          break;
@@ -296,13 +298,13 @@ PAL_RNGBlitToSurface(
          {
             x = dst_ptr % 320;
             y = dst_ptr / 320;
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
             if (++x >= 320)
             {
                x = 0;
                ++y;
             }
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr++];
             dst_ptr += 2;
          }
          break;
@@ -315,13 +317,13 @@ PAL_RNGBlitToSurface(
          {
             x = dst_ptr % 320;
             y = dst_ptr / 320;
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr];
             if (++x >= 320)
             {
                x = 0;
                ++y;
             }
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr + 1];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr + 1];
             dst_ptr += 2;
          }
          ptr += 2;
@@ -333,13 +335,13 @@ PAL_RNGBlitToSurface(
          {
             x = dst_ptr % 320;
             y = dst_ptr / 320;
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr];
             if (++x >= 320)
             {
                x = 0;
                ++y;
             }
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr + 1];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr + 1];
             dst_ptr += 2;
          }
          ptr += 2;
@@ -352,13 +354,13 @@ PAL_RNGBlitToSurface(
          {
             x = dst_ptr % 320;
             y = dst_ptr / 320;
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr];
             if (++x >= 320)
             {
                x = 0;
                ++y;
             }
-            ((LPBYTE)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr + 1];
+            ((unsigned char *)(lpDstSurface->pixels))[y * lpDstSurface->pitch + x] = rng[ptr + 1];
             dst_ptr += 2;
          }
          ptr += 2;
@@ -370,12 +372,12 @@ end:
    return 0;
 }
 
-VOID
+void
 PAL_RNGPlay(
-   INT           iNumRNG,
-   INT           iStartFrame,
-   INT           iEndFrame,
-   INT           iSpeed
+   int           iNumRNG,
+   int           iStartFrame,
+   int           iEndFrame,
+   int           iSpeed
 )
 /*++
   Purpose:
@@ -429,13 +431,17 @@ PAL_RNGPlay(
       if (gpGlobals->fNeedToFadeIn)
       {
          PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-         gpGlobals->fNeedToFadeIn = FALSE;
+         gpGlobals->fNeedToFadeIn = 0;
       }
 
       //
       // Delay for a while
       //
-	  PAL_DelayUntilPC(iTime);
+      PAL_ProcessEvent();                       
+      while (SDL_GetPerformanceCounter() < iTime) 
+      {                                         
+         SDL_Delay(1);                         
+      }
    }
 
    fclose(fp);

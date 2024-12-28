@@ -22,27 +22,25 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-#include "common.h"
-
 #define PAL_ITEM_DESC_BOTTOM	(1 << 15)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-WORD
+unsigned short
 PAL_RunTriggerScript(
-   WORD           wScriptEntry,
-   WORD           wEventObjectID
+   unsigned short           wScriptEntry,
+   unsigned short           wEventObjectID
 );
 
-WORD
+unsigned short
 PAL_RunAutoScript(
-   WORD           wScriptEntry,
-   WORD           wEventObjectID
+   unsigned short           wScriptEntry,
+   unsigned short           wEventObjectID
 );
 
-extern BOOL       g_fScriptSuccess;
+extern int       g_fScriptSuccess;
 
 #ifdef __cplusplus
 }

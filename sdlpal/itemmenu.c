@@ -19,16 +19,26 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "itemmenu.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
+#include "palcfg.h"
+#include "palcommon.h"
+#include "scene.h"
+#include "script.h"
+#include "text.h"
+#include "video.h"
+#include "common.h"
+#include <SDL_timer.h>
 
-static int     g_iNumInventory = 0;
-static WORD    g_wItemFlags = 0;
-static BOOL    g_fNoDesc = FALSE;
+static int g_iNumInventory = 0;
+static unsigned short g_wItemFlags = 0;
+static int g_fNoDesc = FALSE;
 
-WORD
+unsigned short
 PAL_ItemSelectMenuUpdate(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -44,18 +54,19 @@ PAL_ItemSelectMenuUpdate(
 
 --*/
 {
-   int                i, j, k, line, item_delta;
-   WORD               wObject, wScript;
-   BYTE               bColor;
-   static BYTE        bufImage[2048];
-   const int          iItemsPerLine = 32 / gConfig.dwWordLength;
-   const int          iItemTextWidth = 8 * gConfig.dwWordLength + 20;
-   const int          iLinesPerPage = 7 - gConfig.ScreenLayout.ExtraItemDescLines;
-   const int          iCursorXOffset = gConfig.dwWordLength * 5 / 2;
-   const int          iAmountXOffset = gConfig.dwWordLength * 8 + 1;
-   const int          iPageLineOffset = (iLinesPerPage + 1) / 2;
-   const int          iPictureYOffset = (gConfig.ScreenLayout.ExtraItemDescLines > 1) ? (gConfig.ScreenLayout.ExtraItemDescLines - 1) * 16 : 0;
-   DWORD            cursorPos = PAL_XY(15 + iCursorXOffset, 22);;
+   int i, j, k, line, item_delta;
+   unsigned short wObject, wScript;
+   unsigned char bColor;
+   static unsigned char bufImage[2048];
+   const int iItemsPerLine = 32 / gConfig.dwWordLength;
+   const int iItemTextWidth = 8 * gConfig.dwWordLength + 20;
+   const int iLinesPerPage = 7 - gConfig.ScreenLayout.ExtraItemDescLines;
+   const int iCursorXOffset = gConfig.dwWordLength * 5 / 2;
+   const int iAmountXOffset = gConfig.dwWordLength * 8 + 1;
+   const int iPageLineOffset = (iLinesPerPage + 1) / 2;
+   const int iPictureYOffset = (gConfig.ScreenLayout.ExtraItemDescLines > 1) ? (gConfig.ScreenLayout.ExtraItemDescLines - 1) * 16 : 0;
+   unsigned int cursorPos = PAL_XY(15 + iCursorXOffset, 22);
+   ;
 
    //
    // Process input
@@ -107,7 +118,7 @@ PAL_ItemSelectMenuUpdate(
    if (gpGlobals->iCurInvMenuItem + item_delta < 0)
       gpGlobals->iCurInvMenuItem = 0;
    else if (gpGlobals->iCurInvMenuItem + item_delta >= g_iNumInventory)
-      gpGlobals->iCurInvMenuItem = g_iNumInventory-1;
+      gpGlobals->iCurInvMenuItem = g_iNumInventory - 1;
    else
       gpGlobals->iCurInvMenuItem += item_delta;
 
@@ -146,7 +157,7 @@ PAL_ItemSelectMenuUpdate(
          if (i == gpGlobals->iCurInvMenuItem)
          {
             if (!(gpGlobals->g.rgObject[wObject].item.wFlags & g_wItemFlags) ||
-               (SHORT)gpGlobals->rgInventory[i].nAmount <= (SHORT)gpGlobals->rgInventory[i].nAmountInUse)
+                (short)gpGlobals->rgInventory[i].nAmount <= (short)gpGlobals->rgInventory[i].nAmountInUse)
             {
                //
                // This item is not selectable
@@ -169,7 +180,7 @@ PAL_ItemSelectMenuUpdate(
             }
          }
          else if (!(gpGlobals->g.rgObject[wObject].item.wFlags & g_wItemFlags) ||
-            (SHORT)gpGlobals->rgInventory[i].nAmount <= (SHORT)gpGlobals->rgInventory[i].nAmountInUse)
+                  (short)gpGlobals->rgInventory[i].nAmount <= (short)gpGlobals->rgInventory[i].nAmountInUse)
          {
             //
             // This item is not selectable
@@ -194,12 +205,12 @@ PAL_ItemSelectMenuUpdate(
             // Draw the picture of current selected item
             //
             PAL_RLEBlitToSurfaceWithShadow(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
-               PAL_XY(xBase + 5, yBase + 5 - iPictureYOffset), TRUE);
+                                           PAL_XY(xBase + 5, yBase + 5 - iPictureYOffset), TRUE);
             PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
-               PAL_XY(xBase, yBase - iPictureYOffset));
+                                 PAL_XY(xBase, yBase - iPictureYOffset));
 
             if (PAL_MKFReadChunk(bufImage, 2048,
-               gpGlobals->g.rgObject[wObject].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gpGlobals->f.fpBALL) > 0)
             {
                PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(xBase + 8, yBase + 7 - iPictureYOffset));
             }
@@ -208,10 +219,10 @@ PAL_ItemSelectMenuUpdate(
          //
          // Draw the amount of this item
          //
-         if ((SHORT)gpGlobals->rgInventory[i].nAmount - (SHORT)gpGlobals->rgInventory[i].nAmountInUse > 1)
+         if ((short)gpGlobals->rgInventory[i].nAmount - (short)gpGlobals->rgInventory[i].nAmountInUse > 1)
          {
             PAL_DrawNumber(gpGlobals->rgInventory[i].nAmount - gpGlobals->rgInventory[i].nAmountInUse,
-               2, PAL_XY(15 + iAmountXOffset + k * iItemTextWidth, 17 + j * 18), kNumColorCyan, kNumAlignRight);
+                           2, PAL_XY(15 + iAmountXOffset + k * iItemTextWidth, 17 + j * 18), kNumColorCyan, kNumAlignRight);
          }
 
          i++;
@@ -231,9 +242,9 @@ PAL_ItemSelectMenuUpdate(
    if (!gConfig.fIsWIN95)
    {
       if (!g_fNoDesc && gpGlobals->lpObjectDesc != NULL)
-	  {
-         WCHAR szDesc[512], *next;
-         const WCHAR *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, wObject);
+      {
+         unsigned short szDesc[512], *next;
+         const unsigned short *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, wObject);
 
          if (d != NULL)
          {
@@ -287,8 +298,8 @@ PAL_ItemSelectMenuUpdate(
    if (g_InputState.dwKeyPress & kKeySearch)
    {
       if ((gpGlobals->g.rgObject[wObject].item.wFlags & g_wItemFlags) &&
-         (SHORT)gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmount >
-         (SHORT)gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmountInUse)
+          (short)gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmount >
+              (short)gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmountInUse)
       {
          if (gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].nAmount > 0)
          {
@@ -310,10 +321,8 @@ PAL_ItemSelectMenuUpdate(
    return 0xFFFF;
 }
 
-VOID
-PAL_ItemSelectMenuInit(
-   WORD                      wItemFlags
-)
+void PAL_ItemSelectMenuInit(
+    unsigned short wItemFlags)
 /*++
   Purpose:
 
@@ -329,8 +338,8 @@ PAL_ItemSelectMenuInit(
 
 --*/
 {
-   int           i, j;
-   WORD          w;
+   int i, j;
+   unsigned short w;
 
    g_wItemFlags = wItemFlags;
 
@@ -344,7 +353,7 @@ PAL_ItemSelectMenuInit(
    //
    g_iNumInventory = 0;
    while (g_iNumInventory < MAX_INVENTORY &&
-      gpGlobals->rgInventory[g_iNumInventory].wItem != 0)
+          gpGlobals->rgInventory[g_iNumInventory].wItem != 0)
    {
       g_iNumInventory++;
    }
@@ -366,7 +375,7 @@ PAL_ItemSelectMenuInit(
                {
                   gpGlobals->rgInventory[g_iNumInventory].wItem = gpGlobals->g.PlayerRoles.rgwEquipment[j][w];
                   gpGlobals->rgInventory[g_iNumInventory].nAmount = 0;
-                  gpGlobals->rgInventory[g_iNumInventory].nAmountInUse = (WORD)-1;
+                  gpGlobals->rgInventory[g_iNumInventory].nAmountInUse = (unsigned short)-1;
 
                   g_iNumInventory++;
                }
@@ -376,11 +385,10 @@ PAL_ItemSelectMenuInit(
    }
 }
 
-WORD
+unsigned short
 PAL_ItemSelectMenu(
-   LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
-   WORD                      wItemFlags
-)
+    LPITEMCHANGED_CALLBACK lpfnMenuItemChanged,
+    unsigned short wItemFlags)
 /*++
   Purpose:
 
@@ -399,9 +407,9 @@ PAL_ItemSelectMenu(
 
 --*/
 {
-   int              iPrevIndex;
-   WORD             w;
-   DWORD            dwTime;
+   int iPrevIndex;
+   unsigned short w;
+   unsigned int dwTime;
 
    PAL_ItemSelectMenuInit(wItemFlags);
    iPrevIndex = gpGlobals->iCurInvMenuItem;

@@ -113,6 +113,4 @@ protected:
   uint16_t rix_proc();                              /**/
   void set_new_int();
   void switch_ad_bd(uint16_t); /**/
-
-  void read_file_to(uint8_t *&);
 };

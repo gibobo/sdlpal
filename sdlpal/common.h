@@ -75,28 +75,6 @@
 # ifndef TRUE
 #  define TRUE                1
 # endif
-# define VOID                void
-typedef char                CHAR;
-typedef wchar_t             WCHAR;
-typedef short               SHORT;
-typedef long                LONG;
-typedef unsigned long       ULONG, *PULONG;
-typedef unsigned short      USHORT, *PUSHORT;
-typedef unsigned char       UCHAR, *PUCHAR;
-typedef unsigned short      WORD, *LPWORD;
-typedef unsigned int        DWORD, *LPDWORD;
-typedef int                 INT, *LPINT;
-typedef int                 BOOL, *LPBOOL;
-typedef unsigned int        UINT, *PUINT, UINT32, *PUINT32;
-typedef unsigned char       BYTE, *LPBYTE;
-typedef const BYTE         *LPCBYTE;
-typedef float               FLOAT, *LPFLOAT;
-typedef void               *LPVOID;
-typedef const void         *LPCVOID;
-typedef CHAR               *LPSTR;
-typedef const CHAR         *LPCSTR;
-typedef WCHAR              *LPWSTR;
-typedef const WCHAR        *LPCWSTR;
 
 #ifdef PATH_MAX
 # define PAL_MAX_PATH  PATH_MAX
@@ -109,62 +87,10 @@ typedef const WCHAR        *LPCWSTR;
    The example of this file can be found in directories of existing portings.
  */
 
-#include "pal_config.h"
-
-#ifndef PAL_DEFAULT_FULLSCREEN_HEIGHT
-# define PAL_DEFAULT_FULLSCREEN_HEIGHT PAL_DEFAULT_WINDOW_HEIGHT
-#endif
-
-#ifndef PAL_DEFAULT_TEXTURE_WIDTH
-# define PAL_DEFAULT_TEXTURE_WIDTH     PAL_DEFAULT_WINDOW_WIDTH
-#endif
-
-#ifndef PAL_DEFAULT_TEXTURE_HEIGHT
-# define PAL_DEFAULT_TEXTURE_HEIGHT    PAL_DEFAULT_WINDOW_HEIGHT
-#endif
-
-/* Default for 1024 samples */
-#ifndef PAL_AUDIO_DEFAULT_BUFFER_SIZE
-# define PAL_AUDIO_DEFAULT_BUFFER_SIZE   1024
-#endif
-
-#ifndef PAL_CONFIG_PREFIX
-# define PAL_CONFIG_PREFIX "./"
-#endif
-
 #ifndef PAL_LARGE
 # define PAL_LARGE
 #endif
 
-# define PAL_SCALE_SCREEN   TRUE
-
-# define PAL_IS_VALID_JOYSTICK(s)  TRUE
-
-#ifndef PAL_NATIVE_PATH_SEPARATOR
-# define PAL_NATIVE_PATH_SEPARATOR "/"
-#endif
-
-#define PAL_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1
-
-typedef enum tagLOGLEVEL
-{
-	LOGLEVEL_MIN,
-	LOGLEVEL_VERBOSE = LOGLEVEL_MIN,
-	LOGLEVEL_DEBUG,
-	LOGLEVEL_INFO,
-	LOGLEVEL_WARNING,
-	LOGLEVEL_ERROR,
-	LOGLEVEL_FATAL,
-	LOGLEVEL_MAX = LOGLEVEL_FATAL,
-} LOGLEVEL;
-
-#define PAL_LOG_MAX_OUTPUTS   (LOGLEVEL_MAX + 1)
-
-#if defined(DEBUG) || defined(_DEBUG)
-# define PAL_DEFAULT_LOGLEVEL  LOGLEVEL_MIN
-#else
-# define PAL_DEFAULT_LOGLEVEL  LOGLEVEL_MAX
-#endif
 
 #define PAL_GLOBAL_BUFFER_SIZE 1024
 

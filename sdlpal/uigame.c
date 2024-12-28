@@ -21,12 +21,13 @@
 
 #include "uigame.h"
 #include "audio.h"
-#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "itemmenu.h"
 #include "magicmenu.h"
+#include "main.h"
 #include "palcfg.h"
+#include "palcommon.h"
 #include "palette.h"
 #include "play.h"
 #include "script.h"
@@ -34,29 +35,28 @@
 #include "uibattle.h"
 #include "util.h"
 #include "video.h"
-// #include "main.h"
+#include "common.h"
+#include <SDL_timer.h>
 
-static BOOL __buymenu_firsttime_render;
+static int __buymenu_firsttime_render;
 
-static WORD GetSavedTimes(int iSaveSlot)
+static unsigned short GetSavedTimes(int iSaveSlot)
 {
-	FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, PAL_va(0, "%d.rpg", iSaveSlot));
-	WORD wSavedTimes = 0;
-	if (fp != NULL)
-	{
-		if (fread(&wSavedTimes, sizeof(WORD), 1, fp) == 1)
-			wSavedTimes = wSavedTimes;
-		else
-			wSavedTimes = 0;
-		fclose(fp);
-	}
-	return wSavedTimes;
+   FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, PAL_va(0, "%d.rpg", iSaveSlot));
+   unsigned short wSavedTimes = 0;
+   if (fp != NULL)
+   {
+      if (fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
+         wSavedTimes = wSavedTimes;
+      else
+         wSavedTimes = 0;
+      fclose(fp);
+   }
+   return wSavedTimes;
 }
 
-VOID
-PAL_DrawOpeningMenuBackground(
-   VOID
-)
+void PAL_DrawOpeningMenuBackground(
+    void)
 /*++
   Purpose:
 
@@ -72,9 +72,9 @@ PAL_DrawOpeningMenuBackground(
 
 --*/
 {
-   LPBYTE        buf;
+   unsigned char *buf;
 
-   buf = (LPBYTE)malloc(320 * 200);
+   buf = (unsigned char *)malloc(320 * 200);
    if (buf == NULL)
    {
       return;
@@ -94,10 +94,8 @@ PAL_DrawOpeningMenuBackground(
    free(buf);
 }
 
-INT
-PAL_OpeningMenu(
-   VOID
-)
+int PAL_OpeningMenu(
+    void)
 /*++
   Purpose:
 
@@ -113,15 +111,14 @@ PAL_OpeningMenu(
 
 --*/
 {
-   WORD          wItemSelected;
-   WORD          wDefaultItem     = 0;
-   INT           w[2] = { PAL_WordWidth(MAINMENU_LABEL_NEWGAME), PAL_WordWidth(MAINMENU_LABEL_LOADGAME) };
+   unsigned short wItemSelected;
+   unsigned short wDefaultItem = 0;
+   int w[2] = {PAL_WordWidth(MAINMENU_LABEL_NEWGAME), PAL_WordWidth(MAINMENU_LABEL_LOADGAME)};
 
-   MENUITEM      rgMainMenuItem[2] = {
-      // value   label                     enabled   position
-      {  0,      MAINMENU_LABEL_NEWGAME,   TRUE,     PAL_XY(125 - (w[0] > 4 ? (w[0] - 4) * 8 : 0), 95)  },
-      {  1,      MAINMENU_LABEL_LOADGAME,  TRUE,     PAL_XY(125 - (w[1] > 4 ? (w[1] - 4) * 8 : 0), 112) }
-   };
+   MENUITEM rgMainMenuItem[2] = {
+       // value   label                     enabled   position
+       {0, MAINMENU_LABEL_NEWGAME, TRUE, PAL_XY(125 - (w[0] > 4 ? (w[0] - 4) * 8 : 0), 95)},
+       {1, MAINMENU_LABEL_LOADGAME, TRUE, PAL_XY(125 - (w[1] > 4 ? (w[1] - 4) * 8 : 0), 112)}};
 
    //
    // Play the background music
@@ -172,13 +169,11 @@ PAL_OpeningMenu(
    AUDIO_PlayMusic(0, FALSE, 1);
    PAL_FadeOut(1);
 
-   return (INT)wItemSelected;
+   return (int)wItemSelected;
 }
 
-INT
-PAL_SaveSlotMenu(
-   WORD        wDefaultSlot
-)
+int PAL_SaveSlotMenu(
+    unsigned short wDefaultSlot)
 /*++
   Purpose:
 
@@ -194,14 +189,14 @@ PAL_SaveSlotMenu(
 
 --*/
 {
-   LPBOX           rgpBox[5];
-   int             i, w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5);
-   int             dx = (w > 4) ? (w - 4) * 16 : 0;
-   WORD            wItemSelected;
+   LPBOX rgpBox[5];
+   int i, w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5);
+   int dx = (w > 4) ? (w - 4) * 16 : 0;
+   unsigned short wItemSelected;
 
-   MENUITEM        rgMenuItem[5];
+   MENUITEM rgMenuItem[5];
 
-   const SDL_Rect  rect = { 195 - dx, 7, 120 + dx, 190 };
+   const SDL_Rect rect = {195 - dx, 7, 120 + dx, 190};
 
    //
    // Create the boxes and create the menu items
@@ -214,7 +209,7 @@ PAL_SaveSlotMenu(
       rgMenuItem[i].wValue = i + 1;
       rgMenuItem[i].fEnabled = TRUE;
       rgMenuItem[i].wNumWord = LOADMENU_LABEL_SLOT_FIRST + i;
-	  rgMenuItem[i].pos = PAL_XY(210 - dx, 17 + 38 * i);
+      rgMenuItem[i].pos = PAL_XY(210 - dx, 17 + 38 * i);
    }
 
    //
@@ -225,8 +220,8 @@ PAL_SaveSlotMenu(
       //
       // Draw the number
       //
-      PAL_DrawNumber((UINT)GetSavedTimes(i), 4, PAL_XY(270, 38 * i - 17),
-         kNumColorYellow, kNumAlignRight);
+      PAL_DrawNumber((unsigned int)GetSavedTimes(i), 4, PAL_XY(270, 38 * i - 17),
+                     kNumColorYellow, kNumAlignRight);
    }
 
    //
@@ -247,13 +242,11 @@ PAL_SaveSlotMenu(
    return wItemSelected;
 }
 
-static
-WORD
+static unsigned short
 PAL_SelectionMenu(
-	int   nWords,
-	int   nDefault,
-	WORD  wItems[]
-)
+    int nWords,
+    int nDefault,
+    unsigned short wItems[])
 /*++
   Purpose:
 
@@ -262,8 +255,8 @@ PAL_SelectionMenu(
   Parameters:
 
     [IN]  nWords - number of emnu items.
-	[IN]  nDefault - index of default item.
-	[IN]  wItems - item word array.
+   [IN]  nDefault - index of default item.
+   [IN]  wItems - item word array.
 
   Return value:
 
@@ -271,65 +264,66 @@ PAL_SelectionMenu(
 
 --*/
 {
-	LPBOX           rgpBox[4];
-	MENUITEM        rgMenuItem[4];
-	int             w[4] = {
-		(nWords >= 1 && wItems[0]) ? PAL_WordWidth(wItems[0]) : 1,
-		(nWords >= 2 && wItems[1]) ? PAL_WordWidth(wItems[1]) : 1,
-		(nWords >= 3 && wItems[2]) ? PAL_WordWidth(wItems[2]) : 1,
-		(nWords >= 4 && wItems[3]) ? PAL_WordWidth(wItems[3]) : 1 };
-	int             dx[4] = { (w[0] - 1) * 16, (w[1] - 1) * 16, (w[2] - 1) * 16, (w[3] - 1) * 16 }, i;
-	DWORD           pos[4] = { PAL_XY(145, 110), PAL_XY(220 + dx[0], 110), PAL_XY(145, 160), PAL_XY(220 + dx[2], 160) };
-	WORD            wReturnValue;
+   LPBOX rgpBox[4];
+   MENUITEM rgMenuItem[4];
+   int w[4] = {
+       (nWords >= 1 && wItems[0]) ? PAL_WordWidth(wItems[0]) : 1,
+       (nWords >= 2 && wItems[1]) ? PAL_WordWidth(wItems[1]) : 1,
+       (nWords >= 3 && wItems[2]) ? PAL_WordWidth(wItems[2]) : 1,
+       (nWords >= 4 && wItems[3]) ? PAL_WordWidth(wItems[3]) : 1};
+   int dx[4] = {(w[0] - 1) * 16, (w[1] - 1) * 16, (w[2] - 1) * 16, (w[3] - 1) * 16}, i;
+   unsigned int pos[4] = {PAL_XY(145, 110), PAL_XY(220 + dx[0], 110), PAL_XY(145, 160), PAL_XY(220 + dx[2], 160)};
+   unsigned short wReturnValue;
 
-	const SDL_Rect  rect = { 130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100 };
+   const SDL_Rect rect = {130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100};
 
-	for (i = 0; i < nWords; i++)
-		if (nWords > i && !wItems[i])
-			return MENUITEM_VALUE_CANCELLED;
+   for (i = 0; i < nWords; i++)
+      if (nWords > i && !wItems[i])
+         return MENUITEM_VALUE_CANCELLED;
 
-	//
-	// Create menu items
-	//
-	for (i = 0; i < nWords; i++)
-	{
-		rgMenuItem[i].fEnabled = TRUE;
-		rgMenuItem[i].pos = pos[i];
-		rgMenuItem[i].wValue = i;
-		rgMenuItem[i].wNumWord = wItems[i];
-	}
+   //
+   // Create menu items
+   //
+   for (i = 0; i < nWords; i++)
+   {
+      rgMenuItem[i].fEnabled = TRUE;
+      rgMenuItem[i].pos = pos[i];
+      rgMenuItem[i].wValue = i;
+      rgMenuItem[i].wNumWord = wItems[i];
+   }
 
-	//
-	// Create the boxes
-	//
-	dx[1] = dx[0]; dx[3] = dx[2]; dx[0] = dx[2] = 0;
-	for (i = 0; i < nWords; i++)
-	{
-		rgpBox[i] = PAL_CreateSingleLineBox(PAL_XY(130 + 75 * (i % 2) + dx[i], 100 + 50 * (i / 2)), w[i] + 1, TRUE);
-	}
+   //
+   // Create the boxes
+   //
+   dx[1] = dx[0];
+   dx[3] = dx[2];
+   dx[0] = dx[2] = 0;
+   for (i = 0; i < nWords; i++)
+   {
+      rgpBox[i] = PAL_CreateSingleLineBox(PAL_XY(130 + 75 * (i % 2) + dx[i], 100 + 50 * (i / 2)), w[i] + 1, TRUE);
+   }
 
-	//
-	// Activate the menu
-	//
-	wReturnValue = PAL_ReadMenu(NULL, rgMenuItem, nWords, nDefault, MENUITEM_COLOR);
+   //
+   // Activate the menu
+   //
+   wReturnValue = PAL_ReadMenu(NULL, rgMenuItem, nWords, nDefault, MENUITEM_COLOR);
 
-	//
-	// Delete the boxes
-	//
-	for (i = 0; i < nWords; i++)
-	{
-		PAL_DeleteBox(rgpBox[i]);
-	}
+   //
+   // Delete the boxes
+   //
+   for (i = 0; i < nWords; i++)
+   {
+      PAL_DeleteBox(rgpBox[i]);
+   }
 
-	VIDEO_UpdateScreen(&rect);
+   VIDEO_UpdateScreen(&rect);
 
-	return wReturnValue;
+   return wReturnValue;
 }
 
-WORD
+unsigned short
 PAL_TripleMenu(
-   WORD  wThirdWord
-)
+    unsigned short wThirdWord)
 /*++
   Purpose:
 
@@ -345,14 +339,12 @@ PAL_TripleMenu(
 
 --*/
 {
-   WORD wItems[3] = { CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES, wThirdWord };
+   unsigned short wItems[3] = {CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES, wThirdWord};
    return PAL_SelectionMenu(3, 0, wItems);
 }
 
-BOOL
-PAL_ConfirmMenu(
-   VOID
-)
+int PAL_ConfirmMenu(
+    void)
 /*++
   Purpose:
 
@@ -368,16 +360,14 @@ PAL_ConfirmMenu(
 
 --*/
 {
-   WORD wItems[2] = { CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES };
-   WORD wReturnValue = PAL_SelectionMenu(2, 0, wItems);
+   unsigned short wItems[2] = {CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES};
+   unsigned short wReturnValue = PAL_SelectionMenu(2, 0, wItems);
 
    return (wReturnValue == MENUITEM_VALUE_CANCELLED || wReturnValue == 0) ? FALSE : TRUE;
 }
 
-BOOL
-PAL_SwitchMenu(
-   BOOL      fEnabled
-)
+int PAL_SwitchMenu(
+    int fEnabled)
 /*++
   Purpose:
 
@@ -393,15 +383,14 @@ PAL_SwitchMenu(
 
 --*/
 {
-   WORD wItems[2] = { SWITCHMENU_LABEL_DISABLE, SWITCHMENU_LABEL_ENABLE };
-   WORD wReturnValue = PAL_SelectionMenu(2, fEnabled ? 1 : 0, wItems);
+   unsigned short wItems[2] = {SWITCHMENU_LABEL_DISABLE, SWITCHMENU_LABEL_ENABLE};
+   unsigned short wReturnValue = PAL_SelectionMenu(2, fEnabled ? 1 : 0, wItems);
    return (wReturnValue == MENUITEM_VALUE_CANCELLED) ? fEnabled : ((wReturnValue == 0) ? FALSE : TRUE);
 }
 
 LPBOX
 PAL_ShowCash(
-   DWORD      dwCash
-)
+    unsigned int dwCash)
 /*++
   Purpose:
 
@@ -417,7 +406,7 @@ PAL_ShowCash(
 
 --*/
 {
-   LPBOX     lpBox;
+   LPBOX lpBox;
 
    //
    // Create the box.
@@ -441,10 +430,9 @@ PAL_ShowCash(
    return lpBox;
 }
 
-static VOID
+static void
 PAL_SystemMenu_OnItemChange(
-   WORD        wCurrentItem
-)
+    unsigned short wCurrentItem)
 /*++
   Purpose:
 
@@ -463,10 +451,9 @@ PAL_SystemMenu_OnItemChange(
    gpGlobals->iCurSystemMenuItem = wCurrentItem - 1;
 }
 
-static BOOL
+static int
 PAL_SystemMenu(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -482,24 +469,24 @@ PAL_SystemMenu(
 
 --*/
 {
-   LPBOX               lpMenuBox;
-   WORD                wReturnValue;
-   int                 iSlot, i;
-   const SDL_Rect      rect = {40, 60, 280, 135};
+   LPBOX lpMenuBox;
+   unsigned short wReturnValue;
+   int iSlot, i;
+   const SDL_Rect rect = {40, 60, 280, 135};
 
    //
    // Create menu items
    //
-   const MENUITEM      rgSystemMenuItem[] =
-   {
-      // value  label                        enabled   pos
-      { 1,      SYSMENU_LABEL_SAVE,          TRUE,     PAL_XY(53, 72) },
-      { 2,      SYSMENU_LABEL_LOAD,          TRUE,     PAL_XY(53, 72 + 18) },
-      { 3,      SYSMENU_LABEL_MUSIC,         TRUE,     PAL_XY(53, 72 + 36) },
-      { 4,      SYSMENU_LABEL_SOUND,         TRUE,     PAL_XY(53, 72 + 54) },
-      { 5,      SYSMENU_LABEL_QUIT,          TRUE,     PAL_XY(53, 72 + 72) },
-   };
-   const int           nSystemMenuItem = sizeof(rgSystemMenuItem) / sizeof(MENUITEM);
+   const MENUITEM rgSystemMenuItem[] =
+       {
+           // value  label                        enabled   pos
+           {1, SYSMENU_LABEL_SAVE, TRUE, PAL_XY(53, 72)},
+           {2, SYSMENU_LABEL_LOAD, TRUE, PAL_XY(53, 72 + 18)},
+           {3, SYSMENU_LABEL_MUSIC, TRUE, PAL_XY(53, 72 + 36)},
+           {4, SYSMENU_LABEL_SOUND, TRUE, PAL_XY(53, 72 + 54)},
+           {5, SYSMENU_LABEL_QUIT, TRUE, PAL_XY(53, 72 + 72)},
+       };
+   const int nSystemMenuItem = sizeof(rgSystemMenuItem) / sizeof(MENUITEM);
 
    //
    // Create the menu box.
@@ -531,12 +518,12 @@ PAL_SystemMenu(
 
       if (iSlot != MENUITEM_VALUE_CANCELLED)
       {
-         WORD wSavedTimes = 0;
-         gpGlobals->bCurrentSaveSlot = (BYTE)iSlot;
+         unsigned short wSavedTimes = 0;
+         gpGlobals->bCurrentSaveSlot = (unsigned char)iSlot;
 
          for (i = 1; i <= 5; i++)
          {
-            WORD curSavedTimes = GetSavedTimes(i);
+            unsigned short curSavedTimes = GetSavedTimes(i);
             if (curSavedTimes > wSavedTimes)
             {
                wSavedTimes = curSavedTimes;
@@ -585,10 +572,8 @@ PAL_SystemMenu(
    return TRUE;
 }
 
-VOID
-PAL_InGameMagicMenu(
-   VOID
-)
+void PAL_InGameMagicMenu(
+    void)
 /*++
   Purpose:
 
@@ -604,10 +589,10 @@ PAL_InGameMagicMenu(
 
 --*/
 {
-   MENUITEM         rgMenuItem[MAX_PLAYERS_IN_PARTY];
-   int              i, y;
-   static WORD      w;
-   WORD             wMagic;
+   MENUITEM rgMenuItem[MAX_PLAYERS_IN_PARTY];
+   int i, y;
+   static unsigned short w;
+   unsigned short wMagic;
 
    if (gpGlobals->wMaxPartyMemberIndex == 0)
    {
@@ -623,7 +608,7 @@ PAL_InGameMagicMenu(
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
       PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-         TIMEMETER_COLOR_DEFAULT, TRUE);
+                        TIMEMETER_COLOR_DEFAULT, TRUE);
       y += 78;
    }
 
@@ -638,9 +623,9 @@ PAL_InGameMagicMenu(
 
       rgMenuItem[i].wValue = i;
       rgMenuItem[i].wNumWord =
-         gpGlobals->g.PlayerRoles.rgwName[gpGlobals->rgParty[i].wPlayerRole];
+          gpGlobals->g.PlayerRoles.rgwName[gpGlobals->rgParty[i].wPlayerRole];
       rgMenuItem[i].fEnabled =
-         (gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[i].wPlayerRole] > 0);
+          (gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[i].wPlayerRole] > 0);
       rgMenuItem[i].pos = PAL_XY(48, y);
 
       y += 18;
@@ -649,7 +634,7 @@ PAL_InGameMagicMenu(
    //
    // Draw the box
    //
-   PAL_CreateBox(PAL_XY(35, 62), gpGlobals->wMaxPartyMemberIndex, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem)/sizeof(MENUITEM)) - 1, 0, FALSE);
+   PAL_CreateBox(PAL_XY(35, 62), gpGlobals->wMaxPartyMemberIndex, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, FALSE);
 
    w = PAL_ReadMenu(NULL, rgMenuItem, gpGlobals->wMaxPartyMemberIndex + 1, w, MENUITEM_COLOR);
 
@@ -675,16 +660,16 @@ start_magicmenu:
       if (gpGlobals->g.rgObject[wMagic].magic.wFlags & kMagicFlagApplyToAll)
       {
          gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse =
-            PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse, 0);
+             PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse, 0);
 
          if (g_fScriptSuccess)
          {
             gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess =
-               PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess, 0);
+                PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess, 0);
 
-            if(g_fScriptSuccess)
+            if (g_fScriptSuccess)
                gpGlobals->g.PlayerRoles.rgwMP[gpGlobals->rgParty[w].wPlayerRole] -=
-               gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP;
+                   gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP;
          }
 
          if (gpGlobals->fNeedToFadeIn)
@@ -698,8 +683,8 @@ start_magicmenu:
          //
          // Need to select which player to use the magic on.
          //
-         WORD       wPlayer = 0;
-         SDL_Rect   rect;
+         unsigned short wPlayer = 0;
+         SDL_Rect rect;
 
          while (wPlayer != MENUITEM_VALUE_CANCELLED)
          {
@@ -711,7 +696,7 @@ start_magicmenu:
             for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
             {
                PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-                  TIMEMETER_COLOR_DEFAULT, TRUE);
+                                 TIMEMETER_COLOR_DEFAULT, TRUE);
                y += 78;
             }
 
@@ -726,7 +711,7 @@ start_magicmenu:
             VIDEO_RestoreScreen(gpScreen);
 
             PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_CURSOR_UP),
-               gpScreen, PAL_XY(75 + 78 * wPlayer, rect.y));
+                                 gpScreen, PAL_XY(75 + 78 * wPlayer, rect.y));
 
             VIDEO_UpdateScreen(&rect);
 
@@ -743,25 +728,25 @@ start_magicmenu:
                else if (g_InputState.dwKeyPress & kKeySearch)
                {
                   gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse =
-                     PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse,
-                        gpGlobals->rgParty[wPlayer].wPlayerRole);
+                      PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse,
+                                           gpGlobals->rgParty[wPlayer].wPlayerRole);
 
                   if (g_fScriptSuccess)
                   {
                      gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess =
-                        PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess,
-                           gpGlobals->rgParty[wPlayer].wPlayerRole);
+                         PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess,
+                                              gpGlobals->rgParty[wPlayer].wPlayerRole);
 
                      if (g_fScriptSuccess)
                      {
                         gpGlobals->g.PlayerRoles.rgwMP[gpGlobals->rgParty[w].wPlayerRole] -=
-                           gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP;
+                            gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP;
 
                         //
                         // Check if we have run out of MP
                         //
                         if (gpGlobals->g.PlayerRoles.rgwMP[gpGlobals->rgParty[w].wPlayerRole] <
-                           gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP)
+                            gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP)
                         {
                            //
                            // Don't go further if run out of MP
@@ -803,16 +788,15 @@ start_magicmenu:
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-            TIMEMETER_COLOR_DEFAULT, TRUE);
+                           TIMEMETER_COLOR_DEFAULT, TRUE);
          y += 78;
       }
    }
 }
 
-static VOID
+static void
 PAL_InventoryMenu(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -828,16 +812,16 @@ PAL_InventoryMenu(
 
 --*/
 {
-   static WORD      w = 0;
+   static unsigned short w = 0;
 
-   MENUITEM        rgMenuItem[2] =
-   {
-      // value  label                     enabled   pos
-      { 1,      INVMENU_LABEL_EQUIP,      TRUE,     PAL_XY(43, 73) },
-      { 2,      INVMENU_LABEL_USE,        TRUE,     PAL_XY(43, 73 + 18) },
-   };
+   MENUITEM rgMenuItem[2] =
+       {
+           // value  label                     enabled   pos
+           {1, INVMENU_LABEL_EQUIP, TRUE, PAL_XY(43, 73)},
+           {2, INVMENU_LABEL_USE, TRUE, PAL_XY(43, 73 + 18)},
+       };
 
-   PAL_CreateBox(PAL_XY(30, 60), 1, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem)/sizeof(MENUITEM)) - 1, 0, FALSE);
+   PAL_CreateBox(PAL_XY(30, 60), 1, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, FALSE);
 
    w = PAL_ReadMenu(NULL, rgMenuItem, 2, w - 1, MENUITEM_COLOR);
 
@@ -853,10 +837,9 @@ PAL_InventoryMenu(
    }
 }
 
-static VOID
+static void
 PAL_InGameMenu_OnItemChange(
-   WORD        wCurrentItem
-)
+    unsigned short wCurrentItem)
 /*++
   Purpose:
 
@@ -875,10 +858,8 @@ PAL_InGameMenu_OnItemChange(
    gpGlobals->iCurMainMenuItem = wCurrentItem - 1;
 }
 
-VOID
-PAL_InGameMenu(
-   VOID
-)
+void PAL_InGameMenu(
+    void)
 /*++
   Purpose:
 
@@ -894,23 +875,23 @@ PAL_InGameMenu(
 
 --*/
 {
-   LPBOX                lpCashBox, lpMenuBox;
-   WORD                 wReturnValue;
-   
+   LPBOX lpCashBox, lpMenuBox;
+   unsigned short wReturnValue;
+
    // Fix render problem with shadow
    VIDEO_BackupScreen(gpScreen);
 
    //
    // Create menu items
    //
-   MENUITEM        rgMainMenuItem[4] =
-   {
-      // value  label                      enabled   pos
-      { 1,      GAMEMENU_LABEL_STATUS,     TRUE,     PAL_XY(16, 50) },
-      { 2,      GAMEMENU_LABEL_MAGIC,      TRUE,     PAL_XY(16, 50 + 18) },
-      { 3,      GAMEMENU_LABEL_INVENTORY,  TRUE,     PAL_XY(16, 50 + 36) },
-      { 4,      GAMEMENU_LABEL_SYSTEM,     TRUE,     PAL_XY(16, 50 + 54) },
-   };
+   MENUITEM rgMainMenuItem[4] =
+       {
+           // value  label                      enabled   pos
+           {1, GAMEMENU_LABEL_STATUS, TRUE, PAL_XY(16, 50)},
+           {2, GAMEMENU_LABEL_MAGIC, TRUE, PAL_XY(16, 50 + 18)},
+           {3, GAMEMENU_LABEL_INVENTORY, TRUE, PAL_XY(16, 50 + 36)},
+           {4, GAMEMENU_LABEL_SYSTEM, TRUE, PAL_XY(16, 50 + 54)},
+       };
 
    //
    // Display the cash amount.
@@ -929,7 +910,7 @@ PAL_InGameMenu(
    while (TRUE)
    {
       wReturnValue = PAL_ReadMenu(PAL_InGameMenu_OnItemChange, rgMainMenuItem, 4,
-         gpGlobals->iCurMainMenuItem, MENUITEM_COLOR);
+                                  gpGlobals->iCurMainMenuItem, MENUITEM_COLOR);
 
       if (wReturnValue == MENUITEM_VALUE_CANCELLED)
       {
@@ -982,10 +963,8 @@ out:
    VIDEO_RestoreScreen(gpScreen);
 }
 
-VOID
-PAL_PlayerStatus(
-   VOID
-)
+void PAL_PlayerStatus(
+    void)
 /*++
   Purpose:
 
@@ -1001,25 +980,22 @@ PAL_PlayerStatus(
 
 --*/
 {
-   PAL_LARGE BYTE   bufBackground[320 * 200];
-   PAL_LARGE BYTE   bufImage[PAL_RLEBUFSIZE];
-   PAL_LARGE BYTE   bufImageBox[50 * 49];
-   int              labels0[] = {
-      STATUS_LABEL_EXP, STATUS_LABEL_LEVEL, STATUS_LABEL_HP,
-      STATUS_LABEL_MP
-   };
-   int              labels1[] = {
-      STATUS_LABEL_EXP_LAYOUT, STATUS_LABEL_LEVEL_LAYOUT, STATUS_LABEL_HP_LAYOUT,
-      STATUS_LABEL_MP_LAYOUT
-   };
-   int              labels[] = {
-      STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE,
-      STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE
-   };
-   int              iCurrent;
-   int              iPlayerRole;
-   int              i, j;
-   WORD             w;
+   PAL_LARGE unsigned char bufBackground[320 * 200];
+   PAL_LARGE unsigned char bufImage[320 * 200];
+   PAL_LARGE unsigned char bufImageBox[50 * 49];
+   int labels0[] = {
+       STATUS_LABEL_EXP, STATUS_LABEL_LEVEL, STATUS_LABEL_HP,
+       STATUS_LABEL_MP};
+   int labels1[] = {
+       STATUS_LABEL_EXP_LAYOUT, STATUS_LABEL_LEVEL_LAYOUT, STATUS_LABEL_HP_LAYOUT,
+       STATUS_LABEL_MP_LAYOUT};
+   int labels[] = {
+       STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE,
+       STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE};
+   int iCurrent;
+   int iPlayerRole;
+   int i, j;
+   unsigned short w;
 
    PAL_MKFDecompressChunk(bufBackground, 320 * 200, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
    iCurrent = 0;
@@ -1037,14 +1013,16 @@ PAL_PlayerStatus(
          memcpy(&bufBackground[(i + 133) * 320 + 201], &bufBackground[(i + 133) * 320 + 81 - 50], 50);
          memcpy(&bufBackground[(i + 101) * 320 + 251], &bufBackground[(i + 101) * 320 + 81 - 50], 50);
          memcpy(&bufBackground[(i + 39) * 320 + 247], &bufBackground[(i + 39) * 320 + 189 - 50], 50);
-         if (i > 0) memcpy(&bufBackground[(i - 1) * 320 + 189], &bufBackground[(i - 1) * 320 + 189 - 50], 50);
+         if (i > 0)
+            memcpy(&bufBackground[(i - 1) * 320 + 189], &bufBackground[(i - 1) * 320 + 189 - 50], 50);
       }
-      for(i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
+      for (i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
       {
          short x = PAL_X(gConfig.ScreenLayout.RoleEquipImageBoxes[i]);
          short y = PAL_Y(gConfig.ScreenLayout.RoleEquipImageBoxes[i]);
          short sx = (x < 0) ? -x : 0, sy = (y < 0) ? -y : 0, d = (x > 270) ? x - 270 : 0;
-         if (sx >= 50 || sy >= 49 || x >= 320 || y >= 200) continue;
+         if (sx >= 50 || sy >= 49 || x >= 320 || y >= 200)
+            continue;
          for (; sy < 49 && y + sy < 200; sy++)
          {
             memcpy(&bufBackground[(y + sy) * 320 + x + sx], &bufImageBox[sy * 50 + sx], 50 - sx - d);
@@ -1064,7 +1042,7 @@ PAL_PlayerStatus(
       //
       // Draw the image of player role
       //
-      if (PAL_MKFReadChunk(bufImage, PAL_RLEBUFSIZE, gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gpGlobals->f.fpRGM) > 0)
+      if (PAL_MKFReadChunk(bufImage, 320 * 200, gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gpGlobals->f.fpRGM) > 0)
       {
          PAL_RLEBlitToSurface(bufImage, gpScreen, gConfig.ScreenLayout.RoleImage);
       }
@@ -1086,11 +1064,11 @@ PAL_PlayerStatus(
          //
          // Draw the image
          //
-         if (PAL_MKFReadChunk(bufImage, PAL_RLEBUFSIZE,
-            gpGlobals->g.rgObject[w].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+         if (PAL_MKFReadChunk(bufImage, 320 * 200,
+                              gpGlobals->g.rgObject[w].item.wBitmap, gpGlobals->f.fpBALL) > 0)
          {
             PAL_RLEBlitToSurface(bufImage, gpScreen,
-               PAL_XY_OFFSET(gConfig.ScreenLayout.RoleEquipImageBoxes[i], 1, 1));
+                                 PAL_XY_OFFSET(gConfig.ScreenLayout.RoleEquipImageBoxes[i], 1, 1));
          }
 
          //
@@ -1105,9 +1083,9 @@ PAL_PlayerStatus(
          {
             offset = 0;
          }
-         int index = &gConfig.ScreenLayout.RoleEquipNames[i] - gConfig.ScreenLayoutArray;
-         BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
-         BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
+         unsigned int index = &gConfig.ScreenLayout.RoleEquipNames[i] - gConfig.ScreenLayoutArray;
+         int fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
+         int fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
          PAL_DrawText(PAL_GetWord(w), PAL_XY_OFFSET(gConfig.ScreenLayout.RoleEquipNames[i], offset, 0), STATUS_COLOR_EQUIPMENT, fShadow, FALSE, fUse8x8Font);
       }
 
@@ -1117,62 +1095,62 @@ PAL_PlayerStatus(
       for (i = 0; i < sizeof(labels0) / sizeof(int); i++)
       {
          int index = labels1[i];
-         BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
-         BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
-         PAL_DrawText(PAL_GetWord(labels0[i]), *(&gConfig.ScreenLayout.RoleExpLabel+i), MENUITEM_COLOR, fShadow, FALSE, fUse8x8Font);
+         int fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
+         int fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
+         PAL_DrawText(PAL_GetWord(labels0[i]), *(&gConfig.ScreenLayout.RoleExpLabel + i), MENUITEM_COLOR, fShadow, FALSE, fUse8x8Font);
       }
       for (i = 0; i < sizeof(labels) / sizeof(int); i++)
       {
-         int index = &gConfig.ScreenLayout.RoleStatusLabels[i] - gConfig.ScreenLayoutArray;
-         BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
-         BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
+         unsigned int index = &gConfig.ScreenLayout.RoleStatusLabels[i] - gConfig.ScreenLayoutArray;
+         int fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
+         int fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
          PAL_DrawText(PAL_GetWord(labels[i]), gConfig.ScreenLayout.RoleStatusLabels[i], MENUITEM_COLOR, fShadow, FALSE, fUse8x8Font);
       }
 
       PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[iPlayerRole]),
-         gConfig.ScreenLayout.RoleName, MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
+                   gConfig.ScreenLayout.RoleName, MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
 
       //
       // Draw the stats
       //
       if (gConfig.ScreenLayout.RoleExpSlash != 0)
-	  {
+      {
          PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, gConfig.ScreenLayout.RoleExpSlash);
       }
       if (gConfig.ScreenLayout.RoleHPSlash != 0)
-	  {
+      {
          PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, gConfig.ScreenLayout.RoleHPSlash);
       }
       if (gConfig.ScreenLayout.RoleMPSlash != 0)
-	  {
+      {
          PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, gConfig.ScreenLayout.RoleMPSlash);
       }
 
       PAL_DrawNumber(gpGlobals->Exp.rgPrimaryExp[iPlayerRole].wExp, 5,
-         gConfig.ScreenLayout.RoleCurrExp, kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleCurrExp, kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(gpGlobals->g.rgLevelUpExp[gpGlobals->g.PlayerRoles.rgwLevel[iPlayerRole]], 5,
-         gConfig.ScreenLayout.RoleNextExp, kNumColorCyan, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleNextExp, kNumColorCyan, kNumAlignRight);
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwLevel[iPlayerRole], 2,
-         gConfig.ScreenLayout.RoleLevel, kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleLevel, kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwHP[iPlayerRole], 4,
-         gConfig.ScreenLayout.RoleCurHP, kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleCurHP, kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxHP[iPlayerRole], 4,
-         gConfig.ScreenLayout.RoleMaxHP, kNumColorBlue, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleMaxHP, kNumColorBlue, kNumAlignRight);
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMP[iPlayerRole], 4,
-         gConfig.ScreenLayout.RoleCurMP, kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleCurMP, kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxMP[iPlayerRole], 4,
-         gConfig.ScreenLayout.RoleMaxMP, kNumColorBlue, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleMaxMP, kNumColorBlue, kNumAlignRight);
 
       PAL_DrawNumber(PAL_GetPlayerAttackStrength(iPlayerRole), 4,
-         gConfig.ScreenLayout.RoleStatusValues[0], kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleStatusValues[0], kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerMagicStrength(iPlayerRole), 4,
-         gConfig.ScreenLayout.RoleStatusValues[1], kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleStatusValues[1], kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerDefense(iPlayerRole), 4,
-         gConfig.ScreenLayout.RoleStatusValues[2], kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleStatusValues[2], kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerDexterity(iPlayerRole), 4,
-         gConfig.ScreenLayout.RoleStatusValues[3], kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleStatusValues[3], kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerFleeRate(iPlayerRole), 4,
-         gConfig.ScreenLayout.RoleStatusValues[4], kNumColorYellow, kNumAlignRight);
+                     gConfig.ScreenLayout.RoleStatusValues[4], kNumColorYellow, kNumAlignRight);
 
       //
       // Draw all poisons
@@ -1183,7 +1161,7 @@ PAL_PlayerStatus(
 
          if (w != 0 && gpGlobals->g.rgObject[w].poison.wPoisonLevel <= 3)
          {
-            PAL_DrawText(PAL_GetWord(w), gConfig.ScreenLayout.RolePoisonNames[j++], (BYTE)(gpGlobals->g.rgObject[w].poison.wColor + 10), TRUE, FALSE, FALSE);
+            PAL_DrawText(PAL_GetWord(w), gConfig.ScreenLayout.RolePoisonNames[j++], (unsigned char)(gpGlobals->g.rgObject[w].poison.wColor + 10), TRUE, FALSE, FALSE);
          }
       }
 
@@ -1220,10 +1198,9 @@ PAL_PlayerStatus(
    }
 }
 
-WORD
+unsigned short
 PAL_ItemUseMenu(
-   WORD           wItemToUse
-)
+    unsigned short wItemToUse)
 /*++
   Purpose:
 
@@ -1240,12 +1217,12 @@ PAL_ItemUseMenu(
 
 --*/
 {
-   BYTE           bColor, bSelectedColor;
-   PAL_LARGE BYTE bufImage[2048];
-   DWORD          dwColorChangeTime;
-   static SHORT   sSelectedPlayer = 0;
-   SDL_Rect       rect = {110, 2, 200, 180};
-   int            i;
+   unsigned char bColor, bSelectedColor;
+   PAL_LARGE unsigned char bufImage[2048];
+   unsigned int dwColorChangeTime;
+   static short sSelectedPlayer = 0;
+   SDL_Rect rect = {110, 2, 200, 180};
+   int i;
 
    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
    dwColorChangeTime = 0;
@@ -1266,51 +1243,51 @@ PAL_ItemUseMenu(
       // Draw the stats of the selected player
       //
       PAL_DrawText(PAL_GetWord(STATUS_LABEL_LEVEL), PAL_XY(200, 16),
-         ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
+                   ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
       PAL_DrawText(PAL_GetWord(STATUS_LABEL_HP), PAL_XY(200, 34),
-         ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
+                   ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
       PAL_DrawText(PAL_GetWord(STATUS_LABEL_MP), PAL_XY(200, 52),
-         ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
+                   ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
       PAL_DrawText(PAL_GetWord(STATUS_LABEL_ATTACKPOWER), PAL_XY(200, 70),
-         ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
+                   ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
       PAL_DrawText(PAL_GetWord(STATUS_LABEL_MAGICPOWER), PAL_XY(200, 88),
-         ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
+                   ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
       PAL_DrawText(PAL_GetWord(STATUS_LABEL_RESISTANCE), PAL_XY(200, 106),
-         ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
+                   ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
       PAL_DrawText(PAL_GetWord(STATUS_LABEL_DEXTERITY), PAL_XY(200, 124),
-         ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
+                   ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
       PAL_DrawText(PAL_GetWord(STATUS_LABEL_FLEERATE), PAL_XY(200, 142),
-         ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
+                   ITEMUSEMENU_COLOR_STATLABEL, TRUE, FALSE, FALSE);
 
       i = gpGlobals->rgParty[sSelectedPlayer].wPlayerRole;
 
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwLevel[i], 4, PAL_XY(240, 20),
-         kNumColorYellow, kNumAlignRight);
+                     kNumColorYellow, kNumAlignRight);
 
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
-         PAL_XY(263, 38));
+                           PAL_XY(263, 38));
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxHP[i], 4,
-         PAL_XY(261, 40), kNumColorBlue, kNumAlignRight);
+                     PAL_XY(261, 40), kNumColorBlue, kNumAlignRight);
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwHP[i], 4,
-         PAL_XY(240, 37), kNumColorYellow, kNumAlignRight);
+                     PAL_XY(240, 37), kNumColorYellow, kNumAlignRight);
 
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
-         PAL_XY(263, 56));
+                           PAL_XY(263, 56));
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxMP[i], 4,
-         PAL_XY(261, 58), kNumColorBlue, kNumAlignRight);
+                     PAL_XY(261, 58), kNumColorBlue, kNumAlignRight);
       PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMP[i], 4,
-         PAL_XY(240, 55), kNumColorYellow, kNumAlignRight);
+                     PAL_XY(240, 55), kNumColorYellow, kNumAlignRight);
 
       PAL_DrawNumber(PAL_GetPlayerAttackStrength(i), 4, PAL_XY(240, 74),
-         kNumColorYellow, kNumAlignRight);
+                     kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerMagicStrength(i), 4, PAL_XY(240, 92),
-         kNumColorYellow, kNumAlignRight);
+                     kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerDefense(i), 4, PAL_XY(240, 110),
-         kNumColorYellow, kNumAlignRight);
+                     kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerDexterity(i), 4, PAL_XY(240, 128),
-         kNumColorYellow, kNumAlignRight);
+                     kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerFleeRate(i), 4, PAL_XY(240, 146),
-         kNumColorYellow, kNumAlignRight);
+                     kNumColorYellow, kNumAlignRight);
 
       //
       // Draw the names of the players in the party
@@ -1327,11 +1304,11 @@ PAL_ItemUseMenu(
          }
 
          PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[gpGlobals->rgParty[i].wPlayerRole]),
-            PAL_XY(125, 16 + 20 * i), bColor, TRUE, FALSE, FALSE);
+                      PAL_XY(125, 16 + 20 * i), bColor, TRUE, FALSE, FALSE);
       }
 
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
-         PAL_XY(120, 80));
+                           PAL_XY(120, 80));
 
       i = PAL_GetItemAmount(wItemToUse);
 
@@ -1341,7 +1318,7 @@ PAL_ItemUseMenu(
          // Draw the picture of the item
          //
          if (PAL_MKFReadChunk(bufImage, 2048,
-            gpGlobals->g.rgObject[wItemToUse].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                              gpGlobals->g.rgObject[wItemToUse].item.wBitmap, gpGlobals->f.fpBALL) > 0)
          {
             PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(127, 88));
          }
@@ -1370,8 +1347,8 @@ PAL_ItemUseMenu(
          //
          if (SDL_TICKS_PASSED(SDL_GetTicks(), dwColorChangeTime))
          {
-            if ((WORD)bSelectedColor + 1 >=
-               (WORD)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
+            if ((unsigned short)bSelectedColor + 1 >=
+                (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
             {
                bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
             }
@@ -1386,8 +1363,8 @@ PAL_ItemUseMenu(
             // Redraw the selected item.
             //
             PAL_DrawText(
-               PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[gpGlobals->rgParty[sSelectedPlayer].wPlayerRole]),
-               PAL_XY(125, 16 + 20 * sSelectedPlayer), bSelectedColor, FALSE, TRUE, FALSE);
+                PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[gpGlobals->rgParty[sSelectedPlayer].wPlayerRole]),
+                PAL_XY(125, 16 + 20 * sSelectedPlayer), bSelectedColor, FALSE, TRUE, FALSE);
          }
 
          PAL_ProcessEvent();
@@ -1434,10 +1411,9 @@ PAL_ItemUseMenu(
    return MENUITEM_VALUE_CANCELLED;
 }
 
-static VOID
+static void
 PAL_BuyMenu_OnItemChange(
-   WORD           wCurrentItem
-)
+    unsigned short wCurrentItem)
 /*++
   Purpose:
 
@@ -1455,22 +1431,22 @@ PAL_BuyMenu_OnItemChange(
 
 --*/
 {
-   const SDL_Rect      rect = {20, 8, 300, 175};
-   int                 i, j, n, iPlayerID, x, y;
-   PAL_LARGE BYTE      bufImage[2048];
+   const SDL_Rect rect = {20, 8, 300, 175};
+   int i, j, n, iPlayerID, x, y;
+   PAL_LARGE unsigned char bufImage[2048];
 
    //
    // Prepare item bakcground box pos
    //
    x = 40, y = 8;
 
-   if( __buymenu_firsttime_render )
+   if (__buymenu_firsttime_render)
       PAL_RLEBlitToSurfaceWithShadow(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen, PAL_XY(x + 6, y + 6), TRUE);
    //
    // Draw the picture of current selected item
    //
    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
-      PAL_XY(x, y));
+                        PAL_XY(x, y));
 
    //
    // Prepare item pos
@@ -1478,7 +1454,7 @@ PAL_BuyMenu_OnItemChange(
    x = 48, y = 15;
 
    if (PAL_MKFReadChunk(bufImage, 2048,
-      gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                        gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
    {
       PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(x, y));
    }
@@ -1507,7 +1483,8 @@ PAL_BuyMenu_OnItemChange(
       {
          iPlayerID = gpGlobals->rgParty[j].wPlayerRole;
 
-         if (gpGlobals->g.PlayerRoles.rgwEquipment[i][iPlayerID] == wCurrentItem) n++;
+         if (gpGlobals->g.PlayerRoles.rgwEquipment[i][iPlayerID] == wCurrentItem)
+            n++;
       }
    }
 
@@ -1516,13 +1493,13 @@ PAL_BuyMenu_OnItemChange(
    //
    x = 20, y = 100;
 
-   if( __buymenu_firsttime_render )
+   if (__buymenu_firsttime_render)
       PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, FALSE, 6);
    else
-   //
-   // Draw the amount of this item in the inventory
-   //
-   PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, FALSE, 0);
+      //
+      // Draw the amount of this item in the inventory
+      //
+      PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, FALSE, 0);
    PAL_DrawText(PAL_GetWord(BUYMENU_LABEL_CURRENT), PAL_XY(x + 10, y + 10), 0, FALSE, FALSE, FALSE);
    PAL_DrawNumber(n, 6, PAL_XY(x + 49, y + 15), kNumColorYellow, kNumAlignRight);
 
@@ -1531,25 +1508,23 @@ PAL_BuyMenu_OnItemChange(
    //
    x = 20, y = 141;
 
-   if( __buymenu_firsttime_render )
+   if (__buymenu_firsttime_render)
       PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, FALSE, 6);
    else
-   //
-   // Draw the cash amount
-   //
-   PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, FALSE, 0);
+      //
+      // Draw the cash amount
+      //
+      PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, FALSE, 0);
    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(x + 10, y + 10), 0, FALSE, FALSE, FALSE);
    PAL_DrawNumber(gpGlobals->dwCash, 6, PAL_XY(x + 49, y + 15), kNumColorYellow, kNumAlignRight);
 
    VIDEO_UpdateScreen(&rect);
-   
+
    __buymenu_firsttime_render = FALSE;
 }
 
-VOID
-PAL_BuyMenu(
-   WORD           wStoreNum
-)
+void PAL_BuyMenu(
+    unsigned short wStoreNum)
 /*++
   Purpose:
 
@@ -1565,9 +1540,9 @@ PAL_BuyMenu(
 
 --*/
 {
-   MENUITEM        rgMenuItem[MAX_STORE_ITEM];
-   int             i, y;
-   WORD            w;
+   MENUITEM rgMenuItem[MAX_STORE_ITEM];
+   int i, y;
+   unsigned short w;
 
    //
    // create the menu items
@@ -1641,10 +1616,9 @@ PAL_BuyMenu(
    }
 }
 
-static VOID
+static void
 PAL_SellMenu_OnItemChange(
-   WORD         wCurrentItem
-)
+    unsigned short wCurrentItem)
 /*++
   Purpose:
 
@@ -1662,7 +1636,7 @@ PAL_SellMenu_OnItemChange(
 
 --*/
 {
-   WORD x = 100, y = 150;
+   unsigned short x = 100, y = 150;
 
    //
    // Draw the cash amount
@@ -1682,14 +1656,12 @@ PAL_SellMenu_OnItemChange(
    {
       PAL_DrawText(PAL_GetWord(SELLMENU_LABEL_PRICE), PAL_XY(x + 10, y + 10), 0, FALSE, FALSE, FALSE);
       PAL_DrawNumber(gpGlobals->g.rgObject[wCurrentItem].item.wPrice / 2, 6,
-         PAL_XY(x + 48, y + 15), kNumColorYellow, kNumAlignRight);
+                     PAL_XY(x + 48, y + 15), kNumColorYellow, kNumAlignRight);
    }
 }
 
-VOID
-PAL_SellMenu(
-   VOID
-)
+void PAL_SellMenu(
+    void)
 /*++
   Purpose:
 
@@ -1705,7 +1677,7 @@ PAL_SellMenu(
 
 --*/
 {
-   WORD      w;
+   unsigned short w;
 
    while (TRUE)
    {
@@ -1725,10 +1697,8 @@ PAL_SellMenu(
    }
 }
 
-VOID
-PAL_EquipItemMenu(
-   WORD        wItem
-)
+void PAL_EquipItemMenu(
+    unsigned short wItem)
 /*++
   Purpose:
 
@@ -1744,18 +1714,18 @@ PAL_EquipItemMenu(
 
 --*/
 {
-   PAL_LARGE BYTE   bufBackground[320 * 200];
-   PAL_LARGE BYTE   bufImageBox[72 * 72];
-   PAL_LARGE BYTE   bufImage[2048];
-   WORD             w;
-   int              iCurrentPlayer, i;
-   BYTE             bColor, bSelectedColor;
-   DWORD            dwColorChangeTime;
+   PAL_LARGE unsigned char bufBackground[320 * 200];
+   PAL_LARGE unsigned char bufImageBox[72 * 72];
+   PAL_LARGE unsigned char bufImage[2048];
+   unsigned short w;
+   int iCurrentPlayer, i;
+   unsigned char bColor, bSelectedColor;
+   unsigned int dwColorChangeTime;
 
    gpGlobals->wLastUnequippedItem = wItem;
 
    PAL_MKFDecompressChunk(bufBackground, 320 * 200, EQUIPMENU_BACKGROUND_FBPNUM,
-      gpGlobals->f.fpFBP);
+                          gpGlobals->f.fpFBP);
 
    if (gConfig.fUseCustomScreenLayout)
    {
@@ -1802,27 +1772,27 @@ PAL_EquipItemMenu(
       // Draw the item picture
       //
       if (PAL_MKFReadChunk(bufImage, 2048,
-         gpGlobals->g.rgObject[wItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                           gpGlobals->g.rgObject[wItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
       {
          PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY_OFFSET(gConfig.ScreenLayout.EquipImageBox, 8, 8));
       }
 
       if (gConfig.fUseCustomScreenLayout)
       {
-         int labels1[] = { STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE, STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE };
-         int labels2[] = { EQUIP_LABEL_HEAD, EQUIP_LABEL_SHOULDER, EQUIP_LABEL_BODY, EQUIP_LABEL_HAND, EQUIP_LABEL_FOOT, EQUIP_LABEL_NECK };
-		 for (i = 0; i < sizeof(labels1) / sizeof(int); i++)
+         int labels1[] = {STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE, STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE};
+         int labels2[] = {EQUIP_LABEL_HEAD, EQUIP_LABEL_SHOULDER, EQUIP_LABEL_BODY, EQUIP_LABEL_HAND, EQUIP_LABEL_FOOT, EQUIP_LABEL_NECK};
+         for (i = 0; i < sizeof(labels1) / sizeof(int); i++)
          {
-            int index = &gConfig.ScreenLayout.EquipStatusLabels[i] - gConfig.ScreenLayoutArray;
-            BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
-            BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
+            unsigned int index = &gConfig.ScreenLayout.EquipStatusLabels[i] - gConfig.ScreenLayoutArray;
+            int fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
+            int fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
             PAL_DrawText(PAL_GetWord(labels1[i]), gConfig.ScreenLayoutArray[index], MENUITEM_COLOR, fShadow, FALSE, fUse8x8Font);
          }
-		 for (i = 0; i < sizeof(labels2) / sizeof(int); i++)
+         for (i = 0; i < sizeof(labels2) / sizeof(int); i++)
          {
-            int index = &gConfig.ScreenLayout.EquipLabels[i] - gConfig.ScreenLayoutArray;
-            BOOL fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
-            BOOL fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
+            unsigned int index = &gConfig.ScreenLayout.EquipLabels[i] - gConfig.ScreenLayoutArray;
+            int fShadow = (gConfig.ScreenLayoutFlag[index] & DISABLE_SHADOW) ? FALSE : TRUE;
+            int fUse8x8Font = (gConfig.ScreenLayoutFlag[index] & USE_8x8_FONT) ? TRUE : FALSE;
             PAL_DrawText(PAL_GetWord(labels2[i]), gConfig.ScreenLayoutArray[index], MENUITEM_COLOR, fShadow, FALSE, fUse8x8Font);
          }
       }
@@ -1836,7 +1806,7 @@ PAL_EquipItemMenu(
          if (gpGlobals->g.PlayerRoles.rgwEquipment[i][w] != 0)
          {
             PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles.rgwEquipment[i][w]),
-				gConfig.ScreenLayout.EquipNames[i], MENUITEM_COLOR, TRUE, FALSE, FALSE);
+                         gConfig.ScreenLayout.EquipNames[i], MENUITEM_COLOR, TRUE, FALSE, FALSE);
          }
       }
 
@@ -1885,7 +1855,7 @@ PAL_EquipItemMenu(
          }
 
          PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]),
-            PAL_XY_OFFSET(gConfig.ScreenLayout.EquipRoleListBox, 13, 13 + 18 * i), bColor, TRUE, FALSE, FALSE);
+                      PAL_XY_OFFSET(gConfig.ScreenLayout.EquipRoleListBox, 13, 13 + 18 * i), bColor, TRUE, FALSE, FALSE);
       }
 
       //
@@ -1916,8 +1886,8 @@ PAL_EquipItemMenu(
          //
          if (SDL_TICKS_PASSED(SDL_GetTicks(), dwColorChangeTime))
          {
-            if ((WORD)bSelectedColor + 1 >=
-               (WORD)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
+            if ((unsigned short)bSelectedColor + 1 >=
+                (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
             {
                bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
             }
@@ -1936,7 +1906,7 @@ PAL_EquipItemMenu(
             if (gpGlobals->g.rgObject[wItem].item.wFlags & (kItemFlagEquipableByPlayerRole_First << w))
             {
                PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]),
-                  PAL_XY_OFFSET(gConfig.ScreenLayout.EquipRoleListBox, 13, 13 + 18 * iCurrentPlayer), bSelectedColor, TRUE, TRUE, FALSE);
+                            PAL_XY_OFFSET(gConfig.ScreenLayout.EquipRoleListBox, 13, 13 + 18 * iCurrentPlayer), bSelectedColor, TRUE, TRUE, FALSE);
             }
          }
 
@@ -1983,23 +1953,21 @@ PAL_EquipItemMenu(
             // Run the equip script
             //
             gpGlobals->g.rgObject[wItem].item.wScriptOnEquip =
-               PAL_RunTriggerScript(gpGlobals->g.rgObject[wItem].item.wScriptOnEquip,
-                  gpGlobals->rgParty[iCurrentPlayer].wPlayerRole);
+                PAL_RunTriggerScript(gpGlobals->g.rgObject[wItem].item.wScriptOnEquip,
+                                     gpGlobals->rgParty[iCurrentPlayer].wPlayerRole);
          }
       }
    }
 }
 
-VOID
-PAL_QuitGame(
-   VOID
-)
+void PAL_QuitGame(
+    void)
 {
-	WORD wReturnValue = PAL_ConfirmMenu(); // No config menu available
-	if (wReturnValue == 1 || wReturnValue == 2)
-	{
-		AUDIO_PlayMusic(0, FALSE, 2);
-		PAL_FadeOut(2);
-		PAL_Shutdown(0);
-	}
+   unsigned short wReturnValue = PAL_ConfirmMenu(); // No config menu available
+   if (wReturnValue == 1 || wReturnValue == 2)
+   {
+      AUDIO_PlayMusic(0, FALSE, 2);
+      PAL_FadeOut(2);
+      PAL_Shutdown(0);
+   }
 }

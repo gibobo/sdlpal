@@ -27,31 +27,36 @@
 #include "resampler.h"
 #include "src/rix.h"
 #include "src/surroundopl.h"
+#include "common.h"
+#include <SDL_timer.h>
 
-typedef struct tagRIXPLAYER :
-	public AUDIOPLAYER
+typedef struct tagRIXPLAYER : public AUDIOPLAYER
 {
-   Copl                      *opl;
-   CrixPlayer                *rix;
-   void                      *resampler[2];
-   BYTE                       buf[(PAL_MAX_SAMPLERATE + 69) / 70 * sizeof(short) * 2];
-   LPBYTE                     pos;
-   INT                        iNextMusic; // the next music number to switch to
-   DWORD                      dwStartFadeTime;
-   INT                        iTotalFadeOutSamples;
-   INT                        iTotalFadeInSamples;
-   INT                        iRemainingFadeSamples;
-   enum { NONE, FADE_IN, FADE_OUT } FadeType; // fade in or fade out ?
-   BOOL                       fNextLoop;
-   BOOL                       fReady;
+	Copl *opl;
+	CrixPlayer *rix;
+	void *resampler[2];
+	unsigned char buf[(PAL_MAX_SAMPLERATE + 69) / 70 * sizeof(short) * 2];
+	unsigned char *pos;
+	int iNextMusic; // the next music number to switch to
+	unsigned int dwStartFadeTime;
+	int iTotalFadeOutSamples;
+	int iTotalFadeInSamples;
+	int iRemainingFadeSamples;
+	enum
+	{
+		NONE,
+		FADE_IN,
+		FADE_OUT
+	} FadeType; // fade in or fade out ?
+	int fNextLoop;
+	int fReady;
 } RIXPLAYER, *LPRIXPLAYER;
 
-static VOID
+static void
 RIX_FillBuffer(
-	VOID      *object,
-	LPBYTE     stream,
-	INT        len
-)
+	void *object,
+	unsigned char *stream,
+	int len)
 /*++
 	Purpose:
 
@@ -82,7 +87,7 @@ RIX_FillBuffer(
 
 	while (len > 0)
 	{
-		INT       volume, delta_samples = 0, vol_delta = 0;
+		int volume, delta_samples = 0, vol_delta = 0;
 
 		//
 		// fading in or fading out
@@ -97,15 +102,16 @@ RIX_FillBuffer(
 			}
 			else
 			{
-				volume = (INT)(SDL_MIX_MAXVOLUME * (1.0 - (double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples));
-				delta_samples = (pRixPlayer->iTotalFadeInSamples / SDL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1); vol_delta = 1;
+				volume = (int)(SDL_MIX_MAXVOLUME * (1.0 - (double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples));
+				delta_samples = (pRixPlayer->iTotalFadeInSamples / SDL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1);
+				vol_delta = 1;
 			}
 			break;
 		case RIXPLAYER::FADE_OUT:
 			if (pRixPlayer->iTotalFadeOutSamples == pRixPlayer->iRemainingFadeSamples && pRixPlayer->iTotalFadeOutSamples > 0)
 			{
-				UINT  now = SDL_GetTicks();
-				INT   passed_samples = ((INT)(now - pRixPlayer->dwStartFadeTime) > 0) ? (INT)((now - pRixPlayer->dwStartFadeTime) * AUDIO_GetDeviceSpec()->freq / 1000) : 0;
+				unsigned int now = SDL_GetTicks();
+				int passed_samples = ((int)(now - pRixPlayer->dwStartFadeTime) > 0) ? (int)((now - pRixPlayer->dwStartFadeTime) * AUDIO_GetDeviceSpec()->freq / 1000) : 0;
 				pRixPlayer->iRemainingFadeSamples -= passed_samples;
 			}
 			if (pRixPlayer->iMusic == -1 || pRixPlayer->iRemainingFadeSamples <= 0)
@@ -127,8 +133,10 @@ RIX_FillBuffer(
 					pRixPlayer->iTotalFadeOutSamples = 0;
 					pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeInSamples;
 					pRixPlayer->rix->rewind(pRixPlayer->iMusic);
-					if (pRixPlayer->resampler[0]) resampler_clear(pRixPlayer->resampler[0]);
-					if (pRixPlayer->resampler[1]) resampler_clear(pRixPlayer->resampler[1]);
+					if (pRixPlayer->resampler[0])
+						resampler_clear(pRixPlayer->resampler[0]);
+					if (pRixPlayer->resampler[1])
+						resampler_clear(pRixPlayer->resampler[1]);
 					continue;
 				}
 				else
@@ -140,8 +148,9 @@ RIX_FillBuffer(
 			}
 			else
 			{
-				volume = (INT)(SDL_MIX_MAXVOLUME * ((double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeOutSamples));
-				delta_samples = (pRixPlayer->iTotalFadeOutSamples / SDL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1); vol_delta = -1;
+				volume = (int)(SDL_MIX_MAXVOLUME * ((double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeOutSamples));
+				delta_samples = (pRixPlayer->iTotalFadeOutSamples / SDL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1);
+				vol_delta = -1;
 			}
 			break;
 		default:
@@ -197,14 +206,14 @@ RIX_FillBuffer(
 				if (pRixPlayer->resampler[0])
 				{
 					unsigned int samples_written = 0;
-					short *finalBuf = (short*)pRixPlayer->buf;
+					short *finalBuf = (short *)pRixPlayer->buf;
 
 					while (sample_count)
 					{
 						int to_write = resampler_get_free_count(pRixPlayer->resampler[0]);
 						if (to_write)
 						{
-							short *tempBuf = (short*)alloca(to_write * gConfig.iAudioChannels * sizeof(short));
+							short *tempBuf = (short *)alloca(to_write * gConfig.iAudioChannels * sizeof(short));
 							int temp_buf_read = 0;
 							pRixPlayer->opl->update(tempBuf, to_write);
 							for (int i = 0; i < to_write * gConfig.iAudioChannels; i++)
@@ -212,7 +221,8 @@ RIX_FillBuffer(
 						}
 
 						int to_get = resampler_get_sample_count(pRixPlayer->resampler[0]);
-						if (to_get > sample_count) to_get = sample_count;
+						if (to_get > sample_count)
+							to_get = sample_count;
 						for (int i = 0; i < to_get * gConfig.iAudioChannels; i++)
 							finalBuf[samples_written++] = resampler_get_and_remove_sample(pRixPlayer->resampler[i % gConfig.iAudioChannels]);
 						sample_count -= to_get;
@@ -232,19 +242,20 @@ RIX_FillBuffer(
 			//
 			if (pRixPlayer->FadeType != RIXPLAYER::NONE)
 			{
-				short* ptr = (short*)stream;
+				short *ptr = (short *)stream;
 				for (int i = 0; i < l && pRixPlayer->iRemainingFadeSamples > 0; volume += vol_delta)
 				{
 					int j = 0;
 					for (j = 0; i < l && j < delta_samples; i++, j++)
 					{
-						*ptr++ = *(short*)pRixPlayer->pos * volume / SDL_MIX_MAXVOLUME;
+						*ptr++ = *(short *)pRixPlayer->pos * volume / SDL_MIX_MAXVOLUME;
 						pRixPlayer->pos += sizeof(short);
 					}
 					pRixPlayer->iRemainingFadeSamples -= j;
 				}
 				fContinue = (pRixPlayer->iRemainingFadeSamples > 0);
-				len -= (LPBYTE)ptr - stream; stream = (LPBYTE)ptr;
+				len -= (unsigned char *)ptr - stream;
+				stream = (unsigned char *)ptr;
 			}
 			else
 			{
@@ -257,10 +268,9 @@ RIX_FillBuffer(
 	}
 }
 
-static VOID
+static void
 RIX_Shutdown(
-	VOID     *object
-)
+	void *object)
 /*++
 	Purpose:
 
@@ -289,13 +299,12 @@ RIX_Shutdown(
 	}
 }
 
-static BOOL
+static int
 RIX_Play(
-	VOID     *object,
-	INT       iNumRIX,
-	BOOL      fLoop,
-	FLOAT     flFadeTime
-)
+	void *object,
+	int iNumRIX,
+	int fLoop,
+	float flFadeTime)
 /*++
 	Purpose:
 
@@ -362,23 +371,23 @@ RIX_Play(
 
 LPAUDIOPLAYER
 RIX_Init(
-	LPCSTR     szFileName
-)
+	const char *szFileName)
 /*++
   Purpose:
 
-    Initialize the RIX player subsystem.
+	Initialize the RIX player subsystem.
 
   Parameters:
 
-    [IN]  szFileName - Filename of the mus.mkf file.
+	[IN]  szFileName - Filename of the mus.mkf file.
 
   Return value:
 
-    0 if success, -1 if cannot allocate memory, -2 if file not found.
+	0 if success, -1 if cannot allocate memory, -2 if file not found.
 --*/
 {
-	if (!szFileName) return NULL;
+	if (!szFileName)
+		return NULL;
 
 	LPRIXPLAYER pRixPlayer = new RIXPLAYER;
 	if (pRixPlayer == NULL)
@@ -393,7 +402,7 @@ RIX_Init(
 		pRixPlayer->Play = RIX_Play;
 	}
 
-	Copl* opl = CEmuopl::CreateEmuopl(gConfig.iOPLSampleRate);
+	Copl *opl = CEmuopl::CreateEmuopl(gConfig.iOPLSampleRate);
 	if (NULL == opl)
 	{
 		delete pRixPlayer;
@@ -402,7 +411,7 @@ RIX_Init(
 
 	if (gConfig.fUseSurroundOPL)
 	{
-		Copl* tmpopl = new CSurroundopl(gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset, opl, nullptr);
+		Copl *tmpopl = new CSurroundopl(gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset, opl, nullptr);
 		if (NULL == tmpopl)
 		{
 			delete opl;

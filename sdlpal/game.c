@@ -19,11 +19,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
+#include "play.h"
+#include "res.h"
+#include "uigame.h"
+#include "palcommon.h"
+#include <SDL_timer.h>
 
-VOID
+void
 PAL_GameMain(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -40,13 +47,13 @@ PAL_GameMain(
 
 --*/
 {
-   DWORD       dwTime;
+   unsigned int       dwTime;
 
    //
    // Show the opening menu.
    //
-   gpGlobals->bCurrentSaveSlot = (BYTE)PAL_OpeningMenu();
-   gpGlobals->fInMainGame = TRUE;
+   gpGlobals->bCurrentSaveSlot = (unsigned char)PAL_OpeningMenu();
+   gpGlobals->fInMainGame = 1;
 
    //
    // Initialize game data and set the flags to load the game resources.
@@ -57,7 +64,7 @@ PAL_GameMain(
    // Run the main game loop.
    //
    dwTime = SDL_GetTicks();
-   while (TRUE)
+   while (1)
    {
       //
       // Load the game resources if needed.

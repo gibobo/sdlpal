@@ -22,11 +22,12 @@
 //  @Author: Lou Yihua <louyihua@21cn.com>, 2016.
 //
 
-#include "global.h"
 #include "palcfg.h"
-#include "util.h"
-#include "resampler.h"
+#include "global.h"
 #include "pal_config.h"
+#include "palcommon.h"
+#include "common.h"
+#include "resampler.h"
 #include <stdint.h>
 
 #define MAKE_BOOLEAN(defv, minv, maxv)  { .bValue = defv }, { .bValue = minv }, { .bValue = maxv }
@@ -35,18 +36,16 @@
 #define MAKE_STRING(defv)               { .sValue = defv }, { .sValue = NULL }, { .sValue = NULL }
 
 static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
-	{ PALCFG_FULLSCREEN,        PALCFG_BOOLEAN,  "FullScreen",        10, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
-	{ PALCFG_KEEPASPECTRATIO,   PALCFG_BOOLEAN,  "KeepAspectRatio",   15, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },
-	{ PALCFG_STEREO,            PALCFG_BOOLEAN,  "Stereo",             6, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },                  // Default for stereo audio
-	{ PALCFG_USESURROUNDOPL,    PALCFG_BOOLEAN,  "UseSurroundOPL",    14, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },                  // Default for using surround opl
-	{ PALCFG_ENABLEKEYREPEAT,   PALCFG_BOOLEAN,  "EnableKeyRepeat",   15, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
-	{ PALCFG_ENABLEGLSL,        PALCFG_BOOLEAN,  "EnableGLSL",        10, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },
-
-	{ PALCFG_SURROUNDOPLOFFSET, PALCFG_INTEGER,  "SurroundOPLOffset", 17, MAKE_INTEGER(384,                           INT32_MIN,             INT32_MAX) },
-	{ PALCFG_LOGLEVEL,          PALCFG_INTEGER,  "LogLevel",           8, MAKE_INTEGER(PAL_DEFAULT_LOGLEVEL,          LOGLEVEL_MIN,          LOGLEVEL_MAX) },
-	{ PALCFG_AUDIODEVICE,       PALCFG_INTEGER,  "AudioDevice",       11, MAKE_INTEGER(-1,                            INT32_MIN,             INT32_MAX) },
-
-	{ PALCFG_AUDIOBUFFERSIZE,   PALCFG_UNSIGNED, "AudioBufferSize",   15, MAKE_UNSIGNED(PAL_AUDIO_DEFAULT_BUFFER_SIZE, 2,                     32768) },
+	{ PALCFG_FULLSCREEN,        PALCFG_BOOLEAN,  "FullScreen",        10, MAKE_BOOLEAN(FALSE,                          FALSE,                 TRUE) },
+	{ PALCFG_KEEPASPECTRATIO,   PALCFG_BOOLEAN,  "KeepAspectRatio",   15, MAKE_BOOLEAN(TRUE,                           FALSE,                 TRUE) },
+	{ PALCFG_STEREO,            PALCFG_BOOLEAN,  "Stereo",             6, MAKE_BOOLEAN(TRUE,                           FALSE,                 TRUE) },                  // Default for stereo audio
+	{ PALCFG_USESURROUNDOPL,    PALCFG_BOOLEAN,  "UseSurroundOPL",    14, MAKE_BOOLEAN(TRUE,                           FALSE,                 TRUE) },                  // Default for using surround opl
+	{ PALCFG_ENABLEKEYREPEAT,   PALCFG_BOOLEAN,  "EnableKeyRepeat",   15, MAKE_BOOLEAN(FALSE,                          FALSE,                 TRUE) },
+	{ PALCFG_ENABLEGLSL,        PALCFG_BOOLEAN,  "EnableGLSL",        10, MAKE_BOOLEAN(TRUE,                           FALSE,                 TRUE) },
+	{ PALCFG_SURROUNDOPLOFFSET, PALCFG_INTEGER,  "SurroundOPLOffset", 17, MAKE_INTEGER(384,                            INT32_MIN,             INT32_MAX) },
+	{ PALCFG_LOGLEVEL,          PALCFG_INTEGER,  "LogLevel",           8, MAKE_INTEGER(PAL_DEFAULT_LOGLEVEL,           LOGLEVEL_MIN,          LOGLEVEL_MAX) },
+	{ PALCFG_AUDIODEVICE,       PALCFG_INTEGER,  "AudioDevice",       11, MAKE_INTEGER(-1,                             INT32_MIN,             INT32_MAX) },
+	{ PALCFG_AUDIOBUFFERSIZE,   PALCFG_UNSIGNED, "AudioBufferSize",   15, MAKE_UNSIGNED(1024,                          2,                     32768) },
 	{ PALCFG_OPLSAMPLERATE,     PALCFG_UNSIGNED, "OPLSampleRate",     13, MAKE_UNSIGNED(49716,                         0,                     UINT32_MAX) },
 	{ PALCFG_RESAMPLEQUALITY,   PALCFG_UNSIGNED, "ResampleQuality",   15, MAKE_UNSIGNED(RESAMPLER_QUALITY_MAX,         RESAMPLER_QUALITY_MIN, RESAMPLER_QUALITY_MAX) }, // Default for best quality
 	{ PALCFG_SAMPLERATE,        PALCFG_UNSIGNED, "SampleRate",        10, MAKE_UNSIGNED(44100,                         0,                     PAL_MAX_SAMPLERATE) },
@@ -54,9 +53,8 @@ static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
 	{ PALCFG_SOUNDVOLUME,       PALCFG_UNSIGNED, "SoundVolume",       11, MAKE_UNSIGNED(PAL_MAX_VOLUME,                0,                     PAL_MAX_VOLUME) },        // Default for maximum volume
 	{ PALCFG_WINDOWHEIGHT,      PALCFG_UNSIGNED, "WindowHeight",      12, MAKE_UNSIGNED(PAL_DEFAULT_WINDOW_HEIGHT,     0,                     UINT32_MAX) },
 	{ PALCFG_WINDOWWIDTH,       PALCFG_UNSIGNED, "WindowWidth",       11, MAKE_UNSIGNED(PAL_DEFAULT_WINDOW_WIDTH,      0,                     UINT32_MAX) },
-    { PALCFG_TEXTUREHEIGHT,     PALCFG_UNSIGNED, "TextureHeight",     13, MAKE_UNSIGNED(PAL_DEFAULT_TEXTURE_HEIGHT,    0,                     UINT32_MAX) },
-    { PALCFG_TEXTUREWIDTH,      PALCFG_UNSIGNED, "TextureWidth",      12, MAKE_UNSIGNED(PAL_DEFAULT_TEXTURE_WIDTH,     0,                     UINT32_MAX) },
-
+    { PALCFG_TEXTUREHEIGHT,     PALCFG_UNSIGNED, "TextureHeight",     13, MAKE_UNSIGNED(PAL_DEFAULT_WINDOW_HEIGHT,    0,                     UINT32_MAX) },
+    { PALCFG_TEXTUREWIDTH,      PALCFG_UNSIGNED, "TextureWidth",      12, MAKE_UNSIGNED(PAL_DEFAULT_WINDOW_WIDTH,     0,                     UINT32_MAX) },
 	{ PALCFG_GAMEPATH,          PALCFG_STRING,   "GamePath",           8, MAKE_STRING(NULL) },
     { PALCFG_SAVEPATH,          PALCFG_STRING,   "SavePath",           8, MAKE_STRING(NULL) },
     { PALCFG_SHADERPATH,        PALCFG_STRING,   "ShaderPath",        10, MAKE_STRING(NULL) },
@@ -197,7 +195,7 @@ PAL_LoadConfig(
 	gConfig.iSampleRate = values[PALCFG_SAMPLERATE].uValue;
 	gConfig.iOPLSampleRate = values[PALCFG_OPLSAMPLERATE].uValue;
 	gConfig.iResampleQuality = values[PALCFG_RESAMPLEQUALITY].uValue;
-	gConfig.wAudioBufferSize = (WORD)values[PALCFG_AUDIOBUFFERSIZE].uValue;
+	gConfig.wAudioBufferSize = (unsigned short)values[PALCFG_AUDIOBUFFERSIZE].uValue;
 	gConfig.iMusicVolume = values[PALCFG_MUSICVOLUME].uValue;
 	gConfig.iSoundVolume = values[PALCFG_SOUNDVOLUME].uValue;
 	gConfig.pszShader = (char *)values[PALCFG_SHADER].sValue;

@@ -29,9 +29,9 @@
 extern "C" {
 #endif
 
-VOID
+void
 PAL_GameMain(
-   VOID
+   void
 );
 
 #ifdef __cplusplus

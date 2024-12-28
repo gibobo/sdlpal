@@ -69,11 +69,11 @@ PAL_InitFont(
 --*/
 void
 PAL_DrawCharOnSurface(
-	uint16_t                 wChar,
-	SDL_Surface             *lpSurface,
-	DWORD                  pos,
-	uint8_t                  bColor,
-	BOOL                     fUse8x8Font
+	unsigned short                 wChar,
+	SDL_Surface              *lpSurface,
+	unsigned int             pos,
+	unsigned char                  bColor,
+	int                     fUse8x8Font
 );
 
 /*++
@@ -92,7 +92,7 @@ PAL_DrawCharOnSurface(
 --*/
 int
 PAL_CharWidth(
-	uint16_t                 wChar
+	unsigned short                 wChar
 );
 
 /*++

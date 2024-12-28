@@ -25,7 +25,7 @@
 #ifndef video_glsl_h
 #define video_glsl_h
 
-# include "mini_glloader.h"
+#include <SDL_render.h>
 
 #ifdef __cplusplus
 extern "C" {

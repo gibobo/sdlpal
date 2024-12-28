@@ -32,20 +32,20 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
+#include "common.h"
+#include <SDL_timer.h>
 
-extern WORD g_rgPlayerPos[3][3][2];
+extern unsigned short g_rgPlayerPos[3][3][2];
 
 static int g_iCurMiscMenuItem = 0;
 static int g_iCurSubMenuItem = 0;
 
-VOID
-PAL_PlayerInfoBox(
-   DWORD           pos,
-   WORD            wPlayerRole,
-   INT             iTimeMeter,
-   BYTE            bTimeMeterColor,
-   BOOL            fUpdate
-)
+void PAL_PlayerInfoBox(
+    unsigned int pos,
+    unsigned short wPlayerRole,
+    int iTimeMeter,
+    unsigned char bTimeMeterColor,
+    int fUpdate)
 /*++
   Purpose:
 
@@ -69,55 +69,55 @@ PAL_PlayerInfoBox(
 
 --*/
 {
-   SDL_Rect        rect;
-   BYTE            bPoisonColor;
-   int             i, iPartyIndex;
-   WORD            wMaxLevel, w;
+   SDL_Rect rect;
+   unsigned char bPoisonColor;
+   int i, iPartyIndex;
+   unsigned short wMaxLevel, w;
 
-   const BYTE      rgStatusPos[kStatusAll][2] =
-   {
-      {35, 19},  // confused
-      {44, 12},  // slow
-      {54, 1},   // sleep
-      {55, 20},  // silence
-      {0, 0},    // puppet
-      {0, 0},    // bravery
-      {0, 0},    // protect
-      {0, 0},    // haste
-      {0, 0},    // dualattack
-   };
+   const unsigned char rgStatusPos[kStatusAll][2] =
+       {
+           {35, 19}, // confused
+           {44, 12}, // slow
+           {54, 1},  // sleep
+           {55, 20}, // silence
+           {0, 0},   // puppet
+           {0, 0},   // bravery
+           {0, 0},   // protect
+           {0, 0},   // haste
+           {0, 0},   // dualattack
+       };
 
-   const WORD      rgwStatusWord[kStatusAll] =
-   {
-      0x1D,  // confused
-      0x1B,  // slow
-      0x1C,  // sleep
-      0x1A,  // silence
-      0x00,  // puppet
-      0x00,  // bravery
-      0x00,  // protect
-      0x00,  // haste
-      0x00,  // dualattack
-   };
+   const unsigned short rgwStatusWord[kStatusAll] =
+       {
+           0x1D, // confused
+           0x1B, // slow
+           0x1C, // sleep
+           0x1A, // silence
+           0x00, // puppet
+           0x00, // bravery
+           0x00, // protect
+           0x00, // haste
+           0x00, // dualattack
+       };
 
-   const BYTE      rgbStatusColor[kStatusAll] =
-   {
-      0x5F,  // confused
-      0xBF,  // slow
-      0x0E,  // sleep
-      0x3C,  // silence
-      0x00,  // puppet
-      0x00,  // bravery
-      0x00,  // protect
-      0x00,  // haste
-      0x00,  // dualattack
-   };
+   const unsigned char rgbStatusColor[kStatusAll] =
+       {
+           0x5F, // confused
+           0xBF, // slow
+           0x0E, // sleep
+           0x3C, // silence
+           0x00, // puppet
+           0x00, // bravery
+           0x00, // protect
+           0x00, // haste
+           0x00, // dualattack
+       };
 
    //
    // Draw the box
    //
    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_PLAYERINFOBOX),
-      gpScreen, pos);
+                        gpScreen, pos);
 
    //
    // Draw the player face
@@ -140,12 +140,12 @@ PAL_PlayerInfoBox(
          w = gpGlobals->rgPoisonStatus[i][iPartyIndex].wPoisonID;
 
          if (w != 0 &&
-            gpGlobals->g.rgObject[w].poison.wPoisonLevel <= 3)
+             gpGlobals->g.rgObject[w].poison.wPoisonLevel <= 3)
          {
             if (gpGlobals->g.rgObject[w].poison.wPoisonLevel >= wMaxLevel)
             {
                wMaxLevel = gpGlobals->g.rgObject[w].poison.wPoisonLevel;
-               bPoisonColor = (BYTE)(gpGlobals->g.rgObject[w].poison.wColor);
+               bPoisonColor = (unsigned char)(gpGlobals->g.rgObject[w].poison.wColor);
             }
          }
       }
@@ -164,30 +164,30 @@ PAL_PlayerInfoBox(
    if (bPoisonColor == 0xFF)
    {
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_PLAYERFACE_FIRST + wPlayerRole),
-         gpScreen, PAL_XY(PAL_X(pos) - 2, PAL_Y(pos) - 4));
+                           gpScreen, PAL_XY(PAL_X(pos) - 2, PAL_Y(pos) - 4));
    }
    else
    {
       PAL_RLEBlitMonoColor(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_PLAYERFACE_FIRST + wPlayerRole),
-         gpScreen, PAL_XY(PAL_X(pos) - 2, PAL_Y(pos) - 4), bPoisonColor, 0);
+                           gpScreen, PAL_XY(PAL_X(pos) - 2, PAL_Y(pos) - 4), bPoisonColor, 0);
    }
 
    //
    // Draw the HP and MP value
    //
    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
-      PAL_XY(PAL_X(pos) + 49, PAL_Y(pos) + 6));
+                        PAL_XY(PAL_X(pos) + 49, PAL_Y(pos) + 6));
    PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole], 4,
-      PAL_XY(PAL_X(pos) + 47, PAL_Y(pos) + 8), kNumColorYellow, kNumAlignRight);
+                  PAL_XY(PAL_X(pos) + 47, PAL_Y(pos) + 8), kNumColorYellow, kNumAlignRight);
    PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole], 4,
-      PAL_XY(PAL_X(pos) + 26, PAL_Y(pos) + 5), kNumColorYellow, kNumAlignRight);
+                  PAL_XY(PAL_X(pos) + 26, PAL_Y(pos) + 5), kNumColorYellow, kNumAlignRight);
 
    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
-      PAL_XY(PAL_X(pos) + 49, PAL_Y(pos) + 22));
+                        PAL_XY(PAL_X(pos) + 49, PAL_Y(pos) + 22));
    PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxMP[wPlayerRole], 4,
-      PAL_XY(PAL_X(pos) + 47, PAL_Y(pos) + 24), kNumColorCyan, kNumAlignRight);
+                  PAL_XY(PAL_X(pos) + 47, PAL_Y(pos) + 24), kNumColorCyan, kNumAlignRight);
    PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole], 4,
-      PAL_XY(PAL_X(pos) + 26, PAL_Y(pos) + 21), kNumColorCyan, kNumAlignRight);
+                  PAL_XY(PAL_X(pos) + 26, PAL_Y(pos) + 21), kNumColorCyan, kNumAlignRight);
 
    //
    // Draw Statuses
@@ -197,11 +197,11 @@ PAL_PlayerInfoBox(
       for (i = 0; i < kStatusAll; i++)
       {
          if (gpGlobals->rgPlayerStatus[wPlayerRole][i] > 0 &&
-            rgwStatusWord[i] != 0)
+             rgwStatusWord[i] != 0)
          {
             PAL_DrawText(PAL_GetWord(rgwStatusWord[i]),
-               PAL_XY(PAL_X(pos) + rgStatusPos[i][0], PAL_Y(pos) + rgStatusPos[i][1]),
-               rgbStatusColor[i], TRUE, FALSE, FALSE);
+                         PAL_XY(PAL_X(pos) + rgStatusPos[i][0], PAL_Y(pos) + rgStatusPos[i][1]),
+                         rgbStatusColor[i], TRUE, FALSE, FALSE);
          }
       }
    }
@@ -220,10 +220,9 @@ PAL_PlayerInfoBox(
    }
 }
 
-static BOOL
+static int
 PAL_BattleUIIsActionValid(
-   BATTLEUIACTION         ActionType
-)
+    BATTLEUIACTION ActionType)
 /*++
   Purpose:
 
@@ -239,8 +238,8 @@ PAL_BattleUIIsActionValid(
 
 --*/
 {
-   WORD     wPlayerRole;
-   int      i;
+   unsigned short wPlayerRole;
+   int i;
 
    wPlayerRole = gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole;
 
@@ -275,11 +274,10 @@ PAL_BattleUIIsActionValid(
    return TRUE;
 }
 
-static VOID
+static void
 PAL_BattleUIDrawMiscMenu(
-   WORD       wCurrentItem,
-   BOOL       fConfirmed
-)
+    unsigned short wCurrentItem,
+    int fConfirmed)
 /*++
   Purpose:
 
@@ -297,22 +295,21 @@ PAL_BattleUIDrawMiscMenu(
 
 --*/
 {
-   int           i;
-   BYTE          bColor;
+   int i;
+   unsigned char bColor;
 
    MENUITEM rgMenuItem[] = {
-      // value   label                     enabled   position
-      {  0,      BATTLEUI_LABEL_AUTO,      TRUE,     PAL_XY(16, 32)  },
-      {  1,      BATTLEUI_LABEL_INVENTORY, TRUE,     PAL_XY(16, 50)  },
-      {  2,      BATTLEUI_LABEL_DEFEND,    TRUE,     PAL_XY(16, 68)  },
-      {  3,      BATTLEUI_LABEL_FLEE,      TRUE,     PAL_XY(16, 86)  },
-      {  4,      BATTLEUI_LABEL_STATUS,    TRUE,     PAL_XY(16, 104) }
-   };
+       // value   label                     enabled   position
+       {0, BATTLEUI_LABEL_AUTO, TRUE, PAL_XY(16, 32)},
+       {1, BATTLEUI_LABEL_INVENTORY, TRUE, PAL_XY(16, 50)},
+       {2, BATTLEUI_LABEL_DEFEND, TRUE, PAL_XY(16, 68)},
+       {3, BATTLEUI_LABEL_FLEE, TRUE, PAL_XY(16, 86)},
+       {4, BATTLEUI_LABEL_STATUS, TRUE, PAL_XY(16, 104)}};
 
    //
    // Draw the box
    //
-   PAL_CreateBox(PAL_XY(2, 20), 4, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem)/sizeof(MENUITEM)) - 1, 0, FALSE);
+   PAL_CreateBox(PAL_XY(2, 20), 4, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, FALSE);
 
    //
    // Draw the menu items
@@ -337,10 +334,9 @@ PAL_BattleUIDrawMiscMenu(
    }
 }
 
-static WORD
+static unsigned short
 PAL_BattleUIMiscMenuUpdate(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -392,10 +388,9 @@ PAL_BattleUIMiscMenuUpdate(
    return 0xFFFF;
 }
 
-static WORD
+static unsigned short
 PAL_BattleUIMiscItemSubMenuUpdate(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -411,13 +406,13 @@ PAL_BattleUIMiscItemSubMenuUpdate(
 
 --*/
 {
-   int             i;
-   BYTE            bColor;
+   int i;
+   unsigned char bColor;
 
    MENUITEM rgMenuItem[] = {
-      // value   label                      enabled   position
-      {  0,      BATTLEUI_LABEL_USEITEM,    TRUE,     PAL_XY(44, 62)  },
-      {  1,      BATTLEUI_LABEL_THROWITEM,  TRUE,     PAL_XY(44, 80)  },
+       // value   label                      enabled   position
+       {0, BATTLEUI_LABEL_USEITEM, TRUE, PAL_XY(44, 62)},
+       {1, BATTLEUI_LABEL_THROWITEM, TRUE, PAL_XY(44, 80)},
    };
 
    //
@@ -464,11 +459,9 @@ PAL_BattleUIMiscItemSubMenuUpdate(
    return 0xFFFF;
 }
 
-VOID
-PAL_BattleUIShowText(
-   LPCWSTR       lpszText,
-   WORD          wDuration
-)
+void PAL_BattleUIShowText(
+    const unsigned short *lpszText,
+    unsigned short wDuration)
 /*++
   Purpose:
 
@@ -498,10 +491,8 @@ PAL_BattleUIShowText(
    }
 }
 
-VOID
-PAL_BattleUIPlayerReady(
-   WORD          wPlayerIndex
-)
+void PAL_BattleUIPlayerReady(
+    unsigned short wPlayerIndex)
 /*++
   Purpose:
 
@@ -523,10 +514,9 @@ PAL_BattleUIPlayerReady(
    g_Battle.UI.MenuState = kBattleMenuMain;
 }
 
-static VOID
+static void
 PAL_BattleUIUseItem(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -542,7 +532,7 @@ PAL_BattleUIUseItem(
 
 --*/
 {
-   WORD       wSelectedItem;
+   unsigned short wSelectedItem;
 
    wSelectedItem = PAL_ItemSelectMenuUpdate();
 
@@ -570,10 +560,9 @@ PAL_BattleUIUseItem(
    }
 }
 
-static VOID
+static void
 PAL_BattleUIThrowItem(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -589,7 +578,7 @@ PAL_BattleUIThrowItem(
 
 --*/
 {
-   WORD wSelectedItem = PAL_ItemSelectMenuUpdate();
+   unsigned short wSelectedItem = PAL_ItemSelectMenuUpdate();
 
    if (wSelectedItem != 0xFFFF)
    {
@@ -604,7 +593,7 @@ PAL_BattleUIThrowItem(
          }
          else
          {
-            if(g_Battle.UI.iPrevEnemyTarget != -1)
+            if (g_Battle.UI.iPrevEnemyTarget != -1)
                g_Battle.UI.iSelectedIndex = g_Battle.UI.iPrevEnemyTarget;
             g_Battle.UI.state = kBattleUISelectTargetEnemy;
             g_Battle.UI.iSelectedIndex = 0;
@@ -617,11 +606,10 @@ PAL_BattleUIThrowItem(
    }
 }
 
-static WORD
+static unsigned short
 PAL_BattleUIPickAutoMagic(
-   WORD          wPlayerRole,
-   WORD          wRandomRange
-)
+    unsigned short wPlayerRole,
+    unsigned short wRandomRange)
 /*++
   Purpose:
 
@@ -639,8 +627,8 @@ PAL_BattleUIPickAutoMagic(
 
 --*/
 {
-   WORD             wMagic = 0, w, wMagicNum;
-   int              i, iMaxPower = 0, iPower;
+   unsigned short wMagic = 0, w, wMagicNum;
+   int i, iMaxPower = 0, iPower;
 
    if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSilence] != 0)
    {
@@ -661,14 +649,14 @@ PAL_BattleUIPickAutoMagic(
       // skip if the magic is an ultimate move or not enough MP
       //
       if (gpGlobals->g.lprgMagic[wMagicNum].wCostMP == 1 ||
-         gpGlobals->g.lprgMagic[wMagicNum].wCostMP > gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] ||
-         (SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) <= 0)
+          gpGlobals->g.lprgMagic[wMagicNum].wCostMP > gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] ||
+          (short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) <= 0)
       {
          continue;
       }
 
-      iPower = (SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) +
-         RandomLong(0, wRandomRange);
+      iPower = (short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) +
+               RandomLong(0, wRandomRange);
 
       if (iPower > iMaxPower)
       {
@@ -680,10 +668,8 @@ PAL_BattleUIPickAutoMagic(
    return wMagic;
 }
 
-VOID
-PAL_BattleUIUpdate(
-   VOID
-)
+void PAL_BattleUIUpdate(
+    void)
 /*++
   Purpose:
 
@@ -699,22 +685,21 @@ PAL_BattleUIUpdate(
 
 --*/
 {
-   int              i, j, x, y;
-   WORD             wPlayerRole, w;
-   static int       s_iFrame = 0;
+   int i, j, x, y;
+   unsigned short wPlayerRole, w;
+   static int s_iFrame = 0;
 
-   struct {
-      int               iSpriteNum;
-      DWORD           pos;
-      BATTLEUIACTION    action;
-   } rgItems[] =
+   struct
    {
-      {SPRITENUM_BATTLEICON_ATTACK,    PAL_XY(27, 140), kBattleUIActionAttack},
-      {SPRITENUM_BATTLEICON_MAGIC,     PAL_XY(0, 155),  kBattleUIActionMagic},
-      {SPRITENUM_BATTLEICON_COOPMAGIC, PAL_XY(54, 155), kBattleUIActionCoopMagic},
-      {SPRITENUM_BATTLEICON_MISCMENU,  PAL_XY(27, 170), kBattleUIActionMisc}
-   };
-
+      int iSpriteNum;
+      unsigned int pos;
+      BATTLEUIACTION action;
+   } rgItems[] =
+       {
+           {SPRITENUM_BATTLEICON_ATTACK, PAL_XY(27, 140), kBattleUIActionAttack},
+           {SPRITENUM_BATTLEICON_MAGIC, PAL_XY(0, 155), kBattleUIActionMagic},
+           {SPRITENUM_BATTLEICON_COOPMAGIC, PAL_XY(54, 155), kBattleUIActionCoopMagic},
+           {SPRITENUM_BATTLEICON_MISCMENU, PAL_XY(27, 170), kBattleUIActionMisc}};
 
    s_iFrame++;
 
@@ -729,9 +714,9 @@ PAL_BattleUIUpdate(
       }
       else
       {
-         LPCWSTR itemText = PAL_GetWord(BATTLEUI_LABEL_AUTO);
-         PAL_DrawText(itemText, PAL_XY(312-PAL_TextWidth(itemText), 10),
-            MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
+         const unsigned short *itemText = PAL_GetWord(BATTLEUI_LABEL_AUTO);
+         PAL_DrawText(itemText, PAL_XY(312 - PAL_TextWidth(itemText), 10),
+                      MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
       }
    }
 
@@ -797,19 +782,19 @@ PAL_BattleUIUpdate(
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          wPlayerRole = gpGlobals->rgParty[i].wPlayerRole;
-         w = (WORD)(g_Battle.rgPlayer[i].flTimeMeter);
+         w = (unsigned short)(g_Battle.rgPlayer[i].flTimeMeter);
 
          j = TIMEMETER_COLOR_DEFAULT;
 
          if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSleep] != 0 ||
-            gpGlobals->rgPlayerStatus[wPlayerRole][kStatusConfused] != 0 ||
-            gpGlobals->rgPlayerStatus[wPlayerRole][kStatusPuppet] != 0)
+             gpGlobals->rgPlayerStatus[wPlayerRole][kStatusConfused] != 0 ||
+             gpGlobals->rgPlayerStatus[wPlayerRole][kStatusPuppet] != 0)
          {
             w = 0;
          }
 
          PAL_PlayerInfoBox(PAL_XY(91 + 77 * i, 165), wPlayerRole,
-            w, j, FALSE);
+                           w, j, FALSE);
       }
    }
 
@@ -824,7 +809,7 @@ PAL_BattleUIUpdate(
       wPlayerRole = gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole;
 
       if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] == 0 &&
-         gpGlobals->rgPlayerStatus[wPlayerRole][kStatusPuppet])
+          gpGlobals->rgPlayerStatus[wPlayerRole][kStatusPuppet])
       {
          g_Battle.UI.wActionType = kBattleActionAttack;
 
@@ -845,8 +830,8 @@ PAL_BattleUIUpdate(
       // Cancel any actions if player is dead or sleeping.
       //
       if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] == 0 ||
-         gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSleep] != 0 ||
-         gpGlobals->rgPlayerStatus[wPlayerRole][kStatusParalyzed] != 0)
+          gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSleep] != 0 ||
+          gpGlobals->rgPlayerStatus[wPlayerRole][kStatusParalyzed] != 0)
       {
          g_Battle.UI.wActionType = kBattleActionPass;
          PAL_BattleCommitAction(FALSE);
@@ -951,17 +936,17 @@ PAL_BattleUIUpdate(
             if (g_Battle.UI.wSelectedAction == i)
             {
                PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, rgItems[i].iSpriteNum),
-                  gpScreen, rgItems[i].pos);
+                                    gpScreen, rgItems[i].pos);
             }
             else if (PAL_BattleUIIsActionValid(rgItems[i].action))
             {
                PAL_RLEBlitMonoColor(PAL_SpriteGetFrame(gpSpriteUI, rgItems[i].iSpriteNum),
-                  gpScreen, rgItems[i].pos, 0, -4);
+                                    gpScreen, rgItems[i].pos, 0, -4);
             }
             else
             {
                PAL_RLEBlitMonoColor(PAL_SpriteGetFrame(gpSpriteUI, rgItems[i].iSpriteNum),
-                  gpScreen, rgItems[i].pos, 0x10, -4);
+                                    gpScreen, rgItems[i].pos, 0x10, -4);
             }
          }
 
@@ -983,7 +968,7 @@ PAL_BattleUIUpdate(
                   }
                   else
                   {
-                     if(g_Battle.UI.iPrevEnemyTarget != -1)
+                     if (g_Battle.UI.iPrevEnemyTarget != -1)
                         g_Battle.UI.iSelectedIndex = g_Battle.UI.iPrevEnemyTarget;
                      g_Battle.UI.state = kBattleUISelectTargetEnemy;
                      g_Battle.UI.iSelectedIndex = 0;
@@ -1016,7 +1001,7 @@ PAL_BattleUIUpdate(
                      }
                      else
                      {
-                        if(g_Battle.UI.iPrevEnemyTarget != -1)
+                        if (g_Battle.UI.iPrevEnemyTarget != -1)
                            g_Battle.UI.iSelectedIndex = g_Battle.UI.iPrevEnemyTarget;
                         g_Battle.UI.state = kBattleUISelectTargetEnemy;
                         g_Battle.UI.iSelectedIndex = 0;
@@ -1041,7 +1026,7 @@ PAL_BattleUIUpdate(
                   // Misc menu
                   //
                   g_Battle.UI.MenuState = kBattleMenuMisc;
-//                  g_iCurMiscMenuItem = 0; //disabled due to not same as both original version
+                  //                  g_iCurMiscMenuItem = 0; //disabled due to not same as both original version
                   break;
                }
             }
@@ -1122,7 +1107,7 @@ PAL_BattleUIUpdate(
                         for (i = 0; i < MAX_INVENTORY; i++)
                         {
                            if (gpGlobals->rgInventory[i].wItem ==
-                              g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.wActionID)
+                               g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.wActionID)
                            {
                               gpGlobals->rgInventory[i].nAmountInUse--;
                               break;
@@ -1136,7 +1121,7 @@ PAL_BattleUIUpdate(
                            for (i = 0; i < MAX_INVENTORY; i++)
                            {
                               if (gpGlobals->rgInventory[i].wItem ==
-                                 g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.wActionID)
+                                  g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.wActionID)
                               {
                                  gpGlobals->rgInventory[i].nAmountInUse--;
                                  break;
@@ -1145,10 +1130,10 @@ PAL_BattleUIUpdate(
                         }
                      }
                   } while (g_Battle.UI.wCurPlayerIndex > 0 &&
-                     (gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole] == 0 ||
-                      gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole][kStatusConfused] > 0 ||
-                      gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole][kStatusSleep] > 0 ||
-                      gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole][kStatusParalyzed] > 0));
+                           (gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole] == 0 ||
+                            gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole][kStatusConfused] > 0 ||
+                            gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole][kStatusSleep] > 0 ||
+                            gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole][kStatusParalyzed] > 0));
                }
             }
             break;
@@ -1173,7 +1158,7 @@ PAL_BattleUIUpdate(
                      }
                      else
                      {
-                        if(g_Battle.UI.iPrevEnemyTarget != -1)
+                        if (g_Battle.UI.iPrevEnemyTarget != -1)
                            g_Battle.UI.iSelectedIndex = g_Battle.UI.iPrevEnemyTarget;
                         g_Battle.UI.state = kBattleUISelectTargetEnemy;
                         g_Battle.UI.iSelectedIndex = 0;
@@ -1214,7 +1199,7 @@ PAL_BattleUIUpdate(
                {
                case 2: // item
                   g_Battle.UI.MenuState = kBattleMenuMiscItemSubMenu;
-//                  g_iCurSubMenuItem = 0; //disabled due to not same as both original version
+                  //                  g_iCurSubMenuItem = 0; //disabled due to not same as both original version
                   break;
 
                case 3: // defend
@@ -1296,13 +1281,13 @@ PAL_BattleUIUpdate(
       //
       if (y == 1)
       {
-//         g_Battle.UI.iPrevEnemyTarget = x;  //disabled due to not same as both original version
-         if( g_Battle.UI.iSelectedIndex == -1 )
+         //         g_Battle.UI.iPrevEnemyTarget = x;  //disabled due to not same as both original version
+         if (g_Battle.UI.iSelectedIndex == -1)
             g_Battle.UI.iSelectedIndex = x;
          else
-             for (g_Battle.UI.iSelectedIndex = 0; g_Battle.UI.iSelectedIndex < MAX_ENEMIES_IN_TEAM; g_Battle.UI.iSelectedIndex++)
-                 if (g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID != 0)
-                     break;
+            for (g_Battle.UI.iSelectedIndex = 0; g_Battle.UI.iSelectedIndex < MAX_ENEMIES_IN_TEAM; g_Battle.UI.iSelectedIndex++)
+               if (g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID != 0)
+                  break;
          PAL_BattleCommitAction(FALSE);
          break;
       }
@@ -1339,7 +1324,7 @@ PAL_BattleUIUpdate(
          y -= PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.rgEnemy[i].lpSprite, g_Battle.rgEnemy[i].wCurrentFrame));
 
          PAL_RLEBlitWithColorShift(PAL_SpriteGetFrame(g_Battle.rgEnemy[i].lpSprite, g_Battle.rgEnemy[i].wCurrentFrame),
-            gpScreen, PAL_XY(x, y), 7);
+                                   gpScreen, PAL_XY(x, y), 7);
       }
 
       if (g_InputState.dwKeyPress & kKeyMenu)
@@ -1348,29 +1333,33 @@ PAL_BattleUIUpdate(
       }
       else if (g_InputState.dwKeyPress & kKeySearch)
       {
-//         g_Battle.UI.iPrevEnemyTarget = g_Battle.UI.iSelectedIndex; //disabled due to not same as both original version
+         //         g_Battle.UI.iPrevEnemyTarget = g_Battle.UI.iSelectedIndex; //disabled due to not same as both original version
          PAL_BattleCommitAction(FALSE);
       }
       else if (g_InputState.dwKeyPress & (kKeyLeft | kKeyDown))
       {
          g_Battle.UI.iSelectedIndex--;
-         if( g_Battle.UI.iSelectedIndex < 0 ) g_Battle.UI.iSelectedIndex = MAX_ENEMIES_IN_TEAM-1;
+         if (g_Battle.UI.iSelectedIndex < 0)
+            g_Battle.UI.iSelectedIndex = MAX_ENEMIES_IN_TEAM - 1;
          while (g_Battle.UI.iSelectedIndex != 0 &&
-            g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID == 0)
+                g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID == 0)
          {
             g_Battle.UI.iSelectedIndex--;
-            if( g_Battle.UI.iSelectedIndex < 0 ) g_Battle.UI.iSelectedIndex = MAX_ENEMIES_IN_TEAM-1;
+            if (g_Battle.UI.iSelectedIndex < 0)
+               g_Battle.UI.iSelectedIndex = MAX_ENEMIES_IN_TEAM - 1;
          }
       }
       else if (g_InputState.dwKeyPress & (kKeyRight | kKeyUp))
       {
          g_Battle.UI.iSelectedIndex++;
-         if( g_Battle.UI.iSelectedIndex >= MAX_ENEMIES_IN_TEAM ) g_Battle.UI.iSelectedIndex = 0;
+         if (g_Battle.UI.iSelectedIndex >= MAX_ENEMIES_IN_TEAM)
+            g_Battle.UI.iSelectedIndex = 0;
          while (g_Battle.UI.iSelectedIndex < MAX_ENEMIES_IN_TEAM &&
-            g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID == 0)
+                g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID == 0)
          {
             g_Battle.UI.iSelectedIndex++;
-            if( g_Battle.UI.iSelectedIndex >= MAX_ENEMIES_IN_TEAM ) g_Battle.UI.iSelectedIndex = 0;
+            if (g_Battle.UI.iSelectedIndex >= MAX_ENEMIES_IN_TEAM)
+               g_Battle.UI.iSelectedIndex = 0;
          }
       }
       break;
@@ -1388,9 +1377,8 @@ PAL_BattleUIUpdate(
       for (i = 0; i < 4; i++)
       {
          PAL_RLEBlitMonoColor(PAL_SpriteGetFrame(gpSpriteUI, rgItems[i].iSpriteNum),
-            gpScreen, rgItems[i].pos, 0, -4);
+                              gpScreen, rgItems[i].pos, 0, -4);
       }
-
 
       j = SPRITENUM_BATTLE_ARROW_SELECTEDPLAYER;
       if (s_iFrame & 1)
@@ -1443,7 +1431,7 @@ PAL_BattleUIUpdate(
       //
       // Don't bother selecting
       //
-      g_Battle.UI.iSelectedIndex = (WORD)-1;
+      g_Battle.UI.iSelectedIndex = (unsigned short)-1;
       PAL_BattleCommitAction(FALSE);
       break;
 
@@ -1451,7 +1439,7 @@ PAL_BattleUIUpdate(
       //
       // Don't bother selecting
       //
-      g_Battle.UI.iSelectedIndex = (WORD)-1;
+      g_Battle.UI.iSelectedIndex = (unsigned short)-1;
       PAL_BattleCommitAction(FALSE);
       break;
    }
@@ -1472,8 +1460,8 @@ end:
          else
          {
             PAL_DrawNumber(g_Battle.UI.rgShowNum[i].wNum, 5,
-               PAL_XY(PAL_X(g_Battle.UI.rgShowNum[i].pos), PAL_Y(g_Battle.UI.rgShowNum[i].pos) - (SDL_GetTicks() - g_Battle.UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME),
-               g_Battle.UI.rgShowNum[i].color, kNumAlignRight);
+                           PAL_XY(PAL_X(g_Battle.UI.rgShowNum[i].pos), PAL_Y(g_Battle.UI.rgShowNum[i].pos) - (SDL_GetTicks() - g_Battle.UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME),
+                           g_Battle.UI.rgShowNum[i].color, kNumAlignRight);
          }
       }
    }
@@ -1481,12 +1469,10 @@ end:
    PAL_ClearKeyState();
 }
 
-VOID
-PAL_BattleUIShowNum(
-   WORD           wNum,
-   DWORD          pos,
-   NUMCOLOR       color
-)
+void PAL_BattleUIShowNum(
+    unsigned short wNum,
+    unsigned int pos,
+    NUMCOLOR color)
 /*++
   Purpose:
 
@@ -1506,7 +1492,7 @@ PAL_BattleUIShowNum(
 
 --*/
 {
-   int     i;
+   int i;
 
    for (i = 0; i < BATTLEUI_MAX_SHOWNUM; i++)
    {

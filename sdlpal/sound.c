@@ -26,72 +26,72 @@
 #include "resampler.h"
 #include "riff.h"
 #include "util.h"
+#include "common.h"
 
 typedef struct tagWAVESPEC
 {
-	int                 size;
-	int                 freq;
-	SDL_AudioFormat     format;
-	uint8_t             channels;
-	uint8_t             align;
+	int size;
+	int freq;
+	SDL_AudioFormat format;
+	uint8_t channels;
+	uint8_t align;
 } WAVESPEC;
 
-typedef const void * (*SoundLoader)(LPCBYTE, DWORD, WAVESPEC *);
-typedef int(*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, int, const void **);
+typedef const void *(*SoundLoader)(const unsigned char *, unsigned int, WAVESPEC *);
+typedef int (*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, int, const void **);
 
 typedef struct tagWAVEDATA
 {
 	struct tagWAVEDATA *next;
 
-	void               *resampler[2];	/* The resampler used for sound data */
-	ResampleMixer       ResampleMix;
-	const void         *base;
-	const void         *current;
-	const void         *end;
-	WAVESPEC            spec;
+	void *resampler[2]; /* The resampler used for sound data */
+	ResampleMixer ResampleMix;
+	const void *base;
+	const void *current;
+	const void *end;
+	WAVESPEC spec;
 } WAVEDATA;
 
 typedef struct tagSOUNDPLAYER
 {
 	AUDIOPLAYER_COMMONS;
 
-	FILE               *mkf;		/* File pointer to the MKF file */
-	SoundLoader         LoadSound;	/* The function pointer for load WAVE/VOC data */
-	WAVEDATA            soundlist;
-	int                 cursounds;
-	int					lastSFX;
+	FILE *mkf;			   /* File pointer to the MKF file */
+	SoundLoader LoadSound; /* The function pointer for load WAVE/VOC data */
+	WAVEDATA soundlist;
+	int cursounds;
+	int lastSFX;
 } SOUNDPLAYER, *LPSOUNDPLAYER;
 
 static const void *
 SOUND_LoadWAVEData(
-	LPCBYTE                lpData,
-	DWORD                  dwLen,
-	WAVESPEC              *lpSpec
-)
+	const unsigned char *lpData,
+	unsigned int dwLen,
+	WAVESPEC *lpSpec)
 /*++
   Purpose:
 
-    Return the WAVE data pointer inside the input buffer.
+	Return the WAVE data pointer inside the input buffer.
 
   Parameters:
 
-    [IN]  lpData - pointer to the buffer of the WAVE file.
+	[IN]  lpData - pointer to the buffer of the WAVE file.
 
-    [IN]  dwLen - length of the buffer of the WAVE file.
+	[IN]  dwLen - length of the buffer of the WAVE file.
 
-    [OUT] lpSpec - pointer to the SDL_AudioSpec structure, which contains
-                    some basic information about the WAVE file.
+	[OUT] lpSpec - pointer to the SDL_AudioSpec structure, which contains
+					some basic information about the WAVE file.
 
   Return value:
 
-    Pointer to the WAVE data inside the input buffer, NULL if failed.
+	Pointer to the WAVE data inside the input buffer, NULL if failed.
 --*/
 {
-	const RIFFHeader      *lpRiff   = (const RIFFHeader *)lpData;
-	const RIFFChunkHeader *lpChunk  = NULL;
-	const WAVEFormatPCM   *lpFormat = NULL;
-	const uint8_t         *lpWaveData = NULL;
-	uint32_t len,type;
+	const RIFFHeader *lpRiff = (const RIFFHeader *)lpData;
+	const RIFFChunkHeader *lpChunk = NULL;
+	const WAVEFormatPCM *lpFormat = NULL;
+	const uint8_t *lpWaveData = NULL;
+	uint32_t len, type;
 
 	if (dwLen < sizeof(RIFFHeader) || lpRiff->signature != RIFF_RIFF ||
 		lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8))
@@ -99,11 +99,12 @@ SOUND_LoadWAVEData(
 		return NULL;
 	}
 
-	lpChunk = (const RIFFChunkHeader *)(lpRiff + 1); dwLen -= sizeof(RIFFHeader);
+	lpChunk = (const RIFFChunkHeader *)(lpRiff + 1);
+	dwLen -= sizeof(RIFFHeader);
 	while (dwLen >= sizeof(RIFFChunkHeader))
 	{
-        len = lpChunk->length;
-        type = lpChunk->type;
+		len = lpChunk->length;
+		type = lpChunk->type;
 		if (dwLen >= sizeof(RIFFChunkHeader) + len)
 			dwLen -= sizeof(RIFFChunkHeader) + len;
 		else
@@ -142,38 +143,37 @@ SOUND_LoadWAVEData(
 
 typedef struct tagVOCHEADER
 {
-	char    signature[0x14];	/* "Creative Voice File\x1A" */
-	WORD    data_offset;		/* little endian */
-	WORD	version;
-	WORD	version_checksum;
+	char signature[0x14];		/* "Creative Voice File\x1A" */
+	unsigned short data_offset; /* little endian */
+	unsigned short version;
+	unsigned short version_checksum;
 } VOCHEADER, *LPVOCHEADER;
 typedef const VOCHEADER *LPCVOCHEADER;
 
 static const void *
 SOUND_LoadVOCData(
-	LPCBYTE                lpData,
-	DWORD                  dwLen,
-	WAVESPEC              *lpSpec
-)
+	const unsigned char *lpData,
+	unsigned int dwLen,
+	WAVESPEC *lpSpec)
 /*++
   Purpose:
 
-    Return the VOC data pointer inside the input buffer. Currently supports type 01 block only.
+	Return the VOC data pointer inside the input buffer. Currently supports type 01 block only.
 
   Parameters:
 
-    [IN]  lpData - pointer to the buffer of the VOC file.
+	[IN]  lpData - pointer to the buffer of the VOC file.
 
-    [IN]  dwLen - length of the buffer of the VOC file.
+	[IN]  dwLen - length of the buffer of the VOC file.
 
-    [OUT] lpSpec - pointer to the SDL_AudioSpec structure, which contains
-                   some basic information about the VOC file.
+	[OUT] lpSpec - pointer to the SDL_AudioSpec structure, which contains
+				   some basic information about the VOC file.
 
   Return value:
 
-    Pointer to the WAVE data inside the input buffer, NULL if failed.
+	Pointer to the WAVE data inside the input buffer, NULL if failed.
 
-    Reference: http://sox.sourceforge.net/AudioFormats-11.html
+	Reference: http://sox.sourceforge.net/AudioFormats-11.html
 --*/
 {
 	LPCVOCHEADER lpVOC = (LPCVOCHEADER)lpData;
@@ -188,7 +188,7 @@ SOUND_LoadVOCData(
 
 	while (dwLen && *lpData)
 	{
-		DWORD len;
+		unsigned int len;
 		if (dwLen >= 4)
 		{
 			len = lpData[1] | (lpData[2] << 8) | (lpData[3] << 16);
@@ -203,7 +203,8 @@ SOUND_LoadVOCData(
 		}
 		if (*lpData == 0x01)
 		{
-			if (lpData[5] != 0) return NULL;	/* Only 8-bit is supported */
+			if (lpData[5] != 0)
+				return NULL; /* Only 8-bit is supported */
 
 			lpSpec->format = AUDIO_U8;
 			lpSpec->channels = 1;
@@ -224,47 +225,47 @@ SOUND_LoadVOCData(
 
 static int
 SOUND_ResampleMix_U8_Mono_Mono(
-	void                  *resampler[2],
-	const void            *lpData,
-	const WAVESPEC        *lpSpec,
-	void                  *lpBuffer,
-	int                    iBufLen,
-	const void           **llpData
-)
+	void *resampler[2],
+	const void *lpData,
+	const WAVESPEC *lpSpec,
+	void *lpBuffer,
+	int iBufLen,
+	const void **llpData)
 /*++
   Purpose:
 
-    Resample 8-bit unsigned mono PCM data into 16-bit signed (native-endian) mono PCM data.
+	Resample 8-bit unsigned mono PCM data into 16-bit signed (native-endian) mono PCM data.
 
   Parameters:
 
-    [IN]  resampler - array of pointers to the resampler instance.
+	[IN]  resampler - array of pointers to the resampler instance.
 
-    [IN]  lpData - pointer to the buffer of the input PCM data.
+	[IN]  lpData - pointer to the buffer of the input PCM data.
 
-    [IN]  lpSpec - pointer to the WAVESPEC structure, which contains
-                   some basic information about the input PCM data.
+	[IN]  lpSpec - pointer to the WAVESPEC structure, which contains
+				   some basic information about the input PCM data.
 
-    [IN]  lpBuffer - pointer of the buffer of the output PCM data.
+	[IN]  lpBuffer - pointer of the buffer of the output PCM data.
 
-    [IN]  iBufLen - length of the buffer of the output PCM data.
+	[IN]  iBufLen - length of the buffer of the output PCM data.
 
-    [OUT] llpData - pointer to receive the pointer of remaining input PCM data.
+	[OUT] llpData - pointer to receive the pointer of remaining input PCM data.
 
   Return value:
 
-    The number of output buffer used, in bytes.
+	The number of output buffer used, in bytes.
 --*/
 {
 	int src_samples = lpSpec->size;
-	const uint8_t * src = (const uint8_t *)lpData;
+	const uint8_t *src = (const uint8_t *)lpData;
 	short *dst = (short *)lpBuffer;
 	int channel_len = iBufLen, total_bytes = 0;
 
 	while (total_bytes < channel_len && src_samples > 0)
 	{
 		int j, to_write = resampler_get_free_count(resampler[0]);
-		if (to_write > src_samples) to_write = src_samples;
+		if (to_write > src_samples)
+			to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 			resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
 		src_samples -= to_write;
@@ -277,53 +278,54 @@ SOUND_ResampleMix_U8_Mono_Mono(
 		}
 	}
 
-	if (llpData) *llpData = src;
+	if (llpData)
+		*llpData = src;
 	return total_bytes;
 }
 
 static int
 SOUND_ResampleMix_U8_Mono_Stereo(
-	void                  *resampler[2],
-	const void            *lpData,
-	const WAVESPEC        *lpSpec,
-	void                  *lpBuffer,
-	int                    iBufLen,
-	const void           **llpData
-)
+	void *resampler[2],
+	const void *lpData,
+	const WAVESPEC *lpSpec,
+	void *lpBuffer,
+	int iBufLen,
+	const void **llpData)
 /*++
   Purpose:
 
-    Resample 8-bit unsigned mono PCM data into 16-bit signed (native-endian) stereo PCM data.
+	Resample 8-bit unsigned mono PCM data into 16-bit signed (native-endian) stereo PCM data.
 
   Parameters:
 
-    [IN]  resampler - array of pointers to the resampler instance.
+	[IN]  resampler - array of pointers to the resampler instance.
 
-    [IN]  lpData - pointer to the buffer of the input PCM data.
+	[IN]  lpData - pointer to the buffer of the input PCM data.
 
-    [IN]  lpSpec - pointer to the WAVESPEC structure, which contains
-                   some basic information about the input PCM data.
+	[IN]  lpSpec - pointer to the WAVESPEC structure, which contains
+				   some basic information about the input PCM data.
 
-    [IN]  lpBuffer - pointer of the buffer of the output PCM data.
+	[IN]  lpBuffer - pointer of the buffer of the output PCM data.
 
-    [IN]  iBufLen - length of the buffer of the output PCM data.
+	[IN]  iBufLen - length of the buffer of the output PCM data.
 
-    [OUT] llpData - pointer to receive the pointer of remaining input PCM data.
+	[OUT] llpData - pointer to receive the pointer of remaining input PCM data.
 
   Return value:
 
-    The number of output buffer used, in bytes.
+	The number of output buffer used, in bytes.
 --*/
 {
 	int src_samples = lpSpec->size;
-	const uint8_t * src = (const uint8_t *)lpData;
+	const uint8_t *src = (const uint8_t *)lpData;
 	short *dst = (short *)lpBuffer;
 	int channel_len = iBufLen >> 1, total_bytes = 0;
 
 	while (total_bytes < channel_len && src_samples > 0)
 	{
 		int j, to_write = resampler_get_free_count(resampler[0]);
-		if (to_write > src_samples) to_write = src_samples;
+		if (to_write > src_samples)
+			to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 			resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
 		src_samples -= to_write;
@@ -331,58 +333,60 @@ SOUND_ResampleMix_U8_Mono_Stereo(
 		{
 			int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
 			dst[0] = dst[1] = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-			total_bytes += sizeof(short); dst += 2;
+			total_bytes += sizeof(short);
+			dst += 2;
 			resampler_remove_sample(resampler[0]);
 		}
 	}
 
-	if (llpData) *llpData = src;
+	if (llpData)
+		*llpData = src;
 	return total_bytes;
 }
 
 static int
 SOUND_ResampleMix_U8_Stereo_Mono(
-	void                  *resampler[2],
-	const void            *lpData,
-	const WAVESPEC        *lpSpec,
-	void                  *lpBuffer,
-	int                    iBufLen,
-	const void           **llpData
-)
+	void *resampler[2],
+	const void *lpData,
+	const WAVESPEC *lpSpec,
+	void *lpBuffer,
+	int iBufLen,
+	const void **llpData)
 /*++
   Purpose:
 
-    Resample 8-bit unsigned stereo PCM data into 16-bit signed (native-endian) mono PCM data.
+	Resample 8-bit unsigned stereo PCM data into 16-bit signed (native-endian) mono PCM data.
 
   Parameters:
 
-    [IN]  resampler - array of pointers to the resampler instance.
+	[IN]  resampler - array of pointers to the resampler instance.
 
-    [IN]  lpData - pointer to the buffer of the input PCM data.
+	[IN]  lpData - pointer to the buffer of the input PCM data.
 
-    [IN]  lpSpec - pointer to the WAVESPEC structure, which contains
-                   some basic information about the input PCM data.
+	[IN]  lpSpec - pointer to the WAVESPEC structure, which contains
+				   some basic information about the input PCM data.
 
-    [IN]  lpBuffer - pointer of the buffer of the output PCM data.
+	[IN]  lpBuffer - pointer of the buffer of the output PCM data.
 
-    [IN]  iBufLen - length of the buffer of the output PCM data.
+	[IN]  iBufLen - length of the buffer of the output PCM data.
 
-    [OUT] llpData - pointer to receive the pointer of remaining input PCM data.
+	[OUT] llpData - pointer to receive the pointer of remaining input PCM data.
 
   Return value:
 
-    The number of output buffer used, in bytes.
+	The number of output buffer used, in bytes.
 --*/
 {
 	int src_samples = lpSpec->size >> 1;
-	const uint8_t * src = (const uint8_t *)lpData;
+	const uint8_t *src = (const uint8_t *)lpData;
 	short *dst = (short *)lpBuffer;
 	int channel_len = iBufLen, total_bytes = 0;
 
 	while (total_bytes < channel_len && src_samples > 0)
 	{
 		int j, to_write = resampler_get_free_count(resampler[0]);
-		if (to_write > src_samples) to_write = src_samples;
+		if (to_write > src_samples)
+			to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 		{
 			resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
@@ -399,53 +403,54 @@ SOUND_ResampleMix_U8_Stereo_Mono(
 		}
 	}
 
-	if (llpData) *llpData = src;
+	if (llpData)
+		*llpData = src;
 	return total_bytes;
 }
 
 static int
 SOUND_ResampleMix_U8_Stereo_Stereo(
-	void                  *resampler[2],
-	const void            *lpData,
-	const WAVESPEC        *lpSpec,
-	void                  *lpBuffer,
-	int                    iBufLen,
-	const void           **llpData
-)
+	void *resampler[2],
+	const void *lpData,
+	const WAVESPEC *lpSpec,
+	void *lpBuffer,
+	int iBufLen,
+	const void **llpData)
 /*++
   Purpose:
 
-    Resample 8-bit unsigned stereo PCM data into 16-bit signed (native-endian) stereo PCM data.
+	Resample 8-bit unsigned stereo PCM data into 16-bit signed (native-endian) stereo PCM data.
 
   Parameters:
 
-    [IN]  resampler - array of pointers to the resampler instance.
+	[IN]  resampler - array of pointers to the resampler instance.
 
-    [IN]  lpData - pointer to the buffer of the input PCM data.
+	[IN]  lpData - pointer to the buffer of the input PCM data.
 
-    [IN]  lpSpec - pointer to the WAVESPEC structure, which contains
-                   some basic information about the input PCM data.
+	[IN]  lpSpec - pointer to the WAVESPEC structure, which contains
+				   some basic information about the input PCM data.
 
-    [IN]  lpBuffer - pointer of the buffer of the output PCM data.
+	[IN]  lpBuffer - pointer of the buffer of the output PCM data.
 
-    [IN]  iBufLen - length of the buffer of the output PCM data.
+	[IN]  iBufLen - length of the buffer of the output PCM data.
 
-    [OUT] llpData - pointer to receive the pointer of remaining input PCM data.
+	[OUT] llpData - pointer to receive the pointer of remaining input PCM data.
 
   Return value:
 
-    The number of output buffer used, in bytes.
+	The number of output buffer used, in bytes.
 --*/
 {
 	int src_samples = lpSpec->size >> 1;
-	const uint8_t * src = (const uint8_t *)lpData;
+	const uint8_t *src = (const uint8_t *)lpData;
 	short *dst = (short *)lpBuffer;
 	int channel_len = iBufLen >> 1, total_bytes = 0;
 
 	while (total_bytes < channel_len && src_samples > 0)
 	{
 		int j, to_write = resampler_get_free_count(resampler[0]);
-		if (to_write > src_samples) to_write = src_samples;
+		if (to_write > src_samples)
+			to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 		{
 			resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
@@ -465,53 +470,54 @@ SOUND_ResampleMix_U8_Stereo_Stereo(
 		}
 	}
 
-	if (llpData) *llpData = src;
+	if (llpData)
+		*llpData = src;
 	return total_bytes;
 }
 
 static int
 SOUND_ResampleMix_S16_Mono_Mono(
-	void                  *resampler[2],
-	const void            *lpData,
-	const WAVESPEC        *lpSpec,
-	void                  *lpBuffer,
-	int                    iBufLen,
-	const void           **llpData
-)
+	void *resampler[2],
+	const void *lpData,
+	const WAVESPEC *lpSpec,
+	void *lpBuffer,
+	int iBufLen,
+	const void **llpData)
 /*++
   Purpose:
 
-    Resample 16-bit signed (little-endian) mono PCM data into 16-bit signed (native-endian) mono PCM data.
+	Resample 16-bit signed (little-endian) mono PCM data into 16-bit signed (native-endian) mono PCM data.
 
   Parameters:
 
-    [IN]  resampler - array of pointers to the resampler instance.
+	[IN]  resampler - array of pointers to the resampler instance.
 
-    [IN]  lpData - pointer to the buffer of the input PCM data.
+	[IN]  lpData - pointer to the buffer of the input PCM data.
 
-    [IN]  lpSpec - pointer to the WAVESPEC structure, which contains
-                   some basic information about the input PCM data.
+	[IN]  lpSpec - pointer to the WAVESPEC structure, which contains
+				   some basic information about the input PCM data.
 
-    [IN]  lpBuffer - pointer of the buffer of the output PCM data.
+	[IN]  lpBuffer - pointer of the buffer of the output PCM data.
 
-    [IN]  iBufLen - length of the buffer of the output PCM data.
+	[IN]  iBufLen - length of the buffer of the output PCM data.
 
-    [OUT] llpData - pointer to receive the pointer of remaining input PCM data.
+	[OUT] llpData - pointer to receive the pointer of remaining input PCM data.
 
   Return value:
 
-    The number of output buffer used, in bytes.
+	The number of output buffer used, in bytes.
 --*/
 {
 	int src_samples = lpSpec->size >> 1;
-	const short * src = (const short *)lpData;
+	const short *src = (const short *)lpData;
 	short *dst = (short *)lpBuffer;
 	int channel_len = iBufLen, total_bytes = 0;
 
 	while (total_bytes < channel_len && src_samples > 0)
 	{
 		int j, to_write = resampler_get_free_count(resampler[0]);
-		if (to_write > src_samples) to_write = src_samples;
+		if (to_write > src_samples)
+			to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 			resampler_write_sample(resampler[0], *src++);
 		src_samples -= to_write;
@@ -524,53 +530,54 @@ SOUND_ResampleMix_S16_Mono_Mono(
 		}
 	}
 
-	if (llpData) *llpData = src;
+	if (llpData)
+		*llpData = src;
 	return total_bytes;
 }
 
 static int
 SOUND_ResampleMix_S16_Mono_Stereo(
-	void                  *resampler[2],
-	const void            *lpData,
-	const WAVESPEC        *lpSpec,
-	void                  *lpBuffer,
-	int                    iBufLen,
-	const void           **llpData
-)
+	void *resampler[2],
+	const void *lpData,
+	const WAVESPEC *lpSpec,
+	void *lpBuffer,
+	int iBufLen,
+	const void **llpData)
 /*++
   Purpose:
 
-    Resample 16-bit signed (little-endian) mono PCM data into 16-bit signed (native-endian) stereo PCM data.
+	Resample 16-bit signed (little-endian) mono PCM data into 16-bit signed (native-endian) stereo PCM data.
 
   Parameters:
 
-    [IN]  resampler - array of pointers to the resampler instance.
+	[IN]  resampler - array of pointers to the resampler instance.
 
-    [IN]  lpData - pointer to the buffer of the input PCM data.
+	[IN]  lpData - pointer to the buffer of the input PCM data.
 
-    [IN]  lpSpec - pointer to the WAVESPEC structure, which contains
-                   some basic information about the input PCM data.
+	[IN]  lpSpec - pointer to the WAVESPEC structure, which contains
+				   some basic information about the input PCM data.
 
-    [IN]  lpBuffer - pointer of the buffer of the output PCM data.
+	[IN]  lpBuffer - pointer of the buffer of the output PCM data.
 
-    [IN]  iBufLen - length of the buffer of the output PCM data.
+	[IN]  iBufLen - length of the buffer of the output PCM data.
 
-    [OUT] llpData - pointer to receive the pointer of remaining input PCM data.
+	[OUT] llpData - pointer to receive the pointer of remaining input PCM data.
 
   Return value:
 
-    The number of output buffer used, in bytes.
+	The number of output buffer used, in bytes.
 --*/
 {
 	int src_samples = lpSpec->size >> 1;
-	const short * src = (const short *)lpData;
+	const short *src = (const short *)lpData;
 	short *dst = (short *)lpBuffer;
 	int channel_len = iBufLen >> 1, total_bytes = 0;
 
 	while (total_bytes < channel_len && src_samples > 0)
 	{
 		int j, to_write = resampler_get_free_count(resampler[0]);
-		if (to_write > src_samples) to_write = src_samples;
+		if (to_write > src_samples)
+			to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 			resampler_write_sample(resampler[0], *src++);
 		src_samples -= to_write;
@@ -578,58 +585,60 @@ SOUND_ResampleMix_S16_Mono_Stereo(
 		{
 			int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
 			dst[0] = dst[1] = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-			total_bytes += sizeof(short); dst += 2;
+			total_bytes += sizeof(short);
+			dst += 2;
 			resampler_remove_sample(resampler[0]);
 		}
 	}
 
-	if (llpData) *llpData = src;
+	if (llpData)
+		*llpData = src;
 	return total_bytes;
 }
 
 static int
 SOUND_ResampleMix_S16_Stereo_Mono(
-	void                  *resampler[2],
-	const void            *lpData,
-	const WAVESPEC        *lpSpec,
-	void                  *lpBuffer,
-	int                    iBufLen,
-	const void           **llpData
-)
+	void *resampler[2],
+	const void *lpData,
+	const WAVESPEC *lpSpec,
+	void *lpBuffer,
+	int iBufLen,
+	const void **llpData)
 /*++
   Purpose:
 
-    Resample 16-bit signed (little-endian) stereo PCM data into 16-bit signed (native-endian) mono PCM data.
+	Resample 16-bit signed (little-endian) stereo PCM data into 16-bit signed (native-endian) mono PCM data.
 
   Parameters:
 
-    [IN]  resampler - array of pointers to the resampler instance.
+	[IN]  resampler - array of pointers to the resampler instance.
 
-    [IN]  lpData - pointer to the buffer of the input PCM data.
+	[IN]  lpData - pointer to the buffer of the input PCM data.
 
-    [IN]  lpSpec - pointer to the WAVESPEC structure, which contains
-                   some basic information about the input PCM data.
+	[IN]  lpSpec - pointer to the WAVESPEC structure, which contains
+				   some basic information about the input PCM data.
 
-    [IN]  lpBuffer - pointer of the buffer of the output PCM data.
+	[IN]  lpBuffer - pointer of the buffer of the output PCM data.
 
-    [IN]  iBufLen - length of the buffer of the output PCM data.
+	[IN]  iBufLen - length of the buffer of the output PCM data.
 
-    [OUT] llpData - pointer to receive the pointer of remaining input PCM data.
+	[OUT] llpData - pointer to receive the pointer of remaining input PCM data.
 
   Return value:
 
-    The number of output buffer used, in bytes.
+	The number of output buffer used, in bytes.
 --*/
 {
 	int src_samples = lpSpec->size >> 2;
-	const short * src = (const short *)lpData;
+	const short *src = (const short *)lpData;
 	short *dst = (short *)lpBuffer;
 	int channel_len = iBufLen, total_bytes = 0;
 
 	while (total_bytes < channel_len && src_samples > 0)
 	{
 		int j, to_write = resampler_get_free_count(resampler[0]);
-		if (to_write > src_samples) to_write = src_samples;
+		if (to_write > src_samples)
+			to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 		{
 			resampler_write_sample(resampler[0], *src++);
@@ -646,53 +655,54 @@ SOUND_ResampleMix_S16_Stereo_Mono(
 		}
 	}
 
-	if (llpData) *llpData = src;
+	if (llpData)
+		*llpData = src;
 	return total_bytes;
 }
 
 static int
 SOUND_ResampleMix_S16_Stereo_Stereo(
-	void                  *resampler[2],
-	const void            *lpData,
-	const WAVESPEC        *lpSpec,
-	void                  *lpBuffer,
-	int                    iBufLen,
-	const void           **llpData
-)
+	void *resampler[2],
+	const void *lpData,
+	const WAVESPEC *lpSpec,
+	void *lpBuffer,
+	int iBufLen,
+	const void **llpData)
 /*++
   Purpose:
 
-    Resample 16-bit signed (little-endian) stereo PCM data into 16-bit signed (native-endian) stereo PCM data.
+	Resample 16-bit signed (little-endian) stereo PCM data into 16-bit signed (native-endian) stereo PCM data.
 
   Parameters:
 
-    [IN]  resampler - array of pointers to the resampler instance.
+	[IN]  resampler - array of pointers to the resampler instance.
 
-    [IN]  lpData - pointer to the buffer of the input PCM data.
+	[IN]  lpData - pointer to the buffer of the input PCM data.
 
-    [IN]  lpSpec - pointer to the WAVESPEC structure, which contains
-                   some basic information about the input PCM data.
+	[IN]  lpSpec - pointer to the WAVESPEC structure, which contains
+				   some basic information about the input PCM data.
 
-    [IN]  lpBuffer - pointer of the buffer of the output PCM data.
+	[IN]  lpBuffer - pointer of the buffer of the output PCM data.
 
-    [IN]  iBufLen - length of the buffer of the output PCM data.
+	[IN]  iBufLen - length of the buffer of the output PCM data.
 
-    [OUT] llpData - pointer to receive the pointer of remaining input PCM data.
+	[OUT] llpData - pointer to receive the pointer of remaining input PCM data.
 
   Return value:
 
-    The number of output buffer used, in bytes.
+	The number of output buffer used, in bytes.
 --*/
 {
 	int src_samples = lpSpec->size >> 2;
-	const short * src = (const short *)lpData;
+	const short *src = (const short *)lpData;
 	short *dst = (short *)lpBuffer;
 	int channel_len = iBufLen >> 1, total_bytes = 0;
 
 	while (total_bytes < channel_len && src_samples > 0)
 	{
 		int j, to_write = resampler_get_free_count(resampler[0]);
-		if (to_write > src_samples) to_write = src_samples;
+		if (to_write > src_samples)
+			to_write = src_samples;
 		for (j = 0; j < to_write; j++)
 		{
 			resampler_write_sample(resampler[0], *src++);
@@ -712,44 +722,43 @@ SOUND_ResampleMix_S16_Stereo_Stereo(
 		}
 	}
 
-	if (llpData) *llpData = src;
+	if (llpData)
+		*llpData = src;
 	return total_bytes;
 }
 
-
-static BOOL
+static int
 SOUND_Play(
-   VOID  *object,
-   INT    iSoundNum,
-   BOOL   fLoop,
-   FLOAT  flFadeTime
-)
+	void *object,
+	int iSoundNum,
+	int fLoop,
+	float flFadeTime)
 /*++
   Purpose:
 
-    Play a sound in voc.mkf/sounds.mkf file.
+	Play a sound in voc.mkf/sounds.mkf file.
 
   Parameters:
 
-    [IN]  object - Pointer to the SOUNDPLAYER instance.
-    [IN]  iSoundNum - number of the sound; the absolute value is used.
-    [IN]  fLoop - Not used, should be zero.
-    [IN]  flFadeTime - Not used, should be zero.
+	[IN]  object - Pointer to the SOUNDPLAYER instance.
+	[IN]  iSoundNum - number of the sound; the absolute value is used.
+	[IN]  fLoop - Not used, should be zero.
+	[IN]  flFadeTime - Not used, should be zero.
 
   Return value:
 
-    None.
+	None.
 
 --*/
 {
-	LPSOUNDPLAYER  player = (LPSOUNDPLAYER)object;
+	LPSOUNDPLAYER player = (LPSOUNDPLAYER)object;
 	const SDL_AudioSpec *devspec = AUDIO_GetDeviceSpec();
-	WAVESPEC         wavespec;
-	ResampleMixer    mixer;
-	WAVEDATA        *cursnd;
-	void            *buf;
-	const void      *snddata;
-	int              len, i;
+	WAVESPEC wavespec;
+	ResampleMixer mixer;
+	WAVEDATA *cursnd;
+	void *buf;
+	const void *snddata;
+	int len, i;
 
 	//
 	// Check for NULL pointer.
@@ -840,22 +849,20 @@ SOUND_Play(
 	return TRUE;
 }
 
-VOID
-SOUND_Shutdown(
-	VOID     *object
-)
+void SOUND_Shutdown(
+	void *object)
 /*++
   Purpose:
 
-    Shutdown the sound subsystem.
+	Shutdown the sound subsystem.
 
   Parameters:
 
-    None.
+	None.
 
   Return value:
 
-    None.
+	None.
 
 --*/
 {
@@ -865,9 +872,12 @@ SOUND_Shutdown(
 		WAVEDATA *cursnd = &player->soundlist;
 		do
 		{
-			if (cursnd->resampler[0]) resampler_delete(cursnd->resampler[0]);
-			if (cursnd->resampler[1]) resampler_delete(cursnd->resampler[1]);
-			if (cursnd->base) free((void *)cursnd->base);
+			if (cursnd->resampler[0])
+				resampler_delete(cursnd->resampler[0]);
+			if (cursnd->resampler[1])
+				resampler_delete(cursnd->resampler[1]);
+			if (cursnd->base)
+				free((void *)cursnd->base);
 		} while ((cursnd = cursnd->next) != NULL);
 		cursnd = player->soundlist.next;
 		while (cursnd)
@@ -876,31 +886,31 @@ SOUND_Shutdown(
 			cursnd = cursnd->next;
 			free(old);
 		}
-		if (player->mkf) fclose(player->mkf);
+		if (player->mkf)
+			fclose(player->mkf);
 	}
 }
 
-static VOID
+static void
 SOUND_FillBuffer(
-	VOID      *object,
-	LPBYTE     stream,
-	INT        len
-)
+	void *object,
+	unsigned char *stream,
+	int len)
 /*++
   Purpose:
 
-    Fill the background music into the sound buffer. Called by the SDL sound
-    callback function only (audio.c: AUDIO_FillBuffer).
+	Fill the background music into the sound buffer. Called by the SDL sound
+	callback function only (audio.c: AUDIO_FillBuffer).
 
   Parameters:
 
-    [OUT] stream - pointer to the stream buffer.
+	[OUT] stream - pointer to the stream buffer.
 
-    [IN]  len - Length of the buffer.
+	[IN]  len - Length of the buffer.
 
   Return value:
 
-    None.
+	None.
 
 --*/
 {
@@ -931,20 +941,19 @@ SOUND_FillBuffer(
 
 LPAUDIOPLAYER
 SOUND_Init(
-	VOID
-)
+	void)
 /*++
   Purpose:
 
-    Initialize the sound subsystem.
+	Initialize the sound subsystem.
 
   Parameters:
 
-    None.
+	None.
 
   Return value:
 
-    None.
+	None.
 
 --*/
 {
@@ -954,13 +963,17 @@ SOUND_Init(
 
 	if (gConfig.fIsWIN95)
 	{
-		mkfs[0] = "sounds.mkf"; func[0] = SOUND_LoadWAVEData;
-		mkfs[1] = "voc.mkf"; func[1] = SOUND_LoadVOCData;
+		mkfs[0] = "sounds.mkf";
+		func[0] = SOUND_LoadWAVEData;
+		mkfs[1] = "voc.mkf";
+		func[1] = SOUND_LoadVOCData;
 	}
 	else
 	{
-		mkfs[0] = "voc.mkf"; func[0] = SOUND_LoadVOCData;
-		mkfs[1] = "sounds.mkf"; func[1] = SOUND_LoadWAVEData;
+		mkfs[0] = "voc.mkf";
+		func[0] = SOUND_LoadVOCData;
+		mkfs[1] = "sounds.mkf";
+		func[1] = SOUND_LoadWAVEData;
 	}
 
 	for (i = 0; i < 2; i++)

@@ -22,16 +22,18 @@
 #include "util.h"
 #include "global.h"
 #include "input.h"
+#include "main.h"
 #include "palcfg.h"
-// #include "pal_config.h"
-#include <errno.h>
-#include "SDL_messagebox.h"
-#include "SDL_video.h"
+#include "common.h"
+#include <SDL_messagebox.h>
+#include <SDL_timer.h>
+#include <io.h>
+// #include "SDL_video.h"
+// #include <errno.h>
 
 #define PAL_PATH_SEPARATORS "/"
 #define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
 #define PAL_MAX_GLOBAL_BUFFERS 4
-#define INTERNAL_BUFFER_SIZE_ARGS internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE
 static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
 
 long flength(
@@ -282,7 +284,7 @@ void TerminateOnError(
 {
 	va_list argptr;
 	char string[256];
-	extern VOID PAL_Shutdown(int);
+	extern void PAL_Shutdown(int);
 
 	// concatenate all the arguments in one string
 	va_start(argptr, fmt);
@@ -355,8 +357,8 @@ UTIL_calloc(
 
 FILE *
 UTIL_OpenRequiredFileForMode(
-	LPCSTR lpszFileName,
-	LPCSTR szMode)
+	const char *lpszFileName,
+	const char *szMode)
 /*++
   Purpose:
 
@@ -390,7 +392,7 @@ UTIL_OpenRequiredFileForMode(
 
 FILE *
 UTIL_OpenFile(
-	LPCSTR lpszFileName)
+	const char *lpszFileName)
 /*++
   Purpose:
 
@@ -411,8 +413,8 @@ UTIL_OpenFile(
 
 FILE *
 UTIL_OpenFileForMode(
-	LPCSTR lpszFileName,
-	LPCSTR szMode)
+	const char *lpszFileName,
+	const char *szMode)
 /*++
   Purpose:
 
@@ -452,17 +454,17 @@ UTIL_OpenFileForMode(
 
 FILE *
 UTIL_OpenFileAtPath(
-	LPCSTR lpszPath,
-	LPCSTR lpszFileName)
+	const char *lpszPath,
+	const char *lpszFileName)
 {
 	return UTIL_OpenFileAtPathForMode(lpszPath, lpszFileName, "rb");
 }
 
 FILE *
 UTIL_OpenFileAtPathForMode(
-	LPCSTR lpszPath,
-	LPCSTR lpszFileName,
-	LPCSTR szMode)
+	const char *lpszPath,
+	const char *lpszFileName,
+	const char *szMode)
 {
 	if (!lpszPath || !lpszFileName || !szMode)
 		return NULL;
@@ -470,7 +472,7 @@ UTIL_OpenFileAtPathForMode(
 	//
 	// Construct full path according to lpszPath and lpszFileName
 	//
-	const char *path = UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, lpszPath, lpszFileName);
+	const char *path = UTIL_GetFullPathName(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, lpszPath, lpszFileName);
 
 	//
 	// If no matching path, check the open mode
@@ -481,7 +483,7 @@ UTIL_OpenFileAtPathForMode(
 	}
 	else if (szMode[0] != 'r')
 	{
-		return fopen(UTIL_CombinePath(INTERNAL_BUFFER_SIZE_ARGS, 2, lpszPath, lpszFileName), szMode);
+		return fopen(UTIL_CombinePath(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, 2, lpszPath, lpszFileName), szMode);
 	}
 	else
 	{
@@ -489,7 +491,7 @@ UTIL_OpenFileAtPathForMode(
 	}
 }
 
-VOID UTIL_CloseFile(
+void UTIL_CloseFile(
 	FILE *fp)
 /*++
   Purpose:
@@ -512,13 +514,13 @@ VOID UTIL_CloseFile(
 	}
 }
 
-BOOL UTIL_IsFileExist(
+int UTIL_IsFileExist(
 	const char *path)
 {
 	if (UTIL_IsAbsolutePath(path))
-		return UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, "", path) != NULL;
+		return UTIL_GetFullPathName(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, "", path) != NULL;
 	else
-		return UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, gConfig.pszGamePath, path) != NULL;
+		return UTIL_GetFullPathName(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, gConfig.pszGamePath, path) != NULL;
 }
 
 const char *
@@ -538,7 +540,7 @@ UTIL_GetFullPathName(
 	char *_base = strdup(basepath), *_sub = strdup(subpath);
 	const char *result = NULL;
 
-	if (access(UTIL_CombinePath(INTERNAL_BUFFER_SIZE_ARGS, 2, _base, _sub), 0) == 0)
+	if (access(UTIL_CombinePath(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, 2, _base, _sub), 0) == 0)
 	{
 		result = internal_buffer[PAL_MAX_GLOBAL_BUFFERS];
 	}

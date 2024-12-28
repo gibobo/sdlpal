@@ -20,10 +20,10 @@
 //
 
 #include "font.h"
-#include "util.h"
+#include "palcommon.h"
+#include "common.h"
 #include "text.h"
-// #include "pal_config.h"
-
+#include "util.h"
 
 #define _FONT_C
 
@@ -32,8 +32,8 @@
 
 static int _font_height = 16;
 
-static uint8_t reverseBits(uint8_t x) {
-    uint8_t y = 0;
+static unsigned char reverseBits(unsigned char x) {
+    unsigned char y = 0;
     for (int i = 0 ; i < 8; i++){
         y <<= 1;
         y |= (x & 1);
@@ -69,11 +69,11 @@ PAL_InitFont(
 
 void
 PAL_DrawCharOnSurface(
-	uint16_t                 wChar,
+	unsigned short                 wChar,
 	SDL_Surface             *lpSurface,
-	DWORD                  pos,
-	uint8_t                  bColor,
-	BOOL                     fUse8x8Font
+	unsigned int                  pos,
+	unsigned char                  bColor,
+	int                     fUse8x8Font
 )
 {
 	int       i, j;
@@ -101,8 +101,8 @@ PAL_DrawCharOnSurface(
 	//
 	// Draw the character to the surface.
 	//
-	LPBYTE dest = (LPBYTE)lpSurface->pixels + (int)max(y + y_offset, 0) * lpSurface->pitch + x;
-	LPBYTE top = (LPBYTE)lpSurface->pixels + lpSurface->h * lpSurface->pitch;
+	unsigned char * dest = (unsigned char *)lpSurface->pixels + (int)max(y + y_offset, 0) * lpSurface->pitch + x;
+	unsigned char * top = (unsigned char *)lpSurface->pixels + lpSurface->h * lpSurface->pitch;
 	if (fUse8x8Font)
 	{
 		for (i = 0; i < 8 && dest < top; i++, dest += lpSurface->pitch)
@@ -156,7 +156,7 @@ PAL_DrawCharOnSurface(
 
 int
 PAL_CharWidth(
-	uint16_t                 wChar
+	unsigned short                 wChar
 )
 {
 	if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || wChar >= unicode_upper_top)

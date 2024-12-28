@@ -21,15 +21,19 @@
 // multipass shader preset by palxex, 2018
 //
 
-#include "main.h"
-
-#include "video_glsl.h"
-#include "video.h"
-
-#include "glslp.h"
-// #include "pal_config.h"
 #define SDL_STBIMAGE_IMPLEMENTATION
 #include "SDL_stbimage.h"
+
+#include "video_glsl.h"
+#include "glslp.h"
+#include "mini_glloader.h"
+#include "palcfg.h"
+#include "util.h"
+#include "video.h"
+#include "pal_config.h"
+#include "common.h"
+#include <SDL_hints.h>
+
 
 #define FORCE_OPENGL_CORE_PROFILE 1
 #define SUPPORT_PARAMETER_UNIFORM 1
@@ -72,7 +76,7 @@ static SDL_Texture *framePrevTextures[MAX_TEXTURES] = {NULL};
 static int frame_prev_texture_units[MAX_TEXTURES] = {-1};
 
 static GLint frames = 0;
-static char frames_passed_limit = false;
+static char frames_passed_limit = 0;
 
 struct AttrTexCoord
 {
@@ -499,8 +503,8 @@ void SetGroupUniforms(pass_uniform_locations *pSlot, int shaderID, int texture_u
 
     GLfloat size[2];
     if( is_pass && shaderID > 0 && shaderID <= gGLSLP.shaders ) {
-        size[0] = gGLSLP.shader_params[shaderID-1].FBO.pow_width;
-        size[1] = gGLSLP.shader_params[shaderID-1].FBO.pow_height;
+        size[0] = (GLfloat)gGLSLP.shader_params[shaderID-1].FBO.pow_width;
+        size[1] = (GLfloat)gGLSLP.shader_params[shaderID-1].FBO.pow_height;
     }
     else {
         size[0] = 320;
@@ -509,12 +513,12 @@ void SetGroupUniforms(pass_uniform_locations *pSlot, int shaderID, int texture_u
     glUniform2fv(pSlot->input_size_uniform_location, 1, size);
     glUniform2fv(pSlot->texture_size_uniform_location, 1, size);
     if (is_pass && shaderID >= 0 && shaderID < gGLSLP.shaders) {
-        size[0] = gGLSLP.shader_params[shaderID].FBO.pow_width;
-        size[1] = gGLSLP.shader_params[shaderID].FBO.pow_height;
+        size[0] = (GLfloat)gGLSLP.shader_params[shaderID].FBO.pow_width;
+        size[1] = (GLfloat)gGLSLP.shader_params[shaderID].FBO.pow_height;
     }
     else {
-        size[0] = gGLSLP.shader_params[gGLSLP.shaders - 1].FBO.pow_width;
-        size[1] = gGLSLP.shader_params[gGLSLP.shaders - 1].FBO.pow_height;
+        size[0] = (GLfloat)gGLSLP.shader_params[gGLSLP.shaders - 1].FBO.pow_width;
+        size[1] = (GLfloat)gGLSLP.shader_params[gGLSLP.shaders - 1].FBO.pow_height;
     }
     glUniform2fv(pSlot->output_size_uniform_location,  1, size);
 
@@ -619,7 +623,7 @@ int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const SD
     }
     if( pass >= 1 ) {
         //share for all retro-filter
-        glUniform1i(gGLSLP.shader_params[shaderID].self_slots.frame_direction_uniform_location, 1.0); //SDLPal don't support rewinding so direction is always 1
+        glUniform1i(gGLSLP.shader_params[shaderID].self_slots.frame_direction_uniform_location, 1); //SDLPal don't support rewinding so direction is always 1
         
         GLint frame_to_slot = frames;
         if( gGLSLP.shader_params[shaderID].frame_count_mod )
@@ -673,10 +677,10 @@ int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const SD
         _dstrect.h = gRendererHeight;
     }
     
-    minx = dstrect->x;
-    miny = dstrect->y;
-    maxx = dstrect->x + dstrect->w;
-    maxy = dstrect->y + dstrect->h;
+    minx = (GLfloat)dstrect->x;
+    miny = (GLfloat)dstrect->y;
+    maxx = (GLfloat)(dstrect->x + dstrect->w);
+    maxy = (GLfloat)(dstrect->y + dstrect->h);
     
     minu = (GLfloat) srcrect->x / srcrect->w;
     maxu = (GLfloat) (srcrect->x + srcrect->w) / srcrect->w;
@@ -746,12 +750,12 @@ SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height)
 
     double ratio = (double)width / (double)height;
     ratio *= 1.6f * (double)gConfig.dwTextureHeight / (double)gConfig.dwTextureWidth;
-    
-    for( int i=0; i<MAX_INDEX; i++)
-        gOrthoMatrixes[i] = GLKMatrix4MakeOrtho(0, width, 0, height, -1, 1);
+
+    for (int i = 0; i < MAX_INDEX; i++)
+      gOrthoMatrixes[i] = GLKMatrix4MakeOrtho(0.0f, (float)width, 0.0f, (float)height, -1.0f, 1.0f);
     //hack!
-    if( strstr(gConfig.pszShader,"metacrt.glslp") == NULL)
-    gOrthoMatrixes[0] = GLKMatrix4MakeOrtho(0, width, height, 0, -1, 1);
+    if (strstr(gConfig.pszShader, "metacrt.glslp") == NULL)
+      gOrthoMatrixes[0] = GLKMatrix4MakeOrtho(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
 
     //
     // Check whether to keep the aspect ratio
@@ -767,8 +771,8 @@ SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height)
             ratio = (float)width / gConfig.dwTextureWidth;
         }
         
-        WORD w = (WORD)(ratio * gConfig.dwTextureWidth) & ~0x3;
-        WORD h = (WORD)(ratio * gConfig.dwTextureHeight) & ~0x3;
+        unsigned short w = (unsigned short)(ratio * gConfig.dwTextureWidth) & ~0x3;
+        unsigned short h = (unsigned short)(ratio * gConfig.dwTextureHeight) & ~0x3;
         gTextureRect.x = (width - w) / 2;
         gTextureRect.y = (height - h) / 2;
         gTextureRect.w = w; gTextureRect.h = h;
@@ -790,24 +794,24 @@ SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height)
         
         switch (param->scale_type_x) {
             case SCALE_SOURCE:
-                param->FBO.width = (i == 0 ? 320 : gGLSLP.shader_params[i-1].FBO.width) * param->scale_x;
+                param->FBO.width = (unsigned int)((i == 0 ? 320 : gGLSLP.shader_params[i-1].FBO.width) * param->scale_x);
                 break;
             case SCALE_VIEWPORT:
-                param->FBO.width = gConfig.dwTextureWidth * param->scale_x;
+                param->FBO.width = (unsigned int)(gConfig.dwTextureWidth * param->scale_x);
                 break;
             case SCALE_ABSOLUTE:
-                param->FBO.width = param->scale_x;
+                param->FBO.width = (unsigned int)(param->scale_x);
                 break;
         }
         switch (param->scale_type_y) {
             case SCALE_SOURCE:
-                param->FBO.height = (i == 0 ? 200 : gGLSLP.shader_params[i-1].FBO.height) * param->scale_y;
+                param->FBO.height = (unsigned int)((i == 0 ? 200 : gGLSLP.shader_params[i-1].FBO.height) * param->scale_y);
                 break;
             case SCALE_VIEWPORT:
-                param->FBO.height = gConfig.dwTextureHeight * param->scale_y;
+                param->FBO.height = (unsigned int)(gConfig.dwTextureHeight * param->scale_y);
                 break;
             case SCALE_ABSOLUTE:
-                param->FBO.height = param->scale_y;
+                param->FBO.height = (unsigned int)(param->scale_y);
                 break;
         }
         param->FBO.pow_width = next_pow2(param->FBO.width);

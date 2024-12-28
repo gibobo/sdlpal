@@ -125,11 +125,11 @@ static unsigned short
 		return header->LZSSRepeatTable[0];
 }
 
-INT
+int
 	YJ1_Decompress(
-	LPCVOID       Source,
-	LPVOID        Destination,
-	INT           DestSize
+	const void*       Source,
+	void          *Destination,
+	int           DestSize
 	)
 {
 	PYJ_1_FILEHEADER hdr = (PYJ_1_FILEHEADER)Source;
@@ -353,11 +353,11 @@ static int yj2_bt(const unsigned char* data, unsigned int pos)
 }
 
 
-INT
+int
 	YJ2_Decompress(
-	LPCVOID       Source,
-	LPVOID        Destination,
-	INT           DestSize
+	const void*       Source,
+	void          *Destination,
+	int           DestSize
 	)
 {
 	int Length;
@@ -432,4 +432,4 @@ INT
 	return Length;
 }
 
-INT (*Decompress)(LPCVOID, LPVOID, INT);
+int (*Decompress)(const void *, void *, int);

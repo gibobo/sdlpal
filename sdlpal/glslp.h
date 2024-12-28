@@ -61,8 +61,8 @@ typedef struct tagTEXTUREUNITSLOTS {
 
 typedef struct tagFBOPARAM {
     char valid;
-    double width, height;
-    double pow_width, pow_height;
+    unsigned int width, height;
+    unsigned int pow_width, pow_height;
 }fbo_params;
 
 typedef struct tagSHADERPARAM {
@@ -72,7 +72,7 @@ typedef struct tagSHADERPARAM {
     char filter_linear;
     enum wrap_mode wrap_mode;
     enum scale_type scale_type_x, scale_type_y;
-    double scale_x, scale_y;
+    float scale_x, scale_y;
     char mipmap_input;
     char float_framebuffer;
     char srgb_framebuffer;
@@ -107,11 +107,11 @@ typedef struct tagUNIFORMPARAMS {
     //by defination
     char *parameter_name;
     char *desc;
-    double value;
-    double value_default;
-    double minimum;
-    double maximum;
-    double step;
+    float value;
+    float value_default;
+    float minimum;
+    float maximum;
+    float step;
     
     //by implementation
     int uniform_ids[MAX_PARAMETERS];

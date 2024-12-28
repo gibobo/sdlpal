@@ -19,23 +19,34 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
+#include "magicmenu.h"
+#include "game.h"
+#include "global.h"
+#include "input.h"
+#include "palcfg.h"
+#include "palcommon.h"
+#include "scene.h"
+#include "script.h"
+#include "text.h"
+#include "uibattle.h"
+#include "video.h"
+#include "common.h"
+#include <SDL_timer.h>
 
 static struct MAGICITEM
 {
-   WORD         wMagic;
-   WORD         wMP;
-   BOOL         fEnabled;
+   unsigned short wMagic;
+   unsigned short wMP;
+   int fEnabled;
 } rgMagicItem[MAX_PLAYER_MAGICS];
 
-static int     g_iNumMagic = 0;
-static int     g_iCurrentItem = 0;
-static WORD    g_wPlayerMP = 0;
+static int g_iNumMagic = 0;
+static int g_iCurrentItem = 0;
+static unsigned short g_wPlayerMP = 0;
 
-WORD
+unsigned short
 PAL_MagicSelectionMenuUpdate(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -51,15 +62,15 @@ PAL_MagicSelectionMenuUpdate(
 
 --*/
 {
-   int         i, j, k, line, item_delta;
-   BYTE        bColor;
-   WORD        wScript;
-   const int   iItemsPerLine = 32 / gConfig.dwWordLength;
-   const int   iItemTextWidth = 8 * gConfig.dwWordLength + 7;
-   const int   iLinesPerPage = 5 - gConfig.ScreenLayout.ExtraMagicDescLines;
-   const int   iBoxYOffset = gConfig.ScreenLayout.ExtraMagicDescLines * 16;
-   const int   iCursorXOffset = gConfig.dwWordLength * 5 / 2;
-   const int   iPageLineOffset = iLinesPerPage / 2;
+   int i, j, k, line, item_delta;
+   unsigned char bColor;
+   unsigned short wScript;
+   const int iItemsPerLine = 32 / gConfig.dwWordLength;
+   const int iItemTextWidth = 8 * gConfig.dwWordLength + 7;
+   const int iLinesPerPage = 5 - gConfig.ScreenLayout.ExtraMagicDescLines;
+   const int iBoxYOffset = gConfig.ScreenLayout.ExtraMagicDescLines * 16;
+   const int iCursorXOffset = gConfig.dwWordLength * 5 / 2;
+   const int iPageLineOffset = iLinesPerPage / 2;
 
    //
    // Check for inputs
@@ -111,7 +122,7 @@ PAL_MagicSelectionMenuUpdate(
    if (g_iCurrentItem + item_delta < 0)
       g_iCurrentItem = 0;
    else if (g_iCurrentItem + item_delta >= g_iNumMagic)
-      g_iCurrentItem = g_iNumMagic-1;
+      g_iCurrentItem = g_iNumMagic - 1;
    else
       g_iCurrentItem += item_delta;
 
@@ -136,15 +147,15 @@ PAL_MagicSelectionMenuUpdate(
          //
          PAL_CreateSingleLineBox(PAL_XY(215, 0), 5, FALSE);
          PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH),
-            gpScreen, PAL_XY(260, 14));
+                              gpScreen, PAL_XY(260, 14));
          PAL_DrawNumber(rgMagicItem[g_iCurrentItem].wMP, 4, PAL_XY(230, 14),
-            kNumColorYellow, kNumAlignRight);
+                        kNumColorYellow, kNumAlignRight);
          PAL_DrawNumber(g_wPlayerMP, 4, PAL_XY(265, 14), kNumColorCyan, kNumAlignRight);
       }
       else
       {
-         WCHAR szDesc[512], *next;
-         const WCHAR *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, rgMagicItem[g_iCurrentItem].wMagic);
+         unsigned short szDesc[512], *next;
+         const unsigned short *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, rgMagicItem[g_iCurrentItem].wMagic);
 
          //
          // Draw the magic description.
@@ -152,7 +163,7 @@ PAL_MagicSelectionMenuUpdate(
          if (d != NULL)
          {
             k = 3;
-		    wcscpy(szDesc, d);
+            wcscpy(szDesc, d);
             d = szDesc;
 
             while (TRUE)
@@ -180,9 +191,9 @@ PAL_MagicSelectionMenuUpdate(
          //
          PAL_CreateSingleLineBox(PAL_XY(0, 0), 5, FALSE);
          PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH),
-            gpScreen, PAL_XY(45, 14));
+                              gpScreen, PAL_XY(45, 14));
          PAL_DrawNumber(rgMagicItem[g_iCurrentItem].wMP, 4, PAL_XY(15, 14),
-            kNumColorYellow, kNumAlignRight);
+                        kNumColorYellow, kNumAlignRight);
          PAL_DrawNumber(g_wPlayerMP, 4, PAL_XY(50, 14), kNumColorCyan, kNumAlignRight);
       }
    }
@@ -197,7 +208,7 @@ PAL_MagicSelectionMenuUpdate(
             int line_incr = (gpGlobals->g.lprgScriptEntry[wScript].rgwOperand[1] != 1) ? 1 : 0;
             wScript = PAL_RunAutoScript(wScript, line);
             line += line_incr;
-	     }
+         }
          else
          {
             wScript = PAL_RunAutoScript(wScript, 0);
@@ -209,12 +220,11 @@ PAL_MagicSelectionMenuUpdate(
       //
       PAL_CreateSingleLineBox(PAL_XY(0, 0), PAL_X(gConfig.ScreenLayout.MagicMPDescLines), FALSE);
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH),
-          gpScreen, gConfig.ScreenLayout.MagicMPSlashPos);
+                           gpScreen, gConfig.ScreenLayout.MagicMPSlashPos);
       PAL_DrawNumber(rgMagicItem[g_iCurrentItem].wMP, 4, gConfig.ScreenLayout.MagicMPNeededPos,
-          kNumColorYellow, kNumAlignRight);
+                     kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(g_wPlayerMP, 4, gConfig.ScreenLayout.MagicMPCurrentPos, kNumColorCyan, kNumAlignRight);
    }
-
 
    //
    // Draw the texts of the current page
@@ -267,7 +277,7 @@ PAL_MagicSelectionMenuUpdate(
          if (i == g_iCurrentItem)
          {
             PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_CURSOR),
-               gpScreen, PAL_XY(35 + iCursorXOffset + k * iItemTextWidth, 64 + j * 18 + iBoxYOffset));
+                                 gpScreen, PAL_XY(35 + iCursorXOffset + k * iItemTextWidth, 64 + j * 18 + iBoxYOffset));
          }
 
          i++;
@@ -298,12 +308,10 @@ PAL_MagicSelectionMenuUpdate(
    return 0xFFFF;
 }
 
-VOID
-PAL_MagicSelectionMenuInit(
-   WORD         wPlayerRole,
-   BOOL         fInBattle,
-   WORD         wDefaultMagic
-)
+void PAL_MagicSelectionMenuInit(
+    unsigned short wPlayerRole,
+    int fInBattle,
+    unsigned short wDefaultMagic)
 /*++
   Purpose:
 
@@ -323,8 +331,8 @@ PAL_MagicSelectionMenuInit(
 
 --*/
 {
-   WORD       w;
-   int        i, j;
+   unsigned short w;
+   int i, j;
 
    g_iCurrentItem = 0;
    g_iNumMagic = 0;
@@ -376,7 +384,7 @@ PAL_MagicSelectionMenuInit(
    //
    for (i = 0; i < g_iNumMagic - 1; i++)
    {
-      BOOL fCompleted = TRUE;
+      int fCompleted = TRUE;
 
       for (j = 0; j < g_iNumMagic - 1 - i; j++)
       {
@@ -409,12 +417,11 @@ PAL_MagicSelectionMenuInit(
    }
 }
 
-WORD
+unsigned short
 PAL_MagicSelectionMenu(
-   WORD         wPlayerRole,
-   BOOL         fInBattle,
-   WORD         wDefaultMagic
-)
+    unsigned short wPlayerRole,
+    int fInBattle,
+    unsigned short wDefaultMagic)
 /*++
   Purpose:
 
@@ -434,9 +441,9 @@ PAL_MagicSelectionMenu(
 
 --*/
 {
-   WORD            w;
-   int             i;
-   DWORD           dwTime;
+   unsigned short w;
+   int i;
+   unsigned int dwTime;
 
    PAL_MagicSelectionMenuInit(wPlayerRole, fInBattle, wDefaultMagic);
    PAL_ClearKeyState();
@@ -452,7 +459,7 @@ PAL_MagicSelectionMenu(
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          PAL_PlayerInfoBox(PAL_XY(w, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-            TIMEMETER_COLOR_DEFAULT, FALSE);
+                           TIMEMETER_COLOR_DEFAULT, FALSE);
          w += 78;
       }
 

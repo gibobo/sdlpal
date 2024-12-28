@@ -20,54 +20,48 @@
 //
 
 #ifndef _SCENE_H
-#define	_SCENE_H
+#define _SCENE_H
 
-#include "palcommon.h"
+#include <SDL_surface.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-VOID
-PAL_ApplyWave(
-   SDL_Surface    *lpSurface
-);
+   void
+   PAL_ApplyWave(
+       SDL_Surface *lpSurface);
 
-VOID
-PAL_MakeScene(
-   VOID
-);
+   void
+   PAL_MakeScene(
+       void);
 
-BOOL
-PAL_CheckObstacleWithRange(
-	DWORD           pos,
-	BOOL            fCheckEventObjects,
-	WORD            wSelfObject,
-	BOOL			    fCheckRange
-);
+   int
+   PAL_CheckObstacleWithRange(
+       unsigned int pos,
+       int fCheckEventObjects,
+       unsigned short wSelfObject,
+       int fCheckRange);
 
-BOOL
-PAL_CheckObstacle(
-   DWORD           pos,
-   BOOL            fCheckEventObjects,
-   WORD            wSelfObject
-);
+   int
+   PAL_CheckObstacle(
+       unsigned int pos,
+       int fCheckEventObjects,
+       unsigned short wSelfObject);
 
-VOID
-PAL_UpdatePartyGestures(
-   BOOL             fWalking
-);
+   void
+   PAL_UpdatePartyGestures(
+       int fWalking);
 
-VOID
-PAL_UpdateParty(
-   VOID
-);
+   void
+   PAL_UpdateParty(
+       void);
 
-VOID
-PAL_NPCWalkOneStep(
-   WORD          wEventObjectID,
-   INT           iSpeed
-);
+   void
+   PAL_NPCWalkOneStep(
+       unsigned short wEventObjectID,
+       int iSpeed);
 
 #ifdef __cplusplus
 }

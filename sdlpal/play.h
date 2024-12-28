@@ -22,40 +22,38 @@
 #ifndef PLAY_H
 #define PLAY_H
 
-#include "common.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-VOID
+void
 PAL_GameUpdate(
-   BOOL       fTrigger
+   int       fTrigger
 );
 
-VOID
+void
 PAL_GameUseItem(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_GameEquipItem(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_StartFrame(
-   VOID
+   void
 );
 
-VOID
+void
 PAL_WaitForKey(
-   WORD      wTimeOut
+   unsigned short      wTimeOut
 );
 
-VOID
+void
 PAL_WaitForAnyKey(
-   WORD      wTimeOut
+   unsigned short      wTimeOut
 );
 
 #ifdef __cplusplus

@@ -23,24 +23,25 @@
 #include "audio.h"
 #include "global.h"
 #include "util.h"
+#include "palcommon.h"
+#include "common.h"
 
 typedef struct tagRESOURCES
 {
-   BYTE             bLoadFlags;
+   unsigned char bLoadFlags;
 
-   LPPALMAP         lpMap;                                      // current loaded map
-   LPSPRITE        *lppEventObjectSprites;                      // event object sprites
-   int              nEventObject;                               // number of event objects
+   LPPALMAP lpMap;                        // current loaded map
+   unsigned char **lppEventObjectSprites; // event object sprites
+   int nEventObject;                      // number of event objects
 
-   LPSPRITE         rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
+   unsigned char *rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
 } RESOURCES, *LPRESOURCES;
 
 static LPRESOURCES gpResources = NULL;
 
-static VOID
+static void
 PAL_FreeEventObjectSprites(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -72,10 +73,9 @@ PAL_FreeEventObjectSprites(
    }
 }
 
-static VOID
+static void
 PAL_FreePlayerSprites(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -100,10 +100,8 @@ PAL_FreePlayerSprites(
    }
 }
 
-VOID
-PAL_InitResources(
-   VOID
-)
+void PAL_InitResources(
+    void)
 /*++
   Purpose:
 
@@ -122,10 +120,8 @@ PAL_InitResources(
    gpResources = (LPRESOURCES)UTIL_calloc(1, sizeof(RESOURCES));
 }
 
-VOID
-PAL_FreeResources(
-   VOID
-)
+void PAL_FreeResources(
+    void)
 /*++
   Purpose:
 
@@ -163,10 +159,8 @@ PAL_FreeResources(
    gpResources = NULL;
 }
 
-VOID
-PAL_SetLoadFlags(
-   BYTE       bFlags
-)
+void PAL_SetLoadFlags(
+    unsigned char bFlags)
 /*++
   Purpose:
 
@@ -190,10 +184,8 @@ PAL_SetLoadFlags(
    gpResources->bLoadFlags |= bFlags;
 }
 
-VOID
-PAL_LoadResources(
-   VOID
-)
+void PAL_LoadResources(
+    void)
 /*++
   Purpose:
 
@@ -209,8 +201,8 @@ PAL_LoadResources(
 
 --*/
 {
-   int                i, index, l, n;
-   WORD               wPlayerID, wSpriteNum;
+   int i, index, l, n;
+   unsigned short wPlayerID, wSpriteNum;
 
    if (gpResources == NULL || gpResources->bLoadFlags == 0)
    {
@@ -223,7 +215,7 @@ PAL_LoadResources(
    if (gpResources->bLoadFlags & kLoadGlobalData)
    {
       PAL_InitGameData(gpGlobals->bCurrentSaveSlot);
-      AUDIO_PlayMusic(gpGlobals->wNumMusic, TRUE, 1);
+      AUDIO_PlayMusic(gpGlobals->wNumMusic, 1, 1);
    }
 
    //
@@ -231,7 +223,7 @@ PAL_LoadResources(
    //
    if (gpResources->bLoadFlags & kLoadScene)
    {
-      FILE              *fpMAP, *fpGOP;
+      FILE *fpMAP, *fpGOP;
 
       fpMAP = UTIL_OpenRequiredFileForMode("map.mkf", "rb");
       fpGOP = UTIL_OpenRequiredFileForMode("gop.mkf", "rb");
@@ -253,7 +245,7 @@ PAL_LoadResources(
       //
       i = gpGlobals->wNumScene - 1;
       gpResources->lpMap = PAL_LoadMap(gpGlobals->g.rgScene[i].wMapNum,
-         fpMAP, fpGOP);
+                                       fpMAP, fpGOP);
 
       if (gpResources->lpMap == NULL)
       {
@@ -261,7 +253,7 @@ PAL_LoadResources(
          fclose(fpGOP);
 
          TerminateOnError("PAL_LoadResources(): Fail to load map #%d (scene #%d) !",
-            gpGlobals->g.rgScene[i].wMapNum, gpGlobals->wNumScene);
+                          gpGlobals->g.rgScene[i].wMapNum, gpGlobals->wNumScene);
       }
 
       //
@@ -274,7 +266,7 @@ PAL_LoadResources(
       if (gpResources->nEventObject > 0)
       {
          gpResources->lppEventObjectSprites =
-            (LPSPRITE *)UTIL_calloc(gpResources->nEventObject, sizeof(LPSPRITE));
+             (unsigned char **)calloc(gpResources->nEventObject, sizeof(unsigned char *));
       }
 
       for (i = 0; i < gpResources->nEventObject; i++, index++)
@@ -291,13 +283,13 @@ PAL_LoadResources(
 
          l = PAL_MKFGetDecompressedSize(n, gpGlobals->f.fpMGO);
 
-         gpResources->lppEventObjectSprites[i] = (LPSPRITE)UTIL_malloc(l);
+         gpResources->lppEventObjectSprites[i] = (unsigned char *)UTIL_malloc(l);
 
          if (PAL_MKFDecompressChunk(gpResources->lppEventObjectSprites[i], l,
-            n, gpGlobals->f.fpMGO) > 0)
+                                    n, gpGlobals->f.fpMGO) > 0)
          {
             gpGlobals->g.lprgEventObject[index].nSpriteFramesAuto =
-               PAL_SpriteGetNumFrames(gpResources->lppEventObjectSprites[i]);
+                PAL_SpriteGetNumFrames(gpResources->lppEventObjectSprites[i]);
          }
       }
 
@@ -329,10 +321,10 @@ PAL_LoadResources(
 
          l = PAL_MKFGetDecompressedSize(wSpriteNum, gpGlobals->f.fpMGO);
 
-         gpResources->rglpPlayerSprite[i] = (LPSPRITE)UTIL_malloc(l);
+         gpResources->rglpPlayerSprite[i] = (unsigned char *)UTIL_malloc(l);
 
          PAL_MKFDecompressChunk(gpResources->rglpPlayerSprite[i], l, wSpriteNum,
-            gpGlobals->f.fpMGO);
+                                gpGlobals->f.fpMGO);
       }
 
       for (i = 1; i <= gpGlobals->nFollower; i++)
@@ -340,14 +332,14 @@ PAL_LoadResources(
          //
          // Load the follower sprite
          //
-         wSpriteNum = gpGlobals->rgParty[(short)gpGlobals->wMaxPartyMemberIndex+i].wPlayerRole;
+         wSpriteNum = gpGlobals->rgParty[(short)gpGlobals->wMaxPartyMemberIndex + i].wPlayerRole;
 
          l = PAL_MKFGetDecompressedSize(wSpriteNum, gpGlobals->f.fpMGO);
 
-         gpResources->rglpPlayerSprite[(short)gpGlobals->wMaxPartyMemberIndex+i] = (LPSPRITE)UTIL_malloc(l);
+         gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i] = (unsigned char *)UTIL_malloc(l);
 
-         PAL_MKFDecompressChunk(gpResources->rglpPlayerSprite[(short)gpGlobals->wMaxPartyMemberIndex+i], l, wSpriteNum,
-            gpGlobals->f.fpMGO);
+         PAL_MKFDecompressChunk(gpResources->rglpPlayerSprite[(short)gpGlobals->wMaxPartyMemberIndex + i], l, wSpriteNum,
+                                gpGlobals->f.fpMGO);
       }
    }
 
@@ -359,8 +351,7 @@ PAL_LoadResources(
 
 LPPALMAP
 PAL_GetCurrentMap(
-   VOID
-)
+    void)
 /*++
   Purpose:
 
@@ -384,10 +375,9 @@ PAL_GetCurrentMap(
    return gpResources->lpMap;
 }
 
-LPSPRITE
+unsigned char *
 PAL_GetPlayerSprite(
-   BYTE      bPlayerIndex
-)
+    unsigned char bPlayerIndex)
 /*++
   Purpose:
 
@@ -403,7 +393,7 @@ PAL_GetPlayerSprite(
 
 --*/
 {
-   if (gpResources == NULL || bPlayerIndex > MAX_PLAYABLE_PLAYER_ROLES-1)
+   if (gpResources == NULL || bPlayerIndex > MAX_PLAYABLE_PLAYER_ROLES - 1)
    {
       return NULL;
    }
@@ -411,10 +401,9 @@ PAL_GetPlayerSprite(
    return gpResources->rglpPlayerSprite[bPlayerIndex];
 }
 
-LPSPRITE
+unsigned char *
 PAL_GetEventObjectSprite(
-   WORD      wEventObjectID
-)
+    unsigned short wEventObjectID)
 /*++
   Purpose:
 

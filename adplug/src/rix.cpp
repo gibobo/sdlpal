@@ -74,18 +74,6 @@ CrixPlayer::~CrixPlayer()
     free(rix_buf);
 }
 
-void CrixPlayer::read_file_to(uint8_t *&buf)
-{
-  fseek(fp, 0, SEEK_END);
-  length = (uint32_t)ftell(fp);
-  if (buf)
-    free(buf);
-  buf = (uint8_t *)calloc(1, length);
-  fseek(fp, 0, SEEK_SET);
-  fread(buf, length, 1, fp);
-  return;
-}
-
 bool CrixPlayer::load(const std::string &filename, const CFileProvider &cfp)
 {
   fp = fopen(filename.c_str(), "rb");

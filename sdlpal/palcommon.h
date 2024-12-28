@@ -22,213 +22,125 @@
 #ifndef _PALUTILS_H
 #define _PALUTILS_H
 
-#include "common.h"
-#include <SDL.h>
+#include <stdio.h>
+#include <SDL_timer.h>
 
-typedef LPBYTE      LPSPRITE, LPBITMAPRLE;
-typedef LPCBYTE     LPCSPRITE, LPCBITMAPRLE;
-
-#define PAL_XY(x, y)    (DWORD)(((((WORD)(y)) << 16) & 0xFFFF0000) | (((WORD)(x)) & 0xFFFF))
-#define PAL_X(xy)       (SHORT)((xy) & 0xFFFF)
-#define PAL_Y(xy)       (SHORT)(((xy) >> 16) & 0xFFFF)
-#define PAL_XY_OFFSET(xy, x, y)    (DWORD)(((((INT)(y) << 16) & 0xFFFF0000) + ((xy) & 0xFFFF0000)) | (((INT)(x) & 0xFFFF) + ((xy) & 0xFFFF)))
-
-// maximum number of players in party
-#define     MAX_PLAYERS_IN_PARTY         3
-
-// total number of possible player roles
-#define     MAX_PLAYER_ROLES             6
-
-// totally number of playable player roles
-#define     MAX_PLAYABLE_PLAYER_ROLES    5
-
-// maximum entries of inventory
-#define     MAX_INVENTORY                256
-
-// maximum items in a store
-#define     MAX_STORE_ITEM               9
-
-// total number of magic attributes
-#define     NUM_MAGIC_ELEMENTAL          5
-
-// maximum number of enemies in a team
-#define     MAX_ENEMIES_IN_TEAM          5
-
-// maximum number of equipments for a player
-#define     MAX_PLAYER_EQUIPMENTS        6
-
-// maximum number of magics for a player
-#define     MAX_PLAYER_MAGICS            32
-
-// maximum number of scenes
-#define     MAX_SCENES                   300
-
-// maximum number of objects
-#define     MAX_OBJECTS                  600
-
-// maximum number of event objects (should be somewhat more than the original,
-// as there are some modified versions which has more)
-#define     MAX_EVENT_OBJECTS            5500
-
-// maximum number of effective poisons to players
-#define     MAX_POISONS                  16
-
-// maximum number of level
-#define     MAX_LEVELS                   99
-
-#define     MINIMAL_WORD_COUNT           (MAX_OBJECTS + 13)
-
-#define PAL_CDTRACK_BASE    10000
-
-#define PAL_RLEBUFSIZE	64000
-
-typedef enum tagCODEPAGE {
-	CP_BIG5 = 0,
-	CP_GBK = 1,
-	//CP_SHIFTJIS = 2,
-	//CP_JISX0208 = 3,
-	CP_MAX = CP_GBK + 1,
-	CP_UTF_8 = CP_MAX + 1,
-    CP_UCS = CP_UTF_8 + 1,
-} CODEPAGE;
+#define PAL_XY(x, y) (unsigned int)(((((unsigned short)(y)) << 16) & 0xFFFF0000) | (((unsigned short)(x)) & 0xFFFF))
+#define PAL_X(xy) (short)((xy) & 0xFFFF)
+#define PAL_Y(xy) (short)(((xy) >> 16) & 0xFFFF)
+#define PAL_XY_OFFSET(xy, x, y) (unsigned int)(((((int)(y) << 16) & 0xFFFF0000) + ((xy) & 0xFFFF0000)) | (((int)(x) & 0xFFFF) + ((xy) & 0xFFFF)))
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-INT
-PAL_RLEBlitToSurface(
-   LPCBITMAPRLE      lpBitmapRLE,
-   SDL_Surface      *lpDstSurface,
-   DWORD           pos
-);
+    int
+    PAL_RLEBlitToSurface(
+        const unsigned char *lpBitmapRLE,
+        SDL_Surface *lpDstSurface,
+        unsigned int pos);
 
-INT
-PAL_RLEBlitToSurfaceWithShadow(
-   LPCBITMAPRLE      lpBitmapRLE,
-   SDL_Surface      *lpDstSurface,
-   DWORD           pos,
-   BOOL              bShadow
-);
+    int
+    PAL_RLEBlitToSurfaceWithShadow(
+        const unsigned char *lpBitmapRLE,
+        SDL_Surface *lpDstSurface,
+        unsigned int pos,
+        int bShadow);
 
-INT
-PAL_RLEBlitWithColorShift(
-   LPCBITMAPRLE      lpBitmapRLE,
-   SDL_Surface      *lpDstSurface,
-   DWORD           pos,
-   INT               iColorShift
-);
+    int
+    PAL_RLEBlitWithColorShift(
+        const unsigned char *lpBitmapRLE,
+        SDL_Surface *lpDstSurface,
+        unsigned int pos,
+        int iColorShift);
 
-INT
-PAL_RLEBlitMonoColor(
-   LPCBITMAPRLE      lpBitmapRLE,
-   SDL_Surface      *lpDstSurface,
-   DWORD           pos,
-   BYTE              bColor,
-   INT               iColorShift
-);
+    int
+    PAL_RLEBlitMonoColor(
+        const unsigned char *lpBitmapRLE,
+        SDL_Surface *lpDstSurface,
+        unsigned int pos,
+        unsigned char bColor,
+        int iColorShift);
 
-INT
-PAL_FBPBlitToSurface(
-   LPBYTE            lpBitmapFBP,
-   SDL_Surface      *lpDstSurface
-);
+    int
+    PAL_FBPBlitToSurface(
+        unsigned char *lpBitmapFBP,
+        SDL_Surface *lpDstSurface);
 
-INT
-PAL_RLEGetWidth(
-   LPCBITMAPRLE      lpBitmapRLE
-);
+    int
+    PAL_RLEGetWidth(
+        const unsigned char *lpBitmapRLE);
 
-INT
-PAL_RLEGetHeight(
-   LPCBITMAPRLE      lpBitmapRLE
-);
+    int
+    PAL_RLEGetHeight(
+        const unsigned char *lpBitmapRLE);
 
-WORD
-PAL_SpriteGetNumFrames(
-   LPCSPRITE       lpSprite
-);
+    unsigned short
+    PAL_SpriteGetNumFrames(
+        const unsigned char *lpSprite);
 
-LPCBITMAPRLE
-PAL_SpriteGetFrame(
-   LPCSPRITE       lpSprite,
-   INT             iFrameNum
-);
+    const unsigned char *
+    PAL_SpriteGetFrame(
+        const unsigned char *lpSprite,
+        int iFrameNum);
 
-INT
-PAL_MKFGetChunkCount(
-   FILE *fp
-);
+    int
+    PAL_MKFGetChunkCount(
+        FILE *fp);
 
-INT
-PAL_MKFGetChunkSize(
-   UINT    uiChunkNum,
-   FILE   *fp
-);
+    int
+    PAL_MKFGetChunkSize(
+        unsigned int uiChunkNum,
+        FILE *fp);
 
-INT
-PAL_MKFReadChunk(
-   LPBYTE          lpBuffer,
-   UINT            uiBufferSize,
-   UINT            uiChunkNum,
-   FILE           *fp
-);
+    int
+    PAL_MKFReadChunk(
+        unsigned char *lpBuffer,
+        unsigned int uiBufferSize,
+        unsigned int uiChunkNum,
+        FILE *fp);
 
-INT
-PAL_MKFGetDecompressedSize(
-   UINT    uiChunkNum,
-   FILE   *fp
-);
+    int
+    PAL_MKFGetDecompressedSize(
+        unsigned int uiChunkNum,
+        FILE *fp);
 
-INT
-PAL_MKFDecompressChunk(
-   LPBYTE          lpBuffer,
-   UINT            uiBufferSize,
-   UINT            uiChunkNum,
-   FILE           *fp
-);
+    int
+    PAL_MKFDecompressChunk(
+        unsigned char *lpBuffer,
+        unsigned int uiBufferSize,
+        unsigned int uiChunkNum,
+        FILE *fp);
 
-// From yj1.c:
-extern INT
-(*Decompress)(
-   LPCVOID      Source,
-   LPVOID       Destination,
-   INT          DestSize
-);
+    // From yj1.c:
+    extern int (*Decompress)(
+        const void *Source,
+        void *Destination,
+        int DestSize);
 
-INT
-YJ1_Decompress(
-   LPCVOID      Source,
-   LPVOID       Destination,
-   INT          DestSize
-);
+    int
+    YJ1_Decompress(
+        const void *Source,
+        void *Destination,
+        int DestSize);
 
-INT
-YJ2_Decompress(
-   LPCVOID      Source,
-   LPVOID       Destination,
-   INT          DestSize
-);
+    int
+    YJ2_Decompress(
+        const void *Source,
+        void *Destination,
+        int DestSize);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define PAL_DelayUntil(t) \
-   PAL_ProcessEvent(); \
-   while (!SDL_TICKS_PASSED(SDL_GetTicks(), (t))) \
-   { \
-      PAL_ProcessEvent(); \
-      SDL_Delay(1); \
-   }
-
-#define PAL_DelayUntilPC(t) \
-   PAL_ProcessEvent(); \
-   while (SDL_GetPerformanceCounter() < (t)) \
-   { \
-      PAL_ProcessEvent(); \
-      SDL_Delay(1); \
-   }
-
+#define PAL_DelayUntil(t)                          \
+    PAL_ProcessEvent();                            \
+    while (!SDL_TICKS_PASSED(SDL_GetTicks(), (t))) \
+    {                                              \
+        PAL_ProcessEvent();                        \
+        SDL_Delay(1);                              \
+    }
 
 #endif // _PALUTILS_H

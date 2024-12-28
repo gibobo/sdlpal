@@ -20,10 +20,10 @@
 // glslp.c: retroarch-style shader preset parser by palxex, 2018
 //
 
-#include "common.h"
-#include "palcfg.h"
 #include "glslp.h"
+#include "palcfg.h"
 #include "util.h"
+#include "common.h"
 #include <ctype.h>
 
 GLSLP gGLSLP;
@@ -169,7 +169,7 @@ static char *strip_quotes(char *str) {
     return begin;
 }
 
-static BOOL
+static int
 line_tokenize(
     const char * line,
     int * sLength,
@@ -314,28 +314,10 @@ static char * wrap_mode_to_string(enum wrap_mode type) {
     return value;
 }
 
-static char *GLSLP_reflow(char *path) {
-	char *ptr;
-	while ((ptr = strstr(path, "..")) != NULL) {
-		char *dup = strdup(path);
-		dup[ptr - path - 1] = '\0';
-		dup = UTIL_basename(dup);
-		sprintf(path, "%s/%s", dup, ptr + 3);
-		free(dup);
-	}
-	while ((ptr = strstr(path, "/")) != NULL)
-		*ptr = PAL_NATIVE_PATH_SEPARATOR[0];
-	return path;
-}
-
 char *get_glslp_path(const char *filename) {
     char *path = (char*)filename;
     if( !UTIL_IsAbsolutePath(filename) )
-        path = PAL_va(0, "%s%s%s", gConfig.pszShaderPath, PAL_NATIVE_PATH_SEPARATOR, filename);
-#if __WINRT__
-    //seems M$ decided fobidden parent referencing. avoid sandbox escaping?
-	GLSLP_reflow(path);
-#endif
+        path = PAL_va(0, "%s%s%s", gConfig.pszShaderPath, "/", filename);
     return path;
 }
 
@@ -398,13 +380,13 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         s_param->scale_type_y = string_to_scale_type(value);
                         break;
                     case TOKEN_SHADER_SCALE:
-                        s_param->scale_x = s_param->scale_y = SDL_atof(value);
+                        s_param->scale_x = s_param->scale_y = (float)SDL_atof(value);
                         break;
                     case TOKEN_SHADER_SCALE_X:
-                        s_param->scale_x = SDL_atof(value);
+                        s_param->scale_x = (float)SDL_atof(value);
                         break;
                     case TOKEN_SHADER_SCALE_Y:
-                        s_param->scale_y = SDL_atof(value);
+                        s_param->scale_y = (float)SDL_atof(value);
                         break;
                     case TOKEN_SHADER_FLOAT_FRAMEBUFFER:
                         s_param->float_framebuffer = SDL_strcasecmp(value, "true") == 0;
@@ -433,7 +415,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         break;
                     }
                     case TOKEN_TEXTURE_PATH:
-                        t_param->texture_path = strdup((UTIL_IsAbsolutePath(value) || strcmp(basedir, "./") == 0) ? value : PAL_va(0,"%s%s%s",basedir,PAL_NATIVE_PATH_SEPARATOR,value));
+                        t_param->texture_path = strdup((UTIL_IsAbsolutePath(value) || strcmp(basedir, "./") == 0) ? value : PAL_va(0,"%s%s%s",basedir,"/",value));
                         break;
                     case TOKEN_TEXTURE_WRAP_MODE:
                         t_param->wrap_mode = string_to_wrap_mode(value);
@@ -457,7 +439,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         break;
                     }
                     case TOKEN_PARAMETER_NAME:
-                        u_param->value = SDL_atof(value);
+                        u_param->value = (float)SDL_atof(value);
                         break;
                     default:
                         break;

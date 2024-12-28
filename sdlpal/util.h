@@ -22,37 +22,33 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include "common.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum tagPALFILE {
-	PALFILE_ABC = 0x00000001,
-	PALFILE_BALL = 0x00000002,
-	PALFILE_DATA = 0x00000004,
-	PALFILE_F = 0x00000008,
-	PALFILE_FBP = 0x00000010,
-	PALFILE_FIRE = 0x00000020,
-	PALFILE_GOP = 0x00000040,
-	PALFILE_MAP = 0x00000080,
-	PALFILE_MGO = 0x00000100,
-	PALFILE_PAT = 0x00000200,
-	PALFILE_RGM = 0x00000400,
-	PALFILE_RNG = 0x00000800,
-	PALFILE_SSS = 0x00001000,
-	PALFILE_MSG = 0x00002000,
-	PALFILE_M = 0x00004000,
-	PALFILE_WORD = 0x00008000,
-	PALFILE_REQUIRED_MASK = 0x0000ffff,
-	PALFILE_VOC = 0x00010000,
-	PALFILE_SOUNDS = 0x00020000,
-	PALFILE_SOUND_MASK = 0x00030000,
-	PALFILE_MIDI = 0x00040000,
-	PALFILE_MUS = 0x00080000,
-	PALFILE_MUSIC_MASK = 0x000c0000,
-} PALFILE;
+
+typedef enum tagLOGLEVEL
+{
+	LOGLEVEL_MIN,
+	LOGLEVEL_VERBOSE = LOGLEVEL_MIN,
+	LOGLEVEL_DEBUG,
+	LOGLEVEL_INFO,
+	LOGLEVEL_WARNING,
+	LOGLEVEL_ERROR,
+	LOGLEVEL_FATAL,
+	LOGLEVEL_MAX = LOGLEVEL_FATAL,
+} LOGLEVEL;
+
+#define PAL_LOG_MAX_OUTPUTS   (LOGLEVEL_MAX + 1)
+
+#if defined(DEBUG) || defined(_DEBUG)
+# define PAL_DEFAULT_LOGLEVEL  LOGLEVEL_MIN
+#else
+# define PAL_DEFAULT_LOGLEVEL  LOGLEVEL_MAX
+#endif
+
 
 long
 flength(
@@ -68,7 +64,6 @@ char *
 UTIL_GlobalBuffer(
 	int         index
 );
-#define PAL_BUFFER_SIZE_ARGS(i) UTIL_GlobalBuffer(i), PAL_GLOBAL_BUFFER_SIZE
 
 /*++
   Purpose:
@@ -94,6 +89,7 @@ UTIL_va(
 	const char *format,
 	...
 );
+
 #define PAL_va(i, fmt, ...) UTIL_va(UTIL_GlobalBuffer(i), PAL_GLOBAL_BUFFER_SIZE, fmt, __VA_ARGS__)
 
 int
@@ -132,25 +128,25 @@ UTIL_calloc(
 
 FILE *
 UTIL_OpenRequiredFileForMode(
-   LPCSTR               lpszFileName,
-   LPCSTR               szMode
+   const char*               lpszFileName,
+   const char*               szMode
 );
 
 FILE *
 UTIL_OpenFile(
-   LPCSTR               lpszFileName
+   const char*               lpszFileName
 );
 
 FILE *
 UTIL_OpenFileForMode(
-   LPCSTR               lpszFileName,
-   LPCSTR               szMode
+   const char*               lpszFileName,
+   const char*               szMode
 );
 
 FILE *
 UTIL_OpenFileAtPath(
-	LPCSTR              lpszPath,
-	LPCSTR              lpszFileName
+	const char*              lpszPath,
+	const char*              lpszFileName
 );
 
 /*++
@@ -172,12 +168,12 @@ UTIL_OpenFileAtPath(
 --*/
 FILE *
 UTIL_OpenFileAtPathForMode(
-	LPCSTR              lpszPath,
-	LPCSTR              lpszFileName,
-	LPCSTR              szMode
+	const char*              lpszPath,
+	const char*              lpszFileName,
+	const char*              szMode
 );
 
-VOID
+void
 UTIL_CloseFile(
    FILE                *fp
 );
@@ -208,9 +204,10 @@ UTIL_CombinePath(
 	int         numentry,
 	...
 );
+
 #define PAL_CombinePath(i, d, f) UTIL_CombinePath(UTIL_GlobalBuffer(i), PAL_GLOBAL_BUFFER_SIZE, 2, (d), (f))
 
-BOOL
+int
 UTIL_IsFileExist(
     const char *path
 );
@@ -229,7 +226,7 @@ char *UTIL_basename(const char *path);
  * Platform-specific utilities
  */
 
-BOOL
+int
 UTIL_IsAbsolutePath(
 	const char *lpszFileName
 );

@@ -22,7 +22,8 @@
 #ifndef _MAP_H
 #define _MAP_H
 
-#include "palcommon.h"
+#include <stdio.h>
+#include <SDL_surface.h>
 
 //
 // Map format:
@@ -42,7 +43,7 @@
 //
 // Tiles are in diamond shape (32x15).
 //
-// Each tile is represented with a DWORD value, which contains information
+// Each tile is represented with a unsigned int value, which contains information
 // about the tile bitmap, block flag, height, etc.
 //
 // Bottom layer sprite index:
@@ -58,62 +59,57 @@
 
 typedef struct tagPALMAP
 {
-   DWORD          Tiles[128][64][2];
-   LPSPRITE       pTileSprite;
-   INT            iMapNum;
+    unsigned int Tiles[128][64][2];
+    unsigned char *pTileSprite;
+    int iMapNum;
 } PALMAP, *LPPALMAP;
 
 typedef const PALMAP *LPCPALMAP;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-LPPALMAP
-PAL_LoadMap(
-   INT               iMapNum,
-   FILE             *fpMapMKF,
-   FILE             *fpGopMKF
-);
+    LPPALMAP
+    PAL_LoadMap(
+        int iMapNum,
+        FILE *fpMapMKF,
+        FILE *fpGopMKF);
 
-VOID
-PAL_FreeMap(
-   LPPALMAP          lpMap
-);
+    void
+    PAL_FreeMap(
+        LPPALMAP lpMap);
 
-LPCBITMAPRLE
-PAL_MapGetTileBitmap(
-   BYTE       x,
-   BYTE       y,
-   BYTE       h,
-   BYTE       ucLayer,
-   LPCPALMAP  lpMap
-);
+    const unsigned char *
+    PAL_MapGetTileBitmap(
+        unsigned char x,
+        unsigned char y,
+        unsigned char h,
+        unsigned char ucLayer,
+        LPCPALMAP lpMap);
 
-BOOL
-PAL_MapTileIsBlocked(
-   BYTE       x,
-   BYTE       y,
-   BYTE       h,
-   LPCPALMAP  lpMap
-);
+    int
+    PAL_MapTileIsBlocked(
+        unsigned char x,
+        unsigned char y,
+        unsigned char h,
+        LPCPALMAP lpMap);
 
-BYTE
-PAL_MapGetTileHeight(
-   BYTE       x,
-   BYTE       y,
-   BYTE       h,
-   BYTE       ucLayer,
-   LPCPALMAP  lpMap
-);
+    unsigned char
+    PAL_MapGetTileHeight(
+        unsigned char x,
+        unsigned char y,
+        unsigned char h,
+        unsigned char ucLayer,
+        LPCPALMAP lpMap);
 
-VOID
-PAL_MapBlitToSurface(
-   LPCPALMAP             lpMap,
-   SDL_Surface          *lpSurface,
-   const SDL_Rect       *lpSrcRect,
-   BYTE                  ucLayer
-);
+    void
+    PAL_MapBlitToSurface(
+        LPCPALMAP lpMap,
+        SDL_Surface *lpSurface,
+        const SDL_Rect *lpSrcRect,
+        unsigned char ucLayer);
 
 #ifdef __cplusplus
 }
@@ -122,17 +118,17 @@ PAL_MapBlitToSurface(
 //
 // Convert map location to the real location
 //
-#define PAL_XYH_TO_POS(x, y, h)                       \
-   DWORD((x) * 32 + (h) * 16, (y) * 16 + (h) * 8)
+#define PAL_XYH_TO_POS(x, y, h) \
+    unsigned int((x) * 32 + (h) * 16, (y) * 16 + (h) * 8)
 
 //
 // Convert real location to map location
 //
-#define PAL_POS_TO_XYH(pos, x, y, h)                  \
-{                                                     \
-   (h) = (BYTE)(((PAL_X(pos) % 32) != 0) ? 1 : 0);    \
-   (x) = (BYTE)(PAL_X(pos) / 32);                     \
-   (y) = (BYTE)(PAL_Y(pos) / 16);                     \
-}
+#define PAL_POS_TO_XYH(pos, x, y, h)                             \
+    {                                                            \
+        (h) = (unsigned char)(((PAL_X(pos) % 32) != 0) ? 1 : 0); \
+        (x) = (unsigned char)(PAL_X(pos) / 32);                  \
+        (y) = (unsigned char)(PAL_Y(pos) / 16);                  \
+    }
 
 #endif

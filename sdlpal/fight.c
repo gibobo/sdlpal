@@ -19,15 +19,26 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "main.h"
-#include <math.h>
+#include "fight.h"
+#include "audio.h"
+#include "battle.h"
+#include "global.h"
+#include "input.h"
+#include "palcfg.h"
+#include "palcommon.h"
+#include "script.h"
+#include "text.h"
+#include "util.h"
+#include "video.h"
+#include "common.h"
+#include <SDL_timer.h>
 
 //#define INVINCIBLE 1
-extern WORD g_rgPlayerPos[3][3][2];
+extern unsigned short g_rgPlayerPos[3][3][2];
 
-BOOL
+int
 PAL_IsPlayerDying(
-   WORD        wPlayerRole
+   unsigned short        wPlayerRole
 )
 /*++
   Purpose:
@@ -48,9 +59,9 @@ PAL_IsPlayerDying(
       min(100, gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole] / 5);
 }
 
-BOOL
+int
 PAL_IsPlayerHealthy(
-   WORD     wPlayerRole
+   unsigned short     wPlayerRole
 )
 /*++
  Purpose:
@@ -75,17 +86,17 @@ PAL_IsPlayerHealthy(
            gpGlobals->rgPlayerStatus[wPlayerRole][kStatusPuppet] == 0;
 }
 
-INT
+int
 PAL_BattleSelectAutoTarget(
-   VOID
+   void
 )
 {
    return PAL_BattleSelectAutoTargetFrom(0);
 }
 
-INT
+int
 PAL_BattleSelectAutoTargetFrom(
-   INT begin
+   int begin
 )
 /*++
   Purpose:
@@ -127,10 +138,10 @@ PAL_BattleSelectAutoTargetFrom(
    return -1;
 }
 
-static SHORT
+static short
 PAL_CalcBaseDamage(
-   WORD        wAttackStrength,
-   WORD        wDefense
+   unsigned short        wAttackStrength,
+   unsigned short        wDefense
 )
 /*++
   Purpose:
@@ -149,18 +160,18 @@ PAL_CalcBaseDamage(
 
 --*/
 {
-   SHORT            sDamage;
+   short            sDamage;
 
    //
    // Formula courtesy of palxex and shenyanduxing
    //
    if (wAttackStrength > wDefense)
    {
-      sDamage = (SHORT)(wAttackStrength * 2 - wDefense * 1.6 + 0.5);
+      sDamage = (short)(wAttackStrength * 2 - wDefense * 1.6 + 0.5);
    }
    else if (wAttackStrength > wDefense * 0.6)
    {
-      sDamage = (SHORT)(wAttackStrength - wDefense * 0.6 + 0.5);
+      sDamage = (short)(wAttackStrength - wDefense * 0.6 + 0.5);
    }
    else
    {
@@ -170,14 +181,14 @@ PAL_CalcBaseDamage(
    return sDamage;
 }
 
-static SHORT
+static short
 PAL_CalcMagicDamage(
-   WORD             wMagicStrength,
-   WORD             wDefense,
-   const WORD       rgwElementalResistance[NUM_MAGIC_ELEMENTAL],
-   WORD             wPoisonResistance,
-   WORD             wResistanceMultiplier,
-   WORD             wMagicID
+   unsigned short             wMagicStrength,
+   unsigned short             wDefense,
+   const unsigned short       rgwElementalResistance[NUM_MAGIC_ELEMENTAL],
+   unsigned short             wPoisonResistance,
+   unsigned short             wResistanceMultiplier,
+   unsigned short             wMagicID
 )
 /*++
    Purpose:
@@ -204,16 +215,15 @@ PAL_CalcMagicDamage(
 
 --*/
 {
-   SHORT           sDamage;
-   WORD            wElem;
+   short           sDamage;
+   unsigned short            wElem;
 
    wMagicID = gpGlobals->g.rgObject[wMagicID].magic.wMagicNumber;
 
    //
    // Formula courtesy of palxex and shenyanduxing
    //
-   wMagicStrength *= RandomFloat(10, 11);
-   wMagicStrength /= 10;
+   wMagicStrength = (unsigned short)(((float)wMagicStrength * RandomFloat(10, 11)) / 10.0f);
 
    sDamage = PAL_CalcBaseDamage(wMagicStrength, wDefense);
    sDamage /= 4;
@@ -226,7 +236,7 @@ PAL_CalcMagicDamage(
 
       if (wElem > NUM_MAGIC_ELEMENTAL)
       {
-         sDamage *= 10 - ((FLOAT)wPoisonResistance / wResistanceMultiplier);
+         sDamage = (short)((float)sDamage * (10.0f - ((float)wPoisonResistance / (float)wResistanceMultiplier)));
       }
       else if (wElem == 0)
       {
@@ -234,7 +244,7 @@ PAL_CalcMagicDamage(
       }
       else
       {
-         sDamage *= 10 - ((FLOAT)rgwElementalResistance[wElem - 1] / wResistanceMultiplier);
+         sDamage = (short)((float)sDamage * (10.0f - ((float)rgwElementalResistance[wElem - 1] / (float)wResistanceMultiplier)));
       }
 
       sDamage /= 5;
@@ -249,11 +259,11 @@ PAL_CalcMagicDamage(
    return sDamage;
 }
 
-SHORT
+short
 PAL_CalcPhysicalAttackDamage(
-   WORD           wAttackStrength,
-   WORD           wDefense,
-   WORD           wAttackResistance
+   unsigned short           wAttackStrength,
+   unsigned short           wDefense,
+   unsigned short           wAttackResistance
 )
 /*++
   Purpose:
@@ -274,7 +284,7 @@ PAL_CalcPhysicalAttackDamage(
 
 --*/
 {
-   SHORT             sDamage;
+   short             sDamage;
 
    sDamage = PAL_CalcBaseDamage(wAttackStrength, wDefense);
    if (wAttackResistance != 0)
@@ -285,9 +295,9 @@ PAL_CalcPhysicalAttackDamage(
    return sDamage;
 }
 
-static SHORT
+static short
 PAL_GetEnemyDexterity(
-   WORD          wEnemyIndex
+   unsigned short          wEnemyIndex
 )
 /*++
   Purpose:
@@ -304,19 +314,19 @@ PAL_GetEnemyDexterity(
 
 --*/
 {
-   SHORT      s;
+   short      s;
 
    assert(g_Battle.rgEnemy[wEnemyIndex].wObjectID != 0);
 
    s = (g_Battle.rgEnemy[wEnemyIndex].e.wLevel + 6) * 3;
-   s += (SHORT)g_Battle.rgEnemy[wEnemyIndex].e.wDexterity;
+   s += (short)g_Battle.rgEnemy[wEnemyIndex].e.wDexterity;
 
    return s;
 }
 
-static WORD
+static unsigned short
 PAL_GetPlayerActualDexterity(
-   WORD            wPlayerRole
+   unsigned short            wPlayerRole
 )
 /*++
   Purpose:
@@ -333,7 +343,7 @@ PAL_GetPlayerActualDexterity(
 
 --*/
 {
-   WORD wDexterity = PAL_GetPlayerDexterity(wPlayerRole);
+   unsigned short wDexterity = PAL_GetPlayerDexterity(wPlayerRole);
 
    if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusHaste] != 0)
    {
@@ -348,11 +358,11 @@ PAL_GetPlayerActualDexterity(
    return wDexterity;
 }
 
-VOID
+void
 PAL_BattleDelay(
-   WORD       wDuration,
-   WORD       wObjectID,
-   BOOL       fUpdateGesture
+   unsigned short       wDuration,
+   unsigned short       wObjectID,
+   int       fUpdateGesture
 )
 /*++
   Purpose:
@@ -374,7 +384,7 @@ PAL_BattleDelay(
 --*/
 {
    int    i, j;
-   DWORD  dwTime = SDL_GetTicks() + BATTLE_FRAME_TIME;
+   unsigned int  dwTime = SDL_GetTicks() + BATTLE_FRAME_TIME;
 
    for (i = 0; i < wDuration; i++)
    {
@@ -426,9 +436,9 @@ PAL_BattleDelay(
          {
             PAL_DrawText(PAL_GetWord(wObjectID), PAL_XY(130, 75), 15, TRUE, FALSE, FALSE);
          }
-         else if ((SHORT)wObjectID < 0)
+         else if ((short)wObjectID < 0)
          {
-            PAL_DrawText(PAL_GetWord(-((SHORT)wObjectID)), PAL_XY(170, 45), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
+            PAL_DrawText(PAL_GetWord(-((short)wObjectID)), PAL_XY(170, 45), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
          }
          else
          {
@@ -440,9 +450,9 @@ PAL_BattleDelay(
    }
 }
 
-static VOID
+static void
 PAL_BattleBackupStat(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -460,7 +470,7 @@ PAL_BattleBackupStat(
 --*/
 {
    int          i;
-   WORD         wPlayerRole;
+   unsigned short         wPlayerRole;
 
    for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
    {
@@ -482,9 +492,9 @@ PAL_BattleBackupStat(
    }
 }
 
-static BOOL
+static int
 PAL_BattleDisplayStatChange(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -502,9 +512,9 @@ PAL_BattleDisplayStatChange(
 --*/
 {
    int      i, x, y;
-   SHORT    sDamage;
-   WORD     wPlayerRole;
-   BOOL     f = FALSE;
+   short    sDamage;
+   unsigned short     wPlayerRole;
+   int     f = FALSE;
 
    for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
    {
@@ -530,11 +540,11 @@ PAL_BattleDisplayStatChange(
 
          if (sDamage < 0)
          {
-            PAL_BattleUIShowNum((WORD)(-sDamage), PAL_XY(x, y), kNumColorBlue);
+            PAL_BattleUIShowNum((unsigned short)(-sDamage), PAL_XY(x, y), kNumColorBlue);
          }
          else
          {
-            PAL_BattleUIShowNum((WORD)(sDamage), PAL_XY(x, y), kNumColorYellow);
+            PAL_BattleUIShowNum((unsigned short)(sDamage), PAL_XY(x, y), kNumColorYellow);
          }
 
          f = TRUE;
@@ -560,11 +570,11 @@ PAL_BattleDisplayStatChange(
 
          if (sDamage < 0)
          {
-            PAL_BattleUIShowNum((WORD)(-sDamage), PAL_XY(x, y), kNumColorBlue);
+            PAL_BattleUIShowNum((unsigned short)(-sDamage), PAL_XY(x, y), kNumColorBlue);
          }
          else
          {
-            PAL_BattleUIShowNum((WORD)(sDamage), PAL_XY(x, y), kNumColorYellow);
+            PAL_BattleUIShowNum((unsigned short)(sDamage), PAL_XY(x, y), kNumColorYellow);
          }
 
          f = TRUE;
@@ -588,7 +598,7 @@ PAL_BattleDisplayStatChange(
          //
          if (sDamage > 0)
          {
-            PAL_BattleUIShowNum((WORD)(sDamage), PAL_XY(x, y), kNumColorCyan);
+            PAL_BattleUIShowNum((unsigned short)(sDamage), PAL_XY(x, y), kNumColorCyan);
          }
 
          f = TRUE;
@@ -598,9 +608,9 @@ PAL_BattleDisplayStatChange(
    return f;
 }
 
-static VOID
+static void
 PAL_BattlePostActionCheck(
-   BOOL      fCheckPlayers
+   int      fCheckPlayers
 )
 /*++
   Purpose:
@@ -618,8 +628,8 @@ PAL_BattlePostActionCheck(
 --*/
 {
    int      i, j;
-   BOOL     fFade = FALSE;
-   BOOL     fEnemyRemaining = FALSE;
+   int     fFade = FALSE;
+   int     fEnemyRemaining = FALSE;
 
    for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
    {
@@ -628,7 +638,7 @@ PAL_BattlePostActionCheck(
          continue;
       }
 
-      if ((SHORT)(g_Battle.rgEnemy[i].e.wHealth) <= 0)
+      if ((short)(g_Battle.rgEnemy[i].e.wHealth) <= 0)
       {
          //
          // This enemy is KO'ed
@@ -659,7 +669,7 @@ PAL_BattlePostActionCheck(
    {
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
-         WORD w = gpGlobals->rgParty[i].wPlayerRole, wName;
+         unsigned short w = gpGlobals->rgParty[i].wPlayerRole, wName;
 
          if (gpGlobals->g.PlayerRoles.rgwHP[w] < g_Battle.rgPlayer[i].wPrevHP &&
             gpGlobals->g.PlayerRoles.rgwHP[w] == 0)
@@ -706,7 +716,7 @@ PAL_BattlePostActionCheck(
 
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
-         WORD w = gpGlobals->rgParty[i].wPlayerRole, wName;
+         unsigned short w = gpGlobals->rgParty[i].wPlayerRole, wName;
 
          if (gpGlobals->rgPlayerStatus[w][kStatusSleep] != 0 ||
             gpGlobals->rgPlayerStatus[w][kStatusConfused] != 0)
@@ -719,7 +729,7 @@ PAL_BattlePostActionCheck(
             if (gpGlobals->g.PlayerRoles.rgwHP[w] > 0 && PAL_IsPlayerDying(w) &&
                g_Battle.rgPlayer[i].wPrevHP >= gpGlobals->g.PlayerRoles.rgwMaxHP[w] / 5)
             {
-               WORD wCover = gpGlobals->g.PlayerRoles.rgwCoveredBy[w];
+               unsigned short wCover = gpGlobals->g.PlayerRoles.rgwCoveredBy[w];
 
                if (gpGlobals->rgPlayerStatus[wCover][kStatusSleep] != 0 ||
                   gpGlobals->rgPlayerStatus[wCover][kStatusParalyzed] != 0 ||
@@ -795,9 +805,9 @@ end:
    }
 }
 
-VOID
+void
 PAL_BattleUpdateFighters(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -815,7 +825,7 @@ PAL_BattleUpdateFighters(
 --*/
 {
    int        i;
-   WORD       wPlayerRole;
+   unsigned short       wPlayerRole;
 
    //
    // Update the gesture for all players
@@ -891,9 +901,9 @@ PAL_BattleUpdateFighters(
    }
 }
 
-VOID
+void
 PAL_BattlePlayerCheckReady(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -941,9 +951,9 @@ PAL_BattlePlayerCheckReady(
    }
 }
 
-VOID
+void
 PAL_BattleStartFrame(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -961,9 +971,9 @@ PAL_BattleStartFrame(
 --*/
 {
    int                      i, j;
-   WORD                     wPlayerRole;
-   WORD                     wDexterity;
-   BOOL                     fOnlyPuppet = TRUE;
+   unsigned short                     wPlayerRole;
+   unsigned short                     wDexterity;
+   int                     fOnlyPuppet = TRUE;
 
    if (!g_Battle.fEnemyCleared)
    {
@@ -990,7 +1000,7 @@ PAL_BattleStartFrame(
    }
    else
    {
-      BOOL fEnded = TRUE;
+      int fEnded = TRUE;
 
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
@@ -1106,7 +1116,7 @@ PAL_BattleStartFrame(
                g_Battle.ActionQueue[j].wIndex = i;
                g_Battle.ActionQueue[j].fIsSecond = FALSE;
                g_Battle.ActionQueue[j].wDexterity = PAL_GetEnemyDexterity(i);
-               g_Battle.ActionQueue[j].wDexterity *= RandomFloat(0.9f, 1.1f);
+               g_Battle.ActionQueue[j].wDexterity = (unsigned short)((float)g_Battle.ActionQueue[j].wDexterity * RandomFloat(0.9f, 1.1f));
 
                j++;
 
@@ -1116,7 +1126,7 @@ PAL_BattleStartFrame(
                   g_Battle.ActionQueue[j].wIndex = i;
                   g_Battle.ActionQueue[j].fIsSecond = FALSE;
                   g_Battle.ActionQueue[j].wDexterity = PAL_GetEnemyDexterity(i);
-                  g_Battle.ActionQueue[j].wDexterity *= RandomFloat(0.9f, 1.1f);
+                  g_Battle.ActionQueue[j].wDexterity = (unsigned short)((float)g_Battle.ActionQueue[j].wDexterity * RandomFloat(0.9f, 1.1f));
 
                   if(g_Battle.ActionQueue[j].wDexterity <= g_Battle.ActionQueue[j-1].wDexterity)
                       g_Battle.ActionQueue[j].fIsSecond = TRUE;
@@ -1195,7 +1205,7 @@ PAL_BattleStartFrame(
                      wDexterity /= 2;
                   }
 
-                  wDexterity *= RandomFloat(0.9f, 1.1f);
+                  wDexterity = (unsigned short)((float)wDexterity * RandomFloat(0.9f, 1.1f));
 
                   g_Battle.ActionQueue[j].wDexterity = wDexterity;
                }
@@ -1210,7 +1220,7 @@ PAL_BattleStartFrame(
             {
                for (j = i; j < MAX_ACTIONQUEUE_ITEMS; j++)
                {
-                  if ((SHORT)g_Battle.ActionQueue[i].wDexterity < (SHORT)g_Battle.ActionQueue[j].wDexterity)
+                  if ((short)g_Battle.ActionQueue[i].wDexterity < (short)g_Battle.ActionQueue[j].wDexterity)
                   {
                      ACTIONQUEUE t = g_Battle.ActionQueue[i];
                      g_Battle.ActionQueue[i] = g_Battle.ActionQueue[j];
@@ -1280,7 +1290,7 @@ PAL_BattleStartFrame(
                if (g_Battle.rgEnemy[i].rgPoisons[j].wPoisonID != 0)
                {
                   g_Battle.rgEnemy[i].rgPoisons[j].wPoisonScript =
-                     PAL_RunTriggerScript(g_Battle.rgEnemy[i].rgPoisons[j].wPoisonScript, (WORD)i);
+                     PAL_RunTriggerScript(g_Battle.rgEnemy[i].rgPoisons[j].wPoisonScript, (unsigned short)i);
                }
             }
 
@@ -1440,9 +1450,9 @@ PAL_BattleStartFrame(
 
 }
 
-VOID
+void
 PAL_BattleCommitAction(
-   BOOL           fRepeat
+   int           fRepeat
 )
 /*++
   Purpose:
@@ -1459,7 +1469,7 @@ PAL_BattleCommitAction(
 
 --*/
 {
-   WORD      w;
+   unsigned short      w;
 
    if (!fRepeat)
    {
@@ -1468,7 +1478,7 @@ PAL_BattleCommitAction(
       g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.ActionType =
          g_Battle.UI.wActionType;
       g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.sTarget =
-         (SHORT)g_Battle.UI.iSelectedIndex;
+         (short)g_Battle.UI.iSelectedIndex;
 
       if (g_Battle.UI.wActionType == kBattleActionAttack)
       {
@@ -1483,7 +1493,7 @@ PAL_BattleCommitAction(
    }
    else
    {
-      SHORT target = g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.sTarget;
+      short target = g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.sTarget;
       g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action =
          g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].prevAction;
       g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.sTarget = target;
@@ -1557,10 +1567,10 @@ PAL_BattleCommitAction(
 
 }
 
-static VOID
+static void
 PAL_BattleShowPlayerAttackAnim(
-   WORD        wPlayerIndex,
-   BOOL        fCritical
+   unsigned short        wPlayerIndex,
+   int        fCritical
 )
 /*++
   Purpose:
@@ -1579,13 +1589,13 @@ PAL_BattleShowPlayerAttackAnim(
 
 --*/
 {
-   WORD wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
-   SHORT sTarget = g_Battle.rgPlayer[wPlayerIndex].action.sTarget;
+   unsigned short wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+   short sTarget = g_Battle.rgPlayer[wPlayerIndex].action.sTarget;
 
    int index, i, j;
    int enemy_x = 0, enemy_y = 0, enemy_h = 0, x, y, dist = 0;
 
-   DWORD dwTime;
+   unsigned int dwTime;
 
    if (sTarget != -1)
    {
@@ -1683,7 +1693,7 @@ PAL_BattleShowPlayerAttackAnim(
 
    for (i = 0; i < 3; i++)
    {
-      LPCBITMAPRLE b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, index++);
+      const unsigned char* b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, index++);
 
       //
       // Wait for the time of one frame. Accept input here.
@@ -1815,11 +1825,11 @@ PAL_BattleShowPlayerAttackAnim(
    }
 }
 
-static VOID
+static void
 PAL_BattleShowPlayerUseItemAnim(
-   WORD         wPlayerIndex,
-   WORD         wObjectID,
-   SHORT        sTarget
+   unsigned short         wPlayerIndex,
+   unsigned short         wObjectID,
+   short        sTarget
 )
 /*++
   Purpose:
@@ -1887,10 +1897,10 @@ PAL_BattleShowPlayerUseItemAnim(
    }
 }
 
-VOID
+void
 PAL_BattleShowPlayerPreMagicAnim(
-   WORD         wPlayerIndex,
-   BOOL         fSummon
+   unsigned short         wPlayerIndex,
+   int         fSummon
 )
 /*++
   Purpose:
@@ -1910,8 +1920,8 @@ PAL_BattleShowPlayerPreMagicAnim(
 --*/
 {
    int   i, j;
-   DWORD dwTime = SDL_GetTicks();
-   WORD  wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+   unsigned int dwTime = SDL_GetTicks();
+   unsigned short  wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
 
    for (i = 0; i < 4; i++)
    {
@@ -1946,7 +1956,7 @@ PAL_BattleShowPlayerPreMagicAnim(
 	  }
 	  for (i = 0; i < 10; i++)
       {
-         LPCBITMAPRLE b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, index++);
+         const unsigned char* b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, index++);
 
          //
          // Wait for the time of one frame. Accept input here.
@@ -1997,11 +2007,11 @@ PAL_BattleShowPlayerPreMagicAnim(
    PAL_BattleDelay(1, 0, TRUE);
 }
 
-static VOID
+static void
 PAL_BattleShowPlayerDefMagicAnim(
-   WORD         wPlayerIndex,
-   WORD         wObjectID,
-   SHORT        sTarget
+   unsigned short         wPlayerIndex,
+   unsigned short         wObjectID,
+   short        sTarget
 )
 /*++
   Purpose:
@@ -2022,10 +2032,10 @@ PAL_BattleShowPlayerDefMagicAnim(
 
 --*/
 {
-   LPSPRITE   lpSpriteEffect;
+   unsigned char *   lpSpriteEffect;
    int        l, iMagicNum, iEffectNum, n, i, j, x, y;
-   DWORD      dwTime = SDL_GetTicks();
-   SHORT      sLayerOffset;
+   unsigned int      dwTime = SDL_GetTicks();
+   short      sLayerOffset;
 
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
    iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
@@ -2036,9 +2046,9 @@ PAL_BattleShowPlayerDefMagicAnim(
       return;
    }
 
-   lpSpriteEffect = (LPSPRITE)UTIL_malloc(l);
+   lpSpriteEffect = (unsigned char *)UTIL_malloc(l);
 
-   PAL_MKFDecompressChunk((LPBYTE)lpSpriteEffect, l, iEffectNum, gpGlobals->f.fpFIRE);
+   PAL_MKFDecompressChunk((unsigned char *)lpSpriteEffect, l, iEffectNum, gpGlobals->f.fpFIRE);
 
    n = PAL_SpriteGetNumFrames(lpSpriteEffect);
 
@@ -2068,7 +2078,7 @@ PAL_BattleShowPlayerDefMagicAnim(
       //
       // Magic layers offset
       //
-      sLayerOffset = (SHORT)gpGlobals->g.lprgMagic[iMagicNum].rgSpecific.sLayerOffset;
+      sLayerOffset = (short)gpGlobals->g.lprgMagic[iMagicNum].rgSpecific.sLayerOffset;
       
       //
       // Unlocks the sprite sequence to add some image objects.
@@ -2084,8 +2094,8 @@ PAL_BattleShowPlayerDefMagicAnim(
             x = PAL_X(g_Battle.rgPlayer[l].pos);
             y = PAL_Y(g_Battle.rgPlayer[l].pos);
 
-            x += (SHORT) gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
-            y += (SHORT) gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
+            x += (short) gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
+            y += (short) gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
 
             //
             // Add magic sprite to the sprite drawing sequence.
@@ -2100,8 +2110,8 @@ PAL_BattleShowPlayerDefMagicAnim(
          x = PAL_X(g_Battle.rgPlayer[sTarget].pos);
          y = PAL_Y(g_Battle.rgPlayer[sTarget].pos);
 
-         x += (SHORT) gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
-         y += (SHORT) gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
+         x += (short) gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
+         y += (short) gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
 
          //
          // Add magic sprite to the sprite drawing sequence.
@@ -2158,12 +2168,12 @@ PAL_BattleShowPlayerDefMagicAnim(
    }
 }
 
-static VOID
+static void
 PAL_BattleShowPlayerOffMagicAnim(
-   WORD         wPlayerIndex,
-   WORD         wObjectID,
-   SHORT        sTarget,
-   BOOL         fSummon
+   unsigned short         wPlayerIndex,
+   unsigned short         wObjectID,
+   short        sTarget,
+   int         fSummon
 )
 /*++
   Purpose:
@@ -2184,10 +2194,10 @@ PAL_BattleShowPlayerOffMagicAnim(
 
 --*/
 {
-   LPSPRITE   lpSpriteEffect;
+   unsigned char *   lpSpriteEffect;
    int        l, iMagicNum, iEffectNum, n, i, k, x, y, wave, blow;
-   DWORD      dwTime = SDL_GetTicks();
-   SHORT      sLayerOffset;
+   unsigned int      dwTime = SDL_GetTicks();
+   short      sLayerOffset;
 
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
    iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
@@ -2198,13 +2208,13 @@ PAL_BattleShowPlayerOffMagicAnim(
       return;
    }
 
-   lpSpriteEffect = (LPSPRITE)UTIL_malloc(l);
+   lpSpriteEffect = (unsigned char *)UTIL_malloc(l);
 
-   PAL_MKFDecompressChunk((LPBYTE)lpSpriteEffect, l, iEffectNum, gpGlobals->f.fpFIRE);
+   PAL_MKFDecompressChunk((unsigned char *)lpSpriteEffect, l, iEffectNum, gpGlobals->f.fpFIRE);
 
    n = PAL_SpriteGetNumFrames(lpSpriteEffect);
 
-   if (gConfig.fIsWIN95 && wPlayerIndex != (WORD)-1)
+   if (gConfig.fIsWIN95 && wPlayerIndex != (unsigned short)-1)
    {
       g_Battle.rgPlayer[wPlayerIndex].wCurrentFrame = 6;
    }
@@ -2212,7 +2222,7 @@ PAL_BattleShowPlayerOffMagicAnim(
    PAL_BattleDelay(1, 0, TRUE);
 
    l = n - gpGlobals->g.lprgMagic[iMagicNum].wFireDelay;
-   l *= (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wEffectTimes;
+   l *= (short)gpGlobals->g.lprgMagic[iMagicNum].wEffectTimes;
    l += n;
    l += gpGlobals->g.lprgMagic[iMagicNum].wShake;
 
@@ -2226,8 +2236,8 @@ PAL_BattleShowPlayerOffMagicAnim(
 
    for (i = 0; i < l; i++)
    {
-      LPCBITMAPRLE *b = &g_Battle.lpMagicBitmap;
-	  if (!gConfig.fIsWIN95 && i == gpGlobals->g.lprgMagic[iMagicNum].wFireDelay && wPlayerIndex != (WORD)-1)
+      const unsigned char* *b = &g_Battle.lpMagicBitmap;
+	  if (!gConfig.fIsWIN95 && i == gpGlobals->g.lprgMagic[iMagicNum].wFireDelay && wPlayerIndex != (unsigned short)-1)
       {
          g_Battle.rgPlayer[wPlayerIndex].wCurrentFrame = 6;
       }
@@ -2285,7 +2295,7 @@ PAL_BattleShowPlayerOffMagicAnim(
       //
       // Magic layers offset
       //
-      sLayerOffset = (SHORT)gpGlobals->g.lprgMagic[iMagicNum].rgSpecific.sLayerOffset;
+      sLayerOffset = (short)gpGlobals->g.lprgMagic[iMagicNum].rgSpecific.sLayerOffset;
       
       //
       // Unlocks the sprite sequence to add some image objects.
@@ -2299,8 +2309,8 @@ PAL_BattleShowPlayerOffMagicAnim(
          x = PAL_X(g_Battle.rgEnemy[sTarget].pos);
          y = PAL_Y(g_Battle.rgEnemy[sTarget].pos);
 
-         x += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
-         y += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
+         x += (short)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
+         y += (short)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
 
          //
          // Add magic sprite to the sprite drawing sequence.
@@ -2325,8 +2335,8 @@ PAL_BattleShowPlayerOffMagicAnim(
             x = effectpos[k][0];
             y = effectpos[k][1];
 
-            x += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
-            y += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
+            x += (short)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
+            y += (short)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
 
             //
             // Add magic sprite to the sprite drawing sequence.
@@ -2357,8 +2367,8 @@ PAL_BattleShowPlayerOffMagicAnim(
             y = 200;
          }
 
-         x += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
-         y += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
+         x += (short)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
+         y += (short)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
 
          //
          // Add magic sprite to the sprite drawing sequence.
@@ -2396,11 +2406,11 @@ PAL_BattleShowPlayerOffMagicAnim(
    }
 }
 
-static VOID
+static void
 PAL_BattleShowEnemyMagicAnim(
-   WORD         wEnemyIndex,
-   WORD         wObjectID,
-   SHORT        sTarget
+   unsigned short         wEnemyIndex,
+   unsigned short         wObjectID,
+   short        sTarget
 )
 /*++
   Purpose:
@@ -2419,10 +2429,10 @@ PAL_BattleShowEnemyMagicAnim(
 
 --*/
 {
-   LPSPRITE   lpSpriteEffect;
+   unsigned char *   lpSpriteEffect;
    int        l, iMagicNum, iEffectNum, n, i, k, x, y, wave, blow;
-   DWORD      dwTime = SDL_GetTicks();
-   SHORT      sLayerOffset;
+   unsigned int      dwTime = SDL_GetTicks();
+   short      sLayerOffset;
 
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
    iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
@@ -2433,14 +2443,14 @@ PAL_BattleShowEnemyMagicAnim(
       return;
    }
 
-   lpSpriteEffect = (LPSPRITE)UTIL_malloc(l);
+   lpSpriteEffect = (unsigned char *)UTIL_malloc(l);
 
-   PAL_MKFDecompressChunk((LPBYTE)lpSpriteEffect, l, iEffectNum, gpGlobals->f.fpFIRE);
+   PAL_MKFDecompressChunk((unsigned char *)lpSpriteEffect, l, iEffectNum, gpGlobals->f.fpFIRE);
 
    n = PAL_SpriteGetNumFrames(lpSpriteEffect);
 
    l = n - gpGlobals->g.lprgMagic[iMagicNum].wFireDelay;
-   l *= (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wEffectTimes;
+   l *= (short)gpGlobals->g.lprgMagic[iMagicNum].wEffectTimes;
    l += n;
    l += gpGlobals->g.lprgMagic[iMagicNum].wShake;
 
@@ -2449,7 +2459,7 @@ PAL_BattleShowEnemyMagicAnim(
 
    for (i = 0; i < l; i++)
    {
-      LPCBITMAPRLE *b = &g_Battle.lpMagicBitmap;
+      const unsigned char* *b = &g_Battle.lpMagicBitmap;
 
       blow = ((g_Battle.iBlow > 0) ? RandomLong(0, g_Battle.iBlow) : RandomLong(g_Battle.iBlow, 0));
 
@@ -2510,7 +2520,7 @@ PAL_BattleShowEnemyMagicAnim(
       //
       // Magic layers offset
       //
-      sLayerOffset = (SHORT)gpGlobals->g.lprgMagic[iMagicNum].rgSpecific.sLayerOffset;
+      sLayerOffset = (short)gpGlobals->g.lprgMagic[iMagicNum].rgSpecific.sLayerOffset;
       
       //
       // Unlocks the sprite sequence to add some image objects.
@@ -2524,8 +2534,8 @@ PAL_BattleShowEnemyMagicAnim(
          x = PAL_X(g_Battle.rgPlayer[sTarget].pos);
          y = PAL_Y(g_Battle.rgPlayer[sTarget].pos);
 
-         x += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
-         y += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
+         x += (short)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
+         y += (short)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
 
          //
          // Add magic sprite to the sprite drawing sequence.
@@ -2550,8 +2560,8 @@ PAL_BattleShowEnemyMagicAnim(
             x = effectpos[k][0];
             y = effectpos[k][1];
 
-            x += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
-            y += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
+            x += (short)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
+            y += (short)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
 
             //
             // Add magic sprite to the sprite drawing sequence.
@@ -2582,8 +2592,8 @@ PAL_BattleShowEnemyMagicAnim(
             y = 200;
          }
 
-         x += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
-         y += (SHORT)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
+         x += (short)gpGlobals->g.lprgMagic[iMagicNum].wXOffset;
+         y += (short)gpGlobals->g.lprgMagic[iMagicNum].wYOffset;
 
          //
          // Add magic sprite to the sprite drawing sequence.
@@ -2621,10 +2631,10 @@ PAL_BattleShowEnemyMagicAnim(
    }
 }
 
-static VOID
+static void
 PAL_BattleShowPlayerSummonMagicAnim(
-   WORD         wPlayerIndex,
-   WORD         wObjectID
+   unsigned short         wPlayerIndex,
+   unsigned short         wObjectID
 )
 /*++
   Purpose:
@@ -2644,9 +2654,9 @@ PAL_BattleShowPlayerSummonMagicAnim(
 --*/
 {
    int           i, j;
-   WORD          wMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
-   WORD          wEffectMagicID = 0;
-   DWORD         dwTime = SDL_GetTicks();
+   unsigned short          wMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
+   unsigned short          wEffectMagicID = 0;
+   unsigned int         dwTime = SDL_GetTicks();
 
    for (wEffectMagicID = 0; wEffectMagicID < MAX_OBJECTS; wEffectMagicID++)
    {
@@ -2695,9 +2705,9 @@ PAL_BattleShowPlayerSummonMagicAnim(
    PAL_MKFDecompressChunk(g_Battle.lpSummonSprite, i, j, gpGlobals->f.fpF);
 
    g_Battle.iSummonFrame = 0;
-   g_Battle.posSummon = PAL_XY(240 + (SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wXOffset),
-      165 + (SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wYOffset));
-   g_Battle.sBackgroundColorShift = (SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wEffectTimes);
+   g_Battle.posSummon = PAL_XY(240 + (short)(gpGlobals->g.lprgMagic[wMagicNum].wXOffset),
+      165 + (short)(gpGlobals->g.lprgMagic[wMagicNum].wYOffset));
+   g_Battle.sBackgroundColorShift = (short)(gpGlobals->g.lprgMagic[wMagicNum].wEffectTimes);
    g_Battle.fSummonColorShift = TRUE;
 
    //
@@ -2738,12 +2748,12 @@ PAL_BattleShowPlayerSummonMagicAnim(
    //
    // Show the actual magic effect
    //
-   PAL_BattleShowPlayerOffMagicAnim((WORD)-1, wEffectMagicID, -1, TRUE);
+   PAL_BattleShowPlayerOffMagicAnim((unsigned short)-1, wEffectMagicID, -1, TRUE);
 }
 
-static VOID
+static void
 PAL_BattleShowPostMagicAnim(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -2761,7 +2771,7 @@ PAL_BattleShowPostMagicAnim(
 --*/
 {
    int         i, j, x, y, dist = 8;
-   DWORD     rgEnemyPosBak[MAX_ENEMIES_IN_TEAM];
+   unsigned int     rgEnemyPosBak[MAX_ENEMIES_IN_TEAM];
 
    for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
    {
@@ -2800,9 +2810,9 @@ PAL_BattleShowPostMagicAnim(
    PAL_BattleDelay(1, 0, TRUE);
 }
 
-static VOID
+static void
 PAL_BattlePlayerValidateAction(
-   WORD         wPlayerIndex
+   unsigned short         wPlayerIndex
 )
 /*++
   Purpose:
@@ -2819,11 +2829,11 @@ PAL_BattlePlayerValidateAction(
 
 --*/
 {
-   const WORD   wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
-   const WORD   wObjectID = g_Battle.rgPlayer[wPlayerIndex].action.wActionID;
-   const SHORT  sTarget = g_Battle.rgPlayer[wPlayerIndex].action.sTarget;
-   BOOL         fValid = TRUE, fToEnemy = FALSE;
-   WORD         w;
+   const unsigned short   wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+   const unsigned short   wObjectID = g_Battle.rgPlayer[wPlayerIndex].action.wActionID;
+   const short  sTarget = g_Battle.rgPlayer[wPlayerIndex].action.sTarget;
+   int         fValid = TRUE, fToEnemy = FALSE;
+   unsigned short         w;
    int          i;
 
    switch (g_Battle.rgPlayer[wPlayerIndex].action.ActionType)
@@ -3043,9 +3053,9 @@ PAL_BattlePlayerValidateAction(
    }
 }
 
-static VOID
+static void
 PAL_BattleCheckHidingEffect(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -3071,10 +3081,10 @@ PAL_BattleCheckHidingEffect(
    }
 }
 
-INT
+int
 FIGHT_DetectMagicTargetChange(
-   WORD wMagicNum,
-   INT sTarget
+   unsigned short wMagicNum,
+   int sTarget
 )
 {
    if(sTarget == -1 && (
@@ -3096,9 +3106,9 @@ FIGHT_DetectMagicTargetChange(
    return sTarget;
 }
 
-VOID
+void
 PAL_BattlePlayerPerformAction(
-   WORD         wPlayerIndex
+   unsigned short         wPlayerIndex
 )
 /*++
   Purpose:
@@ -3115,19 +3125,19 @@ PAL_BattlePlayerPerformAction(
 
 --*/
 {
-   SHORT    sDamage;
-   WORD     wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
-   SHORT    sTarget;
+   short    sDamage;
+   unsigned short     wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+   short    sTarget;
    int      x, y;
    int      i, j, t;
-   WORD     str, def, res, wObject, wMagicNum;
-   BOOL     fCritical;
-   WORD     rgwCoopPos[3][2] = {{208, 157}, {234, 170}, {260, 183}};
+   unsigned short     str, def, res, wObject, wMagicNum;
+   int     fCritical;
+   unsigned short     rgwCoopPos[3][2] = {{208, 157}, {234, 170}, {260, 183}};
 
    g_Battle.wMovingPlayerIndex = wPlayerIndex;
    g_Battle.iBlow = 0;
 
-   SHORT origTarget = g_Battle.rgPlayer[wPlayerIndex].action.sTarget;
+   short origTarget = g_Battle.rgPlayer[wPlayerIndex].action.sTarget;
    PAL_BattlePlayerValidateAction(wPlayerIndex);
    PAL_BattleBackupStat();
 
@@ -3174,7 +3184,7 @@ PAL_BattlePlayerPerformAction(
                fCritical = TRUE;
             }
 
-            sDamage = (SHORT)(sDamage * RandomFloat(1, 1.125));
+            sDamage = (short)(sDamage * RandomFloat(1, 1.125));
 
             if (sDamage <= 0)
             {
@@ -3225,7 +3235,7 @@ PAL_BattlePlayerPerformAction(
                def += (g_Battle.rgEnemy[index[i]].e.wLevel + 6) * 4;
                res = g_Battle.rgEnemy[index[i]].e.wPhysicalResistance;
 
-               FLOAT sDamage = PAL_CalcPhysicalAttackDamage(str, def, res);
+               float sDamage = PAL_CalcPhysicalAttackDamage(str, def, res);
 
                if (fCritical)
                {
@@ -3242,7 +3252,7 @@ PAL_BattlePlayerPerformAction(
                   sDamage = 1;
                }
 
-               g_Battle.rgEnemy[index[i]].e.wHealth -= sDamage;
+               g_Battle.rgEnemy[index[i]].e.wHealth -= (unsigned short)sDamage;
 
                if (g_Battle.rgEnemy[index[i]].wObjectID != 0)
                     division *= 2;
@@ -3344,7 +3354,7 @@ PAL_BattlePlayerPerformAction(
             sDamage = 1;
          }
 
-         if (sDamage > (SHORT)gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[sTarget].wPlayerRole])
+         if (sDamage > (short)gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[sTarget].wPlayerRole])
          {
             sDamage = gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[sTarget].wPlayerRole];
          }
@@ -3380,7 +3390,7 @@ PAL_BattlePlayerPerformAction(
       if (gpGlobals->g.lprgMagic[wMagicNum].wType == kMagicTypeSummon)
       {
          PAL_BattleShowPlayerPreMagicAnim(wPlayerIndex, TRUE);
-         PAL_BattleShowPlayerSummonMagicAnim((WORD)-1, wObject);
+         PAL_BattleShowPlayerSummonMagicAnim((unsigned short)-1, wObject);
       }
       else
       {
@@ -3412,7 +3422,7 @@ PAL_BattlePlayerPerformAction(
 
             for (j = 0; j <= gpGlobals->wMaxPartyMemberIndex; j++)
             {
-               if ((WORD)j == wPlayerIndex)
+               if ((unsigned short)j == wPlayerIndex)
                {
                   continue;
                }
@@ -3439,7 +3449,7 @@ PAL_BattlePlayerPerformAction(
 
          for (i = gpGlobals->wMaxPartyMemberIndex; i >= 0; i--)
          {
-            if ((WORD)i == wPlayerIndex)
+            if ((unsigned short)i == wPlayerIndex)
             {
                continue;
             }
@@ -3459,7 +3469,7 @@ PAL_BattlePlayerPerformAction(
          g_Battle.rgPlayer[wPlayerIndex].iColorShift = 0;
          PAL_BattleDelay(3, 0, TRUE);
 
-         PAL_BattleShowPlayerOffMagicAnim((WORD)-1, wObject, sTarget, FALSE);
+         PAL_BattleShowPlayerOffMagicAnim((unsigned short)-1, wObject, sTarget, FALSE);
       }
 
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
@@ -3470,7 +3480,7 @@ PAL_BattlePlayerPerformAction(
          gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[i].wPlayerRole] -=
             gpGlobals->g.lprgMagic[wMagicNum].wCostMP;
 
-         if ((SHORT)(gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[i].wPlayerRole]) <= 0)
+         if ((short)(gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[i].wPlayerRole]) <= 0)
          {
             gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[i].wPlayerRole] = 1;
          }
@@ -3583,7 +3593,7 @@ PAL_BattlePlayerPerformAction(
 
                g_Battle.rgPlayer[j].wCurrentFrame = 0;
 
-               if ((WORD)j == wPlayerIndex)
+               if ((unsigned short)j == wPlayerIndex)
                {
                   continue;
                }
@@ -3629,11 +3639,11 @@ PAL_BattlePlayerPerformAction(
             continue;
          }
 
-         def += (SHORT)(g_Battle.rgEnemy[i].e.wDexterity);
+         def += (short)(g_Battle.rgEnemy[i].e.wDexterity);
          def += (g_Battle.rgEnemy[i].e.wLevel + 6) * 4;
       }
 
-      if ((SHORT)def < 0)
+      if ((short)def < 0)
       {
          def = 0;
       }
@@ -3684,7 +3694,7 @@ PAL_BattlePlayerPerformAction(
       if (!gpGlobals->fAutoBattle)
       {
          gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] -= gpGlobals->g.lprgMagic[wMagicNum].wCostMP;
-         if ((SHORT)(gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole]) < 0)
+         if ((short)(gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole]) < 0)
          {
             gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] = 0;
          }
@@ -3697,7 +3707,7 @@ PAL_BattlePlayerPerformAction(
          //
          // Using a defensive magic
          //
-         WORD w = 0;
+         unsigned short w = 0;
 
          if (g_Battle.rgPlayer[wPlayerIndex].action.sTarget != -1)
          {
@@ -3759,12 +3769,12 @@ PAL_BattlePlayerPerformAction(
             }
 
             gpGlobals->g.rgObject[wObject].magic.wScriptOnSuccess =
-               PAL_RunTriggerScript(gpGlobals->g.rgObject[wObject].magic.wScriptOnSuccess, (WORD)sTarget);
+               PAL_RunTriggerScript(gpGlobals->g.rgObject[wObject].magic.wScriptOnSuccess, (unsigned short)sTarget);
 
             //
             // Inflict damage to enemies
             //
-            if ((SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) > 0)
+            if ((short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) > 0)
             {
                if (sTarget == -1)
                {
@@ -3854,7 +3864,7 @@ PAL_BattlePlayerPerformAction(
       // Run the script
       //
       gpGlobals->g.rgObject[wObject].item.wScriptOnThrow =
-         PAL_RunTriggerScript(gpGlobals->g.rgObject[wObject].item.wScriptOnThrow, (WORD)sTarget);
+         PAL_RunTriggerScript(gpGlobals->g.rgObject[wObject].item.wScriptOnThrow, (unsigned short)sTarget);
 
       //
       // Remove the thrown item from inventory
@@ -3919,9 +3929,9 @@ PAL_BattlePlayerPerformAction(
 
 }
 
-static INT
+static int
 PAL_BattleEnemySelectEnemyTargetIndex(
-   VOID
+   void
 )
 /*++
  Purpose:
@@ -3950,9 +3960,9 @@ PAL_BattleEnemySelectEnemyTargetIndex(
    return i;
 }
 
-static INT
+static int
 PAL_BattleEnemySelectTargetIndex(
-   VOID
+   void
 )
 /*++
   Purpose:
@@ -3981,9 +3991,9 @@ PAL_BattleEnemySelectTargetIndex(
    return i;
 }
 
-VOID
+void
 PAL_BattleEnemyPerformAction(
-   WORD         wEnemyIndex
+   unsigned short         wEnemyIndex
 )
 /*++
   Purpose:
@@ -4001,10 +4011,10 @@ PAL_BattleEnemyPerformAction(
 --*/
 {
    int        str, def, iCoverIndex, i, x, y, ex, ey, iSound;
-   WORD       rgwElementalResistance[NUM_MAGIC_ELEMENTAL];
-   WORD       wPlayerRole, w, wMagic, wMagicNum;
-   SHORT      sTarget, sDamage;
-   BOOL       fAutoDefend = FALSE, rgfMagAutoDefend[MAX_PLAYERS_IN_PARTY];
+   unsigned short       rgwElementalResistance[NUM_MAGIC_ELEMENTAL];
+   unsigned short       wPlayerRole, w, wMagic, wMagicNum;
+   short      sTarget, sDamage;
+   int       fAutoDefend = FALSE, rgfMagAutoDefend[MAX_PLAYERS_IN_PARTY];
 
    PAL_BattleBackupStat();
    g_Battle.iBlow = 0;
@@ -4024,11 +4034,11 @@ PAL_BattleEnemyPerformAction(
    }
    else if (g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusConfused] > 0)
    {
-      INT  iTarget = PAL_BattleEnemySelectEnemyTargetIndex();
+      int  iTarget = PAL_BattleEnemySelectEnemyTargetIndex();
       if( iTarget == wEnemyIndex )
          goto end;
-      INT  iX = PAL_X(g_Battle.rgEnemy[iTarget].pos);
-      INT  iY = PAL_Y(g_Battle.rgEnemy[iTarget].pos);
+      int  iX = PAL_X(g_Battle.rgEnemy[iTarget].pos);
+      int  iY = PAL_Y(g_Battle.rgEnemy[iTarget].pos);
       for (i = 0; i < 3; i++)
       {
          x = PAL_X(g_Battle.rgEnemy[wEnemyIndex].pos);
@@ -4045,12 +4055,12 @@ PAL_BattleEnemyPerformAction(
          PAL_BattleDelay(1, 0, TRUE);
       }
 
-      DWORD dwTime = SDL_GetTicks() + BATTLE_FRAME_TIME;
+      unsigned int dwTime = SDL_GetTicks() + BATTLE_FRAME_TIME;
       x = (PAL_X(g_Battle.rgEnemy[wEnemyIndex].pos) + PAL_X(g_Battle.rgEnemy[iTarget].pos)) / 2;
       y = PAL_Y(g_Battle.rgEnemy[iTarget].pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.rgEnemy[iTarget].lpSprite, 0)) / 3 + 10;
       for( i=9; i<12; i++ )
       {
-         LPCBITMAPRLE b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, i);
+         const unsigned char* b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, i);
 
          PAL_DelayUntil(dwTime);
          dwTime = SDL_GetTicks() + BATTLE_FRAME_TIME;
@@ -4065,9 +4075,9 @@ PAL_BattleEnemyPerformAction(
          VIDEO_UpdateScreen(NULL);
       }
 
-      int str = (SHORT)g_Battle.rgEnemy[wEnemyIndex].e.wAttackStrength;
+      int str = (short)g_Battle.rgEnemy[wEnemyIndex].e.wAttackStrength;
       str += (g_Battle.rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
-      int def = (SHORT)g_Battle.rgEnemy[iTarget].e.wDefense;
+      int def = (short)g_Battle.rgEnemy[iTarget].e.wDefense;
       def += (g_Battle.rgEnemy[iTarget].e.wLevel + 6) * 4;
       sDamage = PAL_CalcBaseDamage(str, def)*2/g_Battle.rgEnemy[iTarget].e.wPhysicalResistance;
 
@@ -4104,7 +4114,7 @@ PAL_BattleEnemyPerformAction(
 
       wMagicNum = gpGlobals->g.rgObject[wMagic].magic.wMagicNumber;
 
-      str = (SHORT)g_Battle.rgEnemy[wEnemyIndex].e.wMagicStrength;
+      str = (short)g_Battle.rgEnemy[wEnemyIndex].e.wMagicStrength;
       str += (g_Battle.rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
       if (str < 0)
       {
@@ -4182,7 +4192,7 @@ PAL_BattleEnemyPerformAction(
          g_Battle.rgPlayer[sTarget].wCurrentFrame = 3;
       }
 
-//      PAL_BattleDelay(12, (WORD)(-((SHORT)wMagic)), FALSE);
+//      PAL_BattleDelay(12, (unsigned short)(-((short)wMagic)), FALSE);
 
       gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse =
          PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse, wPlayerRole);
@@ -4195,7 +4205,7 @@ PAL_BattleEnemyPerformAction(
             PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess, wPlayerRole);
       }
 
-      if ((SHORT)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) > 0)
+      if ((short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) > 0)
       {
          if (sTarget == -1)
          {
@@ -4338,9 +4348,9 @@ PAL_BattleEnemyPerformAction(
       //
       // Physical attack
       //
-      WORD wFrameBak = g_Battle.rgPlayer[sTarget].wCurrentFrame;
+      unsigned short wFrameBak = g_Battle.rgPlayer[sTarget].wCurrentFrame;
 
-      str = (SHORT)g_Battle.rgEnemy[wEnemyIndex].e.wAttackStrength;
+      str = (short)g_Battle.rgEnemy[wEnemyIndex].e.wAttackStrength;
       str += (g_Battle.rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
       if (str < 0)
       {
@@ -4483,7 +4493,7 @@ PAL_BattleEnemyPerformAction(
             sDamage /= 2;
          }
 
-         if ((SHORT)gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] < sDamage)
+         if ((short)gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] < sDamage)
          {
             sDamage = gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole];
          }
@@ -4575,10 +4585,10 @@ end:
    i = 0; // do nothing
 }
 
-VOID
+void
 PAL_BattleStealFromEnemy(
-   WORD           wTarget,
-   WORD           wStealRate
+   unsigned short           wTarget,
+   unsigned short           wStealRate
 )
 /*++
   Purpose:
@@ -4599,10 +4609,10 @@ PAL_BattleStealFromEnemy(
 {
    int   iPlayerIndex = g_Battle.wMovingPlayerIndex;
    int   offset, x, y, i;
-   WCHAR s[256] = L"";
+   unsigned short s[256] = L"";
 
    g_Battle.rgPlayer[iPlayerIndex].wCurrentFrame = 10;
-   offset = ((INT)wTarget - iPlayerIndex) * 8;
+   offset = ((int)wTarget - iPlayerIndex) * 8;
 
    x = PAL_X(g_Battle.rgEnemy[wTarget].pos) + 64 - offset;
    y = PAL_Y(g_Battle.rgEnemy[wTarget].pos) + 22 + offset;
@@ -4650,7 +4660,7 @@ PAL_BattleStealFromEnemy(
 
          if (c > 0)
          {
-            PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"@%ls @%d @%ls@", PAL_GetWord(34), c, PAL_GetWord(10));
+            PAL_swprintf(s, sizeof(s) / sizeof(unsigned short), L"@%ls @%d @%ls@", PAL_GetWord(34), c, PAL_GetWord(10));
          }
       }
       else
@@ -4660,7 +4670,7 @@ PAL_BattleStealFromEnemy(
          //
          g_Battle.rgEnemy[wTarget].e.nStealItem--;
          PAL_AddItemToInventory(g_Battle.rgEnemy[wTarget].e.wStealItem, 1);
-         PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"%ls@%ls@", PAL_GetWord(34), PAL_GetWord(g_Battle.rgEnemy[wTarget].e.wStealItem));
+         PAL_swprintf(s, sizeof(s) / sizeof(unsigned short), L"%ls@%ls@", PAL_GetWord(34), PAL_GetWord(g_Battle.rgEnemy[wTarget].e.wStealItem));
 	  }
 
       if (s[0] != '\0')
@@ -4671,11 +4681,11 @@ PAL_BattleStealFromEnemy(
    }
 }
 
-VOID
+void
 PAL_BattleSimulateMagic(
-   SHORT      sTarget,
-   WORD       wMagicObjectID,
-   WORD       wBaseDamage
+   short      sTarget,
+   unsigned short       wMagicObjectID,
+   unsigned short       wBaseDamage
 )
 /*++
   Purpose:
@@ -4696,7 +4706,7 @@ PAL_BattleSimulateMagic(
 
 --*/
 {
-   SHORT   sDamage;
+   short   sDamage;
    int     i, def;
 
    if (gpGlobals->g.rgObject[wMagicObjectID].magic.wFlags & kMagicFlagApplyToAll)
@@ -4728,7 +4738,7 @@ PAL_BattleSimulateMagic(
                continue;
             }
 
-            def = (SHORT)g_Battle.rgEnemy[i].e.wDefense;
+            def = (short)g_Battle.rgEnemy[i].e.wDefense;
             def += (g_Battle.rgEnemy[i].e.wLevel + 6) * 4;
 
             if (def < 0)
@@ -4736,7 +4746,7 @@ PAL_BattleSimulateMagic(
                def = 0;
             }
 
-            sDamage = PAL_CalcMagicDamage(wBaseDamage, (WORD)def, g_Battle.rgEnemy[i].e.wElemResistance,
+            sDamage = PAL_CalcMagicDamage(wBaseDamage, (unsigned short)def, g_Battle.rgEnemy[i].e.wElemResistance,
                g_Battle.rgEnemy[i].e.wPoisonResistance, 1, wMagicObjectID);
 
             if (sDamage < 0)
@@ -4752,7 +4762,7 @@ PAL_BattleSimulateMagic(
          //
          // Apply to one enemy
          //
-         def = (SHORT)g_Battle.rgEnemy[sTarget].e.wDefense;
+         def = (short)g_Battle.rgEnemy[sTarget].e.wDefense;
          def += (g_Battle.rgEnemy[sTarget].e.wLevel + 6) * 4;
 
          if (def < 0)
@@ -4760,7 +4770,7 @@ PAL_BattleSimulateMagic(
             def = 0;
          }
 
-         sDamage = PAL_CalcMagicDamage(wBaseDamage, (WORD)def, g_Battle.rgEnemy[sTarget].e.wElemResistance,
+         sDamage = PAL_CalcMagicDamage(wBaseDamage, (unsigned short)def, g_Battle.rgEnemy[sTarget].e.wElemResistance,
             g_Battle.rgEnemy[sTarget].e.wPoisonResistance, 1, wMagicObjectID);
 
          if (sDamage < 0)

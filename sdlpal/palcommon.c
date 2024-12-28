@@ -20,34 +20,34 @@
 //
 
 #include "palcommon.h"
+#include "common.h"
 #include "palcfg.h"
 
+#define PAL_fread(buf, elem, num, fp)             \
+   if (fread((buf), (elem), (num), (fp)) < (num)) \
+   return -1
+
 PAL_FORCE_INLINE
-BYTE
+unsigned char
 PAL_CalcShadowColor(
-   BYTE bSourceColor
-)
+    unsigned char bSourceColor)
 {
-    return ((bSourceColor&0xF0)|((bSourceColor&0x0F)>>1));
+   return ((bSourceColor & 0xF0) | ((bSourceColor & 0x0F) >> 1));
 }
 
-INT
-PAL_RLEBlitToSurface(
-   LPCBITMAPRLE      lpBitmapRLE,
-   SDL_Surface      *lpDstSurface,
-   DWORD             pos
-)
+int PAL_RLEBlitToSurface(
+    const unsigned char *lpBitmapRLE,
+    SDL_Surface *lpDstSurface,
+    unsigned int pos)
 {
-    return PAL_RLEBlitToSurfaceWithShadow ( lpBitmapRLE, lpDstSurface, pos, FALSE );
+   return PAL_RLEBlitToSurfaceWithShadow(lpBitmapRLE, lpDstSurface, pos, FALSE);
 }
 
-INT
-PAL_RLEBlitToSurfaceWithShadow(
-   LPCBITMAPRLE      lpBitmapRLE,
-   SDL_Surface      *lpDstSurface,
-   DWORD             pos,
-   BOOL              bShadow
-)
+int PAL_RLEBlitToSurfaceWithShadow(
+    const unsigned char *lpBitmapRLE,
+    SDL_Surface *lpDstSurface,
+    unsigned int pos,
+    int bShadow)
 /*++
   Purpose:
 
@@ -70,16 +70,16 @@ PAL_RLEBlitToSurfaceWithShadow(
 
 --*/
 {
-   UINT          i, j, k, sx;
-   INT           x, y;
-   UINT          uiLen       = 0;
-   UINT          uiWidth     = 0;
-   UINT          uiHeight    = 0;
-   UINT          uiSrcX      = 0;
-   BYTE          T;
-   INT           dx          = PAL_X(pos);
-   INT           dy          = PAL_Y(pos);
-   LPBYTE        p;
+   unsigned int i, j, k, sx;
+   int x, y;
+   unsigned int uiLen = 0;
+   unsigned int uiWidth = 0;
+   unsigned int uiHeight = 0;
+   unsigned int uiSrcX = 0;
+   unsigned char T;
+   int dx = PAL_X(pos);
+   int dy = PAL_Y(pos);
+   unsigned char *p;
 
    //
    // Check for NULL pointer.
@@ -93,7 +93,7 @@ PAL_RLEBlitToSurfaceWithShadow(
    // Skip the 0x00000002 in the file header.
    //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-      lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
@@ -167,7 +167,8 @@ PAL_RLEBlitToSurfaceWithShadow(
             if (x < 0)
             {
                j += -x;
-               if (j >= T) break;
+               if (j >= T)
+                  break;
                sx += -x;
                x = 0;
             }
@@ -188,11 +189,13 @@ PAL_RLEBlitToSurfaceWithShadow(
             // Put the pixels in row onto the surface
             //
             k = T - j;
-            if (lpDstSurface->w - x < k) k = lpDstSurface->w - x;
-            if (uiWidth - sx < k) k = uiWidth - sx;
+            if (lpDstSurface->w - x < k)
+               k = lpDstSurface->w - x;
+            if (uiWidth - sx < k)
+               k = uiWidth - sx;
             sx += k;
-            p = ((LPBYTE)lpDstSurface->pixels) + y * lpDstSurface->pitch;
-            if(bShadow)
+            p = ((unsigned char *)lpDstSurface->pixels) + y * lpDstSurface->pitch;
+            if (bShadow)
             {
                j += k;
                for (; k != 0; k--)
@@ -240,13 +243,11 @@ end:
    return 0;
 }
 
-INT
-PAL_RLEBlitWithColorShift(
-   LPCBITMAPRLE      lpBitmapRLE,
-   SDL_Surface      *lpDstSurface,
-   DWORD             pos,
-   INT               iColorShift
-)
+int PAL_RLEBlitWithColorShift(
+    const unsigned char *lpBitmapRLE,
+    SDL_Surface *lpDstSurface,
+    unsigned int pos,
+    int iColorShift)
 /*++
   Purpose:
 
@@ -269,16 +270,16 @@ PAL_RLEBlitWithColorShift(
 
 --*/
 {
-   UINT          i, j, k, sx;
-   INT           x, y;
-   UINT          uiLen       = 0;
-   UINT          uiWidth     = 0;
-   UINT          uiHeight    = 0;
-   UINT          uiSrcX      = 0;
-   BYTE          T, b;
-   INT           dx          = PAL_X(pos);
-   INT           dy          = PAL_Y(pos);
-   LPBYTE        p;
+   unsigned int i, j, k, sx;
+   int x, y;
+   unsigned int uiLen = 0;
+   unsigned int uiWidth = 0;
+   unsigned int uiHeight = 0;
+   unsigned int uiSrcX = 0;
+   unsigned char T, b;
+   int dx = PAL_X(pos);
+   int dy = PAL_Y(pos);
+   unsigned char *p;
 
    //
    // Check for NULL pointer.
@@ -292,7 +293,7 @@ PAL_RLEBlitWithColorShift(
    // Skip the 0x00000002 in the file header.
    //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-      lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
@@ -366,7 +367,8 @@ PAL_RLEBlitWithColorShift(
             if (x < 0)
             {
                j += -x;
-               if (j >= T) break;
+               if (j >= T)
+                  break;
                sx += -x;
                x = 0;
             }
@@ -387,18 +389,20 @@ PAL_RLEBlitWithColorShift(
             // Put the pixels in row onto the surface
             //
             k = T - j;
-            if (lpDstSurface->w - x < k) k = lpDstSurface->w - x;
-            if (uiWidth - sx < k) k = uiWidth - sx;
+            if (lpDstSurface->w - x < k)
+               k = lpDstSurface->w - x;
+            if (uiWidth - sx < k)
+               k = uiWidth - sx;
             sx += k;
-            p = ((LPBYTE)lpDstSurface->pixels) + y * lpDstSurface->pitch;
+            p = ((unsigned char *)lpDstSurface->pixels) + y * lpDstSurface->pitch;
             for (; k != 0; k--)
             {
                b = (lpBitmapRLE[j] & 0x0F);
-               if ((INT)b + iColorShift > 0x0F)
+               if ((int)b + iColorShift > 0x0F)
                {
                   b = 0x0F;
                }
-               else if ((INT)b + iColorShift < 0)
+               else if ((int)b + iColorShift < 0)
                {
                   b = 0;
                }
@@ -441,14 +445,12 @@ end:
    return 0;
 }
 
-INT
-PAL_RLEBlitMonoColor(
-   LPCBITMAPRLE      lpBitmapRLE,
-   SDL_Surface      *lpDstSurface,
-   DWORD             pos,
-   BYTE              bColor,
-   INT               iColorShift
-)
+int PAL_RLEBlitMonoColor(
+    const unsigned char *lpBitmapRLE,
+    SDL_Surface *lpDstSurface,
+    unsigned int pos,
+    unsigned char bColor,
+    int iColorShift)
 /*++
   Purpose:
 
@@ -473,16 +475,16 @@ PAL_RLEBlitMonoColor(
 
 --*/
 {
-   UINT          i, j, k, sx;
-   INT           x, y;
-   UINT          uiLen       = 0;
-   UINT          uiWidth     = 0;
-   UINT          uiHeight    = 0;
-   UINT          uiSrcX      = 0;
-   BYTE          T, b;
-   INT           dx          = PAL_X(pos);
-   INT           dy          = PAL_Y(pos);
-   LPBYTE        p;
+   unsigned int i, j, k, sx;
+   int x, y;
+   unsigned int uiLen = 0;
+   unsigned int uiWidth = 0;
+   unsigned int uiHeight = 0;
+   unsigned int uiSrcX = 0;
+   unsigned char T, b;
+   int dx = PAL_X(pos);
+   int dy = PAL_Y(pos);
+   unsigned char *p;
 
    //
    // Check for NULL pointer.
@@ -496,7 +498,7 @@ PAL_RLEBlitMonoColor(
    // Skip the 0x00000002 in the file header.
    //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-      lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
@@ -571,7 +573,8 @@ PAL_RLEBlitMonoColor(
             if (x < 0)
             {
                j += -x;
-               if (j >= T) break;
+               if (j >= T)
+                  break;
                sx += -x;
                x = 0;
             }
@@ -592,18 +595,20 @@ PAL_RLEBlitMonoColor(
             // Put the pixels in row onto the surface
             //
             k = T - j;
-            if (lpDstSurface->w - x < k) k = lpDstSurface->w - x;
-            if (uiWidth - sx < k) k = uiWidth - sx;
+            if (lpDstSurface->w - x < k)
+               k = lpDstSurface->w - x;
+            if (uiWidth - sx < k)
+               k = uiWidth - sx;
             sx += k;
-            p = ((LPBYTE)lpDstSurface->pixels) + y * lpDstSurface->pitch;
+            p = ((unsigned char *)lpDstSurface->pixels) + y * lpDstSurface->pitch;
             for (; k != 0; k--)
             {
                b = lpBitmapRLE[j] & 0x0F;
-               if ((INT)b + iColorShift > 0x0F)
+               if ((int)b + iColorShift > 0x0F)
                {
                   b = 0x0F;
                }
-               else if ((INT)b + iColorShift < 0)
+               else if ((int)b + iColorShift < 0)
                {
                   b = 0;
                }
@@ -646,11 +651,9 @@ end:
    return 0;
 }
 
-INT
-PAL_FBPBlitToSurface(
-   LPBYTE            lpBitmapFBP,
-   SDL_Surface      *lpDstSurface
-)
+int PAL_FBPBlitToSurface(
+    unsigned char *lpBitmapFBP,
+    SDL_Surface *lpDstSurface)
 /*++
   Purpose:
 
@@ -669,11 +672,11 @@ PAL_FBPBlitToSurface(
 
 --*/
 {
-   int       x, y;
-   LPBYTE    p;
+   int x, y;
+   unsigned char *p;
 
    if (lpBitmapFBP == NULL || lpDstSurface == NULL ||
-      lpDstSurface->w != 320 || lpDstSurface->h != 200)
+       lpDstSurface->w != 320 || lpDstSurface->h != 200)
    {
       return -1;
    }
@@ -683,7 +686,7 @@ PAL_FBPBlitToSurface(
    //
    for (y = 0; y < 200; y++)
    {
-      p = (LPBYTE)(lpDstSurface->pixels) + y * lpDstSurface->pitch;
+      p = (unsigned char *)(lpDstSurface->pixels) + y * lpDstSurface->pitch;
       for (x = 0; x < 320; x++)
       {
          *(p++) = *(lpBitmapFBP++);
@@ -693,10 +696,8 @@ PAL_FBPBlitToSurface(
    return 0;
 }
 
-INT
-PAL_RLEGetWidth(
-   LPCBITMAPRLE    lpBitmapRLE
-)
+int PAL_RLEGetWidth(
+    const unsigned char *lpBitmapRLE)
 /*++
   Purpose:
 
@@ -721,7 +722,7 @@ PAL_RLEGetWidth(
    // Skip the 0x00000002 in the file header.
    //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-      lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
@@ -732,10 +733,8 @@ PAL_RLEGetWidth(
    return lpBitmapRLE[0] | (lpBitmapRLE[1] << 8);
 }
 
-INT
-PAL_RLEGetHeight(
-   LPCBITMAPRLE       lpBitmapRLE
-)
+int PAL_RLEGetHeight(
+    const unsigned char *lpBitmapRLE)
 /*++
   Purpose:
 
@@ -760,7 +759,7 @@ PAL_RLEGetHeight(
    // Skip the 0x00000002 in the file header.
    //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-      lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
@@ -771,10 +770,9 @@ PAL_RLEGetHeight(
    return lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
 }
 
-WORD
+unsigned short
 PAL_SpriteGetNumFrames(
-   LPCSPRITE       lpSprite
-)
+    const unsigned char *lpSprite)
 /*++
   Purpose:
 
@@ -798,11 +796,10 @@ PAL_SpriteGetNumFrames(
    return (lpSprite[0] | (lpSprite[1] << 8)) - 1;
 }
 
-LPCBITMAPRLE
+const unsigned char *
 PAL_SpriteGetFrame(
-   LPCSPRITE       lpSprite,
-   INT             iFrameNum
-)
+    const unsigned char *lpSprite,
+    int iFrameNum)
 /*++
   Purpose:
 
@@ -830,7 +827,7 @@ PAL_SpriteGetFrame(
    //
    // Hack for broken sprites like the Bloody-Mouth Bug
    //
-//   imagecount = (lpSprite[0] | (lpSprite[1] << 8)) - 1;
+   //   imagecount = (lpSprite[0] | (lpSprite[1] << 8)) - 1;
    imagecount = (lpSprite[0] | (lpSprite[1] << 8));
 
    if (iFrameNum < 0 || iFrameNum >= imagecount)
@@ -846,14 +843,13 @@ PAL_SpriteGetFrame(
    //
    iFrameNum <<= 1;
    offset = ((lpSprite[iFrameNum] | (lpSprite[iFrameNum + 1] << 8)) << 1);
-   if (offset == 0x18444) offset = (WORD)offset;
+   if (offset == 0x18444)
+      offset = (unsigned short)offset;
    return &lpSprite[offset];
 }
 
-INT
-PAL_MKFGetChunkCount(
-   FILE *fp
-)
+int PAL_MKFGetChunkCount(
+    FILE *fp)
 /*++
   Purpose:
 
@@ -869,24 +865,22 @@ PAL_MKFGetChunkCount(
 
 --*/
 {
-   INT iNumChunk;
+   int iNumChunk;
    if (fp == NULL)
    {
       return 0;
    }
 
    fseek(fp, 0, SEEK_SET);
-   if (fread(&iNumChunk, sizeof(INT), 1, fp) == 1)
+   if (fread(&iNumChunk, sizeof(int), 1, fp) == 1)
       return (iNumChunk >> 2) - 1;
    else
       return 0;
 }
 
-INT
-PAL_MKFGetChunkSize(
-   UINT    uiChunkNum,
-   FILE   *fp
-)
+int PAL_MKFGetChunkSize(
+    unsigned int uiChunkNum,
+    FILE *fp)
 /*++
   Purpose:
 
@@ -905,9 +899,9 @@ PAL_MKFGetChunkSize(
 
 --*/
 {
-   UINT    uiOffset       = 0;
-   UINT    uiNextOffset   = 0;
-   UINT    uiChunkCount   = 0;
+   unsigned int uiOffset = 0;
+   unsigned int uiNextOffset = 0;
+   unsigned int uiChunkCount = 0;
 
    //
    // Get the total number of chunks.
@@ -922,8 +916,8 @@ PAL_MKFGetChunkSize(
    // Get the offset of the specified chunk and the next chunk.
    //
    fseek(fp, 4 * uiChunkNum, SEEK_SET);
-   PAL_fread(&uiOffset, sizeof(UINT), 1, fp);
-   PAL_fread(&uiNextOffset, sizeof(UINT), 1, fp);
+   PAL_fread(&uiOffset, sizeof(unsigned int), 1, fp);
+   PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
    //
    // Return the length of the chunk.
@@ -931,13 +925,11 @@ PAL_MKFGetChunkSize(
    return uiNextOffset - uiOffset;
 }
 
-INT
-PAL_MKFReadChunk(
-   LPBYTE          lpBuffer,
-   UINT            uiBufferSize,
-   UINT            uiChunkNum,
-   FILE           *fp
-)
+int PAL_MKFReadChunk(
+    unsigned char *lpBuffer,
+    unsigned int uiBufferSize,
+    unsigned int uiChunkNum,
+    FILE *fp)
 /*++
   Purpose:
 
@@ -961,10 +953,10 @@ PAL_MKFReadChunk(
 
 --*/
 {
-   UINT     uiOffset       = 0;
-   UINT     uiNextOffset   = 0;
-   UINT     uiChunkCount;
-   UINT     uiChunkLen;
+   unsigned int uiOffset = 0;
+   unsigned int uiNextOffset = 0;
+   unsigned int uiChunkCount;
+   unsigned int uiChunkLen;
 
    if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0)
    {
@@ -1006,11 +998,9 @@ PAL_MKFReadChunk(
    return -1;
 }
 
-INT
-PAL_MKFGetDecompressedSize(
-   UINT    uiChunkNum,
-   FILE   *fp
-)
+int PAL_MKFGetDecompressedSize(
+    unsigned int uiChunkNum,
+    FILE *fp)
 /*++
   Purpose:
 
@@ -1029,9 +1019,9 @@ PAL_MKFGetDecompressedSize(
 
 --*/
 {
-   DWORD         buf[2];
-   UINT          uiOffset;
-   UINT          uiChunkCount;
+   unsigned int buf[2];
+   unsigned int uiOffset;
+   unsigned int uiChunkCount;
 
    if (fp == NULL)
    {
@@ -1059,23 +1049,21 @@ PAL_MKFGetDecompressedSize(
    fseek(fp, uiOffset, SEEK_SET);
    if (gConfig.fIsWIN95)
    {
-      PAL_fread(buf, sizeof(DWORD), 1, fp);
-      return (INT)buf[0];
+      PAL_fread(buf, sizeof(unsigned int), 1, fp);
+      return (int)buf[0];
    }
    else
    {
-      PAL_fread(buf, sizeof(DWORD), 2, fp);
-      return (buf[0] != 0x315f4a59) ? -1 : (INT)buf[1];
+      PAL_fread(buf, sizeof(unsigned int), 2, fp);
+      return (buf[0] != 0x315f4a59) ? -1 : (int)buf[1];
    }
 }
 
-INT
-PAL_MKFDecompressChunk(
-   LPBYTE          lpBuffer,
-   UINT            uiBufferSize,
-   UINT            uiChunkNum,
-   FILE           *fp
-)
+int PAL_MKFDecompressChunk(
+    unsigned char *lpBuffer,
+    unsigned int uiBufferSize,
+    unsigned int uiChunkNum,
+    FILE *fp)
 /*++
   Purpose:
 
@@ -1099,8 +1087,8 @@ PAL_MKFDecompressChunk(
 
 --*/
 {
-   LPBYTE          buf;
-   int             len;
+   unsigned char *buf;
+   int len;
 
    len = PAL_MKFGetChunkSize(uiChunkNum, fp);
 
@@ -1109,7 +1097,7 @@ PAL_MKFDecompressChunk(
       return len;
    }
 
-   buf = (LPBYTE)malloc(len);
+   buf = (unsigned char *)malloc(len);
    if (buf == NULL)
    {
       return -3;

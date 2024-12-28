@@ -23,67 +23,66 @@
 #define AUDIO_H
 
 #include <SDL_audio.h>
-#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-INT
+int
 AUDIO_OpenDevice(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_CloseDevice(
-   VOID
+   void
 );
 
 SDL_AudioSpec*
 AUDIO_GetDeviceSpec(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_IncreaseVolume(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_DecreaseVolume(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_PlayMusic(
-   INT       iNumRIX,
-   BOOL      fLoop,
-   FLOAT     flFadeTime
+   int       iNumRIX,
+   int      fLoop,
+   float     flFadeTime
 );
 
-VOID
+void
 AUDIO_PlaySound(
-   INT    iSoundNum
+   int    iSoundNum
 );
 
-VOID
+void
 AUDIO_EnableMusic(
-   BOOL   fEnable
+   int   fEnable
 );
 
-BOOL
+int
 AUDIO_MusicEnabled(
-   VOID
+   void
 );
 
-VOID
+void
 AUDIO_EnableSound(
-   BOOL   fEnable
+   int   fEnable
 );
 
-BOOL
+int
 AUDIO_SoundEnabled(
-   VOID
+   void
 );
 
 void
