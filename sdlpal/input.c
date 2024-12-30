@@ -20,13 +20,12 @@
 //
 
 #include "input.h"
+#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "main.h"
 #include "palcfg.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 volatile PALINPUTSTATE   g_InputState;
 #if PAL_HAS_JOYSTICKS
@@ -229,7 +228,7 @@ PAL_UpdateKeyboardState(
    static unsigned int   rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
    const unsigned char*        keyState = (const unsigned char*)SDL_GetKeyboardState(NULL);
    int            i;
-   unsigned int          dwCurrentTime = SDL_GetTicks();
+   unsigned int          dwCurrentTime = UTIL_GetTicks();
 
    for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++)
    {

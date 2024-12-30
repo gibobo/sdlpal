@@ -28,60 +28,22 @@
 extern "C" {
 #endif
 
-int
-AUDIO_OpenDevice(
-   void
-);
+int AUDIO_OpenDevice(void);
 
-void
-AUDIO_CloseDevice(
-   void
-);
+void AUDIO_CloseDevice(void);
 
-SDL_AudioSpec*
+void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime);
+
+void AUDIO_PlaySound(int iSoundNum);
+
+void AUDIO_EnableMusic(int fEnable);
+int AUDIO_MusicEnabled(void);
+
+void AUDIO_EnableSound(int fEnable);
+int AUDIO_SoundEnabled(void);
+
+SDL_AudioSpec *
 AUDIO_GetDeviceSpec(
-   void
-);
-
-void
-AUDIO_IncreaseVolume(
-   void
-);
-
-void
-AUDIO_DecreaseVolume(
-   void
-);
-
-void
-AUDIO_PlayMusic(
-   int       iNumRIX,
-   int      fLoop,
-   float     flFadeTime
-);
-
-void
-AUDIO_PlaySound(
-   int    iSoundNum
-);
-
-void
-AUDIO_EnableMusic(
-   int   fEnable
-);
-
-int
-AUDIO_MusicEnabled(
-   void
-);
-
-void
-AUDIO_EnableSound(
-   int   fEnable
-);
-
-int
-AUDIO_SoundEnabled(
    void
 );
 

@@ -22,9 +22,9 @@
 #ifndef _PALUTILS_H
 #define _PALUTILS_H
 
-#include <stdio.h>
+#include "util.h"
 #include <SDL_surface.h>
-#include <SDL_timer.h>
+#include <stdio.h>
 
 #define PAL_XY(x, y) (unsigned int)(((((unsigned short)(y)) << 16) & 0xFFFF0000) | (((unsigned short)(x)) & 0xFFFF))
 #define PAL_X(xy) (short)((xy) & 0xFFFF)
@@ -135,13 +135,5 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#define PAL_DelayUntil(t)                          \
-    PAL_ProcessEvent();                            \
-    while (!SDL_TICKS_PASSED(SDL_GetTicks(), (t))) \
-    {                                              \
-        PAL_ProcessEvent();                        \
-        SDL_Delay(1);                              \
-    }
 
 #endif // _PALUTILS_H

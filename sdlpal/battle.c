@@ -21,6 +21,7 @@
 
 #include "battle.h"
 #include "audio.h"
+#include "common.h"
 #include "fight.h"
 #include "global.h"
 #include "input.h"
@@ -33,8 +34,6 @@
 #include "ui.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 BATTLE g_Battle;
 
@@ -617,14 +616,14 @@ void PAL_BattleFadeScene(
    unsigned char a, b;
    const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
-   time = SDL_GetTicks();
+   time = UTIL_GetTicks();
 
    for (i = 0; i < 12; i++)
    {
       for (j = 0; j < 6; j++)
       {
          PAL_DelayUntil(time);
-         time = SDL_GetTicks() + 16;
+         time = UTIL_GetTicks() + 16;
 
          //
          // Blend the pixels in the 2 buffers, and put the result into the
@@ -742,7 +741,7 @@ PAL_BattleMain(
       g_Battle.BattleResult = kBattleResultOnGoing;
    }
 
-   dwTime = SDL_GetTicks();
+   dwTime = UTIL_GetTicks();
 
    PAL_ClearKeyState();
 
@@ -767,7 +766,7 @@ PAL_BattleMain(
       //
       // Set the time of the next frame.
       //
-      dwTime = SDL_GetTicks() + BATTLE_FRAME_TIME;
+      dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
 
       //
       // Run the main frame routine.

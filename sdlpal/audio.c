@@ -34,26 +34,20 @@
 
 typedef void(*ResampleMixFunction)(void *, const void *, int, void *, int, int, uint8_t);
 
-typedef struct tagAUDIODEVICE
-{
-   SDL_AudioSpec             spec;		/* Actual-used sound specification */
-   AUDIOPLAYER              *pMusPlayer;
-   AUDIOPLAYER              *pSoundPlayer;
-   void                     *pSoundBuffer;	/* The output buffer for sound */
-   SDL_AudioDeviceID         id;
-   int                       iMusicVolume;	/* The BGM volume ranged in [0, 128] for better performance */
-   int                       iSoundVolume;	/* The sound effect volume ranged in [0, 128] for better performance */
-   int                      fMusicEnabled; /* Is BGM enabled? */
-   int                      fSoundEnabled; /* Is sound effect enabled? */
-   int                      fOpened;       /* Is the audio device opened? */
+typedef struct tagAUDIODEVICE {
+   SDL_AudioSpec spec; /* Actual-used sound specification */
+   AUDIOPLAYER *pMusPlayer;
+   AUDIOPLAYER *pSoundPlayer;
+   void *pSoundBuffer; /* The output buffer for sound */
+   SDL_AudioDeviceID id;
+   int iMusicVolume;  /* The BGM volume ranged in [0, 128] for better performance */
+   int iSoundVolume;  /* The sound effect volume ranged in [0, 128] for better performance */
+   int fMusicEnabled; /* Is BGM enabled? */
+   int fSoundEnabled; /* Is sound effect enabled? */
+   int fOpened;       /* Is the audio device opened? */
 } AUDIODEVICE;
 
 static AUDIODEVICE gAudioDevice;
-
-# define SDL_CloseAudio() SDL_CloseAudioDevice(gAudioDevice.id)
-# define SDL_PauseAudio(pause_on) SDL_PauseAudioDevice(gAudioDevice.id, (pause_on))
-# define SDL_OpenAudio(desired, obtained) \
-	((gAudioDevice.id = SDL_OpenAudioDevice((gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : NULL), 0, (desired), (obtained), 0)) > 0 ? gAudioDevice.id : -1)
 
 PAL_FORCE_INLINE
 void
@@ -223,10 +217,12 @@ AUDIO_OpenDevice(
    gAudioDevice.spec.channels = gConfig.iAudioChannels;
    gAudioDevice.spec.samples = gConfig.wAudioBufferSize;
    gAudioDevice.spec.callback = AUDIO_FillBuffer;
+   const char *device = gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : NULL;
+   gAudioDevice.id = SDL_OpenAudioDevice(device, 0, &gAudioDevice.spec, &spec, 0);
 
    UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio spec:freq %d, format %d, channels %d, samples %d\n", gAudioDevice.spec.freq, gAudioDevice.spec.format,  gAudioDevice.spec.channels, gAudioDevice.spec.samples);
 
-   if (SDL_OpenAudio(&gAudioDevice.spec, &spec) < 0)
+   if (gAudioDevice.id < 0)
    {
       UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio ERROR: %s, got spec:freq %d, format %d, channels %d, samples %d\n", SDL_GetError(), spec.freq, spec.format, spec.channels,  spec.samples);
       //
@@ -255,7 +251,7 @@ AUDIO_OpenDevice(
    //
    // Let the callback function run so that musics will be played.
    //
-   SDL_PauseAudio(0);
+   SDL_PauseAudioDevice(gAudioDevice.id, 0);
 
    return 0;
 }
@@ -279,7 +275,7 @@ AUDIO_CloseDevice(
 
 --*/
 {
-   SDL_CloseAudio();
+   SDL_CloseAudioDevice(gAudioDevice.id);
 
    if (gAudioDevice.pSoundPlayer != NULL)
    {
@@ -322,56 +318,6 @@ AUDIO_ChangeVolumeByValue(
    else if (*iVolume < 0)
       *iVolume = 0;
    return *iVolume;
-}
-
-void
-AUDIO_IncreaseVolume(
-   void
-)
-/*++
-  Purpose:
-
-    Increase global volume by 3%.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-   AUDIO_ChangeVolumeByValue(&gConfig.iMusicVolume, 3);
-   AUDIO_ChangeVolumeByValue(&gConfig.iSoundVolume, 3);
-   gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
-   gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
-}
-
-void
-AUDIO_DecreaseVolume(
-   void
-)
-/*++
-  Purpose:
-
-    Decrease global volume by 3%.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-   AUDIO_ChangeVolumeByValue(&gConfig.iMusicVolume, -3);
-   AUDIO_ChangeVolumeByValue(&gConfig.iSoundVolume, -3);
-   gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
-   gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
 }
 
 void

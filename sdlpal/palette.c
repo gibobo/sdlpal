@@ -20,6 +20,7 @@
 //
 
 #include "palette.h"
+#include "common.h"
 #include "game.h"
 #include "global.h"
 #include "input.h"
@@ -28,8 +29,6 @@
 #include "scene.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 SDL_Color *
 PAL_GetPalette(
@@ -161,18 +160,14 @@ void PAL_FadeOut(
    //
    // Start fading out...
    //
-   time = SDL_GetTicks() + iDelay * 10 * 60;
+   time = UTIL_GetTicks() + iDelay * 10 * 60;
 
-   while (TRUE)
+   while (time > UTIL_GetTicks())
    {
       //
       // Set the current palette...
       //
-      j = (int)(time - SDL_GetTicks()) / iDelay / 10;
-      if (j < 0)
-      {
-         break;
-      }
+      j = (time - UTIL_GetTicks()) / (iDelay * 10);
 
       for (i = 0; i < 256; i++)
       {
@@ -226,13 +221,13 @@ void PAL_FadeIn(
    //
    // Start fading in...
    //
-   time = SDL_GetTicks() + iDelay * 10 * 60;
+   time = UTIL_GetTicks() + iDelay * 10 * 60;
    while (TRUE)
    {
       //
       // Set the current palette...
       //
-      j = (int)(time - SDL_GetTicks()) / iDelay / 10;
+      j = (int)(time - UTIL_GetTicks()) / iDelay / 10;
       if (j < 0)
       {
          break;
@@ -300,7 +295,7 @@ void PAL_SceneFade(
    {
       for (i = 0; i < 64; i += iStep)
       {
-         time = SDL_GetTicks() + 100;
+         time = UTIL_GetTicks() + 100;
 
          //
          // Generate the scene
@@ -323,20 +318,14 @@ void PAL_SceneFade(
          }
          VIDEO_SetPalette(newpalette);
 
-         PAL_ProcessEvent();
-
-         while (!SDL_TICKS_PASSED(SDL_GetTicks(), time))
-         {
-            PAL_ProcessEvent();
-            SDL_Delay(5);
-         }
+         PAL_DelayUntil(time);
       }
    }
    else
    {
       for (i = 63; i >= 0; i += iStep)
       {
-         time = SDL_GetTicks() + 100;
+         time = UTIL_GetTicks() + 100;
 
          //
          // Generate the scene
@@ -359,13 +348,7 @@ void PAL_SceneFade(
          }
          VIDEO_SetPalette(newpalette);
 
-         PAL_ProcessEvent();
-
-         while (!SDL_TICKS_PASSED(SDL_GetTicks(), time))
-         {
-            PAL_ProcessEvent();
-            SDL_Delay(5);
-         }
+         PAL_DelayUntil(time);
       }
    }
 }
@@ -414,7 +397,7 @@ void PAL_PaletteFade(
    //
    for (i = 0; i < 32; i++)
    {
-      time = SDL_GetTicks() + (fUpdateScene ? FRAME_TIME : FRAME_TIME / 4);
+      time = UTIL_GetTicks() + (fUpdateScene ? FRAME_TIME : FRAME_TIME / 4);
 
       for (j = 0; j < 256; j++)
       {
@@ -437,13 +420,7 @@ void PAL_PaletteFade(
          VIDEO_UpdateScreen(NULL);
       }
 
-      PAL_ProcessEvent();
-
-      while (!SDL_TICKS_PASSED(SDL_GetTicks(), time))
-      {
-         PAL_ProcessEvent();
-         SDL_Delay(5);
-      }
+      PAL_DelayUntil(time);
    }
 }
 

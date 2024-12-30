@@ -21,6 +21,7 @@
 
 #include "uigame.h"
 #include "audio.h"
+#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "itemmenu.h"
@@ -35,8 +36,6 @@
 #include "uibattle.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 static int __buymenu_firsttime_render;
 
@@ -83,7 +82,7 @@ void PAL_DrawOpeningMenuBackground(
    //
    // Read the picture from fbp.mkf.
    //
-   PAL_MKFDecompressChunk(buf, 320 * 200, MAINMENU_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, 320 * 200, (gConfig.fIsWIN95 ? 2 : 60), gpGlobals->f.fpFBP);
 
    //
    // ...and blit it to the screen buffer.
@@ -189,7 +188,7 @@ int PAL_SaveSlotMenu(
 
 --*/
 {
-   LPBOX rgpBox[5];
+   BOX *rgpBox[5];
    int i, w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5);
    int dx = (w > 4) ? (w - 4) * 16 : 0;
    unsigned short wItemSelected;
@@ -254,7 +253,7 @@ PAL_SelectionMenu(
 
   Parameters:
 
-    [IN]  nWords - number of emnu items.
+   [IN]  nWords - number of emnu items.
    [IN]  nDefault - index of default item.
    [IN]  wItems - item word array.
 
@@ -264,7 +263,7 @@ PAL_SelectionMenu(
 
 --*/
 {
-   LPBOX rgpBox[4];
+   BOX *rgpBox[4];
    MENUITEM rgMenuItem[4];
    int w[4] = {
        (nWords >= 1 && wItems[0]) ? PAL_WordWidth(wItems[0]) : 1,
@@ -388,9 +387,7 @@ int PAL_SwitchMenu(
    return (wReturnValue == MENUITEM_VALUE_CANCELLED) ? fEnabled : ((wReturnValue == 0) ? FALSE : TRUE);
 }
 
-LPBOX
-PAL_ShowCash(
-    unsigned int dwCash)
+BOX *PAL_ShowCash(unsigned int dwCash)
 /*++
   Purpose:
 
@@ -406,7 +403,7 @@ PAL_ShowCash(
 
 --*/
 {
-   LPBOX lpBox;
+   BOX *lpBox;
 
    //
    // Create the box.
@@ -469,7 +466,7 @@ PAL_SystemMenu(
 
 --*/
 {
-   LPBOX lpMenuBox;
+   BOX *lpMenuBox;
    unsigned short wReturnValue;
    int iSlot, i;
    const SDL_Rect rect = {40, 60, 280, 135};
@@ -775,7 +772,7 @@ start_magicmenu:
                   }
                }
 
-               SDL_Delay(1);
+               UTIL_Sleep(1);
             }
          }
       }
@@ -875,7 +872,8 @@ void PAL_InGameMenu(
 
 --*/
 {
-   LPBOX lpCashBox, lpMenuBox;
+   BOX *lpCashBox;
+   BOX *lpMenuBox;
    unsigned short wReturnValue;
 
    // Fix render problem with shadow
@@ -1336,7 +1334,7 @@ PAL_ItemUseMenu(
          //
          // See if we should change the highlight color
          //
-         if (SDL_TICKS_PASSED(SDL_GetTicks(), dwColorChangeTime))
+         if (UTIL_GetTicks() >= dwColorChangeTime)
          {
             if ((unsigned short)bSelectedColor + 1 >=
                 (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
@@ -1348,7 +1346,7 @@ PAL_ItemUseMenu(
                bSelectedColor++;
             }
 
-            dwColorChangeTime = SDL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
+            dwColorChangeTime = UTIL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
             //
             // Redraw the selected item.
@@ -1365,7 +1363,7 @@ PAL_ItemUseMenu(
             break;
          }
 
-         SDL_Delay(1);
+         UTIL_Sleep(1);
       }
 
       if (i <= 0)
@@ -1748,7 +1746,7 @@ void PAL_EquipItemMenu(
 
    iCurrentPlayer = 0;
    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
-   dwColorChangeTime = SDL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
+   dwColorChangeTime = UTIL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
    while (TRUE)
    {
@@ -1774,12 +1772,12 @@ void PAL_EquipItemMenu(
          int labels2[] = {EQUIP_LABEL_HEAD, EQUIP_LABEL_SHOULDER, EQUIP_LABEL_BODY, EQUIP_LABEL_HAND, EQUIP_LABEL_FOOT, EQUIP_LABEL_NECK};
          for (i = 0; i < sizeof(labels1) / sizeof(int); i++)
          {
-            unsigned int index = &gConfig.ScreenLayout.EquipStatusLabels[i] - gConfig.ScreenLayoutArray;
+            unsigned int index = (unsigned int)(&gConfig.ScreenLayout.EquipStatusLabels[i] - gConfig.ScreenLayoutArray);
             PAL_DrawText(PAL_GetWord(labels1[i]), gConfig.ScreenLayoutArray[index], MENUITEM_COLOR, TRUE, FALSE, FALSE);
          }
          for (i = 0; i < sizeof(labels2) / sizeof(int); i++)
          {
-            unsigned int index = &gConfig.ScreenLayout.EquipLabels[i] - gConfig.ScreenLayoutArray;
+            unsigned int index = (unsigned int)(&gConfig.ScreenLayout.EquipLabels[i] - gConfig.ScreenLayoutArray);
             PAL_DrawText(PAL_GetWord(labels2[i]), gConfig.ScreenLayoutArray[index], MENUITEM_COLOR, TRUE, FALSE, FALSE);
          }
       }
@@ -1871,7 +1869,7 @@ void PAL_EquipItemMenu(
          //
          // See if we should change the highlight color
          //
-         if (SDL_TICKS_PASSED(SDL_GetTicks(), dwColorChangeTime))
+         if (UTIL_GetTicks() >= dwColorChangeTime)
          {
             if ((unsigned short)bSelectedColor + 1 >=
                 (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
@@ -1883,7 +1881,7 @@ void PAL_EquipItemMenu(
                bSelectedColor++;
             }
 
-            dwColorChangeTime = SDL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
+            dwColorChangeTime = UTIL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
             //
             // Redraw the selected item if needed.
@@ -1902,7 +1900,7 @@ void PAL_EquipItemMenu(
             break;
          }
 
-         SDL_Delay(1);
+         UTIL_Sleep(1);
       }
 
       if (wItem == 0)

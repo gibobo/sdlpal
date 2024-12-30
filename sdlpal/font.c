@@ -20,51 +20,36 @@
 //
 
 #include "font.h"
-#include "palcommon.h"
+#include "ascii.h"
 #include "common.h"
+#include "fontglyph.h"
+#include "palcommon.h"
 #include "text.h"
 #include "util.h"
 
-#define _FONT_C
+static const int unicode_lower_top = 0xd800;
+static const int unicode_upper_base = 0xf900;
+static const int unicode_upper_top = 65534;
+#define _font_height (16)
 
-#include "fontglyph.h"
-#include "ascii.h"
-
-static int _font_height = 16;
-
-static unsigned char reverseBits(unsigned char x) {
-    unsigned char y = 0;
-    for (int i = 0 ; i < 8; i++){
+void PAL_InitFont(void) {
+  unsigned short i, j, k;
+  unsigned char x, y;
+  for (i = 0; i < sizeof(iso_font) / 15; i++) {
+    for (j = 0; j < 15; j++) {
+      x = unicode_font[i][j];
+      y = 0;
+      for (k = 0; k < 8; k++) {
         y <<= 1;
         y |= (x & 1);
         x >>= 1;
+      }
+      unicode_font[i][j] = y;
     }
-    return y;
-}
 
-static void PAL_LoadISOFont(void)
-{
-    int         i, j;
-
-    for (i = 0; i < sizeof(iso_font) / 15; i++)
-    {
-        for (j = 0; j < 15; j++)
-        {
-            unicode_font[i][j] = reverseBits(iso_font[i * 15 + j]);
-        }
-
-        unicode_font[i][15] = 0;
-        font_width[i] = 16;
-    }
-}
-
-int
-PAL_InitFont(
-   const CONFIGURATION* cfg
-)
-{
-   PAL_LoadISOFont();
-   return 0;
+    unicode_font[i][15] = 0;
+    font_width[i] = 16;
+  }
 }
 
 void
@@ -72,8 +57,7 @@ PAL_DrawCharOnSurface(
 	unsigned short                 wChar,
 	SDL_Surface             *lpSurface,
 	unsigned int                  pos,
-	unsigned char                  bColor,
-	int                     fUse8x8Font
+	unsigned char                  bColor
 )
 {
 	int       i, j;
@@ -84,8 +68,9 @@ PAL_DrawCharOnSurface(
 	//
 	// Check for NULL pointer & invalid char code.
 	//
-	if (lpSurface == NULL || (wChar >= unicode_lower_top && wChar < unicode_upper_base) ||
-		wChar >= unicode_upper_top || (_font_height == 8 && wChar >= 0x100))
+	if ((lpSurface == NULL) ||
+		(wChar >= unicode_lower_top && wChar < unicode_upper_base) ||
+		(wChar >= unicode_upper_top))
 	{
 		return;
 	}
@@ -103,55 +88,41 @@ PAL_DrawCharOnSurface(
 	//
 	unsigned char * dest = (unsigned char *)lpSurface->pixels + (int)max(y + y_offset, 0) * lpSurface->pitch + x;
 	unsigned char * top = (unsigned char *)lpSurface->pixels + lpSurface->h * lpSurface->pitch;
-	if (fUse8x8Font)
+	
+	if (font_width[wChar] == 32)
 	{
-		for (i = 0; i < 8 && dest < top; i++, dest += lpSurface->pitch)
+		for (i = 0; i < _font_height * 2 && dest < top; i += 2, dest += lpSurface->pitch)
 		{
-			for (j = 0; j < 8 && x + j < lpSurface->w; j++)
+			for (j = 0; j < 8 && x + j + x_offset < lpSurface->w && x + j + x_offset >= 0; j++)
 			{
-				if (iso_font_8x8[wChar][i] & (1 << j))
+				if (unicode_font[wChar][i] & (1 << (7 - j)))
 				{
-					dest[j] = bColor;
+					dest[j + x_offset] = bColor;
+				}
+			}
+			for (j = 0; j < 8 && x + j + 8 + x_offset < lpSurface->w && x + j + 8 + x_offset >= 0; j++)
+			{
+				if (unicode_font[wChar][i + 1] & (1 << (7 - j)))
+				{
+					dest[j + 8 + x_offset] = bColor;
 				}
 			}
 		}
 	}
 	else
 	{
-		if (font_width[wChar] == 32)
+		for (i = 0; i < _font_height && dest < top; i++, dest += lpSurface->pitch)
 		{
-			for (i = 0; i < _font_height * 2 && dest < top; i += 2, dest += lpSurface->pitch)
+			for (j = 0; j < 8 && x + j + x_offset < lpSurface->w && x + j + x_offset >= 0; j++)
 			{
-				for (j = 0; j < 8 && x + j + x_offset < lpSurface->w && x + j + x_offset >= 0; j++)
+				if (unicode_font[wChar][i] & (1 << (7 - j)))
 				{
-					if (unicode_font[wChar][i] & (1 << (7 - j)))
-					{
-						dest[j + x_offset] = bColor;
-					}
-				}
-				for (j = 0; j < 8 && x + j + 8 + x_offset < lpSurface->w && x + j + 8 + x_offset >= 0; j++)
-				{
-					if (unicode_font[wChar][i + 1] & (1 << (7 - j)))
-					{
-						dest[j + 8 + x_offset] = bColor;
-					}
-				}
-			}
-		}
-		else
-		{
-			for (i = 0; i < _font_height && dest < top; i++, dest += lpSurface->pitch)
-			{
-				for (j = 0; j < 8 && x + j + x_offset < lpSurface->w && x + j + x_offset >= 0; j++)
-				{
-					if (unicode_font[wChar][i] & (1 << (7 - j)))
-					{
-						dest[j + x_offset] = bColor;
-					}
+					dest[j + x_offset] = bColor;
 				}
 			}
 		}
 	}
+	
 }
 
 int

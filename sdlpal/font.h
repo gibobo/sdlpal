@@ -41,11 +41,7 @@ extern "C" {
 
     0 = success, -1 = failure.
 --*/
-int
-PAL_InitFont(
-	const CONFIGURATION* cfg
-);
-
+void PAL_InitFont(void);
 
 /*++
   Purpose:
@@ -72,8 +68,7 @@ PAL_DrawCharOnSurface(
 	unsigned short                 wChar,
 	SDL_Surface              *lpSurface,
 	unsigned int             pos,
-	unsigned char                  bColor,
-	int                     fUse8x8Font
+	unsigned char                  bColor
 );
 
 /*++

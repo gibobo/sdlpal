@@ -20,6 +20,7 @@
 //
 
 #include "itemmenu.h"
+#include "common.h"
 #include "game.h"
 #include "global.h"
 #include "input.h"
@@ -29,8 +30,6 @@
 #include "script.h"
 #include "text.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 static int g_iNumInventory = 0;
 static unsigned short g_wItemFlags = 0;
@@ -422,7 +421,7 @@ PAL_ItemSelectMenu(
       (*lpfnMenuItemChanged)(gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].wItem);
    }
 
-   dwTime = SDL_GetTicks();
+   dwTime = UTIL_GetTicks();
 
    while (TRUE)
    {
@@ -437,17 +436,17 @@ PAL_ItemSelectMenu(
       PAL_ClearKeyState();
 
       PAL_ProcessEvent();
-      while (!SDL_TICKS_PASSED(SDL_GetTicks(), dwTime))
+      while (UTIL_GetTicks() < dwTime)
       {
          PAL_ProcessEvent();
          if (g_InputState.dwKeyPress != 0)
          {
             break;
          }
-         SDL_Delay(5);
+         UTIL_Sleep(5);
       }
 
-      dwTime = SDL_GetTicks() + FRAME_TIME;
+      dwTime = UTIL_GetTicks() + FRAME_TIME;
 
       if (w != 0xFFFF)
       {

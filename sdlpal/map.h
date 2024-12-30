@@ -62,7 +62,7 @@ typedef struct tagPALMAP
     unsigned int Tiles[128][64][2];
     unsigned char *pTileSprite;
     int iMapNum;
-} PALMAP, *LPPALMAP;
+} PALMAP;
 
 typedef const PALMAP *LPCPALMAP;
 
@@ -71,15 +71,13 @@ extern "C"
 {
 #endif
 
-    LPPALMAP
-    PAL_LoadMap(
+    PALMAP *PAL_LoadMap(
         int iMapNum,
         FILE *fpMapMKF,
         FILE *fpGopMKF);
 
-    void
-    PAL_FreeMap(
-        LPPALMAP lpMap);
+    void PAL_FreeMap(
+        PALMAP *lpMap);
 
     const unsigned char *
     PAL_MapGetTileBitmap(

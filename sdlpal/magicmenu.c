@@ -20,6 +20,7 @@
 //
 
 #include "magicmenu.h"
+#include "common.h"
 #include "game.h"
 #include "global.h"
 #include "input.h"
@@ -30,8 +31,6 @@
 #include "text.h"
 #include "uibattle.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 static struct MAGICITEM
 {
@@ -448,7 +447,7 @@ PAL_MagicSelectionMenu(
    PAL_MagicSelectionMenuInit(wPlayerRole, fInBattle, wDefaultMagic);
    PAL_ClearKeyState();
 
-   dwTime = SDL_GetTicks();
+   dwTime = UTIL_GetTicks();
 
    while (TRUE)
    {
@@ -474,17 +473,15 @@ PAL_MagicSelectionMenu(
       }
 
       PAL_ProcessEvent();
-      while (!SDL_TICKS_PASSED(SDL_GetTicks(), dwTime))
-      {
-         PAL_ProcessEvent();
-         if (g_InputState.dwKeyPress != 0)
-         {
-            break;
-         }
-         SDL_Delay(5);
+      while (UTIL_GetTicks() < dwTime) {
+        PAL_ProcessEvent();
+        if (g_InputState.dwKeyPress != 0) {
+          break;
+        }
+        UTIL_Sleep(5);
       }
 
-      dwTime = SDL_GetTicks() + FRAME_TIME;
+      dwTime = UTIL_GetTicks() + FRAME_TIME;
    }
 
    return 0; // should not really reach here

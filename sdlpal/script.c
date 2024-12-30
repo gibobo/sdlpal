@@ -25,6 +25,7 @@
 #include "script.h"
 #include "audio.h"
 #include "battle.h"
+#include "common.h"
 #include "ending.h"
 #include "fight.h"
 #include "game.h"
@@ -42,8 +43,6 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 int g_fScriptSuccess = TRUE;
 static int g_iCurEquipPart = -1;
@@ -81,7 +80,7 @@ PAL_NPCWalkTo(
 
 --*/
 {
-   LPEVENTOBJECT pEvtObj;
+   EVENTOBJECT *pEvtObj;
    int xOffset, yOffset;
 
    pEvtObj = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
@@ -158,7 +157,7 @@ PAL_PartyWalkTo(
    {
       PAL_DelayUntil(t);
 
-      t = SDL_GetTicks() + FRAME_TIME;
+      t = UTIL_GetTicks() + FRAME_TIME;
 
       //
       // Store trail
@@ -252,7 +251,7 @@ PAL_PartyRideEventObject(
 {
    int xOffset, yOffset, dx, dy, i;
    unsigned int t;
-   LPEVENTOBJECT p;
+   EVENTOBJECT *p;
 
    p = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
 
@@ -265,7 +264,7 @@ PAL_PartyRideEventObject(
    {
       PAL_DelayUntil(t);
 
-      t = SDL_GetTicks() + FRAME_TIME;
+      t = UTIL_GetTicks() + FRAME_TIME;
 
       if (yOffset < 0)
       {
@@ -351,8 +350,10 @@ PAL_MonsterChasePlayer(
 
 --*/
 {
-   LPEVENTOBJECT pEvtObj = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
-   unsigned short wMonsterSpeed = 0, prevx, prevy;
+   EVENTOBJECT *pEvtObj = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
+   unsigned short wMonsterSpeed = 0;
+   unsigned short prevx;
+   unsigned short prevy;
    int x, y, i, j, l;
 
    if (gpGlobals->wChaseRange != 0)
@@ -539,8 +540,9 @@ PAL_InterpretInstruction(
 
 --*/
 {
-   LPEVENTOBJECT pEvtObj, pCurrent;
-   LPSCRIPTENTRY pScript;
+   EVENTOBJECT *pEvtObj;
+   EVENTOBJECT *pCurrent;
+   SCRIPTENTRY *pScript;
    int iPlayerRole, i, j, x, y;
    unsigned short w, wCurEventObjectID;
 
@@ -2236,7 +2238,7 @@ PAL_InterpretInstruction(
          x = (pScript->rgwOperand[0]);
          y = (pScript->rgwOperand[1]);
 
-         time = SDL_GetTicks() + FRAME_TIME;
+         time = UTIL_GetTicks() + FRAME_TIME;
 
          do
          {
@@ -2283,7 +2285,7 @@ PAL_InterpretInstruction(
             // Delay for one frame
             //
             PAL_DelayUntil(time);
-            time = SDL_GetTicks() + FRAME_TIME;
+            time = UTIL_GetTicks() + FRAME_TIME;
          } while (++i < (pScript->rgwOperand[2]));
       }
       break;
@@ -3066,8 +3068,8 @@ PAL_RunTriggerScript(
 
    unsigned short wNextScriptEntry;
    int fEnded;
-   LPSCRIPTENTRY pScript;
-   LPEVENTOBJECT pEvtObj = NULL;
+   SCRIPTENTRY *pScript;
+   EVENTOBJECT *pEvtObj = NULL;
    int i;
 
    extern int g_fUpdatedInBattle; // HACKHACK
@@ -3253,13 +3255,13 @@ PAL_RunTriggerScript(
 
             PAL_ClearDialog(TRUE);
 
-            time = SDL_GetTicks() + FRAME_TIME;
+            time = UTIL_GetTicks() + FRAME_TIME;
 
             for (i = 0; i < (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1); i++)
             {
                PAL_DelayUntil(time);
 
-               time = SDL_GetTicks() + FRAME_TIME;
+               time = UTIL_GetTicks() + FRAME_TIME;
 
                if (pScript->rgwOperand[2])
                {
@@ -3381,8 +3383,8 @@ PAL_RunAutoScript(
 
 --*/
 {
-   LPSCRIPTENTRY pScript;
-   LPEVENTOBJECT pEvtObj;
+   SCRIPTENTRY *pScript;
+   EVENTOBJECT *pEvtObj;
 
 begin:
    pScript = &(gpGlobals->g.lprgScriptEntry[wScriptEntry]);

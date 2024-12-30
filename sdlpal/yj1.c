@@ -53,7 +53,7 @@ typedef struct _YJ_1_FILEHEADER
 	unsigned short BlockCount;       // number of blocks
 	unsigned char Unknown;
 	unsigned char HuffmanTreeLength; // length of huffman tree
-} YJ_1_FILEHEADER, *PYJ_1_FILEHEADER;
+} YJ_1_FILEHEADER;
 
 typedef struct _YJ_1_BLOCKHEADER
 {
@@ -64,7 +64,7 @@ typedef struct _YJ_1_BLOCKHEADER
 	unsigned char LZSSRepeatCodeLengthTable[3];
 	unsigned char CodeCountCodeLengthTable[3];
 	unsigned char CodeCountTable[2];
-} YJ_1_BLOCKHEADER, *PYJ_1_BLOCKHEADER;
+} YJ_1_BLOCKHEADER;
 
 static unsigned int
 	yj1_get_bits(
@@ -91,7 +91,7 @@ static unsigned short
 	yj1_get_loop(
 	const void *src,
 	unsigned int *bitptr,
-	PYJ_1_BLOCKHEADER header
+	YJ_1_BLOCKHEADER *header
 	)
 {
 	if (yj1_get_bits(src, bitptr, 1))
@@ -110,7 +110,7 @@ static unsigned short
 	yj1_get_count(
 	const void *src,
 	unsigned int *bitptr,
-	PYJ_1_BLOCKHEADER header
+	YJ_1_BLOCKHEADER *header
 	)
 {
 	unsigned short temp;
@@ -132,7 +132,7 @@ int
 	int           DestSize
 	)
 {
-	PYJ_1_FILEHEADER hdr = (PYJ_1_FILEHEADER)Source;
+	YJ_1_FILEHEADER *hdr = (YJ_1_FILEHEADER *)Source;
 	unsigned char *src = (unsigned char *)Source;
 	unsigned char *dest;
 	unsigned int i;
@@ -177,9 +177,9 @@ int
 	for (i = 0; i < hdr->BlockCount; i++)
 	{
 		unsigned int bitptr;
-		PYJ_1_BLOCKHEADER header;
+		YJ_1_BLOCKHEADER *header;
 
-		header = (PYJ_1_BLOCKHEADER)src;
+		header = (YJ_1_BLOCKHEADER *)src;
 		src += 4;
 		if (!header->CompressedLength)
 		{

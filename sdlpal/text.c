@@ -23,6 +23,7 @@
 //
 
 #include "text.h"
+#include "common.h"
 #include "font.h"
 #include "global.h"
 #include "input.h"
@@ -31,8 +32,6 @@
 #include "palette.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 #include <errno.h>
 #include <wctype.h>
 
@@ -515,7 +514,7 @@ PAL_DrawTextUnescape(
 
    urect.x = rect.x = PAL_X(pos);
    urect.y = rect.y = PAL_Y(pos);
-   urect.h = (fUse8x8Font ? 8 : PAL_FontHeight()) + (fShadow ? 1 : 0);
+   urect.h = PAL_FontHeight() + (fShadow ? 1 : 0);
    urect.w = 0;
 
    // Handle text overflow
@@ -529,7 +528,7 @@ PAL_DrawTextUnescape(
       //
       // Draw the character
       //
-      int char_width = fUse8x8Font ? 8 : PAL_CharWidth(*lpszText);
+      int char_width = PAL_CharWidth(*lpszText);
 
       if (fShadow)
       {
@@ -539,12 +538,13 @@ PAL_DrawTextUnescape(
          // It is suspected that there is a bug in the original Win95 version, 
          // so sdlpal chose to use triple shadows for both.
          //
-         PAL_DrawCharOnSurface(*lpszText, gpScreen, PAL_XY(rect.x + 1, rect.y), 0, fUse8x8Font);
-         PAL_DrawCharOnSurface(*lpszText, gpScreen, PAL_XY(rect.x, rect.y + 1), 0, fUse8x8Font);
-         PAL_DrawCharOnSurface(*lpszText, gpScreen, PAL_XY(rect.x + 1, rect.y + 1), 0, fUse8x8Font);
+         PAL_DrawCharOnSurface(*lpszText, gpScreen, PAL_XY(rect.x + 1, rect.y), 0);
+         PAL_DrawCharOnSurface(*lpszText, gpScreen, PAL_XY(rect.x, rect.y + 1), 0);
+         PAL_DrawCharOnSurface(*lpszText, gpScreen, PAL_XY(rect.x + 1, rect.y + 1), 0);
       }
-      PAL_DrawCharOnSurface(*lpszText++, gpScreen, PAL_XY(rect.x, rect.y), bColor, fUse8x8Font);
-      rect.x += char_width; urect.w += char_width;
+      PAL_DrawCharOnSurface(*lpszText++, gpScreen, PAL_XY(rect.x, rect.y), bColor);
+      rect.x += char_width;
+      urect.w += char_width;
    }
 
    //
@@ -764,7 +764,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
    PAL_LARGE SDL_Color   palette[256];
    SDL_Color   *pCurrentPalette, t;
    int         i;
-   uint32_t    dwBeginningTicks = SDL_GetTicks();
+   uint32_t    dwBeginningTicks = UTIL_GetTicks();
 
    //
    // get the current palette
@@ -815,7 +815,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
          VIDEO_SetPalette(palette);
       }
 
-      if (fabs(fMaxSeconds) > FLT_EPSILON && SDL_GetTicks() - dwBeginningTicks > 1000 * fMaxSeconds)
+      if (fabs(fMaxSeconds) > FLT_EPSILON && UTIL_GetTicks() - dwBeginningTicks > 1000 * fMaxSeconds)
       {
          break;
       }
@@ -1058,7 +1058,7 @@ PAL_ShowDialogText(
       //
       {
          unsigned int      pos;
-         LPBOX      lpBox;
+         BOX       *lpBox;
 		 int        i;
 		 int        w = wcslen(lpszText);
 		 int        len = 0;

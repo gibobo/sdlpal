@@ -21,6 +21,7 @@
 #include <SDL.h>
 
 #include "audio.h"
+#include "common.h"
 #include "font.h"
 #include "game.h"
 #include "global.h"
@@ -35,8 +36,6 @@
 #include "text.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 #include <setjmp.h>
 
 static jmp_buf g_exit_jmp_buf;
@@ -97,11 +96,7 @@ PAL_Init(
       TerminateOnError("Could not initialize text subsystem: %d.\n", e);
    }
 
-   e = PAL_InitFont(&gConfig);
-   if (e != 0)
-   {
-      TerminateOnError("Could not load fonts: %d.\n", e);
-   }
+   PAL_InitFont();
 
    PAL_InitInput();
    PAL_InitResources();
@@ -266,7 +261,7 @@ void PAL_SplashScreen(
    PAL_ProcessEvent();
    PAL_ClearKeyState();
 
-   dwBeginTime = SDL_GetTicks();
+   dwBeginTime = UTIL_GetTicks();
 
    srcrect.x = 0;
    srcrect.w = 320;
@@ -276,7 +271,7 @@ void PAL_SplashScreen(
    while (TRUE)
    {
       PAL_ProcessEvent();
-      dwTime = SDL_GetTicks() - dwBeginTime;
+      dwTime = UTIL_GetTicks() - dwBeginTime;
 
       //
       // Set the palette
@@ -285,9 +280,9 @@ void PAL_SplashScreen(
       {
          for (i = 0; i < 256; i++)
          {
-            rgCurrentPalette[i].r = (unsigned char)(palette[i].r * ((float)dwTime / 15000));
-            rgCurrentPalette[i].g = (unsigned char)(palette[i].g * ((float)dwTime / 15000));
-            rgCurrentPalette[i].b = (unsigned char)(palette[i].b * ((float)dwTime / 15000));
+            rgCurrentPalette[i].r = (unsigned char)(((int)palette[i].r * dwTime) / 15000);
+            rgCurrentPalette[i].g = (unsigned char)(((int)palette[i].g * dwTime) / 15000);
+            rgCurrentPalette[i].b = (unsigned char)(((int)palette[i].b * dwTime) / 15000);
          }
       }
 
@@ -403,10 +398,9 @@ void PAL_SplashScreen(
       // Delay a while...
       //
       PAL_ProcessEvent();
-      while (SDL_GetTicks() - dwBeginTime < dwTime + 85)
-      {
-         SDL_Delay(1);
-         PAL_ProcessEvent();
+      while (SDL_GetTicks() < dwTime + dwBeginTime + 85) {
+        UTIL_Sleep(1);
+        PAL_ProcessEvent();
       }
    }
 

@@ -22,11 +22,10 @@
 #include "game.h"
 #include "global.h"
 #include "input.h"
+#include "palcommon.h"
 #include "play.h"
 #include "res.h"
 #include "uigame.h"
-#include "palcommon.h"
-#include <SDL_timer.h>
 
 void
 PAL_GameMain(
@@ -63,7 +62,7 @@ PAL_GameMain(
    //
    // Run the main game loop.
    //
-   dwTime = SDL_GetTicks();
+   dwTime = UTIL_GetTicks();
    while (1)
    {
       //
@@ -84,7 +83,7 @@ PAL_GameMain(
       //
       // Set the time of the next frame.
       //
-      dwTime = SDL_GetTicks() + FRAME_TIME;
+      dwTime = UTIL_GetTicks() + FRAME_TIME;
 
       //
       // Run the main frame routine.

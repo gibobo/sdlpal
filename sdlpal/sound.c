@@ -20,48 +20,43 @@
 //
 
 #include "audio.h"
+#include "common.h"
 #include "palcfg.h"
 #include "palcommon.h"
 #include "players.h"
 #include "resampler.h"
 #include "riff.h"
 #include "util.h"
-#include "common.h"
 
-typedef struct tagWAVESPEC
-{
-	int size;
-	int freq;
-	SDL_AudioFormat format;
-	uint8_t channels;
-	uint8_t align;
+typedef struct tagWAVESPEC {
+  int size;
+  int freq;
+  SDL_AudioFormat format;
+  uint8_t channels;
+  uint8_t align;
 } WAVESPEC;
 
 typedef const void *(*SoundLoader)(const unsigned char *, unsigned int, WAVESPEC *);
 typedef int (*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, int, const void **);
 
-typedef struct tagWAVEDATA
-{
-	struct tagWAVEDATA *next;
-
-	void *resampler[2]; /* The resampler used for sound data */
-	ResampleMixer ResampleMix;
-	const void *base;
-	const void *current;
-	const void *end;
-	WAVESPEC spec;
+typedef struct tagWAVEDATA {
+  struct tagWAVEDATA *next;
+  void *resampler[2]; /* The resampler used for sound data */
+  ResampleMixer ResampleMix;
+  const void *base;
+  const void *current;
+  const void *end;
+  WAVESPEC spec;
 } WAVEDATA;
 
-typedef struct tagSOUNDPLAYER
-{
-	AUDIOPLAYER_COMMONS;
-
-	FILE *mkf;			   /* File pointer to the MKF file */
-	SoundLoader LoadSound; /* The function pointer for load WAVE/VOC data */
-	WAVEDATA soundlist;
-	int cursounds;
-	int lastSFX;
-} SOUNDPLAYER, *LPSOUNDPLAYER;
+typedef struct tagSOUNDPLAYER {
+  AUDIOPLAYER_COMMONS;
+  FILE *mkf;             /* File pointer to the MKF file */
+  SoundLoader LoadSound; /* The function pointer for load WAVE/VOC data */
+  WAVEDATA soundlist;
+  int cursounds;
+  int lastSFX;
+} SOUNDPLAYER;
 
 static const void *
 SOUND_LoadWAVEData(
@@ -141,14 +136,12 @@ SOUND_LoadWAVEData(
 	return lpWaveData;
 }
 
-typedef struct tagVOCHEADER
-{
-	char signature[0x14];		/* "Creative Voice File\x1A" */
-	unsigned short data_offset; /* little endian */
-	unsigned short version;
-	unsigned short version_checksum;
-} VOCHEADER, *LPVOCHEADER;
-typedef const VOCHEADER *LPCVOCHEADER;
+typedef struct tagVOCHEADER {
+  char signature[0x14];       /* "Creative Voice File\x1A" */
+  unsigned short data_offset; /* little endian */
+  unsigned short version;
+  unsigned short version_checksum;
+} VOCHEADER;
 
 static const void *
 SOUND_LoadVOCData(
@@ -176,7 +169,7 @@ SOUND_LoadVOCData(
 	Reference: http://sox.sourceforge.net/AudioFormats-11.html
 --*/
 {
-	LPCVOCHEADER lpVOC = (LPCVOCHEADER)lpData;
+	const VOCHEADER *lpVOC = (const VOCHEADER *)lpData;
 
 	if (dwLen < sizeof(VOCHEADER) || memcmp(lpVOC->signature, "Creative Voice File\x1A", 0x14) || lpVOC->data_offset >= dwLen)
 	{
@@ -751,7 +744,7 @@ SOUND_Play(
 
 --*/
 {
-	LPSOUNDPLAYER player = (LPSOUNDPLAYER)object;
+	SOUNDPLAYER *player = (SOUNDPLAYER *)object;
 	const SDL_AudioSpec *devspec = AUDIO_GetDeviceSpec();
 	WAVESPEC wavespec;
 	ResampleMixer mixer;
@@ -866,7 +859,7 @@ void SOUND_Shutdown(
 
 --*/
 {
-	LPSOUNDPLAYER player = (LPSOUNDPLAYER)object;
+	SOUNDPLAYER *player = (SOUNDPLAYER *)object;
 	if (player)
 	{
 		WAVEDATA *cursnd = &player->soundlist;
@@ -914,7 +907,7 @@ SOUND_FillBuffer(
 
 --*/
 {
-	LPSOUNDPLAYER player = (LPSOUNDPLAYER)object;
+	SOUNDPLAYER *player = (SOUNDPLAYER *)object;
 	if (player)
 	{
 		WAVEDATA *cursnd = &player->soundlist;
@@ -924,7 +917,7 @@ SOUND_FillBuffer(
 			if (cursnd->base)
 			{
 				cursnd->ResampleMix(cursnd->resampler, cursnd->current, &cursnd->spec, stream, len, &cursnd->current);
-				cursnd->spec.size = (const uint8_t *)cursnd->end - (const uint8_t *)cursnd->current;
+				cursnd->spec.size = (int)((const uint8_t *)cursnd->end - (const uint8_t *)cursnd->current);
 				if (cursnd->spec.size < cursnd->spec.align)
 				{
 					free((void *)cursnd->base);
@@ -939,9 +932,7 @@ SOUND_FillBuffer(
 	}
 }
 
-LPAUDIOPLAYER
-SOUND_Init(
-	void)
+AUDIOPLAYER *SOUND_Init(void)
 /*++
   Purpose:
 
@@ -957,44 +948,39 @@ SOUND_Init(
 
 --*/
 {
-	char *mkfs[2];
-	SoundLoader func[2];
-	int i;
+  char *mkfs[2];
+  SoundLoader func[2];
+  int i;
 
-	if (gConfig.fIsWIN95)
-	{
-		mkfs[0] = "sounds.mkf";
-		func[0] = SOUND_LoadWAVEData;
-		mkfs[1] = "voc.mkf";
-		func[1] = SOUND_LoadVOCData;
-	}
-	else
-	{
-		mkfs[0] = "voc.mkf";
-		func[0] = SOUND_LoadVOCData;
-		mkfs[1] = "sounds.mkf";
-		func[1] = SOUND_LoadWAVEData;
-	}
+  if (gConfig.fIsWIN95) {
+    mkfs[0] = "sounds.mkf";
+    func[0] = SOUND_LoadWAVEData;
+    mkfs[1] = "voc.mkf";
+    func[1] = SOUND_LoadVOCData;
+  } else {
+    mkfs[0] = "voc.mkf";
+    func[0] = SOUND_LoadVOCData;
+    mkfs[1] = "sounds.mkf";
+    func[1] = SOUND_LoadWAVEData;
+  }
 
-	for (i = 0; i < 2; i++)
-	{
-		FILE *mkf = UTIL_OpenFile(mkfs[i]);
-		if (mkf)
-		{
-			LPSOUNDPLAYER player = (LPSOUNDPLAYER)malloc(sizeof(SOUNDPLAYER));
-			memset(&player->soundlist, 0, sizeof(WAVEDATA));
-			player->Play = SOUND_Play;
-			player->FillBuffer = SOUND_FillBuffer;
-			player->Shutdown = SOUND_Shutdown;
+  for (i = 0; i < 2; i++) {
+    FILE *mkf = UTIL_OpenFile(mkfs[i]);
+    if (mkf) {
+      SOUNDPLAYER *player = (SOUNDPLAYER *)malloc(sizeof(SOUNDPLAYER));
+      memset(&player->soundlist, 0, sizeof(WAVEDATA));
+      player->Play = SOUND_Play;
+      player->FillBuffer = SOUND_FillBuffer;
+      player->Shutdown = SOUND_Shutdown;
 
-			player->LoadSound = func[i];
-			player->mkf = mkf;
-			player->soundlist.resampler[0] = resampler_create();
-			player->soundlist.resampler[1] = resampler_create();
-			player->cursounds = 0;
-			return (LPAUDIOPLAYER)player;
-		}
-	}
+      player->LoadSound = func[i];
+      player->mkf = mkf;
+      player->soundlist.resampler[0] = resampler_create();
+      player->soundlist.resampler[1] = resampler_create();
+      player->cursounds = 0;
+      return (AUDIOPLAYER*)player;
+    }
+  }
 
-	return NULL;
+  return NULL;
 }

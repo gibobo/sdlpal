@@ -114,32 +114,27 @@ typedef struct tagBATTLEUI
 extern "C" {
 #endif
 
-   void
-   PAL_PlayerInfoBox(
-       unsigned int pos,
-       unsigned short wPlayerRole,
-       int iTimeMeter,
-       unsigned char bTimeMeterColor,
-       int fUpdate);
+void PAL_PlayerInfoBox(
+    unsigned int pos,
+    unsigned short wPlayerRole,
+    int iTimeMeter,
+    unsigned char bTimeMeterColor,
+    int fUpdate);
 
-   void
-   PAL_BattleUIShowText(
-       const unsigned short *lpszText,
-       unsigned short wDuration);
+void PAL_BattleUIShowText(
+    const unsigned short *lpszText,
+    unsigned short wDuration);
 
-   void
-   PAL_BattleUIPlayerReady(
-       unsigned short wPlayerIndex);
+void PAL_BattleUIPlayerReady(
+    unsigned short wPlayerIndex);
 
-   void
-   PAL_BattleUIUpdate(
-       void);
+void PAL_BattleUIUpdate(
+    void);
 
-   void
-   PAL_BattleUIShowNum(
-       unsigned short wNum,
-       unsigned int pos,
-       NUMCOLOR color);
+void PAL_BattleUIShowNum(
+    unsigned short wNum,
+    unsigned int pos,
+    NUMCOLOR color);
 
 #ifdef __cplusplus
 }

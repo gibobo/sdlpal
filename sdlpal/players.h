@@ -25,32 +25,22 @@
 #ifndef PLAYERS_H
 #define PLAYERS_H
 
-typedef struct tagAUDIOPLAYER
-{
-#define AUDIOPLAYER_COMMONS \
-    int                        iMusic;  \
-    int                       fLoop; \
-	void (*Shutdown)(void*); \
-	int (*Play)(void*, int, int, float); \
-	void (*FillBuffer)(void*, unsigned char *, int)
-
-	AUDIOPLAYER_COMMONS;
-} AUDIOPLAYER, *LPAUDIOPLAYER;
+typedef struct tagAUDIOPLAYER {
+#define AUDIOPLAYER_COMMONS             \
+  int iMusic;                           \
+  int fLoop;                            \
+  void (*Shutdown)(void *);             \
+  int (*Play)(void *, int, int, float); \
+  void (*FillBuffer)(void *, unsigned char *, int)
+  AUDIOPLAYER_COMMONS;
+} AUDIOPLAYER;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /* RIX */
-
-LPAUDIOPLAYER
-RIX_Init(
-   const char*     szFileName
-);
-LPAUDIOPLAYER
-SOUND_Init(
-	void
-);
+AUDIOPLAYER *RIX_Init(const char *szFileName);
+AUDIOPLAYER *SOUND_Init(void);
 
 #ifdef __cplusplus
 }

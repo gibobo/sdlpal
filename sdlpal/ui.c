@@ -31,28 +31,24 @@
 
 unsigned char *gpSpriteUI = NULL;
 
-static LPBOX
-PAL_CreateBoxInternal(
-    const SDL_Rect *rect)
-{
-   LPBOX lpBox = (LPBOX)calloc(1, sizeof(BOX));
-   if (lpBox == NULL)
-   {
-      return NULL;
-   }
+static BOX *PAL_CreateBoxInternal(
+    const SDL_Rect *rect) {
+  BOX *lpBox = (BOX *)calloc(1, sizeof(BOX));
+  if (lpBox == NULL) {
+    return NULL;
+  }
 
-   lpBox->pos = PAL_XY(rect->x, rect->y);
-   lpBox->lpSavedArea = VIDEO_DuplicateSurface(gpScreen, rect);
-   lpBox->wHeight = (unsigned short)rect->w;
-   lpBox->wWidth = (unsigned short)rect->h;
+  lpBox->pos = PAL_XY(rect->x, rect->y);
+  lpBox->lpSavedArea = VIDEO_DuplicateSurface(gpScreen, rect);
+  lpBox->wHeight = (unsigned short)rect->w;
+  lpBox->wWidth = (unsigned short)rect->h;
 
-   if (lpBox->lpSavedArea == NULL)
-   {
-      free(lpBox);
-      return NULL;
-   }
+  if (lpBox->lpSavedArea == NULL) {
+    free(lpBox);
+    return NULL;
+  }
 
-   return lpBox;
+  return lpBox;
 }
 
 int PAL_InitUI(
@@ -118,8 +114,7 @@ void PAL_FreeUI(
    }
 }
 
-LPBOX
-PAL_CreateBox(
+BOX *PAL_CreateBox(
     unsigned int pos,
     int nRows,
     int nColumns,
@@ -129,8 +124,7 @@ PAL_CreateBox(
    return PAL_CreateBoxWithShadow(pos, nRows, nColumns, iStyle, fSaveScreen, 6);
 }
 
-LPBOX
-PAL_CreateBoxWithShadow(
+BOX *PAL_CreateBoxWithShadow(
     unsigned int pos,
     int nRows,
     int nColumns,
@@ -163,7 +157,7 @@ PAL_CreateBoxWithShadow(
 {
    int i, j, x, m, n;
    const unsigned char *rglpBorderBitmap[3][3];
-   LPBOX lpBox = NULL;
+   BOX *lpBox = NULL;
    SDL_Rect rect;
 
    //
@@ -239,8 +233,7 @@ PAL_CreateBoxWithShadow(
    return lpBox;
 }
 
-LPBOX
-PAL_CreateSingleLineBox(
+BOX *PAL_CreateSingleLineBox(
     unsigned int pos,
     int nLen,
     int fSaveScreen)
@@ -248,8 +241,7 @@ PAL_CreateSingleLineBox(
    return PAL_CreateSingleLineBoxWithShadow(pos, nLen, fSaveScreen, 6);
 }
 
-LPBOX
-PAL_CreateSingleLineBoxWithShadow(
+BOX *PAL_CreateSingleLineBoxWithShadow(
     unsigned int pos,
     int nLen,
     int fSaveScreen,
@@ -282,7 +274,7 @@ PAL_CreateSingleLineBoxWithShadow(
    const unsigned char *lpBitmapMid;
    const unsigned char *lpBitmapRight;
    SDL_Rect rect;
-   LPBOX lpBox = NULL;
+   BOX *lpBox = NULL;
    int i;
    int xSaved;
 
@@ -350,8 +342,7 @@ PAL_CreateSingleLineBoxWithShadow(
    return lpBox;
 }
 
-void PAL_DeleteBox(
-    LPBOX lpBox)
+void PAL_DeleteBox(BOX *lpBox)
 /*++
   Purpose:
 
@@ -626,7 +617,7 @@ PAL_ReadMenu(
       //
       // Use delay function to avoid high CPU usage.
       //
-      SDL_Delay(50);
+      UTIL_Sleep(50);
    }
 
    return MENUITEM_VALUE_CANCELLED;
@@ -838,17 +829,18 @@ int PAL_WordWidth(
 --*/
 {
    const unsigned short *itemText = PAL_GetWord(nWordIndex);
-   int i, l = wcslen(itemText), w = 0;
+   unsigned int i = 0;
+   unsigned int w = 8;
+   unsigned int l = (unsigned int)wcslen(itemText);
+
    for (i = 0; i < l; i++)
    {
       w += PAL_CharWidth(itemText[i]);
    }
-   return (w + 8) >> 4;
+   return (w >> 4);
 }
 
-LPOBJECTDESC
-PAL_LoadObjectDesc(
-    const char *lpszFileName)
+OBJECTDESC *PAL_LoadObjectDesc(const char *lpszFileName)
 /*++
   Purpose:
 
@@ -867,8 +859,8 @@ PAL_LoadObjectDesc(
    FILE *fp;
    PAL_LARGE char buf[512];
    char *p;
-   LPOBJECTDESC lpDesc = NULL;
-   LPOBJECTDESC pNew = NULL;
+   OBJECTDESC *lpDesc = NULL;
+   OBJECTDESC *pNew = NULL;
    unsigned int i;
    CODEPAGE cp = PAL_DetectCodePage(lpszFileName);
 
@@ -916,8 +908,7 @@ PAL_LoadObjectDesc(
    return lpDesc;
 }
 
-void PAL_FreeObjectDesc(
-    LPOBJECTDESC lpObjectDesc)
+void PAL_FreeObjectDesc(OBJECTDESC *lpObjectDesc)
 /*++
   Purpose:
 
@@ -933,7 +924,7 @@ void PAL_FreeObjectDesc(
 
 --*/
 {
-   LPOBJECTDESC p;
+   OBJECTDESC *p;
 
    while (lpObjectDesc != NULL)
    {
@@ -946,7 +937,7 @@ void PAL_FreeObjectDesc(
 
 const unsigned short *
 PAL_GetObjectDesc(
-    LPOBJECTDESC lpObjectDesc,
+    OBJECTDESC *lpObjectDesc,
     unsigned short wObjectID)
 /*++
   Purpose:

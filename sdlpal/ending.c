@@ -21,6 +21,7 @@
 
 #include "ending.h"
 #include "audio.h"
+#include "common.h"
 #include "global.h"
 #include "palcfg.h"
 #include "palcommon.h"
@@ -30,8 +31,6 @@
 #include "scene.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 static unsigned short g_wCurEffectSprite = 0;
 
@@ -133,7 +132,7 @@ void PAL_ShowFBP(
 
             if (g_wCurEffectSprite != 0)
             {
-               int f = SDL_GetTicks() / 150;
+               int f = UTIL_GetTicks() / 150;
                PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                                     gpScreen, PAL_XY(0, 0));
             }
@@ -262,7 +261,7 @@ void PAL_ScrollFBP(
 
       if (g_wCurEffectSprite != 0)
       {
-         int f = SDL_GetTicks() / 150;
+         int f = UTIL_GetTicks() / 150;
          PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                               gpScreen, PAL_XY(0, 0));
       }
@@ -301,6 +300,7 @@ void PAL_EndingAnimation(
 
 --*/
 {
+   const unsigned int buf_size = 320 * 200;
    unsigned char *buf;
    unsigned char *bufGirl;
    SDL_Surface *pUpper;
@@ -310,19 +310,19 @@ void PAL_EndingAnimation(
    int yPosGirl = 180;
    int i;
 
-   buf = (unsigned char *)UTIL_calloc(1, 64000);
+   buf = (unsigned char *)UTIL_calloc(1, buf_size);
    bufGirl = (unsigned char *)UTIL_calloc(1, 6000);
 
    pUpper = VIDEO_CreateCompatibleSurface(gpScreen);
    pLower = VIDEO_CreateCompatibleSurface(gpScreen);
 
-   PAL_MKFDecompressChunk(buf, 64000, gConfig.fIsWIN95 ? 69 : 61, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, buf_size, gConfig.fIsWIN95 ? 69 : 61, gpGlobals->f.fpFBP);
    PAL_FBPBlitToSurface(buf, pUpper);
 
-   PAL_MKFDecompressChunk(buf, 64000, gConfig.fIsWIN95 ? 70 : 62, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, buf_size, gConfig.fIsWIN95 ? 70 : 62, gpGlobals->f.fpFBP);
    PAL_FBPBlitToSurface(buf, pLower);
 
-   PAL_MKFDecompressChunk(buf, 64000, 571, gpGlobals->f.fpMGO);
+   PAL_MKFDecompressChunk(buf, buf_size, 571, gpGlobals->f.fpMGO);
    PAL_MKFDecompressChunk(bufGirl, 6000, 572, gpGlobals->f.fpMGO);
 
    srcrect.x = 0;
@@ -369,7 +369,7 @@ void PAL_EndingAnimation(
          yPosGirl = 80;
       }
 
-      PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (SDL_GetTicks() / 50) % 4),
+      PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (UTIL_GetTicks() / 50) % 4),
                            gpScreen, PAL_XY(220, yPosGirl));
 
       //
@@ -448,7 +448,7 @@ void PAL_EndingScreen(
 
       SDL_FillRect(gpScreen, NULL, 0);
       PAL_SetPalette(0, FALSE);
-      PAL_RNGPlay(0xb, 0, -1, 7);
+      PAL_RNGPlay(11, 0, -1, 7);
 
       PAL_FadeOut(2);
 

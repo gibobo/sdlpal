@@ -22,11 +22,7 @@
 #include "map.h"
 #include "palcommon.h"
 
-LPPALMAP
-PAL_LoadMap(
-    int iMapNum,
-    FILE *fpMapMKF,
-    FILE *fpGopMKF)
+PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
 /*++
   Purpose:
 
@@ -51,7 +47,7 @@ PAL_LoadMap(
 {
    unsigned char *buf;
    int size;
-   LPPALMAP map;
+   PALMAP *map;
 
    //
    // Check for invalid map number.
@@ -80,7 +76,7 @@ PAL_LoadMap(
    //
    // Create the map instance.
    //
-   map = (LPPALMAP)malloc(sizeof(PALMAP));
+   map = (PALMAP *)malloc(sizeof(PALMAP));
    if (map == NULL)
    {
       return NULL;
@@ -140,8 +136,7 @@ PAL_LoadMap(
    return map;
 }
 
-void PAL_FreeMap(
-    LPPALMAP lpMap)
+void PAL_FreeMap(PALMAP *lpMap)
 /*++
   Purpose:
 

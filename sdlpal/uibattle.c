@@ -21,6 +21,7 @@
 
 #include "uibattle.h"
 #include "battle.h"
+#include "common.h"
 #include "fight.h"
 #include "global.h"
 #include "input.h"
@@ -32,8 +33,6 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 extern unsigned short g_rgPlayerPos[3][3][2];
 
@@ -479,7 +478,7 @@ void PAL_BattleUIShowText(
 
 --*/
 {
-   if (!SDL_TICKS_PASSED(SDL_GetTicks(), g_Battle.UI.dwMsgShowTime))
+   if (UTIL_GetTicks() < g_Battle.UI.dwMsgShowTime)
    {
       wcscpy(g_Battle.UI.szNextMsg, lpszText);
       g_Battle.UI.wNextMsgDuration = wDuration;
@@ -487,7 +486,7 @@ void PAL_BattleUIShowText(
    else
    {
       wcscpy(g_Battle.UI.szMsg, lpszText);
-      g_Battle.UI.dwMsgShowTime = SDL_GetTicks() + wDuration;
+      g_Battle.UI.dwMsgShowTime = UTIL_GetTicks() + wDuration;
    }
 }
 
@@ -1453,14 +1452,14 @@ end:
    {
       if (g_Battle.UI.rgShowNum[i].wNum > 0)
       {
-         if ((SDL_GetTicks() - g_Battle.UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME > 10)
+         if ((UTIL_GetTicks() - g_Battle.UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME > 10)
          {
             g_Battle.UI.rgShowNum[i].wNum = 0;
          }
          else
          {
             PAL_DrawNumber(g_Battle.UI.rgShowNum[i].wNum, 5,
-                           PAL_XY(PAL_X(g_Battle.UI.rgShowNum[i].pos), PAL_Y(g_Battle.UI.rgShowNum[i].pos) - (SDL_GetTicks() - g_Battle.UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME),
+                           PAL_XY(PAL_X(g_Battle.UI.rgShowNum[i].pos), PAL_Y(g_Battle.UI.rgShowNum[i].pos) - (UTIL_GetTicks() - g_Battle.UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME),
                            g_Battle.UI.rgShowNum[i].color, kNumAlignRight);
          }
       }
@@ -1501,7 +1500,7 @@ void PAL_BattleUIShowNum(
          g_Battle.UI.rgShowNum[i].wNum = wNum;
          g_Battle.UI.rgShowNum[i].pos = PAL_XY(PAL_X(pos) - 15, PAL_Y(pos));
          g_Battle.UI.rgShowNum[i].color = color;
-         g_Battle.UI.rgShowNum[i].dwTime = SDL_GetTicks();
+         g_Battle.UI.rgShowNum[i].dwTime = UTIL_GetTicks();
 
          break;
       }

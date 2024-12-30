@@ -20,14 +20,20 @@
 //
 
 #include "util.h"
+#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "main.h"
 #include "palcfg.h"
-#include "common.h"
 #include <SDL_messagebox.h>
 #include <SDL_timer.h>
 #include <errno.h>
+#ifdef _WIN32
+#include <io.h>
+#define access _access
+#else
+#include <unistd.h>
+#endif
 
 #define PAL_PATH_SEPARATORS "/"
 #define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
@@ -262,15 +268,7 @@ float RandomFloat(
 void UTIL_Delay(
 	unsigned int ms)
 {
-	unsigned int t = SDL_GetTicks() + ms;
-
-	PAL_ProcessEvent();
-
-	while (!SDL_TICKS_PASSED(SDL_GetTicks(), t))
-	{
-		SDL_Delay(1);
-		PAL_ProcessEvent();
-	}
+	PAL_DelayUntil(UTIL_GetTicks() + ms);
 }
 
 void TerminateOnError(
@@ -740,4 +738,21 @@ char *UTIL_basename(const char *filename)
 	if (!broked)
 		sprintf((char *)basename_buf, "./");
 	return (char *)basename_buf;
+}
+
+unsigned int UTIL_GetTicks(void) {
+  return SDL_GetTicks();
+}
+
+void UTIL_Sleep(unsigned int tm) {
+  SDL_Delay(tm);
+}
+
+// #define SDL_TICKS_PASSED(A, B) (A >= B)
+void PAL_DelayUntil(unsigned int tm) {
+  PAL_ProcessEvent();
+  while (tm > UTIL_GetTicks()) {
+    PAL_ProcessEvent();
+    UTIL_Sleep(1);
+  }
 }

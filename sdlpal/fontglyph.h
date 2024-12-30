@@ -25,10 +25,6 @@
 #ifndef _FONTGLYPH_H
 #define _FONTGLYPH_H
 
-#ifndef _FONT_C
-#error "This file should only be included inside font.c!"
-#endif
-
 static unsigned char unicode_font[65536][32] = {
   { 170,170,0,1,128,0,0,1,128,0,74,81,234,80,90,81,201,158,0,1,128,0,0,1,128,0,0,1,128,0,85,85 },
   { 170,170,0,1,128,0,0,1,128,0,57,147,194,82,50,95,138,82,113,147,128,0,0,1,128,0,0,1,128,0,85,85 },
@@ -58904,9 +58900,5 @@ unsigned char font_width[65536] = {
   32,32,16,16,16,16,16,16,32,32,16,16,16,16,16,16,32,32,16,16,16,16,16,16,32,32,16,16,16,32,32,32,
   32,32,32,32,32,32,32,32,16,16,16,16,16,16,16,32,32,32,32,32,32,32,32,32,32,32,32,32,32,16,
 };
-
-static const int unicode_lower_top  = 0xd800;
-static const int unicode_upper_base = 0xf900;
-static const int unicode_upper_top  = 65534;
 
 #endif

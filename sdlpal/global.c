@@ -33,70 +33,64 @@ GLOBALVARS * const  gpGlobals = &_gGlobals;
 
 CONFIGURATION gConfig;
 
-#define LOAD_DATA(buf, size, chunknum, fp)                       \
-   do {                                                          \
-      PAL_MKFReadChunk((unsigned char *)(buf), (size), (chunknum), (fp)); \
-   } while(0)
+int PAL_IsWINVersion(int *pfIsWIN95) {
+  FILE *fps[] = {
+      UTIL_OpenRequiredFileForMode("abc.mkf", "rb"),
+      UTIL_OpenRequiredFileForMode("map.mkf", "rb"),
+      gpGlobals->f.fpF,
+      gpGlobals->f.fpFBP,
+      gpGlobals->f.fpFIRE,
+      gpGlobals->f.fpMGO,
+  };
+  const unsigned char fps_count = sizeof(fps) / sizeof(FILE *);
+  unsigned char dos_score = 0;
+  unsigned char win_score = 0;
+  uint8_t *data = NULL;
+  int data_size = 0;
+  int result = FALSE;
 
-int
-PAL_IsWINVersion(
-	int *pfIsWIN95
-)
-{
-	FILE *fps[] = { UTIL_OpenRequiredFileForMode("abc.mkf", "rb"), UTIL_OpenRequiredFileForMode("map.mkf", "rb"), gpGlobals->f.fpF, gpGlobals->f.fpFBP, gpGlobals->f.fpFIRE, gpGlobals->f.fpMGO };
-	uint8_t *data = NULL;
-	int data_size = 0, dos_score = 0, win_score = 0;
-	int result = FALSE;
+  for (unsigned char i = 0; i < fps_count; i++) {
+    //
+    // Find the first non-empty sub-file
+    //
+    int count = PAL_MKFGetChunkCount(fps[i]);
+    int j = 0;
+    int size;
+    while (j < count && (size = PAL_MKFGetChunkSize(j, fps[i])) < 4)
+      j++;
+    if (j >= count)
+      break;
 
-	for (int i = 0; i < sizeof(fps) / sizeof(FILE *); i++)
-	{
-		//
-		// Find the first non-empty sub-file
-		//
-		int count = PAL_MKFGetChunkCount(fps[i]), j = 0, size;
-		while (j < count && (size = PAL_MKFGetChunkSize(j, fps[i])) < 4) j++;
-		if (j >= count) goto PAL_IsWINVersion_Exit;
+    if (data_size < size)
+      data = (uint8_t *)realloc(data, data_size = size);
+    PAL_MKFReadChunk(data, data_size, j, fps[i]);
+    if (data[0] == 'Y' && data[1] == 'J' && data[2] == '_' && data[3] == '1') {
+      dos_score++;
+    } else {
+      win_score++;
+    }
+  }
 
-		//
-		// Read the content and check the compression signature
-		// Note that this check is not 100% correct, however in incorrect situations,
-		// the sub-file will be over 784MB if uncompressed, which is highly unlikely.
-		//
-		if (data_size < size) data = (uint8_t *)realloc(data, data_size = size);
-		PAL_MKFReadChunk(data, data_size, j, fps[i]);
-		if (data[0] == 'Y' && data[1] == 'J' && data[2] == '_' && data[3] == '1')
-		{
-			if (win_score > 0)
-				goto PAL_IsWINVersion_Exit;
-			else
-				dos_score++;
-		}
-		else
-		{
-			if (dos_score > 0)
-				goto PAL_IsWINVersion_Exit;
-			else
-				win_score++;
-		}
-	}
+  //
+  // Finally check the size of object definition
+  //
+  if (win_score == fps_count || dos_score == fps_count) {
+    data_size = PAL_MKFGetChunkSize(2, gpGlobals->f.fpSSS);
+    if (data_size % sizeof(OBJECT) == 0 && data_size % sizeof(OBJECT_DOS) != 0 && dos_score > 0) {
+    } else if (data_size % sizeof(OBJECT_DOS) == 0 && data_size % sizeof(OBJECT) != 0 && win_score > 0) {
 
-	//
-	// Finally check the size of object definition
-	//
-	data_size = PAL_MKFGetChunkSize(2, gpGlobals->f.fpSSS);
-	if (data_size % sizeof(OBJECT) == 0 && data_size % sizeof(OBJECT_DOS) != 0 && dos_score > 0) goto PAL_IsWINVersion_Exit;
-	if (data_size % sizeof(OBJECT_DOS) == 0 && data_size % sizeof(OBJECT) != 0 && win_score > 0) goto PAL_IsWINVersion_Exit;
+    } else {
+      if (pfIsWIN95)
+        *pfIsWIN95 = (win_score == fps_count) ? TRUE : FALSE;
+      result = TRUE;
+    }
+  }
 
-	if (pfIsWIN95) *pfIsWIN95 = (win_score == sizeof(fps) / sizeof(FILE *)) ? TRUE : FALSE;
+  free(data);
+  fclose(fps[1]);
+  fclose(fps[0]);
 
-	result = TRUE;
-
-PAL_IsWINVersion_Exit:
-	free(data);
-	fclose(fps[1]);
-	fclose(fps[0]);
-
-	return result;
+  return result;
 }
 
 CODEPAGE
@@ -250,11 +244,9 @@ PAL_FreeGlobals(
    PAL_FreeConfig();
 }
 
-
 static void
 PAL_ReadGlobalGameData(
-   void
-)
+    void)
 /*++
   Purpose:
 
@@ -270,32 +262,22 @@ PAL_ReadGlobalGameData(
 
 --*/
 {
-   const GAMEDATA    *p = &gpGlobals->g;
-
-   LOAD_DATA(p->lprgScriptEntry, p->nScriptEntry * sizeof(SCRIPTENTRY),
-      4, gpGlobals->f.fpSSS);
-
-   LOAD_DATA(p->lprgStore, p->nStore * sizeof(STORE), 0, gpGlobals->f.fpDATA);
-   LOAD_DATA(p->lprgEnemy, p->nEnemy * sizeof(ENEMY), 1, gpGlobals->f.fpDATA);
-   LOAD_DATA(p->lprgEnemyTeam, p->nEnemyTeam * sizeof(ENEMYTEAM),
-      2, gpGlobals->f.fpDATA);
-   LOAD_DATA(p->lprgMagic, p->nMagic * sizeof(MAGIC), 4, gpGlobals->f.fpDATA);
-   LOAD_DATA(p->lprgBattleField, p->nBattleField * sizeof(BATTLEFIELD),
-      5, gpGlobals->f.fpDATA);
-   LOAD_DATA(p->lprgLevelUpMagic, p->nLevelUpMagic * sizeof(LEVELUPMAGIC_ALL),
-      6, gpGlobals->f.fpDATA);
-   LOAD_DATA(p->rgwBattleEffectIndex, sizeof(p->rgwBattleEffectIndex),
-      11, gpGlobals->f.fpDATA);
-   PAL_MKFReadChunk((unsigned char *)&p->EnemyPos, sizeof(p->EnemyPos),
-      13, gpGlobals->f.fpDATA);
-   PAL_MKFReadChunk((unsigned char *)p->rgLevelUpExp, sizeof(p->rgLevelUpExp),
-      14, gpGlobals->f.fpDATA);
+  const GAMEDATA *p = &gpGlobals->g;
+  PAL_MKFReadChunk((unsigned char *)p->lprgScriptEntry,        p->nScriptEntry * sizeof(SCRIPTENTRY), 4, gpGlobals->f.fpSSS);
+  PAL_MKFReadChunk((unsigned char *)p->lprgStore,              p->nStore * sizeof(STORE), 0, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk((unsigned char *)p->lprgEnemy,              p->nEnemy * sizeof(ENEMY), 1, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk((unsigned char *)p->lprgEnemyTeam,          p->nEnemyTeam * sizeof(ENEMYTEAM), 2, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk((unsigned char *)p->lprgMagic,              p->nMagic * sizeof(MAGIC), 4, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk((unsigned char *)p->lprgBattleField,        p->nBattleField * sizeof(BATTLEFIELD), 5, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk((unsigned char *)p->lprgLevelUpMagic,       p->nLevelUpMagic * sizeof(LEVELUPMAGIC_ALL), 6, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk((unsigned char *)p->rgwBattleEffectIndex,   sizeof(p->rgwBattleEffectIndex), 11, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk((unsigned char *)&p->EnemyPos,              sizeof(p->EnemyPos), 13, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk((unsigned char *)p->rgLevelUpExp,           sizeof(p->rgLevelUpExp), 14, gpGlobals->f.fpDATA);
 }
 
 static void
 PAL_InitGlobalGameData(
-   void
-)
+    void)
 /*++
   Purpose:
 
@@ -311,50 +293,28 @@ PAL_InitGlobalGameData(
 
 --*/
 {
-   int        len;
+#define PAL_DOALLOCATE(fp, num, type, ptr, n)                                 \
+  if (ptr == NULL) {                                                          \
+    int len = PAL_MKFGetChunkSize(num, fp);                                   \
+    ptr = (type *)malloc(len);                                                \
+    n = len / sizeof(type);                                                   \
+    if (ptr == NULL) {                                                        \
+      TerminateOnError("PAL_InitGlobalGameData(): Memory allocation error!"); \
+    }                                                                         \
+  }
 
-#define PAL_DOALLOCATE(fp, num, type, lptype, ptr, n)                            \
-   {                                                                             \
-      len = PAL_MKFGetChunkSize(num, fp);                                        \
-      ptr = (lptype)malloc(len);                                                 \
-      n = len / sizeof(type);                                                    \
-      if (ptr == NULL)                                                           \
-      {                                                                          \
-         TerminateOnError("PAL_InitGlobalGameData(): Memory allocation error!"); \
-      }                                                                          \
-   }
-
-   //
-   // If the memory has not been allocated, allocate first.
-   //
-   if (gpGlobals->g.lprgEventObject == NULL)
-   {
-      PAL_DOALLOCATE(gpGlobals->f.fpSSS, 0, EVENTOBJECT, LPEVENTOBJECT,
-         gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
-
-      PAL_DOALLOCATE(gpGlobals->f.fpSSS, 4, SCRIPTENTRY, LPSCRIPTENTRY,
-         gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
-
-      PAL_DOALLOCATE(gpGlobals->f.fpDATA, 0, STORE, LPSTORE,
-         gpGlobals->g.lprgStore, gpGlobals->g.nStore);
-
-      PAL_DOALLOCATE(gpGlobals->f.fpDATA, 1, ENEMY, LPENEMY,
-         gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
-
-      PAL_DOALLOCATE(gpGlobals->f.fpDATA, 2, ENEMYTEAM, LPENEMYTEAM,
-         gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
-
-      PAL_DOALLOCATE(gpGlobals->f.fpDATA, 4, MAGIC, LPMAGIC,
-         gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
-
-      PAL_DOALLOCATE(gpGlobals->f.fpDATA, 5, BATTLEFIELD, LPBATTLEFIELD,
-         gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
-
-      PAL_DOALLOCATE(gpGlobals->f.fpDATA, 6, LEVELUPMAGIC_ALL, LPLEVELUPMAGIC_ALL,
-         gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
-
-      PAL_ReadGlobalGameData();
-   }
+  //
+  // If the memory has not been allocated, allocate first.
+  //
+  PAL_DOALLOCATE(gpGlobals->f.fpSSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
+  PAL_DOALLOCATE(gpGlobals->f.fpSSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
+  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
+  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
+  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 2, ENEMYTEAM, gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
+  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 4, MAGIC, gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
+  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 5, BATTLEFIELD, gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
+  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
+  PAL_ReadGlobalGameData();
 #undef PAL_DOALLOCATE
 }
 
@@ -383,8 +343,7 @@ PAL_LoadDefaultGame(
    //
    // Load the default data from the game data files.
    //
-   LOAD_DATA(p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT),
-      0, gpGlobals->f.fpSSS);
+   PAL_MKFReadChunk((unsigned char *)p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gpGlobals->f.fpSSS);
    PAL_MKFReadChunk((unsigned char *)p->rgScene, sizeof(p->rgScene), 1, gpGlobals->f.fpSSS);
    if (gConfig.fIsWIN95)
    {
@@ -471,7 +430,7 @@ typedef struct tagSAVEDGAME_COMMON
 	POISONSTATUS     rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
 	INVENTORY        rgInventory[MAX_INVENTORY];               // inventory status
 	SCENE            rgScene[MAX_SCENES];
-} SAVEDGAME_COMMON, *LPSAVEDGAME_COMMON;
+} SAVEDGAME_COMMON;
 
 typedef struct tagSAVEDGAME_DOS
 {
@@ -502,7 +461,7 @@ typedef struct tagSAVEDGAME_DOS
 	SCENE            rgScene[MAX_SCENES];
 	OBJECT_DOS       rgObject[MAX_OBJECTS];
 	EVENTOBJECT      rgEventObject[MAX_EVENT_OBJECTS];
-} SAVEDGAME_DOS, *LPSAVEDGAME_DOS;
+} SAVEDGAME_DOS;
 
 typedef struct tagSAVEDGAME_WIN
 {
@@ -533,12 +492,12 @@ typedef struct tagSAVEDGAME_WIN
 	SCENE            rgScene[MAX_SCENES];
 	OBJECT           rgObject[MAX_OBJECTS];
 	EVENTOBJECT      rgEventObject[MAX_EVENT_OBJECTS];
-} SAVEDGAME_WIN, *LPSAVEDGAME_WIN;
+} SAVEDGAME_WIN;
 
 static int
 PAL_LoadGame_Common(
 	int                 iSaveSlot,
-	LPSAVEDGAME_COMMON  s,
+	SAVEDGAME_COMMON    *s,
 	size_t              size
 )
 {
@@ -621,7 +580,7 @@ PAL_LoadGame_DOS(
    //
    // Get all the data from the saved game struct.
    //
-   if (!PAL_LoadGame_Common(iSaveSlot, (LPSAVEDGAME_COMMON)s, sizeof(SAVEDGAME_DOS)))
+   if (!PAL_LoadGame_Common(iSaveSlot, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_DOS)))
 	   return -1;
 
    //
@@ -667,7 +626,7 @@ PAL_LoadGame_WIN(
    //
    // Get all the data from the saved game struct.
    //
-   if (!PAL_LoadGame_Common(iSaveSlot, (LPSAVEDGAME_COMMON)s, sizeof(SAVEDGAME_WIN)))
+   if (!PAL_LoadGame_Common(iSaveSlot, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN)))
 	   return -1;
 
    memcpy(gpGlobals->g.rgObject, s->rgObject, sizeof(gpGlobals->g.rgObject));
@@ -693,7 +652,7 @@ static void
 PAL_SaveGame_Common(
 	int                iSaveSlot,
 	unsigned short               wSavedTimes,
-	LPSAVEDGAME_COMMON s,
+	SAVEDGAME_COMMON   *s,
 	size_t             size
 )
 {
@@ -778,7 +737,7 @@ PAL_SaveGame_DOS(
    //
    // Put all the data to the saved game struct.
    //
-   PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (LPSAVEDGAME_COMMON)s, sizeof(SAVEDGAME_DOS));
+   PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_DOS));
    free(s);
 }
 
@@ -810,7 +769,7 @@ PAL_SaveGame_WIN(
    memcpy(&s->rgObject, gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject));
    memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
 
-   PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (LPSAVEDGAME_COMMON)s, sizeof(SAVEDGAME_WIN));
+   PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN));
 
    free(s);
 }
@@ -2313,6 +2272,5 @@ PAL_PlayerLevelUp(
    // Reset experience points to zero
    //
    gpGlobals->Exp.rgPrimaryExp[wPlayerRole].wExp = 0;
-   gpGlobals->Exp.rgPrimaryExp[wPlayerRole].wLevel =
-      gpGlobals->g.PlayerRoles.rgwLevel[wPlayerRole];
+   gpGlobals->Exp.rgPrimaryExp[wPlayerRole].wLevel = gpGlobals->g.PlayerRoles.rgwLevel[wPlayerRole];
 }

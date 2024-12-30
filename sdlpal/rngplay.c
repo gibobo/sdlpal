@@ -29,6 +29,7 @@
 #include "palette.h"
 #include "util.h"
 #include "video.h"
+#include <SDL_timer.h>
 
 #define PAL_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1
 
@@ -196,7 +197,7 @@ PAL_RNGBlitToSurface(
          //
          // End
          //
-         goto end;
+         break;
 
       case 0x02:
          dst_ptr += 2;
@@ -368,7 +369,6 @@ PAL_RNGBlitToSurface(
       }
    }
 
-end:
    return 0;
 }
 
@@ -400,48 +400,45 @@ PAL_RNGPlay(
 
 --*/
 {
-   uint64_t       iDelay = (uint64_t)SDL_GetPerformanceFrequency() / (iSpeed == 0 ? 16 : iSpeed);
    uint8_t        *rng = (uint8_t *)malloc(65000);
    uint8_t        *buf = (uint8_t *)malloc(65000);
    FILE           *fp = UTIL_OpenRequiredFileForMode("rng.mkf", "rb");
+   uint64_t       iDelay = SDL_GetPerformanceFrequency() / (iSpeed == 0 ? 16 : iSpeed);
+   uint64_t       iTime  = SDL_GetPerformanceCounter();
 
-   for (uint64_t iTime = SDL_GetPerformanceCounter(); rng && buf && iStartFrame != iEndFrame; iStartFrame++)
-   {
-	  iTime += iDelay;
-      //
-      // Read, decompress and render the frame
-      //
-      if (PAL_RNGReadFrame(buf, 65000, iNumRNG, iStartFrame, fp) < 0 ||
-          PAL_RNGBlitToSurface(rng, Decompress(buf, rng, 65000), gpScreen) == -1)
-      {
-         //
-         // Failed to get the frame, don't go further
-         //
-         break;
-      }
+   for (; rng && buf && iStartFrame != iEndFrame; iStartFrame++) {
+     iTime += iDelay;
+     //
+     // Read, decompress and render the frame
+     //
+     if (PAL_RNGReadFrame(buf, 65000, iNumRNG, iStartFrame, fp) < 0 ||
+         PAL_RNGBlitToSurface(rng, Decompress(buf, rng, 65000), gpScreen) < 0) {
+       //
+       // Failed to get the frame, don't go further
+       //
+       break;
+     }
 
-      //
-      // Update the screen
-      //
-      VIDEO_UpdateScreen(NULL);
+     //
+     // Update the screen
+     //
+     VIDEO_UpdateScreen(NULL);
 
-      //
-      // Fade in the screen if needed
-      //
-      if (gpGlobals->fNeedToFadeIn)
-      {
-         PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-         gpGlobals->fNeedToFadeIn = 0;
-      }
+     //
+     // Fade in the screen if needed
+     //
+     if (gpGlobals->fNeedToFadeIn) {
+       PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
+       gpGlobals->fNeedToFadeIn = 0;
+     }
 
-      //
-      // Delay for a while
-      //
-      PAL_ProcessEvent();                       
-      while (SDL_GetPerformanceCounter() < iTime) 
-      {                                         
-         SDL_Delay(1);                         
-      }
+     //
+     // Delay for a while
+     //
+     PAL_ProcessEvent();
+     while (SDL_GetPerformanceCounter() < iTime) {
+       UTIL_Sleep(1);
+     }
    }
 
    fclose(fp);

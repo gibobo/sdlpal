@@ -245,7 +245,7 @@ PAL_SceneDrawSprites(
       const unsigned char *lpFrame;
       const unsigned char *lpSprite;
 
-      LPEVENTOBJECT lpEvtObj = &(gpGlobals->g.lprgEventObject[i]);
+      EVENTOBJECT *lpEvtObj = &gpGlobals->g.lprgEventObject[i];
 
       int iFrame;
 
@@ -594,7 +594,7 @@ int PAL_CheckObstacleWithRange(
       for (i = gpGlobals->g.rgScene[gpGlobals->wNumScene - 1].wEventObjectIndex;
            i < gpGlobals->g.rgScene[gpGlobals->wNumScene].wEventObjectIndex; i++)
       {
-         LPEVENTOBJECT p = &(gpGlobals->g.lprgEventObject[i]);
+         EVENTOBJECT *p = &gpGlobals->g.lprgEventObject[i];
          if (i == wSelfObject - 1)
          {
             //
@@ -854,7 +854,7 @@ void PAL_NPCWalkOneStep(
 
 --*/
 {
-   LPEVENTOBJECT p;
+   EVENTOBJECT *p;
 
    //
    // Check for invalid parameters
@@ -864,7 +864,7 @@ void PAL_NPCWalkOneStep(
       return;
    }
 
-   p = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
+   p = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
 
    //
    // Move the event object by the specified direction

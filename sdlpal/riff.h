@@ -107,11 +107,9 @@ typedef struct BitmapInfoHeader
 } BitmapInfoHeader;
 
 #define RIFF_RIFF (((uint32_t)'R') | (((uint32_t)'I') << 8) | (((uint32_t)'F') << 16) | (((uint32_t)'F') << 24))
-
 #define RIFF_WAVE (((uint32_t)'W') | (((uint32_t)'A') << 8) | (((uint32_t)'V') << 16) | (((uint32_t)'E') << 24))
 #define WAVE_fmt  (((uint32_t)'f') | (((uint32_t)'m') << 8) | (((uint32_t)'t') << 16) | (((uint32_t)' ') << 24))
 #define WAVE_data (((uint32_t)'d') | (((uint32_t)'a') << 8) | (((uint32_t)'t') << 16) | (((uint32_t)'a') << 24))
-
 #define RIFF_AVI  (((uint32_t)'A') | (((uint32_t)'V') << 8) | (((uint32_t)'I') << 16) | (((uint32_t)' ') << 24))
 #define AVI_hdrl  (((uint32_t)'h') | (((uint32_t)'d') << 8) | (((uint32_t)'r') << 16) | (((uint32_t)'l') << 24))
 #define AVI_strl  (((uint32_t)'s') | (((uint32_t)'t') << 8) | (((uint32_t)'r') << 16) | (((uint32_t)'l') << 24))

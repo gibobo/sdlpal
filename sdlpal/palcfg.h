@@ -188,7 +188,7 @@ typedef struct tagCONFIGURATION
 	int             fUseCustomScreenLayout;
 	int             fLaunchSetting;
 	int             fEnableKeyRepeat;
-} CONFIGURATION, *LPCONFIGURATION;
+} CONFIGURATION;
 
 #ifdef __cplusplus
 extern "C" {

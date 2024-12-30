@@ -20,14 +20,13 @@
 //
 
 #include "video.h"
+#include "common.h"
 #include "input.h"
 #include "mini_glloader.h"
+#include "pal_config.h"
 #include "palcfg.h"
 #include "util.h"
-#include "pal_config.h"
-#include "common.h"
 #include <SDL_hints.h>
-#include <SDL_timer.h>
 
 // Screen buffer
 SDL_Surface              *gpScreen           = NULL;
@@ -694,7 +693,7 @@ VIDEO_FadeScreen(
       screenRealY = offset / 2;
    }
 
-   time = SDL_GetTicks();
+   time = UTIL_GetTicks();
 
    wSpeed++;
    wSpeed *= 10;
@@ -703,13 +702,8 @@ VIDEO_FadeScreen(
    {
       for (j = 0; j < 6; j++)
       {
-         PAL_ProcessEvent();
-         while (!SDL_TICKS_PASSED(SDL_GetTicks(), time))
-         {
-            PAL_ProcessEvent();
-            SDL_Delay(5);
-         }
-         time = SDL_GetTicks() + wSpeed;
+         PAL_DelayUntil(time);
+         time = UTIL_GetTicks() + wSpeed;
 
          //
          // Blend the pixels in the 2 buffers, and put the result into the

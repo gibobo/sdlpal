@@ -26,18 +26,15 @@
 #include "palcommon.h"
 #include "common.h"
 
-typedef struct tagRESOURCES
-{
-   unsigned char bLoadFlags;
+typedef struct tagRESOURCES {
+  unsigned char bLoadFlags;
+  PALMAP *lpMap;                                              // current loaded map
+  unsigned char **lppEventObjectSprites;                      // event object sprites
+  int nEventObject;                                           // number of event objects
+  unsigned char *rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
+} RESOURCES;
 
-   LPPALMAP lpMap;                        // current loaded map
-   unsigned char **lppEventObjectSprites; // event object sprites
-   int nEventObject;                      // number of event objects
-
-   unsigned char *rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
-} RESOURCES, *LPRESOURCES;
-
-static LPRESOURCES gpResources = NULL;
+static RESOURCES *gpResources = NULL;
 
 static void
 PAL_FreeEventObjectSprites(
@@ -100,8 +97,7 @@ PAL_FreePlayerSprites(
    }
 }
 
-void PAL_InitResources(
-    void)
+void PAL_InitResources(void)
 /*++
   Purpose:
 
@@ -117,7 +113,7 @@ void PAL_InitResources(
 
 --*/
 {
-   gpResources = (LPRESOURCES)UTIL_calloc(1, sizeof(RESOURCES));
+   gpResources = (RESOURCES *)UTIL_calloc(1, sizeof(RESOURCES));
 }
 
 void PAL_FreeResources(
@@ -349,9 +345,7 @@ void PAL_LoadResources(
    gpResources->bLoadFlags = 0;
 }
 
-LPPALMAP
-PAL_GetCurrentMap(
-    void)
+PALMAP *PAL_GetCurrentMap(void)
 /*++
   Purpose:
 

@@ -55,10 +55,7 @@ PAL_LoadResources(
    void
 );
 
-LPPALMAP
-PAL_GetCurrentMap(
-   void
-);
+PALMAP *PAL_GetCurrentMap(void);
 
 unsigned char *
 PAL_GetPlayerSprite(

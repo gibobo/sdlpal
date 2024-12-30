@@ -346,6 +346,12 @@ UTIL_LogSetPrelude(
     const char    *prelude
 );
 
+unsigned int UTIL_GetTicks(void);
+
+void UTIL_Sleep(unsigned int tm);
+
+void PAL_DelayUntil(unsigned int tm);
+
 #ifdef __cplusplus
 }
 #endif

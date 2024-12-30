@@ -112,8 +112,7 @@ typedef enum tagOBJECTSTATE
    kObjStateHidden = 0,
    kObjStateNormal = 1,
    kObjStateBlocker = 2
-} OBJECTSTATE,
-    *LPOBJECTSTATE;
+} OBJECTSTATE;
 
 typedef enum tagTRIGGERMODE
 {
@@ -146,7 +145,7 @@ typedef struct tagEVENTOBJECT
    unsigned short wSpritePtrOffset;          // FIXME: ???
    unsigned short nSpriteFramesAuto;         // total number of frames of the sprite, used by auto script
    unsigned short wScriptIdleFrameCountAuto; // count of idle frames, used by auto script
-} EVENTOBJECT, *LPEVENTOBJECT;
+} EVENTOBJECT;
 
 typedef struct tagSCENE
 {
@@ -154,7 +153,7 @@ typedef struct tagSCENE
    unsigned short wScriptOnEnter;    // when entering this scene, execute script from here
    unsigned short wScriptOnTeleport; // when teleporting out of this scene, execute script from here
    unsigned short wEventObjectIndex; // event objects in this scene begins from number wEventObjectIndex + 1
-} SCENE, *LPSCENE;
+} SCENE;
 
 // object including system strings, players, items, magics, enemies and poison scripts.
 
@@ -260,7 +259,7 @@ typedef union tagOBJECT_DOS
    OBJECT_MAGIC_DOS magic;
    OBJECT_ENEMY enemy;
    OBJECT_POISON poison;
-} OBJECT_DOS, *LPOBJECT_DOS;
+} OBJECT_DOS;
 
 typedef union tagOBJECT
 {
@@ -270,25 +269,25 @@ typedef union tagOBJECT
    OBJECT_MAGIC magic;
    OBJECT_ENEMY enemy;
    OBJECT_POISON poison;
-} OBJECT, *LPOBJECT;
+} OBJECT;
 
 typedef struct tagSCRIPTENTRY
 {
    unsigned short wOperation;    // operation code
    unsigned short rgwOperand[3]; // operands
-} SCRIPTENTRY, *LPSCRIPTENTRY;
+} SCRIPTENTRY;
 
 typedef struct tagINVENTORY
 {
    unsigned short wItem;        // item object code
    unsigned short nAmount;      // amount of this item
    unsigned short nAmountInUse; // in-use amount of this item
-} INVENTORY, *LPINVENTORY;
+} INVENTORY;
 
 typedef struct tagSTORE
 {
    unsigned short rgwItems[MAX_STORE_ITEM];
-} STORE, *LPSTORE;
+} STORE;
 
 typedef struct tagENEMY
 {
@@ -323,12 +322,12 @@ typedef struct tagENEMY
    unsigned short wPhysicalResistance;                  // resistance to physical attack
    unsigned short wDualMove;                            // whether this enemy can do dual move or not
    unsigned short wCollectValue;                        // value for collecting this enemy for items
-} ENEMY, *LPENEMY;
+} ENEMY;
 
 typedef struct tagENEMYTEAM
 {
    unsigned short rgwEnemy[MAX_ENEMIES_IN_TEAM];
-} ENEMYTEAM, *LPENEMYTEAM;
+} ENEMYTEAM;
 
 typedef unsigned short PLAYERS[MAX_PLAYER_ROLES];
 
@@ -369,7 +368,7 @@ typedef struct tagPLAYERROLES
    PLAYERS rgwMagicSound;                                                        // sound played when player is casting a magic
    PLAYERS rgwCoverSound;                                                        // sound played when player cover others
    PLAYERS rgwDyingSound;                                                        // sound played when player is dying
-} PLAYERROLES, *LPPLAYERROLES;
+} PLAYERROLES;
 
 typedef enum tagMAGIC_TYPE
 {
@@ -388,7 +387,7 @@ typedef union tagMAGIC_SPECIAL
    unsigned short wSummonEffect; // summon effect sprite (in F.MKF)
    short sLayerOffset;           // limited to non-summon magic.
                                  // actual layer: PAL_Y(pos) + wYOffset + wMagicLayerOffset
-} MAGIC_SPECIAL, *LPMAGIC_SPECIAL;
+} MAGIC_SPECIAL;
 
 typedef struct tagMAGIC
 {
@@ -408,25 +407,25 @@ typedef struct tagMAGIC
    unsigned short wBaseDamage;  // base damage
    unsigned short wElemental;   // elemental (0 = No Elemental, last = poison)
    short wSound;                // sound played when using this magic
-} MAGIC, *LPMAGIC;
+} MAGIC;
 
 typedef struct tagBATTLEFIELD
 {
    unsigned short wScreenWave;                // level of screen waving
    short rgsMagicEffect[NUM_MAGIC_ELEMENTAL]; // effect of attributed magics
-} BATTLEFIELD, *LPBATTLEFIELD;
+} BATTLEFIELD;
 
 // magics learned when level up
 typedef struct tagLEVELUPMAGIC
 {
    unsigned short wLevel; // level reached
    unsigned short wMagic; // magic learned
-} LEVELUPMAGIC, *LPLEVELUPMAGIC;
+} LEVELUPMAGIC;
 
 typedef struct tagLEVELUPMAGIC_ALL
 {
    LEVELUPMAGIC m[MAX_PLAYABLE_PLAYER_ROLES];
-} LEVELUPMAGIC_ALL, *LPLEVELUPMAGIC_ALL;
+} LEVELUPMAGIC_ALL;
 
 typedef struct tagPALPOS
 {
@@ -437,48 +436,48 @@ typedef struct tagPALPOS
 typedef struct tagENEMYPOS
 {
    PALPOS pos[MAX_ENEMIES_IN_TEAM][MAX_ENEMIES_IN_TEAM];
-} ENEMYPOS, *LPENEMYPOS;
+} ENEMYPOS;
 
 // Exp. points needed for the next level
-typedef unsigned short LEVELUPEXP, *LPLEVELUPEXP;
+typedef unsigned short LEVELUPEXP;
 
 // game data which is available in data files.
 typedef struct tagGAMEDATA
 {
-   LPEVENTOBJECT lprgEventObject;
+   EVENTOBJECT *lprgEventObject;
    int nEventObject;
 
    SCENE rgScene[MAX_SCENES];
    OBJECT rgObject[MAX_OBJECTS];
 
-   LPSCRIPTENTRY lprgScriptEntry;
+   SCRIPTENTRY *lprgScriptEntry;
    int nScriptEntry;
 
-   LPSTORE lprgStore;
+   STORE *lprgStore;
    int nStore;
 
-   LPENEMY lprgEnemy;
+   ENEMY *lprgEnemy;
    int nEnemy;
 
-   LPENEMYTEAM lprgEnemyTeam;
+   ENEMYTEAM *lprgEnemyTeam;
    int nEnemyTeam;
 
    PLAYERROLES PlayerRoles;
 
-   LPMAGIC lprgMagic;
+   MAGIC *lprgMagic;
    int nMagic;
 
-   LPBATTLEFIELD lprgBattleField;
+   BATTLEFIELD *lprgBattleField;
    int nBattleField;
 
-   LPLEVELUPMAGIC_ALL lprgLevelUpMagic;
+   LEVELUPMAGIC_ALL *lprgLevelUpMagic;
    int nLevelUpMagic;
 
    ENEMYPOS EnemyPos;
    LEVELUPEXP rgLevelUpExp[MAX_LEVELS + 1];
 
    unsigned short rgwBattleEffectIndex[10][2];
-} GAMEDATA, *LPGAMEDATA;
+} GAMEDATA;
 
 typedef struct tagFILES
 {
@@ -490,7 +489,7 @@ typedef struct tagFILES
    FILE *fpFIRE; // fire effect sprites
    FILE *fpRGM;  // character face bitmaps
    FILE *fpSSS;  // script data
-} FILES, *LPFILES;
+} FILES;
 
 // player party
 typedef struct tagPARTY
@@ -499,14 +498,14 @@ typedef struct tagPARTY
    short x, y;                  // position
    unsigned short wFrame;       // current frame number
    unsigned short wImageOffset; // FIXME: ???
-} PARTY, *LPPARTY;
+} PARTY;
 
 // player trail, used for other party members to follow the main party member
 typedef struct tagTRAIL
 {
    unsigned short x, y;       // position
    unsigned short wDirection; // direction
-} TRAIL, *LPTRAIL;
+} TRAIL;
 
 typedef struct tagEXPERIENCE
 {
@@ -514,7 +513,7 @@ typedef struct tagEXPERIENCE
    unsigned short wReserved;
    unsigned short wLevel; // current level
    unsigned short wCount;
-} EXPERIENCE, *LPEXPERIENCE;
+} EXPERIENCE;
 
 typedef struct tagALLEXPERIENCE
 {
@@ -526,13 +525,13 @@ typedef struct tagALLEXPERIENCE
    EXPERIENCE rgDefenseExp[MAX_PLAYER_ROLES];
    EXPERIENCE rgDexterityExp[MAX_PLAYER_ROLES];
    EXPERIENCE rgFleeExp[MAX_PLAYER_ROLES];
-} ALLEXPERIENCE, *LPALLEXPERIENCE;
+} ALLEXPERIENCE;
 
 typedef struct tagPOISONSTATUS
 {
    unsigned short wPoisonID;     // kind of the poison
    unsigned short wPoisonScript; // script entry
-} POISONSTATUS, *LPPOISONSTATUS;
+} POISONSTATUS;
 
 typedef struct tagGLOBALVARS
 {
@@ -579,9 +578,9 @@ typedef struct tagGLOBALVARS
    ALLEXPERIENCE Exp;                                                   // experience status
    POISONSTATUS rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
    INVENTORY rgInventory[MAX_INVENTORY];                                // inventory status
-   LPOBJECTDESC lpObjectDesc;
+   OBJECTDESC *lpObjectDesc;
    unsigned int dwFrameNum;
-} GLOBALVARS, *LPGLOBALVARS;
+} GLOBALVARS;
 
 #ifdef __cplusplus
 extern "C"

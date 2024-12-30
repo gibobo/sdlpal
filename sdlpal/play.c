@@ -20,17 +20,16 @@
 //
 
 #include "play.h"
+#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "itemmenu.h"
+#include "palcommon.h"
 #include "scene.h"
 #include "script.h"
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
-#include "palcommon.h"
-#include "common.h"
-#include <SDL_timer.h>
 
 void
 PAL_GameUpdate(
@@ -53,7 +52,7 @@ PAL_GameUpdate(
 {
    unsigned short            wEventObjectID, wDir;
    int             i;
-   LPEVENTOBJECT   p;
+   EVENTOBJECT     *p;
 
    //
    // Check for trigger events
@@ -388,7 +387,7 @@ PAL_Search(
 --*/
 {
    int                x, y, xOffset, yOffset, dx, dy, dh, ex, ey, eh, i, k, l;
-   LPEVENTOBJECT      p;
+   EVENTOBJECT        *p;
    unsigned int              rgPos[13];
 
    //
@@ -603,11 +602,11 @@ PAL_WaitForKeyInternal(
 
 --*/
 {
-   unsigned int     dwTimeOut = SDL_GetTicks() + wTimeOut;
+   unsigned int     dwTimeOut = UTIL_GetTicks() + wTimeOut;
 
    PAL_ClearKeyState();
 
-   while (wTimeOut == 0 || !SDL_TICKS_PASSED(SDL_GetTicks(), dwTimeOut))
+   while (wTimeOut == 0 || (UTIL_GetTicks() < dwTimeOut))
    {
       UTIL_Delay(5);
 
