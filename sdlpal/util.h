@@ -90,7 +90,7 @@ UTIL_va(
 	...
 );
 
-#define PAL_va(i, fmt, ...) UTIL_va(UTIL_GlobalBuffer(i), PAL_GLOBAL_BUFFER_SIZE, fmt, __VA_ARGS__)
+#define PAL_va(fmt, ...) UTIL_va(UTIL_GlobalBuffer(0), PAL_GLOBAL_BUFFER_SIZE, fmt, __VA_ARGS__)
 
 int
 RandomLong(

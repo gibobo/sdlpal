@@ -126,7 +126,7 @@ static int token_conform( const char *name, LineType type, GLSLP *pGLSLP ) {
         case TOKEN_SHADER_MIPMAP_INPUT:
         case TOKEN_SHADER_FRAME_COUNT_MOD:
             for( int i = 0; i < pGLSLP->shaders; i++ ) {
-                if( SDL_strcasecmp(name, PAL_va(0, tokens[type], i) ) == 0 ) {
+                if( SDL_strcasecmp(name, PAL_va(tokens[type], i) ) == 0 ) {
                     index = i;
                     break;
                 }
@@ -138,7 +138,7 @@ static int token_conform( const char *name, LineType type, GLSLP *pGLSLP ) {
         case TOKEN_TEXTURE_MIPMAP:
             for( int i = 0; i < pGLSLP->textures; i++ ) {
                 texture_param *param = &pGLSLP->texture_params[i];
-                if( SDL_strcasecmp(name, PAL_va(0, tokens[type], param->texture_name) ) == 0 ) {
+                if( SDL_strcasecmp(name, PAL_va(tokens[type], param->texture_name) ) == 0 ) {
                     index = i;
                     break;
                 }
@@ -147,7 +147,7 @@ static int token_conform( const char *name, LineType type, GLSLP *pGLSLP ) {
         case TOKEN_PARAMETER_NAME:
             for( int i = 0; i < pGLSLP->uniform_parameters; i++ ) {
                 uniform_param *param = &pGLSLP->uniform_params[i];
-                if( SDL_strcasecmp(name, PAL_va(0, tokens[type], param->parameter_name) ) == 0 ) {
+                if( SDL_strcasecmp(name, PAL_va(tokens[type], param->parameter_name) ) == 0 ) {
                     index = i;
                     break;
                 }
@@ -317,7 +317,7 @@ static char * wrap_mode_to_string(enum wrap_mode type) {
 char *get_glslp_path(const char *filename) {
     char *path = (char*)filename;
     if( !UTIL_IsAbsolutePath(filename) )
-        path = PAL_va(0, "%s%s%s", gConfig.pszShaderPath, "/", filename);
+        path = PAL_va("%s%s%s", gConfig.pszShaderPath, "/", filename);
     return path;
 }
 
@@ -359,7 +359,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         break;
                     }
                     case TOKEN_SHADER_PATH:
-                        s_param->shader = strdup((UTIL_IsAbsolutePath(value) || strcmp(basedir, "./") == 0)? value : PAL_va(0,"%s/%s",basedir,value));
+                        s_param->shader = strdup((UTIL_IsAbsolutePath(value) || strcmp(basedir, "./") == 0) ? value : PAL_va("%s/%s", basedir, value));
                         break;
                     case TOKEN_SHADER_ALIAS:
                         s_param->alias = strdup(value);
@@ -415,7 +415,7 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         break;
                     }
                     case TOKEN_TEXTURE_PATH:
-                        t_param->texture_path = strdup((UTIL_IsAbsolutePath(value) || strcmp(basedir, "./") == 0) ? value : PAL_va(0,"%s%s%s",basedir,"/",value));
+                        t_param->texture_path = strdup((UTIL_IsAbsolutePath(value) || strcmp(basedir, "./") == 0) ? value : PAL_va("%s%s%s", basedir, "/", value));
                         break;
                     case TOKEN_TEXTURE_WRAP_MODE:
                         t_param->wrap_mode = string_to_wrap_mode(value);
@@ -457,26 +457,26 @@ char *serialize_glslp(const GLSLP *pGLSLP){
     sprintf(output, "%s\r\n\r\n%s = %d", output, tokens[TOKEN_SHADERS], pGLSLP->shaders);
     for( int i = 0; i < pGLSLP->shaders; i++ ) {
         shader_param *param = &pGLSLP->shader_params[i];
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_PATH], i),               param->shader );
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_ALIAS], i),              param->alias ? param->alias : "");
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_FILTER_LINEAR], i),      param->filter_linear ? "true" : "false");
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_WRAR_MODE], i),          wrap_mode_to_string(param->wrap_mode));
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_SCALE_TYPE_X], i),       scale_type_to_string(param->scale_type_x));
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_SCALE_TYPE_Y], i),       scale_type_to_string(param->scale_type_y));
-        sprintf(output, "%s\r\n%s = %.1f", output, PAL_va(0, tokens[TOKEN_SHADER_SCALE_X], i),          param->scale_x );
-        sprintf(output, "%s\r\n%s = %.1f", output, PAL_va(0, tokens[TOKEN_SHADER_SCALE_Y], i),          param->scale_y );
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_FLOAT_FRAMEBUFFER], i),  param->float_framebuffer ? "true" : "false");
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_SRGB_FRAMEBUFFER], i),   param->srgb_framebuffer ? "true" : "false");
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_SHADER_MIPMAP_INPUT], i),       param->mipmap_input ? "true" : "false");
-        sprintf(output, "%s\r\n%s = %d", output, PAL_va(0, tokens[TOKEN_SHADER_FRAME_COUNT_MOD], i),    param->frame_count_mod);
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_PATH], i),               param->shader );
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_ALIAS], i),              param->alias ? param->alias : "");
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_FILTER_LINEAR], i),      param->filter_linear ? "true" : "false");
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_WRAR_MODE], i),          wrap_mode_to_string(param->wrap_mode));
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_SCALE_TYPE_X], i),       scale_type_to_string(param->scale_type_x));
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_SCALE_TYPE_Y], i),       scale_type_to_string(param->scale_type_y));
+        sprintf(output, "%s\r\n%s = %.1f", output, PAL_va(tokens[TOKEN_SHADER_SCALE_X], i),          param->scale_x );
+        sprintf(output, "%s\r\n%s = %.1f", output, PAL_va(tokens[TOKEN_SHADER_SCALE_Y], i),          param->scale_y );
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_FLOAT_FRAMEBUFFER], i),  param->float_framebuffer ? "true" : "false");
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_SRGB_FRAMEBUFFER], i),   param->srgb_framebuffer ? "true" : "false");
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_SHADER_MIPMAP_INPUT], i),       param->mipmap_input ? "true" : "false");
+        sprintf(output, "%s\r\n%s = %d", output, PAL_va(tokens[TOKEN_SHADER_FRAME_COUNT_MOD], i),    param->frame_count_mod);
     }
     sprintf(output, "%s\r\n\r\n%s = \"%s\"", output, tokens[TOKEN_TEXTURES], glslp_pack_texturenames(pGLSLP));
     for( int i=0; i<pGLSLP->textures; i++ ) {
         texture_param *param = &pGLSLP->texture_params[i];
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_TEXTURE_PATH], param->texture_name),        param->texture_path);
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_TEXTURE_LINEAR], param->texture_name),      param->linear ? "true" : "false");
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_TEXTURE_MIPMAP], param->texture_name),      param->mipmap ? "true" : "false");
-        sprintf(output, "%s\r\n%s = %s", output, PAL_va(0, tokens[TOKEN_TEXTURE_WRAP_MODE], param->texture_name),   wrap_mode_to_string(param->wrap_mode));
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_TEXTURE_PATH], param->texture_name),        param->texture_path);
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_TEXTURE_LINEAR], param->texture_name),      param->linear ? "true" : "false");
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_TEXTURE_MIPMAP], param->texture_name),      param->mipmap ? "true" : "false");
+        sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_TEXTURE_WRAP_MODE], param->texture_name),   wrap_mode_to_string(param->wrap_mode));
     }
     sprintf(output, "%s\r\n\r\n%s = \"%s\"", output, tokens[TOKEN_PARAMETERS], glslp_pack_parameters(pGLSLP));
     for( int i=0; i<pGLSLP->uniform_parameters; i++ ) {

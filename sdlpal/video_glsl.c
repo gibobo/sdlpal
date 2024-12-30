@@ -145,113 +145,120 @@ static unsigned next_pow2(unsigned x)
     return x + 1;
 }
 
-static char *plain_glsl_vert = "\r\n\
-#if __VERSION__ >= 130              \r\n\
-#define COMPAT_VARYING out          \r\n\
-#define COMPAT_ATTRIBUTE in         \r\n\
-#define COMPAT_TEXTURE texture      \r\n\
-#else                               \r\n\
-#define COMPAT_VARYING varying      \r\n\
-#define COMPAT_ATTRIBUTE attribute  \r\n\
-#define COMPAT_TEXTURE texture2D    \r\n\
-#endif                              \r\n\
-#ifdef GL_ES                        \r\n\
-#define COMPAT_PRECISION mediump    \r\n\
-#else                               \r\n\
-#define COMPAT_PRECISION            \r\n\
-#endif                              \r\n\
-uniform mat4 MVPMatrix;             \r\n\
-COMPAT_ATTRIBUTE vec4 VertexCoord;  \r\n\
-COMPAT_ATTRIBUTE vec4 TexCoord;     \r\n\
-COMPAT_VARYING vec2 v_texCoord;     \r\n\
-void main()                         \r\n\
-{                                   \r\n\
-gl_Position = MVPMatrix * VertexCoord; \r\n\
-v_texCoord = TexCoord.xy;              \r\n\
-}";
-static char *plain_glsl_frag = "\r\n\
-#if __VERSION__ >= 130              \r\n\
-#define COMPAT_VARYING in           \r\n\
-#define COMPAT_TEXTURE texture      \r\n\
-out vec4 FragColor;                 \r\n\
-#else                               \r\n\
-#define COMPAT_VARYING varying      \r\n\
-#define FragColor gl_FragColor      \r\n\
-#define COMPAT_TEXTURE texture2D    \r\n\
-#endif                              \r\n\
-#ifdef GL_ES                        \r\n\
-#ifdef GL_FRAGMENT_PRECISION_HIGH   \r\n\
-precision highp float;              \r\n\
-#else                               \r\n\
-precision mediump float;            \r\n\
-#endif                              \r\n\
-#define COMPAT_PRECISION mediump    \r\n\
-#else                               \r\n\
-#define COMPAT_PRECISION            \r\n\
-#endif                              \r\n\
-COMPAT_VARYING vec2 v_texCoord;     \r\n\
-uniform sampler2D tex0;             \r\n\
-uniform int HDR;                    \r\n\
-uniform int useTouchOverlay;        \r\n\
-uniform sampler2D TouchOverlay;     \r\n\
-vec3 ACESFilm(vec3 x)               \r\n\
-{                                   \r\n\
-const float A = 2.51;               \r\n\
-const float B = 0.03;               \r\n\
-const float C = 2.43;               \r\n\
-const float D = 0.59;               \r\n\
-const float E = 0.14;               \r\n\
-return (x * (A * x + B)) / (x * (C * x + D) + E); \r\n\
-}                                   \r\n\
-const float SRGB_ALPHA = 0.055;     \r\n\
-float linear_to_srgb(float channel) {\r\n\
-if(channel <= 0.0031308)            \r\n\
-return 12.92 * channel;             \r\n\
-else                                \r\n\
-return (1.0 + SRGB_ALPHA) * pow(channel, 1.0/2.4) - SRGB_ALPHA;    \r\n\
-}                                   \r\n\
-vec3 rgb_to_srgb(vec3 rgb) {        \r\n\
-return vec3(linear_to_srgb(rgb.r), linear_to_srgb(rgb.g), linear_to_srgb(rgb.b)    ); \r\n\
-}                                   \r\n\
-float srgb_to_linear(float channel) {    \r\n\
-if (channel <= 0.04045)             \r\n\
-return channel / 12.92;             \r\n\
-else                                \r\n\
-return pow((channel + SRGB_ALPHA) / (1.0 + SRGB_ALPHA), 2.4);    \r\n\
-}                                   \r\n\
-vec3 srgb_to_rgb(vec3 srgb) {       \r\n\
-return vec3(srgb_to_linear(srgb.r),    srgb_to_linear(srgb.g),    srgb_to_linear(srgb.b));\r\n\
-}\r\n\
-vec4 blend(vec4 dst, vec4 src){     \r\n\
-src.a*=(" STR(TOUCHOVERLAY_ALPHAMOD) ".0/255.0);\r\n\
-float final_alpha = 1.0;\r\n\
-return vec4( (src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / final_alpha, final_alpha);\r\n\
-}\r\n\
-void main()                         \r\n\
-{                                   \r\n\
-vec4 srgb = COMPAT_TEXTURE(tex0 , v_texCoord.xy);   \r\n\
-FragColor = vec4(srgb_to_rgb(srgb.rgb), srgb.a);  \r\n\
-#ifdef GL_ES                        \r\n\
-FragColor.rgb = FragColor.bgr;      \r\n\
-#endif                              \r\n\
-vec3 color = FragColor.rgb;         \r\n\
-if( HDR > 0 )                       \r\n\
-color = ACESFilm(color);            \r\n\
-color = rgb_to_srgb(color);         \r\n\
-FragColor.rgb=color;                \r\n\
-if( useTouchOverlay > 0 )           \r\n\
-FragColor = blend(FragColor, COMPAT_TEXTURE(TouchOverlay , v_texCoord.xy));     \r\n\
-}";
+static char *plain_glsl_vert =
+"#if __VERSION__ >= 130\n"
+"   #define COMPAT_VARYING out\n"
+"   #define COMPAT_ATTRIBUTE in\n"
+"   #define COMPAT_TEXTURE texture\n"
+"#else\n"
+"   #define COMPAT_VARYING varying\n"
+"   #define COMPAT_ATTRIBUTE attribute\n"
+"   #define COMPAT_TEXTURE texture2D\n"
+"#endif\n"
+"#ifdef GL_ES\n"
+"   #define COMPAT_PRECISION mediump\n"
+"#else\n"
+"   #define COMPAT_PRECISION\n"
+"#endif\n"
+"uniform mat4 MVPMatrix;\n"
+"COMPAT_ATTRIBUTE vec4 VertexCoord;\n"
+"COMPAT_ATTRIBUTE vec4 TexCoord;\n"
+"COMPAT_VARYING vec2 v_texCoord;\n"
+"void main() {\n"
+"   gl_Position = MVPMatrix * VertexCoord;\n"
+"   v_texCoord = TexCoord.xy;\n"
+"}\n";
 
-static char *glslp_template = "\r\n\
-orig_filter = %s \r\n\
-shaders = 1     \r\n\
-shader0 = %s    \r\n\
-scale_type0 = absolute   \r\n\
-scale_x0 = %d   \r\n\
-scale_y0 = %d   \r\n\
-filter_linear0 = %s    \r\n\
-";
+static char *plain_glsl_frag =
+"#if __VERSION__ >= 130\n"
+"    #define COMPAT_VARYING in\n"
+"    #define COMPAT_TEXTURE texture\n"
+"    out vec4 FragColor;\n"
+"#else\n"
+"    #define COMPAT_VARYING varying\n"
+"    #define COMPAT_TEXTURE texture2D\n"
+"    #define FragColor gl_FragColor\n"
+"#endif\n"
+""
+"#ifdef GL_ES\n"
+"    #ifdef GL_FRAGMENT_PRECISION_HIGH\n"
+"        precision highp float;\n"
+"    #else\n"
+"        precision mediump float;\n"
+"    #endif\n"
+"    #define COMPAT_PRECISION mediump\n"
+"#else\n"
+"    #define COMPAT_PRECISION\n"
+"#endif\n"
+""
+"COMPAT_VARYING vec2 v_texCoord;\n"
+"uniform sampler2D tex0;\n"
+"uniform int HDR;\n"
+"uniform int useTouchOverlay;\n"
+"uniform sampler2D TouchOverlay;\n"
+""
+"vec3 ACESFilm(vec3 x)\n"
+"{\n"
+"    const float A = 2.51;\n"
+"    const float B = 0.03;\n"
+"    const float C = 2.43;\n"
+"    const float D = 0.59;\n"
+"    const float E = 0.14;\n"
+"    return (x * (A * x + B)) / (x * (C * x + D) + E);\n"
+"}\n"
+""
+"const float SRGB_ALPHA = 0.055;\n"
+"float linear_to_srgb(float channel) {\n"
+"    if(channel <= 0.0031308)\n"
+"        return 12.92 * channel;\n"
+"    else\n"
+"        return (1.0 + SRGB_ALPHA) * pow(channel, 1.0/2.4) - SRGB_ALPHA;\n"
+"}\n"
+""
+"vec3 rgb_to_srgb(vec3 rgb) {\n"
+"    return vec3(linear_to_srgb(rgb.r), linear_to_srgb(rgb.g), linear_to_srgb(rgb.b)    );\n"
+"}\n"
+""
+"float srgb_to_linear(float channel) {\n"
+"    if (channel <= 0.04045)\n"
+"        return channel / 12.92;\n"
+"    else\n"
+"        return pow((channel + SRGB_ALPHA) / (1.0 + SRGB_ALPHA), 2.4);\n"
+"}\n"
+""
+"vec3 srgb_to_rgb(vec3 srgb) {\n"
+"    return vec3(srgb_to_linear(srgb.r),    srgb_to_linear(srgb.g),    srgb_to_linear(srgb.b));\n"
+"}\n"
+""
+"vec4 blend(vec4 dst, vec4 src) {\n"
+"    src.a*=(120.0/255.0);\n"
+"    float final_alpha = 1.0;\n"
+"    return vec4( (src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / final_alpha, final_alpha);\n"
+"}\n"
+""
+"void main() {\n"
+"    vec4 srgb = COMPAT_TEXTURE(tex0 , v_texCoord.xy);\n"
+"    FragColor = vec4(srgb_to_rgb(srgb.rgb), srgb.a);\n"
+"#ifdef GL_ES\n"
+"    FragColor.rgb = FragColor.bgr;\n"
+"#endif\n"
+"    vec3 color = FragColor.rgb;\n"
+"    if( HDR > 0 )\n"
+"        color = ACESFilm(color);\n"
+"    color = rgb_to_srgb(color);\n"
+"    FragColor.rgb=color;\n"
+"    if( useTouchOverlay > 0 )\n"
+"        FragColor = blend(FragColor, COMPAT_TEXTURE(TouchOverlay , v_texCoord.xy));\n"
+"}\n";
+
+static char *glslp_template = 
+"orig_filter = %s\n"
+"shaders = 1\n"
+"shader0 = %s\n"
+"scale_type0 = absolute\n"
+"scale_x0 = %d\n"
+"scale_y0 = %d\n"
+"filter_linear0 = %s\n";
 
 char *readShaderFile(const char *filename, GLuint type) {
     FILE *fp = UTIL_OpenRequiredFileForMode(get_glslp_path(filename), "rb");
@@ -409,7 +416,7 @@ void setupShaderParams(int pass){
     }
 
     for( int i = 0; i < MAX_TEXTURES; i++ ) {
-        slot = glGetAttribLocation(gProgramIds[pass], PAL_va(0,"%sTexCoord",frame_prev_prefixes[i]));
+        slot = glGetAttribLocation(gProgramIds[pass], PAL_va("%sTexCoord", frame_prev_prefixes[i]));
         if(slot >= 0) {
             glEnableVertexAttribArray(slot);
             glVertexAttribPointer(slot, 4, GL_FLOAT, GL_FALSE, sizeof(struct VertexDataFormat), (GLvoid*)offsetof(struct VertexDataFormat, texCoord));
@@ -486,11 +493,10 @@ SDL_Texture *load_texture(char *name, char *filename, char filter_linear, enum w
 }
 
 void GetMultiPassUniformLocations(pass_uniform_locations *pSlot, int programID, char *prefix) {
-    pSlot->texture_uniform_location        = glGetUniformLocation( programID, PAL_va(0, "%sTexture",        prefix) );
-    pSlot->texture_size_uniform_location   = glGetUniformLocation( programID, PAL_va(0, "%sTextureSize",    prefix) );
-    pSlot->input_size_uniform_location     = glGetUniformLocation( programID, PAL_va(0, "%sInputSize",      prefix) );
-
-    pSlot->tex_coord_attrib_location      = glGetAttribLocation ( programID, PAL_va(0, "%sTexCoord",       prefix) );
+    pSlot->texture_uniform_location        = glGetUniformLocation( programID, PAL_va("%sTexture",        prefix) );
+    pSlot->texture_size_uniform_location   = glGetUniformLocation( programID, PAL_va("%sTextureSize",    prefix) );
+    pSlot->input_size_uniform_location     = glGetUniformLocation( programID, PAL_va("%sInputSize",      prefix) );
+    pSlot->tex_coord_attrib_location       = glGetAttribLocation ( programID, PAL_va("%sTexCoord",       prefix) );
 }
 //void fake_glUniform1i (GLint location, GLint v0) {
 //    glUniform1i(location, v0);
@@ -550,8 +556,8 @@ int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const SD
             GetMultiPassUniformLocations(&gGLSLP.shader_params[shaderID].prev_slots[i], gProgramIds[pass], frame_prev_prefixes[i] );
         if( pass >= 2 ){
             for( int i = 0; i < shaderID-1; i++ ) {
-                GetMultiPassUniformLocations(&gGLSLP.shader_params[shaderID].pass_slots[i], gProgramIds[pass], PAL_va(0, "Pass%d", i+1) );
-                GetMultiPassUniformLocations(&gGLSLP.shader_params[shaderID].pass_slots[i], gProgramIds[pass], PAL_va(0, "PassPrev%d", shaderID-i+1) );
+                GetMultiPassUniformLocations(&gGLSLP.shader_params[shaderID].pass_slots[i], gProgramIds[pass], PAL_va("Pass%d", i + 1));
+                GetMultiPassUniformLocations(&gGLSLP.shader_params[shaderID].pass_slots[i], gProgramIds[pass], PAL_va("PassPrev%d", shaderID - i + 1));
                 if( gGLSLP.shader_params[i].alias )
                     GetMultiPassUniformLocations(&gGLSLP.shader_params[shaderID].alias_slots, gProgramIds[pass], gGLSLP.shader_params[i].alias );
             }
@@ -1049,7 +1055,7 @@ void VIDEO_GLSL_Setup() {
         if( SDL_strcasecmp( strrchr(gConfig.pszShader, '.'), ".glsl") == 0 ) {
             UTIL_LogOutput(LOGLEVEL_DEBUG, "[PASS 2] loading %s\n", gConfig.pszShader);
             FILE *fp = UTIL_OpenFileForMode(MID_GLSLP, "w");
-            fputs( PAL_va( 0, glslp_template, gConfig.pszShader, gConfig.pszShader, gConfig.dwTextureWidth, gConfig.dwTextureHeight, "false" ), fp );
+            fputs(PAL_va(glslp_template, gConfig.pszShader, gConfig.pszShader, gConfig.dwTextureWidth, gConfig.dwTextureHeight, "false"), fp);
             fclose(fp);
             origGLSL = gConfig.pszShader;
             gConfig.pszShader = strdup(MID_GLSLP);
@@ -1069,7 +1075,7 @@ void VIDEO_GLSL_Setup() {
         glBindBuffer( GL_ARRAY_BUFFER, gVBOIds[id+i] );
         glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(struct VertexDataFormat), vData, GL_DYNAMIC_DRAW );
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gEBOId );
-        UTIL_LogSetPrelude(PAL_va(0,"[PASS 2.%d] ",i+1));
+        UTIL_LogSetPrelude(PAL_va("[PASS 2.%d] ", i + 1));
         gProgramIds[id+i] = compileProgram(gGLSLP.shader_params[i].shader, gGLSLP.shader_params[i].shader, 0);
         setupShaderParams(id+i);
     }

@@ -165,7 +165,6 @@ typedef struct tagCONFIGURATION
 	char            *pszSavePath;
     char            *pszShaderPath;
 	char            *pszShader;
-	unsigned int            dwWordLength;
 	unsigned int            dwScreenWidth;
 	unsigned int            dwScreenHeight;
     unsigned int            dwTextureWidth;
@@ -180,7 +179,6 @@ typedef struct tagCONFIGURATION
 	int              iSoundVolume;
 	LOGLEVEL         iLogLevel;
 	unsigned short             wAudioBufferSize;
-	int             fIsWIN95;
 	int             fUseSurroundOPL;
 	int             fKeepAspectRatio;
 	int             fFullScreen;

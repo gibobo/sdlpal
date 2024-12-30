@@ -578,7 +578,6 @@ typedef struct tagGLOBALVARS
    ALLEXPERIENCE Exp;                                                   // experience status
    POISONSTATUS rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
    INVENTORY rgInventory[MAX_INVENTORY];                                // inventory status
-   OBJECTDESC *lpObjectDesc;
    unsigned int dwFrameNum;
 } GLOBALVARS;
 
@@ -588,10 +587,6 @@ extern "C"
 #endif
 
    extern GLOBALVARS *const gpGlobals;
-
-   int
-   PAL_IsWINVersion(
-       int *pfIsWIN95);
 
    CODEPAGE
    PAL_DetectCodePage(

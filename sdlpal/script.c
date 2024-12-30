@@ -2112,23 +2112,15 @@ PAL_InterpretInstruction(
       //
       // Show FBP picture
       //
-      if (gConfig.fIsWIN95)
-      {
-         SDL_FillRect(gpScreen, NULL, 0);
-         VIDEO_UpdateScreen(NULL);
-      }
-      else
-      {
-         PAL_EndingSetEffectSprite(0);
-         PAL_ShowFBP(pScript->rgwOperand[0], pScript->rgwOperand[1]);
-      }
+      SDL_FillRect(gpScreen, NULL, 0);
+      VIDEO_UpdateScreen(NULL);
       break;
 
    case 0x0077:
       //
       // Stop current playing music
       //
-      AUDIO_PlayMusic(0, FALSE,
+      AUDIO_PlayMusic(0x00, FALSE,
                       (pScript->rgwOperand[0] == 0) ? 2.0f : (float)(pScript->rgwOperand[0]) * 3);
       gpGlobals->wNumMusic = 0;
       break;
@@ -2612,8 +2604,6 @@ PAL_InterpretInstruction(
       //
       // Show the ending animation
       //
-      if (!gConfig.fIsWIN95)
-         PAL_EndingAnimation();
       break;
 
    case 0x0097:
@@ -2906,8 +2896,7 @@ PAL_InterpretInstruction(
       //
       // Quit game
       //
-      if (gConfig.fIsWIN95)
-         PAL_EndingScreen();
+      PAL_EndingScreen();
       PAL_Shutdown(0);
       break;
 
@@ -2948,31 +2937,12 @@ PAL_InterpretInstruction(
       //
       // Scroll FBP to the screen
       //
-      if (!gConfig.fIsWIN95)
-      {
-         if (pScript->rgwOperand[0] == 68)
-         {
-            //
-            // HACKHACK: to make the ending picture show correctly
-            //
-            PAL_ShowFBP(69, 0);
-         }
-         PAL_ScrollFBP(pScript->rgwOperand[0], pScript->rgwOperand[2], TRUE);
-      }
       break;
 
    case 0x00A5:
       //
       // Show FBP picture with sprite effects
       //
-      if (!gConfig.fIsWIN95)
-      {
-         if (pScript->rgwOperand[1] != 0xFFFF)
-         {
-            PAL_EndingSetEffectSprite(pScript->rgwOperand[1]);
-         }
-         PAL_ShowFBP(pScript->rgwOperand[0], pScript->rgwOperand[2]);
-      }
       break;
 
    case 0x00A6:
@@ -3488,18 +3458,11 @@ begin:
       break;
 
    case 0xFFFF:
-      if (gConfig.fIsWIN95)
-      {
-         int XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : gConfig.ScreenLayout.MagicDescMsgPos;
-         int YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 - gConfig.ScreenLayout.ExtraItemDescLines * 16 : 3;
-         int iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
-         PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
-         wScriptEntry++;
-      }
-      else
-      {
-         wScriptEntry++;
-      }
+      int XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : gConfig.ScreenLayout.MagicDescMsgPos;
+      int YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 - gConfig.ScreenLayout.ExtraItemDescLines * 16 : 3;
+      int iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
+      PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
+      wScriptEntry++;
       break;
 
    case 0x00A7:

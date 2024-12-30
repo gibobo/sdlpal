@@ -33,66 +33,6 @@ GLOBALVARS * const  gpGlobals = &_gGlobals;
 
 CONFIGURATION gConfig;
 
-int PAL_IsWINVersion(int *pfIsWIN95) {
-  FILE *fps[] = {
-      UTIL_OpenRequiredFileForMode("abc.mkf", "rb"),
-      UTIL_OpenRequiredFileForMode("map.mkf", "rb"),
-      gpGlobals->f.fpF,
-      gpGlobals->f.fpFBP,
-      gpGlobals->f.fpFIRE,
-      gpGlobals->f.fpMGO,
-  };
-  const unsigned char fps_count = sizeof(fps) / sizeof(FILE *);
-  unsigned char dos_score = 0;
-  unsigned char win_score = 0;
-  uint8_t *data = NULL;
-  int data_size = 0;
-  int result = FALSE;
-
-  for (unsigned char i = 0; i < fps_count; i++) {
-    //
-    // Find the first non-empty sub-file
-    //
-    int count = PAL_MKFGetChunkCount(fps[i]);
-    int j = 0;
-    int size;
-    while (j < count && (size = PAL_MKFGetChunkSize(j, fps[i])) < 4)
-      j++;
-    if (j >= count)
-      break;
-
-    if (data_size < size)
-      data = (uint8_t *)realloc(data, data_size = size);
-    PAL_MKFReadChunk(data, data_size, j, fps[i]);
-    if (data[0] == 'Y' && data[1] == 'J' && data[2] == '_' && data[3] == '1') {
-      dos_score++;
-    } else {
-      win_score++;
-    }
-  }
-
-  //
-  // Finally check the size of object definition
-  //
-  if (win_score == fps_count || dos_score == fps_count) {
-    data_size = PAL_MKFGetChunkSize(2, gpGlobals->f.fpSSS);
-    if (data_size % sizeof(OBJECT) == 0 && data_size % sizeof(OBJECT_DOS) != 0 && dos_score > 0) {
-    } else if (data_size % sizeof(OBJECT_DOS) == 0 && data_size % sizeof(OBJECT) != 0 && win_score > 0) {
-
-    } else {
-      if (pfIsWIN95)
-        *pfIsWIN95 = (win_score == fps_count) ? TRUE : FALSE;
-      result = TRUE;
-    }
-  }
-
-  free(data);
-  fclose(fps[1]);
-  fclose(fps[0]);
-
-  return result;
-}
-
 CODEPAGE
 PAL_DetectCodePage(
 	const char *   filename
@@ -169,7 +109,6 @@ PAL_InitGlobals(
    //
    // Retrieve game resource version
    //
-   if (!PAL_IsWINVersion(&gConfig.fIsWIN95)) return -1;
 
    //
    // Detect game language only when no message file specified
@@ -179,9 +118,8 @@ PAL_InitGlobals(
    //
    // Set decompress function
    //
-   Decompress = gConfig.fIsWIN95 ? YJ2_Decompress : YJ1_Decompress;
+   Decompress = YJ2_Decompress;
 
-   gpGlobals->lpObjectDesc = NULL;
    gpGlobals->bCurrentSaveSlot = 1;
 
    return 0;
@@ -229,12 +167,6 @@ PAL_FreeGlobals(
    free(gpGlobals->g.lprgMagic);
    free(gpGlobals->g.lprgBattleField);
    free(gpGlobals->g.lprgLevelUpMagic);
-
-   //
-   // Free the object description data
-   //
-   if (!gConfig.fIsWIN95)
-      PAL_FreeObjectDesc(gpGlobals->lpObjectDesc);
 
    //
    // Clear the instance
@@ -345,27 +277,8 @@ PAL_LoadDefaultGame(
    //
    PAL_MKFReadChunk((unsigned char *)p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gpGlobals->f.fpSSS);
    PAL_MKFReadChunk((unsigned char *)p->rgScene, sizeof(p->rgScene), 1, gpGlobals->f.fpSSS);
-   if (gConfig.fIsWIN95)
-   {
-      PAL_MKFReadChunk((unsigned char *)p->rgObject, sizeof(p->rgObject), 2, gpGlobals->f.fpSSS);
-   }
-   else
-   {
-      OBJECT_DOS objects[MAX_OBJECTS];
-      PAL_MKFReadChunk((unsigned char *)objects, sizeof(objects), 2, gpGlobals->f.fpSSS);
-      //
-      // Convert the DOS-style data structure to WIN-style data structure
-      //
-      for (i = 0; i < MAX_OBJECTS; i++)
-      {
-         memcpy(&p->rgObject[i], &objects[i], sizeof(OBJECT_DOS));
-         p->rgObject[i].rgwData[6] = objects[i].rgwData[5];     // wFlags
-         p->rgObject[i].rgwData[5] = 0;                         // wScriptDesc or wReserved2
-      }
-   }
-
-   PAL_MKFReadChunk((unsigned char *)&p->PlayerRoles, sizeof(PLAYERROLES),
-      3, gpGlobals->f.fpDATA);
+   PAL_MKFReadChunk((unsigned char *)p->rgObject, sizeof(p->rgObject), 2, gpGlobals->f.fpSSS);
+   PAL_MKFReadChunk((unsigned char *)&p->PlayerRoles, sizeof(PLAYERROLES), 3, gpGlobals->f.fpDATA);
 
    //
    // Set some other default data.
@@ -504,7 +417,7 @@ PAL_LoadGame_Common(
 	//
 	// Try to open the specified file
 	//
-	FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, PAL_va(1, "%d.rpg", iSaveSlot));
+	FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, UTIL_va(UTIL_GlobalBuffer(1), PAL_GLOBAL_BUFFER_SIZE, "%d.rpg", iSaveSlot));
 	//
 	// Read all data from the file and close.
 	//
@@ -645,7 +558,7 @@ PAL_LoadGame(
    int            iSaveSlot
 )
 {
-	return gConfig.fIsWIN95 ? PAL_LoadGame_WIN(iSaveSlot) : PAL_LoadGame_DOS(iSaveSlot);
+	return PAL_LoadGame_WIN(iSaveSlot);
 }
 
 static void
@@ -689,7 +602,7 @@ PAL_SaveGame_Common(
 	//
 	// Try writing to file
 	//
-	if ((fp = UTIL_OpenFileAtPathForMode(gConfig.pszSavePath, PAL_va(1, "%d.rpg", iSaveSlot), "wb")) == NULL)
+	if ((fp = UTIL_OpenFileAtPathForMode(gConfig.pszSavePath, UTIL_va(UTIL_GlobalBuffer(1), PAL_GLOBAL_BUFFER_SIZE, "%d.rpg", iSaveSlot), "wb")) == NULL)
 	{
 		return;
 	}
@@ -780,10 +693,7 @@ PAL_SaveGame(
    unsigned short           wSavedTimes
 )
 {
-	if (gConfig.fIsWIN95)
-		PAL_SaveGame_WIN(iSaveSlot, wSavedTimes);
-	else
-		PAL_SaveGame_DOS(iSaveSlot, wSavedTimes);
+   PAL_SaveGame_WIN(iSaveSlot, wSavedTimes);
 }
 
 void

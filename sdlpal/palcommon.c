@@ -1047,16 +1047,8 @@ int PAL_MKFGetDecompressedSize(
    // Read the header.
    //
    fseek(fp, uiOffset, SEEK_SET);
-   if (gConfig.fIsWIN95)
-   {
-      PAL_fread(buf, sizeof(unsigned int), 1, fp);
-      return (int)buf[0];
-   }
-   else
-   {
-      PAL_fread(buf, sizeof(unsigned int), 2, fp);
-      return (buf[0] != 0x315f4a59) ? -1 : (int)buf[1];
-   }
+   PAL_fread(buf, sizeof(unsigned int), 1, fp);
+   return (int)buf[0];
 }
 
 int PAL_MKFDecompressChunk(

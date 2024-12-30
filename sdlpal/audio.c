@@ -27,13 +27,6 @@
 #include "util.h"
 #include "common.h"
 
-/* WASAPI need fewer samples for less gapping */
-#ifndef PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI
-# define PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI   512
-#endif
-
-typedef void(*ResampleMixFunction)(void *, const void *, int, void *, int, int, uint8_t);
-
 typedef struct tagAUDIODEVICE {
    SDL_AudioSpec spec; /* Actual-used sound specification */
    AUDIOPLAYER *pMusPlayer;
@@ -199,7 +192,7 @@ AUDIO_OpenDevice(
     if (driver_name) {
         UTIL_LogOutput(LOGLEVEL_VERBOSE, "Audio subsystem initialized; current driver is %s.\n", driver_name);
         if(SDL_strncmp(driver_name, "wasapi", 6)==0)
-            gConfig.wAudioBufferSize = PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI;
+            gConfig.wAudioBufferSize = 512;
     } else {
         UTIL_LogOutput(LOGLEVEL_VERBOSE, "Audio subsystem not initialized.\n");
     }

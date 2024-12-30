@@ -41,7 +41,6 @@
 
 #define DESCTEXT_COLOR 0x3C
 
-#define RIX_NUM_OPENINGMENU 4
 #define MAINMENU_LABEL_NEWGAME 7
 #define MAINMENU_LABEL_LOADGAME 8
 
@@ -142,13 +141,6 @@ typedef struct tagMENUITEM
 } MENUITEM;
 typedef const MENUITEM *LPCMENUITEM;
 
-typedef struct tagOBJECTDESC
-{
-    unsigned short wObjectID;
-    wchar_t *lpDesc;
-    struct tagOBJECTDESC *next;
-} OBJECTDESC;
-
 typedef void (*LPITEMCHANGED_CALLBACK)(unsigned short);
 
 #define MENUITEM_VALUE_CANCELLED 0xFFFF
@@ -235,18 +227,6 @@ int PAL_WordMaxWidth(
 
 int PAL_WordWidth(
     int nWordIndex);
-
-OBJECTDESC *
-PAL_LoadObjectDesc(
-    const char *lpszFileName);
-
-void PAL_FreeObjectDesc(
-    OBJECTDESC *lpObjectDesc);
-
-const unsigned short *
-PAL_GetObjectDesc(
-    OBJECTDESC *lpObjectDesc,
-    unsigned short wObjectID);
 
 extern unsigned char *gpSpriteUI;
 

@@ -143,79 +143,6 @@ typedef struct tagVOCHEADER {
   unsigned short version_checksum;
 } VOCHEADER;
 
-static const void *
-SOUND_LoadVOCData(
-	const unsigned char *lpData,
-	unsigned int dwLen,
-	WAVESPEC *lpSpec)
-/*++
-  Purpose:
-
-	Return the VOC data pointer inside the input buffer. Currently supports type 01 block only.
-
-  Parameters:
-
-	[IN]  lpData - pointer to the buffer of the VOC file.
-
-	[IN]  dwLen - length of the buffer of the VOC file.
-
-	[OUT] lpSpec - pointer to the SDL_AudioSpec structure, which contains
-				   some basic information about the VOC file.
-
-  Return value:
-
-	Pointer to the WAVE data inside the input buffer, NULL if failed.
-
-	Reference: http://sox.sourceforge.net/AudioFormats-11.html
---*/
-{
-	const VOCHEADER *lpVOC = (const VOCHEADER *)lpData;
-
-	if (dwLen < sizeof(VOCHEADER) || memcmp(lpVOC->signature, "Creative Voice File\x1A", 0x14) || lpVOC->data_offset >= dwLen)
-	{
-		return NULL;
-	}
-
-	lpData += lpVOC->data_offset;
-	dwLen -= lpVOC->data_offset;
-
-	while (dwLen && *lpData)
-	{
-		unsigned int len;
-		if (dwLen >= 4)
-		{
-			len = lpData[1] | (lpData[2] << 8) | (lpData[3] << 16);
-			if (dwLen >= len + 4)
-				dwLen -= len + 4;
-			else
-				return NULL;
-		}
-		else
-		{
-			return NULL;
-		}
-		if (*lpData == 0x01)
-		{
-			if (lpData[5] != 0)
-				return NULL; /* Only 8-bit is supported */
-
-			lpSpec->format = AUDIO_U8;
-			lpSpec->channels = 1;
-			lpSpec->freq = ((1000000 / (256 - lpData[4]) + 99) / 100) * 100; /* Round to next 100Hz */
-			lpSpec->size = len - 2;
-			lpSpec->align = 1;
-
-			return lpData + 6;
-		}
-		else
-		{
-			lpData += len + 4;
-		}
-	}
-
-	return NULL;
-}
-
 static int
 SOUND_ResampleMix_U8_Mono_Mono(
 	void *resampler[2],
@@ -948,39 +875,21 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
-  char *mkfs[2];
-  SoundLoader func[2];
-  int i;
+	FILE *mkf = UTIL_OpenFile("sounds.mkf");
+	if (mkf)
+	{
+		SOUNDPLAYER *player = (SOUNDPLAYER *)malloc(sizeof(SOUNDPLAYER));
+		memset(&player->soundlist, 0, sizeof(WAVEDATA));
+		player->Play = SOUND_Play;
+		player->FillBuffer = SOUND_FillBuffer;
+		player->Shutdown = SOUND_Shutdown;
 
-  if (gConfig.fIsWIN95) {
-    mkfs[0] = "sounds.mkf";
-    func[0] = SOUND_LoadWAVEData;
-    mkfs[1] = "voc.mkf";
-    func[1] = SOUND_LoadVOCData;
-  } else {
-    mkfs[0] = "voc.mkf";
-    func[0] = SOUND_LoadVOCData;
-    mkfs[1] = "sounds.mkf";
-    func[1] = SOUND_LoadWAVEData;
-  }
-
-  for (i = 0; i < 2; i++) {
-    FILE *mkf = UTIL_OpenFile(mkfs[i]);
-    if (mkf) {
-      SOUNDPLAYER *player = (SOUNDPLAYER *)malloc(sizeof(SOUNDPLAYER));
-      memset(&player->soundlist, 0, sizeof(WAVEDATA));
-      player->Play = SOUND_Play;
-      player->FillBuffer = SOUND_FillBuffer;
-      player->Shutdown = SOUND_Shutdown;
-
-      player->LoadSound = func[i];
-      player->mkf = mkf;
-      player->soundlist.resampler[0] = resampler_create();
-      player->soundlist.resampler[1] = resampler_create();
-      player->cursounds = 0;
-      return (AUDIOPLAYER*)player;
-    }
-  }
-
-  return NULL;
+		player->LoadSound = SOUND_LoadWAVEData;
+		player->mkf = mkf;
+		player->soundlist.resampler[0] = resampler_create();
+		player->soundlist.resampler[1] = resampler_create();
+		player->cursounds = 0;
+		return (AUDIOPLAYER *)player;
+	}
+	return NULL;
 }

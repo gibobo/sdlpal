@@ -41,12 +41,6 @@
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;
 
-#define BITMAPNUM_SPLASH_UP (gConfig.fIsWIN95 ? 0x03 : 0x26)
-#define BITMAPNUM_SPLASH_DOWN (gConfig.fIsWIN95 ? 0x04 : 0x27)
-#define SPRITENUM_SPLASH_TITLE 0x47
-#define SPRITENUM_SPLASH_CRANE 0x49
-#define NUM_RIX_TITLE 0x05
-
 static void
 PAL_Init(
     void)
@@ -102,11 +96,7 @@ PAL_Init(
    PAL_InitResources();
    AUDIO_OpenDevice();
 
-   VIDEO_SetWindowTitle(
-       UTIL_va(UTIL_GlobalBuffer(0),
-               128,
-               "Pal %s",
-               gConfig.fIsWIN95 ? "Win95" : "DOS"));
+   VIDEO_SetWindowTitle(UTIL_va(UTIL_GlobalBuffer(0), 32, "Pal"));
 }
 
 void PAL_Shutdown(
@@ -223,16 +213,16 @@ void PAL_SplashScreen(
    //
    // Read the bitmaps
    //
-   PAL_MKFReadChunk(buf, 320 * 200, BITMAPNUM_SPLASH_UP, gpGlobals->f.fpFBP);
+   PAL_MKFReadChunk(buf, 320 * 200, 0x03, gpGlobals->f.fpFBP);
    Decompress(buf, buf2, 320 * 200);
    PAL_FBPBlitToSurface(buf2, lpBitmapUp);
-   PAL_MKFReadChunk(buf, 320 * 200, BITMAPNUM_SPLASH_DOWN, gpGlobals->f.fpFBP);
+   PAL_MKFReadChunk(buf, 320 * 200, 0x04, gpGlobals->f.fpFBP);
    Decompress(buf, buf2, 320 * 200);
    PAL_FBPBlitToSurface(buf2, lpBitmapDown);
-   PAL_MKFReadChunk(buf, 32000, SPRITENUM_SPLASH_TITLE, gpGlobals->f.fpMGO);
+   PAL_MKFReadChunk(buf, 32000, 0x47, gpGlobals->f.fpMGO);
    Decompress(buf, buf2, 32000);
    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(buf2, 0);
-   PAL_MKFReadChunk(buf, 32000, SPRITENUM_SPLASH_CRANE, gpGlobals->f.fpMGO);
+   PAL_MKFReadChunk(buf, 32000, 0x49, gpGlobals->f.fpMGO);
    Decompress(buf, lpSpriteCrane, 32000);
 
    iTitleHeight = PAL_RLEGetHeight(lpBitmapTitle);
@@ -253,7 +243,7 @@ void PAL_SplashScreen(
    // Play the title music
    //
    AUDIO_PlayMusic(-1, FALSE, 0);
-   AUDIO_PlayMusic(NUM_RIX_TITLE, TRUE, 2);
+   AUDIO_PlayMusic(0x05, TRUE, 2);
 
    //
    // Clear all of the events and key states
@@ -408,7 +398,7 @@ void PAL_SplashScreen(
    VIDEO_FreeSurface(lpBitmapUp);
    free(buf);
 
-   AUDIO_PlayMusic(0, FALSE, 1);
+   AUDIO_PlayMusic(0x00, FALSE, 1);
 
    PAL_FadeOut(1);
 }

@@ -170,7 +170,8 @@ PAL_LoadConfig(
 		.MagicDescMsgPos	= PAL_XY(102, 0),
 	};
 
-	for (PALCFG_ITEM i = PALCFG_ALL_MIN; i < PALCFG_ALL_MAX; i++) values[i] = gConfigItems[i].DefaultValue;
+	for (PALCFG_ITEM i = PALCFG_ALL_MIN; i < PALCFG_ALL_MAX; i++)
+		values[i] = gConfigItems[i].DefaultValue;
 
 	//
 	// Set configurable global options
@@ -178,10 +179,8 @@ PAL_LoadConfig(
 	if (!gConfig.pszSavePath) gConfig.pszSavePath = gConfig.pszGamePath ? strdup(gConfig.pszGamePath) : strdup(PAL_SAVE_PREFIX);
 	if (!gConfig.pszGamePath) gConfig.pszGamePath = strdup(PAL_PREFIX);
     if (!gConfig.pszShaderPath) gConfig.pszShaderPath = strdup(gConfig.pszGamePath);
-	gConfig.dwWordLength = 10;	// This is the default value for Chinese version
 	gConfig.ScreenLayout = screen_layout;
 
-	gConfig.fIsWIN95 = FALSE;	// Default for DOS version
 	gConfig.fUseSurroundOPL = values[PALCFG_STEREO].bValue && values[PALCFG_USESURROUNDOPL].bValue;
 	gConfig.fEnableKeyRepeat = values[PALCFG_ENABLEKEYREPEAT].bValue;
 	gConfig.fKeepAspectRatio = values[PALCFG_KEEPASPECTRATIO].bValue;

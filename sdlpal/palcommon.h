@@ -121,12 +121,6 @@ extern "C"
         int DestSize);
 
     int
-    YJ1_Decompress(
-        const void *Source,
-        void *Destination,
-        int DestSize);
-
-    int
     YJ2_Decompress(
         const void *Source,
         void *Destination,

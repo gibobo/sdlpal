@@ -41,7 +41,7 @@ static int __buymenu_firsttime_render;
 
 static unsigned short GetSavedTimes(int iSaveSlot)
 {
-   FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, PAL_va(0, "%d.rpg", iSaveSlot));
+   FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, PAL_va("%d.rpg", iSaveSlot));
    unsigned short wSavedTimes = 0;
    if (fp != NULL)
    {
@@ -82,7 +82,7 @@ void PAL_DrawOpeningMenuBackground(
    //
    // Read the picture from fbp.mkf.
    //
-   PAL_MKFDecompressChunk(buf, 320 * 200, (gConfig.fIsWIN95 ? 2 : 60), gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, 320 * 200, 2, gpGlobals->f.fpFBP);
 
    //
    // ...and blit it to the screen buffer.
@@ -122,7 +122,7 @@ int PAL_OpeningMenu(
    //
    // Play the background music
    //
-   AUDIO_PlayMusic(RIX_NUM_OPENINGMENU, TRUE, 1);
+   AUDIO_PlayMusic(0x04, TRUE, 1);
 
    //
    // Draw the background
@@ -165,7 +165,7 @@ int PAL_OpeningMenu(
    //
    // Fade out the screen and the music
    //
-   AUDIO_PlayMusic(0, FALSE, 1);
+   AUDIO_PlayMusic(0x00, FALSE, 1);
    PAL_FadeOut(1);
 
    return (int)wItemSelected;
@@ -537,7 +537,7 @@ PAL_SystemMenu(
       iSlot = PAL_SaveSlotMenu(gpGlobals->bCurrentSaveSlot);
       if (iSlot != MENUITEM_VALUE_CANCELLED)
       {
-         AUDIO_PlayMusic(0, FALSE, 1);
+         AUDIO_PlayMusic(0x00, FALSE, 1);
          PAL_FadeOut(1);
          PAL_ReloadInNextTick(iSlot);
       }
@@ -1951,7 +1951,7 @@ void PAL_QuitGame(
    unsigned short wReturnValue = PAL_ConfirmMenu(); // No config menu available
    if (wReturnValue == 1 || wReturnValue == 2)
    {
-      AUDIO_PlayMusic(0, FALSE, 2);
+      AUDIO_PlayMusic(0x00, FALSE, 2);
       PAL_FadeOut(2);
       PAL_Shutdown(0);
    }

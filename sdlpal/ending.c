@@ -148,7 +148,7 @@ void PAL_ShowFBP(
    //
    // HACKHACK: to make the ending show correctly
    //
-   if (wChunkNum != (gConfig.fIsWIN95 ? 68 : 49))
+   if (wChunkNum != 68)
    {
       PAL_FBPBlitToSurface(buf, gpScreen);
    }
@@ -316,10 +316,10 @@ void PAL_EndingAnimation(
    pUpper = VIDEO_CreateCompatibleSurface(gpScreen);
    pLower = VIDEO_CreateCompatibleSurface(gpScreen);
 
-   PAL_MKFDecompressChunk(buf, buf_size, gConfig.fIsWIN95 ? 69 : 61, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, buf_size, 69, gpGlobals->f.fpFBP);
    PAL_FBPBlitToSurface(buf, pUpper);
 
-   PAL_MKFDecompressChunk(buf, buf_size, gConfig.fIsWIN95 ? 70 : 62, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, buf_size, 70, gpGlobals->f.fpFBP);
    PAL_FBPBlitToSurface(buf, pLower);
 
    PAL_MKFDecompressChunk(buf, buf_size, 571, gpGlobals->f.fpMGO);
@@ -440,7 +440,7 @@ void PAL_EndingScreen(
       PAL_EndingAnimation();
 
       AUDIO_PlayMusic(-1, FALSE, 0);
-      AUDIO_PlayMusic(0, FALSE, 2);
+      AUDIO_PlayMusic(0x00, FALSE, 2);
       PAL_ColorFade(7, 15, FALSE);
 
       AUDIO_PlayMusic(-1, FALSE, 0);
@@ -476,7 +476,7 @@ void PAL_EndingScreen(
       PAL_ShowFBP(68, 6);
 
       PAL_WaitForKey(0);
-      AUDIO_PlayMusic(0, FALSE, 1);
+      AUDIO_PlayMusic(0x00, FALSE, 1);
       UTIL_Delay(500);
    }
 
@@ -493,7 +493,7 @@ void PAL_EndingScreen(
       PAL_ScrollFBP(60, 0xf, TRUE);
       PAL_ScrollFBP(59, 0xf, TRUE);
 
-      AUDIO_PlayMusic(0, FALSE, 6);
+      AUDIO_PlayMusic(0x00, FALSE, 6);
       PAL_FadeOut(3);
    }
 }

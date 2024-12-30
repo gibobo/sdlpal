@@ -57,11 +57,11 @@ PAL_ItemSelectMenuUpdate(
    unsigned short wObject, wScript;
    unsigned char bColor;
    static unsigned char bufImage[2048];
-   const int iItemsPerLine = 32 / gConfig.dwWordLength;
-   const int iItemTextWidth = 8 * gConfig.dwWordLength + 20;
+   const int iItemsPerLine = 32 / 10;
+   const int iItemTextWidth = 8 * 10 + 20;
    const int iLinesPerPage = 7 - gConfig.ScreenLayout.ExtraItemDescLines;
-   const int iCursorXOffset = gConfig.dwWordLength * 5 / 2;
-   const int iAmountXOffset = gConfig.dwWordLength * 8 + 1;
+   const int iCursorXOffset = 10 * 5 / 2;
+   const int iAmountXOffset = 10 * 8 + 1;
    const int iPageLineOffset = (iLinesPerPage + 1) / 2;
    const int iPictureYOffset = (gConfig.ScreenLayout.ExtraItemDescLines > 1) ? (gConfig.ScreenLayout.ExtraItemDescLines - 1) * 16 : 0;
    unsigned int cursorPos = PAL_XY(15 + iCursorXOffset, 22);
@@ -238,58 +238,21 @@ PAL_ItemSelectMenuUpdate(
    //
    // Draw the description of the selected item
    //
-   if (!gConfig.fIsWIN95)
+   if (!g_fNoDesc)
    {
-      if (!g_fNoDesc && gpGlobals->lpObjectDesc != NULL)
+      wScript = gpGlobals->g.rgObject[wObject].item.wScriptDesc;
+      line = 0;
+      while (wScript && gpGlobals->g.lprgScriptEntry[wScript].wOperation != 0)
       {
-         wchar_t szDesc[512], *next;
-         const wchar_t *d = PAL_GetObjectDesc(gpGlobals->lpObjectDesc, wObject);
-
-         if (d != NULL)
+         if (gpGlobals->g.lprgScriptEntry[wScript].wOperation == 0xFFFF)
          {
-            k = 150 - gConfig.ScreenLayout.ExtraItemDescLines * 16;
-            wcscpy(szDesc, d);
-            d = szDesc;
-
-            while (TRUE)
-            {
-               next = wcschr(d, '*');
-               if (next != NULL)
-               {
-                  *next++ = '\0';
-               }
-
-               PAL_DrawText(d, PAL_XY(75, k), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
-               k += 16;
-
-               if (next == NULL)
-               {
-                  break;
-               }
-
-               d = next;
-            }
+            int line_incr = (gpGlobals->g.lprgScriptEntry[wScript].rgwOperand[1] != 1) ? 1 : 0;
+            wScript = PAL_RunAutoScript(wScript, PAL_ITEM_DESC_BOTTOM | line);
+            line += line_incr;
          }
-      }
-   }
-   else
-   {
-      if (!g_fNoDesc)
-      {
-         wScript = gpGlobals->g.rgObject[wObject].item.wScriptDesc;
-         line = 0;
-         while (wScript && gpGlobals->g.lprgScriptEntry[wScript].wOperation != 0)
+         else
          {
-            if (gpGlobals->g.lprgScriptEntry[wScript].wOperation == 0xFFFF)
-            {
-               int line_incr = (gpGlobals->g.lprgScriptEntry[wScript].rgwOperand[1] != 1) ? 1 : 0;
-               wScript = PAL_RunAutoScript(wScript, PAL_ITEM_DESC_BOTTOM | line);
-               line += line_incr;
-            }
-            else
-            {
-               wScript = PAL_RunAutoScript(wScript, 0);
-            }
+            wScript = PAL_RunAutoScript(wScript, 0);
          }
       }
    }

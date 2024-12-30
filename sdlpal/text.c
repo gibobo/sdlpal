@@ -191,13 +191,13 @@ PAL_InitText(
 	//
 	// Each word has 10 bytes
 	//
-	g_TextLib.nWords = (i + (gConfig.dwWordLength - 1)) / gConfig.dwWordLength;
+	g_TextLib.nWords = (i + (10 - 1)) / 10;
 	if (g_TextLib.nWords < (MAX_OBJECTS + 13)) g_TextLib.nWords = (MAX_OBJECTS + 13);
 
 	//
 	// Read the words
 	//
-	temp = (unsigned char *)malloc(gConfig.dwWordLength * g_TextLib.nWords);
+	temp = (unsigned char *)malloc(10 * g_TextLib.nWords);
 	if (temp == NULL)
 	{
 		fclose(fpWord);
@@ -211,7 +211,7 @@ PAL_InitText(
 		fclose(fpMsg);
 		return -1;
 	}
-	memset(temp + i, 0, gConfig.dwWordLength * g_TextLib.nWords - i);
+	memset(temp + i, 0, 10 * g_TextLib.nWords - i);
 
 	//
 	// Close the words file
@@ -221,10 +221,10 @@ PAL_InitText(
 	// Split the words and do code page conversion
 	for (i = 0, wlen = 0; i < g_TextLib.nWords; i++)
 	{
-		int base = i * gConfig.dwWordLength;
-		int pos = base + gConfig.dwWordLength - 1;
+		int base = i * 10;
+		int pos = base + 10 - 1;
 		while (pos >= base && temp[pos] == ' ') temp[pos--] = 0;
-		wlen += PAL_MultiByteToWideChar((const char*)temp + base, gConfig.dwWordLength, NULL, 0) + 1;
+		wlen += PAL_MultiByteToWideChar((const char*)temp + base, 10, NULL, 0) + 1;
 	}
 	g_TextLib.lpWordBuf = (wchar_t**)malloc(g_TextLib.nWords * sizeof(wchar_t*));
 	if (g_TextLib.lpWordBuf == NULL)
@@ -245,7 +245,7 @@ PAL_InitText(
 	{
 		int l;
 		g_TextLib.lpWordBuf[i] = tmp + wpos;
-		l = PAL_MultiByteToWideChar((const char*)temp + i * gConfig.dwWordLength, gConfig.dwWordLength, g_TextLib.lpWordBuf[i], wlen - wpos);
+		l = PAL_MultiByteToWideChar((const char*)temp + i * 10, 10, g_TextLib.lpWordBuf[i], wlen - wpos);
 		if (l > 0 && g_TextLib.lpWordBuf[i][l - 1] == '1')
 			g_TextLib.lpWordBuf[i][l - 1] = 0;
 		g_TextLib.lpWordBuf[i][l] = 0;
