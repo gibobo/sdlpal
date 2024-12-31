@@ -20,14 +20,19 @@
 //
 
 #include "audio.h"
+#include "audio_internal.h"
 #include "common.h"
 #include "convertopl.h"
 #include "emuopls.h"
 #include "palcfg.h"
+#include "global.h"
+#include "util.h"
 #include "players.h"
 #include "resampler.h"
 #include "src/rix.h"
 #include "src/surroundopl.h"
+
+#define     PAL_MAX_SAMPLERATE           49716
 
 typedef struct tagRIXPLAYER {
   AUDIOPLAYER_COMMONS;
@@ -450,7 +455,7 @@ AUDIOPLAYER *RIX_Init(const char *szFileName)
 		for (int i = 0; i < gConfig.iAudioChannels; i++)
 		{
 			pRixPlayer->resampler[i] = resampler_create();
-			resampler_set_quality(pRixPlayer->resampler[i], ((gConfig.iOPLSampleRate % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % gConfig.iOPLSampleRate) == 0) ? RESAMPLER_QUALITY_MIN : gConfig.iResampleQuality);
+			resampler_set_quality(pRixPlayer->resampler[i], ((gConfig.iOPLSampleRate % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % gConfig.iOPLSampleRate) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
 			resampler_set_rate(pRixPlayer->resampler[i], (double)gConfig.iOPLSampleRate / (double)gConfig.iSampleRate);
 		}
 	}

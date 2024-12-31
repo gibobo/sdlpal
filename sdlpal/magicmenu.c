@@ -66,8 +66,8 @@ PAL_MagicSelectionMenuUpdate(
    unsigned short wScript;
    const int iItemsPerLine = 32 / 10;
    const int iItemTextWidth = 8 * 10 + 7;
-   const int iLinesPerPage = 5 - gConfig.ScreenLayout.ExtraMagicDescLines;
-   const int iBoxYOffset = gConfig.ScreenLayout.ExtraMagicDescLines * 16;
+   const int iLinesPerPage = 5;
+   const int iBoxYOffset = 0;
    const int iCursorXOffset = 10 * 5 / 2;
    const int iPageLineOffset = iLinesPerPage / 2;
 
@@ -149,12 +149,10 @@ PAL_MagicSelectionMenuUpdate(
    //
    // Draw the MP of the selected magic.
    //
-   PAL_CreateSingleLineBox(PAL_XY(0, 0), PAL_X(gConfig.ScreenLayout.MagicMPDescLines), FALSE);
-   PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH),
-                        gpScreen, gConfig.ScreenLayout.MagicMPSlashPos);
-   PAL_DrawNumber(rgMagicItem[g_iCurrentItem].wMP, 4, gConfig.ScreenLayout.MagicMPNeededPos,
-                  kNumColorYellow, kNumAlignRight);
-   PAL_DrawNumber(g_wPlayerMP, 4, gConfig.ScreenLayout.MagicMPCurrentPos, kNumColorCyan, kNumAlignRight);
+   PAL_CreateSingleLineBox(PAL_XY(0, 0), PAL_X(PAL_XY(5, 0)), FALSE);
+   PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, PAL_XY(45, 14));
+   PAL_DrawNumber(rgMagicItem[g_iCurrentItem].wMP, 4, PAL_XY(15, 14), kNumColorYellow, kNumAlignRight);
+   PAL_DrawNumber(g_wPlayerMP, 4, PAL_XY(50, 14), kNumColorCyan, kNumAlignRight);
 
    //
    // Draw the texts of the current page

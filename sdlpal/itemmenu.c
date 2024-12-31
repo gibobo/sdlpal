@@ -59,11 +59,11 @@ PAL_ItemSelectMenuUpdate(
    static unsigned char bufImage[2048];
    const int iItemsPerLine = 32 / 10;
    const int iItemTextWidth = 8 * 10 + 20;
-   const int iLinesPerPage = 7 - gConfig.ScreenLayout.ExtraItemDescLines;
+   const int iLinesPerPage = 7;
    const int iCursorXOffset = 10 * 5 / 2;
    const int iAmountXOffset = 10 * 8 + 1;
    const int iPageLineOffset = (iLinesPerPage + 1) / 2;
-   const int iPictureYOffset = (gConfig.ScreenLayout.ExtraItemDescLines > 1) ? (gConfig.ScreenLayout.ExtraItemDescLines - 1) * 16 : 0;
+   const int iPictureYOffset = 0;
    unsigned int cursorPos = PAL_XY(15 + iCursorXOffset, 22);
    ;
 

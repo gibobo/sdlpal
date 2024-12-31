@@ -647,10 +647,10 @@ static const char *const _loglevel_str[] = {
 void UTIL_LogRemoveOutputCallback(
 	int id)
 {
-	if (id < 0 || id >= PAL_LOG_MAX_OUTPUTS)
+	if (id < 0 || id > LOGLEVEL_MAX)
 		return;
 
-	while (id < PAL_LOG_MAX_OUTPUTS - 1)
+	while (id < LOGLEVEL_MAX)
 	{
 		_log_callbacks[id] = _log_callbacks[id + 1];
 		_log_callback_levels[id] = _log_callback_levels[id + 1];

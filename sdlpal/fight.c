@@ -20,7 +20,7 @@
 //
 
 #include "fight.h"
-// #include "audio.h"
+#include "audio/audio.h"
 #include "battle.h"
 #include "common.h"
 #include "global.h"

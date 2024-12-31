@@ -20,7 +20,7 @@
 //
 
 #include "res.h"
-#include "audio.h"
+#include "audio/audio.h"
 #include "global.h"
 #include "util.h"
 #include "palcommon.h"

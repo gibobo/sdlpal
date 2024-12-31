@@ -1,4 +1,4 @@
-file(GLOB SDLPAL_SOURCES	${SDLPAL_DIR}/*.cpp ${SDLPAL_DIR}/*.c)
+file(GLOB SDLPAL_SOURCES	${SDLPAL_DIR}/*.cpp ${SDLPAL_DIR}/*.c ${SDLPAL_DIR}/audio/*.cpp ${SDLPAL_DIR}/audio/*.c)
 file(GLOB SDLPAL_HEADERS	${SDLPAL_DIR}/*.hpp ${SDLPAL_DIR}/*.h)
 
 add_library(sdlpal
@@ -13,6 +13,7 @@ target_include_directories(sdlpal
         ${SDL2_DIR}/include
         ${ADPLUG_DIR}
         ${BINIO_INCLUDE_DIR}
+        ${SDLPAL_DIR}
 )
 
 target_compile_definitions(sdlpal

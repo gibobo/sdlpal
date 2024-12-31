@@ -20,6 +20,7 @@
 //
 
 #include "audio.h"
+#include "audio_internal.h"
 #include "common.h"
 #include "palcfg.h"
 #include "palcommon.h"
@@ -753,7 +754,7 @@ SOUND_Play(
 			cursnd->resampler[i] = resampler_create();
 		else
 			resampler_clear(cursnd->resampler[i]);
-		resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : gConfig.iResampleQuality);
+		resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
 		resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)devspec->freq);
 	}
 

@@ -68,7 +68,6 @@ if(WIN32)
 else()
     # find_package(FLTK)
     add_executable (${PROJECT_NAME}
-        ${ADPLUG_FILES}
         ${SDLPAL_DIR}/main.c
         unix/unix.cpp
     )

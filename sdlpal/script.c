@@ -23,7 +23,7 @@
 //
 
 #include "script.h"
-#include "audio.h"
+#include "audio/audio.h"
 #include "battle.h"
 #include "common.h"
 #include "ending.h"
@@ -3458,8 +3458,8 @@ begin:
       break;
 
    case 0xFFFF:
-      int XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : gConfig.ScreenLayout.MagicDescMsgPos;
-      int YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 - gConfig.ScreenLayout.ExtraItemDescLines * 16 : 3;
+      int XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : PAL_XY(102, 0);
+      int YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 : 3;
       int iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
       PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
       wScriptEntry++;

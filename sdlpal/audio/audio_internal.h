@@ -19,28 +19,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AUDIO_H
-#define AUDIO_H
+#ifndef AUDIO_INTERNAL_H
+#define AUDIO_INTERNAL_H
 
 #include <SDL_audio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-int AUDIO_OpenDevice(void);
-
-void AUDIO_CloseDevice(void);
-
-void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime);
-
-void AUDIO_PlaySound(int iSoundNum);
-
-void AUDIO_EnableMusic(int fEnable);
-int AUDIO_MusicEnabled(void);
-
-void AUDIO_EnableSound(int fEnable);
-int AUDIO_SoundEnabled(void);
 
 SDL_AudioSpec *
 AUDIO_GetDeviceSpec(

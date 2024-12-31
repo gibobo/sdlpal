@@ -460,30 +460,6 @@ VIDEO_GetPalette(
 }
 
 void
-VIDEO_ToggleScaleScreen(
-   void
-)
-/*++
-  Purpose:
-
-    Toggle scalescreen mode, only used in some platforms.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-   bScaleScreen = !bScaleScreen;
-   VIDEO_Resize(PAL_DEFAULT_WINDOW_WIDTH, PAL_DEFAULT_WINDOW_HEIGHT);
-   VIDEO_UpdateScreen(NULL);
-}
-
-void
 VIDEO_ToggleFullscreen(
    void
 )

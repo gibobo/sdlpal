@@ -43,13 +43,6 @@ typedef enum tagLOGLEVEL
 
 #define PAL_LOG_MAX_OUTPUTS   (LOGLEVEL_MAX + 1)
 
-#if defined(DEBUG) || defined(_DEBUG)
-# define PAL_DEFAULT_LOGLEVEL  LOGLEVEL_MIN
-#else
-# define PAL_DEFAULT_LOGLEVEL  LOGLEVEL_MAX
-#endif
-
-
 long
 flength(
    FILE *fp

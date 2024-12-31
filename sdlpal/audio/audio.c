@@ -20,12 +20,15 @@
 //
 
 #include "audio.h"
+#include "audio_internal.h"
 #include "global.h"
 #include "palcfg.h"
 #include "players.h"
 #include "resampler.h"
 #include "util.h"
 #include "common.h"
+
+#define     PAL_MAX_VOLUME               100
 
 typedef struct tagAUDIODEVICE {
    SDL_AudioSpec spec; /* Actual-used sound specification */
@@ -176,8 +179,8 @@ AUDIO_OpenDevice(
    gAudioDevice.fOpened = FALSE;
    gAudioDevice.fMusicEnabled = TRUE;
    gAudioDevice.fSoundEnabled = TRUE;
-   gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
-   gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
+   gAudioDevice.iMusicVolume = SDL_MIX_MAXVOLUME;
+   gAudioDevice.iSoundVolume = SDL_MIX_MAXVOLUME;
 
    //
    // Initialize the resampler module

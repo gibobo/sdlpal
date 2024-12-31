@@ -582,169 +582,143 @@ typedef struct tagGLOBALVARS
 } GLOBALVARS;
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-   extern GLOBALVARS *const gpGlobals;
+extern GLOBALVARS *const gpGlobals;
 
-   CODEPAGE
-   PAL_DetectCodePage(
-       const char *filename);
+CODEPAGE
+PAL_DetectCodePage(
+    const char *filename);
 
-   int
-   PAL_InitGlobals(
-       void);
+int PAL_InitGlobals(
+    void);
 
-   void
-   PAL_FreeGlobals(
-       void);
+void PAL_FreeGlobals(
+    void);
 
-   void
-   PAL_SaveGame(
-       int iSaveSlot,
-       unsigned short wSavedTimes);
+void PAL_SaveGame(
+    int iSaveSlot,
+    unsigned short wSavedTimes);
 
-   void
-   PAL_InitGameData(
-       int iSaveSlot);
+void PAL_InitGameData(
+    int iSaveSlot);
 
-   void
-   PAL_ReloadInNextTick(
-       int iSaveSlot);
+void PAL_ReloadInNextTick(
+    int iSaveSlot);
 
-   int
-   PAL_CountItem(
-       unsigned short wObjectID);
+int PAL_CountItem(
+    unsigned short wObjectID);
 
-   int
-   PAL_GetItemIndexToInventory(
-       unsigned short wObjectID,
-       int *index);
+int PAL_GetItemIndexToInventory(
+    unsigned short wObjectID,
+    int *index);
 
-   int
-   PAL_AddItemToInventory(
-       unsigned short wObjectID,
-       int iNum);
+int PAL_AddItemToInventory(
+    unsigned short wObjectID,
+    int iNum);
 
-   int
-   PAL_IncreaseHPMP(
-       unsigned short wPlayerRole,
-       short sHP,
-       short sMP);
+int PAL_IncreaseHPMP(
+    unsigned short wPlayerRole,
+    short sHP,
+    short sMP);
 
-   int
-   PAL_GetItemAmount(
-       unsigned short wItem);
+int PAL_GetItemAmount(
+    unsigned short wItem);
 
-   void
-   PAL_UpdateEquipments(
-       void);
+void PAL_UpdateEquipments(
+    void);
 
-   void
-   PAL_CompressInventory(
-       void);
+void PAL_CompressInventory(
+    void);
 
-   void
-   PAL_RemoveEquipmentEffect(
-       unsigned short wPlayerRole,
-       unsigned short wEquipPart);
+void PAL_RemoveEquipmentEffect(
+    unsigned short wPlayerRole,
+    unsigned short wEquipPart);
 
-   void
-   PAL_AddPoisonForPlayer(
-       unsigned short wPlayerRole,
-       unsigned short wPoisonID);
+void PAL_AddPoisonForPlayer(
+    unsigned short wPlayerRole,
+    unsigned short wPoisonID);
 
-   void
-   PAL_CurePoisonByKind(
-       unsigned short wPlayerRole,
-       unsigned short wPoisonID);
+void PAL_CurePoisonByKind(
+    unsigned short wPlayerRole,
+    unsigned short wPoisonID);
 
-   void
-   PAL_CurePoisonByLevel(
-       unsigned short wPlayerRole,
-       unsigned short wMaxLevel);
+void PAL_CurePoisonByLevel(
+    unsigned short wPlayerRole,
+    unsigned short wMaxLevel);
 
-   int
-   PAL_IsPlayerPoisonedByLevel(
-       unsigned short wPlayerRole,
-       unsigned short wMinLevel);
+int PAL_IsPlayerPoisonedByLevel(
+    unsigned short wPlayerRole,
+    unsigned short wMinLevel);
 
-   int
-   PAL_IsPlayerPoisonedByKind(
-       unsigned short wPlayerRole,
-       unsigned short wPoisonID);
+int PAL_IsPlayerPoisonedByKind(
+    unsigned short wPlayerRole,
+    unsigned short wPoisonID);
 
-   unsigned short
-   PAL_GetPlayerAttackStrength(
-       unsigned short wPlayerRole);
+unsigned short
+PAL_GetPlayerAttackStrength(
+    unsigned short wPlayerRole);
 
-   unsigned short
-   PAL_GetPlayerMagicStrength(
-       unsigned short wPlayerRole);
+unsigned short
+PAL_GetPlayerMagicStrength(
+    unsigned short wPlayerRole);
 
-   unsigned short
-   PAL_GetPlayerDefense(
-       unsigned short wPlayerRole);
+unsigned short
+PAL_GetPlayerDefense(
+    unsigned short wPlayerRole);
 
-   unsigned short
-   PAL_GetPlayerDexterity(
-       unsigned short wPlayerRole);
+unsigned short
+PAL_GetPlayerDexterity(
+    unsigned short wPlayerRole);
 
-   unsigned short
-   PAL_GetPlayerFleeRate(
-       unsigned short wPlayerRole);
+unsigned short
+PAL_GetPlayerFleeRate(
+    unsigned short wPlayerRole);
 
-   unsigned short
-   PAL_GetPlayerPoisonResistance(
-       unsigned short wPlayerRole);
+unsigned short
+PAL_GetPlayerPoisonResistance(
+    unsigned short wPlayerRole);
 
-   unsigned short
-   PAL_GetPlayerElementalResistance(
-       unsigned short wPlayerRole,
-       int iAttrib);
+unsigned short
+PAL_GetPlayerElementalResistance(
+    unsigned short wPlayerRole,
+    int iAttrib);
 
-   unsigned short
-   PAL_GetPlayerBattleSprite(
-       unsigned short wPlayerRole);
+unsigned short
+PAL_GetPlayerBattleSprite(
+    unsigned short wPlayerRole);
 
-   unsigned short
-   PAL_GetPlayerCooperativeMagic(
-       unsigned short wPlayerRole);
+unsigned short
+PAL_GetPlayerCooperativeMagic(
+    unsigned short wPlayerRole);
 
-   int
-   PAL_PlayerCanAttackAll(
-       unsigned short wPlayerRole);
+int PAL_PlayerCanAttackAll(
+    unsigned short wPlayerRole);
 
-   int
-   PAL_AddMagic(
-       unsigned short wPlayerRole,
-       unsigned short wMagic);
+int PAL_AddMagic(
+    unsigned short wPlayerRole,
+    unsigned short wMagic);
 
-   void
-   PAL_RemoveMagic(
-       unsigned short wPlayerRole,
-       unsigned short wMagic);
+void PAL_RemoveMagic(
+    unsigned short wPlayerRole,
+    unsigned short wMagic);
 
-   int
-   PAL_SetPlayerStatus(
-       unsigned short wPlayerRole,
-       unsigned short wStatusID,
-       unsigned short wNumRound);
+int PAL_SetPlayerStatus(
+    unsigned short wPlayerRole,
+    unsigned short wStatusID,
+    unsigned short wNumRound);
 
-   void
-   PAL_RemovePlayerStatus(
-       unsigned short wPlayerRole,
-       unsigned short wStatusID);
+void PAL_RemovePlayerStatus(
+    unsigned short wPlayerRole,
+    unsigned short wStatusID);
 
-   void
-   PAL_ClearAllPlayerStatus(
-       void);
+void PAL_ClearAllPlayerStatus(
+    void);
 
-   void
-   PAL_PlayerLevelUp(
-       unsigned short wPlayerRole,
-       unsigned short wNumLevel);
+void PAL_PlayerLevelUp(
+    unsigned short wPlayerRole,
+    unsigned short wNumLevel);
 
 #ifdef __cplusplus
 }

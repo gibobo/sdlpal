@@ -20,7 +20,7 @@
 //
 
 #include "uigame.h"
-#include "audio.h"
+#include "audio/audio.h"
 #include "common.h"
 #include "global.h"
 #include "input.h"
