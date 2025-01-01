@@ -22,40 +22,39 @@
 #include "player.h"
 #include "opl.h"
 
-class CFakeopl : public Copl {
+class CFakeopl : public Copl
+{
 public:
-	void init() {}
-	void update(short* buf, int samples) {}
-	void write(int reg, int val) {}
-	bool getstereo() { return false; }
+   void init() {}
+   void update(short *buf, int samples) {}
+   void write(int reg, int val) {}
+   bool getstereo() { return false; }
 };
 
 /***** CPlayer *****/
 
 const unsigned short CPlayer::note_table[12] =
-   {363, 385, 408, 432, 458, 485, 514, 544, 577, 611, 647, 686};
+    {363, 385, 408, 432, 458, 485, 514, 544, 577, 611, 647, 686};
 
 const unsigned char CPlayer::op_table[9] =
-   {0x00, 0x01, 0x02, 0x08, 0x09, 0x0a, 0x10, 0x11, 0x12};
+    {0x00, 0x01, 0x02, 0x08, 0x09, 0x0a, 0x10, 0x11, 0x12};
 
-CPlayer::CPlayer(Copl *newopl)
-      : opl(newopl) {
-}
+CPlayer::CPlayer(Copl *newopl) : opl(newopl) {}
 
-CPlayer::~CPlayer() {
-}
+CPlayer::~CPlayer() {}
 
-unsigned long CPlayer::songlength(int subsong) {
+unsigned long CPlayer::songlength(int subsong)
+{
    CFakeopl tempopl;
-   Copl    *saveopl = opl;
-   float    slength = 0.0f;
+   Copl *saveopl = opl;
+   float slength = 0.0f;
 
    // save original OPL from being overwritten
    opl = &tempopl;
 
    // get song length
    rewind(subsong);
-   while (update() && slength < 600000)	// song length limit: 10 minutes
+   while (update() && slength < 600000) // song length limit: 10 minutes
       slength += 1000.0f / getrefresh();
    rewind(subsong);
 
@@ -64,10 +63,11 @@ unsigned long CPlayer::songlength(int subsong) {
    return (unsigned long)slength;
 }
 
-void CPlayer::seek(unsigned long ms) {
+void CPlayer::seek(unsigned long ms)
+{
    float pos = 0.0f;
 
    rewind();
-   while (pos < ms && update())		// seek to new position
-      pos += 1000/getrefresh();
+   while (pos < ms && update()) // seek to new position
+      pos += 1000 / getrefresh();
 }

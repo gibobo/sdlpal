@@ -33,12 +33,11 @@ using namespace std;
 #define RELEASE_INLINE inline
 #endif
 
-const uint8_t CrixPlayer::adflag[] = {0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1};
-const uint8_t CrixPlayer::reg_data[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21};
-const uint8_t CrixPlayer::ad_C0_offs[] = {0, 1, 2, 0, 1, 2, 3, 4, 5, 3, 4, 5, 6, 7, 8, 6, 7, 8};
-const uint8_t CrixPlayer::modify[] = {0, 3, 1, 4, 2, 5, 6, 9, 7, 10, 8, 11, 12, 15, 13, 16, 14, 17, 12,
-                                      15, 16, 0, 14, 0, 17, 0, 13, 0};
-const uint8_t CrixPlayer::bd_reg_data[] = {
+static const uint8_t adflag[] = {0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1};
+static const uint8_t reg_data[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21};
+static const uint8_t ad_C0_offs[] = {0, 1, 2, 0, 1, 2, 3, 4, 5, 3, 4, 5, 6, 7, 8, 6, 7, 8};
+static const uint8_t modify[] = {0, 3, 1, 4, 2, 5, 6, 9, 7, 10, 8, 11, 12, 15, 13, 16, 14, 17, 12, 15, 16, 0, 14, 0, 17, 0, 13, 0};
+static const uint8_t bd_reg_data[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x08, 0x04, 0x02, 0x01,
     0x00, 0x01, 0x01, 0x03, 0x0F, 0x05, 0x00, 0x01, 0x03, 0x0F, 0x00,
     0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x01, 0x0F, 0x07, 0x00, 0x02,
@@ -51,9 +50,8 @@ const uint8_t CrixPlayer::bd_reg_data[] = {
     0x0F, 0x0B, 0x00, 0x05, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x01, 0x00, 0x0F, 0x0B, 0x00, 0x07, 0x05, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00};
-uint8_t CrixPlayer::for40reg[] = {0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
-                                  0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F};
-const uint16_t CrixPlayer::mus_time = 0x4268;
+
+static uint8_t for40reg[] = {0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F};
 
 /*** public methods *************************************/
 
@@ -62,10 +60,7 @@ CPlayer *CrixPlayer::factory(Copl *newopl)
   return new CrixPlayer(newopl);
 }
 
-CrixPlayer::CrixPlayer(Copl *newopl)
-    : CPlayer(newopl), fp(NULL), rix_buf(NULL)
-{
-}
+CrixPlayer::CrixPlayer(Copl *newopl) : CPlayer(newopl), fp(NULL), rix_buf(NULL) {}
 
 CrixPlayer::~CrixPlayer()
 {
@@ -224,15 +219,15 @@ RELEASE_INLINE uint16_t CrixPlayer::ad_initial()
     f_buffer[i * 12] = ((uint16_t)res + 4) >> 3;
     for (int t = 1; t < 12; t++)
     {
-      res *= 1.06;
+      res = res * 106 / 100;
       f_buffer[i * 12 + t] = ((uint16_t)res + 4) >> 3;
     }
   }
   for (i = 0; i < 8; i++)
     for (j = 0; j < 12; j++)
     {
-      a0b0_data5[k] = i;
-      addrs_head[k] = j;
+      a0b0_data5[k] = (uint8_t)i;
+      addrs_head[k] = (uint8_t)j;
       k++;
     }
   ad_bd_reg();

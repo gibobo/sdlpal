@@ -21,6 +21,7 @@
  */
 
 #include "player.h"
+#include "fprovide.h"
 #include <stdint.h>
 
 class CrixPlayer : public CPlayer
@@ -62,14 +63,6 @@ protected:
   uint16_t displace[11];
   ADDT reg_bufs[18];
   uint32_t pos, length;
-
-  static const uint8_t adflag[18];
-  static const uint8_t reg_data[18];
-  static const uint8_t ad_C0_offs[18];
-  static const uint8_t modify[28];
-  static const uint8_t bd_reg_data[124];
-  static uint8_t for40reg[18];
-  static const uint16_t mus_time;
   uint32_t I, T;
   uint16_t mus_block;
   uint16_t ins_block;

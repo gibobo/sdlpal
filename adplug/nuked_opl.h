@@ -25,9 +25,13 @@
 #ifndef SDLPAL_NUKED_OPL_H
 #define SDLPAL_NUKED_OPL_H
 
-#include "opltypes.h"
+#define OPL3_EXTREG_BASE 0x100
+#define OPL3_4OP_REGISTER 0x104
+#define OPL3_MODE_REGISTER 0x105
+
 #include "oplcore.h"
-extern "C" {
+extern "C"
+{
 #include "opl3.h"
 }
 
@@ -37,16 +41,19 @@ public:
 	NUKEDOPL3(uint32_t samplerate) : OPLCORE(samplerate) {}
 
 	void Reset() { OPL3_Reset(&chip, rate); }
-	void Write(uint32_t reg, uint8_t val) {
-		if (reg == OPL3_4OP_REGISTER || reg == OPL3_MODE_REGISTER) {
+	void Write(uint32_t reg, uint8_t val)
+	{
+		if (reg == OPL3_4OP_REGISTER || reg == OPL3_MODE_REGISTER)
+		{
 			OPL3_WriteReg(&chip, (uint16_t)reg, val);
 		}
-		else {
+		else
+		{
 			OPL3_WriteRegBuffered(&chip, (uint16_t)reg, val);
 		}
 	}
-	void Generate(short* buf, int samples) { OPL3_GenerateStream(&chip, buf, samples); }
-	OPLCORE* Duplicate() { return new NUKEDOPL3(rate); }
+	void Generate(short *buf, int samples) { OPL3_GenerateStream(&chip, buf, samples); }
+	OPLCORE *Duplicate() { return new NUKEDOPL3(rate); }
 
 private:
 	opl3_chip chip;

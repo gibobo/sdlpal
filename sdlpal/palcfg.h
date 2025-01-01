@@ -74,13 +74,11 @@ typedef struct tagCONFIGURATION {
   unsigned int dwTextureWidth;
   unsigned int dwTextureHeight;
   int iAudioDevice;
-  int iSurroundOPLOffset;
   int iAudioChannels;
   int iSampleRate;
   int iOPLSampleRate;
   LOGLEVEL iLogLevel;
   unsigned short wAudioBufferSize;
-  int fUseSurroundOPL;
   int fKeepAspectRatio;
   int fFullScreen;
   int fUseCustomScreenLayout;

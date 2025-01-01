@@ -29,8 +29,8 @@
 #include "util.h"
 #include "players.h"
 #include "resampler.h"
-#include "src/rix.h"
-#include "src/surroundopl.h"
+#include "rix.h"
+#include "fprovide.h"
 
 #define     PAL_MAX_SAMPLERATE           49716
 
@@ -408,18 +408,6 @@ AUDIOPLAYER *RIX_Init(const char *szFileName)
 	{
 		delete pRixPlayer;
 		return NULL;
-	}
-
-	if (gConfig.fUseSurroundOPL)
-	{
-		Copl *tmpopl = new CSurroundopl(gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset, opl, nullptr);
-		if (NULL == tmpopl)
-		{
-			delete opl;
-			delete pRixPlayer;
-			return NULL;
-		}
-		opl = tmpopl;
 	}
 
 	pRixPlayer->opl = new CConvertopl(opl, true, gConfig.iAudioChannels == 2);

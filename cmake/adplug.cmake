@@ -1,6 +1,5 @@
 file(GLOB ADPLUG_FILES
     ${ADPLUG_DIR}/*.cpp
-    ${ADPLUG_DIR}/*/*.cpp
     ${NUKED_DIR}/*.c
     ${BINIO_SOURCE_DIR}/*.cpp
 )

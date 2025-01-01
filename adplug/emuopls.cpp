@@ -43,6 +43,7 @@
 #include "nuked_opl.h"
 #include "emuopls.h"
 
-Copl* CEmuopl::CreateEmuopl(int rate) {
+Copl *CEmuopl::CreateEmuopl(int rate)
+{
     return new CEmuopl(new NUKEDOPL3(rate), TYPE_OPL3);
 }

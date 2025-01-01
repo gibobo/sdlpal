@@ -128,8 +128,6 @@ PAL_LoadConfig(
 	gConfig.fKeepAspectRatio = TRUE;
 	gConfig.fFullScreen = FALSE;
 	gConfig.iAudioChannels = TRUE ? 2 : 1;
-	gConfig.fUseSurroundOPL = (gConfig.iAudioChannels==2) && TRUE;
-	gConfig.iSurroundOPLOffset = 384;
 	gConfig.iLogLevel = LOGLEVEL_MIN;
 	gConfig.iAudioDevice = -1;
 
