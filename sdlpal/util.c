@@ -752,12 +752,3 @@ void PAL_DelayUntil(unsigned int tm) {
     UTIL_Sleep(1);
   }
 }
-
-unsigned long long PAL_GetPerformanceFrequency(void)
-{
-  return SDL_GetPerformanceFrequency();
-}
-
-unsigned long long PAL_GetPerformanceCounter(void) {
-  return SDL_GetPerformanceCounter();
-}

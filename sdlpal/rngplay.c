@@ -399,11 +399,11 @@ PAL_RNGPlay(
 
 --*/
 {
-   uint8_t        *rng = (uint8_t *)malloc(65000);
-   uint8_t        *buf = (uint8_t *)malloc(65000);
-   FILE           *fp = UTIL_OpenRequiredFileForMode("rng.mkf", "rb");
-   uint64_t       iDelay = PAL_GetPerformanceFrequency() / (iSpeed == 0 ? 16 : iSpeed);
-   uint64_t       iTime  = PAL_GetPerformanceCounter();
+   FILE *fp = UTIL_OpenRequiredFileForMode("rng.mkf", "rb");
+   unsigned char *rng = (uint8_t *)malloc(65000);
+   unsigned char *buf = (uint8_t *)malloc(65000);
+   unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
+   unsigned int iTime = UTIL_GetTicks();
 
    //
    // Avoid losing the last frame
@@ -439,10 +439,7 @@ PAL_RNGPlay(
      //
      // Delay for a while
      //
-     PAL_ProcessEvent();
-     while (PAL_GetPerformanceCounter() < iTime) {
-       UTIL_Sleep(1);
-     }
+     PAL_DelayUntil(iTime);
    }
 
    fclose(fp);

@@ -417,83 +417,84 @@ void PAL_EndingScreen(
    // Use AVI & WIN95's music if we can
    // Otherwise, simulate the ending of DOS version
    //
-   {
-      AUDIO_PlayMusic(-1, FALSE, 0);
-      AUDIO_PlayMusic(0x1a, TRUE, 0);
-      PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 110, 150, 7);
-      PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 151, -1, 9);
+#if 1 // 不明音樂播放
+   AUDIO_PlayMusic(-1, FALSE, 0);
+   AUDIO_PlayMusic(0x1a, TRUE, 0);
+   PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 110, 150, 7);
+   PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 151, -1, 9);
 
-      PAL_FadeOut(2);
+   PAL_FadeOut(2);
+#endif
+#if 1 // 水魔獸
+   AUDIO_PlayMusic(-1, FALSE, 0);
+   AUDIO_PlayMusic(0x19, TRUE, 0);
 
-      AUDIO_PlayMusic(-1, FALSE, 0);
-      AUDIO_PlayMusic(0x19, TRUE, 0);
+   PAL_ShowFBP(75, 0);
+   PAL_FadeIn(5, FALSE, 1);
+   PAL_ScrollFBP(74, 0xf, TRUE);
 
-      PAL_ShowFBP(75, 0);
-      PAL_FadeIn(5, FALSE, 1);
-      PAL_ScrollFBP(74, 0xf, TRUE);
+   PAL_FadeOut(1);
 
-      PAL_FadeOut(1);
+   PAL_CleanScreen();
+   gpGlobals->wNumPalette = 4;
+   gpGlobals->fNeedToFadeIn = TRUE;
+   PAL_EndingAnimation();
+#endif
+#if 1 // 水災
+   AUDIO_PlayMusic(-1, FALSE, 0);
+   AUDIO_PlayMusic(0x00, FALSE, 2);
+   PAL_ColorFade(7, 15, FALSE);
 
-      PAL_CleanScreen();
-      gpGlobals->wNumPalette = 4;
-      gpGlobals->fNeedToFadeIn = TRUE;
-      PAL_EndingAnimation();
+   AUDIO_PlayMusic(-1, FALSE, 0);
+   AUDIO_PlayMusic(0x11, TRUE, 0);
 
-      AUDIO_PlayMusic(-1, FALSE, 0);
-      AUDIO_PlayMusic(0x00, FALSE, 2);
-      PAL_ColorFade(7, 15, FALSE);
+   PAL_CleanScreen();
+   PAL_SetPalette(0, FALSE);
+   PAL_RNGPlay(11, 0, -1, 7);
 
-      AUDIO_PlayMusic(-1, FALSE, 0);
-      AUDIO_PlayMusic(0x11, TRUE, 0);
+   PAL_FadeOut(2);
 
-      PAL_CleanScreen();
-      PAL_SetPalette(0, FALSE);
-      PAL_RNGPlay(11, 0, -1, 7);
+   PAL_CleanScreen();
+   gpGlobals->wNumPalette = 8;
+   gpGlobals->fNeedToFadeIn = TRUE;
+   PAL_RNGPlay(10, 0, -1, 6);
 
-      PAL_FadeOut(2);
+   PAL_EndingSetEffectSprite(0);
+   PAL_ShowFBP(77, 10);
 
-      PAL_CleanScreen();
-      gpGlobals->wNumPalette = 8;
-      gpGlobals->fNeedToFadeIn = TRUE;
-      PAL_RNGPlay(10, 0, -1, 6);
+   VIDEO_BackupScreen(gpScreen);
 
-      PAL_EndingSetEffectSprite(0);
-      PAL_ShowFBP(77, 10);
+   PAL_EndingSetEffectSprite(0x27b);
+   PAL_ShowFBP(76, 7);
 
-      VIDEO_BackupScreen(gpScreen);
+   PAL_SetPalette(5, FALSE);
+   PAL_ShowFBP(73, 7);
+   PAL_ScrollFBP(72, 0xf, TRUE);
 
-      PAL_EndingSetEffectSprite(0x27b);
-      PAL_ShowFBP(76, 7);
+   PAL_ShowFBP(71, 7);
+   PAL_ShowFBP(68, 7);
 
-      PAL_SetPalette(5, FALSE);
-      PAL_ShowFBP(73, 7);
-      PAL_ScrollFBP(72, 0xf, TRUE);
+   PAL_EndingSetEffectSprite(0);
+   PAL_ShowFBP(68, 6);
 
-      PAL_ShowFBP(71, 7);
-      PAL_ShowFBP(68, 7);
+   PAL_WaitForKey(0);
+   AUDIO_PlayMusic(0x00, FALSE, 1);
+   UTIL_Delay(500);
+#endif
+#if 1 // 工作人員名單
+   AUDIO_PlayMusic(-1, FALSE, 0);
+   AUDIO_PlayMusic(9, TRUE, 0);
+   PAL_ScrollFBP(67, 0xf, TRUE);
+   PAL_ScrollFBP(66, 0xf, TRUE); // 阿奴
+   PAL_ScrollFBP(65, 0xf, TRUE);
+   PAL_ScrollFBP(64, 0xf, TRUE); // 林月如
+   PAL_ScrollFBP(63, 0xf, TRUE);
+   PAL_ScrollFBP(62, 0xf, TRUE); // 趙靈兒
+   PAL_ScrollFBP(61, 0xf, TRUE);
+   PAL_ScrollFBP(60, 0xf, TRUE); // 李逍遙
+   PAL_ScrollFBP(59, 0xf, TRUE);
 
-      PAL_EndingSetEffectSprite(0);
-      PAL_ShowFBP(68, 6);
-
-      PAL_WaitForKey(0);
-      AUDIO_PlayMusic(0x00, FALSE, 1);
-      UTIL_Delay(500);
-   }
-
-   {
-      AUDIO_PlayMusic(-1, FALSE, 0);
-      AUDIO_PlayMusic(9, TRUE, 0);
-      PAL_ScrollFBP(67, 0xf, TRUE);
-      PAL_ScrollFBP(66, 0xf, TRUE);
-      PAL_ScrollFBP(65, 0xf, TRUE);
-      PAL_ScrollFBP(64, 0xf, TRUE);
-      PAL_ScrollFBP(63, 0xf, TRUE);
-      PAL_ScrollFBP(62, 0xf, TRUE);
-      PAL_ScrollFBP(61, 0xf, TRUE);
-      PAL_ScrollFBP(60, 0xf, TRUE);
-      PAL_ScrollFBP(59, 0xf, TRUE);
-
-      AUDIO_PlayMusic(0x00, FALSE, 6);
-      PAL_FadeOut(3);
-   }
+   AUDIO_PlayMusic(0x00, FALSE, 6);
+   PAL_FadeOut(3); // 淡出
+#endif
 }

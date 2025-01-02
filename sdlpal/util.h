@@ -345,9 +345,6 @@ void UTIL_Sleep(unsigned int tm);
 
 void PAL_DelayUntil(unsigned int tm);
 
-unsigned long long PAL_GetPerformanceFrequency(void);
-unsigned long long PAL_GetPerformanceCounter(void);
-
 #ifdef __cplusplus
 }
 #endif

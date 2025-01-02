@@ -32,24 +32,33 @@ static const int unicode_upper_base = 0xf900;
 static const int unicode_upper_top = 65534;
 #define _font_height (16)
 
-void PAL_InitFont(void) {
-  unsigned short i, j, k;
-  unsigned char x, y;
-  for (i = 0; i < sizeof(iso_font) / 15; i++) {
-    for (j = 0; j < 15; j++) {
-      x = unicode_font[i][j];
-      y = 0;
-      for (k = 0; k < 8; k++) {
+static unsigned char reverseBits(unsigned char x) {
+    unsigned char y = 0;
+    for (int i = 0 ; i < 8; i++){
         y <<= 1;
         y |= (x & 1);
         x >>= 1;
-      }
-      unicode_font[i][j] = y;
     }
+    return y;
+}
 
-    unicode_font[i][15] = 0;
-    font_width[i] = 16;
-  }
+void
+PAL_InitFont(
+   void
+)
+{
+    int         i, j;
+
+    for (i = 0; i < sizeof(iso_font) / 15; i++)
+    {
+        for (j = 0; j < 15; j++)
+        {
+            unicode_font[i][j] = reverseBits(iso_font[i * 15 + j]);
+        }
+
+        unicode_font[i][15] = 0;
+        font_width[i] = 16;
+    }
 }
 
 void
