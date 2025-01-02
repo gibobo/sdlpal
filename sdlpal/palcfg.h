@@ -29,7 +29,6 @@
 #include "util.h"
 
 typedef struct tagSCREENLAYOUT {
-  // uigame
   unsigned int EquipImageBox;
   unsigned int EquipRoleListBox;
   unsigned int EquipItemName;
@@ -41,6 +40,9 @@ typedef struct tagSCREENLAYOUT {
   unsigned int RoleName;
   unsigned int RoleImage;
   unsigned int RoleExpLabel;
+  unsigned int RoleLevelLabel;
+  unsigned int RoleHPLabel;
+  unsigned int RoleMPLabel;
   unsigned int RoleStatusLabels[5];
   unsigned int RoleCurrExp;
   unsigned int RoleNextExp;
@@ -56,6 +58,13 @@ typedef struct tagSCREENLAYOUT {
   unsigned int RoleEquipImageBoxes[MAX_PLAYER_EQUIPMENTS];
   unsigned int RoleEquipNames[MAX_PLAYER_EQUIPMENTS];
   unsigned int RolePoisonNames[MAX_POISONS];
+  unsigned int ExtraItemDescLines;
+  unsigned int ExtraMagicDescLines;
+  unsigned int MagicMPDescLines;
+  unsigned int MagicMPSlashPos;
+  unsigned int MagicMPNeededPos;
+  unsigned int MagicMPCurrentPos;
+  unsigned int MagicDescMsgPos;
 } SCREENLAYOUT;
 
 typedef struct tagCONFIGURATION {
@@ -74,11 +83,13 @@ typedef struct tagCONFIGURATION {
   unsigned int dwTextureWidth;
   unsigned int dwTextureHeight;
   int iAudioDevice;
+  int iSurroundOPLOffset;
   int iAudioChannels;
   int iSampleRate;
   int iOPLSampleRate;
   LOGLEVEL iLogLevel;
   unsigned short wAudioBufferSize;
+  int fUseSurroundOPL;
   int fKeepAspectRatio;
   int fFullScreen;
   int fUseCustomScreenLayout;

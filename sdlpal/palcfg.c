@@ -77,6 +77,9 @@ PAL_LoadConfig(
 		.RoleName            = PAL_XY(110, 8),
 		.RoleImage           = PAL_XY(110, 30),
 		.RoleExpLabel        = PAL_XY(6, 6),
+		.RoleLevelLabel      = PAL_XY(6, 32),
+		.RoleHPLabel         = PAL_XY(6, 54),
+		.RoleMPLabel         = PAL_XY(6, 76),
 		.RoleStatusLabels    = {
 			PAL_XY(6, 98),  PAL_XY(6, 118),
 			PAL_XY(6, 138), PAL_XY(6, 158),
@@ -114,6 +117,19 @@ PAL_LoadConfig(
 			PAL_XY(185, 166), PAL_XY(185, 184),
 			PAL_XY(185, 184), PAL_XY(185, 184)
 		},
+
+		// Extra Lines
+		.ExtraItemDescLines  = PAL_XY(0, 0),
+		.ExtraMagicDescLines = PAL_XY(0, 0),
+
+		// Magic Menu Desc
+		.MagicMPDescLines	= PAL_XY(5, 0),
+		.MagicMPSlashPos	= PAL_XY(45, 14),
+		.MagicMPNeededPos	= PAL_XY(15, 14),
+		.MagicMPCurrentPos	= PAL_XY(50, 14),
+
+		// Magic Desc Message Pos
+		.MagicDescMsgPos	= PAL_XY(102, 0),
 	};
 
 	//
