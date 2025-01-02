@@ -161,8 +161,8 @@ typedef struct tagBATTLE
 
    unsigned short             wMaxEnemyIndex;
 
-   SDL_Surface     *lpSceneBuf;
-   SDL_Surface     *lpBackground;
+   PAL_Surface     *lpSceneBuf;
+   PAL_Surface     *lpBackground;
 
    short            sBackgroundColorShift;
 
@@ -230,19 +230,19 @@ PAL_BattleDrawBackground(
 void
 PAL_BattleDrawEnemySprites(
    unsigned short              wEnemyIndex,
-   SDL_Surface      *lpDstSurface
+   PAL_Surface      *lpDstSurface
 );
 
 void
 PAL_BattleDrawPlayerSprites(
    unsigned short              wPlayerIndex,
-   SDL_Surface      *lpDstSurface
+   PAL_Surface      *lpDstSurface
 );
 
 void
 PAL_BattleDrawMagicSprites(
    int               iMagicNum,
-   SDL_Surface      *lpDstSurface,
+   PAL_Surface      *lpDstSurface,
    unsigned int           pos
 );
 

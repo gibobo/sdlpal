@@ -24,11 +24,11 @@
 
 #include "scene.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "map.h"
 #include "palette.h"
 #include "res.h"
-#include "video.h"
+#include "video/video.h"
 #include "palcommon.h"
 #include "common.h"
 
@@ -367,7 +367,7 @@ PAL_SceneDrawSprites(
 }
 
 void PAL_ApplyWave(
-    SDL_Surface *lpSurface)
+    PAL_Surface *lpSurface)
 /*++
    Purpose:
 
@@ -470,7 +470,7 @@ void PAL_MakeScene(
 
 --*/
 {
-   static SDL_Rect rect = {0, 0, 320, 200};
+   static PAL_Rect rect = {0, 0, 320, 200};
 
    //
    // Step 1: Draw the complete map, for both of the layers.
@@ -786,10 +786,10 @@ void PAL_UpdateParty(
    //
    // Has user pressed one of the arrow keys?
    //
-   if (g_InputState.dir != kDirUnknown)
+   if (PAL_GetDirInput() != kDirUnknown)
    {
-      xOffset = ((g_InputState.dir == kDirWest || g_InputState.dir == kDirSouth) ? -16 : 16);
-      yOffset = ((g_InputState.dir == kDirWest || g_InputState.dir == kDirNorth) ? -8 : 8);
+      xOffset = ((PAL_GetDirInput() == kDirWest || PAL_GetDirInput() == kDirSouth) ? -16 : 16);
+      yOffset = ((PAL_GetDirInput() == kDirWest || PAL_GetDirInput() == kDirNorth) ? -8 : 8);
 
       xSource = PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset);
       ySource = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
@@ -797,7 +797,7 @@ void PAL_UpdateParty(
       xTarget = xSource + xOffset;
       yTarget = ySource + yOffset;
 
-      gpGlobals->wPartyDirection = g_InputState.dir;
+      gpGlobals->wPartyDirection = PAL_GetDirInput();
 
       //
       // Check for obstacles on the destination location
@@ -812,7 +812,7 @@ void PAL_UpdateParty(
             gpGlobals->rgTrail[i + 1] = gpGlobals->rgTrail[i];
          }
 
-         gpGlobals->rgTrail[0].wDirection = g_InputState.dir;
+         gpGlobals->rgTrail[0].wDirection = PAL_GetDirInput();
          gpGlobals->rgTrail[0].x = xSource;
          gpGlobals->rgTrail[0].y = ySource;
 

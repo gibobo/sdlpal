@@ -22,17 +22,17 @@
 #include "ui.h"
 #include "font.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "palcommon.h"
 #include "text.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 #include "common.h"
 
 unsigned char *gpSpriteUI = NULL;
 
 static BOX *PAL_CreateBoxInternal(
-    const SDL_Rect *rect) {
+    const PAL_Rect *rect) {
   BOX *lpBox = (BOX *)calloc(1, sizeof(BOX));
   if (lpBox == NULL) {
     return NULL;
@@ -158,7 +158,7 @@ BOX *PAL_CreateBoxWithShadow(
    int i, j, x, m, n;
    const unsigned char *rglpBorderBitmap[3][3];
    BOX *lpBox = NULL;
-   SDL_Rect rect;
+   PAL_Rect rect;
 
    //
    // Get the bitmaps
@@ -273,7 +273,7 @@ BOX *PAL_CreateSingleLineBoxWithShadow(
    const unsigned char *lpBitmapLeft;
    const unsigned char *lpBitmapMid;
    const unsigned char *lpBitmapRight;
-   SDL_Rect rect;
+   PAL_Rect rect;
    BOX *lpBox = NULL;
    int i;
    int xSaved;
@@ -358,7 +358,7 @@ void PAL_DeleteBox(BOX *lpBox)
 
 --*/
 {
-   SDL_Rect rect;
+   PAL_Rect rect;
 
    //
    // Check for NULL pointer.
@@ -381,7 +381,7 @@ void PAL_DeleteBox(BOX *lpBox)
    //
    // Free the memory used by the box
    //
-   VIDEO_FreeSurface(lpBox->lpSavedArea);
+   PAL_FreeSurface(lpBox->lpSavedArea);
    free(lpBox);
 }
 
@@ -422,7 +422,7 @@ PAL_ReadMenu(
    //
    // Fix issue #166
    //
-   g_bRenderPaused = TRUE;
+   VIDEO_RenderPaused(TRUE);
    //
    // Draw all the menu texts.
    //
@@ -447,7 +447,7 @@ PAL_ReadMenu(
    //
    // Fix issue #166
    //
-   g_bRenderPaused = FALSE;
+   VIDEO_RenderPaused(FALSE);
    VIDEO_UpdateScreen(NULL);
 
    if (lpfnMenuItemChanged != NULL)
@@ -470,12 +470,12 @@ PAL_ReadMenu(
 
       PAL_ProcessEvent();
 
-      if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight))
+      if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
       {
          //
          // Fix issue #166
          //
-         g_bRenderPaused = TRUE;
+         VIDEO_RenderPaused(TRUE);
 
          //
          // User pressed the down or right arrow key
@@ -517,7 +517,7 @@ PAL_ReadMenu(
          //
          // Fix issue #166
          //
-         g_bRenderPaused = FALSE;
+         VIDEO_RenderPaused(FALSE);
          VIDEO_UpdateScreen(NULL);
 
          if (lpfnMenuItemChanged != NULL)
@@ -525,12 +525,12 @@ PAL_ReadMenu(
             (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
          }
       }
-      else if (g_InputState.dwKeyPress & (kKeyUp | kKeyLeft))
+      else if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
       {
          //
          // Fix issue #166
          //
-         g_bRenderPaused = TRUE;
+         VIDEO_RenderPaused(TRUE);
 
          //
          // User pressed the up or left arrow key
@@ -574,7 +574,7 @@ PAL_ReadMenu(
          //
          // Fix issue #166
          //
-         g_bRenderPaused = FALSE;
+         VIDEO_RenderPaused(FALSE);
          VIDEO_UpdateScreen(NULL);
 
          if (lpfnMenuItemChanged != NULL)
@@ -582,7 +582,7 @@ PAL_ReadMenu(
             (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
          }
       }
-      else if (g_InputState.dwKeyPress & kKeyMenu)
+      else if (PAL_GetKeyInput() & kKeyMenu)
       {
          //
          // User cancelled
@@ -600,7 +600,7 @@ PAL_ReadMenu(
 
          break;
       }
-      else if (g_InputState.dwKeyPress & kKeySearch)
+      else if (PAL_GetKeyInput() & kKeySearch)
       {
          //
          // User pressed Enter
@@ -730,11 +730,13 @@ void PAL_DrawNumber(
       text width.
 
 --*/
-size_t
+int
 PAL_TextWidth(
-    const unsigned short *lpszItemText)
+    const wchar_t *lpszItemText)
 {
-   size_t l = wcslen(lpszItemText), j = 0, w = 0;
+   int l = (int)wcslen(lpszItemText);
+   int j = 0;
+   int w = 0;
    for (j = 0; j < l; j++)
    {
       w += PAL_CharWidth(lpszItemText[j]);
@@ -761,11 +763,13 @@ int PAL_MenuTextMaxWidth(
 
 --*/
 {
-   size_t i, r = 0;
+   int i;
+   int r = 0;
+   int w;
    for (i = 0; i < nMenuItem; i++)
    {
-      const unsigned short *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
-      size_t w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4;
+      const wchar_t *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
+      w = (int)((PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4);
       if (r < w)
       {
          r = w;
@@ -793,11 +797,14 @@ int PAL_WordMaxWidth(
 
 --*/
 {
-   int i, r = 0;
+   int i;
+   int j = 0;
+   int r = 0;
    for (i = 0; i < nWordNum; i++)
    {
-      const unsigned short *itemText = PAL_GetWord(nFirstWord + i);
-      int j = 0, l = wcslen(itemText), w = 0;
+      const wchar_t *itemText = PAL_GetWord(nFirstWord + i);
+      int l = (int)wcslen(itemText);
+      int w = 0;
       for (j = 0; j < l; j++)
       {
          w += PAL_CharWidth(itemText[j]);
@@ -828,7 +835,7 @@ int PAL_WordWidth(
 
 --*/
 {
-   const unsigned short *itemText = PAL_GetWord(nWordIndex);
+   const wchar_t *itemText = PAL_GetWord(nWordIndex);
    unsigned int i = 0;
    unsigned int w = 8;
    unsigned int l = (unsigned int)wcslen(itemText);

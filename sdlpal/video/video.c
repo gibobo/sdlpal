@@ -21,27 +21,23 @@
 
 #include "video.h"
 #include "common.h"
-#include "input.h"
+#include "input/input.h"
 #include "mini_glloader.h"
 #include "pal_config.h"
 #include "palcfg.h"
 #include "util.h"
+#include <SDL_render.h>
 #include <SDL_hints.h>
-
-// Screen buffer
-SDL_Surface              *gpScreen           = NULL;
-
-// Backup screen buffer
-SDL_Surface              *gpScreenBak        = NULL;
 
 // The global palette
 static SDL_Palette       *gpPalette          = NULL;
-
+PAL_Surface              *gpScreen           = NULL;  // Screen buffer
+PAL_Surface              *gpScreenBak        = NULL;  // Backup screen buffer
+PAL_Surface       *gpScreenReal       = NULL;   // The real screen surface
 SDL_Window        *gpWindow           = NULL;
 SDL_Renderer      *gpRenderer         = NULL;
 SDL_Texture       *gpTexture          = NULL;
 SDL_Texture       *gpTouchOverlay     = NULL;
-SDL_Rect           gTextureRect;
 
 static struct RenderBackend {
     void (*Init)();
@@ -51,10 +47,9 @@ static struct RenderBackend {
 } gRenderBackend;
 
 
-// The real screen surface
-SDL_Surface       *gpScreenReal       = NULL;
 
-volatile int g_bRenderPaused = FALSE;
+
+volatile unsigned char g_bRenderPaused = FALSE;
 
 static int bScaleScreen = TRUE;
 
@@ -113,10 +108,9 @@ VIDEO_Startup(
    //
    // Create the screen buffer and the backup screen buffer.
    //
-   gpScreen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 8, 0, 0, 0, 0);
-   gpScreenBak = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 8, 0, 0, 0, 0);
-   gpScreenReal = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 32,
-                                       0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+   gpScreen = (PAL_Surface *)SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 8, 0, 0, 0, 0);
+   gpScreenBak = (PAL_Surface *)SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 8, 0, 0, 0, 0);
+   gpScreenReal = (PAL_Surface *)SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
 
    //
    // Create texture for screen.
@@ -140,13 +134,11 @@ VIDEO_Startup(
    }
 
    // notice: power of 2
-#  define PIXELS 1
 	// We need a total empty texture in case of not using touch overlay.
 	// Or GL runtime will pick the previous texture - the main screen itself
 	// and reuse it - that makes color seems overexposed
-   unsigned char pixels[4 * PIXELS * PIXELS];
-   memset(pixels, 0, sizeof(pixels));
-   SDL_Surface *temp = SDL_CreateRGBSurfaceFrom(pixels, PIXELS, PIXELS, 32, 4 * PIXELS, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+   unsigned char pixels[4] = {0, 0, 0, 0};
+   SDL_Surface *temp = SDL_CreateRGBSurfaceFrom(pixels, 1, 1, 32, 4, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
    gpTouchOverlay = SDL_CreateTextureFromSurface(gpRenderer, temp);
    SDL_FreeSurface(temp);
 
@@ -179,13 +171,13 @@ VIDEO_Shutdown(
 
    if (gpScreen != NULL)
    {
-      SDL_FreeSurface(gpScreen);
+      SDL_FreeSurface((SDL_Surface *)gpScreen);
    }
    gpScreen = NULL;
 
    if (gpScreenBak != NULL)
    {
-      SDL_FreeSurface(gpScreenBak);
+      SDL_FreeSurface((SDL_Surface *)gpScreenBak);
    }
    gpScreenBak = NULL;
 
@@ -217,19 +209,18 @@ VIDEO_Shutdown(
    {
       SDL_FreePalette(gpPalette);
    }
-
    gpPalette = NULL;
 
    if (gpScreenReal != NULL)
    {
-      SDL_FreeSurface(gpScreenReal);
+      SDL_FreeSurface((SDL_Surface *)gpScreenReal);
    }
    gpScreenReal = NULL;
 }
 
 void
 VIDEO_UpdateScreen(
-   const SDL_Rect  *lpRect
+   const PAL_Rect  *lpRect
 )
 /*++
   Purpose:
@@ -247,7 +238,7 @@ VIDEO_UpdateScreen(
 --*/
 {
    SDL_Rect        srcrect, dstrect;
-   short           offset = 240 - 200;
+   short           offset = 40;
    short           screenRealHeight = gpScreenReal->h;
    short           screenRealY = 0;
 
@@ -261,7 +252,7 @@ VIDEO_UpdateScreen(
    //
    if (SDL_MUSTLOCK(gpScreenReal))
    {
-      if (SDL_LockSurface(gpScreenReal) < 0)
+      if (SDL_LockSurface((SDL_Surface *)gpScreenReal) < 0)
          return;
    }
 
@@ -278,7 +269,7 @@ VIDEO_UpdateScreen(
       dstrect.w = (unsigned short)((unsigned int)(lpRect->w) * gpScreenReal->w / gpScreen->w);
       dstrect.h = (unsigned short)((unsigned int)(lpRect->h) * screenRealHeight / gpScreen->h);
 
-      SDL_UpperBlit(gpScreen, (SDL_Rect *)lpRect, gpScreenReal, &dstrect);
+      SDL_UpperBlit((SDL_Surface *)gpScreen, (SDL_Rect *)lpRect, (SDL_Surface *)gpScreenReal, &dstrect);
    }
    else if (g_wShakeTime != 0)
    {
@@ -304,7 +295,7 @@ VIDEO_UpdateScreen(
          dstrect.y = (screenRealY + g_wShakeLevel) * screenRealHeight / gpScreen->h;
       }
 
-      SDL_UpperBlit(gpScreen, &srcrect, gpScreenReal, &dstrect);
+      SDL_UpperBlit((SDL_Surface *)gpScreen, &srcrect, (SDL_Surface *)gpScreenReal, &dstrect);
 
       if (g_wShakeTime & 1)
       {
@@ -317,7 +308,7 @@ VIDEO_UpdateScreen(
 
       dstrect.h = g_wShakeLevel * screenRealHeight / gpScreen->h;
 
-      SDL_FillRect(gpScreenReal, &dstrect, 0);
+      SDL_FillRect((SDL_Surface *)gpScreenReal, &dstrect, 0);
 
 #if SDL_MAJOR_VERSION == 1 && SDL_MINOR_VERSION <= 2
       dstrect.x = dstrect.y = 0;
@@ -333,7 +324,7 @@ VIDEO_UpdateScreen(
       dstrect.w = gpScreenReal->w;
       dstrect.h = screenRealHeight;
 
-      SDL_UpperBlit(gpScreen, NULL, gpScreenReal, &dstrect);
+      SDL_UpperBlit((SDL_Surface *)gpScreen, NULL, (SDL_Surface *)gpScreenReal, &dstrect);
 
 #if SDL_MAJOR_VERSION == 1 && SDL_MINOR_VERSION <= 2
       dstrect.x = dstrect.y = 0;
@@ -346,13 +337,13 @@ VIDEO_UpdateScreen(
 
    if (SDL_MUSTLOCK(gpScreenReal))
    {
-	   SDL_UnlockSurface(gpScreenReal);
+	   SDL_UnlockSurface((SDL_Surface *)gpScreenReal);
    }
 }
 
 void
 VIDEO_SetPalette(
-   SDL_Color        rgPalette[256]
+   PAL_Color       *rgPalette
 )
 /*++
   Purpose:
@@ -369,21 +360,21 @@ VIDEO_SetPalette(
 
 --*/
 {
-   SDL_Rect rect;
+   PAL_Rect rect;
 
-   SDL_SetPaletteColors(gpPalette, rgPalette, 0, 256);
+   SDL_SetPaletteColors(gpPalette, (const SDL_Color *)rgPalette, 0, 256);
 
-   SDL_SetSurfacePalette(gpScreen, gpPalette);
-   SDL_SetSurfacePalette(gpScreenBak, gpPalette);
+   SDL_SetSurfacePalette((SDL_Surface *)gpScreen, gpPalette);
+   SDL_SetSurfacePalette((SDL_Surface *)gpScreenBak, gpPalette);
 
    //
    // HACKHACK: need to invalidate gpScreen->map otherwise the palette
    // would not be effective during blit
    //
-   SDL_SetSurfaceColorMod(gpScreen, 0, 0, 0);
-   SDL_SetSurfaceColorMod(gpScreen, 0xFF, 0xFF, 0xFF);
-   SDL_SetSurfaceColorMod(gpScreenBak, 0, 0, 0);
-   SDL_SetSurfaceColorMod(gpScreenBak, 0xFF, 0xFF, 0xFF);
+   SDL_SetSurfaceColorMod((SDL_Surface *)gpScreen, 0, 0, 0);
+   SDL_SetSurfaceColorMod((SDL_Surface *)gpScreen, 0xFF, 0xFF, 0xFF);
+   SDL_SetSurfaceColorMod((SDL_Surface *)gpScreenBak, 0, 0, 0);
+   SDL_SetSurfaceColorMod((SDL_Surface *)gpScreenBak, 0xFF, 0xFF, 0xFF);
 
    rect.x = 0;
    rect.y = 0;
@@ -415,7 +406,7 @@ VIDEO_Resize(
 
 --*/
 {
-   SDL_Rect rect;
+   PAL_Rect rect;
 
    if (gpTexture)
    {
@@ -437,7 +428,7 @@ VIDEO_Resize(
    VIDEO_UpdateScreen(&rect);
 }
 
-SDL_Color *
+PAL_Color *
 VIDEO_GetPalette(
    void
 )
@@ -456,7 +447,7 @@ VIDEO_GetPalette(
 
 --*/
 {
-   return gpPalette->colors;
+   return (PAL_Color *)gpPalette->colors;
 }
 
 void
@@ -488,44 +479,6 @@ VIDEO_ToggleFullscreen(
 		SDL_SetWindowFullscreen(gpWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		gConfig.fFullScreen = TRUE;
 	}
-}
-
-void
-VIDEO_SaveScreenshot(
-   void
-)
-/*++
-  Purpose:
-
-    Save the screenshot of current screen to a BMP file.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-	char filename[80];
-#ifdef _WIN32
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-	sprintf(filename, "%04d%02d%02d%02d%02d%02d%03d.bmp", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
-#elif !defined( GEKKO )
-	struct timeval tv;
-	struct tm *ptm;
-	gettimeofday(&tv, NULL);
-	ptm = localtime(&tv.tv_sec);
-	sprintf(filename, "%04d%02d%02d%02d%02d%02d%03d.bmp", ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, (int)(tv.tv_usec / 1000));
-#endif
-
-	//
-	// Save the screenshot.
-	//
-	SDL_SaveBMP(gpScreen, PAL_CombinePath(0, gConfig.pszSavePath, filename));
 }
 
 void
@@ -576,7 +529,7 @@ VIDEO_SwitchScreen(
 {
    int               i, j;
    const int         rgIndex[6] = {0, 3, 1, 5, 2, 4};
-   SDL_Rect          dstrect;
+   PAL_Rect          dstrect;
 
    short             offset = 240 - 200;
    short             screenRealHeight = gpScreenReal->h;
@@ -608,17 +561,17 @@ VIDEO_SwitchScreen(
 
 	  if (SDL_MUSTLOCK(gpScreenReal))
 	  {
-		  if (SDL_LockSurface(gpScreenReal) < 0)
+		  if (SDL_LockSurface((SDL_Surface *)gpScreenReal) < 0)
 			  return;
 	  }
 
-      SDL_UpperBlit(gpScreenBak, NULL, gpScreenReal, &dstrect);
+      VIDEO_CopySurface(gpScreenBak, NULL, gpScreenReal, &dstrect);
 
       gRenderBackend.RenderCopy();
 
 	  if (SDL_MUSTLOCK(gpScreenReal))
 	  {
-		  SDL_UnlockSurface(gpScreenReal);
+		  SDL_UnlockSurface((SDL_Surface *)gpScreenReal);
 	  }
 
       UTIL_Delay(wSpeed);
@@ -649,7 +602,7 @@ VIDEO_FadeScreen(
    unsigned int             time;
    unsigned char              a, b;
    const int         rgIndex[6] = {0, 3, 1, 5, 2, 4};
-   SDL_Rect          dstrect;
+   PAL_Rect          dstrect;
    short             offset = 240 - 200;
    short             screenRealHeight = gpScreenReal->h;
    short             screenRealY = 0;
@@ -659,7 +612,7 @@ VIDEO_FadeScreen(
    //
    if (SDL_MUSTLOCK(gpScreenReal))
    {
-      if (SDL_LockSurface(gpScreenReal) < 0)
+      if (SDL_LockSurface((SDL_Surface *)gpScreenReal) < 0)
          return;
    }
 
@@ -713,7 +666,7 @@ VIDEO_FadeScreen(
             //
             // Shake the screen
             //
-            SDL_Rect srcrect, dstrect;
+            PAL_Rect srcrect, dstrect;
 
             srcrect.x = 0;
             srcrect.y = 0;
@@ -734,7 +687,7 @@ VIDEO_FadeScreen(
                dstrect.y = (screenRealY + g_wShakeLevel) * screenRealHeight / gpScreen->h;
             }
 
-            SDL_UpperBlit(gpScreenBak, &srcrect, gpScreenReal, &dstrect);
+            SDL_UpperBlit((SDL_Surface *)gpScreenBak, (const SDL_Rect *)&srcrect, (SDL_Surface *)gpScreenReal, (SDL_Rect *)&dstrect);
 
             if (g_wShakeTime & 1)
             {
@@ -747,7 +700,7 @@ VIDEO_FadeScreen(
 
             dstrect.h = g_wShakeLevel * screenRealHeight / gpScreen->h;
 
-            SDL_FillRect(gpScreenReal, &dstrect, 0);
+            SDL_FillRect((SDL_Surface *)gpScreenReal, (const SDL_Rect *)&dstrect, 0);
             gRenderBackend.RenderCopy();
             g_wShakeTime--;
          }
@@ -758,15 +711,15 @@ VIDEO_FadeScreen(
             dstrect.w = gpScreenReal->w;
             dstrect.h = screenRealHeight;
 
-            SDL_UpperBlit(gpScreenBak, NULL, gpScreenReal, &dstrect);
+            VIDEO_CopySurface(gpScreenBak, NULL, gpScreenReal, &dstrect);
             gRenderBackend.RenderCopy();
          }
       }
    }
 
-   if (SDL_MUSTLOCK(gpScreenReal))
+   if (SDL_MUSTLOCK((SDL_Surface *)gpScreenReal))
    {
-      SDL_UnlockSurface(gpScreenReal);
+      SDL_UnlockSurface((SDL_Surface *)gpScreenReal);
    }
 
    //
@@ -797,18 +750,10 @@ VIDEO_SetWindowTitle(
 	SDL_SetWindowTitle(gpWindow, pszTitle);
 }
 
-SDL_Surface *
-VIDEO_CreateCompatibleSurface(
-	SDL_Surface    *pSource
-)
-{
-	return VIDEO_CreateCompatibleSizedSurface(pSource, NULL);
-}
-
-SDL_Surface *
+PAL_Surface *
 VIDEO_CreateCompatibleSizedSurface(
-	SDL_Surface    *pSource,
-	const SDL_Rect *pSize
+	PAL_Surface    *pSource,
+	const PAL_Rect *pSize
 )
 /*++
   Purpose:
@@ -838,16 +783,16 @@ VIDEO_CreateCompatibleSizedSurface(
 
 	if (dest)
 	{
-		VIDEO_UpdateSurfacePalette(dest);
+	   SDL_SetSurfacePalette(dest, gpPalette);
 	}
 
-	return dest;
+	return (PAL_Surface *)dest;
 }
 
-SDL_Surface *
+PAL_Surface *
 VIDEO_DuplicateSurface(
-	SDL_Surface    *pSource,
-	const SDL_Rect *pRect
+	PAL_Surface    *pSource,
+	const PAL_Rect *pRect
 )
 /*++
   Purpose:
@@ -865,7 +810,7 @@ VIDEO_DuplicateSurface(
 
 --*/
 {
-	SDL_Surface* dest = VIDEO_CreateCompatibleSizedSurface(pSource, pRect);
+	PAL_Surface* dest = VIDEO_CreateCompatibleSizedSurface(pSource, pRect);
 
 	if (dest)
 	{
@@ -877,7 +822,7 @@ VIDEO_DuplicateSurface(
 
 void
 VIDEO_UpdateSurfacePalette(
-	SDL_Surface    *pSurface
+	PAL_Surface    *pSurface
 )
 /*++
   Purpose:
@@ -894,35 +839,30 @@ VIDEO_UpdateSurfacePalette(
 
 --*/
 {
-	SDL_SetSurfacePalette(pSurface, gpPalette);
+	SDL_SetSurfacePalette((SDL_Surface *)pSurface, gpPalette);
 }
 
+
 void
-VIDEO_DrawSurfaceToScreen(
-    SDL_Surface    *pSurface
+VIDEO_RenderPaused(
+	unsigned char flag
 )
-/*++
-  Purpose:
-
-    Draw a surface directly to screen.
-
-  Parameters:
-
-    [IN]  pSurface - the surface which needs to be drawn to screen.
-
-  Return value:
-
-    None.
-
---*/
 {
-   //
-   // Draw the surface to screen.
-   //
-   if (g_bRenderPaused)
-   {
-      return;
-   }
-   SDL_BlitScaled(pSurface, NULL, gpScreenReal, NULL);
-   gRenderBackend.RenderCopy();
+   g_bRenderPaused = flag;
+}
+
+int PAL_UpperBlit(
+    PAL_Surface *src,
+    const PAL_Rect *srcrect,
+    PAL_Surface *dst,
+    PAL_Rect *dstrect) {
+  return SDL_UpperBlit((SDL_Surface *)src, (const SDL_Rect *)srcrect, (SDL_Surface *)dst, (SDL_Rect *)dstrect);
+}
+
+void PAL_FreeSurface(PAL_Surface *surface) {
+  SDL_FreeSurface((SDL_Surface *)surface);
+}
+
+void PAL_CleanScreen(void) {
+  SDL_FillRect((SDL_Surface *)gpScreen, NULL, 0);
 }

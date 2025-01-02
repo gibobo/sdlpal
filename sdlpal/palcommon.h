@@ -23,7 +23,7 @@
 #define _PALUTILS_H
 
 #include "util.h"
-#include <SDL_surface.h>
+#include "video/video.h"
 #include <stdio.h>
 
 #define PAL_XY(x, y) (unsigned int)(((((unsigned short)(y)) << 16) & 0xFFFF0000) | (((unsigned short)(x)) & 0xFFFF))
@@ -39,27 +39,27 @@ extern "C"
     int
     PAL_RLEBlitToSurface(
         const unsigned char *lpBitmapRLE,
-        SDL_Surface *lpDstSurface,
+        PAL_Surface *lpDstSurface,
         unsigned int pos);
 
     int
     PAL_RLEBlitToSurfaceWithShadow(
         const unsigned char *lpBitmapRLE,
-        SDL_Surface *lpDstSurface,
+        PAL_Surface *lpDstSurface,
         unsigned int pos,
         int bShadow);
 
     int
     PAL_RLEBlitWithColorShift(
         const unsigned char *lpBitmapRLE,
-        SDL_Surface *lpDstSurface,
+        PAL_Surface *lpDstSurface,
         unsigned int pos,
         int iColorShift);
 
     int
     PAL_RLEBlitMonoColor(
         const unsigned char *lpBitmapRLE,
-        SDL_Surface *lpDstSurface,
+        PAL_Surface *lpDstSurface,
         unsigned int pos,
         unsigned char bColor,
         int iColorShift);
@@ -67,7 +67,7 @@ extern "C"
     int
     PAL_FBPBlitToSurface(
         unsigned char *lpBitmapFBP,
-        SDL_Surface *lpDstSurface);
+        PAL_Surface *lpDstSurface);
 
     int
     PAL_RLEGetWidth(

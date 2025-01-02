@@ -21,7 +21,7 @@
 
 #include "game.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "palcommon.h"
 #include "play.h"
 #include "res.h"

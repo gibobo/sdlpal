@@ -23,14 +23,14 @@
 #include "common.h"
 #include "game.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "palcfg.h"
 #include "palcommon.h"
 #include "scene.h"
 #include "script.h"
 #include "text.h"
 #include "uibattle.h"
-#include "video.h"
+#include "video/video.h"
 
 static struct MAGICITEM
 {
@@ -74,39 +74,39 @@ PAL_MagicSelectionMenuUpdate(
    //
    // Check for inputs
    //
-   if (g_InputState.dwKeyPress & kKeyUp)
+   if (PAL_GetKeyInput() & kKeyUp)
    {
       item_delta = -iItemsPerLine;
    }
-   else if (g_InputState.dwKeyPress & kKeyDown)
+   else if (PAL_GetKeyInput() & kKeyDown)
    {
       item_delta = iItemsPerLine;
    }
-   else if (g_InputState.dwKeyPress & kKeyLeft)
+   else if (PAL_GetKeyInput() & kKeyLeft)
    {
       item_delta = -1;
    }
-   else if (g_InputState.dwKeyPress & kKeyRight)
+   else if (PAL_GetKeyInput() & kKeyRight)
    {
       item_delta = 1;
    }
-   else if (g_InputState.dwKeyPress & kKeyPgUp)
+   else if (PAL_GetKeyInput() & kKeyPgUp)
    {
       item_delta = -(iItemsPerLine * iLinesPerPage);
    }
-   else if (g_InputState.dwKeyPress & kKeyPgDn)
+   else if (PAL_GetKeyInput() & kKeyPgDn)
    {
       item_delta = iItemsPerLine * iLinesPerPage;
    }
-   else if (g_InputState.dwKeyPress & kKeyHome)
+   else if (PAL_GetKeyInput() & kKeyHome)
    {
       item_delta = -g_iCurrentItem;
    }
-   else if (g_InputState.dwKeyPress & kKeyEnd)
+   else if (PAL_GetKeyInput() & kKeyEnd)
    {
       item_delta = g_iNumMagic - g_iCurrentItem - 1;
    }
-   else if (g_InputState.dwKeyPress & kKeyMenu)
+   else if (PAL_GetKeyInput() & kKeyMenu)
    {
       return 0;
    }
@@ -212,7 +212,7 @@ PAL_MagicSelectionMenuUpdate(
       }
    }
 
-   if (g_InputState.dwKeyPress & kKeySearch)
+   if (PAL_GetKeyInput() & kKeySearch)
    {
       if (rgMagicItem[g_iCurrentItem].fEnabled)
       {
@@ -404,7 +404,7 @@ PAL_MagicSelectionMenu(
       PAL_ProcessEvent();
       while (UTIL_GetTicks() < dwTime) {
         PAL_ProcessEvent();
-        if (g_InputState.dwKeyPress != 0) {
+        if (PAL_GetKeyInput() != kKeyNone) {
           break;
         }
         UTIL_Sleep(5);

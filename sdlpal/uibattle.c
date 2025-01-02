@@ -24,7 +24,7 @@
 #include "common.h"
 #include "fight.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "itemmenu.h"
 #include "magicmenu.h"
 #include "palcfg.h"
@@ -32,7 +32,7 @@
 #include "text.h"
 #include "uigame.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 
 extern unsigned short g_rgPlayerPos[3][3][2];
 
@@ -68,7 +68,7 @@ void PAL_PlayerInfoBox(
 
 --*/
 {
-   SDL_Rect rect;
+   PAL_Rect rect;
    unsigned char bPoisonColor;
    int i, iPartyIndex;
    unsigned short wMaxLevel, w;
@@ -359,7 +359,7 @@ PAL_BattleUIMiscMenuUpdate(
    //
    // Process inputs
    //
-   if (g_InputState.dwKeyPress & (kKeyUp | kKeyLeft))
+   if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
    {
       g_iCurMiscMenuItem--;
       if (g_iCurMiscMenuItem < 0)
@@ -367,7 +367,7 @@ PAL_BattleUIMiscMenuUpdate(
          g_iCurMiscMenuItem = 4;
       }
    }
-   else if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight))
+   else if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
    {
       g_iCurMiscMenuItem++;
       if (g_iCurMiscMenuItem > 4)
@@ -375,11 +375,11 @@ PAL_BattleUIMiscMenuUpdate(
          g_iCurMiscMenuItem = 0;
       }
    }
-   else if (g_InputState.dwKeyPress & kKeySearch)
+   else if (PAL_GetKeyInput() & kKeySearch)
    {
       return g_iCurMiscMenuItem + 1;
    }
-   else if (g_InputState.dwKeyPress & kKeyMenu)
+   else if (PAL_GetKeyInput() & kKeyMenu)
    {
       return 0;
    }
@@ -438,19 +438,19 @@ PAL_BattleUIMiscItemSubMenuUpdate(
    //
    // Process inputs
    //
-   if (g_InputState.dwKeyPress & (kKeyUp | kKeyLeft))
+   if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
    {
       g_iCurSubMenuItem = 0;
    }
-   else if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight))
+   else if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
    {
       g_iCurSubMenuItem = 1;
    }
-   else if (g_InputState.dwKeyPress & kKeySearch)
+   else if (PAL_GetKeyInput() & kKeySearch)
    {
       return g_iCurSubMenuItem + 1;
    }
-   else if (g_InputState.dwKeyPress & kKeyMenu)
+   else if (PAL_GetKeyInput() & kKeyMenu)
    {
       return 0;
    }
@@ -707,7 +707,7 @@ void PAL_BattleUIUpdate(
       //
       // Draw the "auto attack" message if in the autoattack mode.
       //
-      if (g_InputState.dwKeyPress & kKeyMenu)
+      if (PAL_GetKeyInput() & kKeyMenu)
       {
          g_Battle.UI.fAutoAttack = FALSE;
       }
@@ -762,7 +762,7 @@ void PAL_BattleUIUpdate(
       goto end;
    }
 
-   if (g_InputState.dwKeyPress & kKeyAuto)
+   if (PAL_GetKeyInput() & kKeyAuto)
    {
       g_Battle.UI.fAutoAttack = !g_Battle.UI.fAutoAttack;
       g_Battle.UI.MenuState = kBattleMenuMain;
@@ -797,7 +797,7 @@ void PAL_BattleUIUpdate(
       }
    }
 
-   if (g_InputState.dwKeyPress & kKeyStatus)
+   if (PAL_GetKeyInput() & kKeyStatus)
    {
       PAL_PlayerStatus();
       goto end;
@@ -901,22 +901,22 @@ void PAL_BattleUIUpdate(
       {
          if (g_Battle.UI.MenuState == kBattleMenuMain)
          {
-            if (g_InputState.dir == kDirNorth)
+            if (PAL_GetDirInput() == kDirNorth)
             {
                g_Battle.UI.wSelectedAction = 0;
             }
-            else if (g_InputState.dir == kDirSouth)
+            else if (PAL_GetDirInput() == kDirSouth)
             {
                g_Battle.UI.wSelectedAction = 3;
             }
-            else if (g_InputState.dir == kDirWest)
+            else if (PAL_GetDirInput() == kDirWest)
             {
                if (PAL_BattleUIIsActionValid(kBattleUIActionMagic))
                {
                   g_Battle.UI.wSelectedAction = 1;
                }
             }
-            else if (g_InputState.dir == kDirEast)
+            else if (PAL_GetDirInput() == kDirEast)
             {
                if (PAL_BattleUIIsActionValid(kBattleUIActionCoopMagic))
                {
@@ -952,7 +952,7 @@ void PAL_BattleUIUpdate(
          switch (g_Battle.UI.MenuState)
          {
          case kBattleMenuMain:
-            if (g_InputState.dwKeyPress & kKeySearch)
+            if (PAL_GetKeyInput() & kKeySearch)
             {
                switch (g_Battle.UI.wSelectedAction)
                {
@@ -1029,12 +1029,12 @@ void PAL_BattleUIUpdate(
                   break;
                }
             }
-            else if (g_InputState.dwKeyPress & kKeyDefend)
+            else if (PAL_GetKeyInput() & kKeyDefend)
             {
                g_Battle.UI.wActionType = kBattleActionDefend;
                PAL_BattleCommitAction(FALSE);
             }
-            else if (g_InputState.dwKeyPress & kKeyForce)
+            else if (PAL_GetKeyInput() & kKeyForce)
             {
                w = PAL_BattleUIPickAutoMagic(gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole, 60);
 
@@ -1068,26 +1068,26 @@ void PAL_BattleUIUpdate(
 
                PAL_BattleCommitAction(FALSE);
             }
-            else if (g_InputState.dwKeyPress & kKeyFlee)
+            else if (PAL_GetKeyInput() & kKeyFlee)
             {
                g_Battle.UI.wActionType = kBattleActionFlee;
                PAL_BattleCommitAction(FALSE);
             }
-            else if (g_InputState.dwKeyPress & kKeyUseItem)
+            else if (PAL_GetKeyInput() & kKeyUseItem)
             {
                g_Battle.UI.MenuState = kBattleMenuUseItemSelect;
                PAL_ItemSelectMenuInit(kItemFlagUsable);
             }
-            else if (g_InputState.dwKeyPress & kKeyThrowItem)
+            else if (PAL_GetKeyInput() & kKeyThrowItem)
             {
                g_Battle.UI.MenuState = kBattleMenuThrowItemSelect;
                PAL_ItemSelectMenuInit(kItemFlagThrowable);
             }
-            else if (g_InputState.dwKeyPress & kKeyRepeat)
+            else if (PAL_GetKeyInput() & kKeyRepeat)
             {
                PAL_BattleCommitAction(TRUE);
             }
-            else if (g_InputState.dwKeyPress & kKeyMenu)
+            else if (PAL_GetKeyInput() & kKeyMenu)
             {
                g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].state = kFighterWait;
                g_Battle.UI.state = kBattleUIWait;
@@ -1326,16 +1326,16 @@ void PAL_BattleUIUpdate(
                                    gpScreen, PAL_XY(x, y), 7);
       }
 
-      if (g_InputState.dwKeyPress & kKeyMenu)
+      if (PAL_GetKeyInput() & kKeyMenu)
       {
          g_Battle.UI.state = kBattleUISelectMove;
       }
-      else if (g_InputState.dwKeyPress & kKeySearch)
+      else if (PAL_GetKeyInput() & kKeySearch)
       {
          //         g_Battle.UI.iPrevEnemyTarget = g_Battle.UI.iSelectedIndex; //disabled due to not same as both original version
          PAL_BattleCommitAction(FALSE);
       }
-      else if (g_InputState.dwKeyPress & (kKeyLeft | kKeyDown))
+      else if (PAL_GetKeyInput() & (kKeyLeft | kKeyDown))
       {
          g_Battle.UI.iSelectedIndex--;
          if (g_Battle.UI.iSelectedIndex < 0)
@@ -1348,7 +1348,7 @@ void PAL_BattleUIUpdate(
                g_Battle.UI.iSelectedIndex = MAX_ENEMIES_IN_TEAM - 1;
          }
       }
-      else if (g_InputState.dwKeyPress & (kKeyRight | kKeyUp))
+      else if (PAL_GetKeyInput() & (kKeyRight | kKeyUp))
       {
          g_Battle.UI.iSelectedIndex++;
          if (g_Battle.UI.iSelectedIndex >= MAX_ENEMIES_IN_TEAM)
@@ -1393,15 +1393,15 @@ void PAL_BattleUIUpdate(
 
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, j), gpScreen, PAL_XY(x, y));
 
-      if (g_InputState.dwKeyPress & kKeyMenu)
+      if (PAL_GetKeyInput() & kKeyMenu)
       {
          g_Battle.UI.state = kBattleUISelectMove;
       }
-      else if (g_InputState.dwKeyPress & kKeySearch)
+      else if (PAL_GetKeyInput() & kKeySearch)
       {
          PAL_BattleCommitAction(FALSE);
       }
-      else if (g_InputState.dwKeyPress & (kKeyLeft | kKeyDown))
+      else if (PAL_GetKeyInput() & (kKeyLeft | kKeyDown))
       {
          if (g_Battle.UI.iSelectedIndex != 0)
          {
@@ -1412,7 +1412,7 @@ void PAL_BattleUIUpdate(
             g_Battle.UI.iSelectedIndex = gpGlobals->wMaxPartyMemberIndex;
          }
       }
-      else if (g_InputState.dwKeyPress & (kKeyRight | kKeyUp))
+      else if (PAL_GetKeyInput() & (kKeyRight | kKeyUp))
       {
          if (g_Battle.UI.iSelectedIndex < gpGlobals->wMaxPartyMemberIndex)
          {

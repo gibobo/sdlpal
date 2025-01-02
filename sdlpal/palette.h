@@ -22,14 +22,14 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
-#include <SDL_pixels.h>
+#include "video/video.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    SDL_Color *
+    PAL_Color *
     PAL_GetPalette(
         int iPaletteNum,
         int fNight);

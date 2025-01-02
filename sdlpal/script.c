@@ -30,7 +30,7 @@
 #include "fight.h"
 #include "game.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "main.h"
 #include "palcfg.h"
 #include "palcommon.h"
@@ -42,7 +42,7 @@
 #include "text.h"
 #include "uigame.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 
 int g_fScriptSuccess = TRUE;
 static int g_iCurEquipPart = -1;
@@ -1394,7 +1394,7 @@ PAL_InterpretInstruction(
          int iBGWidth = PAL_RLEGetWidth(pBG), iBGHeight = PAL_RLEGetHeight(pBG);
          int iBG_X = (320 - iBGWidth) / 2, iBG_Y = (200 - iBGHeight) / 2;
          unsigned int pos = PAL_XY(iBG_X, iBG_Y);
-         SDL_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
+         PAL_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
          PAL_RLEBlitToSurface(pBG, gpScreen, pos);
 
          unsigned short wObject = gpGlobals->g.lprgStore[0].rgwItems[i];
@@ -1921,7 +1921,7 @@ PAL_InterpretInstruction(
       // Throw weapon to enemy
       //
       w = pScript->rgwOperand[1] * 5;
-      w += (unsigned short)(gpGlobals->g.PlayerRoles.rgwAttackStrength[gpGlobals->rgParty[g_Battle.wMovingPlayerIndex].wPlayerRole] * RandomFloat(0, 4));
+      w +=(gpGlobals->g.PlayerRoles.rgwAttackStrength[gpGlobals->rgParty[g_Battle.wMovingPlayerIndex].wPlayerRole] * RandomLong(0, 3));
       PAL_BattleSimulateMagic(wEventObjectID, pScript->rgwOperand[0], w);
       break;
 
@@ -2112,7 +2112,7 @@ PAL_InterpretInstruction(
       //
       // Show FBP picture
       //
-      SDL_FillRect(gpScreen, NULL, 0);
+      PAL_CleanScreen();
       VIDEO_UpdateScreen(NULL);
       break;
 

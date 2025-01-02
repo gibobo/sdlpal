@@ -22,29 +22,14 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <SDL_events.h>
-#include <SDL_rect.h>
-
-typedef enum tagPALDIRECTION
+enum PALDIRECTION
 {
    kDirSouth = 0,
    kDirWest,
    kDirNorth,
    kDirEast,
    kDirUnknown
-} PALDIRECTION, *LPPALDIRECTION;
-
-typedef struct tagPALINPUTSTATE
-{
-   PALDIRECTION           dir, prevdir;
-   unsigned int                  dwKeyPress;
-   unsigned int                  dwKeyOrder[4];
-   unsigned int                  dwKeyMaxCount;
-#if PAL_HAS_JOYSTICKS
-   int                    axisX,axisY;
-   int                   joystickNeedUpdate;
-#endif
-} PALINPUTSTATE;
+};
 
 enum PALKEY
 {
@@ -68,6 +53,19 @@ enum PALKEY
    kKeyHome        = (1 << 16),
    kKeyEnd         = (1 << 17),
 };
+
+typedef struct tagPALINPUTSTATE
+{
+   unsigned char          dir;
+   unsigned int           dwKeyPress;
+   unsigned int           dwKeyOrder[4];
+   unsigned int           dwKeyMaxCount;
+#if PAL_HAS_JOYSTICKS
+   int                    axisX;
+   int                    axisY;
+   int                    joystickNeedUpdate;
+#endif
+} PALINPUTSTATE;
 
 #ifdef __cplusplus
 extern "C" {
@@ -94,20 +92,24 @@ PAL_ShutdownInput(
 );
 
 void
-PAL_SetTouchBounds(
-   unsigned int dwScreenWidth,
-   unsigned int dwScreenHeight,
-   SDL_Rect renderRect
+PAL_SetKeyInput(
+   unsigned int key
+);
+
+unsigned int
+PAL_GetKeyInput(
+   void
 );
 
 void
-PAL_RegisterInputFilter(
-   void (*init_filter)(),
-   int (*event_filter)(const SDL_Event *, volatile PALINPUTSTATE *),
-   void (*shutdown_filter)()
+PAL_SetDirInput(
+   unsigned char dir
 );
 
-extern volatile PALINPUTSTATE g_InputState;
+unsigned char
+PAL_GetDirInput(
+   void
+);
 
 // extern int g_fUseJoystick;
 

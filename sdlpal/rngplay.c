@@ -24,12 +24,11 @@
 
 #include "rngplay.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "util.h"
-#include "video.h"
-#include <SDL_timer.h>
+#include "video/video.h"
 
 #define PAL_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1
 
@@ -145,7 +144,7 @@ static int
 PAL_RNGBlitToSurface(
    const uint8_t   *rng,
    int              length,
-   SDL_Surface     *lpDstSurface
+   PAL_Surface     *lpDstSurface
 )
 /*++
   Purpose:
@@ -403,8 +402,13 @@ PAL_RNGPlay(
    uint8_t        *rng = (uint8_t *)malloc(65000);
    uint8_t        *buf = (uint8_t *)malloc(65000);
    FILE           *fp = UTIL_OpenRequiredFileForMode("rng.mkf", "rb");
-   uint64_t       iDelay = SDL_GetPerformanceFrequency() / (iSpeed == 0 ? 16 : iSpeed);
-   uint64_t       iTime  = SDL_GetPerformanceCounter();
+   uint64_t       iDelay = PAL_GetPerformanceFrequency() / (iSpeed == 0 ? 16 : iSpeed);
+   uint64_t       iTime  = PAL_GetPerformanceCounter();
+
+   //
+   // Avoid losing the last frame
+   //
+   if (iEndFrame > 0) iEndFrame++;
 
    for (; rng && buf && iStartFrame != iEndFrame; iStartFrame++) {
      iTime += iDelay;
@@ -436,7 +440,7 @@ PAL_RNGPlay(
      // Delay for a while
      //
      PAL_ProcessEvent();
-     while (SDL_GetPerformanceCounter() < iTime) {
+     while (PAL_GetPerformanceCounter() < iTime) {
        UTIL_Sleep(1);
      }
    }

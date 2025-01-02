@@ -26,12 +26,12 @@
 #include "common.h"
 #include "font.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "palcfg.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 #include <errno.h>
 #include <wctype.h>
 
@@ -98,7 +98,7 @@ PAL_ParseLine(
 			if (sscanf(line, "%d", &index) == 1)
 			{
 				*value = val + 1;
-				*length = end - *value;
+				*length = (int)(end - *value);
 				return index;
 			}
 		}
@@ -115,7 +115,7 @@ PAL_ReadOneLine(
 {
 	if (fgets(temp, limit, fp))
 	{
-		int n = strlen(temp);
+		int n = (int)strlen(temp);
 		if (n == limit - 1 && temp[n - 1] != '\n' && !feof(fp))
 		{
 			// Line too long, try to read it as a whole
@@ -129,7 +129,7 @@ PAL_ReadOneLine(
 				}
 				if (fgets(tmp + n, limit + 1, fp))
 				{
-					n += strlen(tmp + n);
+					n += (int)strlen(tmp + n);
 					if (n < limit - 1 || temp[n - 1] == '\n')
 						break;
 					else
@@ -510,7 +510,7 @@ PAL_DrawTextUnescape(
 
 --*/
 {
-   SDL_Rect   rect, urect;
+   PAL_Rect   rect, urect;
 
    urect.x = rect.x = PAL_X(pos);
    urect.y = rect.y = PAL_Y(pos);
@@ -636,7 +636,7 @@ PAL_StartDialogWithOffset(
 --*/
 {
    PAL_LARGE unsigned char buf[320 * 200];
-   SDL_Rect       rect;
+   PAL_Rect       rect;
 
    if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
    {
@@ -761,8 +761,8 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
 --*/
 {
-   PAL_LARGE SDL_Color   palette[256];
-   SDL_Color   *pCurrentPalette, t;
+   PAL_LARGE PAL_Color   palette[256];
+   PAL_Color   *pCurrentPalette, t;
    int         i;
    uint32_t    dwBeginningTicks = UTIL_GetTicks();
 
@@ -781,7 +781,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
       const unsigned char* p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
       if (p != NULL)
       {
-         SDL_Rect rect;
+         PAL_Rect rect;
 
          rect.x = PAL_X(g_TextLib.posIcon);
          rect.y = PAL_Y(g_TextLib.posIcon);
@@ -820,7 +820,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
          break;
       }
 
-      if (g_InputState.dwKeyPress != 0)
+      if (PAL_GetKeyInput() != kKeyNone)
       {
          break;
       }
@@ -990,7 +990,7 @@ TEXT_DisplayText(
                PAL_ClearKeyState();
                UTIL_Delay(g_TextLib.iDelayTime * 8);
                
-               if (g_InputState.dwKeyPress & (kKeySearch | kKeyMenu))
+               if (PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
                {
                   //
                   // User pressed a key to skip the dialog
@@ -1022,7 +1022,7 @@ PAL_ShowDialogText(
 
 --*/
 {
-   SDL_Rect        rect;
+   PAL_Rect        rect;
    int             x, y;
 
    PAL_ClearKeyState();
@@ -1060,7 +1060,7 @@ PAL_ShowDialogText(
          unsigned int      pos;
          BOX       *lpBox;
 		 int        i;
-		 int        w = wcslen(lpszText);
+		 int        w = (int)wcslen(lpszText);
 		 int        len = 0;
 
 		 for (i = 0; i < w; i++)
@@ -1097,7 +1097,7 @@ PAL_ShowDialogText(
    }
    else
    {
-      int len = wcslen(lpszText);
+      int len = (int)wcslen(lpszText);
       if (g_TextLib.nCurrentDialogLine == 0 &&
           g_TextLib.bDialogPosition != kDialogCenter &&
 		  (lpszText[len - 1] == 0xff1a ||
@@ -1364,7 +1364,7 @@ PAL_MultiByteToWideCharCP(
 
 	if (mbslength == -1)
 	{
-		mbslength = strlen(mbs);
+		mbslength = (int)strlen(mbs);
 		null = 1;
 	}
 
@@ -1814,7 +1814,7 @@ PAL_swprintf(
 					if (wide)
 					{
 						buf = va_arg(ap, wchar_t*);
-						len = wcslen(buf);
+						len = (int)wcslen(buf);
 					}
 					else
 					{
@@ -1833,7 +1833,7 @@ PAL_swprintf(
 				}
 
 				// Limit output length no longer then precision
-				if (precision > (int)len)
+				if (precision > len)
 					precision = len;
 
 				// Left-side padding
@@ -1842,7 +1842,7 @@ PAL_swprintf(
 
 				// Do not overflow the output buffer
 				if (buffer + precision > buffer_end)
-					precision = buffer_end - buffer;
+					precision = (int)(buffer_end - buffer);
 
 				// Convert or copy string (char) into output buffer
 				if (*format == 's' && !wide)
@@ -1863,7 +1863,7 @@ PAL_swprintf(
 
 				// We copy this argument's format string into internal buffer
 				if (fmt_len < (int)(format - fmt_start + 1))
-					cur_fmt = realloc(cur_fmt, ((fmt_len = format - fmt_start + 1) + 1) * sizeof(wchar_t));
+					cur_fmt = (wchar_t *)realloc(cur_fmt, ((fmt_len = (int)(format - fmt_start + 1)) + 1) * sizeof(wchar_t));
 				wcsncpy(cur_fmt, fmt_start, fmt_len);
 				cur_fmt[fmt_len] = L'\0';
 				// And pass it into vswprintf to get the output
@@ -1917,8 +1917,8 @@ PAL_swprintf(
 	// If the format string is malformed, try to copy it into the dest buffer
 	if (state && buffer < buffer_end)
 	{
-		int fmt_len = format - fmt_start;
-		int buf_len = buffer_end - buffer;
+		int fmt_len = (int)(format - fmt_start);
+		int buf_len = (int)(buffer_end - buffer);
 		if (fmt_len <= buf_len)
 		{
 			wcsncpy(buffer, fmt_start, buf_len);

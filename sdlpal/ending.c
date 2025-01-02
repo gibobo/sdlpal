@@ -30,7 +30,7 @@
 #include "rngplay.h"
 #include "scene.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 
 static unsigned short g_wCurEffectSprite = 0;
 
@@ -92,7 +92,7 @@ void PAL_ShowFBP(
 
    if (wFade)
    {
-      SDL_Surface *p = VIDEO_CreateCompatibleSurface(gpScreen);
+      PAL_Surface *p = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
 
       wFade++;
       wFade *= 10;
@@ -142,7 +142,7 @@ void PAL_ShowFBP(
          }
       }
 
-      VIDEO_FreeSurface(p);
+      PAL_FreeSurface(p);
    }
 
    //
@@ -179,11 +179,11 @@ void PAL_ScrollFBP(
 
 --*/
 {
-   SDL_Surface *p;
+   PAL_Surface *p;
    PAL_LARGE unsigned char buf[320 * 200];
    PAL_LARGE unsigned char bufSprite[320 * 200];
    int i, l;
-   SDL_Rect rect, dstrect;
+   PAL_Rect rect, dstrect;
 
    if (PAL_MKFDecompressChunk(buf, 320 * 200, wChunkNum, gpGlobals->f.fpFBP) <= 0)
    {
@@ -195,7 +195,7 @@ void PAL_ScrollFBP(
       PAL_MKFDecompressChunk(bufSprite, 320 * 200, g_wCurEffectSprite, gpGlobals->f.fpMGO);
    }
 
-   p = VIDEO_CreateCompatibleSurface(gpScreen);
+   p = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
 
    if (p == NULL)
    {
@@ -279,7 +279,7 @@ void PAL_ScrollFBP(
    }
 
    VIDEO_CopyEntireSurface(p, gpScreen);
-   VIDEO_FreeSurface(p);
+   PAL_FreeSurface(p);
    VIDEO_UpdateScreen(NULL);
 }
 
@@ -303,9 +303,9 @@ void PAL_EndingAnimation(
    const unsigned int buf_size = 320 * 200;
    unsigned char *buf;
    unsigned char *bufGirl;
-   SDL_Surface *pUpper;
-   SDL_Surface *pLower;
-   SDL_Rect srcrect, dstrect;
+   PAL_Surface *pUpper;
+   PAL_Surface *pLower;
+   PAL_Rect srcrect, dstrect;
 
    int yPosGirl = 180;
    int i;
@@ -313,8 +313,8 @@ void PAL_EndingAnimation(
    buf = (unsigned char *)UTIL_calloc(1, buf_size);
    bufGirl = (unsigned char *)UTIL_calloc(1, 6000);
 
-   pUpper = VIDEO_CreateCompatibleSurface(gpScreen);
-   pLower = VIDEO_CreateCompatibleSurface(gpScreen);
+   pUpper = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
+   pLower = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
 
    PAL_MKFDecompressChunk(buf, buf_size, 69, gpGlobals->f.fpFBP);
    PAL_FBPBlitToSurface(buf, pUpper);
@@ -389,8 +389,8 @@ void PAL_EndingAnimation(
 
    gpGlobals->wScreenWave = 0;
 
-   VIDEO_FreeSurface(pUpper);
-   VIDEO_FreeSurface(pLower);
+   PAL_FreeSurface(pUpper);
+   PAL_FreeSurface(pLower);
 
    free(buf);
    free(bufGirl);
@@ -434,7 +434,7 @@ void PAL_EndingScreen(
 
       PAL_FadeOut(1);
 
-      SDL_FillRect(gpScreen, NULL, 0);
+      PAL_CleanScreen();
       gpGlobals->wNumPalette = 4;
       gpGlobals->fNeedToFadeIn = TRUE;
       PAL_EndingAnimation();
@@ -446,13 +446,13 @@ void PAL_EndingScreen(
       AUDIO_PlayMusic(-1, FALSE, 0);
       AUDIO_PlayMusic(0x11, TRUE, 0);
 
-      SDL_FillRect(gpScreen, NULL, 0);
+      PAL_CleanScreen();
       PAL_SetPalette(0, FALSE);
       PAL_RNGPlay(11, 0, -1, 7);
 
       PAL_FadeOut(2);
 
-      SDL_FillRect(gpScreen, NULL, 0);
+      PAL_CleanScreen();
       gpGlobals->wNumPalette = 8;
       gpGlobals->fNeedToFadeIn = TRUE;
       PAL_RNGPlay(10, 0, -1, 6);

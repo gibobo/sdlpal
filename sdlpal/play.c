@@ -22,14 +22,14 @@
 #include "play.h"
 #include "common.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "itemmenu.h"
 #include "palcommon.h"
 #include "scene.h"
 #include "script.h"
 #include "uigame.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 
 void
 PAL_GameUpdate(
@@ -529,49 +529,49 @@ PAL_StartFrame(
    PAL_MakeScene();
    VIDEO_UpdateScreen(NULL);
 
-   if (g_InputState.dwKeyPress & kKeyMenu)
+   if (PAL_GetKeyInput() & kKeyMenu)
    {
       //
       // Show the in-game menu
       //
       PAL_InGameMenu();
    }
-   else if (g_InputState.dwKeyPress & kKeyUseItem)
+   else if (PAL_GetKeyInput() & kKeyUseItem)
    {
       //
       // Show the use item menu
       //
       PAL_GameUseItem();
    }
-   else if (g_InputState.dwKeyPress & kKeyThrowItem)
+   else if (PAL_GetKeyInput() & kKeyThrowItem)
    {
       //
       // Show the equipment menu
       //
       PAL_GameEquipItem();
    }
-   else if (g_InputState.dwKeyPress & kKeyForce)
+   else if (PAL_GetKeyInput() & kKeyForce)
    {
       //
       // Show the magic menu
       //
       PAL_InGameMagicMenu();
    }
-   else if (g_InputState.dwKeyPress & kKeyStatus)
+   else if (PAL_GetKeyInput() & kKeyStatus)
    {
       //
       // Show the player status
       //
       PAL_PlayerStatus();
    }
-   else if (g_InputState.dwKeyPress & kKeySearch)
+   else if (PAL_GetKeyInput() & kKeySearch)
    {
       //
       // Process search events
       //
       PAL_Search();
    }
-   else if (g_InputState.dwKeyPress & kKeyFlee)
+   else if (PAL_GetKeyInput() & kKeyFlee)
    {
       //
       // Quit Game
@@ -610,8 +610,8 @@ PAL_WaitForKeyInternal(
    {
       UTIL_Delay(5);
 
-      if (g_InputState.dwKeyPress && fAllowAnyKey
-         || g_InputState.dwKeyPress & (kKeySearch | kKeyMenu))
+      if (PAL_GetKeyInput() && fAllowAnyKey
+         || PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
       {
          break;
       }

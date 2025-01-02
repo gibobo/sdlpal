@@ -23,7 +23,7 @@
 #define _MAP_H
 
 #include <stdio.h>
-#include <SDL_surface.h>
+#include "video/video.h"
 
 //
 // Map format:
@@ -105,8 +105,8 @@ extern "C"
     void
     PAL_MapBlitToSurface(
         LPCPALMAP lpMap,
-        SDL_Surface *lpSurface,
-        const SDL_Rect *lpSrcRect,
+        PAL_Surface *lpSurface,
+        const PAL_Rect *lpSrcRect,
         unsigned char ucLayer);
 
 #ifdef __cplusplus

@@ -22,7 +22,7 @@
 #include "util.h"
 #include "common.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "main.h"
 #include "palcfg.h"
 #include <SDL_messagebox.h>
@@ -300,10 +300,6 @@ void TerminateOnError(
 		SDL_ShowMessageBox(&mbd, &btnid);
 		PAL_Shutdown(255);
 	}
-
-#ifdef _DEBUG
-	assert(!"TerminateOnError()"); // allows jumping to debugger
-#endif
 
 	PAL_Shutdown(255);
 }
@@ -755,4 +751,13 @@ void PAL_DelayUntil(unsigned int tm) {
     PAL_ProcessEvent();
     UTIL_Sleep(1);
   }
+}
+
+unsigned long long PAL_GetPerformanceFrequency(void)
+{
+  return SDL_GetPerformanceFrequency();
+}
+
+unsigned long long PAL_GetPerformanceCounter(void) {
+  return SDL_GetPerformanceCounter();
 }

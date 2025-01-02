@@ -24,7 +24,7 @@
 #include "common.h"
 #include "fight.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
@@ -33,7 +33,7 @@
 #include "text.h"
 #include "ui.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 
 BATTLE g_Battle;
 
@@ -97,7 +97,7 @@ void PAL_BattleDrawBackground(
 
 void PAL_BattleDrawEnemySprites(
     unsigned short wEnemyIndex,
-    SDL_Surface *lpDstSurface)
+    PAL_Surface *lpDstSurface)
 /*++
   Purpose:
 
@@ -152,7 +152,7 @@ void PAL_BattleDrawEnemySprites(
 
 void PAL_BattleDrawPlayerSprites(
     unsigned short wPlayerIndex,
-    SDL_Surface *lpDstSurface)
+    PAL_Surface *lpDstSurface)
 /*++
   Purpose:
 
@@ -223,7 +223,7 @@ void PAL_BattleDrawPlayerSprites(
 
 void PAL_BattleDrawMagicSprites(
     int iMagicNum,
-    SDL_Surface *lpDstSurface,
+    PAL_Surface *lpDstSurface,
     unsigned int pos)
 /*++
   Purpose:
@@ -940,7 +940,7 @@ PAL_LoadBattleBackground(
    //
    // Create the surface
    //
-   g_Battle.lpBackground = VIDEO_CreateCompatibleSurface(gpScreen);
+   g_Battle.lpBackground = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
 
    if (g_Battle.lpBackground == NULL)
    {
@@ -976,8 +976,8 @@ PAL_BattleWon(
 
 --*/
 {
-   const SDL_Rect rect = {0, 60, 320, 100};
-   SDL_Rect rect1 = {80, 0, 180, 200};
+   const PAL_Rect rect = {0, 60, 320, 100};
+   PAL_Rect rect1 = {80, 0, 180, 200};
 
    int i, j, iTotalCount;
    unsigned int dwExp;
@@ -1585,7 +1585,7 @@ PAL_StartBattle(
    //
    // Create the surface for scene buffer
    //
-   g_Battle.lpSceneBuf = VIDEO_CreateCompatibleSurface(gpScreen);
+   g_Battle.lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
 
    if (g_Battle.lpSceneBuf == NULL)
    {
@@ -1677,8 +1677,8 @@ PAL_StartBattle(
    //
    // Free the surfaces for the background picture and scene buffer
    //
-   VIDEO_FreeSurface(g_Battle.lpBackground);
-   VIDEO_FreeSurface(g_Battle.lpSceneBuf);
+   PAL_FreeSurface(g_Battle.lpBackground);
+   PAL_FreeSurface(g_Battle.lpSceneBuf);
 
    g_Battle.lpBackground = NULL;
    g_Battle.lpSceneBuf = NULL;

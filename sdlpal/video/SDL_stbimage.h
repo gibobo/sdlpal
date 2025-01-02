@@ -1,5 +1,5 @@
 ﻿/*
- * A small header-only library to load an image into a RGB(A) SDL_Surface*,
+ * A small header-only library to load an image into a RGB(A) PAL_Surface*,
  * like a stripped down version of SDL_Image, but using stb_image.h to decode
  * images and thus without any further external dependencies.
  * Supports all filetypes supported by stb_image (JPEG, PNG, TGA, BMP, PSD, ...
@@ -39,7 +39,7 @@
  *   stb_image.h uses assert.h by default. You can #define STBI_ASSERT(x)
  *   before the implementation-#include of SDL_stbimage.h to avoid that.
  *   By default stb_image supports HDR images, for that it needs pow() from libm.
- *   If you don't need HDR (it can't be loaded into a SDL_Surface anyway),
+ *   If you don't need HDR (it can't be loaded into a PAL_Surface anyway),
  *   #define STBI_NO_LINEAR and #define STBI_NO_HDR before including this header.
  *
  * License:
@@ -57,6 +57,7 @@
 #ifndef SDL__STBIMAGE_H
 #define SDL__STBIMAGE_H
 #include <SDL_render.h>
+#include "video/video.h"
 
 #ifndef SDL_STBIMG_ALLOW_STDIO
 #define STBI_NO_STDIO // don't need STDIO, will use SDL_RWops to open files
@@ -74,20 +75,20 @@ extern "C"
 {
 #endif
 
-	// loads the image file at the given path into a RGB(A) SDL_Surface
+	// loads the image file at the given path into a RGB(A) PAL_Surface
 	// Returns NULL on error, use SDL_GetError() to get more information.
-	SDL_STBIMG_DEF SDL_Surface *STBIMG_Load(const char *file);
+	SDL_STBIMG_DEF PAL_Surface *STBIMG_Load(const char *file);
 
-	// loads the image file in the given memory buffer into a RGB(A) SDL_Surface
+	// loads the image file in the given memory buffer into a RGB(A) PAL_Surface
 	// Returns NULL on error, use SDL_GetError() to get more information.
-	SDL_STBIMG_DEF SDL_Surface *STBIMG_LoadFromMemory(const unsigned char *buffer, int length);
+	SDL_STBIMG_DEF PAL_Surface *STBIMG_LoadFromMemory(const unsigned char *buffer, int length);
 
-	// loads an image file into a RGB(A) SDL_Surface from a seekable SDL_RWops (src)
+	// loads an image file into a RGB(A) PAL_Surface from a seekable SDL_RWops (src)
 	// if you set freesrc to non-zero, SDL_RWclose(src) will be executed after reading.
 	// Returns NULL on error, use SDL_GetError() to get more information.
-	SDL_STBIMG_DEF SDL_Surface *STBIMG_Load_RW(SDL_RWops *src, int freesrc);
+	SDL_STBIMG_DEF PAL_Surface *STBIMG_Load_RW(SDL_RWops *src, int freesrc);
 
-	// Creates an SDL_Surface* using the raw RGB(A) pixelData with given width/height
+	// Creates an PAL_Surface* using the raw RGB(A) pixelData with given width/height
 	// (this doesn't use stb_image and is just a simple SDL_CreateSurfaceFrom()-wrapper)
 	// ! It must be byte-wise 24bit RGB ("888", bytesPerPixel=3) !
 	// !  or byte-wise 32bit RGBA ("8888", bytesPerPixel=4) data !
@@ -96,7 +97,7 @@ extern "C"
 	//  was allocated with SDL_malloc(), SDL_calloc() or SDL_realloc()!
 	// Returns NULL on error (in that case pixelData won't be freed!),
 	//  use SDL_GetError() to get more information.
-	SDL_STBIMG_DEF SDL_Surface *STBIMG_CreateSurface(unsigned char *pixelData, int width, int height,
+	SDL_STBIMG_DEF PAL_Surface *STBIMG_CreateSurface(unsigned char *pixelData, int width, int height,
 													 int bytesPerPixel, SDL_bool freeWithSurface);
 
 	// loads the image file at the given path into a RGB(A) SDL_Texture
@@ -133,7 +134,7 @@ extern "C"
 	} STBIMG_stbio_RWops;
 
 	// creates stbi_io_callbacks and userdata to use stbi_*_from_callbacks() directly,
-	//  especially useful to use SDL_RWops with stb_image, without using SDL_Surface
+	//  especially useful to use SDL_RWops with stb_image, without using PAL_Surface
 	// src must be readable and seekable!
 	// Returns SDL_FALSE on error (SDL_GetError() will give you info), else SDL_TRUE
 	// NOTE: If you want to use src twice (e.g. for info and load), remember to rewind
@@ -141,7 +142,7 @@ extern "C"
 	//       inbetween the uses!
 	SDL_STBIMG_DEF SDL_bool STBIMG_stbi_callback_from_RW(SDL_RWops *src, STBIMG_stbio_RWops *out);
 
-	// loads an image file into a RGB(A) SDL_Surface from a SDL_RWops (src)
+	// loads an image file into a RGB(A) PAL_Surface from a SDL_RWops (src)
 	// - without using SDL_RWseek(), for streams that don't support or are slow
 	//   at seeking. It reads everything into a buffer and calls STBIMG_LoadFromMemory()
 	// You should probably only use this if you *really* have performance problems
@@ -149,7 +150,7 @@ extern "C"
 	// src must at least support SDL_RWread() and SDL_RWsize()
 	// if you set freesrc to non-zero, SDL_RWclose(src) will be executed after reading.
 	// Returns NULL on error, use SDL_GetError() to get more information.
-	SDL_STBIMG_DEF SDL_Surface *STBIMG_Load_RW_noSeek(SDL_RWops *src, int freesrc);
+	SDL_STBIMG_DEF PAL_Surface *STBIMG_Load_RW_noSeek(SDL_RWops *src, int freesrc);
 
 #ifdef __cplusplus
 } // extern "C"
@@ -180,7 +181,7 @@ typedef struct
 	int format; // 3: RGB, 4: RGBA
 } STBIMG__image;
 
-static SDL_Surface *STBIMG__CreateSurfaceImpl(STBIMG__image img, int freeWithSurface)
+static PAL_Surface *STBIMG__CreateSurfaceImpl(STBIMG__image img, int freeWithSurface)
 {
 	SDL_Surface *surf = NULL;
 	Uint32 rmask, gmask, bmask, amask;
@@ -204,7 +205,7 @@ static SDL_Surface *STBIMG__CreateSurfaceImpl(STBIMG__image img, int freeWithSur
 
 	if (freeWithSurface)
 	{
-		// SDL_Surface::flags is documented to be read-only.. but if the pixeldata
+		// PAL_Surface::flags is documented to be read-only.. but if the pixeldata
 		// has been allocated with SDL_malloc()/SDL_calloc()/SDL_realloc() this
 		// should work (and it currently does) + @icculus said it's reasonably safe:
 		//  https://twitter.com/icculus/status/667036586610139137 :-)
@@ -212,15 +213,15 @@ static SDL_Surface *STBIMG__CreateSurfaceImpl(STBIMG__image img, int freeWithSur
 		surf->flags &= ~SDL_PREALLOC;
 	}
 
-	return surf;
+	return (PAL_Surface *)surf;
 }
 
-SDL_STBIMG_DEF SDL_Surface *STBIMG_LoadFromMemory(const unsigned char *buffer, int length)
+SDL_STBIMG_DEF PAL_Surface *STBIMG_LoadFromMemory(const unsigned char *buffer, int length)
 {
 	STBIMG__image img = {0};
 	int bppToUse = 0;
 	int inforet = 0;
-	SDL_Surface *ret = NULL;
+	PAL_Surface *ret = NULL;
 
 	if (buffer == NULL)
 	{
@@ -322,12 +323,12 @@ SDL_STBIMG_DEF SDL_bool STBIMG_stbi_callback_from_RW(SDL_RWops *src, STBIMG_stbi
 	return SDL_TRUE;
 }
 
-SDL_STBIMG_DEF SDL_Surface *STBIMG_Load_RW(SDL_RWops *src, int freesrc)
+SDL_STBIMG_DEF PAL_Surface *STBIMG_Load_RW(SDL_RWops *src, int freesrc)
 {
 	STBIMG__image img = {0};
 	int bppToUse = 0;
 	int inforet = 0;
-	SDL_Surface *ret = NULL;
+	PAL_Surface *ret = NULL;
 	Sint64 srcOffset = 0;
 
 	STBIMG_stbio_RWops cbData;
@@ -406,11 +407,11 @@ end:
 	return ret;
 }
 
-SDL_STBIMG_DEF SDL_Surface *STBIMG_Load_RW_noSeek(SDL_RWops *src, int freesrc)
+SDL_STBIMG_DEF PAL_Surface *STBIMG_Load_RW_noSeek(SDL_RWops *src, int freesrc)
 {
 	unsigned char *buf = NULL;
 	Sint64 fileSize = 0;
-	SDL_Surface *ret = NULL;
+	PAL_Surface *ret = NULL;
 
 	if (src == NULL)
 	{
@@ -461,7 +462,7 @@ end:
 }
 
 
-SDL_STBIMG_DEF SDL_Surface *STBIMG_Load(const char *file)
+SDL_STBIMG_DEF PAL_Surface *STBIMG_Load(const char *file)
 {
 	SDL_RWops *src = SDL_RWFromFile(file, "rb");
 	if (src == NULL)
@@ -469,7 +470,7 @@ SDL_STBIMG_DEF SDL_Surface *STBIMG_Load(const char *file)
 	return STBIMG_Load_RW(src, 1);
 }
 
-SDL_STBIMG_DEF SDL_Surface *STBIMG_CreateSurface(unsigned char *pixelData, int width, int height, int bytesPerPixel, SDL_bool freeWithSurface)
+SDL_STBIMG_DEF PAL_Surface *STBIMG_CreateSurface(unsigned char *pixelData, int width, int height, int bytesPerPixel, SDL_bool freeWithSurface)
 {
 	STBIMG__image img;
 
@@ -497,13 +498,13 @@ SDL_STBIMG_DEF SDL_Surface *STBIMG_CreateSurface(unsigned char *pixelData, int w
 	return STBIMG__CreateSurfaceImpl(img, freeWithSurface);
 }
 
-static SDL_Texture *STBIMG__SurfToTex(SDL_Renderer *renderer, SDL_Surface *surf)
+static SDL_Texture *STBIMG__SurfToTex(SDL_Renderer *renderer, PAL_Surface *surf)
 {
 	SDL_Texture *ret = NULL;
 	if (surf != NULL)
 	{
-		ret = SDL_CreateTextureFromSurface(renderer, surf);
-		SDL_FreeSurface(surf); // not needed anymore, it's copied into tex
+		ret = SDL_CreateTextureFromSurface(renderer, (SDL_Surface *)surf);
+		SDL_FreeSurface((SDL_Surface *)surf); // not needed anymore, it's copied into tex
 	}
 	// if surf is NULL, whatever tried to create it should have called SDL_SetError(),
 	// if SDL_CreateTextureFromSurface() returned NULL it should have set an error
@@ -534,7 +535,7 @@ SDL_STBIMG_DEF SDL_Texture *
 STBIMG_CreateTexture(SDL_Renderer *renderer, const unsigned char *pixelData,
 					 int width, int height, int bytesPerPixel)
 {
-	SDL_Surface *surf = STBIMG_CreateSurface((unsigned char *)pixelData, width, height, bytesPerPixel, SDL_FALSE);
+	PAL_Surface *surf = STBIMG_CreateSurface((unsigned char *)pixelData, width, height, bytesPerPixel, SDL_FALSE);
 	return STBIMG__SurfToTex(renderer, surf);
 }
 

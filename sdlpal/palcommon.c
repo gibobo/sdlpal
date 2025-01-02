@@ -37,7 +37,7 @@ PAL_CalcShadowColor(
 
 int PAL_RLEBlitToSurface(
     const unsigned char *lpBitmapRLE,
-    SDL_Surface *lpDstSurface,
+    PAL_Surface *lpDstSurface,
     unsigned int pos)
 {
    return PAL_RLEBlitToSurfaceWithShadow(lpBitmapRLE, lpDstSurface, pos, FALSE);
@@ -45,7 +45,7 @@ int PAL_RLEBlitToSurface(
 
 int PAL_RLEBlitToSurfaceWithShadow(
     const unsigned char *lpBitmapRLE,
-    SDL_Surface *lpDstSurface,
+    PAL_Surface *lpDstSurface,
     unsigned int pos,
     int bShadow)
 /*++
@@ -70,12 +70,12 @@ int PAL_RLEBlitToSurfaceWithShadow(
 
 --*/
 {
-   unsigned int i, j, k, sx;
+   int i, j, k, sx;
    int x, y;
-   unsigned int uiLen = 0;
-   unsigned int uiWidth = 0;
-   unsigned int uiHeight = 0;
-   unsigned int uiSrcX = 0;
+   int uiLen = 0;
+   int uiWidth = 0;
+   int uiHeight = 0;
+   int uiSrcX = 0;
    unsigned char T;
    int dx = PAL_X(pos);
    int dy = PAL_Y(pos);
@@ -245,7 +245,7 @@ end:
 
 int PAL_RLEBlitWithColorShift(
     const unsigned char *lpBitmapRLE,
-    SDL_Surface *lpDstSurface,
+    PAL_Surface *lpDstSurface,
     unsigned int pos,
     int iColorShift)
 /*++
@@ -270,12 +270,12 @@ int PAL_RLEBlitWithColorShift(
 
 --*/
 {
-   unsigned int i, j, k, sx;
+   int i, j, k, sx;
    int x, y;
-   unsigned int uiLen = 0;
-   unsigned int uiWidth = 0;
-   unsigned int uiHeight = 0;
-   unsigned int uiSrcX = 0;
+   int uiLen = 0;
+   int uiWidth = 0;
+   int uiHeight = 0;
+   int uiSrcX = 0;
    unsigned char T, b;
    int dx = PAL_X(pos);
    int dy = PAL_Y(pos);
@@ -447,7 +447,7 @@ end:
 
 int PAL_RLEBlitMonoColor(
     const unsigned char *lpBitmapRLE,
-    SDL_Surface *lpDstSurface,
+    PAL_Surface *lpDstSurface,
     unsigned int pos,
     unsigned char bColor,
     int iColorShift)
@@ -475,12 +475,12 @@ int PAL_RLEBlitMonoColor(
 
 --*/
 {
-   unsigned int i, j, k, sx;
+   int i, j, k, sx;
    int x, y;
-   unsigned int uiLen = 0;
-   unsigned int uiWidth = 0;
-   unsigned int uiHeight = 0;
-   unsigned int uiSrcX = 0;
+   int uiLen = 0;
+   int uiWidth = 0;
+   int uiHeight = 0;
+   int uiSrcX = 0;
    unsigned char T, b;
    int dx = PAL_X(pos);
    int dy = PAL_Y(pos);
@@ -653,7 +653,7 @@ end:
 
 int PAL_FBPBlitToSurface(
     unsigned char *lpBitmapFBP,
-    SDL_Surface *lpDstSurface)
+    PAL_Surface *lpDstSurface)
 /*++
   Purpose:
 

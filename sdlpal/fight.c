@@ -24,13 +24,13 @@
 #include "battle.h"
 #include "common.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "palcfg.h"
 #include "palcommon.h"
 #include "script.h"
 #include "text.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 
 //#define INVINCIBLE 1
 extern unsigned short g_rgPlayerPos[3][3][2];
@@ -1417,12 +1417,12 @@ PAL_BattleStartFrame(
    if (g_Battle.UI.MenuState == kBattleMenuMain &&
       g_Battle.UI.state == kBattleUISelectMove)
    {
-      if (g_InputState.dwKeyPress & kKeyRepeat)
+      if (PAL_GetKeyInput() & kKeyRepeat)
       {
          g_Battle.fRepeat = TRUE;
          g_Battle.UI.fAutoAttack = g_Battle.fPrevAutoAtk;
       }
-      else if (g_InputState.dwKeyPress & kKeyForce)
+      else if (PAL_GetKeyInput() & kKeyForce)
       {
          g_Battle.fForce = TRUE;
       }
@@ -1430,15 +1430,15 @@ PAL_BattleStartFrame(
 
    if (g_Battle.fRepeat)
    {
-      g_InputState.dwKeyPress = kKeyRepeat;
+      PAL_SetKeyInput(kKeyRepeat);
    }
    else if (g_Battle.fForce)
    {
-      g_InputState.dwKeyPress = kKeyForce;
+      PAL_SetKeyInput(kKeyForce);
    }
    else if (g_Battle.fFlee)
    {
-      g_InputState.dwKeyPress = kKeyFlee;
+      PAL_SetKeyInput(kKeyFlee);
    }
 
    //

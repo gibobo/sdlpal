@@ -23,7 +23,7 @@
 #include "audio/audio.h"
 #include "common.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "itemmenu.h"
 #include "magicmenu.h"
 #include "main.h"
@@ -35,7 +35,7 @@
 #include "text.h"
 #include "uibattle.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 
 static int __buymenu_firsttime_render;
 
@@ -189,13 +189,14 @@ int PAL_SaveSlotMenu(
 --*/
 {
    BOX *rgpBox[5];
-   int i, w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5);
+   int i;
+   int w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5);
    int dx = (w > 4) ? (w - 4) * 16 : 0;
    unsigned short wItemSelected;
 
    MENUITEM rgMenuItem[5];
 
-   const SDL_Rect rect = {195 - dx, 7, 120 + dx, 190};
+   const PAL_Rect rect = {195 - dx, 7, 120 + dx, 190};
 
    //
    // Create the boxes and create the menu items
@@ -274,7 +275,7 @@ PAL_SelectionMenu(
    unsigned int pos[4] = {PAL_XY(145, 110), PAL_XY(220 + dx[0], 110), PAL_XY(145, 160), PAL_XY(220 + dx[2], 160)};
    unsigned short wReturnValue;
 
-   const SDL_Rect rect = {130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100};
+   const PAL_Rect rect = {130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100};
 
    for (i = 0; i < nWords; i++)
       if (nWords > i && !wItems[i])
@@ -469,7 +470,7 @@ PAL_SystemMenu(
    BOX *lpMenuBox;
    unsigned short wReturnValue;
    int iSlot, i;
-   const SDL_Rect rect = {40, 60, 280, 135};
+   const PAL_Rect rect = {40, 60, 280, 135};
 
    //
    // Create menu items
@@ -681,7 +682,7 @@ start_magicmenu:
          // Need to select which player to use the magic on.
          //
          unsigned short wPlayer = 0;
-         SDL_Rect rect;
+         PAL_Rect rect;
 
          while (wPlayer != MENUITEM_VALUE_CANCELLED)
          {
@@ -717,12 +718,12 @@ start_magicmenu:
                PAL_ClearKeyState();
                PAL_ProcessEvent();
 
-               if (g_InputState.dwKeyPress & kKeyMenu)
+               if (PAL_GetKeyInput() & kKeyMenu)
                {
                   wPlayer = MENUITEM_VALUE_CANCELLED;
                   break;
                }
-               else if (g_InputState.dwKeyPress & kKeySearch)
+               else if (PAL_GetKeyInput() & kKeySearch)
                {
                   gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse =
                       PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse,
@@ -755,7 +756,7 @@ start_magicmenu:
 
                   break;
                }
-               else if (g_InputState.dwKeyPress & (kKeyLeft | kKeyUp))
+               else if (PAL_GetKeyInput() & (kKeyLeft | kKeyUp))
                {
                   if (wPlayer > 0)
                   {
@@ -763,7 +764,7 @@ start_magicmenu:
                      break;
                   }
                }
-               else if (g_InputState.dwKeyPress & (kKeyRight | kKeyDown))
+               else if (PAL_GetKeyInput() & (kKeyRight | kKeyDown))
                {
                   if (wPlayer < gpGlobals->wMaxPartyMemberIndex)
                   {
@@ -1168,17 +1169,17 @@ void PAL_PlayerStatus(
       {
          UTIL_Delay(1);
 
-         if (g_InputState.dwKeyPress & kKeyMenu)
+         if (PAL_GetKeyInput() & kKeyMenu)
          {
             iCurrent = -1;
             break;
          }
-         else if (g_InputState.dwKeyPress & (kKeyLeft | kKeyUp))
+         else if (PAL_GetKeyInput() & (kKeyLeft | kKeyUp))
          {
             iCurrent--;
             break;
          }
-         else if (g_InputState.dwKeyPress & (kKeyRight | kKeyDown | kKeySearch))
+         else if (PAL_GetKeyInput() & (kKeyRight | kKeyDown | kKeySearch))
          {
             iCurrent++;
             break;
@@ -1210,7 +1211,7 @@ PAL_ItemUseMenu(
    PAL_LARGE unsigned char bufImage[2048];
    unsigned int dwColorChangeTime;
    static short sSelectedPlayer = 0;
-   SDL_Rect rect = {110, 2, 200, 180};
+   PAL_Rect rect = {110, 2, 200, 180};
    int i;
 
    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
@@ -1358,7 +1359,7 @@ PAL_ItemUseMenu(
 
          PAL_ProcessEvent();
 
-         if (g_InputState.dwKeyPress != 0)
+         if (PAL_GetKeyInput() != kKeyNone)
          {
             break;
          }
@@ -1371,7 +1372,7 @@ PAL_ItemUseMenu(
          return MENUITEM_VALUE_CANCELLED;
       }
 
-      if (g_InputState.dwKeyPress & (kKeyUp | kKeyLeft))
+      if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
       {
          sSelectedPlayer--;
          if (sSelectedPlayer < 0)
@@ -1379,7 +1380,7 @@ PAL_ItemUseMenu(
             sSelectedPlayer = gpGlobals->wMaxPartyMemberIndex;
          }
       }
-      else if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight))
+      else if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
       {
          sSelectedPlayer++;
          if (sSelectedPlayer > gpGlobals->wMaxPartyMemberIndex)
@@ -1387,11 +1388,11 @@ PAL_ItemUseMenu(
             sSelectedPlayer = 0;
          }
       }
-      else if (g_InputState.dwKeyPress & kKeyMenu)
+      else if (PAL_GetKeyInput() & kKeyMenu)
       {
          break;
       }
-      else if (g_InputState.dwKeyPress & kKeySearch)
+      else if (PAL_GetKeyInput() & kKeySearch)
       {
          return gpGlobals->rgParty[sSelectedPlayer].wPlayerRole;
       }
@@ -1420,7 +1421,7 @@ PAL_BuyMenu_OnItemChange(
 
 --*/
 {
-   const SDL_Rect rect = {20, 8, 300, 175};
+   const PAL_Rect rect = {20, 8, 300, 175};
    int i, j, n, iPlayerID, x, y;
    PAL_LARGE unsigned char bufImage[2048];
 
@@ -1895,7 +1896,7 @@ void PAL_EquipItemMenu(
             }
          }
 
-         if (g_InputState.dwKeyPress != 0)
+         if (PAL_GetKeyInput() != kKeyNone)
          {
             break;
          }
@@ -1908,7 +1909,7 @@ void PAL_EquipItemMenu(
          return;
       }
 
-      if (g_InputState.dwKeyPress & (kKeyUp | kKeyLeft))
+      if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
       {
          iCurrentPlayer--;
          if (iCurrentPlayer < 0)
@@ -1916,7 +1917,7 @@ void PAL_EquipItemMenu(
             iCurrentPlayer = gpGlobals->wMaxPartyMemberIndex;
          }
       }
-      else if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight))
+      else if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
       {
          iCurrentPlayer++;
          if (iCurrentPlayer > gpGlobals->wMaxPartyMemberIndex)
@@ -1924,11 +1925,11 @@ void PAL_EquipItemMenu(
             iCurrentPlayer = 0;
          }
       }
-      else if (g_InputState.dwKeyPress & kKeyMenu)
+      else if (PAL_GetKeyInput() & kKeyMenu)
       {
          return;
       }
-      else if (g_InputState.dwKeyPress & kKeySearch)
+      else if (PAL_GetKeyInput() & kKeySearch)
       {
          w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;
 

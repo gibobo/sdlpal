@@ -23,14 +23,13 @@
 #include "common.h"
 #include "game.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "palcommon.h"
 #include "play.h"
 #include "scene.h"
 #include "util.h"
-#include "video.h"
 
-SDL_Color *
+PAL_Color *
 PAL_GetPalette(
     int iPaletteNum,
     int fNight)
@@ -51,7 +50,7 @@ PAL_GetPalette(
 
 --*/
 {
-   static SDL_Color palette[256];
+   static PAL_Color palette[256];
    PAL_LARGE unsigned char buf[1536];
    int i;
    FILE *fp;
@@ -115,7 +114,7 @@ void PAL_SetPalette(
 
 --*/
 {
-   SDL_Color *p = PAL_GetPalette(iPaletteNum, fNight);
+   PAL_Color *p = PAL_GetPalette(iPaletteNum, fNight);
 
    if (p != NULL)
    {
@@ -146,8 +145,8 @@ void PAL_FadeOut(
 {
    int i, j;
    unsigned int time;
-   PAL_LARGE SDL_Color palette[256];
-   PAL_LARGE SDL_Color newpalette[256];
+   PAL_LARGE PAL_Color palette[256];
+   PAL_LARGE PAL_Color newpalette[256];
 
    //
    // Get the original palette...
@@ -210,8 +209,8 @@ void PAL_FadeIn(
 {
    int i, j;
    unsigned int time;
-   SDL_Color *palette;
-   PAL_LARGE SDL_Color newpalette[256];
+   PAL_Color *palette;
+   PAL_LARGE PAL_Color newpalette[256];
 
    //
    // Get the new palette...
@@ -273,7 +272,7 @@ void PAL_SceneFade(
 
 --*/
 {
-   SDL_Color *palette, newpalette[256];
+   PAL_Color *palette, newpalette[256];
    int i, j;
    unsigned int time;
 
@@ -301,8 +300,7 @@ void PAL_SceneFade(
          // Generate the scene
          //
          PAL_ClearKeyState();
-         g_InputState.dir = kDirUnknown;
-         g_InputState.prevdir = kDirUnknown;
+         PAL_SetDirInput(kDirUnknown);
          PAL_GameUpdate(FALSE);
          PAL_MakeScene();
          VIDEO_UpdateScreen(NULL);
@@ -331,8 +329,7 @@ void PAL_SceneFade(
          // Generate the scene
          //
          PAL_ClearKeyState();
-         g_InputState.dir = kDirUnknown;
-         g_InputState.prevdir = kDirUnknown;
+         PAL_SetDirInput(kDirUnknown);
          PAL_GameUpdate(FALSE);
          PAL_MakeScene();
          VIDEO_UpdateScreen(NULL);
@@ -378,9 +375,9 @@ void PAL_PaletteFade(
 {
    int i, j;
    unsigned int time;
-   SDL_Color *newpalette = PAL_GetPalette(iPaletteNum, fNight);
-   PAL_LARGE SDL_Color palette[256];
-   PAL_LARGE SDL_Color t[256];
+   PAL_Color *newpalette = PAL_GetPalette(iPaletteNum, fNight);
+   PAL_LARGE PAL_Color palette[256];
+   PAL_LARGE PAL_Color t[256];
 
    if (newpalette == NULL)
    {
@@ -413,8 +410,7 @@ void PAL_PaletteFade(
       if (fUpdateScene)
       {
          PAL_ClearKeyState();
-         g_InputState.dir = kDirUnknown;
-         g_InputState.prevdir = kDirUnknown;
+         PAL_SetDirInput(kDirUnknown);
          PAL_GameUpdate(FALSE);
          PAL_MakeScene();
          VIDEO_UpdateScreen(NULL);
@@ -447,8 +443,8 @@ void PAL_ColorFade(
 
 --*/
 {
-   SDL_Color *palette;
-   PAL_LARGE SDL_Color newpalette[256];
+   PAL_Color *palette;
+   PAL_LARGE PAL_Color newpalette[256];
    int i, j;
 
    palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
@@ -570,8 +566,8 @@ void PAL_FadeToRed(
 
 --*/
 {
-   SDL_Color *palette;
-   PAL_LARGE SDL_Color newpalette[256];
+   PAL_Color *palette;
+   PAL_LARGE PAL_Color newpalette[256];
    int i, j;
    unsigned char color;
 

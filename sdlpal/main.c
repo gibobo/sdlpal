@@ -25,7 +25,7 @@
 #include "font.h"
 #include "game.h"
 #include "global.h"
-#include "input.h"
+#include "input/input.h"
 #include "main.h"
 #include "pal_config.h"
 #include "palcfg.h"
@@ -35,7 +35,7 @@
 #include "rngplay.h"
 #include "text.h"
 #include "util.h"
-#include "video.h"
+#include "video/video.h"
 #include <setjmp.h>
 
 static jmp_buf g_exit_jmp_buf;
@@ -131,13 +131,7 @@ void PAL_Shutdown(
    PAL_FreeGlobals();
 
    g_exit_code = exit_code;
-#if !__EMSCRIPTEN__
    longjmp(g_exit_jmp_buf, 1);
-#else
-   SDL_Quit();
-   UTIL_Platform_Quit();
-   return;
-#endif
 }
 
 void PAL_TrademarkScreen(
@@ -180,10 +174,10 @@ void PAL_SplashScreen(
 
 --*/
 {
-   SDL_Color *palette = PAL_GetPalette(1, FALSE);
-   SDL_Color rgCurrentPalette[256];
-   SDL_Surface *lpBitmapDown, *lpBitmapUp;
-   SDL_Rect srcrect, dstrect;
+   PAL_Color *palette = PAL_GetPalette(1, FALSE);
+   PAL_Color rgCurrentPalette[256];
+   PAL_Surface *lpBitmapDown, *lpBitmapUp;
+   PAL_Rect srcrect, dstrect;
    unsigned char *lpSpriteCrane;
    unsigned char *lpBitmapTitle;
    unsigned char *buf;
@@ -207,8 +201,8 @@ void PAL_SplashScreen(
    //
    // Create the surfaces
    //
-   lpBitmapDown = VIDEO_CreateCompatibleSurface(gpScreen);
-   lpBitmapUp = VIDEO_CreateCompatibleSurface(gpScreen);
+   lpBitmapDown = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
+   lpBitmapUp = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
 
    //
    // Read the bitmaps
@@ -344,7 +338,7 @@ void PAL_SplashScreen(
       //
       // Check for keypress...
       //
-      if (g_InputState.dwKeyPress & (kKeyMenu | kKeySearch))
+      if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
       {
          //
          // User has pressed a key...
@@ -394,8 +388,8 @@ void PAL_SplashScreen(
       }
    }
 
-   VIDEO_FreeSurface(lpBitmapDown);
-   VIDEO_FreeSurface(lpBitmapUp);
+   PAL_FreeSurface(lpBitmapDown);
+   PAL_FreeSurface(lpBitmapUp);
    free(buf);
 
    AUDIO_PlayMusic(0x00, FALSE, 1);
@@ -423,8 +417,6 @@ int main(
 
 --*/
 {
-
-#if !__EMSCRIPTEN__
    if (setjmp(g_exit_jmp_buf) != 0)
    {
       // A longjmp is made, should exit here
@@ -432,7 +424,6 @@ int main(
       UTIL_Platform_Quit();
       return g_exit_code;
    }
-#endif
 
    //
    // Initialize SDL

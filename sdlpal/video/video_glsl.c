@@ -41,11 +41,11 @@
 #define MID_GLSLP "sdlpal.glslp"
 
 extern SDL_Window        *gpWindow;
-extern SDL_Surface       *gpScreenReal;
+extern PAL_Surface       *gpScreenReal;
 extern SDL_Renderer      *gpRenderer;
 extern SDL_Texture       *gpTexture;
 extern SDL_Texture       *gpTouchOverlay;
-extern SDL_Rect           gTextureRect;
+static PAL_Rect           gTextureRect;
 
 static int gRendererWidth;
 static int gRendererHeight;
@@ -478,17 +478,17 @@ GLint get_gl_wrap_mode(enum wrap_mode mode, enum scale_type type) {
 }
 
 SDL_Texture *load_texture(char *name, char *filename, char filter_linear, enum wrap_mode mode, enum scale_type type) {
-    SDL_Surface *surf = STBIMG_Load(get_glslp_path(filename));
+    PAL_Surface *surf = STBIMG_Load(get_glslp_path(filename));
     if( !surf )
         TerminateOnError("Texture %s cannot be open!", get_glslp_path(filename));
     if( filter_linear )
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(gpRenderer, surf);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(gpRenderer, (SDL_Surface *)surf);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
     SDL_GL_BindTexture(texture, NULL, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, get_gl_wrap_mode(mode, type));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, get_gl_wrap_mode(mode, type));
-    SDL_FreeSurface(surf);
+    SDL_FreeSurface((SDL_Surface *)surf);
     return texture;
 }
 
@@ -532,7 +532,7 @@ void SetGroupUniforms(pass_uniform_locations *pSlot, int shaderID, int texture_u
 //    glVertexAttribPointer(pSlot->tex_coord_attrib_location, 4, GL_FLOAT, GL_FALSE, sizeof(struct VertexDataFormat), (GLvoid*)offsetof(struct VertexDataFormat, texCoord));
 }
 
-int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const SDL_Rect * srcrect, const SDL_Rect * dstrect, int pass)
+int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const PAL_Rect * srcrect, const PAL_Rect * dstrect, int pass)
 {
     GLint oldProgramId;
     GLfloat minx, miny, maxx, maxy;
@@ -663,7 +663,7 @@ int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const SD
     }
 #endif
     
-    SDL_Rect _srcrect,_dstrect;
+    PAL_Rect _srcrect,_dstrect;
     
     int w, h;
     SDL_QueryTexture(texture, NULL, NULL, &w, &h);
@@ -740,7 +740,7 @@ int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const SD
 //remove all fixed pipeline call in RenderCopy
 #define SDL_RenderCopy CORE_RenderCopy
 PAL_FORCE_INLINE int CORE_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                    const SDL_Rect * srcrect, const SDL_Rect * dstrect)
+                    const PAL_Rect * srcrect, const PAL_Rect * dstrect)
 {
     // hack for 2.0.10, manually call glViewport for replaced SDL_RenderCopy.
     int w,h;
@@ -857,7 +857,7 @@ void VIDEO_GLSL_RenderCopy()
     
     if( gGLSLP.shader_params[0].filter_linear)
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    origTexture = SDL_CreateTextureFromSurface(gpRenderer, gpScreenReal);
+    origTexture = SDL_CreateTextureFromSurface(gpRenderer, (SDL_Surface *)gpScreenReal);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
     SDL_GL_BindTexture(origTexture, NULL, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, get_gl_wrap_mode(gGLSLP.shader_params[0].wrap_mode, gGLSLP.shader_params[0].scale_type_x));

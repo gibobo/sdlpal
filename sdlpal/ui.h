@@ -22,7 +22,7 @@
 #ifndef UI_H
 #define UI_H
 
-#include <SDL_surface.h>
+#include "video/video.h"
 
 #define CHUNKNUM_SPRITEUI 9
 
@@ -128,8 +128,9 @@
 typedef struct tagBOX
 {
     unsigned int pos;
-    unsigned short wWidth, wHeight;
-    SDL_Surface *lpSavedArea;
+    unsigned short wWidth;
+    unsigned short wHeight;
+    PAL_Surface *lpSavedArea;
 } BOX;
 
 typedef struct tagMENUITEM
@@ -213,9 +214,9 @@ void PAL_DrawNumber(
     NUMCOLOR color,
     NUMALIGN align);
 
-size_t
+int
 PAL_TextWidth(
-    const unsigned short *lpszItemText);
+    const wchar_t *lpszItemText);
 
 int PAL_MenuTextMaxWidth(
     LPCMENUITEM rgMenuItem,

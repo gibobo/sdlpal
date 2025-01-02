@@ -22,7 +22,7 @@
 #ifndef _SCENE_H
 #define _SCENE_H
 
-#include <SDL_surface.h>
+#include "video/video.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -31,7 +31,7 @@ extern "C"
 
    void
    PAL_ApplyWave(
-       SDL_Surface *lpSurface);
+       PAL_Surface *lpSurface);
 
    void
    PAL_MakeScene(

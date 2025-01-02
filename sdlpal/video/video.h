@@ -22,23 +22,43 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#include <SDL_render.h>
+#include <SDL_pixels.h>
 
-#define TOUCHOVERLAY_ALPHAMOD           120
+#define VIDEO_CopySurface(s, sr, t, tr) PAL_UpperBlit((s), (sr), (t), (tr))
+#define VIDEO_CopyEntireSurface(s, t)   PAL_UpperBlit((s), NULL, (t), NULL)
+#define VIDEO_BackupScreen(s)           PAL_UpperBlit((s), NULL, gpScreenBak, NULL)
+#define VIDEO_RestoreScreen(t)          PAL_UpperBlit(gpScreenBak, NULL, (t), NULL)
 
-#define VIDEO_CopySurface(s, sr, t, tr) SDL_BlitSurface((s), (sr), (t), (tr))
-#define VIDEO_CopyEntireSurface(s, t)   SDL_BlitSurface((s), NULL, (t), NULL)
-#define VIDEO_BackupScreen(s)           SDL_BlitSurface((s), NULL, gpScreenBak, NULL)
-#define VIDEO_RestoreScreen(t)          SDL_BlitSurface(gpScreenBak, NULL, (t), NULL)
-#define VIDEO_FreeSurface(s)            SDL_FreeSurface(s)
+typedef struct PAL_Surface
+{
+    unsigned int flags;         /**< Read-only */
+    SDL_PixelFormat *format;    /**< Read-only */
+    int w, h;                   /**< Read-only */
+    int pitch;                  /**< Read-only */
+    void *pixels;               /**< Read-write */
+} PAL_Surface;
+
+typedef struct PAL_Rect {
+  int x;
+  int y;
+  int w;
+  int h;
+} PAL_Rect;
+
+typedef struct PAL_Color {
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
+  unsigned char a;
+} PAL_Color;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern SDL_Surface *gpScreen;
-extern SDL_Surface *gpScreenBak;
-extern volatile int g_bRenderPaused;
+extern PAL_Surface *gpScreen;
+extern PAL_Surface *gpScreenBak;
+
 void Filter_StepParamSlot(int step);
 void Filter_StepCurrentParam(int step);
 
@@ -54,12 +74,12 @@ VIDEO_Shutdown(
 
 void
 VIDEO_UpdateScreen(
-   const SDL_Rect  *lpRect
+   const PAL_Rect *lpRect
 );
 
 void
 VIDEO_SetPalette(
-   SDL_Color        rgPalette[256]
+   PAL_Color       *rgPalette
 );
 
 void
@@ -68,18 +88,13 @@ VIDEO_Resize(
    int             h
 );
 
-SDL_Color *
+PAL_Color *
 VIDEO_GetPalette(
    void
 );
 
 void
 VIDEO_ToggleFullscreen(
-   void
-);
-
-void
-VIDEO_SaveScreenshot(
    void
 );
 
@@ -104,32 +119,38 @@ VIDEO_SetWindowTitle(
 	const char*   pszTitle
 );
 
-SDL_Surface *
+PAL_Surface *
 VIDEO_DuplicateSurface(
-	SDL_Surface    *pSource,
-	const SDL_Rect *pRect
+	PAL_Surface    *pSource,
+	const PAL_Rect *pRect
 );
 
-SDL_Surface *
-VIDEO_CreateCompatibleSurface(
-	SDL_Surface    *pSource
-);
-
-SDL_Surface *
+PAL_Surface *
 VIDEO_CreateCompatibleSizedSurface(
-	SDL_Surface    *pSource,
-	const SDL_Rect *pSize
+	PAL_Surface    *pSource,
+	const PAL_Rect *pSize
 );
 
 void
 VIDEO_UpdateSurfacePalette(
-	SDL_Surface    *pSurface
+	PAL_Surface    *pSurface
 );
 
 void
-VIDEO_DrawSurfaceToScreen(
-    SDL_Surface    *pSurface
+VIDEO_RenderPaused(
+	unsigned char flag
 );
+
+int PAL_UpperBlit(
+    PAL_Surface *src,
+    const PAL_Rect *srcrect,
+    PAL_Surface *dst,
+    PAL_Rect *dstrect);
+
+void PAL_FreeSurface(
+    PAL_Surface *surface);
+
+void PAL_CleanScreen(void);
 
 #ifdef __cplusplus
 }

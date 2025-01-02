@@ -25,7 +25,8 @@
 #include "input.h"
 #include "main.h"
 #include "palcfg.h"
-#include "video.h"
+#include "video/video.h"
+#include <SDL_events.h>
 
 volatile PALINPUTSTATE   g_InputState;
 #if PAL_HAS_JOYSTICKS
@@ -300,10 +301,6 @@ PAL_KeyboardEventFilter(
             PAL_Shutdown(0);
          }
       }
-      else if (lpEvent->key.keysym.sym == SDLK_p)
-      {
-         VIDEO_SaveScreenshot();
-      }
       else if (lpEvent->key.keysym.sym == SDLK_z)
       {
          Filter_StepParamSlot(1);
@@ -398,34 +395,29 @@ PAL_JoystickEventFilter(
       {
          case SDL_HAT_LEFT:
          case SDL_HAT_LEFTUP:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
             g_InputState.dir = kDirWest;
             g_InputState.dwKeyPress = kKeyLeft;
             break;
 
          case SDL_HAT_RIGHT:
          case SDL_HAT_RIGHTDOWN:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
             g_InputState.dir = kDirEast;
             g_InputState.dwKeyPress = kKeyRight;
             break;
 
          case SDL_HAT_UP:
          case SDL_HAT_RIGHTUP:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
             g_InputState.dir = kDirNorth;
             g_InputState.dwKeyPress = kKeyUp;
             break;
 
          case SDL_HAT_DOWN:
          case SDL_HAT_LEFTDOWN:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
             g_InputState.dir = kDirSouth;
             g_InputState.dwKeyPress = kKeyDown;
             break;
 
          case SDL_HAT_CENTERED:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
             g_InputState.dir = kDirUnknown;
             g_InputState.dwKeyPress = kKeyNone;
             break;
@@ -474,31 +466,26 @@ void
 {
    if( g_InputState.axisX == 1 && g_InputState.axisY >= 0 )
    {
-      g_InputState.prevdir = g_InputState.dir;
       g_InputState.dir = kDirEast;
       g_InputState.dwKeyPress |= kKeyRight;
    }
    else if( g_InputState.axisX == -1 && g_InputState.axisY <= 0 )
    {
-      g_InputState.prevdir = g_InputState.dir;
       g_InputState.dir = kDirWest;
       g_InputState.dwKeyPress |= kKeyLeft;
    }
    else if( g_InputState.axisY == 1 && g_InputState.axisX <= 0 )
    {
-      g_InputState.prevdir = g_InputState.dir;
       g_InputState.dir = kDirSouth;
       g_InputState.dwKeyPress |= kKeyDown;
    }
    else if( g_InputState.axisY == -1 && g_InputState.axisX >= 0 )
    {
-      g_InputState.prevdir = g_InputState.dir;
       g_InputState.dir = kDirNorth;
       g_InputState.dwKeyPress |= kKeyUp;
    }
    else
    {
-      g_InputState.prevdir = g_InputState.dir;
       g_InputState.dir = kDirUnknown;
       if(!input_event_filter)
          g_InputState.dwKeyPress = kKeyNone;
@@ -536,16 +523,18 @@ PAL_EventFilter(
          //
          // resized the window
          //
-         VIDEO_Resize(lpEvent->window.data1, lpEvent->window.data2);
+         VIDEO_Resize(
+             lpEvent->window.data1,
+             lpEvent->window.data2);
       }
       break;
 
    case SDL_APP_WILLENTERBACKGROUND:
-      g_bRenderPaused = TRUE;
+      VIDEO_RenderPaused(TRUE);
       break;
 
    case SDL_APP_DIDENTERFOREGROUND:
-      g_bRenderPaused = FALSE;
+      VIDEO_RenderPaused(FALSE);
       VIDEO_UpdateScreen(NULL);
       break;
 
@@ -584,7 +573,7 @@ PAL_ClearKeyState(
 
 --*/
 {
-   g_InputState.dwKeyPress = 0;
+   g_InputState.dwKeyPress = kKeyNone;
 }
 
 void
@@ -608,7 +597,6 @@ PAL_InitInput(
 {
    memset((void *)&g_InputState, 0, sizeof(g_InputState));
    g_InputState.dir = kDirUnknown;
-   g_InputState.prevdir = kDirUnknown;
 
    //
    // Check for joystick
@@ -727,37 +715,18 @@ PAL_ProcessEvent(
 #endif
 }
 
-void
-PAL_RegisterInputFilter(
-   void (*init_filter)(),
-   int (*event_filter)(const SDL_Event *, volatile PALINPUTSTATE *),
-   void (*shutdown_filter)()
-)
-/*++
-  Purpose:
+void PAL_SetKeyInput(unsigned int key) {
+  g_InputState.dwKeyPress = key;
+}
 
-    Register caller-defined input event filter.
+unsigned int PAL_GetKeyInput(void) {
+  return g_InputState.dwKeyPress;
+}
 
-  Parameters:
+void PAL_SetDirInput(unsigned char dir) {
+  g_InputState.dir = dir;
+}
 
-    [IN] init_filter - Filter that will be called inside PAL_InitInput
-	[IN] event_filter - Filter that will be called inside PAL_PollEvent, 
-	                    return non-zero value from this filter disables
-						further internal event processing.
-	[IN] shutdown_filter - Filter that will be called inside PAL_ShutdownInput
-
-	Passing NULL to either parameter means the caller does not provide such filter.
-
-  Return value:
-
-    None.
-
---*/
-{
-	if (init_filter)
-		input_init_filter = init_filter;
-	if (event_filter)
-		input_event_filter = event_filter;
-	if (shutdown_filter)
-		input_shutdown_filter = shutdown_filter;
+unsigned char PAL_GetDirInput(void) {
+  return g_InputState.dir;
 }

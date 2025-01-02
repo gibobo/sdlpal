@@ -55,7 +55,7 @@ void PAL_InitFont(void) {
 void
 PAL_DrawCharOnSurface(
 	unsigned short                 wChar,
-	SDL_Surface             *lpSurface,
+	PAL_Surface             *lpSurface,
 	unsigned int                  pos,
 	unsigned char                  bColor
 )
