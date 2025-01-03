@@ -459,7 +459,7 @@ PAL_BattleUIMiscItemSubMenuUpdate(
 }
 
 void PAL_BattleUIShowText(
-    const unsigned short *lpszText,
+    const wchar_t *lpszText,
     unsigned short wDuration)
 /*++
   Purpose:
@@ -713,7 +713,7 @@ void PAL_BattleUIUpdate(
       }
       else
       {
-         const unsigned short *itemText = PAL_GetWord(BATTLEUI_LABEL_AUTO);
+         const wchar_t *itemText = PAL_GetWord(BATTLEUI_LABEL_AUTO);
          PAL_DrawText(itemText, PAL_XY(312 - PAL_TextWidth(itemText), 10),
                       MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
       }

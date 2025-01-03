@@ -66,12 +66,14 @@ PAL_Init(
    e = PAL_InitGlobals();
    if (e != 0)
    {
+		PAL_Shutdown(255);
       TerminateOnError("Could not initialize global data: %d.\n", e);
    }
 
    e = VIDEO_Startup();
    if (e != 0)
    {
+		PAL_Shutdown(255);
       TerminateOnError("Could not initialize Video: %d.\n", e);
    }
 
@@ -80,12 +82,14 @@ PAL_Init(
    e = PAL_InitUI();
    if (e != 0)
    {
+		PAL_Shutdown(255);
       TerminateOnError("Could not initialize UI subsystem: %d.\n", e);
    }
 
    e = PAL_InitText();
    if (e != 0)
    {
+		PAL_Shutdown(255);
       TerminateOnError("Could not initialize text subsystem: %d.\n", e);
    }
 

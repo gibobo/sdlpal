@@ -491,7 +491,7 @@ void glslp_add_parameter(char *line, size_t len, GLSLP *pGLSLP) {
     tempParam.parameter_name = UTIL_calloc(1, PAL_MAX_PATH);
     tempParam.desc = UTIL_calloc(1, PAL_MAX_PATH);
     int found = -1, nfound = 0;
-    sscanf(line, "#pragma parameter %63s \"%63[^\"]\" %lf %lf %lf %lf", tempParam.parameter_name, tempParam.desc, &tempParam.value_default, &tempParam.minimum, &tempParam.maximum, &tempParam.step);
+    sscanf(line, "#pragma parameter %63s \"%63[^\"]\" %f %f %f %f", tempParam.parameter_name, tempParam.desc, &tempParam.value_default, &tempParam.minimum, &tempParam.maximum, &tempParam.step);
     UTIL_LogOutput(LOGLEVEL_INFO, "Found #pragma parameter %s (%s) %.6f %.6f %.6f %.6f\n", tempParam.desc, tempParam.parameter_name, tempParam.value_default, tempParam.minimum, tempParam.maximum, tempParam.step);
     for( int i = 0; i < pGLSLP->uniform_parameters; i++ ) {
         uniform_param *param = &pGLSLP->uniform_params[i];

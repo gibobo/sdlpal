@@ -122,7 +122,7 @@ void PAL_PlayerInfoBox(
     int fUpdate);
 
 void PAL_BattleUIShowText(
-    const unsigned short *lpszText,
+    const wchar_t *lpszText,
     unsigned short wDuration);
 
 void PAL_BattleUIPlayerReady(

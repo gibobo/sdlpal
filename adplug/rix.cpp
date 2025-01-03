@@ -183,8 +183,8 @@ RELEASE_INLINE void CrixPlayer::Pause()
 RELEASE_INLINE void CrixPlayer::ad_a0b0l_reg_(uint16_t index, uint16_t p2, uint16_t p3)
 {
   //   uint16_t i = p2+a0b0_data2[index];
-  a0b0_data4[index] = p3;
-  a0b0_data3[index] = p2;
+  a0b0_data4[index] = (uint8_t)p3;
+  a0b0_data3[index] = (uint8_t)p2;
 }
 RELEASE_INLINE void CrixPlayer::data_initial()
 {
@@ -399,8 +399,8 @@ RELEASE_INLINE void CrixPlayer::ad_a0b0l_reg(uint16_t index, uint16_t p2, uint16
 {
   uint16_t data;
   uint16_t i = p2 + a0b0_data2[index];
-  a0b0_data4[index] = p3;
-  a0b0_data3[index] = p2;
+  a0b0_data4[index] = (uint8_t)p3;
+  a0b0_data3[index] = (uint8_t)p2;
   i = ((signed short)i <= 0x5F ? i : 0x5F);
   i = ((signed short)i >= 0 ? i : 0);
   data = f_buffer[addrs_head[i] + displace[index] / 2];
@@ -465,7 +465,7 @@ RELEASE_INLINE void CrixPlayer::ins_to_reg(uint16_t index, uint16_t *insb, uint1
 {
   uint16_t i;
   for (i = 0; i < 13; i++)
-    reg_bufs[index].v[i] = insb[i];
+    reg_bufs[index].v[i] = (uint8_t)insb[i];
   reg_bufs[index].v[13] = value & 3;
   ad_bd_reg(), ad_08_reg(),
       ad_40_reg(index), ad_C0_reg(index), ad_60_reg(index),

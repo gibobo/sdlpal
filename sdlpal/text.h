@@ -32,26 +32,12 @@ typedef enum tagDIALOGPOSITION
     kDialogCenterWindow
 } DIALOGLOCATION;
 
-typedef enum tagCODEPAGE
-{
-    CP_BIG5 = 0,
-    CP_GBK = 1,
-    // CP_SHIFTJIS = 2,
-    // CP_JISX0208 = 3,
-    CP_MAX = CP_GBK + 1,
-    CP_UTF_8 = CP_MAX + 1,
-    CP_UCS = CP_UTF_8 + 1,
-} CODEPAGE;
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 typedef struct tagTEXTLIB {
-  wchar_t **lpWordBuf;
-  wchar_t **lpMsgBuf;
-
   int nWords;
   int nMsgs;
   int nIndices;
@@ -72,7 +58,6 @@ typedef struct tagTEXTLIB {
 } TEXTLIB;
 
 extern TEXTLIB g_TextLib;
-
 extern wchar_t *g_rcCredits[12];
 
 int PAL_InitText(

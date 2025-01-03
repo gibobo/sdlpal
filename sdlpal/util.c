@@ -752,3 +752,16 @@ void PAL_DelayUntil(unsigned int tm) {
     UTIL_Sleep(1);
   }
 }
+
+#ifdef _WIN32
+void UTIL_Platform_Quit(void) {}
+#else
+#include <syslog.h>
+void UTIL_Platform_Quit(void) { closelog(); }
+#endif
+
+int UTIL_IsAbsolutePath(const char *lpszFileName) {
+  if (lpszFileName == 0)
+    return FALSE;
+  return (lpszFileName[0] == '/' || lpszFileName[1] == ':');
+}

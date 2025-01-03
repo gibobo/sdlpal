@@ -14,14 +14,9 @@ find_package (GLUT)
 
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(WIN32)
-    set(PLATFORM_DIR win32)
-    if(MSVC)
-        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-        add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
-    endif()
-else()
-    set(PLATFORM_DIR unix)
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 #
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -33,6 +28,9 @@ set (NUKED_DIR              external/nuked)
 set (ADPLUG_DIR             adplug)
 set (SDLPAL_DIR             sdlpal/)
 
+file(GLOB_RECURSE SDLPAL_SOURCES    ${SDLPAL_DIR}/*.c ${SDLPAL_DIR}/*.cpp)
+file(GLOB_RECURSE SDLPAL_HEADERS	${SDLPAL_DIR}/*.h)
+
 add_subdirectory(external/SDL)
 # add_subdirectory(external/libbinio)
 
@@ -42,56 +40,32 @@ add_subdirectory(external/SDL)
 # endif()
 
 include(cmake/adplug.cmake)
-include(cmake/sdlpal.cmake)
+
+add_executable(${PROJECT_NAME}
+    ${SDLPAL_SOURCES}
+)
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        ${SDL2_DIR}/include()
+        ${BINIO_INCLUDE_DIR}
+        ${ADPLUG_DIR}
+        ${SDLPAL_DIR}
+)
 
 if(WIN32)
-    add_executable (${PROJECT_NAME}
-        ${SDLPAL_DIR}/main.c
-        win32/win32.cpp
-    )
-
     target_link_libraries(${PROJECT_NAME}
         ${OPENGL_LIBRARY}
         SDL2-static
         SDL2main
         adplug
-        sdlpal
-    )
-
-    target_include_directories(${PROJECT_NAME}
-        PUBLIC
-            ${PLATFORM_DIR}
-            ${SDL2_DIR}/include
-            ${ADPLUG_DIR}
-            ${SDLPAL_DIR}
     )
 else()
-    # find_package(FLTK)
-    add_executable (${PROJECT_NAME}
-        ${SDLPAL_DIR}/main.c
-        unix/unix.cpp
-    )
-
-    # sudo apt-get install libglfw3-dev libgles2-mesa-dev
     target_link_libraries(${PROJECT_NAME}
-        # ${FLTK_LIBRARIES}
         ${OPENGL_LIBRARY}
         OpenGL::OpenGL OpenGL::EGL 
         SDL2-static
         SDL2main
-        sdlpal
+        adplug
     )
-
-    target_include_directories(${PROJECT_NAME}
-        PUBLIC
-            ${PLATFORM_DIR}
-            ${SDL2_DIR}/include
-            ${ADPLUG_DIR}
-            ${SDLPAL_DIR}
-            ${BINIO_SOURCE_DIR}
-            ${BINIO_INCLUDE_DIR}
-            ${NUKED_DIR}
-            # ${FLTK_INCLUDE_DIR}
-    )
-
 endif()
