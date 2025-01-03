@@ -22,6 +22,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#define PAL_HAS_JOYSTICKS
+
 enum PALDIRECTION
 {
    kDirSouth = 0,
@@ -60,11 +62,6 @@ typedef struct tagPALINPUTSTATE
    unsigned int           dwKeyPress;
    unsigned int           dwKeyOrder[4];
    unsigned int           dwKeyMaxCount;
-#if PAL_HAS_JOYSTICKS
-   int                    axisX;
-   int                    axisY;
-   int                    joystickNeedUpdate;
-#endif
 } PALINPUTSTATE;
 
 #ifdef __cplusplus
@@ -110,8 +107,6 @@ unsigned char
 PAL_GetDirInput(
    void
 );
-
-// extern int g_fUseJoystick;
 
 #ifdef __cplusplus
 }

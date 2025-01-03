@@ -28,12 +28,13 @@
 #include "video/video.h"
 #include <SDL_events.h>
 
-volatile PALINPUTSTATE   g_InputState;
-#if PAL_HAS_JOYSTICKS
-static SDL_Joystick     *g_pJoy = NULL;
+volatile PALINPUTSTATE g_InputState;
+#ifdef PAL_HAS_JOYSTICKS
+static SDL_Joystick *g_pJoy = NULL;
+static int joystick_axis_X;
+static int joystick_axis_Y;
+static int joystickNeedUpdate = FALSE;
 #endif
-
-int                     g_fUseJoystick = TRUE;
 
 static void _default_init_filter() {}
 static int _default_input_event_filter(const SDL_Event *event, volatile PALINPUTSTATE *state) { return 0; }
@@ -285,15 +286,7 @@ PAL_KeyboardEventFilter(
       //
       if (lpEvent->key.keysym.mod & KMOD_ALT)
       {
-         if (lpEvent->key.keysym.sym == SDLK_RETURN)
-         {
-            //
-            // Pressed Alt+Enter (toggle fullscreen)...
-            //
-            VIDEO_ToggleFullscreen();
-            return;
-         }
-         else if (lpEvent->key.keysym.sym == SDLK_F4)
+         if (lpEvent->key.keysym.sym == SDLK_F4)
          {
             //
             // Pressed Alt+F4 (Exit program)...
@@ -320,6 +313,7 @@ PAL_KeyboardEventFilter(
    }
 }
 
+#ifdef PAL_HAS_JOYSTICKS
 static void
 PAL_JoystickEventFilter(
    const SDL_Event       *lpEvent
@@ -339,11 +333,10 @@ PAL_JoystickEventFilter(
 
 --*/
 {
-#if PAL_HAS_JOYSTICKS
    switch (lpEvent->type)
    {
    case SDL_JOYAXISMOTION:
-      g_InputState.joystickNeedUpdate = TRUE;
+      joystickNeedUpdate = TRUE;
       //
       // Moved an axis on joystick
       //
@@ -355,15 +348,15 @@ PAL_JoystickEventFilter(
          //
          if (lpEvent->jaxis.value > 3200)
          {
-            g_InputState.axisX = 1;
+            joystick_axis_X = 1;
          }
          else if (lpEvent->jaxis.value < -3200)
          {
-            g_InputState.axisX = -1;
+            joystick_axis_X = -1;
          }
          else
          {
-            g_InputState.axisX = 0;
+            joystick_axis_X = 0;
          }
          break;
 
@@ -373,15 +366,15 @@ PAL_JoystickEventFilter(
          //
          if (lpEvent->jaxis.value > 3200)
          {
-            g_InputState.axisY = 1;
+            joystick_axis_Y = 1;
          }
          else if (lpEvent->jaxis.value < -3200)
          {
-            g_InputState.axisY = -1;
+            joystick_axis_Y = -1;
          }
          else
          {
-            g_InputState.axisY = 0;
+            joystick_axis_Y = 0;
          }
          break;
       }
@@ -440,10 +433,8 @@ PAL_JoystickEventFilter(
       }
       break;
    }
-#endif
 }
 
-#if PAL_HAS_JOYSTICKS
 
 static void
 PAL_UpdateJoyStickState(
@@ -464,22 +455,22 @@ void
  
  --*/
 {
-   if( g_InputState.axisX == 1 && g_InputState.axisY >= 0 )
+   if( joystick_axis_X == 1 && joystick_axis_Y >= 0 )
    {
       g_InputState.dir = kDirEast;
       g_InputState.dwKeyPress |= kKeyRight;
    }
-   else if( g_InputState.axisX == -1 && g_InputState.axisY <= 0 )
+   else if( joystick_axis_X == -1 && joystick_axis_Y <= 0 )
    {
       g_InputState.dir = kDirWest;
       g_InputState.dwKeyPress |= kKeyLeft;
    }
-   else if( g_InputState.axisY == 1 && g_InputState.axisX <= 0 )
+   else if( joystick_axis_Y == 1 && joystick_axis_X <= 0 )
    {
       g_InputState.dir = kDirSouth;
       g_InputState.dwKeyPress |= kKeyDown;
    }
-   else if( g_InputState.axisY == -1 && g_InputState.axisX >= 0 )
+   else if( joystick_axis_Y == -1 && joystick_axis_X >= 0 )
    {
       g_InputState.dir = kDirNorth;
       g_InputState.dwKeyPress |= kKeyUp;
@@ -546,7 +537,9 @@ PAL_EventFilter(
    }
 
    PAL_KeyboardEventFilter(lpEvent);
+#ifdef PAL_HAS_JOYSTICKS
    PAL_JoystickEventFilter(lpEvent);
+#endif
 
    //
    // All events are handled here; don't put anything to the internal queue
@@ -601,8 +594,8 @@ PAL_InitInput(
    //
    // Check for joystick
    //
-#if PAL_HAS_JOYSTICKS
-   if (SDL_NumJoysticks() > 0 && g_fUseJoystick)
+#ifdef PAL_HAS_JOYSTICKS
+   if (SDL_NumJoysticks() > 0)
    {
       int i;
       for (i = 0; i < SDL_NumJoysticks(); i++)
@@ -639,7 +632,7 @@ PAL_ShutdownInput(
 
 --*/
 {
-#if PAL_HAS_JOYSTICKS
+#ifdef PAL_HAS_JOYSTICKS
    if (g_pJoy != NULL)
    {
       SDL_JoystickClose(g_pJoy);
@@ -703,15 +696,13 @@ PAL_ProcessEvent(
 
 --*/
 {
-#if PAL_HAS_JOYSTICKS
-   g_InputState.joystickNeedUpdate = FALSE;
-#endif
    while (PAL_PollEvent(NULL));
 
    PAL_UpdateKeyboardState();
-#if PAL_HAS_JOYSTICKS
-   if(g_InputState.joystickNeedUpdate)
-      PAL_UpdateJoyStickState();
+#ifdef PAL_HAS_JOYSTICKS
+   if (joystickNeedUpdate)
+     PAL_UpdateJoyStickState();
+   joystickNeedUpdate = FALSE;
 #endif
 }
 

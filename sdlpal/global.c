@@ -24,7 +24,6 @@
 #include "common.h"
 #include "palcommon.h"
 #include "res.h"
-// #include "resampler.h"
 #include "script.h"
 #include "util.h"
 
@@ -32,48 +31,6 @@ static GLOBALVARS _gGlobals;
 GLOBALVARS * const  gpGlobals = &_gGlobals;
 
 CONFIGURATION gConfig;
-
-CODEPAGE
-PAL_DetectCodePage(
-	const char *   filename
-)
-{
-	FILE *fp;
-	char *word_buf = NULL;
-	size_t word_len;
-	CODEPAGE cp = CP_BIG5;
-
-	if (NULL != (fp = UTIL_OpenFile(filename)))
-	{
-		fseek(fp, 0, SEEK_END);
-		word_len = ftell(fp);
-		word_buf = (char *)malloc(word_len);
-		fseek(fp, 0, SEEK_SET);
-		word_len = fread(word_buf, 1, word_len, fp);
-		UTIL_CloseFile(fp);
-		// Eliminates null characters so that PAL_MultiByteToWideCharCP works properly
-		for (char *ptr = word_buf; ptr < word_buf + word_len; ptr++)
-		{
-			if (!*ptr)
-				*ptr = ' ';
-		}
-	}
-
-	if (word_buf)
-	{
-		int probability;
-		cp = PAL_DetectCodePageForString(word_buf, (int)word_len, cp, &probability);
-
-		free(word_buf);
-
-		if (probability == 100)
-			UTIL_LogOutput(LOGLEVEL_INFO, "PAL_DetectCodePage detected code page '%s' for %s\n", cp ? "GBK" : "BIG5", filename);
-		else
-			UTIL_LogOutput(LOGLEVEL_WARNING, "PAL_DetectCodePage detected the most possible (%d) code page '%s' for %s\n", probability, cp ? "GBK" : "BIG5", filename);
-	}
-
-	return cp;
-}
 
 int
 PAL_InitGlobals(
@@ -105,15 +62,6 @@ PAL_InitGlobals(
    gpGlobals->f.fpFIRE = UTIL_OpenRequiredFileForMode("fire.mkf", "rb");
    gpGlobals->f.fpRGM = UTIL_OpenRequiredFileForMode("rgm.mkf", "rb");
    gpGlobals->f.fpSSS = UTIL_OpenRequiredFileForMode("sss.mkf", "rb");
-
-   //
-   // Retrieve game resource version
-   //
-
-   //
-   // Detect game language only when no message file specified
-   //
-   PAL_SetCodePage(PAL_DetectCodePage("word.dat"));
 
    //
    // Set decompress function

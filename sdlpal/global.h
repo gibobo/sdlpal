@@ -587,9 +587,6 @@ extern "C" {
 
 extern GLOBALVARS *const gpGlobals;
 
-CODEPAGE
-PAL_DetectCodePage(
-    const char *filename);
 
 int PAL_InitGlobals(
     void);

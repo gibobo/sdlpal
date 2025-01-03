@@ -22,7 +22,7 @@
 #ifndef _TEXT_H
 #define _TEXT_H
 
-#include "common.h"
+#include <wchar.h>
 
 typedef enum tagDIALOGPOSITION
 {
@@ -131,43 +131,19 @@ void PAL_ShowDialogText(
     const wchar_t *lpszText);
 
 void PAL_ClearDialog(
-    int fWaitForKey);
+    char fWaitForKey);
 
 void PAL_EndDialog(
-    void);
-
-int PAL_IsInDialog(
     void);
 
 int PAL_DialogIsPlayingRNG(
     void);
 
-int PAL_MultiByteToWideChar(
-    const char *mbs,
-    int mbslength,
-    wchar_t *wcs,
-    int wcslength);
-
 int PAL_MultiByteToWideCharCP(
-    CODEPAGE cp,
     const char *mbs,
     int mbslength,
     wchar_t *wcs,
     int wcslength);
-
-CODEPAGE
-PAL_GetCodePage(
-    void);
-
-void PAL_SetCodePage(
-    CODEPAGE uCodePage);
-
-CODEPAGE
-PAL_DetectCodePageForString(
-    const char *text,
-    int text_len,
-    CODEPAGE default_cp,
-    int *probability);
 
 int PAL_swprintf(
     wchar_t *buffer,

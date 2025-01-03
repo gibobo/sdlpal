@@ -25,18 +25,9 @@
 // #define UNICODE
 // #define _UNICODE
 
-// #include <tchar.h>
-// #include <windows.h>
-// #include <commctrl.h>
-// #include <shlobj.h>
-// #include <errno.h>
-// #include <string>
-// #include "resource.h"
-// #include "global.h"
 #include "util.h"
 #include "palcfg.h"
 #include "common.h"
-// #include "resampler.h"
 
 extern "C" void UTIL_Platform_Quit(void) {}
 

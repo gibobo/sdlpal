@@ -23,6 +23,7 @@
 //
 
 #include "text.h"
+#include "codepage.h"
 #include "common.h"
 #include "font.h"
 #include "global.h"
@@ -41,113 +42,17 @@
 #define   FONT_COLOR_CYAN           0x8D
 #define   FONT_COLOR_CYAN_ALT       0x8C
 #define   FONT_COLOR_RED_ALT        0x17
-
-int      g_fUpdatedInBattle      = FALSE;
-
-static wchar_t internal_wbuffer[PAL_GLOBAL_BUFFER_SIZE];
-
 #define   MESSAGE_MAX_BUFFER_SIZE   512
 
-#define INCLUDE_CODEPAGE_H
-#include "codepage.h"
-
-#define SDLPAL_EXTRA_WORD_COUNT     1
-static wchar_t* gc_rgszSDLPalWords[CP_MAX][SDLPAL_EXTRA_WORD_COUNT] = {
-	{ L"\x8FD4\x56DE\x8A2D\x5B9A" },
-	{ L"\x8FD4\x56DE\x8BBE\x7F6E" },
+int g_fUpdatedInBattle = FALSE;
+static wchar_t internal_wbuffer[PAL_GLOBAL_BUFFER_SIZE];
+static wchar_t *gc_rgszSDLPalWords[] = {
+    {L"\x8FD4\x56DE\x8BBE\x7F6E"},
 };
 
 wchar_t* g_rcCredits[12];
 
 TEXTLIB         g_TextLib;
-
-PAL_FORCE_INLINE int
-PAL_ParseLine(
-	char     *line,
-	char    **value,
-	int      *length,
-	int       deltrail
-	)
-{
-	//
-	// Remove the leading spaces
-	//
-	while (*line && iswspace(*line)) line++;
-	//
-	// Skip comments starting with '#'
-	//
-	if (*line && *line != '#')
-	{
-		//
-		// Split the index and value
-		//
-		char* val = strchr(line, '=');
-		if (val)
-		{
-			//
-			// Remove the trailing spaces
-			//
-			char* end = line + strlen(line);
-			int index;
-			if (end > line && end[-1] == '\n') *(--end) = 0;
-			if (deltrail) while (end > line && iswspace(end[-1])) *(--end) = 0;
-
-			//
-			// Parse the index and pass out value
-			//
-			if (sscanf(line, "%d", &index) == 1)
-			{
-				*value = val + 1;
-				*length = (int)(end - *value);
-				return index;
-			}
-		}
-	}
-	return 0;
-}
-
-PAL_FORCE_INLINE char *
-PAL_ReadOneLine(
-	char     *temp,
-	int      limit,
-	FILE     *fp
-	)
-{
-	if (fgets(temp, limit, fp))
-	{
-		int n = (int)strlen(temp);
-		if (n == limit - 1 && temp[n - 1] != '\n' && !feof(fp))
-		{
-			// Line too long, try to read it as a whole
-			int nn = 2;
-			char *tmp = strdup(temp);
-			while (!feof(fp))
-			{
-				if (!(tmp = (char *)realloc(tmp, nn * limit)))
-				{
-					TerminateOnError("PAL_ReadOneLine(): failed to allocate memory for long line!");
-				}
-				if (fgets(tmp + n, limit + 1, fp))
-				{
-					n += (int)strlen(tmp + n);
-					if (n < limit - 1 || temp[n - 1] == '\n')
-						break;
-					else
-						nn++;
-				}
-			}
-			if (tmp[n - 1] == '\n') tmp[n - 1] = 0;
-			return tmp;
-		}
-		else
-		{
-			while (n > 0 && (temp[n - 1] == '\n' || temp[n - 1] == '\r')) temp[--n] = 0;
-			return temp;
-		}
-	}
-	else
-		return NULL;
-}
 
 int
 PAL_InitText(
@@ -224,7 +129,7 @@ PAL_InitText(
 		int base = i * 10;
 		int pos = base + 10 - 1;
 		while (pos >= base && temp[pos] == ' ') temp[pos--] = 0;
-		wlen += PAL_MultiByteToWideChar((const char*)temp + base, 10, NULL, 0) + 1;
+		wlen += PAL_MultiByteToWideCharCP((const char*)temp + base, 10, NULL, 0) + 1;
 	}
 	g_TextLib.lpWordBuf = (wchar_t**)malloc(g_TextLib.nWords * sizeof(wchar_t*));
 	if (g_TextLib.lpWordBuf == NULL)
@@ -245,7 +150,7 @@ PAL_InitText(
 	{
 		int l;
 		g_TextLib.lpWordBuf[i] = tmp + wpos;
-		l = PAL_MultiByteToWideChar((const char*)temp + i * 10, 10, g_TextLib.lpWordBuf[i], wlen - wpos);
+		l = PAL_MultiByteToWideCharCP((const char*)temp + i * 10, 10, g_TextLib.lpWordBuf[i], wlen - wpos);
 		if (l > 0 && g_TextLib.lpWordBuf[i][l - 1] == '1')
 			g_TextLib.lpWordBuf[i][l - 1] = 0;
 		g_TextLib.lpWordBuf[i][l] = 0;
@@ -301,7 +206,7 @@ PAL_InitText(
 	// Split messages and do code page conversion here
 	for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++)
 	{
-		wlen += PAL_MultiByteToWideChar((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
+		wlen += PAL_MultiByteToWideCharCP((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
 	}
 	g_TextLib.lpMsgBuf = (wchar_t**)malloc(g_TextLib.nMsgs * sizeof(wchar_t*));
 	if (g_TextLib.lpMsgBuf == NULL)
@@ -324,13 +229,13 @@ PAL_InitText(
 	{
 		int l;
 		g_TextLib.lpMsgBuf[i] = tmp + wpos;
-		l = PAL_MultiByteToWideChar((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], g_TextLib.lpMsgBuf[i], wlen - wpos);
+		l = PAL_MultiByteToWideCharCP((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], g_TextLib.lpMsgBuf[i], wlen - wpos);
 		g_TextLib.lpMsgBuf[i][l] = 0;
 		wpos += l + 1;
 	}
 	free(temp);
 	free(offsets);
-	memcpy(g_TextLib.lpWordBuf + SYSMENU_LABEL_LAUNCHSETTING, gc_rgszSDLPalWords[PAL_GetCodePage()], SDLPAL_EXTRA_WORD_COUNT * sizeof(const wchar_t*));
+	memcpy(g_TextLib.lpWordBuf + SYSMENU_LABEL_LAUNCHSETTING, gc_rgszSDLPalWords, sizeof(const wchar_t*));
 
    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
    g_TextLib.bIcon = 0;
@@ -837,14 +742,6 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
    g_TextLib.fUserSkip = FALSE;
 }
 
-static void
-PAL_DialogWaitForKey(
-   void
-)
-{
-   PAL_DialogWaitForKeyWithMaximumSeconds(0);
-}
-
 int
 TEXT_DisplayText(
    const wchar_t *lpszText,
@@ -1042,7 +939,7 @@ PAL_ShowDialogText(
       //
       // The rest dialogs should be shown in the next page.
       //
-      PAL_DialogWaitForKey();
+      PAL_DialogWaitForKeyWithMaximumSeconds(0);
       g_TextLib.nCurrentDialogLine = 0;
       VIDEO_RestoreScreen(gpScreen);
       VIDEO_UpdateScreen(NULL);
@@ -1136,7 +1033,7 @@ PAL_ShowDialogText(
 
 void
 PAL_ClearDialog(
-   int       fWaitForKey
+   char       fWaitForKey
 )
 /*++
   Purpose:
@@ -1155,7 +1052,7 @@ PAL_ClearDialog(
 {
    if (g_TextLib.nCurrentDialogLine > 0 && fWaitForKey)
    {
-      PAL_DialogWaitForKey();
+      PAL_DialogWaitForKeyWithMaximumSeconds(0);
    }
 
    g_TextLib.nCurrentDialogLine = 0;
@@ -1203,28 +1100,6 @@ PAL_EndDialog(
 }
 
 int
-PAL_IsInDialog(
-   void
-)
-/*++
-  Purpose:
-
-    Check if there are dialog texts on the screen.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    TRUE if there are dialog texts on the screen, FALSE if not.
-
---*/
-{
-   return (g_TextLib.nCurrentDialogLine != 0);
-}
-
-int
 PAL_DialogIsPlayingRNG(
    void
 )
@@ -1246,93 +1121,8 @@ PAL_DialogIsPlayingRNG(
    return g_TextLib.fPlayingRNG;
 }
 
-static CODEPAGE g_codepage = CP_UTF_8;
-
-CODEPAGE
-PAL_GetCodePage(
-	void
-)
-{
-	return g_codepage;
-}
-
-void
-PAL_SetCodePage(
-	CODEPAGE    uCodePage
-)
-{
-	g_codepage = uCodePage;
-}
-
-CODEPAGE
-PAL_DetectCodePageForString(
-	const char *   text,
-	int            text_len,
-	CODEPAGE       default_cp,
-	int *          probability
-)
-{
-	// Try to convert the content of word.dat with different codepages,
-	// and use the codepage with minimal inconvertible characters
-	// Works fine currently for detecting Simplified Chinese & Traditional Chinese.
-	// Since we're using language files to support additional languages, this detection
-	// should be fine for us now.
-	int min_invalids = INT_MAX;
-
-	if (text && text_len > 0)
-	{
-		// The file to be detected should not contain characters outside these ranges
-		const static int valid_ranges[][2] = {
-			{ 0x4E00, 0x9FFF }, // CJK Unified Ideographs
-			{ 0x3400, 0x4DBF }, // CJK Unified Ideographs Extension A
-			{ 0xF900, 0xFAFF }, // CJK Compatibility Ideographs
-			{ 0x0020, 0x007E }, // Basic ASCII
-			{ 0x3000, 0x301E }, // CJK Symbols
-			{ 0xFF01, 0xFF5E }, // Fullwidth Forms
-		};
-
-		for (CODEPAGE i = CP_BIG5; i <= CP_GBK; i++)
-		{
-			int invalids, length = PAL_MultiByteToWideCharCP(i, text, text_len, NULL, 0);
-			wchar_t *wbuf = (wchar_t *)malloc(length * sizeof(wchar_t));
-			PAL_MultiByteToWideCharCP(i, text, text_len, wbuf, length);
-			for (int j = invalids = 0; j < length; j++)
-			{
-				int score = 1;
-				for (int k = 0; k < sizeof(valid_ranges) / sizeof(valid_ranges[0]); k++)
-				{
-					if (wbuf[j] >= valid_ranges[k][0] &&
-						wbuf[j] <= valid_ranges[k][1])
-					{
-						score = 0;
-						break;
-					}
-				}
-				invalids += score;
-			}
-			// code page with less invalid chars wins
-			if (invalids < min_invalids)
-			{
-				min_invalids = invalids;
-				default_cp = i;
-			}
-			free(wbuf);
-		}
-	}
-	if (probability)
-	{
-		if (min_invalids < text_len / 2)
-			*probability = (text_len / 2 - min_invalids) * 200 / text_len;
-		else
-			*probability = 0;
-	}
-
-	return default_cp;
-}
-
 int
 PAL_MultiByteToWideCharCP(
-   CODEPAGE      cp,
    const char   *mbs,
    int           mbslength,
    wchar_t*      wcs,
@@ -1345,7 +1135,6 @@ PAL_MultiByteToWideCharCP(
 
   Parameters:
 
-    [IN]  cp - Code page for conversion.
     [IN]  mbs - Pointer to the multi-byte string.
 	[IN]  mbslength - Length of the multi-byte string, or -1 for auto-detect.
 	[IN]  wcs - Pointer to the wide string buffer.
@@ -1370,218 +1159,48 @@ PAL_MultiByteToWideCharCP(
 
 	if (!wcs)
 	{
-		switch (cp)
+		for (i = 0; i < mbslength && mbs[i]; i++)
 		{
-		//case CP_SHIFTJIS:
-		//	for (i = 0; i < mbslength && mbs[i]; i++)
-		//	{
-		//		if (state == 0)
-		//		{
-		//			if ((unsigned char)mbs[i] <= 0x80 || (unsigned char)mbs[i] >= 0xfd || ((unsigned char)mbs[i] >= 0xa0 && (unsigned char)mbs[i] <= 0xdf))
-		//				wlen++;
-		//			else
-		//				state = 1;
-		//		}
-		//		else
-		//		{
-		//			wlen++;
-		//			state = 0;
-		//		}
-		//	}
-		//	break;
-		case CP_GBK:
-		case CP_BIG5:
-			for (i = 0; i < mbslength && mbs[i]; i++)
+			if (state == 0)
 			{
-				if (state == 0)
-				{
-					if ((unsigned char)mbs[i] <= 0x80 || (unsigned char)mbs[i] == 0xff)
-						wlen++;
-					else
-						state = 1;
-				}
-				else
-				{
+				if ((unsigned char)mbs[i] <= 0x80 || (unsigned char)mbs[i] == 0xff)
 					wlen++;
-					state = 0;
-				}
-			}
-			break;
-		case CP_UTF_8:
-			for (i = 0; i < mbslength && mbs[i]; i++)
-			{
-				if (state == 0)
-				{
-					if ((unsigned char)mbs[i] >= 0x80)
-					{
-						unsigned char s = (unsigned char)mbs[i] << 1;
-						while (s >= 0x80) { state++; s <<= 1; }
-						if (state < 1 || state > 3)
-						{
-							state = 0;
-							wlen++;
-						}
-					}
-					else
-						wlen++;
-				}
 				else
-				{
-					if ((unsigned char)mbs[i] >= 0x80 && (unsigned char)mbs[i] < 0xc0)
-					{
-						if (--state == 0) wlen++;
-					}
-					else
-					{
-						state = 0; wlen++;
-					}
-				}
+					state = 1;
 			}
-			break;
-        case CP_UCS:
-            i = mbslength;
-            wlen = mbslength/2;
-            break;
-		default:
-			return -1;
+			else
+			{
+				wlen++;
+				state = 0;
+			}
 		}
 		if (i < mbslength && !mbs[i]) null = 1;
 		return wlen + null + (state != 0);
 	}
 	else
 	{
-		wchar_t invalid_char;
-		switch (cp)
+		wchar_t invalid_char = 0x3f;
+		for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
 		{
-		//case CP_SHIFTJIS:
-		//	invalid_char = 0x30fb;
-		//	for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
-		//	{
-		//		if (state == 0)
-		//		{
-		//			if ((unsigned char)mbs[i] <= 0x80)
-		//				wcs[wlen++] = mbs[i];
-		//			else if ((unsigned char)mbs[i] >= 0xa0 && (unsigned char)mbs[i] <= 0xdf)
-		//				wcs[wlen++] = cptbl_jis_half[(unsigned char)mbs[i] - 0xa0];
-		//			else if ((unsigned char)mbs[i] == 0xfd)
-		//				wcs[wlen++] = 0xf8f1;
-		//			else if ((unsigned char)mbs[i] == 0xfe)
-		//				wcs[wlen++] = 0xf8f2;
-		//			else if ((unsigned char)mbs[i] == 0xff)
-		//				wcs[wlen++] = 0xf8f3;
-		//			else
-		//				state = 1;
-		//		}
-		//		else
-		//		{
-		//			if ((unsigned char)mbs[i] < 0x40)
-		//				wcs[wlen++] = 0x30fb;
-		//			else if ((unsigned char)mbs[i - 1] < 0xa0)
-		//				wcs[wlen++] = cptbl_jis[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x40];
-		//			else
-		//				wcs[wlen++] = cptbl_jis[(unsigned char)mbs[i - 1] - 0xc1][(unsigned char)mbs[i] - 0x40];
-		//			state = 0;
-		//		}
-		//	}
-		//	break;
-		case CP_GBK:
-			invalid_char = 0x3f;
-			for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
+			if (state == 0)
 			{
-				if (state == 0)
-				{
-					if ((unsigned char)mbs[i] < 0x80)
-						wcs[wlen++] = mbs[i];
-					else if ((unsigned char)mbs[i] == 0x80)
-						wcs[wlen++] = 0x20ac;
-					else if ((unsigned char)mbs[i] == 0xff)
-						wcs[wlen++] = 0xf8f5;
-					else
-						state = 1;
-				}
+				if ((unsigned char)mbs[i] <= 0x80)
+					wcs[wlen++] = mbs[i];
+				else if ((unsigned char)mbs[i] == 0xff)
+					wcs[wlen++] = 0xf8f8;
 				else
-				{
-					if ((unsigned char)mbs[i] < 0x40)
-						wcs[wlen++] = invalid_char;
-					else
-						wcs[wlen++] = cptbl_gbk[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x40];
-					state = 0;
-				}
+					state = 1;
 			}
-			break;
-		case CP_BIG5:
-			invalid_char = 0x3f;
-			for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
+			else
 			{
-				if (state == 0)
-				{
-					if ((unsigned char)mbs[i] <= 0x80)
-						wcs[wlen++] = mbs[i];
-					else if ((unsigned char)mbs[i] == 0xff)
-						wcs[wlen++] = 0xf8f8;
-					else
-						state = 1;
-				}
+				if ((unsigned char)mbs[i] < 0x40 || ((unsigned char)mbs[i] >= 0x7f && (unsigned char)mbs[i] <= 0xa0))
+					wcs[wlen++] = invalid_char;
+				else if ((unsigned char)mbs[i] <= 0x7e)
+					wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x40];
 				else
-				{
-					if ((unsigned char)mbs[i] < 0x40 || ((unsigned char)mbs[i] >= 0x7f && (unsigned char)mbs[i] <= 0xa0))
-						wcs[wlen++] = invalid_char;
-					else if ((unsigned char)mbs[i] <= 0x7e)
-						wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x40];
-					else
-						wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x60];
-					state = 0;
-				}
+					wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x60];
+				state = 0;
 			}
-			break;
-		case CP_UTF_8:
-			invalid_char = 0x3f;
-			for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
-			{
-				if (state == 0)
-				{
-					if ((unsigned char)mbs[i] >= 0x80)
-					{
-						unsigned char s = (unsigned char)mbs[i] << 1;
-						while (s >= 0x80) { state++; s <<= 1; }
-						if (state < 1 || state > 3)
-						{
-							state = 0;
-							wcs[wlen++] = invalid_char;
-						}
-						else
-						{
-							wcs[wlen] = s >> (state + 1);
-						}
-					}
-					else
-						wcs[wlen++] = mbs[i];
-				}
-				else
-				{
-					if ((unsigned char)mbs[i] >= 0x80 && (unsigned char)mbs[i] < 0xc0)
-					{
-						wcs[wlen] <<= 6;
-						wcs[wlen] |= (unsigned char)mbs[i] & 0x3f;
-						if (--state == 0) wlen++;
-					}
-					else
-					{
-						state = 0;
-						wcs[wlen++] = invalid_char;
-					}
-				}
-			}
-			break;
-        case CP_UCS:
-            for (i = 0; i < mbslength && wlen < wcslength; i+=2){
-                uint8_t *ptr = (uint8_t*)&wcs[wlen++];
-                *(ptr+1)=mbs[i];
-                *ptr    =mbs[i+1];
-            }
-            break;
-		default:
-			return -1;
 		}
 		if (state != 0 && wlen < wcslength)
 		{
@@ -1596,37 +1215,6 @@ PAL_MultiByteToWideCharCP(
 		}
 		return wlen;
 	}
-}
-
-int
-PAL_MultiByteToWideChar(
-   const char    *mbs,
-   int           mbslength,
-   wchar_t       *wcs,
-   int           wcslength
-)
-/*++
-  Purpose:
-
-    Convert multi-byte string into the corresponding unicode string.
-
-  Parameters:
-
-    [IN]  mbs - Pointer to the multi-byte string.
-	[IN]  mbslength - Length of the multi-byte string, or -1 for auto-detect.
-	[IN]  wcs - Pointer to the wide string buffer.
-	[IN]  wcslength - Length of the wide string buffer.
-
-  Return value:
-
-    The length of converted wide string. If mbslength is set to -1, the returned
-	value includes the terminal null-char; otherwise, the null-char is not included.
-	If wcslength is set to 0, wcs can be set to NULL and the return value is the
-	required length of the wide string buffer.
-
---*/
-{
-	return PAL_MultiByteToWideCharCP(g_codepage, mbs, mbslength, wcs, wcslength);
 }
 
 int
@@ -1808,7 +1396,7 @@ PAL_swprintf(
 
 				if (*format == 's')
 				{
-					// For ANSI string, convert it through PAL_MultiByteToWideChar
+					// For ANSI string, convert it through PAL_MultiByteToWideCharCP
 					// To improve effciency, here just test the length and left
 					// actual conversion later directly into the output buffer
 					if (wide)
@@ -1819,7 +1407,7 @@ PAL_swprintf(
 					else
 					{
 						buf = (wchar_t*)va_arg(ap, char*);
-						len = PAL_MultiByteToWideChar((const char*)buf, -1, NULL, 0) - 1;
+						len = PAL_MultiByteToWideCharCP((const char*)buf, -1, NULL, 0) - 1;
 					}
 				}
 				else
@@ -1846,7 +1434,7 @@ PAL_swprintf(
 
 				// Convert or copy string (char) into output buffer
 				if (*format == 's' && !wide)
-					PAL_MultiByteToWideChar((const char*)buf, -1, buffer, precision);
+					PAL_MultiByteToWideCharCP((const char*)buf, -1, buffer, precision);
 				else
 					wcsncpy(buffer, buf, precision);
 				buffer += precision; count += precision;

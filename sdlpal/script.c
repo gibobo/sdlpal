@@ -2962,57 +2962,6 @@ PAL_InterpretInstruction(
    return wScriptEntry + 1;
 }
 
-PAL_FORCE_INLINE
-int MESSAGE_GetSpan(
-    unsigned short *pwScriptEntry)
-/*++
- Purpose:
-
- Get the final span of a message block which started from message index of wScriptEntry
-
- Parameters:
-
- [IN]  pwScriptEntry - The pointer of script entry which starts the message block, must be a 0xffff command.
-
- Return value:
-
- The final span of the message block.
-
- --*/
-{
-   int currentScriptEntry = *pwScriptEntry;
-   int result = 0;
-   int beginning = 1;
-   int firstMsgIndex, lastMsgIndex;
-
-   // ensure the command is 0xFFFF
-   assert(gpGlobals->g.lprgScriptEntry[currentScriptEntry].wOperation == 0xFFFF);
-
-   firstMsgIndex = lastMsgIndex = gpGlobals->g.lprgScriptEntry[currentScriptEntry].rgwOperand[0];
-
-   //
-   // If the NEXT command is 0xFFFF, but the message index is not continuous or not incremental,
-   // this MESSAGE block shoud end at THIS command.
-   //
-   if (gpGlobals->g.lprgScriptEntry[currentScriptEntry + 1].wOperation == 0xFFFF && gpGlobals->g.lprgScriptEntry[currentScriptEntry + 1].rgwOperand[0] != lastMsgIndex + 1)
-      currentScriptEntry++;
-   else
-      while ((gpGlobals->g.lprgScriptEntry[currentScriptEntry].wOperation == 0xFFFF &&
-              (!beginning ? gpGlobals->g.lprgScriptEntry[currentScriptEntry].rgwOperand[0] == lastMsgIndex + 1 : 1)) ||
-             gpGlobals->g.lprgScriptEntry[currentScriptEntry].wOperation == 0x008E)
-      {
-         if (gpGlobals->g.lprgScriptEntry[currentScriptEntry].wOperation == 0xFFFF)
-            lastMsgIndex = gpGlobals->g.lprgScriptEntry[currentScriptEntry].rgwOperand[0];
-         currentScriptEntry++;
-         beginning = 0;
-      }
-
-   result = lastMsgIndex - firstMsgIndex;
-   assert(result >= 0);
-   *pwScriptEntry = currentScriptEntry;
-   return result;
-}
-
 unsigned short
 PAL_RunTriggerScript(
     unsigned short wScriptEntry,
@@ -3355,6 +3304,9 @@ PAL_RunAutoScript(
 {
    SCRIPTENTRY *pScript;
    EVENTOBJECT *pEvtObj;
+   int XBase;
+   int YBase;
+   int iDescLine;
 
 begin:
    pScript = &(gpGlobals->g.lprgScriptEntry[wScriptEntry]);
@@ -3458,9 +3410,9 @@ begin:
       break;
 
    case 0xFFFF:
-      int XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : PAL_XY(102, 0);
-      int YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 : 3;
-      int iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
+      XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : PAL_XY(102, 0);
+      YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 : 3;
+      iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
       PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
       wScriptEntry++;
       break;

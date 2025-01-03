@@ -23,7 +23,6 @@
 #include "common.h"
 #include "input/input.h"
 #include "mini_glloader.h"
-#include "pal_config.h"
 #include "palcfg.h"
 #include "util.h"
 #include <SDL_render.h>
@@ -448,37 +447,6 @@ VIDEO_GetPalette(
 --*/
 {
    return (PAL_Color *)gpPalette->colors;
-}
-
-void
-VIDEO_ToggleFullscreen(
-   void
-)
-/*++
-  Purpose:
-
-    Toggle fullscreen mode.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-	if (gConfig.fFullScreen)
-	{
-		SDL_SetWindowFullscreen(gpWindow, 0);
-		gConfig.fFullScreen = FALSE;
-	}
-	else
-	{
-		SDL_SetWindowFullscreen(gpWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		gConfig.fFullScreen = TRUE;
-	}
 }
 
 void

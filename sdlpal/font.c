@@ -21,11 +21,12 @@
 
 #include "font.h"
 #include "ascii.h"
-#include "common.h"
 #include "fontglyph.h"
 #include "palcommon.h"
 #include "text.h"
 #include "util.h"
+
+#define ReLU(A)  ((A) > 0 ? (A) : 0)
 
 static const int unicode_lower_top = 0xd800;
 static const int unicode_upper_base = 0xf900;
@@ -95,7 +96,7 @@ PAL_DrawCharOnSurface(
 	//
 	// Draw the character to the surface.
 	//
-	unsigned char * dest = (unsigned char *)lpSurface->pixels + (int)max(y + y_offset, 0) * lpSurface->pitch + x;
+	unsigned char * dest = (unsigned char *)lpSurface->pixels + ReLU(y + y_offset) * lpSurface->pitch + x;
 	unsigned char * top = (unsigned char *)lpSurface->pixels + lpSurface->h * lpSurface->pitch;
 	
 	if (font_width[wChar] == 32)

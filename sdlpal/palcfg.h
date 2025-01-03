@@ -91,7 +91,6 @@ typedef struct tagCONFIGURATION {
   unsigned short wAudioBufferSize;
   int fUseSurroundOPL;
   int fKeepAspectRatio;
-  int fFullScreen;
   int fUseCustomScreenLayout;
   int fEnableKeyRepeat;
 } CONFIGURATION;

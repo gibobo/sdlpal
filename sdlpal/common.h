@@ -22,28 +22,22 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
-#include <wchar.h>
+#include <assert.h>
+#include <float.h>
+#include <limits.h>
+#include <math.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <limits.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-#define __WIDETEXT(quote) L##quote
-#define WIDETEXT(quote) __WIDETEXT(quote)
-
-#define STR_INDIR(x)                    #x
-#define STR(x)                          STR_INDIR(x)
-
-#if !defined(fmax) || !defined(fmin)
-# include <math.h>
+#include <wchar.h>
+#ifndef _WIN32
+#include <dirent.h>
+#include <unistd.h>
 #endif
-
-#include <float.h>
 
 #ifndef max
 # define max fmax
@@ -59,38 +53,24 @@
 #else
 #define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
 #endif
-#endif /* PAL_FORCE_INLINE not defined */
-
-#ifdef _WIN32
-// # include <windows.h>
-// # include <io.h>
-#else
-# include <unistd.h>
-# include <dirent.h>
 #endif
 
-# ifndef FALSE
-#  define FALSE               0
-# endif
-# ifndef TRUE
-#  define TRUE                1
-# endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
 
 #ifdef PATH_MAX
-# define PAL_MAX_PATH  PATH_MAX
+#define PAL_MAX_PATH PATH_MAX
 #else
-# define PAL_MAX_PATH  1024
+#define PAL_MAX_PATH 1024
 #endif
-
-/* When porting SDLPAL to a new platform, please make a separate directory and put a file 
-   named 'pal_config.h' that contains marco definitions & header includes into the directory.
-   The example of this file can be found in directories of existing portings.
- */
 
 #ifndef PAL_LARGE
-# define PAL_LARGE
+#define PAL_LARGE
 #endif
-
 
 #define PAL_GLOBAL_BUFFER_SIZE 1024
 

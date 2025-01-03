@@ -27,7 +27,6 @@
 #include "global.h"
 #include "input/input.h"
 #include "main.h"
-#include "pal_config.h"
 #include "palcfg.h"
 #include "palcommon.h"
 #include "palette.h"
@@ -428,7 +427,11 @@ int main(
    //
    // Initialize SDL
    //
-   if (SDL_Init(PAL_SDL_INIT_FLAGS) == -1)
+#ifdef PAL_HAS_JOYSTICKS
+   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK) == -1)
+#else
+   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE) == -1)
+#endif
    {
       TerminateOnError("Could not initialize SDL: %s.\n", SDL_GetError());
    }

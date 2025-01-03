@@ -24,9 +24,8 @@
 
 #include "palcfg.h"
 // #include "global.h"
-#include "pal_config.h"
 #include "palcommon.h"
-// #include "common.h"
+#include "common.h"
 // #include <stdint.h>
 
 void
@@ -135,14 +134,13 @@ PAL_LoadConfig(
 	//
 	// Set configurable global options
 	//
-	if (!gConfig.pszSavePath) gConfig.pszSavePath = strdup(PAL_SAVE_PREFIX);
-	if (!gConfig.pszGamePath) gConfig.pszGamePath = strdup(PAL_PREFIX);
+	if (!gConfig.pszSavePath) gConfig.pszSavePath = strdup(SOURCE_DIR "/Pal98rqptw/");
+	if (!gConfig.pszGamePath) gConfig.pszGamePath = strdup(SOURCE_DIR "/Pal98rqptw/");
     if (!gConfig.pszShaderPath) gConfig.pszShaderPath = strdup(gConfig.pszGamePath);
 	gConfig.ScreenLayout = screen_layout;
 
 	gConfig.fEnableKeyRepeat = FALSE;
 	gConfig.fKeepAspectRatio = TRUE;
-	gConfig.fFullScreen = FALSE;
 	gConfig.iAudioChannels = TRUE ? 2 : 1;
 	gConfig.iLogLevel = LOGLEVEL_MIN;
 	gConfig.iAudioDevice = -1;
@@ -151,8 +149,8 @@ PAL_LoadConfig(
 	gConfig.iOPLSampleRate = 49716;
 	gConfig.wAudioBufferSize = 1024;
 	gConfig.pszShader = SOURCE_DIR"/shaders/plain.glsl";
-	gConfig.dwTextureWidth  = PAL_DEFAULT_WINDOW_WIDTH;
-	gConfig.dwTextureHeight = PAL_DEFAULT_WINDOW_HEIGHT;
-	gConfig.dwScreenWidth = PAL_DEFAULT_WINDOW_WIDTH;
-	gConfig.dwScreenHeight = PAL_DEFAULT_WINDOW_HEIGHT;
+	gConfig.dwTextureWidth  = 640;
+	gConfig.dwTextureHeight = 400;
+	gConfig.dwScreenWidth = 640;
+	gConfig.dwScreenHeight = 400;
 }

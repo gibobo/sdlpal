@@ -285,6 +285,11 @@ emscripten/*.cpp
 
 Pal98rqptw/
 *.bak
+*.7z
+*.rar
+*.zip
 vc16/
 vc17/
 .build/
+build/
+out/

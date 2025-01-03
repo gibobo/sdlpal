@@ -30,14 +30,12 @@
 #include "palcfg.h"
 #include "util.h"
 #include "video.h"
-#include "pal_config.h"
 #include "common.h"
 #include <SDL_hints.h>
 
 
 #define FORCE_OPENGL_CORE_PROFILE 1
 #define SUPPORT_PARAMETER_UNIFORM 1
-
 #define MID_GLSLP "sdlpal.glslp"
 
 extern SDL_Window        *gpWindow;
@@ -932,7 +930,7 @@ void VIDEO_GLSL_Init() {
 #   endif
 #endif
 
-    Uint32 flags = PAL_VIDEO_INIT_FLAGS | SDL_WINDOW_OPENGL;
+    Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
     
     UTIL_LogOutput(LOGLEVEL_DEBUG, "requesting to create window with flags: %s %s profile latest available\n", SDL_GetHint( SDL_HINT_RENDER_DRIVER ),  get_gl_profile(get_SDL_GLAttribute(SDL_GL_CONTEXT_PROFILE_MASK)));
     gpWindow = SDL_CreateWindow("Pal", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gConfig.dwScreenWidth, gConfig.dwScreenHeight, flags);

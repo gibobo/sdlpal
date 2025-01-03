@@ -94,11 +94,6 @@ VIDEO_GetPalette(
 );
 
 void
-VIDEO_ToggleFullscreen(
-   void
-);
-
-void
 VIDEO_ShakeScreen(
    unsigned short           wShakeTime,
    unsigned short           wShakeLevel

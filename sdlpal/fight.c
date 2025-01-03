@@ -54,8 +54,8 @@ PAL_IsPlayerDying(
 
 --*/
 {
-   return gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] <
-      min(100, gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole] / 5);
+  return gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] <
+         min(100, gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole] / 5);
 }
 
 int
