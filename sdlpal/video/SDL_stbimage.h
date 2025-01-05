@@ -184,9 +184,9 @@ typedef struct
 static PAL_Surface *STBIMG__CreateSurfaceImpl(STBIMG__image img, int freeWithSurface)
 {
 	SDL_Surface *surf = NULL;
-	Uint32 rmask, gmask, bmask, amask;
+	unsigned int rmask, gmask, bmask, amask;
 	// ok, the following is pretty stupid.. SDL_CreateRGBSurfaceFrom() pretends to use
-	// a void* for the data, but it's really treated as endian-specific Uint32*
+	// a void* for the data, but it's really treated as endian-specific unsigned int*
 	// and there isn't even an SDL_PIXELFORMAT_* for 32bit byte-wise RGBA
 	rmask = 0x000000ff;
 	gmask = 0x0000ff00;

@@ -348,13 +348,11 @@ GLuint compileShader(const char* sourceOrFilename, GLuint shaderType, int is_sou
         {
             GLchar *log = (GLchar*)malloc(logLength);
             glGetShaderInfoLog(result, logLength, &logLength, log);
-            UTIL_LogOutput(LOGLEVEL_FATAL, "shader %s compilation error:%s\n", is_source ? "stock" : sourceOrFilename,log);
             free(log);
         }
         glDeleteShader(result);
         result = 0;
-    }else
-        UTIL_LogOutput(LOGLEVEL_DEBUG, "%s shader %s compilation succeed!\n", SHADER_TYPE(shaderType), is_source ? "stock" : sourceOrFilename );
+    }
     free(pShaderBuffer);
     return result;
 }
@@ -378,18 +376,16 @@ GLuint compileProgram(const char* vtx, const char* frag,int is_source) {
         // Check the status of the compile/link
         GLint programLinked = GL_FALSE;
         glGetProgramiv(programId, GL_LINK_STATUS, &programLinked );
-        if( programLinked != GL_TRUE ) {
+        if (programLinked != GL_TRUE) {
             GLint logLen;
             glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &logLen);
-            if(logLen > 0) {
-                char* log = (char*) malloc(logLen * sizeof(char));
+            if (logLen > 0) {
+                char *log = (char *)malloc(logLen * sizeof(char));
                 // Show any errors as appropriate
                 glGetProgramInfoLog(programId, logLen, &logLen, log);
-                UTIL_LogOutput(LOGLEVEL_FATAL, "shader linkage error:%s\n",log);
                 free(log);
             }
-        }else
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "shaders linkage succeed!\n");
+        }
     }
     if(vtxShaderId) {
         glDeleteShader(vtxShaderId);
@@ -409,8 +405,6 @@ void setupShaderParams(int pass){
     if(slot >= 0) {
         glEnableVertexAttribArray(slot);
         glVertexAttribPointer(slot, 4, GL_FLOAT, GL_FALSE, sizeof(struct VertexDataFormat), (GLvoid*)offsetof(struct VertexDataFormat, position));
-    }else{
-        UTIL_LogOutput(LOGLEVEL_DEBUG, "attrib VertexCoord not exist\n");
     }
 
     for( int i = 0; i < MAX_TEXTURES; i++ ) {
@@ -424,29 +418,13 @@ void setupShaderParams(int pass){
     }
     
     gMVPSlots[pass] = glGetUniformLocation(gProgramIds[pass], "MVPMatrix");
-    if(gMVPSlots[pass] < 0)
-        UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform MVPMatrix not exist\n");
     
     if( pass > 0 ) {
         gGLSLP.shader_params[shader].self_slots.texture_size_uniform_location = glGetUniformLocation(gProgramIds[pass], "TextureSize");
-        if(gGLSLP.shader_params[shader].self_slots.texture_size_uniform_location < 0)
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform TextureSize not exist\n");
-        
         gGLSLP.shader_params[shader].self_slots.output_size_uniform_location= glGetUniformLocation(gProgramIds[pass], "OutputSize");
-        if(gGLSLP.shader_params[shader].self_slots.output_size_uniform_location < 0)
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform OutputSize not exist\n");
-        
         gGLSLP.shader_params[shader].self_slots.input_size_uniform_location = glGetUniformLocation(gProgramIds[pass], "InputSize");
-        if(gGLSLP.shader_params[shader].self_slots.input_size_uniform_location < 0)
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform InputSize not exist\n");
-        
         gGLSLP.shader_params[shader].self_slots.frame_direction_uniform_location = glGetUniformLocation(gProgramIds[pass], "FrameDirection");
-        if(gGLSLP.shader_params[shader].self_slots.frame_direction_uniform_location < 0)
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform FrameDirection not exist\n");
-        
         gGLSLP.shader_params[shader].self_slots.frame_count_uniform_location = glGetUniformLocation(gProgramIds[pass],  "FrameCount");
-        if(gGLSLP.shader_params[shader].self_slots.frame_count_uniform_location < 0)
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "uniform FrameCount not exist\n");
     }
 }
 
@@ -930,28 +908,13 @@ void VIDEO_GLSL_Init() {
 #   endif
 #endif
 
-    Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
-    
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "requesting to create window with flags: %s %s profile latest available\n", SDL_GetHint( SDL_HINT_RENDER_DRIVER ),  get_gl_profile(get_SDL_GLAttribute(SDL_GL_CONTEXT_PROFILE_MASK)));
+    unsigned int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
     gpWindow = SDL_CreateWindow("Pal", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gConfig.dwScreenWidth, gConfig.dwScreenHeight, flags);
     if (gpWindow == NULL) {
-        UTIL_LogOutput(LOGLEVEL_DEBUG, "failed to create window with ordered flags! %s\n", SDL_GetError());
-        UTIL_LogOutput(LOGLEVEL_DEBUG, "reverting to: OpenGL %s profile %d.%d\n", get_gl_profile(orig_profile), orig_major, orig_minor);
-        
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, orig_major);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, orig_minor);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,  orig_profile);
         gpWindow = SDL_CreateWindow("Pal", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gConfig.dwScreenWidth, gConfig.dwScreenHeight, flags);
-    }
-}
-
-static void dump_preset() {
-    FILE *fp = UTIL_OpenFileForMode(MID_GLSLP, "w");
-    if(fp) {
-        char *content = serialize_glslp(&gGLSLP);
-        fputs( content, fp );
-        free(content);
-        fclose(fp);
     }
 }
 
@@ -962,37 +925,21 @@ void VIDEO_GLSL_Setup() {
     
     for( int i = 0; i < MAX_TEXTURES; i++ )
         frame_prev_texture_units[i] = -1;
-    
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "render info:%s\n",rendererInfo.name);
 
     char *glversion = (char*)glGetString(GL_VERSION);
     char *glslversion = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
     SDL_sscanf(glversion, "%d.%d", &glversion_major, &glversion_minor);
     if(!strncmp(rendererInfo.name, "opengl", 6)) {
-        if (!initGLExtensions(glversion_major))
-            UTIL_LogOutput(LOGLEVEL_FATAL,  "Couldn't init GL extensions!\n" );
+        assert(initGLExtensions(glversion_major));
 	}
-	else
-		UTIL_LogOutput(LOGLEVEL_FATAL, "OpenGL initial failed, check your code!\n");
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "GL_VENDOR:%s\n",glGetString(GL_VENDOR));
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "GL_VERSION:%s\n",glversion);
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "GL_SHADING_LANGUAGE_VERSION:%s\n",glslversion);
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "GL_RENDERER:%s\n",glGetString(GL_RENDERER));
     GLint maxTextureSize, maxDrawBuffers, maxColorAttachments;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
     glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "GL_MAX_TEXTURE_SIZE:%d\n",maxTextureSize);
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "GL_MAX_DRAW_BUFFERS:%d\n",maxDrawBuffers);
-    UTIL_LogOutput(LOGLEVEL_DEBUG, "GL_MAX_COLOR_ATTACHMENTS:%d\n",maxColorAttachments);
     if( glversion_major >= 3 ) {
-        GLint n, i;
+        GLint n;
         glGetIntegerv(GL_NUM_EXTENSIONS, &n);
-        for (i = 0; i < n; i++) {
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "extension %d:%s\n", i, glGetStringi(GL_EXTENSIONS, i));
-        }
-    }else
-        UTIL_LogOutput(LOGLEVEL_DEBUG, "GL_EXTENSIONS:%s\n",glGetString(GL_EXTENSIONS));
+    }
     SDL_sscanf(glslversion, "%d.%d", &glslversion_major, &glslversion_minor);
     
     // iOS native GLES supports VAO extension
@@ -1036,29 +983,17 @@ void VIDEO_GLSL_Setup() {
     glBindBuffer( GL_ARRAY_BUFFER, gVBOIds[id] );
     glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(struct VertexDataFormat), vData, GL_DYNAMIC_DRAW );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gEBOId );
-    UTIL_LogSetPrelude("[PASS 1] ");
     gProgramIds[id] = compileProgram(plain_glsl_vert, plain_glsl_frag, 1);
     setupShaderParams(id++);
-    
-    UTIL_LogSetPrelude(NULL);
 
-    GLSLP tempGLSLP;
-    memset(&tempGLSLP,0,sizeof(GLSLP));
-    if( UTIL_IsFileExist(MID_GLSLP) && parse_glslp(MID_GLSLP,&tempGLSLP) && tempGLSLP.orig_filter && strcmp( tempGLSLP.orig_filter, gConfig.pszShader ) == 0 ) {
-        //same file, not needed to parse again
-        memcpy(&gGLSLP,&tempGLSLP,sizeof(GLSLP));
-        UTIL_LogOutput(LOGLEVEL_DEBUG, "[PASS 2] load parametered filter preset\n");
-    }else{
+    {
         char *origGLSL = NULL;
         if( SDL_strcasecmp( strrchr(gConfig.pszShader, '.'), ".glsl") == 0 ) {
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "[PASS 2] loading %s\n", gConfig.pszShader);
             FILE *fp = UTIL_OpenFileForMode(MID_GLSLP, "w");
             fputs(PAL_va(glslp_template, gConfig.pszShader, gConfig.pszShader, gConfig.dwTextureWidth, gConfig.dwTextureHeight, "false"), fp);
             fclose(fp);
             origGLSL = gConfig.pszShader;
             gConfig.pszShader = strdup(MID_GLSLP);
-        }else{
-            UTIL_LogOutput(LOGLEVEL_DEBUG, "[PASS 2] going to parse %s\n", gConfig.pszShader);
         }
         parse_glslp(gConfig.pszShader,&gGLSLP);
         if( origGLSL ) {
@@ -1073,12 +1008,10 @@ void VIDEO_GLSL_Setup() {
         glBindBuffer( GL_ARRAY_BUFFER, gVBOIds[id+i] );
         glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(struct VertexDataFormat), vData, GL_DYNAMIC_DRAW );
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gEBOId );
-        UTIL_LogSetPrelude(PAL_va("[PASS 2.%d] ", i + 1));
         gProgramIds[id+i] = compileProgram(gGLSLP.shader_params[i].shader, gGLSLP.shader_params[i].shader, 0);
         setupShaderParams(id+i);
     }
-    // for debugging usage
-    dump_preset();
+
     for( int i = 0; i < gGLSLP.textures; i++ ) {
         texture_param *param = &gGLSLP.texture_params[i];
         char *texture_name = param->texture_name;
@@ -1097,7 +1030,6 @@ void VIDEO_GLSL_Setup() {
     // Unsure what happened.
     if( glversion_major <= 2 ) {
         id=0;
-        UTIL_LogSetPrelude("[PASS 1] ");
         glBindBuffer( GL_ARRAY_BUFFER, gVBOIds[id] );
         glBufferData( GL_ARRAY_BUFFER, 4 * sizeof(struct VertexDataFormat), vData, GL_DYNAMIC_DRAW );
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gEBOId );
@@ -1105,15 +1037,9 @@ void VIDEO_GLSL_Setup() {
     }
     
     if(VAOSupported) glBindVertexArray(0);
-
-    UTIL_LogSetPrelude(NULL);
 }
 
-void VIDEO_GLSL_Destroy() {
-    // for modified parameters
-    if( gGLSLP.shaders > 0 )
-        dump_preset();
-    
+void VIDEO_GLSL_Destroy() {    
     destroy_glslp(&gGLSLP);
     for( int i = 0; i < MAX_TEXTURES; i++ )
         if( framePrevTextures[i] )
@@ -1129,12 +1055,10 @@ void Filter_StepParamSlot(int step) {
         return;
     slot = (gGLSLP.uniform_parameters + slot + step) % gGLSLP.uniform_parameters;
     uniform_param *param = &gGLSLP.uniform_params[slot];
-    UTIL_LogOutput(LOGLEVEL_INFO, "[PARAM] slot:%s cur:%.2f range:[%.2f,%.2f]\n", param->parameter_name, param->value, param->minimum, param->maximum);
 }
 void Filter_StepCurrentParam(int step) {
     if( gGLSLP.uniform_parameters <= 0 )
         return;
     uniform_param *param = &gGLSLP.uniform_params[slot];
     param->value = CLAMP( param->value + step * param->step, param->minimum, param->maximum);
-    UTIL_LogOutput(LOGLEVEL_INFO, "[PARAM] slot:%s cur:%.2f range:[%.2f,%.2f]\n", param->parameter_name, param->value, param->minimum, param->maximum);
 }

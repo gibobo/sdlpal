@@ -142,7 +142,6 @@ PAL_LoadConfig(
 	gConfig.fEnableKeyRepeat = FALSE;
 	gConfig.fKeepAspectRatio = TRUE;
 	gConfig.iAudioChannels = TRUE ? 2 : 1;
-	gConfig.iLogLevel = LOGLEVEL_MIN;
 	gConfig.iAudioDevice = -1;
 
 	gConfig.iSampleRate = 44100;

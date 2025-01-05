@@ -28,21 +28,6 @@
 extern "C" {
 #endif
 
-
-typedef enum tagLOGLEVEL
-{
-	LOGLEVEL_MIN,
-	LOGLEVEL_VERBOSE = LOGLEVEL_MIN,
-	LOGLEVEL_DEBUG,
-	LOGLEVEL_INFO,
-	LOGLEVEL_WARNING,
-	LOGLEVEL_ERROR,
-	LOGLEVEL_FATAL,
-	LOGLEVEL_MAX = LOGLEVEL_FATAL,
-} LOGLEVEL;
-
-#define PAL_LOG_MAX_OUTPUTS   (LOGLEVEL_MAX + 1)
-
 long
 flength(
    FILE *fp
@@ -227,116 +212,6 @@ UTIL_IsAbsolutePath(
 void
 UTIL_Platform_Quit(
 	void
-);
-
-
-/*
- * Logging utilities
- */
-
-/*++
-  Purpose:
-
-    The pointer to callback function that produces actual log output.
-
-  Parameters:
-
-    [IN]  level    - The log level of this output call.
-	[IN]  full_log - The full log string produced by UTIL_LogOutput.
-	[IN]  user_log - The log string produced by user-provided format.
-
-  Return value:
-
-    None.
-
---*/
-typedef void(*LOGCALLBACK)(LOGLEVEL level, const char *full_log, const char *user_log);
-
-/*++
-  Purpose:
-
-    Adds a log output callback.
-
-  Parameters:
-
-    [IN]  callback     - The callback function to be added. Once added,
-	                     it will be called by UTIL_LogOutput.
-    [IN]  loglevel     - The minimal log level that the callback should
-	                     be called. Any log whose level below this will
-						 be ignored by the callback.
-
-  Return value:
-
-    The slot id (>= 0), -1 if all slots are used or callback is NULL.
-
---*/
-
-/*++
-  Purpose:
-
-    Removes a log output callback.
-
-  Parameters:
-
-    [IN]  id           - The id of callback function to be removed.
-
-  Return value:
-
-    None
-
---*/
-void
-UTIL_LogRemoveOutputCallback(
-	int            id
-);
-
-/*++
-  Purpose:
-
-    Set the minimal log level that could be output.
-	Any level below this level will produce no output.
-
-  Parameters:
-
-    [IN]  minlevel - The minimal log level, must be within the
-	                 range [LOGLEVEL_MIN, LOGLEVEL_MAX].
-
-  Return value:
-
-    None.
-
---*/
-void
-UTIL_LogOutput(
-	LOGLEVEL       level,
-	const char    *fmt,
-	...
-);
-
-/*++
-  Purpose:
-
-    Set the minimal log level that could be output.
-	Any level below this level will produce no output.
-
-  Parameters:
-
-    [IN]  minlevel - The minimal log level, must be within the
-	                 range [LOGLEVEL_MIN, LOGLEVEL_MAX].
-
-  Return value:
-
-    None.
-
---*/
-void
-UTIL_LogSetLevel(
-	LOGLEVEL       minlevel
-);
-
-void
-UTIL_LogSetPrelude(
-    const char    *prelude
 );
 
 unsigned int UTIL_GetTicks(void);

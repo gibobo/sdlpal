@@ -186,24 +186,12 @@ AUDIO_OpenDevice(
    // Initialize the resampler module
    //
    resampler_init();
-
-    for( int i = 0; i<SDL_GetNumAudioDrivers();i++)
-    {
-        UTIL_LogOutput(LOGLEVEL_VERBOSE, "Available audio driver %d:%s\n", i, SDL_GetAudioDriver(i));
-    }
-    const char* driver_name = SDL_GetCurrentAudioDriver();
-    if (driver_name) {
-        UTIL_LogOutput(LOGLEVEL_VERBOSE, "Audio subsystem initialized; current driver is %s.\n", driver_name);
-        if(SDL_strncmp(driver_name, "wasapi", 6)==0)
-            gConfig.wAudioBufferSize = 512;
-    } else {
-        UTIL_LogOutput(LOGLEVEL_VERBOSE, "Audio subsystem not initialized.\n");
-    }
-    for( int i = 0; i<SDL_GetNumAudioDevices(0);i++)
-    {
-        UTIL_LogOutput(LOGLEVEL_VERBOSE, "Available audio device %d:%s\n", i, SDL_GetAudioDeviceName(i,0));
-    }
-    UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio device: %s\n",(gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : "default"));
+   const char *driver_name = SDL_GetCurrentAudioDriver();
+   if (driver_name)
+   {
+      if (SDL_strncmp(driver_name, "wasapi", 6) == 0)
+         gConfig.wAudioBufferSize = 512;
+   }
 
    //
    // Open the audio device.
@@ -216,19 +204,12 @@ AUDIO_OpenDevice(
    const char *device = gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : NULL;
    gAudioDevice.id = SDL_OpenAudioDevice(device, 0, &gAudioDevice.spec, &spec, 0);
 
-   UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio spec:freq %d, format %d, channels %d, samples %d\n", gAudioDevice.spec.freq, gAudioDevice.spec.format,  gAudioDevice.spec.channels, gAudioDevice.spec.samples);
-
    if (gAudioDevice.id < 0)
    {
-      UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio ERROR: %s, got spec:freq %d, format %d, channels %d, samples %d\n", SDL_GetError(), spec.freq, spec.format, spec.channels,  spec.samples);
-      //
-      // Failed
-      //
-      return -3;
+      return -3; // Failed
    }
    else
    {
-      UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio succeed, got spec:freq %d, format %d, channels %d, samples %d\n", spec.freq, spec.format, spec.channels,  spec.samples);
       gAudioDevice.pSoundBuffer = malloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels * sizeof(short));
    }
 

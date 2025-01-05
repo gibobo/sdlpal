@@ -492,7 +492,6 @@ void glslp_add_parameter(char *line, size_t len, GLSLP *pGLSLP) {
     tempParam.desc = UTIL_calloc(1, PAL_MAX_PATH);
     int found = -1, nfound = 0;
     sscanf(line, "#pragma parameter %63s \"%63[^\"]\" %f %f %f %f", tempParam.parameter_name, tempParam.desc, &tempParam.value_default, &tempParam.minimum, &tempParam.maximum, &tempParam.step);
-    UTIL_LogOutput(LOGLEVEL_INFO, "Found #pragma parameter %s (%s) %.6f %.6f %.6f %.6f\n", tempParam.desc, tempParam.parameter_name, tempParam.value_default, tempParam.minimum, tempParam.maximum, tempParam.step);
     for( int i = 0; i < pGLSLP->uniform_parameters; i++ ) {
         uniform_param *param = &pGLSLP->uniform_params[i];
         if( param->parameter_name && strncmp( param->parameter_name, tempParam.parameter_name, strlen(tempParam.parameter_name) ) == 0 ) {
@@ -516,7 +515,6 @@ void glslp_add_parameter(char *line, size_t len, GLSLP *pGLSLP) {
         memset(param->uniform_ids,-1,sizeof(param->uniform_ids));
         param->value = param->value_default;
     }else {
-        UTIL_LogOutput(LOGLEVEL_INFO, "#pragma parameter %s already has value %.6f\n", param->parameter_name, param->value);
         free(tempParam.parameter_name);
         free(tempParam.desc);
     }

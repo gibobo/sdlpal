@@ -87,7 +87,6 @@ typedef struct tagCONFIGURATION {
   int iAudioChannels;
   int iSampleRate;
   int iOPLSampleRate;
-  LOGLEVEL iLogLevel;
   unsigned short wAudioBufferSize;
   int fUseSurroundOPL;
   int fKeepAspectRatio;

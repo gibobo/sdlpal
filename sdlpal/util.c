@@ -25,7 +25,6 @@
 #include "input/input.h"
 #include "main.h"
 #include "palcfg.h"
-#include <SDL_messagebox.h>
 #include <SDL_timer.h>
 #include <errno.h>
 #ifdef _WIN32
@@ -39,6 +38,7 @@
 #define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
 #define PAL_MAX_GLOBAL_BUFFERS 4
 static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
+static char basename_buf[256];
 
 long flength(
 	FILE *fp)
@@ -280,27 +280,11 @@ void TerminateOnError(
 {
 	va_list argptr;
 	char string[256];
-	extern void PAL_Shutdown(int);
-
 	// concatenate all the arguments in one string
 	va_start(argptr, fmt);
 	vsnprintf(string, sizeof(string), fmt, argptr);
 	va_end(argptr);
-
 	fprintf(stderr, "\nFATAL ERROR: %s\n", string);
-
-	{
-		extern SDL_Window *gpWindow;
-		char buffer[300];
-		SDL_MessageBoxButtonData buttons[2] = {{0, 0, "Yes"}, {0, 1, "No"}};
-		SDL_MessageBoxData mbd = {SDL_MESSAGEBOX_ERROR, gpWindow, "FATAL ERROR", buffer, 2, buttons, NULL};
-		int btnid;
-		sprintf(buffer, "%s\n", string);
-		mbd.numbuttons = 1;
-		SDL_ShowMessageBox(&mbd, &btnid);
-		PAL_Shutdown(255);
-	}
-
 	PAL_Shutdown(255);
 }
 
@@ -616,111 +600,6 @@ UTIL_GlobalBuffer(
 	return (index >= 0 && index < PAL_MAX_GLOBAL_BUFFERS) ? internal_buffer[index] : NULL;
 }
 
-/*
- * Logging utilities
- */
-
-#ifndef PAL_LOG_BUFFER_SIZE
-#define PAL_LOG_BUFFER_SIZE 4096
-#endif
-
-#define PAL_LOG_BUFFER_EXTRA_SIZE 32 + sizeof(_log_prelude)
-
-static char _log_prelude[80];
-static LOGCALLBACK _log_callbacks[PAL_LOG_MAX_OUTPUTS];
-static LOGLEVEL _log_callback_levels[PAL_LOG_MAX_OUTPUTS];
-static char _log_buffer[PAL_LOG_BUFFER_SIZE + PAL_LOG_BUFFER_EXTRA_SIZE];
-
-static const char *const _loglevel_str[] = {
-	"[VERBOSE]",
-	"  [DEBUG]",
-	"   [INFO]",
-	"[WARNING]",
-	"  [ERROR]",
-	"  [FATAL]",
-};
-
-void UTIL_LogRemoveOutputCallback(
-	int id)
-{
-	if (id < 0 || id > LOGLEVEL_MAX)
-		return;
-
-	while (id < LOGLEVEL_MAX)
-	{
-		_log_callbacks[id] = _log_callbacks[id + 1];
-		_log_callback_levels[id] = _log_callback_levels[id + 1];
-		id++;
-	}
-	_log_callbacks[id] = NULL;
-	_log_callback_levels[id] = LOGLEVEL_MIN;
-}
-
-void UTIL_LogOutput(
-	LOGLEVEL level,
-	const char *fmt,
-	...)
-{
-	va_list va;
-	time_t tv = time(NULL);
-	struct tm *tmval = localtime(&tv);
-	int id, n;
-
-	if (level > LOGLEVEL_MAX)
-		level = LOGLEVEL_MAX;
-
-	snprintf(_log_buffer, PAL_LOG_BUFFER_EXTRA_SIZE,
-			 "%04d-%02d-%02d %02d:%02d:%02d %s: ",
-			 tmval->tm_year + 1900, tmval->tm_mon + 1, tmval->tm_mday,
-			 tmval->tm_hour, tmval->tm_min, tmval->tm_sec,
-			 _loglevel_str[level]);
-	if (strlen(_log_prelude) > 0)
-		strncat(_log_buffer, _log_prelude, PAL_LOG_BUFFER_EXTRA_SIZE);
-
-	va_start(va, fmt);
-	n = vsnprintf(_log_buffer + strnlen(_log_buffer, PAL_LOG_BUFFER_EXTRA_SIZE), PAL_LOG_BUFFER_SIZE, fmt, va);
-	va_end(va);
-	n = (n == -1) ? PAL_LOG_BUFFER_EXTRA_SIZE + PAL_LOG_BUFFER_SIZE - 1 : n + PAL_LOG_BUFFER_EXTRA_SIZE;
-	_log_buffer[n--] = '\0';
-	if (_log_buffer[n] != '\n')
-		_log_buffer[n] = '\n';
-
-	if (level == LOGLEVEL_FATAL)
-		TerminateOnError(_log_buffer);
-
-	if (level < gConfig.iLogLevel || !_log_callbacks[0])
-		return;
-
-	for (id = 0; id < PAL_LOG_MAX_OUTPUTS && _log_callbacks[id]; id++)
-	{
-		if (level >= _log_callback_levels[id])
-		{
-			_log_callbacks[id](level, _log_buffer, _log_buffer + PAL_LOG_BUFFER_EXTRA_SIZE - 1);
-		}
-	}
-}
-
-void UTIL_LogSetLevel(
-	LOGLEVEL minlevel)
-{
-	if (minlevel < LOGLEVEL_MIN)
-		gConfig.iLogLevel = LOGLEVEL_MIN;
-	else if (minlevel > LOGLEVEL_MAX)
-		gConfig.iLogLevel = LOGLEVEL_MAX;
-	else
-		gConfig.iLogLevel = minlevel;
-}
-
-void UTIL_LogSetPrelude(
-	const char *prelude)
-{
-	memset(_log_prelude, 0, sizeof(_log_prelude));
-	if (prelude)
-		strncpy(_log_prelude, prelude, sizeof(_log_prelude) - 1);
-}
-
-char basename_buf[256];
-
 char *UTIL_basename(const char *filename)
 {
 	memset(basename_buf, 0, 256);
@@ -737,20 +616,18 @@ char *UTIL_basename(const char *filename)
 }
 
 unsigned int UTIL_GetTicks(void) {
-  return SDL_GetTicks();
+	return SDL_GetTicks();
 }
 
 void UTIL_Sleep(unsigned int tm) {
-  SDL_Delay(tm);
+	SDL_Delay(tm);
 }
 
 // #define SDL_TICKS_PASSED(A, B) (A >= B)
 void PAL_DelayUntil(unsigned int tm) {
-  PAL_ProcessEvent();
-  while (tm > UTIL_GetTicks()) {
-    PAL_ProcessEvent();
-    UTIL_Sleep(1);
-  }
+	do 	{
+		PAL_ProcessEvent();
+	} while (tm > UTIL_GetTicks());
 }
 
 #ifdef _WIN32

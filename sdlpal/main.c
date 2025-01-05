@@ -384,11 +384,10 @@ void PAL_SplashScreen(
       //
       // Delay a while...
       //
-      PAL_ProcessEvent();
-      while (SDL_GetTicks() < dwTime + dwBeginTime + 85) {
-        UTIL_Sleep(1);
+      do {
         PAL_ProcessEvent();
-      }
+        UTIL_Sleep(1);
+      } while (UTIL_GetTicks() < dwTime + dwBeginTime + 85);
    }
 
    PAL_FreeSurface(lpBitmapDown);
