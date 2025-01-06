@@ -21,18 +21,14 @@
 // multipass shader preset by palxex, 2018
 //
 
-#define SDL_STBIMAGE_IMPLEMENTATION
-#include "SDL_stbimage.h"
-
 #include "video_glsl.h"
+#include "common.h"
 #include "glslp.h"
 #include "mini_glloader.h"
 #include "palcfg.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
 #include <SDL_hints.h>
-
 
 #define FORCE_OPENGL_CORE_PROFILE 1
 #define SUPPORT_PARAMETER_UNIFORM 1
@@ -42,7 +38,6 @@ extern SDL_Window        *gpWindow;
 extern PAL_Surface       *gpScreenReal;
 extern SDL_Renderer      *gpRenderer;
 extern SDL_Texture       *gpTexture;
-extern SDL_Texture       *gpTouchOverlay;
 static PAL_Rect           gTextureRect;
 
 static int gRendererWidth;
@@ -95,19 +90,20 @@ struct VertexDataFormat
     struct AttrVertexPos position;
     struct AttrTexCoord texCoord;
 };
-#pragma pack(push,16)
-union _GLKMatrix4
-{
-    struct
-    {
-        float m00, m01, m02, m03;
-        float m10, m11, m12, m13;
-        float m20, m21, m22, m23;
-        float m30, m31, m32, m33;
-    };
-    float m[16];
+
+#pragma pack(push, 16)
+union _GLKMatrix4 {
+  struct
+  {
+    float m00, m01, m02, m03;
+    float m10, m11, m12, m13;
+    float m20, m21, m22, m23;
+    float m30, m31, m32, m33;
+  };
+  float m[16];
 };
 #pragma pack(pop)
+
 typedef union _GLKMatrix4 GLKMatrix4;
 
 static GLKMatrix4 gOrthoMatrixes[MAX_INDEX];
@@ -123,10 +119,11 @@ GLKMatrix4 GLKMatrix4MakeOrtho(float left, float right,
     float fan = farZ + nearZ;
     float fsn = farZ - nearZ;
     
-    GLKMatrix4 m = { 2.0f / rsl, 0.0f, 0.0f, 0.0f,
+    GLKMatrix4 m = { 
+        2.0f / rsl, 0.0f, 0.0f, 0.0f,
         0.0f, 2.0f / tsb, 0.0f, 0.0f,
         0.0f, 0.0f, -2.0f / fsn, 0.0f,
-        -ral / rsl, -tab / tsb, -fan / fsn, 1.0f };
+        -ral / rsl, -tab / tsb, -fan / fsn, 1.0f};
     
     return m;
 }
@@ -428,10 +425,6 @@ void setupShaderParams(int pass){
     }
 }
 
-GLint get_gl_clamp_to_border() {
-    return GL_CLAMP_TO_BORDER;
-}
-
 GLint get_gl_wrap_mode(enum wrap_mode mode, enum scale_type type) {
     GLint gl_wrap_mode = GL_INVALID_ENUM;
     switch (mode) {
@@ -442,30 +435,15 @@ GLint get_gl_wrap_mode(enum wrap_mode mode, enum scale_type type) {
             gl_wrap_mode = GL_CLAMP_TO_EDGE;
             break;
         case WRAP_CLAMP_TO_BORDER:
-            gl_wrap_mode = get_gl_clamp_to_border();
+            gl_wrap_mode = GL_CLAMP_TO_BORDER;
             break;
         default:
             gl_wrap_mode = GL_INVALID_ENUM;
             break;
     }
     if( type == SCALE_ABSOLUTE )
-        gl_wrap_mode = get_gl_clamp_to_border();
+        gl_wrap_mode = GL_CLAMP_TO_BORDER;
     return gl_wrap_mode;
-}
-
-SDL_Texture *load_texture(char *name, char *filename, char filter_linear, enum wrap_mode mode, enum scale_type type) {
-    PAL_Surface *surf = STBIMG_Load(get_glslp_path(filename));
-    if( !surf )
-        TerminateOnError("Texture %s cannot be open!", get_glslp_path(filename));
-    if( filter_linear )
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(gpRenderer, (SDL_Surface *)surf);
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-    SDL_GL_BindTexture(texture, NULL, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, get_gl_wrap_mode(mode, type));
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, get_gl_wrap_mode(mode, type));
-    SDL_FreeSurface((SDL_Surface *)surf);
-    return texture;
 }
 
 void GetMultiPassUniformLocations(pass_uniform_locations *pSlot, int programID, char *prefix) {
@@ -548,12 +526,6 @@ int VIDEO_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, const PA
     //calc texture unit:1(main texture)+glslp_textures+glsl_uniform_textures(orig,pass(1-6),prev(1-6))
     
     int texture_unit_used = 1;
-    int touchoverlay_texture_slot = -1;
-    if( pass == 0 && gpTouchOverlay) {
-        glActiveTexture(GL_TEXTURE0+texture_unit_used);
-        SDL_GL_BindTexture(gpTouchOverlay, NULL, NULL);
-        touchoverlay_texture_slot = texture_unit_used++;
-    }
     if( pass >= 1 ) {
         //global
         if( gGLSLP.textures > 0 ) {
@@ -801,7 +773,7 @@ SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height)
         
         if( param_next_pass && param_next_pass->filter_linear )
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-        param->pass_sdl_texture = SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, param->FBO.pow_width, param->FBO.pow_height);
+        param->pass_sdl_texture = SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, param->FBO.pow_width, param->FBO.pow_height);
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
         SDL_GL_BindTexture(param->pass_sdl_texture, NULL, NULL);
         if( param_next_pass ) {
@@ -820,7 +792,7 @@ SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height)
     for( int i = 0; i < MAX_TEXTURES; i++ ) {
         if( framePrevTextures[i] )
             SDL_DestroyTexture(framePrevTextures[i]);
-        framePrevTextures[i] = SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, gConfig.dwTextureWidth, gConfig.dwTextureHeight);
+        framePrevTextures[i] = SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, gConfig.dwTextureWidth, gConfig.dwTextureHeight);
     }
     return framePrevTextures[0];
 }
@@ -1012,13 +984,6 @@ void VIDEO_GLSL_Setup() {
         setupShaderParams(id+i);
     }
 
-    for( int i = 0; i < gGLSLP.textures; i++ ) {
-        texture_param *param = &gGLSLP.texture_params[i];
-        char *texture_name = param->texture_name;
-        gGLSLP.texture_params[i].sdl_texture = load_texture(texture_name, param->texture_path, param->linear, param->wrap_mode, SCALE_SOURCE);
-        for( int j = 0; j < gGLSLP.shaders; j++ )
-            gGLSLP.texture_params[i].slots_pass[id+j] = glGetUniformLocation(gProgramIds[id+j], texture_name);
-    }
     for( int i = 0; i < gGLSLP.uniform_parameters; i++ ) {
         uniform_param *param = &gGLSLP.uniform_params[i];
         for( int j = 0; j < gGLSLP.shaders; j++ )

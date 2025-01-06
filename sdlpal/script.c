@@ -46,6 +46,7 @@
 
 int g_fScriptSuccess = TRUE;
 static int g_iCurEquipPart = -1;
+extern BATTLE g_Battle;
 
 static int
 PAL_NPCWalkTo(
@@ -1387,7 +1388,6 @@ PAL_InterpretInstruction(
 
          PAL_AddItemToInventory(gpGlobals->g.lprgStore[0].rgwItems[i], 1);
 
-         g_TextLib.iDialogShadow = 5;
          PAL_StartDialogWithOffset(kDialogCenterWindow, 0, 0, FALSE, 0, -10);
          PAL_swprintf(s, sizeof(s) / sizeof(wchar_t), L"%ls@%ls@", PAL_GetWord(42), PAL_GetWord(gpGlobals->g.lprgStore[0].rgwItems[i]));
          const unsigned char *pBG = PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX);
@@ -1419,8 +1419,7 @@ PAL_InterpretInstruction(
 
          VIDEO_UpdateScreen(&rect);
 
-         PAL_ShowDialogText(s);
-         g_TextLib.iDialogShadow = 0;
+         PAL_ShowDialogText(s, 5);
       }
       else
       {
@@ -3260,7 +3259,7 @@ PAL_RunTriggerScript(
          //
          // Print dialog text
          //
-         PAL_ShowDialogText(PAL_GetMsg(pScript->rgwOperand[0]));
+         PAL_ShowDialogText(PAL_GetMsg(pScript->rgwOperand[0]), 0);
          wScriptEntry++;
          break;
 

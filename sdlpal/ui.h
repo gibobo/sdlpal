@@ -132,6 +132,7 @@ typedef struct tagMENUITEM
     int fEnabled;
     unsigned int pos;
 } MENUITEM;
+
 typedef const MENUITEM *LPCMENUITEM;
 
 typedef void (*LPITEMCHANGED_CALLBACK)(unsigned short);

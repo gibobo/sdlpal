@@ -22,6 +22,7 @@
 #ifndef UIBATTLE_H
 #define UIBATTLE_H
 
+#include <wchar.h>
 #include "ui.h"
 
 typedef enum tagBATTLEUISTATE

@@ -51,8 +51,6 @@ static wchar_t **lpWordBuf;
 static wchar_t **lpMsgBuf;
 static wchar_t internal_wbuffer[PAL_GLOBAL_BUFFER_SIZE];
 
-wchar_t* g_rcCredits[12];
-
 TEXTLIB         g_TextLib;
 
 int
@@ -850,7 +848,8 @@ TEXT_DisplayText(
 
 void
 PAL_ShowDialogText(
-	const wchar_t *lpszText
+	const wchar_t *lpszText,
+    int iDialogShadow
 )
 /*++
   Purpose:
@@ -915,7 +914,7 @@ PAL_ShowDialogText(
          //
          pos = PAL_XY(PAL_X(g_TextLib.posDialogText) - len * 4, PAL_Y(g_TextLib.posDialogText));
          // Follow behavior of original version
-         lpBox = PAL_CreateSingleLineBoxWithShadow(pos, (len + 1) / 2, FALSE, g_TextLib.iDialogShadow);
+         lpBox = PAL_CreateSingleLineBoxWithShadow(pos, (len + 1) / 2, FALSE, iDialogShadow);
 
          rect.x = PAL_X(pos);
          rect.y = PAL_Y(pos);

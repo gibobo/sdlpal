@@ -39,7 +39,7 @@ static BOX *PAL_CreateBoxInternal(
   }
 
   lpBox->pos = PAL_XY(rect->x, rect->y);
-  lpBox->lpSavedArea = VIDEO_DuplicateSurface(gpScreen, rect);
+  lpBox->lpSavedArea = VIDEO_DuplicateSurface(rect);
   lpBox->wHeight = (unsigned short)rect->w;
   lpBox->wWidth = (unsigned short)rect->h;
 

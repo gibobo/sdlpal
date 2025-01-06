@@ -24,11 +24,6 @@
 
 #include <SDL_pixels.h>
 
-#define VIDEO_CopySurface(s, sr, t, tr) PAL_UpperBlit((s), (sr), (t), (tr))
-#define VIDEO_CopyEntireSurface(s, t)   PAL_UpperBlit((s), NULL, (t), NULL)
-#define VIDEO_BackupScreen(s)           PAL_UpperBlit((s), NULL, gpScreenBak, NULL)
-#define VIDEO_RestoreScreen(t)          PAL_UpperBlit(gpScreenBak, NULL, (t), NULL)
-
 typedef struct PAL_Surface
 {
     unsigned int flags;         /**< Read-only */
@@ -116,13 +111,11 @@ VIDEO_SetWindowTitle(
 
 PAL_Surface *
 VIDEO_DuplicateSurface(
-	PAL_Surface    *pSource,
 	const PAL_Rect *pRect
 );
 
 PAL_Surface *
 VIDEO_CreateCompatibleSizedSurface(
-	PAL_Surface    *pSource,
 	const PAL_Rect *pSize
 );
 
@@ -136,11 +129,19 @@ VIDEO_RenderPaused(
 	unsigned char flag
 );
 
-int PAL_UpperBlit(
+int VIDEO_CopySurface(
     PAL_Surface *src,
     const PAL_Rect *srcrect,
     PAL_Surface *dst,
     PAL_Rect *dstrect);
+
+int VIDEO_CopyEntireSurface(
+    PAL_Surface *src,
+    PAL_Surface *dst);
+
+int VIDEO_BackupScreen(PAL_Surface *src);
+
+int VIDEO_RestoreScreen(PAL_Surface *dst);
 
 void PAL_FreeSurface(
     PAL_Surface *surface);

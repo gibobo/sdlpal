@@ -672,8 +672,9 @@ int PAL_FBPBlitToSurface(
 
 --*/
 {
-   int x, y;
-   unsigned char *p;
+   unsigned short y;
+   unsigned char *src;
+   unsigned char *dst;
 
    if (lpBitmapFBP == NULL || lpDstSurface == NULL ||
        lpDstSurface->w != 320 || lpDstSurface->h != 200)
@@ -684,15 +685,17 @@ int PAL_FBPBlitToSurface(
    //
    // simply copy everything to the surface
    //
-   for (y = 0; y < 200; y++)
-   {
-      p = (unsigned char *)(lpDstSurface->pixels) + y * lpDstSurface->pitch;
-      for (x = 0; x < 320; x++)
-      {
-         *(p++) = *(lpBitmapFBP++);
-      }
+   src = (unsigned char *)lpDstSurface->pixels;
+   dst = lpBitmapFBP;
+   if (lpDstSurface->pitch == lpDstSurface->w) {
+     memcpy(src, dst, lpDstSurface->w * lpDstSurface->h);
+   } else {
+     for (y = 0; y < lpDstSurface->h; y++) {
+       memcpy(src, dst, lpDstSurface->w);
+       src += lpDstSurface->pitch;
+       dst += lpDstSurface->w;
+     }
    }
-
    return 0;
 }
 

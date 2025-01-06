@@ -51,44 +51,40 @@ PAL_GetPalette(
 --*/
 {
    static PAL_Color palette[256];
-   PAL_LARGE unsigned char buf[1536];
+   PAL_LARGE unsigned char buf[256 * 3 * 2];
+   unsigned char *ptr;
    int i;
    FILE *fp;
 
    fp = UTIL_OpenRequiredFileForMode("pat.mkf", "rb");
 
-   //
-   // Read the palette data from the pat.mkf file
-   //
-   i = PAL_MKFReadChunk(buf, 1536, iPaletteNum, fp);
+   if (fp == NULL)
+     return NULL;
 
+   memset(palette, 0, sizeof(PAL_Color) * 256);
+   memset(buf, 0, sizeof(unsigned char) * 256 * 3 * 2);
+
+   // Read the palette data from the pat.mkf file
+   i = PAL_MKFReadChunk(buf, 256 * 3 * 2, iPaletteNum, fp);
    fclose(fp);
 
    if (i < 0)
    {
-      //
       // Read failed
-      //
       return NULL;
    }
    else if (i <= 256 * 3)
    {
-      //
       // There is no night colors in the palette
-      //
       fNight = FALSE;
    }
+   ptr = buf + 256 * 3 * ((fNight) ? 1 : 0);
 
-   for (i = 0; i < 256; i++)
+   for (i = 0; i < 256; i++, ptr+=3)
    {
-      palette[i].r = buf[(fNight ? 256 * 3 : 0) + i * 3] << 2;
-      palette[i].g = buf[(fNight ? 256 * 3 : 0) + i * 3 + 1] << 2;
-      palette[i].b = buf[(fNight ? 256 * 3 : 0) + i * 3 + 2] << 2;
-#if 0
-      palette[i].r += (255 - palette[i].r) / 5;
-      palette[i].g += (255 - palette[i].g) / 5;
-      palette[i].b += (255 - palette[i].b) / 5;
-#endif
+      palette[i].r = ptr[0] << 2;
+      palette[i].g = ptr[1] << 2;
+      palette[i].b = ptr[2] << 2;
    }
 
    return palette;

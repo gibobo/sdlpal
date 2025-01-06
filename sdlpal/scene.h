@@ -29,39 +29,32 @@ extern "C"
 {
 #endif
 
-   void
-   PAL_ApplyWave(
-       PAL_Surface *lpSurface);
+void PAL_ApplyWave(
+    PAL_Surface *lpSurface);
 
-   void
-   PAL_MakeScene(
-       void);
+void PAL_MakeScene(
+    void);
 
-   int
-   PAL_CheckObstacleWithRange(
-       unsigned int pos,
-       int fCheckEventObjects,
-       unsigned short wSelfObject,
-       int fCheckRange);
+int PAL_CheckObstacleWithRange(
+    unsigned int pos,
+    int fCheckEventObjects,
+    unsigned short wSelfObject,
+    int fCheckRange);
 
-   int
-   PAL_CheckObstacle(
-       unsigned int pos,
-       int fCheckEventObjects,
-       unsigned short wSelfObject);
+int PAL_CheckObstacle(
+    unsigned int pos,
+    int fCheckEventObjects,
+    unsigned short wSelfObject);
 
-   void
-   PAL_UpdatePartyGestures(
-       int fWalking);
+void PAL_UpdatePartyGestures(
+    int fWalking);
 
-   void
-   PAL_UpdateParty(
-       void);
+void PAL_UpdateParty(
+    void);
 
-   void
-   PAL_NPCWalkOneStep(
-       unsigned short wEventObjectID,
-       int iSpeed);
+void PAL_NPCWalkOneStep(
+    unsigned short wEventObjectID,
+    int iSpeed);
 
 #ifdef __cplusplus
 }

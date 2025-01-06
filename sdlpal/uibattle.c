@@ -34,10 +34,9 @@
 #include "util.h"
 #include "video/video.h"
 
-extern unsigned short g_rgPlayerPos[3][3][2];
-
 static int g_iCurMiscMenuItem = 0;
 static int g_iCurSubMenuItem = 0;
+extern BATTLE g_Battle;
 
 void PAL_PlayerInfoBox(
     unsigned int pos,
@@ -870,8 +869,9 @@ void PAL_BattleUIUpdate(
          i = SPRITENUM_BATTLE_ARROW_CURRENTPLAYER;
       }
 
-      x = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][g_Battle.UI.wCurPlayerIndex][0] - 8;
-      y = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][g_Battle.UI.wCurPlayerIndex][1] - 74;
+      PAL_GetPlayerPos((unsigned char)g_Battle.UI.wCurPlayerIndex, &x, &y);
+      x -= 8;
+      y -= 74;
 
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, i), gpScreen, PAL_XY(x, y));
    }
@@ -1388,8 +1388,9 @@ void PAL_BattleUIUpdate(
       //
       // Draw arrows on the selected player
       //
-      x = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][g_Battle.UI.iSelectedIndex][0] - 8;
-      y = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][g_Battle.UI.iSelectedIndex][1] - 67;
+      PAL_GetPlayerPos(g_Battle.UI.iSelectedIndex, &x, &y);
+      x -= 8;
+      y -= 67;
 
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, j), gpScreen, PAL_XY(x, y));
 

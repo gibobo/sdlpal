@@ -215,8 +215,6 @@ typedef struct tagBATTLE
 extern "C" {
 #endif
 
-extern BATTLE g_Battle;
-
 void
 PAL_LoadBattleSprites(
    void
@@ -314,6 +312,13 @@ BATTLERESULT
 PAL_StartBattle(
    unsigned short        wEnemyTeam,
    int        fIsBoss
+);
+
+void
+PAL_GetPlayerPos(
+   unsigned char PlayerIndex,
+   int *posX,
+   int *posY
 );
 
 #ifdef __cplusplus

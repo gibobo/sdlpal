@@ -33,7 +33,7 @@
 #include "video/video.h"
 
 //#define INVINCIBLE 1
-extern unsigned short g_rgPlayerPos[3][3][2];
+extern BATTLE g_Battle;
 
 int
 PAL_IsPlayerDying(
@@ -1641,8 +1641,9 @@ PAL_BattleShowPlayerAttackAnim(
    g_Battle.rgPlayer[wPlayerIndex].wCurrentFrame = 8;
    if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusDualAttack] > 0 && PAL_PlayerCanAttackAll(wPlayerRole))
    {
-       x = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][wPlayerIndex][0] - 8;
-       y = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][wPlayerIndex][1] - 4;
+      PAL_GetPlayerPos((unsigned char)wPlayerIndex, &x, &y);
+       x -= 8;
+       y -= 4;
 
        if (g_Battle.rgPlayer[wPlayerIndex].fSecondAttack == FALSE)
        {
@@ -1662,8 +1663,9 @@ PAL_BattleShowPlayerAttackAnim(
    y -= 2;
    if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusDualAttack] > 0 && PAL_PlayerCanAttackAll(wPlayerRole))
    {
-       x = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][wPlayerIndex][0] - 8;
-       y = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][wPlayerIndex][1] - 4;
+       PAL_GetPlayerPos((unsigned char)wPlayerIndex, &x, &y);
+       x -= 8;
+       y -= 4;
 
        if (g_Battle.rgPlayer[wPlayerIndex].fSecondAttack == FALSE)
        {
@@ -4656,7 +4658,7 @@ PAL_BattleStealFromEnemy(
       if (s[0] != '\0')
       {
          PAL_StartDialog(kDialogCenterWindow, 0, 0, FALSE);
-         PAL_ShowDialogText(s);
+         PAL_ShowDialogText(s, 0);
       }
    }
 }

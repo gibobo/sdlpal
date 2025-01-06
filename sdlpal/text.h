@@ -50,15 +50,11 @@ typedef struct tagTEXTLIB {
   unsigned char bDialogPosition;
   unsigned char bIcon;
   int iDelayTime;
-  int iDialogShadow;
   int fUserSkip;
   int fPlayingRNG;
 
   unsigned char bufDialogIcons[282];
 } TEXTLIB;
-
-extern TEXTLIB g_TextLib;
-extern wchar_t *g_rcCredits[12];
 
 int PAL_InitText(
     void);
@@ -113,7 +109,8 @@ int TEXT_DisplayText(
     int isDialog);
 
 void PAL_ShowDialogText(
-    const wchar_t *lpszText);
+    const wchar_t *lpszText,
+    int iDialogShadow);
 
 void PAL_ClearDialog(
     char fWaitForKey);

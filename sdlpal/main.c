@@ -179,7 +179,8 @@ void PAL_SplashScreen(
 {
    PAL_Color *palette = PAL_GetPalette(1, FALSE);
    PAL_Color rgCurrentPalette[256];
-   PAL_Surface *lpBitmapDown, *lpBitmapUp;
+   PAL_Surface *lpBitmapDown;
+   PAL_Surface *lpBitmapUp;
    PAL_Rect srcrect, dstrect;
    unsigned char *lpSpriteCrane;
    unsigned char *lpBitmapTitle;
@@ -194,9 +195,7 @@ void PAL_SplashScreen(
       return;
    }
 
-   //
    // Allocate all the needed memory at once for simplification
-   //
    buf = (unsigned char *)UTIL_calloc(1, 320 * 200 * 2);
    buf2 = &buf[320 * 200];
    lpSpriteCrane = (unsigned char *)buf2 + 32000;
@@ -204,8 +203,8 @@ void PAL_SplashScreen(
    //
    // Create the surfaces
    //
-   lpBitmapDown = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
-   lpBitmapUp = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
+   lpBitmapDown = VIDEO_CreateCompatibleSizedSurface(NULL);
+   lpBitmapUp = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    //
    // Read the bitmaps
@@ -213,12 +212,15 @@ void PAL_SplashScreen(
    PAL_MKFReadChunk(buf, 320 * 200, 0x03, gpGlobals->f.fpFBP);
    Decompress(buf, buf2, 320 * 200);
    PAL_FBPBlitToSurface(buf2, lpBitmapUp);
+
    PAL_MKFReadChunk(buf, 320 * 200, 0x04, gpGlobals->f.fpFBP);
    Decompress(buf, buf2, 320 * 200);
    PAL_FBPBlitToSurface(buf2, lpBitmapDown);
+
    PAL_MKFReadChunk(buf, 32000, 0x47, gpGlobals->f.fpMGO);
    Decompress(buf, buf2, 32000);
    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(buf2, 0);
+
    PAL_MKFReadChunk(buf, 32000, 0x49, gpGlobals->f.fpMGO);
    Decompress(buf, lpSpriteCrane, 32000);
 
@@ -296,9 +298,7 @@ void PAL_SplashScreen(
 
       VIDEO_CopySurface(lpBitmapUp, &srcrect, gpScreen, &dstrect);
 
-      //
       // The lower part...
-      //
       srcrect.y = 0;
       srcrect.h = iImgPos;
 
@@ -307,9 +307,7 @@ void PAL_SplashScreen(
 
       VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
 
-      //
       // Draw the cranes...
-      //
       for (i = 0; i < 9; i++)
       {
          const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane,
@@ -321,14 +319,10 @@ void PAL_SplashScreen(
       }
       iCraneFrame++;
 
-      //
       // Draw the title...
-      //
       if (PAL_RLEGetHeight(lpBitmapTitle) < iTitleHeight)
       {
-         //
          // HACKHACK
-         //
          unsigned short w = lpBitmapTitle[2] | (lpBitmapTitle[3] << 8);
          w++;
          lpBitmapTitle[2] = (w & 0xFF);
@@ -338,14 +332,10 @@ void PAL_SplashScreen(
       PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
       VIDEO_UpdateScreen(NULL);
 
-      //
       // Check for keypress...
-      //
       if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
       {
-         //
          // User has pressed a key...
-         //
          lpBitmapTitle[2] = iTitleHeight & 0xFF;
          lpBitmapTitle[3] = iTitleHeight >> 8; // HACKHACK
 
@@ -353,37 +343,29 @@ void PAL_SplashScreen(
 
          VIDEO_UpdateScreen(NULL);
 
-         if (dwTime < 15000)
+         // If the picture has not completed fading in, complete the rest
+         while (dwTime < 15000)
          {
-            //
-            // If the picture has not completed fading in, complete the rest
-            //
-            while (dwTime < 15000)
+            for (i = 0; i < 256; i++)
             {
-               for (i = 0; i < 256; i++)
-               {
-                  rgCurrentPalette[i].r = (unsigned char)(palette[i].r * ((float)dwTime / 15000));
-                  rgCurrentPalette[i].g = (unsigned char)(palette[i].g * ((float)dwTime / 15000));
-                  rgCurrentPalette[i].b = (unsigned char)(palette[i].b * ((float)dwTime / 15000));
-               }
-               VIDEO_SetPalette(rgCurrentPalette);
-               VIDEO_UpdateSurfacePalette(lpBitmapDown);
-               VIDEO_UpdateSurfacePalette(lpBitmapUp);
-               UTIL_Delay(8);
-               dwTime += 250;
+               rgCurrentPalette[i].r = (unsigned char)(palette[i].r * ((float)dwTime / 15000));
+               rgCurrentPalette[i].g = (unsigned char)(palette[i].g * ((float)dwTime / 15000));
+               rgCurrentPalette[i].b = (unsigned char)(palette[i].b * ((float)dwTime / 15000));
             }
-            UTIL_Delay(500);
+            VIDEO_SetPalette(rgCurrentPalette);
+            VIDEO_UpdateSurfacePalette(lpBitmapDown);
+            VIDEO_UpdateSurfacePalette(lpBitmapUp);
+            UTIL_Delay(8);
+            dwTime += 250;
          }
+         if (dwTime < 15250)
+            UTIL_Delay(500);
 
-         //
          // Quit the splash screen
-         //
          break;
       }
 
-      //
       // Delay a while...
-      //
       do {
         PAL_ProcessEvent();
         UTIL_Sleep(1);
@@ -441,14 +423,10 @@ int main(
 
    PAL_LoadConfig();
 
-   //
    // Initialize everything
-   //
    PAL_Init();
 
-   //
    // Show the trademark screen and splash screen
-   //
    PAL_TrademarkScreen();
    PAL_SplashScreen();
 

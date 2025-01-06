@@ -92,7 +92,7 @@ void PAL_ShowFBP(
 
    if (wFade)
    {
-      PAL_Surface *p = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
+      PAL_Surface *p = VIDEO_CreateCompatibleSizedSurface(NULL);
 
       wFade++;
       wFade *= 10;
@@ -195,7 +195,7 @@ void PAL_ScrollFBP(
       PAL_MKFDecompressChunk(bufSprite, 320 * 200, g_wCurEffectSprite, gpGlobals->f.fpMGO);
    }
 
-   p = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
+   p = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    if (p == NULL)
    {
@@ -313,8 +313,8 @@ void PAL_EndingAnimation(
    buf = (unsigned char *)UTIL_calloc(1, buf_size);
    bufGirl = (unsigned char *)UTIL_calloc(1, 6000);
 
-   pUpper = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
-   pLower = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
+   pUpper = VIDEO_CreateCompatibleSizedSurface(NULL);
+   pLower = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    PAL_MKFDecompressChunk(buf, buf_size, 69, gpGlobals->f.fpFBP);
    PAL_FBPBlitToSurface(buf, pUpper);

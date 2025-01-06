@@ -44,6 +44,11 @@ unsigned short
         {{180, 180}, {234, 170}, {270, 146}} // three players
 };
 
+void PAL_GetPlayerPos(unsigned char PlayerIndex, int *posX, int *posY) {
+  (*posX) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][0];
+  (*posY) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][1];
+}
+
 void PAL_BattleDrawBackground(
     void)
 /*++
@@ -940,7 +945,7 @@ PAL_LoadBattleBackground(
    //
    // Create the surface
    //
-   g_Battle.lpBackground = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
+   g_Battle.lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    if (g_Battle.lpBackground == NULL)
    {
@@ -1585,7 +1590,7 @@ PAL_StartBattle(
    //
    // Create the surface for scene buffer
    //
-   g_Battle.lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(gpScreen, NULL);
+   g_Battle.lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    if (g_Battle.lpSceneBuf == NULL)
    {
