@@ -294,22 +294,6 @@ PAL_KeyboardEventFilter(
             PAL_Shutdown(0);
          }
       }
-      else if (lpEvent->key.keysym.sym == SDLK_z)
-      {
-         Filter_StepParamSlot(1);
-      }
-      else if (lpEvent->key.keysym.sym == SDLK_x)
-      {
-         Filter_StepParamSlot(-1);
-      }
-      else if (lpEvent->key.keysym.sym == SDLK_COMMA)
-      {
-         Filter_StepCurrentParam(1);
-      }
-      else if (lpEvent->key.keysym.sym == SDLK_PERIOD)
-      {
-         Filter_StepCurrentParam(-1);
-      }
    }
 }
 

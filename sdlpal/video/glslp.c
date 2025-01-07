@@ -145,13 +145,6 @@ static int token_conform( const char *name, LineType type, GLSLP *pGLSLP ) {
             }
             break;
         case TOKEN_PARAMETER_NAME:
-            for( int i = 0; i < pGLSLP->uniform_parameters; i++ ) {
-                uniform_param *param = &pGLSLP->uniform_params[i];
-                if( SDL_strcasecmp(name, PAL_va(tokens[type], param->parameter_name) ) == 0 ) {
-                    index = i;
-                    break;
-                }
-            }
             break;
         default:
             break;
@@ -237,15 +230,6 @@ static char *glslp_pack_texturenames(const GLSLP *gGLSLP) {
     for(int i = 0; i < gGLSLP->textures; i++ ) {
         if( i != 0 ) strcat(glslp_commonbuf, ";");
         strcat(glslp_commonbuf, gGLSLP->texture_params[i].texture_name);
-    }
-    return glslp_commonbuf;
-}
-
-char *glslp_pack_parameters(const GLSLP *gGLSLP) {
-    memset(glslp_commonbuf,0,sizeof(glslp_commonbuf));
-    for(int i = 0; i < gGLSLP->uniform_parameters; i++ ) {
-        if( i != 0 ) strcat(glslp_commonbuf, ";");
-        strcat(glslp_commonbuf, gGLSLP->uniform_params[i].parameter_name);
     }
     return glslp_commonbuf;
 }
@@ -340,7 +324,6 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
             {
                 shader_param  *s_param = &pGLSLP->shader_params[index];
                 texture_param *t_param = &pGLSLP->texture_params[index];
-                uniform_param *u_param = &pGLSLP->uniform_params[index];
                 switch( lineType ) {
                     case TOKEN_ORIGFILTER:
                         pGLSLP->orig_filter=strdup(value);
@@ -426,20 +409,9 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                     case TOKEN_TEXTURE_MIPMAP:
                         t_param->mipmap = SDL_strcasecmp(value, "true") == 0;
                         break;
-                    case TOKEN_PARAMETERS: {
-                        pGLSLP->uniform_parameters = split_with(value, ';');
-                        if( pGLSLP->uniform_parameters > 0 ) {
-                            pGLSLP->uniform_params = UTIL_calloc(pGLSLP->uniform_parameters, sizeof(uniform_param));
-                            for( int i = 0; i < pGLSLP->uniform_parameters; i++ ) {
-                                uniform_param *param = &pGLSLP->uniform_params[i];
-                                memset(param->uniform_ids,-1,sizeof(param->uniform_ids));
-                                param->parameter_name = strdup((char*)&glslp_commonbuf+i*PAL_MAX_PATH);
-                            }
-                        }
+                    case TOKEN_PARAMETERS:
                         break;
-                    }
                     case TOKEN_PARAMETER_NAME:
-                        u_param->value = (float)SDL_atof(value);
                         break;
                     default:
                         break;
@@ -478,46 +450,7 @@ char *serialize_glslp(const GLSLP *pGLSLP){
         sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_TEXTURE_MIPMAP], param->texture_name),      param->mipmap ? "true" : "false");
         sprintf(output, "%s\r\n%s = %s", output, PAL_va(tokens[TOKEN_TEXTURE_WRAP_MODE], param->texture_name),   wrap_mode_to_string(param->wrap_mode));
     }
-    sprintf(output, "%s\r\n\r\n%s = \"%s\"", output, tokens[TOKEN_PARAMETERS], glslp_pack_parameters(pGLSLP));
-    for( int i=0; i<pGLSLP->uniform_parameters; i++ ) {
-        uniform_param *param = &pGLSLP->uniform_params[i];
-        sprintf(output, "%s\r\n%s = \"%.6f\"", output, param->parameter_name, param->value);
-    }
     return output;
-}
-
-void glslp_add_parameter(char *line, size_t len, GLSLP *pGLSLP) {
-    uniform_param tempParam;
-    tempParam.parameter_name = UTIL_calloc(1, PAL_MAX_PATH);
-    tempParam.desc = UTIL_calloc(1, PAL_MAX_PATH);
-    int found = -1, nfound = 0;
-    sscanf(line, "#pragma parameter %63s \"%63[^\"]\" %f %f %f %f", tempParam.parameter_name, tempParam.desc, &tempParam.value_default, &tempParam.minimum, &tempParam.maximum, &tempParam.step);
-    for( int i = 0; i < pGLSLP->uniform_parameters; i++ ) {
-        uniform_param *param = &pGLSLP->uniform_params[i];
-        if( param->parameter_name && strncmp( param->parameter_name, tempParam.parameter_name, strlen(tempParam.parameter_name) ) == 0 ) {
-            found = i;
-        }
-    }
-    if( found == -1 ) {
-        nfound = 1;
-        found = pGLSLP->uniform_parameters++;
-        pGLSLP->uniform_params = realloc(pGLSLP->uniform_params, pGLSLP->uniform_parameters * sizeof(uniform_param));
-    }
-    uniform_param *param = &pGLSLP->uniform_params[found];
-    param->value_default = tempParam.value_default;
-    param->minimum = tempParam.minimum;
-    param->maximum = tempParam.maximum;
-    param->step = tempParam.step;
-    
-    if( nfound ) {
-        param->parameter_name = tempParam.parameter_name;
-        param->desc = tempParam.desc;
-        memset(param->uniform_ids,-1,sizeof(param->uniform_ids));
-        param->value = param->value_default;
-    }else {
-        free(tempParam.parameter_name);
-        free(tempParam.desc);
-    }
 }
 
 void destroy_glslp(GLSLP *pGLSLP) {
@@ -543,13 +476,5 @@ void destroy_glslp(GLSLP *pGLSLP) {
             SDL_DestroyTexture(pGLSLP->texture_params[i].sdl_texture);
     }
     free(pGLSLP->texture_params);
-    for( int i=0; i<pGLSLP->uniform_parameters; i++ ) {
-        uniform_param *param = &pGLSLP->uniform_params[i];
-        if(param->parameter_name)
-            free(param->parameter_name);
-        if(param->desc)
-            free(param->desc);
-    }
-    free(pGLSLP->uniform_params);
     memset(pGLSLP, 0, sizeof(GLSLP));
 }

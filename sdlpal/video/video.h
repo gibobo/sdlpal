@@ -54,9 +54,6 @@ extern "C" {
 extern PAL_Surface *gpScreen;
 extern PAL_Surface *gpScreenBak;
 
-void Filter_StepParamSlot(int step);
-void Filter_StepCurrentParam(int step);
-
 int
 VIDEO_Startup(
    void

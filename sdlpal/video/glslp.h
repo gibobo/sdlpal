@@ -25,11 +25,7 @@
 
 #include <SDL_render.h>
 
-#define MAX_INDEX 26
-
-#define MAX_TEXTURES 8
-#define PREV_TEXTURES (MAX_TEXTURES-1)
-
+#define MAX_INDEX 2
 #define MAX_PARAMETERS 200
 
 enum wrap_mode {
@@ -123,8 +119,6 @@ typedef struct tagGLSLP {
     shader_param *shader_params;
     int textures;
     texture_param *texture_params;
-    int uniform_parameters;
-    uniform_param *uniform_params;
 }GLSLP;
 
 extern GLSLP gGLSLP;
@@ -133,8 +127,6 @@ char *get_glslp_path(const char *filename);
 
 char parse_glslp(const char *, GLSLP *);
 char *serialize_glslp(const GLSLP *);
-
-void glslp_add_parameter(char *line, size_t len, GLSLP *);
 
 void destroy_glslp(GLSLP *);
 

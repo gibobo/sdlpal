@@ -27,7 +27,6 @@
 
 #if __IOS__ || __ANDROID__ || __EMSCRIPTEN__ || __WINRT__ || SDL_VIDEO_DRIVER_RPI
 #define GLES 1
-#undef FORCE_OPENGL_CORE_PROFILE
 #endif
 
 //avoid manually imported glfuncs conflicts with platform-builtin ones, like emscripten
