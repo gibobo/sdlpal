@@ -14,24 +14,23 @@
 #else
 #define COMPAT_PRECISION
 #endif
-uniform mat4 MVPMatrix;
 
 COMPAT_ATTRIBUTE vec4 VertexCoord;
-COMPAT_ATTRIBUTE vec4 TexCoord;
+COMPAT_ATTRIBUTE vec2 TexCoord;
 
 COMPAT_VARYING vec2 v_texCoord;
 COMPAT_VARYING vec4 v_fragCoord;
 
 void main()
 {
-    gl_Position = MVPMatrix * VertexCoord;
+    gl_Position = VertexCoord;
     vec4 normalizedPosition = gl_Position/gl_Position.w;
     mat4 ndcBiasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,  
                                  0.0, 0.5, 0.0, 0.0,  
                                  0.0, 0.0, 0.5, 0.0,  
                                  0.5, 0.5, 0.5, 1.0 );
 	v_fragCoord = ndcBiasMatrix * normalizedPosition;
-    v_texCoord = TexCoord.xy;
+    v_texCoord = TexCoord;
 }
 
 #elif defined(FRAGMENT)

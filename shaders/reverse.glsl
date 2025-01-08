@@ -14,17 +14,16 @@
 #else
 #define COMPAT_PRECISION
 #endif
-uniform mat4 MVPMatrix;
 
 COMPAT_ATTRIBUTE vec4 VertexCoord;
-COMPAT_ATTRIBUTE vec4 TexCoord;
+COMPAT_ATTRIBUTE vec2 TexCoord;
 
 COMPAT_VARYING vec2 v_texCoord;
 
 void main()
 {
-    gl_Position = MVPMatrix * VertexCoord;
-    v_texCoord = TexCoord.xy;
+    gl_Position = VertexCoord;
+    v_texCoord = TexCoord;
 }
 #elif defined(FRAGMENT)
 #if __VERSION__ >= 130

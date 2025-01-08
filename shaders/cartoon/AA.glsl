@@ -37,7 +37,6 @@
 #else
 #define COMPAT_PRECISION
 #endif
-uniform mat4 MVPMatrix;
 uniform COMPAT_PRECISION int FrameDirection;
 uniform COMPAT_PRECISION int FrameCount;
 uniform COMPAT_PRECISION vec2 OutputSize;
@@ -45,7 +44,7 @@ uniform COMPAT_PRECISION vec2 TextureSize;
 uniform COMPAT_PRECISION vec2 InputSize;
 
 COMPAT_ATTRIBUTE vec4 VertexCoord;
-COMPAT_ATTRIBUTE vec4 TexCoord;
+COMPAT_ATTRIBUTE vec2 TexCoord;
 
 COMPAT_VARYING vec2 v_texCoord;
 
@@ -61,8 +60,8 @@ void main()
 	float dx = 1.0/InputSize.x;
 	float dy = 1.0/InputSize.y;
 
-    gl_Position = MVPMatrix * VertexCoord;
-    v_texCoord = TexCoord.xy;
+    gl_Position = VertexCoord;
+    v_texCoord = TexCoord;
 
 	t1.xy = v_texCoord + vec2(-dx,  0);
 	t2.xy = v_texCoord + vec2( dx,  0);

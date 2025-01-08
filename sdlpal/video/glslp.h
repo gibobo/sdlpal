@@ -40,27 +40,6 @@ enum scale_type {
     SCALE_ABSOLUTE
 };
 
-typedef struct tagTEXTUREUNITSLOTS {
-    int texture_uniform_location;
-
-    int texture_size_uniform_location;
-    int input_size_uniform_location;
-
-    int tex_coord_attrib_location;
-    
-    int output_size_uniform_location;
-    int frame_direction_uniform_location;
-    int frame_count_uniform_location;
-    
-    int texture_unit;
-}pass_uniform_locations;
-
-typedef struct tagFBOPARAM {
-    char valid;
-    unsigned int width, height;
-    unsigned int pow_width, pow_height;
-}fbo_params;
-
 typedef struct tagSHADERPARAM {
     //by defination
     char *shader;
@@ -73,16 +52,6 @@ typedef struct tagSHADERPARAM {
     char float_framebuffer;
     char srgb_framebuffer;
     int frame_count_mod;
-    
-    //by implementation
-    SDL_Texture *pass_sdl_texture;
-    pass_uniform_locations self_slots;
-    pass_uniform_locations orig_slots;
-    pass_uniform_locations alias_slots;
-    pass_uniform_locations pass_slots[MAX_INDEX];
-    pass_uniform_locations prev_slots[MAX_INDEX];
-    pass_uniform_locations passprev_slots[MAX_INDEX];
-    fbo_params FBO;
 }shader_param;
 
 typedef struct tagTEXTUREPARAMS {
@@ -108,9 +77,6 @@ typedef struct tagUNIFORMPARAMS {
     float minimum;
     float maximum;
     float step;
-    
-    //by implementation
-    int uniform_ids[MAX_PARAMETERS];
 }uniform_param;
 
 typedef struct tagGLSLP {

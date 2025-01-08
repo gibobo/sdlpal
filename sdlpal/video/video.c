@@ -336,43 +336,6 @@ VIDEO_SetPalette(
    VIDEO_UpdateScreen(&rect);
 }
 
-void
-VIDEO_Resize(
-   int             w,
-   int             h
-)
-/*++
-  Purpose:
-
-    This function is called when user resized the window.
-
-  Parameters:
-
-    [IN]  w - width of the window after resizing.
-
-    [IN]  h - height of the window after resizing.
-
-  Return value:
-
-    None.
-
---*/
-{
-   if (gpTexture)
-   {
-      SDL_DestroyTexture(gpTexture);
-   }
-
-   gpTexture = VIDEO_GLSL_CreateTexture(w, h);
-
-   if (gpTexture == NULL)
-   {
-      TerminateOnError("Re-creating texture failed on window resize!\n");
-   }
-
-   VIDEO_UpdateScreen(NULL);
-}
-
 PAL_Color *
 VIDEO_GetPalette(
    void

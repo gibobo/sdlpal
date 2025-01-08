@@ -74,12 +74,6 @@ VIDEO_SetPalette(
    PAL_Color       *rgPalette
 );
 
-void
-VIDEO_Resize(
-   int             w,
-   int             h
-);
-
 PAL_Color *
 VIDEO_GetPalette(
    void

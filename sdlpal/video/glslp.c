@@ -216,15 +216,6 @@ line_tokenize(
     return FALSE;
 }
 
-static void clear_shader_slots(shader_param *param) {
-    memset(&param->self_slots, -1, sizeof(pass_uniform_locations) );
-    memset(&param->orig_slots, -1, sizeof(pass_uniform_locations) );
-    memset(&param->prev_slots, -1, sizeof(pass_uniform_locations)*MAX_INDEX );
-    memset(&param->pass_slots, -1, sizeof(pass_uniform_locations)*MAX_INDEX );
-    memset(&param->passprev_slots, -1, sizeof(pass_uniform_locations)*MAX_INDEX );
-    memset(&param->alias_slots, -1, sizeof(pass_uniform_locations) );
-}
-
 static char *glslp_pack_texturenames(const GLSLP *gGLSLP) {
     memset(glslp_commonbuf,0,sizeof(glslp_commonbuf));
     for(int i = 0; i < gGLSLP->textures; i++ ) {
@@ -333,7 +324,6 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         pGLSLP->shader_params = UTIL_calloc(pGLSLP->shaders, sizeof(shader_param));
                         for( int i = 0; i < pGLSLP->shaders; i++ ) {
                             shader_param *param = &pGLSLP->shader_params[i];
-                            clear_shader_slots(param);
                             param->scale_type_x = param->scale_type_y = SCALE_SOURCE;
                             param->scale_x = param->scale_y = 1.0f;
                             param->wrap_mode = WRAP_CLAMP_TO_EDGE;
@@ -363,13 +353,13 @@ char parse_glslp(const char *filename, GLSLP *pGLSLP) {
                         s_param->scale_type_y = string_to_scale_type(value);
                         break;
                     case TOKEN_SHADER_SCALE:
-                        s_param->scale_x = s_param->scale_y = (float)SDL_atof(value);
+                        s_param->scale_x = s_param->scale_y = 1.0f;
                         break;
                     case TOKEN_SHADER_SCALE_X:
-                        s_param->scale_x = (float)SDL_atof(value);
+                        s_param->scale_x = 1.0f;
                         break;
                     case TOKEN_SHADER_SCALE_Y:
-                        s_param->scale_y = (float)SDL_atof(value);
+                        s_param->scale_y = 1.0f;
                         break;
                     case TOKEN_SHADER_FLOAT_FRAMEBUFFER:
                         s_param->float_framebuffer = SDL_strcasecmp(value, "true") == 0;
@@ -462,8 +452,6 @@ void destroy_glslp(GLSLP *pGLSLP) {
             free(param->shader);
         if(param->alias)
             free(param->alias);
-        if(param->pass_sdl_texture )
-            SDL_DestroyTexture( pGLSLP->shader_params[i].pass_sdl_texture );
     }
 	free(pGLSLP->shader_params);
     for( int i=0; i<pGLSLP->textures; i++ ) {
