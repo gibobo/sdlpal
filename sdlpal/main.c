@@ -99,7 +99,7 @@ PAL_Init(
    PAL_InitResources();
    AUDIO_OpenDevice();
 
-   VIDEO_SetWindowTitle(UTIL_va(UTIL_GlobalBuffer(0), 32, "Pal"));
+   VIDEO_SetWindowTitle("Pal");
 }
 
 void PAL_Shutdown(

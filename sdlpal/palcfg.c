@@ -35,7 +35,6 @@ PAL_FreeConfig(
 {
 	free(gConfig.pszGamePath);
     free(gConfig.pszSavePath);
-    free(gConfig.pszShaderPath);
 	memset(&gConfig, 0, sizeof(CONFIGURATION));
 }
 
@@ -134,9 +133,9 @@ PAL_LoadConfig(
 	//
 	// Set configurable global options
 	//
-	if (!gConfig.pszSavePath) gConfig.pszSavePath = strdup(SOURCE_DIR "/Pal98rqptw/");
-	if (!gConfig.pszGamePath) gConfig.pszGamePath = strdup(SOURCE_DIR "/Pal98rqptw/");
-    if (!gConfig.pszShaderPath) gConfig.pszShaderPath = strdup(gConfig.pszGamePath);
+	if (!gConfig.pszSavePath)	gConfig.pszSavePath = strdup(SOURCE_DIR "/Pal98rqptw/");
+	if (!gConfig.pszGamePath)	gConfig.pszGamePath = strdup(SOURCE_DIR "/Pal98rqptw/");
+	if (!gConfig.pszShader)		gConfig.pszShader 	= strdup(SOURCE_DIR "/shaders/plain.glsl");
 	gConfig.ScreenLayout = screen_layout;
 
 	gConfig.fEnableKeyRepeat = FALSE;
@@ -147,9 +146,6 @@ PAL_LoadConfig(
 	gConfig.iSampleRate = 44100;
 	gConfig.iOPLSampleRate = 49716;
 	gConfig.wAudioBufferSize = 1024;
-	gConfig.pszShader = SOURCE_DIR"/shaders/plain.glsl";
 	gConfig.dwTextureWidth  = 640;
 	gConfig.dwTextureHeight = 400;
-	gConfig.dwScreenWidth = 640;
-	gConfig.dwScreenHeight = 400;
 }
