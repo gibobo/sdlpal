@@ -29,11 +29,10 @@
 extern "C" {
 #endif
 
-extern void *VIDEO_GLSL_CreateTexture();
-extern void VIDEO_GLSL_RenderCopy();
-extern void VIDEO_GLSL_Init();
-extern void VIDEO_GLSL_Setup();
-extern void VIDEO_GLSL_Destroy();
+// #define GLES
+
+extern void VIDEO_GLSL_Setup(const char * rendererName);
+extern void VIDEO_GLSL_RenderCopy(void *data);
 
 #ifdef __cplusplus
 }

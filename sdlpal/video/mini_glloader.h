@@ -25,10 +25,6 @@
 
 #include <SDL_opengl.h>
 
-#if __IOS__ || __ANDROID__ || __EMSCRIPTEN__ || __WINRT__ || SDL_VIDEO_DRIVER_RPI
-#define GLES 1
-#endif
-
 //avoid manually imported glfuncs conflicts with platform-builtin ones, like emscripten
 #define glCreateShader _glCreateShader
 #define glShaderSource _glShaderSource
@@ -51,6 +47,7 @@
 #define glBufferSubData _glBufferSubData
 #define glGetAttribLocation _glGetAttribLocation
 #define glEnableVertexAttribArray _glEnableVertexAttribArray
+#define glDisableVertexAttribArray _glDisableVertexAttribArray
 #define glVertexAttribPointer _glVertexAttribPointer
 #define glUniformMatrix4fv _glUniformMatrix4fv
 #define glUniform2fv _glUniform2fv
@@ -82,6 +79,7 @@ extern PFNGLBUFFERDATAPROC glBufferData;
 extern PFNGLBUFFERSUBDATAPROC glBufferSubData;
 extern PFNGLGETATTRIBLOCATIONPROC glGetAttribLocation;
 extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+extern PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
 extern PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer;
 extern PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
 extern PFNGLUNIFORM2FVPROC glUniform2fv;
