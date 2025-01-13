@@ -492,6 +492,15 @@ PAL_EventFilter(
 {
    switch (lpEvent->type)
    {
+   case SDL_WINDOWEVENT:
+      if (lpEvent->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+      {
+         //
+         // resized the window
+         //
+         VIDEO_Resize(lpEvent->window.data1, lpEvent->window.data2);
+      }
+      break;
    case SDL_APP_WILLENTERBACKGROUND:
       VIDEO_RenderPaused(TRUE);
       break;

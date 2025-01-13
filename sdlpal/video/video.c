@@ -110,6 +110,9 @@ VIDEO_Startup(
         return -2;
     }
 
+    int w, h;
+    SDL_GetRendererOutputSize(gpRenderer, &w, &h);
+    VIDEO_Resize(w, h);
     return 0;
 }
 
@@ -196,18 +199,19 @@ VIDEO_UpdateScreen(
 	   return;
    }
 
-   //
-   // Lock surface if needed
-   //
-   if (SDL_MUSTLOCK(gpScreenReal))
-   {
-      if (SDL_LockSurface((SDL_Surface *)gpScreenReal) < 0)
-         return;
-   }
-
    if (lpRect != NULL)
    {
-      SDL_UpperBlit((SDL_Surface *)gpScreen, (SDL_Rect *)lpRect, (SDL_Surface *)gpScreenReal, (SDL_Rect *)lpRect);
+     for (int j = lpRect->y; j < lpRect->y + lpRect->h; j++) {
+       unsigned char *src = (unsigned char *)gpScreen->pixels + j * gpScreen->pitch;
+       unsigned char *dst = (unsigned char *)gpScreenReal->pixels + j * gpScreenReal->pitch;
+       for (int i = lpRect->x; i < lpRect->x + lpRect->w; i++) {
+         dst[i * 3 + 0] = gpPalette->colors[src[i]].r;
+         dst[i * 3 + 1] = gpPalette->colors[src[i]].g;
+         dst[i * 3 + 2] = gpPalette->colors[src[i]].b;
+       }
+     }
+
+      // SDL_UpperBlit((SDL_Surface *)gpScreen, (SDL_Rect *)lpRect, (SDL_Surface *)gpScreenReal, (SDL_Rect *)lpRect);
    }
    else if (g_wShakeTime != 0)
    {
@@ -231,7 +235,22 @@ VIDEO_UpdateScreen(
          dstrect.y = g_wShakeLevel;
       }
 
-      SDL_UpperBlit((SDL_Surface *)gpScreen, &srcrect, (SDL_Surface *)gpScreenReal, &dstrect);
+      unsigned char *src = (unsigned char *)gpScreen->pixels;
+      unsigned char *dst = (unsigned char *)gpScreenReal->pixels;
+      int sx, sy, sw = gpScreen->pitch;
+      int dx, dy, dw = gpScreenReal->pitch;
+      for (dy = dstrect.y; dy < dstrect.y + dstrect.h; dy++) {
+        sy = (dy * srcrect.h) / dstrect.h;
+        for (dx = dstrect.x; dx < dstrect.x + dstrect.w; dx++) {
+          sx = (dx * srcrect.w) / dstrect.w;
+          unsigned char val = src[sy * sw + sx];
+          unsigned int i = dy * dw + dx * 3;
+          dst[i + 0] = gpPalette->colors[val].r;
+          dst[i + 1] = gpPalette->colors[val].g;
+          dst[i + 2] = gpPalette->colors[val].b;
+        }
+      }
+      // SDL_UpperBlit((SDL_Surface *)gpScreen, &srcrect, (SDL_Surface *)gpScreenReal, &dstrect);
 
       if (g_wShakeTime & 1)
       {
@@ -250,16 +269,20 @@ VIDEO_UpdateScreen(
    }
    else
    {
-      SDL_UpperBlit((SDL_Surface *)gpScreen, NULL, (SDL_Surface *)gpScreenReal, NULL);
+     for (int j = 0; j < 200; j++) {
+       unsigned char *src = (unsigned char *)gpScreen->pixels + j * gpScreen->pitch;
+       unsigned char *dst = (unsigned char *)gpScreenReal->pixels + j * gpScreenReal->pitch;
+       for (int i = 0; i < 320; i++) {
+         dst[i * 3 + 0] = gpPalette->colors[src[i]].r;
+         dst[i * 3 + 1] = gpPalette->colors[src[i]].g;
+         dst[i * 3 + 2] = gpPalette->colors[src[i]].b;
+       }
+     }
+      // SDL_UpperBlit((SDL_Surface *)gpScreen, NULL, (SDL_Surface *)gpScreenReal, NULL);
    }
 
    VIDEO_GLSL_RenderCopy(gpScreenReal->pixels);
    SDL_GL_SwapWindowWithResult(gpWindow);
-
-   if (SDL_MUSTLOCK(gpScreenReal))
-   {
-	   SDL_UnlockSurface((SDL_Surface *)gpScreenReal);
-   }
 }
 
 void
@@ -388,21 +411,10 @@ VIDEO_SwitchScreen(
       dstrect.w = 320;
       dstrect.h = 200;
 
-      if (SDL_MUSTLOCK(gpScreenReal))
-      {
-         if (SDL_LockSurface((SDL_Surface *)gpScreenReal) < 0)
-            return;
-      }
-
       VIDEO_CopySurface(gpScreenBak, NULL, gpScreenReal, &dstrect);
 
       VIDEO_GLSL_RenderCopy(gpScreenReal->pixels);
       SDL_GL_SwapWindowWithResult(gpWindow);
-
-      if (SDL_MUSTLOCK(gpScreenReal))
-      {
-         SDL_UnlockSurface((SDL_Surface *)gpScreenReal);
-      }
 
       UTIL_Delay(wSpeed);
    }
@@ -433,15 +445,6 @@ VIDEO_FadeScreen(
    unsigned char     a, b;
    const unsigned int         rgIndex[6] = {0, 3, 1, 5, 2, 4};
    PAL_Rect          dstrect;
-
-   //
-   // Lock surface if needed
-   //
-   if (SDL_MUSTLOCK(gpScreenReal))
-   {
-      if (SDL_LockSurface((SDL_Surface *)gpScreenReal) < 0)
-         return;
-   }
 
    time = UTIL_GetTicks();
 
@@ -504,7 +507,22 @@ VIDEO_FadeScreen(
                dstrect.y = g_wShakeLevel;
             }
 
-            SDL_UpperBlit((SDL_Surface *)gpScreenBak, (const SDL_Rect *)&srcrect, (SDL_Surface *)gpScreenReal, (SDL_Rect *)&dstrect);
+            unsigned char *src = (unsigned char *)gpScreenBak->pixels;
+            unsigned char *dst = (unsigned char *)gpScreenReal->pixels;
+            int sx, sy, sw = gpScreenBak->pitch;
+            int dx, dy, dw = gpScreenReal->pitch;
+            for (dy = dstrect.y; dy < dstrect.y + dstrect.h; dy++) {
+              sy = (dy * srcrect.h) / dstrect.h;
+              for (dx = dstrect.x; dx < dstrect.x + dstrect.w; dx++) {
+                sx = (dx * srcrect.w) / dstrect.w;
+                unsigned char val = src[sy * sw + sx];
+                unsigned int i = dy * dw + dx * 3;
+                dst[i + 0] = gpPalette->colors[val].r;
+                dst[i + 1] = gpPalette->colors[val].g;
+                dst[i + 2] = gpPalette->colors[val].b;
+              }
+            }
+            // SDL_UpperBlit((SDL_Surface *)gpScreenBak, (const SDL_Rect *)&srcrect, (SDL_Surface *)gpScreenReal, (SDL_Rect *)&dstrect);
 
             if (g_wShakeTime & 1)
             {
@@ -533,11 +551,6 @@ VIDEO_FadeScreen(
          }
          SDL_GL_SwapWindowWithResult(gpWindow);
       }
-   }
-
-   if (SDL_MUSTLOCK((SDL_Surface *)gpScreenReal))
-   {
-      SDL_UnlockSurface((SDL_Surface *)gpScreenReal);
    }
 
    // Draw the result buffer to the screen as the final step
@@ -670,19 +683,21 @@ void VIDEO_CopySurface(
     const PAL_Rect *srcrect,
     PAL_Surface *dst,
     PAL_Rect *dstrect) {
-   unsigned char *p_src = (unsigned char *)src->pixels + srcrect->y * src->pitch + srcrect->x;
-   unsigned char *p_dst = (unsigned char *)dst->pixels + dstrect->y * dst->pitch + dstrect->x;
-   unsigned int dx, dy;
-   unsigned int sx, sy;
-   for (dx = 0; dx < dstrect->w; dx++)
-   {
-      sx = (dx * srcrect->w) / dstrect->w;
-      for (dy = 0; dy < dstrect->h; dy++)
-      {
-         sy = (dy * srcrect->h) / dstrect->h;
-         p_dst[dx + dy * dst->pitch] = p_src[sx + sy * src->pitch];
-      }
-   }
+  int sr_x = (srcrect) ? (srcrect->x) : 0;
+  int sr_y = (srcrect) ? (srcrect->y) : 0;
+  int sr_w = (srcrect) ? (srcrect->w) : src->w;
+  int sr_h = (srcrect) ? (srcrect->h) : src->h;
+  unsigned char *p_src = (unsigned char *)src->pixels + sr_y * src->pitch + sr_x;
+  unsigned char *p_dst = (unsigned char *)dst->pixels + dstrect->y * dst->pitch + dstrect->x;
+  int dx, dy;
+  int sx, sy;
+  for (dy = 0; dy < dstrect->h; dy++) {
+    sy = (dy * sr_h) / dstrect->h;
+    for (dx = 0; dx < dstrect->w; dx++) {
+      sx = (dx * sr_w) / dstrect->w;
+      p_dst[dx + dy * dst->pitch] = p_src[sx + sy * src->pitch];
+    }
+  }
 }
 
 void VIDEO_CopyEntireSurface(

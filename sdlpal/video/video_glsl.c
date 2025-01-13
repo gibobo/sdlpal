@@ -25,15 +25,15 @@
 #include "mini_glloader.h"
 #include "palcfg.h"
 #include "video.h"
-#include <SDL_render.h>
+#include <stdio.h>
 #include <assert.h>
-
-extern SDL_Renderer *gpRenderer;
 
 static uint32_t gProgramId;
 static int position = -1;
 static int texcoord = -1;
 static int texture = -1;
+static int window_width = 0;
+static int window_height = 0;
 static int glversion_major, glversion_minor;
 static int glslversion_major, glslversion_minor;
 static const float p_vex[] = {-1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0};
@@ -54,7 +54,7 @@ char *readShaderFile(const char *filename, GLuint type)
 
 char *skip_version(char *src) {
     int glslVersion = -1;
-    SDL_sscanf(src, "#version %d", &glslVersion);
+    sscanf(src, "#version %d", &glslVersion);
     if( glslVersion != -1 ){
         char *eol = strstr(src, "\n");
         for(int i = 0; i < eol-src; i++)
@@ -167,16 +167,16 @@ void VIDEO_GLSL_Setup(const char * rendererName) {
     
 #ifdef GLES
     if(!strncmp(glversion, "OpenGL ES", 9)) {
-        SDL_sscanf(glversion, "OpenGL ES %d.%d", &glversion_major, &glversion_minor);
+        sscanf(glversion, "OpenGL ES %d.%d", &glversion_major, &glversion_minor);
     }
     if(!strncmp(glslversion, "OpenGL ES GLSL ES", 17)) {
-        SDL_sscanf(glslversion, "OpenGL ES GLSL ES %d.%d", &glslversion_major, &glslversion_minor);
+        sscanf(glslversion, "OpenGL ES GLSL ES %d.%d", &glslversion_major, &glslversion_minor);
     }
 #else
-    SDL_sscanf(glversion, "%d.%d", &glversion_major, &glversion_minor);
+    sscanf(glversion, "%d.%d", &glversion_major, &glversion_minor);
 #endif
 
-    SDL_sscanf(glslversion, "%d.%d", &glslversion_major, &glslversion_minor);
+    sscanf(glslversion, "%d.%d", &glslversion_major, &glslversion_minor);
 
     if(!strncmp(rendererName, "opengl", 6)) {
         assert(initGLExtensions(glversion_major));
@@ -203,9 +203,7 @@ void VIDEO_GLSL_Setup(const char * rendererName) {
 }
 
 void VIDEO_GLSL_RenderCopy(void *data) {
-    int w, h;
-    SDL_GetRendererOutputSize(gpRenderer, &w, &h);
-    glViewport(0, 0, w, h);
+    glViewport(0, 0, window_width, window_height);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -223,4 +221,9 @@ void VIDEO_GLSL_RenderCopy(void *data) {
     glDisableVertexAttribArray(position);
     glDisableVertexAttribArray(texcoord);
     glUseProgram(0);
+}
+
+void VIDEO_Resize(int w, int h) {
+  window_width = w;
+  window_height = h;
 }

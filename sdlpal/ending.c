@@ -34,26 +34,6 @@
 
 static unsigned short g_wCurEffectSprite = 0;
 
-static void PAL_EndingSetEffectSprite(
-    unsigned short wSpriteNum)
-/*++
-  Purpose:
-
-    Set the effect sprite of the ending.
-
-  Parameters:
-
-    [IN]  wSpriteNum - the number of the sprite.
-
-  Return value:
-
-    None.
-
---*/
-{
-   g_wCurEffectSprite = wSpriteNum;
-}
-
 static void PAL_ShowFBP(
     unsigned short wChunkNum,
     unsigned short wFade)
@@ -459,12 +439,12 @@ void PAL_EndingScreen(
    gpGlobals->fNeedToFadeIn = TRUE;
    PAL_RNGPlay(10, 0, -1, 6);
 
-   PAL_EndingSetEffectSprite(0);
+   g_wCurEffectSprite = 0;
    PAL_ShowFBP(77, 10);
 
    VIDEO_BackupScreen(gpScreen);
 
-   PAL_EndingSetEffectSprite(0x27b);
+   g_wCurEffectSprite = 0x27b;
    PAL_ShowFBP(76, 7);
 
    PAL_SetPalette(5, FALSE);
@@ -474,7 +454,7 @@ void PAL_EndingScreen(
    PAL_ShowFBP(71, 7);
    PAL_ShowFBP(68, 7);
 
-   PAL_EndingSetEffectSprite(0);
+   g_wCurEffectSprite = 0;
    PAL_ShowFBP(68, 6);
 
    PAL_WaitForKey(0);

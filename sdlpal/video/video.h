@@ -139,6 +139,8 @@ void PAL_FreeSurface(
 
 void PAL_CleanScreen(void);
 
+void VIDEO_Resize(int w, int h);
+
 #ifdef __cplusplus
 }
 #endif
