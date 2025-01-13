@@ -572,9 +572,9 @@ void PAL_FadeToRed(
 
    for (i = 0; i < gpScreen->pitch * gpScreen->h; i++)
    {
-      if (((unsigned char *)(gpScreen->pixels))[i] == 0x4F)
+      if (((unsigned char *)gpScreen->pixels)[i] == 0x4F)
       {
-         ((unsigned char *)(gpScreen->pixels))[i] = 0x4E; // HACKHACK
+         ((unsigned char *)gpScreen->pixels)[i] = 0x4E; // HACKHACK
       }
    }
 

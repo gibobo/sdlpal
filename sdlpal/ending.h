@@ -27,29 +27,6 @@ extern "C" {
 #endif
 
 void
-PAL_EndingSetEffectSprite(
-   unsigned short         wSpriteNum
-);
-
-void
-PAL_ShowFBP(
-   unsigned short         wChunkNum,
-   unsigned short         wFade
-);
-
-void
-PAL_ScrollFBP(
-   unsigned short         wChunkNum,
-   unsigned short         wScrollSpeed,
-   int         fScrollDown
-);
-
-void
-PAL_EndingAnimation(
-   void
-);
-
-void
 PAL_EndingScreen(
    void
 );

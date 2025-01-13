@@ -95,7 +95,7 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
    //
    // Decompress the tile data.
    //
-   if (Decompress(buf, (unsigned char *)(map->Tiles), sizeof(map->Tiles)) < 0)
+   if (Decompress(buf, (unsigned char *)map->Tiles, sizeof(map->Tiles)) < 0)
    {
       free(map);
       free(buf);

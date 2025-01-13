@@ -34,7 +34,7 @@
 
 static unsigned short g_wCurEffectSprite = 0;
 
-void PAL_EndingSetEffectSprite(
+static void PAL_EndingSetEffectSprite(
     unsigned short wSpriteNum)
 /*++
   Purpose:
@@ -54,7 +54,7 @@ void PAL_EndingSetEffectSprite(
    g_wCurEffectSprite = wSpriteNum;
 }
 
-void PAL_ShowFBP(
+static void PAL_ShowFBP(
     unsigned short wChunkNum,
     unsigned short wFade)
 /*++
@@ -110,8 +110,8 @@ void PAL_ShowFBP(
             //
             for (k = rgIndex[j]; k < gpScreen->pitch * gpScreen->h; k += 6)
             {
-               a = ((unsigned char *)(p->pixels))[k];
-               b = ((unsigned char *)(gpScreenBak->pixels))[k];
+               a = ((unsigned char *)p->pixels)[k];
+               b = ((unsigned char *)gpScreenBak->pixels)[k];
 
                if (i > 0)
                {
@@ -125,7 +125,7 @@ void PAL_ShowFBP(
                   }
                }
 
-               ((unsigned char *)(gpScreenBak->pixels))[k] = ((a & 0xF0) | (b & 0x0F));
+               ((unsigned char *)gpScreenBak->pixels)[k] = ((a & 0xF0) | (b & 0x0F));
             }
 
             VIDEO_RestoreScreen(gpScreen);
@@ -156,7 +156,7 @@ void PAL_ShowFBP(
    VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_ScrollFBP(
+static void PAL_ScrollFBP(
     unsigned short wChunkNum,
     unsigned short wScrollSpeed,
     int fScrollDown)
@@ -283,7 +283,7 @@ void PAL_ScrollFBP(
    VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_EndingAnimation(
+static void PAL_EndingAnimation(
     void)
 /*++
   Purpose:

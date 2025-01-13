@@ -244,13 +244,13 @@ VIDEO_UpdateScreen(
 
       dstrect.h = g_wShakeLevel;
 
-      SDL_FillRect((SDL_Surface *)gpScreenReal, &dstrect, 0);
+      memset(((unsigned char *)gpScreenReal->pixels) + dstrect.y * gpScreenReal->pitch, 0, dstrect.h * gpScreenReal->pitch);
 
       g_wShakeTime--;
    }
    else
    {
-      VIDEO_CopyEntireSurface((SDL_Surface *)gpScreen, (SDL_Surface *)gpScreenReal);
+      SDL_UpperBlit((SDL_Surface *)gpScreen, NULL, (SDL_Surface *)gpScreenReal, NULL);
    }
 
    VIDEO_GLSL_RenderCopy(gpScreenReal->pixels);
@@ -377,7 +377,7 @@ VIDEO_SwitchScreen(
    {
       for (j = rgIndex[i]; j < gpScreen->pitch * gpScreen->h; j += 6)
       {
-         ((unsigned char *)(gpScreenBak->pixels))[j] = ((unsigned char *)(gpScreen->pixels))[j];
+         ((unsigned char *)gpScreenBak->pixels)[j] = ((unsigned char *)gpScreen->pixels)[j];
       }
 
       //
@@ -431,7 +431,7 @@ VIDEO_FadeScreen(
    unsigned int      i, j, k;
    unsigned int      time;
    unsigned char     a, b;
-   const int         rgIndex[6] = {0, 3, 1, 5, 2, 4};
+   const unsigned int         rgIndex[6] = {0, 3, 1, 5, 2, 4};
    PAL_Rect          dstrect;
 
    //
@@ -461,8 +461,8 @@ VIDEO_FadeScreen(
          //
          for (k = rgIndex[j]; k < gpScreen->pitch * gpScreen->h; k += 6)
          {
-            a = ((unsigned char *)(gpScreen->pixels))[k];
-            b = ((unsigned char *)(gpScreenBak->pixels))[k];
+            a = ((unsigned char *)gpScreen->pixels)[k];
+            b = ((unsigned char *)gpScreenBak->pixels)[k];
 
             if (i > 0)
             {
@@ -476,7 +476,7 @@ VIDEO_FadeScreen(
                }
             }
 
-            ((unsigned char *)(gpScreenBak->pixels))[k] = ((a & 0xF0) | (b & 0x0F));
+            ((unsigned char *)gpScreenBak->pixels)[k] = ((a & 0xF0) | (b & 0x0F));
          }
 
          // Draw the backup buffer to the screen
@@ -517,7 +517,7 @@ VIDEO_FadeScreen(
 
             dstrect.h = g_wShakeLevel;
 
-            SDL_FillRect((SDL_Surface *)gpScreenReal, (const SDL_Rect *)&dstrect, 0);
+            memset(((unsigned char *)gpScreenReal->pixels) + dstrect.y * gpScreenReal->pitch, 0, dstrect.h * gpScreenReal->pitch);
             VIDEO_GLSL_RenderCopy(gpScreenReal->pixels);
             g_wShakeTime--;
          }
@@ -665,26 +665,38 @@ VIDEO_RenderPaused(
    g_bRenderPaused = flag;
 }
 
-int VIDEO_CopySurface(
+void VIDEO_CopySurface(
     PAL_Surface *src,
     const PAL_Rect *srcrect,
     PAL_Surface *dst,
     PAL_Rect *dstrect) {
-  return SDL_UpperBlit((SDL_Surface *)src, (const SDL_Rect*)srcrect, (SDL_Surface *)dst, (SDL_Rect*)dstrect);
+   unsigned char *p_src = (unsigned char *)src->pixels + srcrect->y * src->pitch + srcrect->x;
+   unsigned char *p_dst = (unsigned char *)dst->pixels + dstrect->y * dst->pitch + dstrect->x;
+   unsigned int dx, dy;
+   unsigned int sx, sy;
+   for (dx = 0; dx < dstrect->w; dx++)
+   {
+      sx = (dx * srcrect->w) / dstrect->w;
+      for (dy = 0; dy < dstrect->h; dy++)
+      {
+         sy = (dy * srcrect->h) / dstrect->h;
+         p_dst[dx + dy * dst->pitch] = p_src[sx + sy * src->pitch];
+      }
+   }
 }
 
-int VIDEO_CopyEntireSurface(
+void VIDEO_CopyEntireSurface(
     PAL_Surface *src,
     PAL_Surface *dst) {
-  return SDL_UpperBlit((SDL_Surface *)src, NULL, (SDL_Surface *)dst, NULL);
+   memcpy(dst->pixels, src->pixels, dst->pitch * dst->h);
 }
 
-int VIDEO_BackupScreen(PAL_Surface *src) {
-  return VIDEO_CopyEntireSurface(src, gpScreenBak);
+void VIDEO_BackupScreen(PAL_Surface *src) {
+   memcpy(gpScreenBak->pixels, src->pixels, gpScreenBak->pitch * gpScreenBak->h);
 }
 
-int VIDEO_RestoreScreen(PAL_Surface *dst) {
-  return VIDEO_CopyEntireSurface(gpScreenBak, dst);
+void VIDEO_RestoreScreen(PAL_Surface *dst) {
+   memcpy(dst->pixels, gpScreenBak->pixels, gpScreenBak->pitch * gpScreenBak->h);
 }
 
 void PAL_FreeSurface(PAL_Surface *surface) {
@@ -692,5 +704,5 @@ void PAL_FreeSurface(PAL_Surface *surface) {
 }
 
 void PAL_CleanScreen(void) {
-  SDL_FillRect((SDL_Surface *)gpScreen, NULL, 0);
+   memset(gpScreen->pixels, 0, gpScreen->pitch * gpScreen->h);
 }

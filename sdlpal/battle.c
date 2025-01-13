@@ -636,8 +636,8 @@ void PAL_BattleFadeScene(
          //
          for (k = rgIndex[j]; k < gpScreen->pitch * gpScreen->h; k += 6)
          {
-            a = ((unsigned char *)(g_Battle.lpSceneBuf->pixels))[k];
-            b = ((unsigned char *)(gpScreenBak->pixels))[k];
+            a = ((unsigned char *)g_Battle.lpSceneBuf->pixels)[k];
+            b = ((unsigned char *)gpScreenBak->pixels)[k];
 
             if (i > 0)
             {
@@ -651,7 +651,7 @@ void PAL_BattleFadeScene(
                }
             }
 
-            ((unsigned char *)(gpScreenBak->pixels))[k] = ((a & 0xF0) | (b & 0x0F));
+            ((unsigned char *)gpScreenBak->pixels)[k] = ((a & 0xF0) | (b & 0x0F));
          }
 
          //

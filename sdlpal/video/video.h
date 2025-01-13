@@ -120,19 +120,19 @@ VIDEO_RenderPaused(
 	unsigned char flag
 );
 
-int VIDEO_CopySurface(
+void VIDEO_CopySurface(
     PAL_Surface *src,
     const PAL_Rect *srcrect,
     PAL_Surface *dst,
     PAL_Rect *dstrect);
 
-int VIDEO_CopyEntireSurface(
+void VIDEO_CopyEntireSurface(
     PAL_Surface *src,
     PAL_Surface *dst);
 
-int VIDEO_BackupScreen(PAL_Surface *src);
+void VIDEO_BackupScreen(PAL_Surface *src);
 
-int VIDEO_RestoreScreen(PAL_Surface *dst);
+void VIDEO_RestoreScreen(PAL_Surface *dst);
 
 void PAL_FreeSurface(
     PAL_Surface *surface);
