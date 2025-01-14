@@ -54,20 +54,20 @@ static void PAL_ShowFBP(
 
 --*/
 {
-   PAL_LARGE unsigned char buf[320 * 200];
-   PAL_LARGE unsigned char bufSprite[320 * 200];
+   PAL_LARGE unsigned char buf[SCREEN_W * SCREEN_H];
+   PAL_LARGE unsigned char bufSprite[SCREEN_W * SCREEN_H];
    const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
    int i, j, k;
    unsigned char a, b;
 
-   if (PAL_MKFDecompressChunk(buf, 320 * 200, wChunkNum, gpGlobals->f.fpFBP) <= 0)
+   if (PAL_MKFDecompressChunk(buf, SCREEN_W * SCREEN_H, wChunkNum, gpGlobals->f.fpFBP) <= 0)
    {
       memset(buf, 0, sizeof(buf));
    }
 
    if (g_wCurEffectSprite != 0)
    {
-      PAL_MKFDecompressChunk(bufSprite, 320 * 200, g_wCurEffectSprite, gpGlobals->f.fpMGO);
+      PAL_MKFDecompressChunk(bufSprite, SCREEN_W * SCREEN_H, g_wCurEffectSprite, gpGlobals->f.fpMGO);
    }
 
    if (wFade)
@@ -160,19 +160,19 @@ static void PAL_ScrollFBP(
 --*/
 {
    PAL_Surface *p;
-   PAL_LARGE unsigned char buf[320 * 200];
-   PAL_LARGE unsigned char bufSprite[320 * 200];
+   PAL_LARGE unsigned char buf[SCREEN_W * SCREEN_H];
+   PAL_LARGE unsigned char bufSprite[SCREEN_W * SCREEN_H];
    int i, l;
    PAL_Rect rect, dstrect;
 
-   if (PAL_MKFDecompressChunk(buf, 320 * 200, wChunkNum, gpGlobals->f.fpFBP) <= 0)
+   if (PAL_MKFDecompressChunk(buf, sizeof(buf), wChunkNum, gpGlobals->f.fpFBP) <= 0)
    {
       return;
    }
 
    if (g_wCurEffectSprite != 0)
    {
-      PAL_MKFDecompressChunk(bufSprite, 320 * 200, g_wCurEffectSprite, gpGlobals->f.fpMGO);
+      PAL_MKFDecompressChunk(bufSprite, sizeof(bufSprite), g_wCurEffectSprite, gpGlobals->f.fpMGO);
    }
 
    p = VIDEO_CreateCompatibleSizedSurface(NULL);
@@ -191,9 +191,9 @@ static void PAL_ScrollFBP(
    }
 
    rect.x = 0;
-   rect.w = 320;
+   rect.w = SCREEN_W;
    dstrect.x = 0;
-   dstrect.w = 320;
+   dstrect.w = SCREEN_W;
 
    for (l = 0; l < 220; l++)
    {
@@ -252,7 +252,6 @@ static void PAL_ScrollFBP(
       {
          PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
          gpGlobals->fNeedToFadeIn = FALSE;
-         VIDEO_UpdateSurfacePalette(p);
       }
 
       UTIL_Delay(800 / wScrollSpeed);
@@ -280,7 +279,7 @@ static void PAL_EndingAnimation(
 
 --*/
 {
-   const unsigned int buf_size = 320 * 200;
+   const unsigned int buf_size = SCREEN_W * SCREEN_H;
    unsigned char *buf;
    unsigned char *bufGirl;
    PAL_Surface *pUpper;
@@ -307,8 +306,8 @@ static void PAL_EndingAnimation(
 
    srcrect.x = 0;
    dstrect.x = 0;
-   srcrect.w = 320;
-   dstrect.w = 320;
+   srcrect.w = SCREEN_W;
+   dstrect.w = SCREEN_W;
 
    gpGlobals->wScreenWave = 2;
 
@@ -360,8 +359,6 @@ static void PAL_EndingAnimation(
       {
          PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
          gpGlobals->fNeedToFadeIn = FALSE;
-         VIDEO_UpdateSurfacePalette(pUpper);
-         VIDEO_UpdateSurfacePalette(pLower);
       }
 
       UTIL_Delay(50);

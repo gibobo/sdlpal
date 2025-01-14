@@ -1391,8 +1391,10 @@ PAL_InterpretInstruction(
          PAL_StartDialogWithOffset(kDialogCenterWindow, 0, 0, FALSE, 0, -10);
          PAL_swprintf(s, sizeof(s) / sizeof(wchar_t), L"%ls@%ls@", PAL_GetWord(42), PAL_GetWord(gpGlobals->g.lprgStore[0].rgwItems[i]));
          const unsigned char *pBG = PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX);
-         int iBGWidth = PAL_RLEGetWidth(pBG), iBGHeight = PAL_RLEGetHeight(pBG);
-         int iBG_X = (320 - iBGWidth) / 2, iBG_Y = (200 - iBGHeight) / 2;
+         int iBGWidth = PAL_RLEGetWidth(pBG);
+         int iBGHeight = PAL_RLEGetHeight(pBG);
+         int iBG_X = (SCREEN_W - iBGWidth) / 2;
+         int iBG_Y = (SCREEN_H - iBGHeight) / 2;
          unsigned int pos = PAL_XY(iBG_X, iBG_Y);
          PAL_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
          PAL_RLEBlitToSurface(pBG, gpScreen, pos);

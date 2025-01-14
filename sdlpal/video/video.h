@@ -22,8 +22,6 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#include <SDL_pixels.h>
-
 #define SCREEN_W 320
 #define SCREEN_H 200
 
@@ -96,11 +94,6 @@ VIDEO_DuplicateSurface(
 PAL_Surface *
 VIDEO_CreateCompatibleSizedSurface(
 	const PAL_Rect *pSize
-);
-
-void
-VIDEO_UpdateSurfacePalette(
-	PAL_Surface    *pSurface
 );
 
 void

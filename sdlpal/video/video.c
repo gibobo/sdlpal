@@ -212,13 +212,13 @@ VIDEO_UpdateScreen(
       // Shake the screen
       srcrect.x = 0;
       srcrect.y = 0;
-      srcrect.w = 320;
-      srcrect.h = 200 - g_wShakeLevel;
+      srcrect.w = SCREEN_W;
+      srcrect.h = SCREEN_H - g_wShakeLevel;
 
       dstrect.x = 0;
       dstrect.y = 0;
-      dstrect.w = 320;
-      dstrect.h = 200 - g_wShakeLevel;
+      dstrect.w = SCREEN_W;
+      dstrect.h = SCREEN_H - g_wShakeLevel;
 
       if (g_wShakeTime & 1)
       {
@@ -264,14 +264,14 @@ VIDEO_UpdateScreen(
    }
    else
    {
-       unsigned char *src = (unsigned char *)gpScreen->pixels;
-       unsigned char *dst = bufScreenReal;
-       for (int i = 0; i < 320 * 200; i++, src++, dst += 3)
-       {
-           dst[0] = bufPalette[(*src)*3+0];
-           dst[1] = bufPalette[(*src)*3+1];
-           dst[2] = bufPalette[(*src)*3+2];
-       }
+      unsigned char *src = (unsigned char *)gpScreen->pixels;
+      unsigned char *dst = bufScreenReal;
+      for (int i = 0; i < SCREEN_W * SCREEN_H; i++, src++, dst += 3)
+      {
+         dst[0] = bufPalette[(*src) * 3 + 0];
+         dst[1] = bufPalette[(*src) * 3 + 1];
+         dst[2] = bufPalette[(*src) * 3 + 2];
+      }
    }
 
    VIDEO_GLSL_RenderCopy(bufScreenReal);
@@ -375,7 +375,7 @@ VIDEO_SwitchScreen(
    for (i = 0; i < 6; i++)
    {
        // Draw the backup buffer to the screen
-       for (j = 0; j < 320 * 200; j++)
+       for (j = 0; j < SCREEN_W * SCREEN_H; j++)
        {
            if (j % 6 == rgIndex[i])
                srcBak[j] = src[j];
@@ -456,17 +456,8 @@ VIDEO_FadeScreen(
          if (g_wShakeTime != 0)
          {
             // Shake the screen
-            PAL_Rect srcrect, dstrect;
-
-            srcrect.x = 0;
-            srcrect.y = 0;
-            srcrect.w = 320;
-            srcrect.h = 200 - g_wShakeLevel;
-
-            dstrect.x = 0;
-            dstrect.y = 0;
-            dstrect.w = 320;
-            dstrect.h = 200 - g_wShakeLevel;
+            PAL_Rect srcrect = {0, 0, SCREEN_W, SCREEN_H - g_wShakeLevel};
+            PAL_Rect dstrect = {0, 0, SCREEN_W, SCREEN_H - g_wShakeLevel};
 
             if (g_wShakeTime & 1)
             {
@@ -514,7 +505,7 @@ VIDEO_FadeScreen(
          {
              unsigned char *src = (unsigned char *)gpScreenBak->pixels;
              unsigned char *dst = bufScreenReal;
-             for (int j = 0; j < 320 * 200; j++, src++, dst += 3)
+             for (int j = 0; j < SCREEN_W * SCREEN_H; j++, src++, dst += 3)
              {
                  dst[0] = bufPalette[(*src)*3+0];
                  dst[1] = bufPalette[(*src)*3+1];
@@ -613,28 +604,6 @@ VIDEO_DuplicateSurface(
 }
 
 void
-VIDEO_UpdateSurfacePalette(
-	PAL_Surface    *pSurface
-)
-/*++
-  Purpose:
-
-    Use the global palette to update the palette of pSurface.
-
-  Parameters:
-
-    [IN]  pSurface - the surface whose palette should be updated.
-
-  Return value:
-
-    None.
-
---*/
-{
-}
-
-
-void
 VIDEO_RenderPaused(
 	unsigned char flag
 )
@@ -685,12 +654,14 @@ void VIDEO_RestoreScreen(PAL_Surface *dst) {
    memcpy(dst->pixels, gpScreenBak->pixels, SCREEN_W * SCREEN_H);
 }
 
-void PAL_FreeSurface(PAL_Surface *surface) {
-  if (surface) {
-    if (surface->pixels)
-      free(surface->pixels);
-    free(surface);
-  }
+void PAL_FreeSurface(PAL_Surface *surface)
+{
+   if (surface)
+   {
+      if (surface->pixels)
+         free(surface->pixels);
+      free(surface);
+   }
 }
 
 void PAL_CleanScreen(void) {

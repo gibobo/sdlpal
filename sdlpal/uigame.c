@@ -73,7 +73,7 @@ void PAL_DrawOpeningMenuBackground(
 {
    unsigned char *buf;
 
-   buf = (unsigned char *)malloc(320 * 200);
+   buf = (unsigned char *)malloc(SCREEN_W * SCREEN_H);
    if (buf == NULL)
    {
       return;
@@ -82,7 +82,7 @@ void PAL_DrawOpeningMenuBackground(
    //
    // Read the picture from fbp.mkf.
    //
-   PAL_MKFDecompressChunk(buf, 320 * 200, 2, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, SCREEN_W * SCREEN_H, 2, gpGlobals->f.fpFBP);
 
    //
    // ...and blit it to the screen buffer.
@@ -703,7 +703,7 @@ start_magicmenu:
             //
             rect.x = 0;
             rect.y = 158;
-            rect.w = 320;
+            rect.w = SCREEN_W;
             rect.h = 6;
 
             VIDEO_RestoreScreen(gpScreen);
@@ -979,8 +979,8 @@ void PAL_PlayerStatus(
 
 --*/
 {
-   PAL_LARGE unsigned char bufBackground[320 * 200];
-   PAL_LARGE unsigned char bufImage[320 * 200];
+   PAL_LARGE unsigned char bufBackground[SCREEN_W * SCREEN_H];
+   PAL_LARGE unsigned char bufImage[SCREEN_W * SCREEN_H];
    PAL_LARGE unsigned char bufImageBox[50 * 49];
    int labels0[] = {
        STATUS_LABEL_EXP, STATUS_LABEL_LEVEL, STATUS_LABEL_HP,

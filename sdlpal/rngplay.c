@@ -77,25 +77,19 @@ PAL_RNGReadFrame(
       return -1;
    }
 
-   //
    // Get the total number of chunks.
-   //
    uiChunkCount = PAL_MKFGetChunkCount(fpRngMKF);
    if (uiRngNum >= uiChunkCount)
    {
       return -1;
    }
 
-   //
    // Get the offset of the chunk.
-   //
    fseek(fpRngMKF, 4 * uiRngNum, SEEK_SET);
    PAL_fread(&uiOffset, sizeof(unsigned int), 1, fpRngMKF);
    PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
 
-   //
    // Get the length of the chunk.
-   //
    iChunkLen = uiNextOffset - uiOffset;
    if (iChunkLen != 0)
    {
@@ -106,9 +100,7 @@ PAL_RNGReadFrame(
       return -1;
    }
 
-   //
    // Get the number of sub chunks.
-   //
    PAL_fread(&uiChunkCount, sizeof(unsigned int), 1, fpRngMKF);
    uiChunkCount = (uiChunkCount >> 2) - 1;
    if (uiFrameNum >= uiChunkCount)
@@ -116,16 +108,12 @@ PAL_RNGReadFrame(
       return -1;
    }
 
-   //
    // Get the offset of the sub chunk.
-   //
    fseek(fpRngMKF, uiOffset + 4 * uiFrameNum, SEEK_SET);
    PAL_fread(&uiSubOffset, sizeof(unsigned int), 1, fpRngMKF);
    PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
 
-   //
    // Get the length of the sub chunk.
-   //
    iChunkLen = uiNextOffset - uiSubOffset;
    if ((unsigned int)iChunkLen > uiBufferSize)
    {
@@ -143,10 +131,9 @@ PAL_RNGReadFrame(
 
 static int
 PAL_RNGBlitToSurface(
-   const uint8_t   *rng,
-   int              length,
-   PAL_Surface     *lpDstSurface
-)
+    const unsigned char *rng,
+    int length,
+    PAL_Surface *lpDstSurface)
 /*++
   Purpose:
 
@@ -173,18 +160,15 @@ PAL_RNGBlitToSurface(
    int ptr = 0;
    unsigned int i, n, data;
    unsigned char *dst = NULL;
-   //
+
    // Check for invalid parameters.
-   //
    if (lpDstSurface == NULL || length < 0)
    {
       return -1;
    }
    dst = (unsigned char *)lpDstSurface->pixels;
-   //
+
    // Draw the frame to the surface.
-   // FIXME: Dirty and ineffective code, needs to be cleaned up
-   //
    while (ptr < length)
    {
       data = rng[ptr++];
@@ -194,6 +178,7 @@ PAL_RNGBlitToSurface(
       case 0x00:
       case 0x13:
          // End
+         ptr = length;
          break;
 
       case 0x02:
@@ -318,45 +303,33 @@ PAL_RNGPlay(
 --*/
 {
    FILE *fp = UTIL_OpenRequiredFileForMode("rng.mkf", "rb");
-   unsigned char *rng = (uint8_t *)malloc(65000);
-   unsigned char *buf = (uint8_t *)malloc(65000);
+   unsigned char *rng = (unsigned char *)malloc(65000);
+   unsigned char *buf = (unsigned char *)malloc(65000);
    unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
    unsigned int iTime = UTIL_GetTicks();
 
-   //
    // Avoid losing the last frame
-   //
    if (iEndFrame > 0) iEndFrame++;
 
    for (; rng && buf && iStartFrame != iEndFrame; iStartFrame++) {
      iTime += iDelay;
-     //
      // Read, decompress and render the frame
-     //
      if (PAL_RNGReadFrame(buf, 65000, iNumRNG, iStartFrame, fp) < 0 ||
          PAL_RNGBlitToSurface(rng, Decompress(buf, rng, 65000), gpScreen) < 0) {
-       //
        // Failed to get the frame, don't go further
-       //
        break;
      }
 
-     //
      // Update the screen
-     //
      VIDEO_UpdateScreen(NULL);
 
-     //
      // Fade in the screen if needed
-     //
      if (gpGlobals->fNeedToFadeIn) {
        PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
        gpGlobals->fNeedToFadeIn = 0;
      }
 
-     //
      // Delay for a while
-     //
      PAL_DelayUntil(iTime);
    }
 

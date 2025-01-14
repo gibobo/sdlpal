@@ -470,7 +470,7 @@ void PAL_MakeScene(
 
 --*/
 {
-   static PAL_Rect rect = {0, 0, 320, 200};
+   static PAL_Rect rect = {0, 0, SCREEN_W, SCREEN_H};
 
    //
    // Step 1: Draw the complete map, for both of the layers.

@@ -390,7 +390,7 @@ PAL_DrawTextUnescape(
    urect.w = 0;
 
    // Handle text overflow
-   if (rect.x >= 320) return;
+   if (rect.x >= SCREEN_W) return;
 
    if(fUnescape)
       lpszText = PAL_UnescapeText(lpszText);
@@ -432,13 +432,13 @@ PAL_DrawTextUnescape(
 	  urect.h += 2*PROT_OFFSET;
 	  if (urect.x < 0) urect.x = 0;
 	  if (urect.y < 0) urect.y = 0;
-      if (urect.x + urect.w > 320)
+      if (urect.x + urect.w > SCREEN_W)
       {
-         urect.w = 320 - urect.x;
+         urect.w = SCREEN_W - urect.x;
       }
-	  if (urect.y + urect.h > 200)
+	  if (urect.y + urect.h > SCREEN_H)
 	  {
-		  urect.h = 200 - urect.y;
+		  urect.h = SCREEN_H - urect.y;
 	  }
       VIDEO_UpdateScreen(&urect);
    }
@@ -507,7 +507,7 @@ PAL_StartDialogWithOffset(
 
 --*/
 {
-   PAL_LARGE unsigned char buf[320 * 200];
+   PAL_LARGE unsigned char buf[SCREEN_W * SCREEN_H];
    PAL_Rect       rect;
 
    if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
@@ -544,7 +544,7 @@ PAL_StartDialogWithOffset(
          //
          // Display the character face at the upper part of the screen
          //
-         if (PAL_MKFReadChunk(buf, 320 * 200, iNumCharFace, gpGlobals->f.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, SCREEN_W * SCREEN_H, iNumCharFace, gpGlobals->f.fpRGM) > 0)
          {
             rect.w = PAL_RLEGetWidth((const unsigned char*)buf);
             rect.h = PAL_RLEGetHeight((const unsigned char*)buf);
@@ -568,7 +568,7 @@ PAL_StartDialogWithOffset(
          //
          // Display the character face at the lower part of the screen
          //
-         if (PAL_MKFReadChunk(buf, 320 * 200, iNumCharFace, gpGlobals->f.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, SCREEN_W * SCREEN_H, iNumCharFace, gpGlobals->f.fpRGM) > 0)
          {
             rect.x = 270 - PAL_RLEGetWidth((const unsigned char*)buf) / 2 + xOff;
             rect.y = 144 - PAL_RLEGetHeight((const unsigned char*)buf) / 2 + yOff;
@@ -925,7 +925,7 @@ PAL_ShowDialogText(
 
          rect.x = PAL_X(pos);
          rect.y = PAL_Y(pos);
-         rect.w = 320 - rect.x * 2 + 32;
+         rect.w = SCREEN_W - rect.x * 2 + 32;
          rect.h = 64;
          VIDEO_UpdateScreen(&rect);
 

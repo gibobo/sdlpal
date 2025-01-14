@@ -105,9 +105,9 @@ PAL_GameUpdate(
          if (p->sState < 0)
          {
             if (p->x < PAL_X(gpGlobals->viewport) ||
-               p->x > PAL_X(gpGlobals->viewport) + 320 ||
+               p->x > PAL_X(gpGlobals->viewport) + SCREEN_W ||
                p->y < PAL_Y(gpGlobals->viewport) ||
-               p->y > PAL_Y(gpGlobals->viewport) + 320)
+               p->y > PAL_Y(gpGlobals->viewport) + SCREEN_W)
             {
                p->sState = abs(p->sState);
                p->wCurrentFrameNum = 0;

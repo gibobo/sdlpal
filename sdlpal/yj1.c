@@ -160,7 +160,7 @@ int YJ2_Decompress(
     if (!yj2_build_tree(&tree))
         return -1;
 
-    Length = (*((unsigned int *)Source));
+    Length = *(unsigned int *)Source;
     if (Length > DestSize)
         return -1;
     dest = (unsigned char *)Destination;

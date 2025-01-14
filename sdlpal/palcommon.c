@@ -677,7 +677,7 @@ int PAL_FBPBlitToSurface(
    unsigned char *dst;
 
    if (lpBitmapFBP == NULL || lpDstSurface == NULL ||
-       lpDstSurface->w != 320 || lpDstSurface->h != 200)
+       lpDstSurface->w != SCREEN_W || lpDstSurface->h != SCREEN_H)
    {
       return -1;
    }

@@ -940,7 +940,7 @@ PAL_LoadBattleBackground(
 
 --*/
 {
-   PAL_LARGE unsigned char buf[320 * 200];
+   PAL_LARGE unsigned char buf[SCREEN_W * SCREEN_H];
 
    //
    // Create the surface
@@ -955,7 +955,7 @@ PAL_LoadBattleBackground(
    //
    // Load the picture
    //
-   PAL_MKFDecompressChunk(buf, 320 * 200, gpGlobals->wNumBattleField, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, SCREEN_W * SCREEN_H, gpGlobals->wNumBattleField, gpGlobals->f.fpFBP);
 
    //
    // Draw the picture to the surface.

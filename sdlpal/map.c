@@ -21,6 +21,7 @@
 
 #include "map.h"
 #include "palcommon.h"
+#include <stdlib.h>
 
 PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
 /*++
@@ -46,7 +47,7 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
 --*/
 {
    unsigned char *buf;
-   int size;
+   unsigned int size;
    PALMAP *map;
 
    //

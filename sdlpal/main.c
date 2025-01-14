@@ -196,21 +196,21 @@ void PAL_SplashScreen(
    }
 
    // Allocate all the needed memory at once for simplification
-   buf = (unsigned char *)UTIL_calloc(1, 320 * 200 * 2);
-   buf2 = &buf[320 * 200];
-   lpSpriteCrane = (unsigned char *)buf2 + 32000;
+   buf = (unsigned char *)UTIL_calloc(2, SCREEN_W * SCREEN_H);
+   buf2 = buf + SCREEN_W * SCREEN_H;
+   lpSpriteCrane = buf2 + 32000;
 
    // Create the surfaces
    lpBitmapDown = VIDEO_CreateCompatibleSizedSurface(NULL);
    lpBitmapUp = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    // Read the bitmaps
-   PAL_MKFReadChunk(buf, 320 * 200, 0x03, gpGlobals->f.fpFBP);
-   Decompress(buf, buf2, 320 * 200);
+   PAL_MKFReadChunk(buf, SCREEN_W * SCREEN_H, 0x03, gpGlobals->f.fpFBP);
+   Decompress(buf, buf2, SCREEN_W * SCREEN_H);
    PAL_FBPBlitToSurface(buf2, lpBitmapUp);
 
-   PAL_MKFReadChunk(buf, 320 * 200, 0x04, gpGlobals->f.fpFBP);
-   Decompress(buf, buf2, 320 * 200);
+   PAL_MKFReadChunk(buf, SCREEN_W * SCREEN_H, 0x04, gpGlobals->f.fpFBP);
+   Decompress(buf, buf2, SCREEN_W * SCREEN_H);
    PAL_FBPBlitToSurface(buf2, lpBitmapDown);
 
    PAL_MKFReadChunk(buf, 32000, 0x47, gpGlobals->f.fpMGO);
@@ -243,18 +243,16 @@ void PAL_SplashScreen(
    dwBeginTime = UTIL_GetTicks();
 
    srcrect.x = 0;
-   srcrect.w = 320;
+   srcrect.w = SCREEN_W;
    dstrect.x = 0;
-   dstrect.w = 320;
+   dstrect.w = SCREEN_W;
 
    while (TRUE)
    {
       PAL_ProcessEvent();
       dwTime = UTIL_GetTicks() - dwBeginTime;
 
-      //
       // Set the palette
-      //
       if (dwTime < 15000)
       {
          for (i = 0; i < 256 * 3; i++)
@@ -264,8 +262,6 @@ void PAL_SplashScreen(
       }
 
       VIDEO_SetPalette(rgCurrentPalette);
-      VIDEO_UpdateSurfacePalette(lpBitmapDown);
-      VIDEO_UpdateSurfacePalette(lpBitmapUp);
 
       // Draw the screen
       if (iImgPos > 1)
@@ -335,8 +331,6 @@ void PAL_SplashScreen(
                rgCurrentPalette[i] = (unsigned char)(palette[i] * ((float)dwTime / 15000));
             }
             VIDEO_SetPalette(rgCurrentPalette);
-            VIDEO_UpdateSurfacePalette(lpBitmapDown);
-            VIDEO_UpdateSurfacePalette(lpBitmapUp);
             UTIL_Delay(8);
             dwTime += 250;
          }
