@@ -24,10 +24,11 @@
 
 #include <SDL_pixels.h>
 
+#define SCREEN_W 320
+#define SCREEN_H 200
+
 typedef struct PAL_Surface
 {
-    unsigned int flags;         /**< Read-only */
-    SDL_PixelFormat *format;    /**< Read-only */
     int w, h;                   /**< Read-only */
     int pitch;                  /**< Read-only */
     void *pixels;               /**< Read-write */
@@ -39,13 +40,6 @@ typedef struct PAL_Rect {
   int w;
   int h;
 } PAL_Rect;
-
-typedef struct PAL_Color {
-  unsigned char r;
-  unsigned char g;
-  unsigned char b;
-  unsigned char a;
-} PAL_Color;
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,15 +63,9 @@ VIDEO_UpdateScreen(
    const PAL_Rect *lpRect
 );
 
-void
-VIDEO_SetPalette(
-   PAL_Color       *rgPalette
-);
+void VIDEO_SetPalette(const unsigned char *rgPalette);
 
-PAL_Color *
-VIDEO_GetPalette(
-   void
-);
+const unsigned char *VIDEO_GetPalette(void);
 
 void
 VIDEO_ShakeScreen(

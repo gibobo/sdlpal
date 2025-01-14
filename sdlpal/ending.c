@@ -88,7 +88,7 @@ static void PAL_ShowFBP(
             // Blend the pixels in the 2 buffers, and put the result into the
             // backup buffer
             //
-            for (k = rgIndex[j]; k < gpScreen->pitch * gpScreen->h; k += 6)
+            for (k = rgIndex[j]; k < SCREEN_W * SCREEN_H; k += 6)
             {
                a = ((unsigned char *)p->pixels)[k];
                b = ((unsigned char *)gpScreenBak->pixels)[k];

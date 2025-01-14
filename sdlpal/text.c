@@ -612,8 +612,9 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
 --*/
 {
-   PAL_LARGE PAL_Color   palette[256];
-   PAL_Color   *pCurrentPalette, t;
+   unsigned char  palette[256 * 3];
+   unsigned char *pCurrentPalette;
+   unsigned char  t[3];
    int         i;
    uint32_t    dwBeginningTicks = UTIL_GetTicks();
 
@@ -656,12 +657,18 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
          //
          // palette shift
          //
-         t = palette[0xF9];
+         t[0] = palette[0xF9*3+0];
+         t[1] = palette[0xF9*3+1];
+         t[2] = palette[0xF9*3+2];
          for (i = 0xF9; i < 0xFE; i++)
          {
-            palette[i] = palette[i + 1];
+            palette[i*3+0] = palette[i + 3];
+            palette[i*3+1] = palette[i + 4];
+            palette[i*3+2] = palette[i + 5];
          }
-         palette[0xFE] = t;
+         palette[0xFE*3+0] = t[0];
+         palette[0xFE*3+1] = t[1];
+         palette[0xFE*3+2] = t[2];
 
          VIDEO_SetPalette(palette);
       }

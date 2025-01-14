@@ -30,16 +30,16 @@
 #include <SDL_render.h>
 
 // The global palette
-static SDL_Palette  *gpPalette          = NULL;
 PAL_Surface         *gpScreen           = NULL; // Screen buffer
 PAL_Surface         *gpScreenBak        = NULL; // Backup screen buffer
-PAL_Surface         *gpScreenReal       = NULL; // The real screen surface
 SDL_Window          *gpWindow           = NULL;
 SDL_Renderer        *gpRenderer         = NULL;
 
 volatile unsigned char g_bRenderPaused = FALSE;
 static unsigned short g_wShakeTime = 0;
 static unsigned short g_wShakeLevel = 0;
+static unsigned char *bufScreenReal = NULL;
+static unsigned char *bufPalette = NULL;
 
 int
 VIDEO_Startup(
@@ -96,15 +96,15 @@ VIDEO_Startup(
     //
     // Create the screen buffer and the backup screen buffer.
     //
-    gpScreen = (PAL_Surface *)SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 8, 0, 0, 0, 0);
-    gpScreenBak = (PAL_Surface *)SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 8, 0, 0, 0, 0);
-    gpScreenReal = (PAL_Surface *)SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 24, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+    gpScreen = VIDEO_CreateCompatibleSizedSurface(NULL);
+    gpScreenBak = VIDEO_CreateCompatibleSizedSurface(NULL);
+    bufScreenReal = malloc(SCREEN_W * 3 * SCREEN_H);
 
     // Create palette object
-    gpPalette = SDL_AllocPalette(256);
+    bufPalette = malloc(256 * 3);
 
     // Failed?
-    if (gpScreen == NULL || gpScreenBak == NULL || gpScreenReal == NULL || gpPalette == NULL)
+    if (gpScreen == NULL || gpScreenBak == NULL || bufScreenReal == NULL || bufPalette == NULL)
     {
         VIDEO_Shutdown();
         return -2;
@@ -136,41 +136,35 @@ VIDEO_Shutdown(
 --*/
 {
     // since gConfig is cleared already we'd to detect on side effects
-   if (gpScreen != NULL)
-   {
-      SDL_FreeSurface((SDL_Surface *)gpScreen);
-   }
-   gpScreen = NULL;
+    if (gpRenderer)
+    {
+        SDL_DestroyRenderer(gpRenderer);
+    }
+    gpRenderer = NULL;
 
-   if (gpScreenBak != NULL)
-   {
-      SDL_FreeSurface((SDL_Surface *)gpScreenBak);
-   }
-   gpScreenBak = NULL;
+    if (gpWindow)
+    {
+        SDL_DestroyWindow(gpWindow);
+    }
+    gpWindow = NULL;
 
-   if (gpScreenReal != NULL)
-   {
-      SDL_FreeSurface((SDL_Surface *)gpScreenReal);
-   }
-   gpScreenReal = NULL;
+    PAL_FreeSurface(gpScreen);
+    gpScreen = NULL;
 
-   if (gpRenderer)
-   {
-      SDL_DestroyRenderer(gpRenderer);
-   }
-   gpRenderer = NULL;
+    PAL_FreeSurface(gpScreenBak);
+    gpScreenBak = NULL;
 
-   if (gpWindow)
-   {
-      SDL_DestroyWindow(gpWindow);
-   }
-   gpWindow = NULL;
+    if (bufScreenReal != NULL)
+    {
+        free(bufScreenReal);
+    }
+    bufScreenReal = NULL;
 
-   if (gpPalette)
-   {
-      SDL_FreePalette(gpPalette);
-   }
-   gpPalette = NULL;
+    if (bufPalette != NULL)
+    {
+        free(bufPalette);
+    }
+    bufPalette = NULL;
 }
 
 void
@@ -203,13 +197,13 @@ VIDEO_UpdateScreen(
    {
        for (int j = lpRect->y; j < lpRect->y + lpRect->h; j++)
        {
-           unsigned char *src = (unsigned char *)gpScreen->pixels + j * gpScreen->pitch;
-           unsigned char *dst = (unsigned char *)gpScreenReal->pixels + j * gpScreenReal->pitch;
+           unsigned char *src = (unsigned char *)gpScreen->pixels + j * SCREEN_W;
+           unsigned char *dst = bufScreenReal + j * (SCREEN_W * 3);
            for (int i = lpRect->x; i < lpRect->x + lpRect->w; i++)
            {
-               dst[i * 3 + 0] = gpPalette->colors[src[i]].r;
-               dst[i * 3 + 1] = gpPalette->colors[src[i]].g;
-               dst[i * 3 + 2] = gpPalette->colors[src[i]].b;
+             dst[i * 3 + 0] = bufPalette[src[i] * 3 + 0];
+             dst[i * 3 + 1] = bufPalette[src[i] * 3 + 1];
+             dst[i * 3 + 2] = bufPalette[src[i] * 3 + 2];
            }
        }
    }
@@ -236,9 +230,9 @@ VIDEO_UpdateScreen(
       }
 
       unsigned char *src = (unsigned char *)gpScreen->pixels;
-      unsigned char *dst = (unsigned char *)gpScreenReal->pixels;
-      int sx, sy, sw = gpScreen->pitch;
-      int dx, dy, dw = gpScreenReal->pitch;
+      unsigned char *dst = bufScreenReal;
+      int sx, sy, sw = SCREEN_W;
+      int dx, dy, dw = SCREEN_W * 3;
       for (dy = dstrect.y; dy < dstrect.y + dstrect.h; dy++)
       {
           sy = (dy * srcrect.h) / dstrect.h;
@@ -247,9 +241,9 @@ VIDEO_UpdateScreen(
               sx = (dx * srcrect.w) / dstrect.w;
               unsigned char val = src[sy * sw + sx];
               unsigned int i = dy * dw + dx * 3;
-              dst[i + 0] = gpPalette->colors[val].r;
-              dst[i + 1] = gpPalette->colors[val].g;
-              dst[i + 2] = gpPalette->colors[val].b;
+              dst[i + 0] = bufPalette[val * 3 + 0];
+              dst[i + 1] = bufPalette[val * 3 + 1];
+              dst[i + 2] = bufPalette[val * 3 + 2];
           }
       }
 
@@ -264,30 +258,27 @@ VIDEO_UpdateScreen(
 
       dstrect.h = g_wShakeLevel;
 
-      memset(((unsigned char *)gpScreenReal->pixels) + dstrect.y * gpScreenReal->pitch, 0, dstrect.h * gpScreenReal->pitch);
+      memset(bufScreenReal + dstrect.y * (SCREEN_W * 3), 0, dstrect.h * (SCREEN_W * 3));
 
       g_wShakeTime--;
    }
    else
    {
        unsigned char *src = (unsigned char *)gpScreen->pixels;
-       unsigned char *dst = (unsigned char *)gpScreenReal->pixels;
+       unsigned char *dst = bufScreenReal;
        for (int i = 0; i < 320 * 200; i++, src++, dst += 3)
        {
-           dst[0] = gpPalette->colors[*src].r;
-           dst[1] = gpPalette->colors[*src].g;
-           dst[2] = gpPalette->colors[*src].b;
+           dst[0] = bufPalette[(*src)*3+0];
+           dst[1] = bufPalette[(*src)*3+1];
+           dst[2] = bufPalette[(*src)*3+2];
        }
    }
 
-   VIDEO_GLSL_RenderCopy(gpScreenReal->pixels);
+   VIDEO_GLSL_RenderCopy(bufScreenReal);
    SDL_GL_SwapWindowWithResult(gpWindow);
 }
 
-void
-VIDEO_SetPalette(
-   PAL_Color       *rgPalette
-)
+void VIDEO_SetPalette(const unsigned char *rgPalette)
 /*++
   Purpose:
 
@@ -303,27 +294,11 @@ VIDEO_SetPalette(
 
 --*/
 {
-   SDL_SetPaletteColors(gpPalette, (const SDL_Color *)rgPalette, 0, 256);
-
-   SDL_SetSurfacePalette((SDL_Surface *)gpScreen, gpPalette);
-   SDL_SetSurfacePalette((SDL_Surface *)gpScreenBak, gpPalette);
-
-   //
-   // HACKHACK: need to invalidate gpScreen->map otherwise the palette
-   // would not be effective during blit
-   //
-   // SDL_SetSurfaceColorMod((SDL_Surface *)gpScreen, 0, 0, 0);
-   // SDL_SetSurfaceColorMod((SDL_Surface *)gpScreen, 0xFF, 0xFF, 0xFF);
-   // SDL_SetSurfaceColorMod((SDL_Surface *)gpScreenBak, 0, 0, 0);
-   // SDL_SetSurfaceColorMod((SDL_Surface *)gpScreenBak, 0xFF, 0xFF, 0xFF);
-
-   VIDEO_UpdateScreen(NULL);
+    memcpy(bufPalette, rgPalette, 256 * 3);
+    VIDEO_UpdateScreen(NULL);
 }
 
-PAL_Color *
-VIDEO_GetPalette(
-   void
-)
+const unsigned char *VIDEO_GetPalette(void)
 /*++
   Purpose:
 
@@ -339,7 +314,7 @@ VIDEO_GetPalette(
 
 --*/
 {
-   return (PAL_Color *)gpPalette->colors;
+  return (const unsigned char *)bufPalette;
 }
 
 void
@@ -396,7 +371,7 @@ VIDEO_SwitchScreen(
 
    unsigned char *src = (unsigned char *)gpScreen->pixels;
    unsigned char *srcBak = (unsigned char *)gpScreenBak->pixels;
-   unsigned char *dst = (unsigned char *)gpScreenReal->pixels;
+   unsigned char *dst = bufScreenReal;
    for (i = 0; i < 6; i++)
    {
        // Draw the backup buffer to the screen
@@ -404,12 +379,12 @@ VIDEO_SwitchScreen(
        {
            if (j % 6 == rgIndex[i])
                srcBak[j] = src[j];
-           dst[j * 3 + 0] = gpPalette->colors[srcBak[j]].r;
-           dst[j * 3 + 1] = gpPalette->colors[srcBak[j]].g;
-           dst[j * 3 + 2] = gpPalette->colors[srcBak[j]].b;
+           dst[j * 3 + 0] = bufPalette[srcBak[j]*3+0];
+           dst[j * 3 + 1] = bufPalette[srcBak[j]*3+1];
+           dst[j * 3 + 2] = bufPalette[srcBak[j]*3+2];
        }
 
-       VIDEO_GLSL_RenderCopy(gpScreenReal->pixels);
+       VIDEO_GLSL_RenderCopy(bufScreenReal);
        SDL_GL_SwapWindowWithResult(gpWindow);
 
        UTIL_Delay(wSpeed);
@@ -439,8 +414,7 @@ VIDEO_FadeScreen(
    unsigned int      i, j, k;
    unsigned int      time;
    unsigned char     a, b;
-   const unsigned int         rgIndex[6] = {0, 3, 1, 5, 2, 4};
-   PAL_Rect          dstrect;
+   const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
    time = UTIL_GetTicks();
 
@@ -458,7 +432,7 @@ VIDEO_FadeScreen(
          // Blend the pixels in the 2 buffers, and put the result into the
          // backup buffer
          //
-         for (k = rgIndex[j]; k < gpScreen->pitch * gpScreen->h; k += 6)
+         for (k = rgIndex[j]; k < SCREEN_W * SCREEN_H; k += 6)
          {
             a = ((unsigned char *)gpScreen->pixels)[k];
             b = ((unsigned char *)gpScreenBak->pixels)[k];
@@ -504,9 +478,9 @@ VIDEO_FadeScreen(
             }
 
             unsigned char *src = (unsigned char *)gpScreenBak->pixels;
-            unsigned char *dst = (unsigned char *)gpScreenReal->pixels;
-            int sx, sy, sw = gpScreenBak->pitch;
-            int dx, dy, dw = gpScreenReal->pitch;
+            unsigned char *dst = bufScreenReal;
+            int sx, sy, sw = SCREEN_W;
+            int dx, dy, dw = (SCREEN_W * 3);
             for (dy = dstrect.y; dy < dstrect.y + dstrect.h; dy++)
             {
                 sy = (dy * srcrect.h) / dstrect.h;
@@ -515,9 +489,9 @@ VIDEO_FadeScreen(
                     sx = (dx * srcrect.w) / dstrect.w;
                     unsigned char val = src[sy * sw + sx];
                     unsigned int i = dy * dw + dx * 3;
-                    dst[i + 0] = gpPalette->colors[val].r;
-                    dst[i + 1] = gpPalette->colors[val].g;
-                    dst[i + 2] = gpPalette->colors[val].b;
+                    dst[i + 0] = bufPalette[val*3+0];
+                    dst[i + 1] = bufPalette[val*3+1];
+                    dst[i + 2] = bufPalette[val*3+2];
                 }
             }
 
@@ -532,19 +506,19 @@ VIDEO_FadeScreen(
 
             dstrect.h = g_wShakeLevel;
 
-            memset(((unsigned char *)gpScreenReal->pixels) + dstrect.y * gpScreenReal->pitch, 0, dstrect.h * gpScreenReal->pitch);
-            VIDEO_GLSL_RenderCopy(gpScreenReal->pixels);
+            memset(bufScreenReal + dstrect.y * (SCREEN_W * 3), 0, dstrect.h * (SCREEN_W * 3));
+            VIDEO_GLSL_RenderCopy(bufScreenReal);
             g_wShakeTime--;
          }
          else
          {
              unsigned char *src = (unsigned char *)gpScreenBak->pixels;
-             unsigned char *dst = (unsigned char *)gpScreenReal->pixels;
+             unsigned char *dst = bufScreenReal;
              for (int j = 0; j < 320 * 200; j++, src++, dst += 3)
              {
-                 dst[0] = gpPalette->colors[*src].r;
-                 dst[1] = gpPalette->colors[*src].g;
-                 dst[2] = gpPalette->colors[*src].b;
+                 dst[0] = bufPalette[(*src)*3+0];
+                 dst[1] = bufPalette[(*src)*3+1];
+                 dst[2] = bufPalette[(*src)*3+2];
              }
              VIDEO_GLSL_RenderCopy(dst);
          }
@@ -599,21 +573,13 @@ VIDEO_CreateCompatibleSizedSurface(
 --*/
 {
     // Create the surface
-    SDL_Surface *dest = SDL_CreateRGBSurface(
-        gpScreen->flags,
-        pSize ? pSize->w : gpScreen->w,
-        pSize ? pSize->h : gpScreen->h,
-        gpScreen->format->BitsPerPixel,
-        gpScreen->format->Rmask,
-        gpScreen->format->Gmask,
-        gpScreen->format->Bmask,
-        gpScreen->format->Amask);
-
-    if (dest) {
-        SDL_SetSurfacePalette(dest, gpPalette);
-    }
-
-    return (PAL_Surface *)dest;
+    PAL_Surface *dest;
+    dest = malloc(sizeof(PAL_Surface));
+    dest->w = pSize ? pSize->w : SCREEN_W;
+    dest->h = pSize ? pSize->h : SCREEN_H;
+    dest->pitch = dest->w;
+    dest->pixels = malloc(dest->pitch * dest->h);
+    return dest;
 }
 
 PAL_Surface *
@@ -665,7 +631,6 @@ VIDEO_UpdateSurfacePalette(
 
 --*/
 {
-	SDL_SetSurfacePalette((SDL_Surface *)pSurface, gpPalette);
 }
 
 
@@ -693,8 +658,8 @@ void VIDEO_CopySurface(
 
     unsigned char *p_src = (unsigned char *)src->pixels + sr_y * src->pitch + sr_x;
     unsigned char *p_dst = (unsigned char *)dst->pixels + dr_y * dst->pitch + dr_x;
-    int dx, dy;
-    int sx, sy;
+    unsigned int dx, dy;
+    unsigned int sx, sy;
     for (dy = 0; dy < dr_h; dy++)
     {
         sy = (dy * sr_h) / dr_h;
@@ -713,17 +678,21 @@ void VIDEO_CopyEntireSurface(
 }
 
 void VIDEO_BackupScreen(PAL_Surface *src) {
-   memcpy(gpScreenBak->pixels, src->pixels, gpScreenBak->pitch * gpScreenBak->h);
+   memcpy(gpScreenBak->pixels, src->pixels, SCREEN_W * SCREEN_H);
 }
 
 void VIDEO_RestoreScreen(PAL_Surface *dst) {
-   memcpy(dst->pixels, gpScreenBak->pixels, gpScreenBak->pitch * gpScreenBak->h);
+   memcpy(dst->pixels, gpScreenBak->pixels, SCREEN_W * SCREEN_H);
 }
 
 void PAL_FreeSurface(PAL_Surface *surface) {
-  SDL_FreeSurface((SDL_Surface *)surface);
+  if (surface) {
+    if (surface->pixels)
+      free(surface->pixels);
+    free(surface);
+  }
 }
 
 void PAL_CleanScreen(void) {
-   memset(gpScreen->pixels, 0, gpScreen->pitch * gpScreen->h);
+   memset(gpScreen->pixels, 0, SCREEN_W * SCREEN_H);
 }

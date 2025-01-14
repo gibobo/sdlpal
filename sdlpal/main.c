@@ -177,8 +177,8 @@ void PAL_SplashScreen(
 
 --*/
 {
-   PAL_Color *palette = PAL_GetPalette(1, FALSE);
-   PAL_Color rgCurrentPalette[256];
+   unsigned char *palette = PAL_GetPalette(1, FALSE);
+   unsigned char rgCurrentPalette[256*3];
    PAL_Surface *lpBitmapDown;
    PAL_Surface *lpBitmapUp;
    PAL_Rect srcrect, dstrect;
@@ -200,15 +200,11 @@ void PAL_SplashScreen(
    buf2 = &buf[320 * 200];
    lpSpriteCrane = (unsigned char *)buf2 + 32000;
 
-   //
    // Create the surfaces
-   //
    lpBitmapDown = VIDEO_CreateCompatibleSizedSurface(NULL);
    lpBitmapUp = VIDEO_CreateCompatibleSizedSurface(NULL);
 
-   //
    // Read the bitmaps
-   //
    PAL_MKFReadChunk(buf, 320 * 200, 0x03, gpGlobals->f.fpFBP);
    Decompress(buf, buf2, 320 * 200);
    PAL_FBPBlitToSurface(buf2, lpBitmapUp);
@@ -228,9 +224,7 @@ void PAL_SplashScreen(
    lpBitmapTitle[2] = 0;
    lpBitmapTitle[3] = 0; // HACKHACK
 
-   //
    // Generate the positions of the cranes
-   //
    for (i = 0; i < 9; i++)
    {
       cranepos[i][0] = RandomLong(300, 600);
@@ -238,15 +232,11 @@ void PAL_SplashScreen(
       cranepos[i][2] = RandomLong(0, 8);
    }
 
-   //
    // Play the title music
-   //
    AUDIO_PlayMusic(-1, FALSE, 0);
    AUDIO_PlayMusic(0x05, TRUE, 2);
 
-   //
    // Clear all of the events and key states
-   //
    PAL_ProcessEvent();
    PAL_ClearKeyState();
 
@@ -267,11 +257,9 @@ void PAL_SplashScreen(
       //
       if (dwTime < 15000)
       {
-         for (i = 0; i < 256; i++)
+         for (i = 0; i < 256 * 3; i++)
          {
-            rgCurrentPalette[i].r = (unsigned char)(((int)palette[i].r * dwTime) / 15000);
-            rgCurrentPalette[i].g = (unsigned char)(((int)palette[i].g * dwTime) / 15000);
-            rgCurrentPalette[i].b = (unsigned char)(((int)palette[i].b * dwTime) / 15000);
+            rgCurrentPalette[i] = (unsigned char)(((unsigned int)palette[i] * dwTime) / 15000);
          }
       }
 
@@ -279,17 +267,13 @@ void PAL_SplashScreen(
       VIDEO_UpdateSurfacePalette(lpBitmapDown);
       VIDEO_UpdateSurfacePalette(lpBitmapUp);
 
-      //
       // Draw the screen
-      //
       if (iImgPos > 1)
       {
          iImgPos--;
       }
 
-      //
       // The upper part...
-      //
       srcrect.y = iImgPos;
       srcrect.h = 200 - iImgPos;
 
@@ -346,11 +330,9 @@ void PAL_SplashScreen(
          // If the picture has not completed fading in, complete the rest
          while (dwTime < 15000)
          {
-            for (i = 0; i < 256; i++)
+            for (i = 0; i < 256 * 3; i++)
             {
-               rgCurrentPalette[i].r = (unsigned char)(palette[i].r * ((float)dwTime / 15000));
-               rgCurrentPalette[i].g = (unsigned char)(palette[i].g * ((float)dwTime / 15000));
-               rgCurrentPalette[i].b = (unsigned char)(palette[i].b * ((float)dwTime / 15000));
+               rgCurrentPalette[i] = (unsigned char)(palette[i] * ((float)dwTime / 15000));
             }
             VIDEO_SetPalette(rgCurrentPalette);
             VIDEO_UpdateSurfacePalette(lpBitmapDown);
@@ -409,9 +391,7 @@ int main(
       return g_exit_code;
    }
 
-   //
    // Initialize SDL
-   //
 #ifdef PAL_HAS_JOYSTICKS
    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK) == -1)
 #else
@@ -430,14 +410,10 @@ int main(
    PAL_TrademarkScreen();
    PAL_SplashScreen();
 
-   //
    // Run the main game routine
-   //
    PAL_GameMain();
 
-   //
    // Should not really reach here...
-   //
    assert(FALSE);
    return 255;
 }
