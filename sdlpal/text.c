@@ -73,14 +73,14 @@ PAL_InitText(
 
 --*/
 {
-	FILE            *fp;
-	unsigned int    *offsets;
-	unsigned char   *temp;
-	int wpos, wlen, i;
+    FILE            *fp;
+    unsigned int    *offsets;
+    unsigned char   *temp;
+    int wpos, wlen, i;
 
-	//
-	// Open the message and word data files.
-	//
+    //
+    // Open the message and word data files.
+    //
     fp = UTIL_OpenRequiredFileForMode("word.dat", "rb");
     if (fp == NULL)
         return -1;
@@ -103,17 +103,17 @@ PAL_InitText(
     }
     memset(temp, 0, 10 * g_TextLib.nWords);
 
-	if (fread(temp, 1, i, fp) < i)
-	{
-		free(temp);
-		fclose(fp);
-		return -1;
-	}
+    if (fread(temp, 1, i, fp) < i)
+    {
+        free(temp);
+        fclose(fp);
+        return -1;
+    }
 
-	// Close the words file
-	fclose(fp);
+    // Close the words file
+    fclose(fp);
 
-	// Split the words and do code page conversion
+    // Split the words and do code page conversion
     for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
         int base = i * 10;
         int pos = base + 9;
@@ -122,7 +122,7 @@ PAL_InitText(
         wlen += PAL_MultiByteToWideCharCP((const char *)temp + base, 10, NULL, 0) + 1;
     }
 
-	WordBuf = (wchar_t*)malloc(wlen * sizeof(wchar_t));
+    WordBuf = (wchar_t*)malloc(wlen * sizeof(wchar_t));
     lpWordBuf = (wchar_t**)malloc(g_TextLib.nWords * sizeof(wchar_t*));
     if (WordBuf == NULL || lpWordBuf == NULL) {
       free(temp);
@@ -131,21 +131,21 @@ PAL_InitText(
     memset(WordBuf, 0, wlen * sizeof(wchar_t));
     memset(lpWordBuf, 0, g_TextLib.nWords * sizeof(wchar_t*));
 
-	for (i = 0, wpos = 0; i < g_TextLib.nWords; i++)
-	{
-		int l;
-		lpWordBuf[i] = WordBuf + wpos;
-		l = PAL_MultiByteToWideCharCP((const char*)temp + i * 10, 10, lpWordBuf[i], wlen - wpos);
-		if (l > 0 && lpWordBuf[i][l - 1] == '1')
-			lpWordBuf[i][l - 1] = 0;
-		lpWordBuf[i][l] = 0;
-		wpos += l + 1;
-	}
-	free(temp);
+    for (i = 0, wpos = 0; i < g_TextLib.nWords; i++)
+    {
+        int l;
+        lpWordBuf[i] = WordBuf + wpos;
+        l = PAL_MultiByteToWideCharCP((const char*)temp + i * 10, 10, lpWordBuf[i], wlen - wpos);
+        if (l > 0 && lpWordBuf[i][l - 1] == '1')
+            lpWordBuf[i][l - 1] = 0;
+        lpWordBuf[i][l] = 0;
+        wpos += l + 1;
+    }
+    free(temp);
 
-	// Read the message offsets. The message offsets are in SSS.MKF #3
-	i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
-	g_TextLib.nMsgs = i - 1;
+    // Read the message offsets. The message offsets are in SSS.MKF #3
+    i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
+    g_TextLib.nMsgs = i - 1;
 
     offsets = (unsigned int *)malloc(i * sizeof(unsigned int));
     if (offsets == NULL) {
@@ -154,10 +154,10 @@ PAL_InitText(
     memset(offsets, 0, i * sizeof(unsigned int));
     PAL_MKFReadChunk((unsigned char *)offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
-	// Read the messages.
-	fp = UTIL_OpenRequiredFileForMode("m.msg", "rb");
-	if(fp == NULL)
-		return -1;
+    // Read the messages.
+    fp = UTIL_OpenRequiredFileForMode("m.msg", "rb");
+    if(fp == NULL)
+        return -1;
 
     i = flength(fp);
     temp = (unsigned char *)malloc(i);
@@ -177,12 +177,12 @@ PAL_InitText(
     fclose(fp);
 
     // Split messages and do code page conversion here
-	for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++)
-	{
-		wlen += PAL_MultiByteToWideCharCP((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
-	}
-	MsgBuf = (wchar_t*)malloc(wlen * sizeof(wchar_t));
-	lpMsgBuf = (wchar_t**)malloc(g_TextLib.nMsgs * sizeof(wchar_t*));
+    for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++)
+    {
+        wlen += PAL_MultiByteToWideCharCP((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
+    }
+    MsgBuf = (wchar_t*)malloc(wlen * sizeof(wchar_t));
+    lpMsgBuf = (wchar_t**)malloc(g_TextLib.nMsgs * sizeof(wchar_t*));
     if (MsgBuf == NULL || lpMsgBuf == NULL) {
         free(temp);
         free(offsets);
@@ -192,15 +192,15 @@ PAL_InitText(
     memset(lpMsgBuf, 0, g_TextLib.nWords * sizeof(wchar_t*));
 
     for (i = 0, wpos = 0; i < g_TextLib.nMsgs; i++)
-	{
-		int l;
-		lpMsgBuf[i] = MsgBuf + wpos;
-		l = PAL_MultiByteToWideCharCP((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
-		lpMsgBuf[i][l] = 0;
-		wpos += l + 1;
-	}
-	free(temp);
-	free(offsets);
+    {
+        int l;
+        lpMsgBuf[i] = MsgBuf + wpos;
+        l = PAL_MultiByteToWideCharCP((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
+        lpMsgBuf[i][l] = 0;
+        wpos += l + 1;
+    }
+    free(temp);
+    free(offsets);
 
    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
    g_TextLib.bIcon = 0;
@@ -212,7 +212,7 @@ PAL_InitText(
    g_TextLib.bDialogPosition = kDialogUpper;
    g_TextLib.fUserSkip = FALSE;
 
-   PAL_MKFReadChunk(g_TextLib.bufDialogIcons, 282, 12, gpGlobals->f.fpDATA);
+   PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gpGlobals->f.fpDATA);
 
    return 0;
 }
@@ -302,10 +302,10 @@ PAL_UnescapeText(
 )
 {
    wchar_t *buf = internal_wbuffer;
-   
+
    if(wcsstr(lpszText, L"\\") == NULL)
       return (wchar_t*)lpszText;
-   
+
    memset(internal_wbuffer, 0, sizeof(internal_wbuffer));
 
    while (*lpszText != L'\0')
@@ -375,7 +375,7 @@ PAL_DrawTextUnescape(
     [IN]  fUse8x8Font - TRUE if use 8x8 font.
 
     [IN]  fUnescape - TRUE if unescaping needed.
- 
+
   Return value:
 
     None.
@@ -386,7 +386,7 @@ PAL_DrawTextUnescape(
 
    urect.x = rect.x = PAL_X(pos);
    urect.y = rect.y = PAL_Y(pos);
-   urect.h = PAL_FontHeight() + (fShadow ? 1 : 0);
+   urect.h = FONT_HEIGHT + (fShadow ? 1 : 0);
    urect.w = 0;
 
    // Handle text overflow
@@ -397,17 +397,15 @@ PAL_DrawTextUnescape(
 
    while (*lpszText)
    {
-      //
       // Draw the character
-      //
       int char_width = PAL_CharWidth(*lpszText);
 
       if (fShadow)
       {
          //
-         // Note: In the original PAL DOS version, 
-         // the text has triple shadows, while Win95 only has one layer. 
-         // It is suspected that there is a bug in the original Win95 version, 
+         // Note: In the original PAL DOS version,
+         // the text has triple shadows, while Win95 only has one layer.
+         // It is suspected that there is a bug in the original Win95 version,
          // so sdlpal chose to use triple shadows for both.
          //
          PAL_DrawCharOnSurface(*lpszText, gpScreen, PAL_XY(rect.x + 1, rect.y), 0);
@@ -426,20 +424,20 @@ PAL_DrawTextUnescape(
    {
       if (fShadow) urect.w++,urect.h++;
 #define PROT_OFFSET 10 //consider offset in custom font
-	  urect.x -= PROT_OFFSET;
-	  urect.w += 2 * PROT_OFFSET;
-	  urect.y -= PROT_OFFSET;
-	  urect.h += 2*PROT_OFFSET;
-	  if (urect.x < 0) urect.x = 0;
-	  if (urect.y < 0) urect.y = 0;
+      urect.x -= PROT_OFFSET;
+      urect.w += 2 * PROT_OFFSET;
+      urect.y -= PROT_OFFSET;
+      urect.h += 2*PROT_OFFSET;
+      if (urect.x < 0) urect.x = 0;
+      if (urect.y < 0) urect.y = 0;
       if (urect.x + urect.w > SCREEN_W)
       {
          urect.w = SCREEN_W - urect.x;
       }
-	  if (urect.y + urect.h > SCREEN_H)
-	  {
-		  urect.h = SCREEN_H - urect.y;
-	  }
+      if (urect.y + urect.h > SCREEN_H)
+      {
+          urect.h = SCREEN_H - urect.y;
+      }
       VIDEO_UpdateScreen(&urect);
    }
 }
@@ -544,7 +542,7 @@ PAL_StartDialogWithOffset(
          //
          // Display the character face at the upper part of the screen
          //
-         if (PAL_MKFReadChunk(buf, SCREEN_W * SCREEN_H, iNumCharFace, gpGlobals->f.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, sizeof(buf), iNumCharFace, gpGlobals->f.fpRGM) > 0)
          {
             rect.w = PAL_RLEGetWidth((const unsigned char*)buf);
             rect.h = PAL_RLEGetHeight((const unsigned char*)buf);
@@ -568,13 +566,11 @@ PAL_StartDialogWithOffset(
          //
          // Display the character face at the lower part of the screen
          //
-         if (PAL_MKFReadChunk(buf, SCREEN_W * SCREEN_H, iNumCharFace, gpGlobals->f.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, sizeof(buf), iNumCharFace, gpGlobals->f.fpRGM) > 0)
          {
             rect.x = 270 - PAL_RLEGetWidth((const unsigned char*)buf) / 2 + xOff;
             rect.y = 144 - PAL_RLEGetHeight((const unsigned char*)buf) / 2 + yOff;
-
             PAL_RLEBlitToSurface((const unsigned char*)buf, gpScreen, PAL_XY(rect.x, rect.y));
-
             VIDEO_UpdateScreen(NULL);
          }
       }
@@ -586,7 +582,7 @@ PAL_StartDialogWithOffset(
       g_TextLib.posDialogText = PAL_XY(160, 40);
       break;
    }
-   
+
    g_TextLib.posDialogTitle = PAL_XY( PAL_X(g_TextLib.posDialogTitle) + xOff, PAL_Y(g_TextLib.posDialogTitle) + yOff);
    g_TextLib.posDialogText = PAL_XY( PAL_X(g_TextLib.posDialogText) + xOff, PAL_Y(g_TextLib.posDialogText) + yOff);
 
@@ -709,7 +705,7 @@ TEXT_DisplayText(
    wchar_t text[2];
    unsigned char color;
    unsigned char isNumber=0;
-   
+
    while (lpszText != NULL && *lpszText != '\0')
    {
       switch (*lpszText)
@@ -771,7 +767,7 @@ TEXT_DisplayText(
             }
             lpszText++;
             break;
-            
+
          case '$':
             //
             // Set the delay time of text-displaying
@@ -779,7 +775,7 @@ TEXT_DisplayText(
             g_TextLib.iDelayTime = wcstol(lpszText + 1, NULL, 10) * 10 / 7;
             lpszText += 3;
             break;
-            
+
          case '~':
             //
             // Delay for a period and quit
@@ -793,7 +789,7 @@ TEXT_DisplayText(
             g_TextLib.nCurrentDialogLine = -1;
             g_TextLib.fUserSkip = FALSE;
             return x; // don't go further
-            
+
          case ')':
             //
             // Set the waiting icon
@@ -801,7 +797,7 @@ TEXT_DisplayText(
             g_TextLib.bIcon = 1;
             lpszText++;
             break;
-            
+
          case '(':
             //
             // Set the waiting icon
@@ -809,14 +805,14 @@ TEXT_DisplayText(
             g_TextLib.bIcon = 2;
             lpszText++;
             break;
-            
+
          case '\\':
             lpszText++;
-            
+
          default:
             text[0] = *lpszText++;
             text[1] = 0;
-            
+
             color = g_TextLib.bCurrentFontColor;
             if(isDialog) {
                if(g_TextLib.bCurrentFontColor == FONT_COLOR_DEFAULT)
@@ -834,17 +830,15 @@ TEXT_DisplayText(
             else
                PAL_DrawTextUnescape(text, PAL_XY(x, y), color, !isDialog, !isDialog && !g_TextLib.fUserSkip, FALSE, FALSE);
             x += PAL_CharWidth(text[0]);
-            
+
             if (!isDialog && !g_TextLib.fUserSkip)
             {
                PAL_ClearKeyState();
                UTIL_Delay(g_TextLib.iDelayTime * 8);
-               
+
                if (PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
                {
-                  //
                   // User pressed a key to skip the dialog
-                  //
                   g_TextLib.fUserSkip = TRUE;
                }
             }
@@ -855,7 +849,7 @@ TEXT_DisplayText(
 
 void
 PAL_ShowDialogText(
-	const wchar_t *lpszText,
+    const wchar_t *lpszText,
     int iDialogShadow
 )
 /*++
@@ -910,16 +904,16 @@ PAL_ShowDialogText(
       {
          unsigned int      pos;
          BOX       *lpBox;
-		 int        i;
-		 int        w = (int)wcslen(lpszText);
-		 int        len = 0;
+         int        i;
+         int        w = (int)wcslen(lpszText);
+         int        len = 0;
 
-		 for (i = 0; i < w; i++)
+         for (i = 0; i < w; i++)
             len += PAL_CharWidth(lpszText[i]) >> 3;
-         //
+
          // Create the window box
-         //
          pos = PAL_XY(PAL_X(g_TextLib.posDialogText) - len * 4, PAL_Y(g_TextLib.posDialogText));
+
          // Follow behavior of original version
          lpBox = PAL_CreateSingleLineBoxWithShadow(pos, (len + 1) / 2, FALSE, iDialogShadow);
 
@@ -929,17 +923,13 @@ PAL_ShowDialogText(
          rect.h = 64;
          VIDEO_UpdateScreen(&rect);
 
-         //
          // Show the text on the screen
-         //
          TEXT_DisplayText(lpszText, PAL_X(pos) + 8 + ((len & 1) << 2), PAL_Y(pos) + 10, TRUE);
          VIDEO_UpdateScreen(&rect);
 
          PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
 
-         //
          // Delete the box
-         //
          PAL_DeleteBox(lpBox);
          VIDEO_UpdateScreen(&rect);
 
@@ -951,10 +941,10 @@ PAL_ShowDialogText(
       int len = (int)wcslen(lpszText);
       if (g_TextLib.nCurrentDialogLine == 0 &&
           g_TextLib.bDialogPosition != kDialogCenter &&
-		  (lpszText[len - 1] == 0xff1a ||
-		   lpszText[len - 1] == 0x2236 || // Special case for Pal WIN95 Simplified Chinese version
-		   lpszText[len - 1] == ':')
-		 )
+          (lpszText[len - 1] == 0xff1a ||
+           lpszText[len - 1] == 0x2236 || // Special case for Pal WIN95 Simplified Chinese version
+           lpszText[len - 1] == ':')
+         )
       {
          //
          // name of character
@@ -970,14 +960,14 @@ PAL_ShowDialogText(
             //
             VIDEO_BackupScreen(gpScreen);
          }
-         
+
          x = TEXT_DisplayText(lpszText, x, y, FALSE);
 
-		 // and update the full screen at once after all texts are drawn
-		 if (g_TextLib.fUserSkip)
-		 {
-			 VIDEO_UpdateScreen(NULL);
-		 }
+         // and update the full screen at once after all texts are drawn
+         if (g_TextLib.fUserSkip)
+         {
+             VIDEO_UpdateScreen(NULL);
+         }
 
          g_TextLib.posIcon = PAL_XY(x, y);
          g_TextLib.nCurrentDialogLine++;
@@ -1090,113 +1080,113 @@ PAL_MultiByteToWideCharCP(
   Parameters:
 
     [IN]  mbs - Pointer to the multi-byte string.
-	[IN]  mbslength - Length of the multi-byte string, or -1 for auto-detect.
-	[IN]  wcs - Pointer to the wide string buffer.
-	[IN]  wcslength - Length of the wide string buffer.
+    [IN]  mbslength - Length of the multi-byte string, or -1 for auto-detect.
+    [IN]  wcs - Pointer to the wide string buffer.
+    [IN]  wcslength - Length of the wide string buffer.
 
   Return value:
 
     The length of converted wide string. If mbslength is set to -1, the returned
-	value includes the terminal null-char; otherwise, the null-char is not included.
-	If wcslength is set to 0, wcs can be set to NULL and the return value is the
-	required length of the wide string buffer.
+    value includes the terminal null-char; otherwise, the null-char is not included.
+    If wcslength is set to 0, wcs can be set to NULL and the return value is the
+    required length of the wide string buffer.
 
 --*/
 {
-	int i = 0, state = 0, wlen = 0, null = 0;
+    int i = 0, state = 0, wlen = 0, null = 0;
 
-	if (mbslength == -1)
-	{
-		mbslength = (int)strlen(mbs);
-		null = 1;
-	}
+    if (mbslength == -1)
+    {
+        mbslength = (int)strlen(mbs);
+        null = 1;
+    }
 
-	if (!wcs)
-	{
-		for (i = 0; i < mbslength && mbs[i]; i++)
-		{
-			if (state == 0)
-			{
-				if ((unsigned char)mbs[i] <= 0x80 || (unsigned char)mbs[i] == 0xff)
-					wlen++;
-				else
-					state = 1;
-			}
-			else
-			{
-				wlen++;
-				state = 0;
-			}
-		}
-		if (i < mbslength && !mbs[i]) null = 1;
-		return wlen + null + (state != 0);
-	}
-	else
-	{
-		wchar_t invalid_char = 0x3f;
-		for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
-		{
-			if (state == 0)
-			{
-				if ((unsigned char)mbs[i] <= 0x80)
-					wcs[wlen++] = mbs[i];
-				else if ((unsigned char)mbs[i] == 0xff)
-					wcs[wlen++] = 0xf8f8;
-				else
-					state = 1;
-			}
-			else
-			{
-				if ((unsigned char)mbs[i] < 0x40 || ((unsigned char)mbs[i] >= 0x7f && (unsigned char)mbs[i] <= 0xa0))
-					wcs[wlen++] = invalid_char;
-				else if ((unsigned char)mbs[i] <= 0x7e)
-					wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x40];
-				else
-					wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x60];
-				state = 0;
-			}
-		}
-		if (state != 0 && wlen < wcslength)
-		{
-			wcs[wlen++] = invalid_char;
-		}
-		if (null || (i < mbslength && !mbs[i]))
-		{
-			if (wlen < wcslength)
-				wcs[wlen++] = 0;
-			else
-				wcs[wlen - 1] = 0;
-		}
-		return wlen;
-	}
+    if (!wcs)
+    {
+        for (i = 0; i < mbslength && mbs[i]; i++)
+        {
+            if (state == 0)
+            {
+                if ((unsigned char)mbs[i] <= 0x80 || (unsigned char)mbs[i] == 0xff)
+                    wlen++;
+                else
+                    state = 1;
+            }
+            else
+            {
+                wlen++;
+                state = 0;
+            }
+        }
+        if (i < mbslength && !mbs[i]) null = 1;
+        return wlen + null + (state != 0);
+    }
+    else
+    {
+        wchar_t invalid_char = 0x3f;
+        for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
+        {
+            if (state == 0)
+            {
+                if ((unsigned char)mbs[i] <= 0x80)
+                    wcs[wlen++] = mbs[i];
+                else if ((unsigned char)mbs[i] == 0xff)
+                    wcs[wlen++] = 0xf8f8;
+                else
+                    state = 1;
+            }
+            else
+            {
+                if ((unsigned char)mbs[i] < 0x40 || ((unsigned char)mbs[i] >= 0x7f && (unsigned char)mbs[i] <= 0xa0))
+                    wcs[wlen++] = invalid_char;
+                else if ((unsigned char)mbs[i] <= 0x7e)
+                    wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x40];
+                else
+                    wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x60];
+                state = 0;
+            }
+        }
+        if (state != 0 && wlen < wcslength)
+        {
+            wcs[wlen++] = invalid_char;
+        }
+        if (null || (i < mbslength && !mbs[i]))
+        {
+            if (wlen < wcslength)
+                wcs[wlen++] = 0;
+            else
+                wcs[wlen - 1] = 0;
+        }
+        return wlen;
+    }
 }
 
 int
 PAL_swprintf(
-	wchar_t* buffer,
-	int count,
-	const wchar_t *format,
-	...
+    wchar_t* buffer,
+    int count,
+    const wchar_t *format,
+    ...
 )
 /*++
   Purpose:
 
     Formatted wide-character output conversion that output Chinese characters correctly.
-	This function supported a subset of format strings that are commonly supported by
-	various C libraries, which can be formalized as following:
+    This function supported a subset of format strings that are commonly supported by
+    various C libraries, which can be formalized as following:
 
-	%[flags] [width] [.precision] [{h | l | ll}] type
+    %[flags] [width] [.precision] [{h | l | ll}] type
 
-	When handling '%c' and '%s', this function follows the Linux's library convention,
-	which means '%c' and '%s' always output multi-byte strings, and '%lc' and '%ls'
-	always output wide-char strings.
+    When handling '%c' and '%s', this function follows the Linux's library convention,
+    which means '%c' and '%s' always output multi-byte strings, and '%lc' and '%ls'
+    always output wide-char strings.
 
   Parameters:
 
     [IN]  buffer - Storage location for output.
-	[IN]  count - Length of the output buffer in characters including the termination null one.
-	[IN]  format - Format-control string.
-	[IN]  ... - Optional arguments.
+    [IN]  count - Length of the output buffer in characters including the termination null one.
+    [IN]  format - Format-control string.
+    [IN]  ... - Optional arguments.
 
   Return value:
 
@@ -1204,278 +1194,278 @@ PAL_swprintf(
 
 --*/
 {
-	va_list ap;
-	const wchar_t * const format_end = format + wcslen(format);
-	const wchar_t * const buffer_end = buffer + count - 1;
-	wchar_t chr_buf[2] = { 0, 0 };
-	const wchar_t* fmt_start = NULL;
-	wchar_t* cur_fmt = NULL;
-	int fmt_len = 0;
-	int state, precision = 0, width = 0;
-	int left_aligned = 0, wide = 0, narrow = 0;
-	int width_var = 0, precision_var = 0, precision_defined = 0;
+    va_list ap;
+    const wchar_t * const format_end = format + wcslen(format);
+    const wchar_t * const buffer_end = buffer + count - 1;
+    wchar_t chr_buf[2] = { 0, 0 };
+    const wchar_t* fmt_start = NULL;
+    wchar_t* cur_fmt = NULL;
+    int fmt_len = 0;
+    int state, precision = 0, width = 0;
+    int left_aligned = 0, wide = 0, narrow = 0;
+    int width_var = 0, precision_var = 0, precision_defined = 0;
 
-	// Buffer & length check
-	if (buffer == NULL || format == NULL)
-	{
-		errno = EINVAL;
-		return -1;
-	}
+    // Buffer & length check
+    if (buffer == NULL || format == NULL)
+    {
+        errno = EINVAL;
+        return -1;
+    }
 
-	if (buffer_end <= buffer)
-		return 0;
+    if (buffer_end <= buffer)
+        return 0;
 
-	va_start(ap, format);
+    va_start(ap, format);
 
-	count = 0; state = 0;
-	while (buffer < buffer_end && format < format_end)
-	{
-		switch (state)
-		{
-		case 0: // Outside format spec
-			if (*format != L'%')
-			{
-				*buffer++ = *format++;
-				count++;
-			}
-			else
-			{
-				fmt_start = format++;
-				left_aligned = wide = narrow = 0;
-				precision_var = width_var = 0;
-				precision_defined = 0;
-				state = 1;
-			}
-			continue;
-		case 1: // [flags]
-			switch (*format)
-			{
-			case L'-':
-				left_aligned = 1;
-			case L'+':
-			case L' ':
-			case L'#':
-			case L'0':
-				format++;
-				continue;
-			default:
-				state = 2;
-				width = width_var = 0;
-			}
-		case 2: // [width]
-			switch (*format)
-			{
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-				if (width >= 0)
-					width = width * 10 + (*format - L'0');
-				format++;
-				continue;
-			case '*':
-				if (width == 0)
-					width_var = 1;
-				format++;
-				continue;
-			case '.':
-				format++;
-				precision = precision_var = 0;
-				precision_defined = 1;
-				state = 3;
-				continue;
-			default:
-				state = 4;
-				continue;
-			}
-		case 3: // [.precision]
-			switch (*format)
-			{
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-				if (precision >= 0)
-					precision = precision * 10 + (*format - L'0');
-				format++;
-				continue;
-			case '*':
-				if (precision == 0)
-					precision_var = 1;
-				format++;
-				continue;
-			default:
-				state = 4;
-			}
-		case 4: // [{h | l | ll}]
-			switch (*format)
-			{
-			case 'l': if (narrow == 0) wide++; format++; continue;
-			case 'h': if (wide == 0) narrow++; format++; continue;
-			default: state = 5;
-			}
-		case 5: // type
-			if (*format == 'c' || *format == 's')
-			{
-				// We handle char & str specially
-				wchar_t* buf;
-				int len;
-				int i;
+    count = 0; state = 0;
+    while (buffer < buffer_end && format < format_end)
+    {
+        switch (state)
+        {
+        case 0: // Outside format spec
+            if (*format != L'%')
+            {
+                *buffer++ = *format++;
+                count++;
+            }
+            else
+            {
+                fmt_start = format++;
+                left_aligned = wide = narrow = 0;
+                precision_var = width_var = 0;
+                precision_defined = 0;
+                state = 1;
+            }
+            continue;
+        case 1: // [flags]
+            switch (*format)
+            {
+            case L'-':
+                left_aligned = 1;
+            case L'+':
+            case L' ':
+            case L'#':
+            case L'0':
+                format++;
+                continue;
+            default:
+                state = 2;
+                width = width_var = 0;
+            }
+        case 2: // [width]
+            switch (*format)
+            {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                if (width >= 0)
+                    width = width * 10 + (*format - L'0');
+                format++;
+                continue;
+            case '*':
+                if (width == 0)
+                    width_var = 1;
+                format++;
+                continue;
+            case '.':
+                format++;
+                precision = precision_var = 0;
+                precision_defined = 1;
+                state = 3;
+                continue;
+            default:
+                state = 4;
+                continue;
+            }
+        case 3: // [.precision]
+            switch (*format)
+            {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                if (precision >= 0)
+                    precision = precision * 10 + (*format - L'0');
+                format++;
+                continue;
+            case '*':
+                if (precision == 0)
+                    precision_var = 1;
+                format++;
+                continue;
+            default:
+                state = 4;
+            }
+        case 4: // [{h | l | ll}]
+            switch (*format)
+            {
+            case 'l': if (narrow == 0) wide++; format++; continue;
+            case 'h': if (wide == 0) narrow++; format++; continue;
+            default: state = 5;
+            }
+        case 5: // type
+            if (*format == 'c' || *format == 's')
+            {
+                // We handle char & str specially
+                wchar_t* buf;
+                int len;
+                int i;
 
-				// Check width
-				if (width_var)
-				{
-					width = va_arg(ap, int);
-					left_aligned = (width < 0);
-					width = left_aligned ? -width : width;
-				}
-				// Although precision has no meaning to '%c' output, however
-				// the argument still needs to be read if '.*' is provided
-				if (precision_var)
-					precision = va_arg(ap, int);
-				else if (!precision_defined)
-					precision = INT_MAX;
+                // Check width
+                if (width_var)
+                {
+                    width = va_arg(ap, int);
+                    left_aligned = (width < 0);
+                    width = left_aligned ? -width : width;
+                }
+                // Although precision has no meaning to '%c' output, however
+                // the argument still needs to be read if '.*' is provided
+                if (precision_var)
+                    precision = va_arg(ap, int);
+                else if (!precision_defined)
+                    precision = INT_MAX;
 
-				if (*format == 's')
-				{
-					// For ANSI string, convert it through PAL_MultiByteToWideCharCP
-					// To improve effciency, here just test the length and left
-					// actual conversion later directly into the output buffer
-					if (wide)
-					{
-						buf = va_arg(ap, wchar_t*);
-						len = (int)wcslen(buf);
-					}
-					else
-					{
-						buf = (wchar_t*)va_arg(ap, char*);
-						len = PAL_MultiByteToWideCharCP((const char*)buf, -1, NULL, 0) - 1;
-					}
-				}
-				else
-				{
-					// For ANSI character, put it into the internal buffer
-					if (wide)
-						chr_buf[0] = va_arg(ap, wchar_t);
-					else
-						chr_buf[0] = va_arg(ap, int);
-					buf = chr_buf; len = 1;
-				}
+                if (*format == 's')
+                {
+                    // For ANSI string, convert it through PAL_MultiByteToWideCharCP
+                    // To improve effciency, here just test the length and left
+                    // actual conversion later directly into the output buffer
+                    if (wide)
+                    {
+                        buf = va_arg(ap, wchar_t*);
+                        len = (int)wcslen(buf);
+                    }
+                    else
+                    {
+                        buf = (wchar_t*)va_arg(ap, char*);
+                        len = PAL_MultiByteToWideCharCP((const char*)buf, -1, NULL, 0) - 1;
+                    }
+                }
+                else
+                {
+                    // For ANSI character, put it into the internal buffer
+                    if (wide)
+                        chr_buf[0] = va_arg(ap, wchar_t);
+                    else
+                        chr_buf[0] = va_arg(ap, int);
+                    buf = chr_buf; len = 1;
+                }
 
-				// Limit output length no longer then precision
-				if (precision > len)
-					precision = len;
+                // Limit output length no longer then precision
+                if (precision > len)
+                    precision = len;
 
-				// Left-side padding
-				for (i = 0; !left_aligned && i < width - precision && buffer < buffer_end; i++)
-					*buffer++ = L' ', count++;
+                // Left-side padding
+                for (i = 0; !left_aligned && i < width - precision && buffer < buffer_end; i++)
+                    *buffer++ = L' ', count++;
 
-				// Do not overflow the output buffer
-				if (buffer + precision > buffer_end)
-					precision = (int)(buffer_end - buffer);
+                // Do not overflow the output buffer
+                if (buffer + precision > buffer_end)
+                    precision = (int)(buffer_end - buffer);
 
-				// Convert or copy string (char) into output buffer
-				if (*format == 's' && !wide)
-					PAL_MultiByteToWideCharCP((const char*)buf, -1, buffer, precision);
-				else
-					wcsncpy(buffer, buf, precision);
-				buffer += precision; count += precision;
+                // Convert or copy string (char) into output buffer
+                if (*format == 's' && !wide)
+                    PAL_MultiByteToWideCharCP((const char*)buf, -1, buffer, precision);
+                else
+                    wcsncpy(buffer, buf, precision);
+                buffer += precision; count += precision;
 
-				// Right-side padding
-				for (i = 0; left_aligned && i < width - precision && buffer < buffer_end; i++)
-					*buffer++ = L' ', count++;
-			}
-			else
-			{
-				// For other types, pass them directly into vswprintf
-				int cur_cnt = 0;
-				va_list apd;
+                // Right-side padding
+                for (i = 0; left_aligned && i < width - precision && buffer < buffer_end; i++)
+                    *buffer++ = L' ', count++;
+            }
+            else
+            {
+                // For other types, pass them directly into vswprintf
+                int cur_cnt = 0;
+                va_list apd;
 
-				// We copy this argument's format string into internal buffer
-				if (fmt_len < (int)(format - fmt_start + 1))
-					cur_fmt = (wchar_t *)realloc(cur_fmt, ((fmt_len = (int)(format - fmt_start + 1)) + 1) * sizeof(wchar_t));
-				wcsncpy(cur_fmt, fmt_start, fmt_len);
-				cur_fmt[fmt_len] = L'\0';
-				// And pass it into vswprintf to get the output
-				va_copy(apd, ap);
-				cur_cnt = vswprintf(buffer, buffer_end - buffer, cur_fmt, apd);
-				va_end(apd);
-				buffer += cur_cnt; count += cur_cnt;
+                // We copy this argument's format string into internal buffer
+                if (fmt_len < (int)(format - fmt_start + 1))
+                    cur_fmt = (wchar_t *)realloc(cur_fmt, ((fmt_len = (int)(format - fmt_start + 1)) + 1) * sizeof(wchar_t));
+                wcsncpy(cur_fmt, fmt_start, fmt_len);
+                cur_fmt[fmt_len] = L'\0';
+                // And pass it into vswprintf to get the output
+                va_copy(apd, ap);
+                cur_cnt = vswprintf(buffer, buffer_end - buffer, cur_fmt, apd);
+                va_end(apd);
+                buffer += cur_cnt; count += cur_cnt;
 
-				// Then we need to move the argument pointer into next one
-				// Check if width/precision should be read from arguments
-				if (width_var) va_arg(ap, int);
-				if (precision_var) va_arg(ap, int);
+                // Then we need to move the argument pointer into next one
+                // Check if width/precision should be read from arguments
+                if (width_var) va_arg(ap, int);
+                if (precision_var) va_arg(ap, int);
 
-				// Move pointer to pass the actual value argument
-				switch (*format)
-				{
-				case 'd':
-				case 'i':
-				case 'o':
-				case 'u':
-				case 'x':
-				case 'X':
-					if (wide == 1)
-						va_arg(ap, long);
-					else if (wide >= 2)
-						va_arg(ap, long long);
-					else
-						va_arg(ap, int);
-					break;
-				case 'e':
-				case 'E':
-				case 'f':
-				case 'g':
-				case 'G':
-				case 'a':
-				case 'A':
-					va_arg(ap, double);
-					break;
-				case 'p':
-				case 'n':
-					va_arg(ap, void*);
-					break;
-				}
-			}
-			state = 0;
-			format++;
-			break;
-		}
-	}
+                // Move pointer to pass the actual value argument
+                switch (*format)
+                {
+                case 'd':
+                case 'i':
+                case 'o':
+                case 'u':
+                case 'x':
+                case 'X':
+                    if (wide == 1)
+                        va_arg(ap, long);
+                    else if (wide >= 2)
+                        va_arg(ap, long long);
+                    else
+                        va_arg(ap, int);
+                    break;
+                case 'e':
+                case 'E':
+                case 'f':
+                case 'g':
+                case 'G':
+                case 'a':
+                case 'A':
+                    va_arg(ap, double);
+                    break;
+                case 'p':
+                case 'n':
+                    va_arg(ap, void*);
+                    break;
+                }
+            }
+            state = 0;
+            format++;
+            break;
+        }
+    }
 
-	// If the format string is malformed, try to copy it into the dest buffer
-	if (state && buffer < buffer_end)
-	{
-		int fmt_len = (int)(format - fmt_start);
-		int buf_len = (int)(buffer_end - buffer);
-		if (fmt_len <= buf_len)
-		{
-			wcsncpy(buffer, fmt_start, buf_len);
-			buffer += fmt_len;
-		}
-		else
-		{
-			wcsncpy(buffer, fmt_start, buf_len);
-			buffer += buf_len;
-		}
-	}
+    // If the format string is malformed, try to copy it into the dest buffer
+    if (state && buffer < buffer_end)
+    {
+        int fmt_len = (int)(format - fmt_start);
+        int buf_len = (int)(buffer_end - buffer);
+        if (fmt_len <= buf_len)
+        {
+            wcsncpy(buffer, fmt_start, buf_len);
+            buffer += fmt_len;
+        }
+        else
+        {
+            wcsncpy(buffer, fmt_start, buf_len);
+            buffer += buf_len;
+        }
+    }
 
-	// NULL-terminate the string
-	*buffer = L'\0';
+    // NULL-terminate the string
+    *buffer = L'\0';
 
-	va_end(ap);
-	return count;
+    va_end(ap);
+    return count;
 }

@@ -71,13 +71,11 @@ void PAL_BattleDrawBackground(
    unsigned char *pDst;
    unsigned char b;
 
-   //
    // Draw the background
-   //
-   pSrc = (unsigned char *)g_Battle.lpBackground->pixels;
-   pDst = (unsigned char *)g_Battle.lpSceneBuf->pixels;
+   pSrc = g_Battle.lpBackground->pixels;
+   pDst = g_Battle.lpSceneBuf->pixels;
 
-   for (i = 0; i < g_Battle.lpSceneBuf->pitch * g_Battle.lpSceneBuf->h; i++)
+   for (i = 0; i < g_Battle.lpSceneBuf->w * g_Battle.lpSceneBuf->h; i++)
    {
       b = (*pSrc & 0x0F);
       b += g_Battle.sBackgroundColorShift;
@@ -122,18 +120,14 @@ void PAL_BattleDrawEnemySprites(
 {
    unsigned int pos;
 
-   //
    // Draw the enemies
-   //
    pos = g_Battle.rgEnemy[wEnemyIndex].pos;
 
    if (g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusConfused] > 0 &&
        g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusSleep] == 0 &&
        g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusParalyzed] == 0)
    {
-      //
       // Enemy is confused
-      //
       pos = PAL_XY(PAL_X(pos) + RandomLong(-1, 1), PAL_Y(pos));
    }
 
@@ -630,14 +624,12 @@ void PAL_BattleFadeScene(
          PAL_DelayUntil(time);
          time = UTIL_GetTicks() + 16;
 
-         //
          // Blend the pixels in the 2 buffers, and put the result into the
          // backup buffer
-         //
          for (k = rgIndex[j]; k < SCREEN_W * SCREEN_H; k += 6)
          {
-            a = ((unsigned char *)g_Battle.lpSceneBuf->pixels)[k];
-            b = ((unsigned char *)gpScreenBak->pixels)[k];
+            a = g_Battle.lpSceneBuf->pixels[k];
+            b = gpScreenBak->pixels[k];
 
             if (i > 0)
             {
@@ -651,12 +643,10 @@ void PAL_BattleFadeScene(
                }
             }
 
-            ((unsigned char *)gpScreenBak->pixels)[k] = ((a & 0xF0) | (b & 0x0F));
+            gpScreenBak->pixels[k] = (a & 0xF0) | (b & 0x0F);
          }
 
-         //
          // Draw the backup buffer to the screen
-         //
          VIDEO_RestoreScreen(gpScreen);
 
          PAL_BattleUIUpdate();

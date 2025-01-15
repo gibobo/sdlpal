@@ -65,7 +65,7 @@ PAL_GetPalette(
    memset(buf, 0, sizeof(buf));
 
    // Read the palette data from the pat.mkf file
-   i = PAL_MKFReadChunk(buf, 256 * 3 * 2, iPaletteNum, fp);
+   i = PAL_MKFReadChunk(buf, sizeof(buf), iPaletteNum, fp);
    fclose(fp);
 
    if (i < 0)
@@ -496,9 +496,9 @@ void PAL_FadeToRed(
 
    for (i = 0; i < SCREEN_W * SCREEN_H; i++)
    {
-      if (((unsigned char *)gpScreen->pixels)[i] == 0x4F)
+      if (gpScreen->pixels[i] == 0x4F)
       {
-         ((unsigned char *)gpScreen->pixels)[i] = 0x4E; // HACKHACK
+         gpScreen->pixels[i] = 0x4E; // HACKHACK
       }
    }
 

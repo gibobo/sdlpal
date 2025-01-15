@@ -982,21 +982,15 @@ void PAL_PlayerStatus(
    PAL_LARGE unsigned char bufBackground[SCREEN_W * SCREEN_H];
    PAL_LARGE unsigned char bufImage[SCREEN_W * SCREEN_H];
    PAL_LARGE unsigned char bufImageBox[50 * 49];
-   int labels0[] = {
-       STATUS_LABEL_EXP, STATUS_LABEL_LEVEL, STATUS_LABEL_HP,
-       STATUS_LABEL_MP};
-   int labels1[] = {
-       STATUS_LABEL_EXP_LAYOUT, STATUS_LABEL_LEVEL_LAYOUT, STATUS_LABEL_HP_LAYOUT,
-       STATUS_LABEL_MP_LAYOUT};
-   int labels[] = {
-       STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE,
-       STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE};
+   int labels0[] = {STATUS_LABEL_EXP, STATUS_LABEL_LEVEL, STATUS_LABEL_HP, STATUS_LABEL_MP};
+   int labels1[] = {STATUS_LABEL_EXP_LAYOUT, STATUS_LABEL_LEVEL_LAYOUT, STATUS_LABEL_HP_LAYOUT, STATUS_LABEL_MP_LAYOUT};
+   int labels[] = {STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE, STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE};
    int iCurrent;
    int iPlayerRole;
    int i, j;
    unsigned short w;
 
-   PAL_MKFDecompressChunk(bufBackground, 320 * 200, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(bufBackground, sizeof(bufBackground), STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
    iCurrent = 0;
 
    if (gConfig.fUseCustomScreenLayout)
@@ -1033,22 +1027,16 @@ void PAL_PlayerStatus(
    {
       iPlayerRole = gpGlobals->rgParty[iCurrent].wPlayerRole;
 
-      //
       // Draw the background image
-      //
       PAL_FBPBlitToSurface(bufBackground, gpScreen);
 
-      //
       // Draw the image of player role
-      //
-      if (PAL_MKFReadChunk(bufImage, 320 * 200, gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gpGlobals->f.fpRGM) > 0)
+      if (PAL_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gpGlobals->f.fpRGM) > 0)
       {
          PAL_RLEBlitToSurface(bufImage, gpScreen, gConfig.ScreenLayout.RoleImage);
       }
 
-      //
       // Draw the equipments
-      //
       for (i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
       {
          int offset;
@@ -1060,23 +1048,19 @@ void PAL_PlayerStatus(
             continue;
          }
 
-         //
          // Draw the image
-         //
-         if (PAL_MKFReadChunk(bufImage, 320 * 200,
+         if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
                               gpGlobals->g.rgObject[w].item.wBitmap, gpGlobals->f.fpBALL) > 0)
          {
             PAL_RLEBlitToSurface(bufImage, gpScreen,
                                  PAL_XY_OFFSET(gConfig.ScreenLayout.RoleEquipImageBoxes[i], 1, 1));
          }
 
-         //
          // Draw the text label
-         //
          offset = PAL_WordWidth(w) * 16;
-         if (PAL_X(gConfig.ScreenLayout.RoleEquipNames[i]) + offset > 320)
+         if (PAL_X(gConfig.ScreenLayout.RoleEquipNames[i]) + offset > SCREEN_W)
          {
-            offset = 320 - PAL_X(gConfig.ScreenLayout.RoleEquipNames[i]) - offset;
+            offset = SCREEN_W - PAL_X(gConfig.ScreenLayout.RoleEquipNames[i]) - offset;
          }
          else
          {
@@ -1085,9 +1069,7 @@ void PAL_PlayerStatus(
          PAL_DrawText(PAL_GetWord(w), PAL_XY_OFFSET(gConfig.ScreenLayout.RoleEquipNames[i], offset, 0), STATUS_COLOR_EQUIPMENT, TRUE, FALSE, FALSE);
       }
 
-      //
       // Draw the text labels
-      //
       for (i = 0; i < sizeof(labels0) / sizeof(int); i++)
       {
          PAL_DrawText(PAL_GetWord(labels0[i]), *(&gConfig.ScreenLayout.RoleExpLabel + i), MENUITEM_COLOR, TRUE, FALSE, FALSE);
@@ -1100,9 +1082,7 @@ void PAL_PlayerStatus(
       PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[iPlayerRole]),
                    gConfig.ScreenLayout.RoleName, MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
 
-      //
       // Draw the stats
-      //
       if (gConfig.ScreenLayout.RoleExpSlash != 0)
       {
          PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, gConfig.ScreenLayout.RoleExpSlash);
@@ -1142,9 +1122,7 @@ void PAL_PlayerStatus(
       PAL_DrawNumber(PAL_GetPlayerFleeRate(iPlayerRole), 4,
                      gConfig.ScreenLayout.RoleStatusValues[4], kNumColorYellow, kNumAlignRight);
 
-      //
       // Draw all poisons
-      //
       for (i = j = 0; i < MAX_POISONS; i++)
       {
          w = gpGlobals->rgPoisonStatus[i][iCurrent].wPoisonID;
@@ -1155,14 +1133,10 @@ void PAL_PlayerStatus(
          }
       }
 
-      //
       // Update the screen
-      //
       VIDEO_UpdateScreen(NULL);
 
-      //
       // Wait for input
-      //
       PAL_ClearKeyState();
 
       while (TRUE)
@@ -1307,7 +1281,7 @@ PAL_ItemUseMenu(
          //
          // Draw the picture of the item
          //
-         if (PAL_MKFReadChunk(bufImage, 2048,
+         if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
                               gpGlobals->g.rgObject[wItemToUse].item.wBitmap, gpGlobals->f.fpBALL) > 0)
          {
             PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(127, 88));
@@ -1443,7 +1417,7 @@ PAL_BuyMenu_OnItemChange(
    //
    x = 48, y = 15;
 
-   if (PAL_MKFReadChunk(bufImage, 2048,
+   if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
                         gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
    {
       PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(x, y));
@@ -1704,7 +1678,7 @@ void PAL_EquipItemMenu(
 
 --*/
 {
-   PAL_LARGE unsigned char bufBackground[320 * 200];
+   PAL_LARGE unsigned char bufBackground[SCREEN_W * SCREEN_H];
    PAL_LARGE unsigned char bufImageBox[72 * 72];
    PAL_LARGE unsigned char bufImage[2048];
    unsigned short w;
@@ -1714,7 +1688,7 @@ void PAL_EquipItemMenu(
 
    gpGlobals->wLastUnequippedItem = wItem;
 
-   PAL_MKFDecompressChunk(bufBackground, 320 * 200, EQUIPMENU_BACKGROUND_FBPNUM,
+   PAL_MKFDecompressChunk(bufBackground, sizeof(bufBackground), EQUIPMENU_BACKGROUND_FBPNUM,
                           gpGlobals->f.fpFBP);
 
    if (gConfig.fUseCustomScreenLayout)
@@ -1753,15 +1727,11 @@ void PAL_EquipItemMenu(
    {
       wItem = gpGlobals->wLastUnequippedItem;
 
-      //
       // Draw the background
-      //
       PAL_FBPBlitToSurface(bufBackground, gpScreen);
 
-      //
       // Draw the item picture
-      //
-      if (PAL_MKFReadChunk(bufImage, 2048,
+      if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
                            gpGlobals->g.rgObject[wItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
       {
          PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY_OFFSET(gConfig.ScreenLayout.EquipImageBox, 8, 8));
@@ -1783,9 +1753,7 @@ void PAL_EquipItemMenu(
          }
       }
 
-      //
       // Draw the current equipment of the selected player
-      //
       w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;
       for (i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
       {
@@ -1796,23 +1764,17 @@ void PAL_EquipItemMenu(
          }
       }
 
-      //
       // Draw the stats of the currently selected player
-      //
       PAL_DrawNumber(PAL_GetPlayerAttackStrength(w), 4, gConfig.ScreenLayout.EquipStatusValues[0], kNumColorCyan, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerMagicStrength(w), 4, gConfig.ScreenLayout.EquipStatusValues[1], kNumColorCyan, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerDefense(w), 4, gConfig.ScreenLayout.EquipStatusValues[2], kNumColorCyan, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerDexterity(w), 4, gConfig.ScreenLayout.EquipStatusValues[3], kNumColorCyan, kNumAlignRight);
       PAL_DrawNumber(PAL_GetPlayerFleeRate(w), 4, gConfig.ScreenLayout.EquipStatusValues[4], kNumColorCyan, kNumAlignRight);
 
-      //
       // Draw a box for player selection
-      //
       PAL_CreateBox(gConfig.ScreenLayout.EquipRoleListBox, gpGlobals->wMaxPartyMemberIndex, PAL_WordMaxWidth(36, 4) - 1, 0, FALSE);
 
-      //
       // Draw the label of players
-      //
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          w = gpGlobals->rgParty[i].wPlayerRole;
@@ -1844,32 +1806,24 @@ void PAL_EquipItemMenu(
                       PAL_XY_OFFSET(gConfig.ScreenLayout.EquipRoleListBox, 13, 13 + 18 * i), bColor, TRUE, FALSE, FALSE);
       }
 
-      //
       // Draw the text label and amount of the item
-      //
       if (wItem != 0)
       {
          PAL_DrawText(PAL_GetWord(wItem), gConfig.ScreenLayout.EquipItemName, MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
          PAL_DrawNumber(PAL_GetItemAmount(wItem), 2, gConfig.ScreenLayout.EquipItemAmount, kNumColorCyan, kNumAlignRight);
       }
 
-      //
       // Update the screen
-      //
       VIDEO_UpdateScreen(NULL);
 
-      //
       // Accept input
-      //
       PAL_ClearKeyState();
 
       while (TRUE)
       {
          PAL_ProcessEvent();
 
-         //
          // See if we should change the highlight color
-         //
          if (UTIL_GetTicks() >= dwColorChangeTime)
          {
             if ((unsigned short)bSelectedColor + 1 >=
@@ -1884,9 +1838,7 @@ void PAL_EquipItemMenu(
 
             dwColorChangeTime = UTIL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
-            //
             // Redraw the selected item if needed.
-            //
             w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;
 
             if (gpGlobals->g.rgObject[wItem].item.wFlags & (kItemFlagEquipableByPlayerRole_First << w))
@@ -1935,9 +1887,7 @@ void PAL_EquipItemMenu(
 
          if (gpGlobals->g.rgObject[wItem].item.wFlags & (kItemFlagEquipableByPlayerRole_First << w))
          {
-            //
             // Run the equip script
-            //
             gpGlobals->g.rgObject[wItem].item.wScriptOnEquip =
                 PAL_RunTriggerScript(gpGlobals->g.rgObject[wItem].item.wScriptOnEquip,
                                      gpGlobals->rgParty[iCurrentPlayer].wPlayerRole);

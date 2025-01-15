@@ -175,13 +175,12 @@ void PAL_FreeMap(PALMAP *lpMap)
    free(lpMap);
 }
 
-const unsigned char *
-PAL_MapGetTileBitmap(
+const unsigned char *PAL_MapGetTileBitmap(
     unsigned char x,
     unsigned char y,
     unsigned char h,
     unsigned char ucLayer,
-    LPCPALMAP lpMap)
+    PALMAP *lpMap)
 /*++
   Purpose:
 
@@ -206,43 +205,39 @@ PAL_MapGetTileBitmap(
 
 --*/
 {
-   unsigned int d;
+  unsigned int d;
 
-   //
-   // Check for invalid parameters.
-   //
-   if (x >= 64 || y >= 128 || h > 1 || lpMap == NULL)
-   {
-      return NULL;
-   }
+  //
+  // Check for invalid parameters.
+  //
+  if (x >= 64 || y >= 128 || h > 1 || lpMap == NULL) {
+    return NULL;
+  }
 
-   //
-   // Get the tile data of the specified location.
-   //
-   d = lpMap->Tiles[y][x][h];
+  //
+  // Get the tile data of the specified location.
+  //
+  d = lpMap->Tiles[y][x][h];
 
-   if (ucLayer == 0)
-   {
-      //
-      // Bottom layer
-      //
-      return PAL_SpriteGetFrame(lpMap->pTileSprite, (d & 0xFF) | ((d >> 4) & 0x100));
-   }
-   else
-   {
-      //
-      // Top layer
-      //
-      d >>= 16;
-      return PAL_SpriteGetFrame(lpMap->pTileSprite, ((d & 0xFF) | ((d >> 4) & 0x100)) - 1);
-   }
+  if (ucLayer == 0) {
+    //
+    // Bottom layer
+    //
+    return PAL_SpriteGetFrame(lpMap->pTileSprite, (d & 0xFF) | ((d >> 4) & 0x100));
+  } else {
+    //
+    // Top layer
+    //
+    d >>= 16;
+    return PAL_SpriteGetFrame(lpMap->pTileSprite, ((d & 0xFF) | ((d >> 4) & 0x100)) - 1);
+  }
 }
 
 int PAL_MapTileIsBlocked(
     unsigned char x,
     unsigned char y,
     unsigned char h,
-    LPCPALMAP lpMap)
+    PALMAP *lpMap)
 /*++
   Purpose:
 
@@ -282,7 +277,7 @@ PAL_MapGetTileHeight(
     unsigned char y,
     unsigned char h,
     unsigned char ucLayer,
-    LPCPALMAP lpMap)
+    PALMAP *lpMap)
 /*++
   Purpose:
 
@@ -330,7 +325,7 @@ PAL_MapGetTileHeight(
 }
 
 void PAL_MapBlitToSurface(
-    LPCPALMAP lpMap,
+    PALMAP *lpMap,
     PAL_Surface *lpSurface,
     const PAL_Rect *lpSrcRect,
     unsigned char ucLayer)

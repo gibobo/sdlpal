@@ -166,7 +166,7 @@ PAL_RNGBlitToSurface(
    {
       return -1;
    }
-   dst = (unsigned char *)lpDstSurface->pixels;
+   dst = lpDstSurface->pixels;
 
    // Draw the frame to the surface.
    while (ptr < length)

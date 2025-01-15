@@ -266,201 +266,123 @@ PAL_LoadDefaultGame(
 
 typedef struct tagSAVEDGAME_COMMON
 {
-	unsigned short             wSavedTimes;             // saved times
-	unsigned short             wViewportX, wViewportY;  // viewport location
-	unsigned short             nPartyMember;            // number of members in party
-	unsigned short             wNumScene;               // scene number
-	unsigned short             wPaletteOffset;
-	unsigned short             wPartyDirection;         // party direction
-	unsigned short             wNumMusic;               // music number
-	unsigned short             wNumBattleMusic;         // battle music number
-	unsigned short             wNumBattleField;         // battle field number
-	unsigned short             wScreenWave;             // level of screen waving
-	unsigned short             wBattleSpeed;            // battle speed
-	unsigned short             wCollectValue;           // value of "collected" items
-	unsigned short             wLayer;
-	unsigned short             wChaseRange;
-	unsigned short             wChasespeedChangeCycles;
-	unsigned short             nFollower;
-	unsigned short             rgwReserved2[3];         // unused
-	unsigned int            dwCash;                  // amount of cash
-	PARTY            rgParty[MAX_PLAYABLE_PLAYER_ROLES];       // player party
-	TRAIL            rgTrail[MAX_PLAYABLE_PLAYER_ROLES];       // player trail
-	ALLEXPERIENCE    Exp;                     // experience data
-	PLAYERROLES      PlayerRoles;
-	POISONSTATUS     rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
-	INVENTORY        rgInventory[MAX_INVENTORY];               // inventory status
-	SCENE            rgScene[MAX_SCENES];
+    unsigned short             wSavedTimes;             // saved times
+    unsigned short             wViewportX, wViewportY;  // viewport location
+    unsigned short             nPartyMember;            // number of members in party
+    unsigned short             wNumScene;               // scene number
+    unsigned short             wPaletteOffset;
+    unsigned short             wPartyDirection;         // party direction
+    unsigned short             wNumMusic;               // music number
+    unsigned short             wNumBattleMusic;         // battle music number
+    unsigned short             wNumBattleField;         // battle field number
+    unsigned short             wScreenWave;             // level of screen waving
+    unsigned short             wBattleSpeed;            // battle speed
+    unsigned short             wCollectValue;           // value of "collected" items
+    unsigned short             wLayer;
+    unsigned short             wChaseRange;
+    unsigned short             wChasespeedChangeCycles;
+    unsigned short             nFollower;
+    unsigned short             rgwReserved2[3];         // unused
+    unsigned int            dwCash;                  // amount of cash
+    PARTY            rgParty[MAX_PLAYABLE_PLAYER_ROLES];       // player party
+    TRAIL            rgTrail[MAX_PLAYABLE_PLAYER_ROLES];       // player trail
+    ALLEXPERIENCE    Exp;                     // experience data
+    PLAYERROLES      PlayerRoles;
+    POISONSTATUS     rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
+    INVENTORY        rgInventory[MAX_INVENTORY];               // inventory status
+    SCENE            rgScene[MAX_SCENES];
 } SAVEDGAME_COMMON;
-
-typedef struct tagSAVEDGAME_DOS
-{
-	unsigned short             wSavedTimes;             // saved times
-	unsigned short             wViewportX, wViewportY;  // viewport location
-	unsigned short             nPartyMember;            // number of members in party
-	unsigned short             wNumScene;               // scene number
-	unsigned short             wPaletteOffset;
-	unsigned short             wPartyDirection;         // party direction
-	unsigned short             wNumMusic;               // music number
-	unsigned short             wNumBattleMusic;         // battle music number
-	unsigned short             wNumBattleField;         // battle field number
-	unsigned short             wScreenWave;             // level of screen waving
-	unsigned short             wBattleSpeed;            // battle speed
-	unsigned short             wCollectValue;           // value of "collected" items
-	unsigned short             wLayer;
-	unsigned short             wChaseRange;
-	unsigned short             wChasespeedChangeCycles;
-	unsigned short             nFollower;
-	unsigned short             rgwReserved2[3];         // unused
-	unsigned int            dwCash;                  // amount of cash
-	PARTY            rgParty[MAX_PLAYABLE_PLAYER_ROLES];       // player party
-	TRAIL            rgTrail[MAX_PLAYABLE_PLAYER_ROLES];       // player trail
-	ALLEXPERIENCE    Exp;                     // experience data
-	PLAYERROLES      PlayerRoles;
-	POISONSTATUS     rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
-	INVENTORY        rgInventory[MAX_INVENTORY];               // inventory status
-	SCENE            rgScene[MAX_SCENES];
-	OBJECT_DOS       rgObject[MAX_OBJECTS];
-	EVENTOBJECT      rgEventObject[MAX_EVENT_OBJECTS];
-} SAVEDGAME_DOS;
 
 typedef struct tagSAVEDGAME_WIN
 {
-	unsigned short             wSavedTimes;             // saved times
-	unsigned short             wViewportX, wViewportY;  // viewport location
-	unsigned short             nPartyMember;            // number of members in party
-	unsigned short             wNumScene;               // scene number
-	unsigned short             wPaletteOffset;
-	unsigned short             wPartyDirection;         // party direction
-	unsigned short             wNumMusic;               // music number
-	unsigned short             wNumBattleMusic;         // battle music number
-	unsigned short             wNumBattleField;         // battle field number
-	unsigned short             wScreenWave;             // level of screen waving
-	unsigned short             wBattleSpeed;            // battle speed
-	unsigned short             wCollectValue;           // value of "collected" items
-	unsigned short             wLayer;
-	unsigned short             wChaseRange;
-	unsigned short             wChasespeedChangeCycles;
-	unsigned short             nFollower;
-	unsigned short             rgwReserved2[3];         // unused
-	unsigned int            dwCash;                  // amount of cash
-	PARTY            rgParty[MAX_PLAYABLE_PLAYER_ROLES];       // player party
-	TRAIL            rgTrail[MAX_PLAYABLE_PLAYER_ROLES];       // player trail
-	ALLEXPERIENCE    Exp;                     // experience data
-	PLAYERROLES      PlayerRoles;
-	POISONSTATUS     rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
-	INVENTORY        rgInventory[MAX_INVENTORY];               // inventory status
-	SCENE            rgScene[MAX_SCENES];
-	OBJECT           rgObject[MAX_OBJECTS];
-	EVENTOBJECT      rgEventObject[MAX_EVENT_OBJECTS];
+    unsigned short             wSavedTimes;             // saved times
+    unsigned short             wViewportX, wViewportY;  // viewport location
+    unsigned short             nPartyMember;            // number of members in party
+    unsigned short             wNumScene;               // scene number
+    unsigned short             wPaletteOffset;
+    unsigned short             wPartyDirection;         // party direction
+    unsigned short             wNumMusic;               // music number
+    unsigned short             wNumBattleMusic;         // battle music number
+    unsigned short             wNumBattleField;         // battle field number
+    unsigned short             wScreenWave;             // level of screen waving
+    unsigned short             wBattleSpeed;            // battle speed
+    unsigned short             wCollectValue;           // value of "collected" items
+    unsigned short             wLayer;
+    unsigned short             wChaseRange;
+    unsigned short             wChasespeedChangeCycles;
+    unsigned short             nFollower;
+    unsigned short             rgwReserved2[3];         // unused
+    unsigned int            dwCash;                  // amount of cash
+    PARTY            rgParty[MAX_PLAYABLE_PLAYER_ROLES];       // player party
+    TRAIL            rgTrail[MAX_PLAYABLE_PLAYER_ROLES];       // player trail
+    ALLEXPERIENCE    Exp;                     // experience data
+    PLAYERROLES      PlayerRoles;
+    POISONSTATUS     rgPoisonStatus[MAX_POISONS][MAX_PLAYABLE_PLAYER_ROLES]; // poison status
+    INVENTORY        rgInventory[MAX_INVENTORY];               // inventory status
+    SCENE            rgScene[MAX_SCENES];
+    OBJECT           rgObject[MAX_OBJECTS];
+    EVENTOBJECT      rgEventObject[MAX_EVENT_OBJECTS];
 } SAVEDGAME_WIN;
 
 static int
 PAL_LoadGame_Common(
-	int                 iSaveSlot,
-	SAVEDGAME_COMMON    *s,
-	size_t              size
+    int                 iSaveSlot,
+    SAVEDGAME_COMMON    *s,
+    size_t              size
 )
 {
-	//
-	// Try to open the specified file
-	//
-	FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, UTIL_va(UTIL_GlobalBuffer(1), PAL_GLOBAL_BUFFER_SIZE, "%d.rpg", iSaveSlot));
-	//
-	// Read all data from the file and close.
-	//
-	size_t n = fp ? fread(s, 1, size, fp) : 0;
+    //
+    // Try to open the specified file
+    //
+    FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, UTIL_va(UTIL_GlobalBuffer(1), PAL_GLOBAL_BUFFER_SIZE, "%d.rpg", iSaveSlot));
+    //
+    // Read all data from the file and close.
+    //
+    size_t n = fp ? fread(s, 1, size, fp) : 0;
 
-	if (fp != NULL)
-	{
-		fclose(fp);
-	}
+    if (fp != NULL)
+    {
+        fclose(fp);
+    }
 
-	if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
-	{
-		return FALSE;
-	}
+    if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
+    {
+        return FALSE;
+    }
 
-	//
-	// Get common data from the saved game struct.
-	//
-	gpGlobals->viewport = PAL_XY(s->wViewportX, s->wViewportY);
-	gpGlobals->wMaxPartyMemberIndex = s->nPartyMember;
-	gpGlobals->wNumScene = s->wNumScene;
-	gpGlobals->fNightPalette = (s->wPaletteOffset != 0);
-	gpGlobals->wPartyDirection = s->wPartyDirection;
-	gpGlobals->wNumMusic = s->wNumMusic;
-	gpGlobals->wNumBattleMusic = s->wNumBattleMusic;
-	gpGlobals->wNumBattleField = s->wNumBattleField;
-	gpGlobals->wScreenWave = s->wScreenWave;
-	gpGlobals->sWaveProgression = 0;
-	gpGlobals->wCollectValue = s->wCollectValue;
-	gpGlobals->wLayer = s->wLayer;
-	gpGlobals->wChaseRange = s->wChaseRange;
-	gpGlobals->wChasespeedChangeCycles = s->wChasespeedChangeCycles;
-	gpGlobals->nFollower = s->nFollower;
-	gpGlobals->dwCash = s->dwCash;
+    //
+    // Get common data from the saved game struct.
+    //
+    gpGlobals->viewport = PAL_XY(s->wViewportX, s->wViewportY);
+    gpGlobals->wMaxPartyMemberIndex = s->nPartyMember;
+    gpGlobals->wNumScene = s->wNumScene;
+    gpGlobals->fNightPalette = (s->wPaletteOffset != 0);
+    gpGlobals->wPartyDirection = s->wPartyDirection;
+    gpGlobals->wNumMusic = s->wNumMusic;
+    gpGlobals->wNumBattleMusic = s->wNumBattleMusic;
+    gpGlobals->wNumBattleField = s->wNumBattleField;
+    gpGlobals->wScreenWave = s->wScreenWave;
+    gpGlobals->sWaveProgression = 0;
+    gpGlobals->wCollectValue = s->wCollectValue;
+    gpGlobals->wLayer = s->wLayer;
+    gpGlobals->wChaseRange = s->wChaseRange;
+    gpGlobals->wChasespeedChangeCycles = s->wChasespeedChangeCycles;
+    gpGlobals->nFollower = s->nFollower;
+    gpGlobals->dwCash = s->dwCash;
 
-	memcpy(gpGlobals->rgParty, s->rgParty, sizeof(gpGlobals->rgParty));
-	memcpy(gpGlobals->rgTrail, s->rgTrail, sizeof(gpGlobals->rgTrail));
-	gpGlobals->Exp = s->Exp;
-	gpGlobals->g.PlayerRoles = s->PlayerRoles;
-	memset(gpGlobals->rgPoisonStatus, 0, sizeof(gpGlobals->rgPoisonStatus));
-	memcpy(gpGlobals->rgInventory, s->rgInventory, sizeof(gpGlobals->rgInventory));
-	memcpy(gpGlobals->g.rgScene, s->rgScene, sizeof(gpGlobals->g.rgScene));
+    memcpy(gpGlobals->rgParty, s->rgParty, sizeof(gpGlobals->rgParty));
+    memcpy(gpGlobals->rgTrail, s->rgTrail, sizeof(gpGlobals->rgTrail));
+    gpGlobals->Exp = s->Exp;
+    gpGlobals->g.PlayerRoles = s->PlayerRoles;
+    memset(gpGlobals->rgPoisonStatus, 0, sizeof(gpGlobals->rgPoisonStatus));
+    memcpy(gpGlobals->rgInventory, s->rgInventory, sizeof(gpGlobals->rgInventory));
+    memcpy(gpGlobals->g.rgScene, s->rgScene, sizeof(gpGlobals->g.rgScene));
 
-	gpGlobals->fEnteringScene = FALSE;
+    gpGlobals->fEnteringScene = FALSE;
 
-	PAL_CompressInventory();
+    PAL_CompressInventory();
 
-	return TRUE;
-}
-
-static int
-PAL_LoadGame_DOS(
-   int            iSaveSlot
-)
-/*++
-  Purpose:
-
-    Load a saved game.
-
-  Parameters:
-
-    [IN]  szFileName - file name of saved game.
-
-  Return value:
-
-    0 if success, -1 if failed.
-
---*/
-{
-   SAVEDGAME_DOS   *s = (SAVEDGAME_DOS*)malloc(sizeof(SAVEDGAME_DOS));
-   int                       i;
-
-   //
-   // Get all the data from the saved game struct.
-   //
-   if (!PAL_LoadGame_Common(iSaveSlot, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_DOS)))
-	   return -1;
-
-   //
-   // Convert the DOS-style data structure to WIN-style data structure
-   //
-   for (i = 0; i < MAX_OBJECTS; i++)
-   {
-      memcpy(&gpGlobals->g.rgObject[i], &s->rgObject[i], sizeof(OBJECT_DOS));
-      gpGlobals->g.rgObject[i].rgwData[6] = s->rgObject[i].rgwData[5];     // wFlags
-      gpGlobals->g.rgObject[i].rgwData[5] = 0;                            // wScriptDesc or wReserved2
-   }
-   memcpy(gpGlobals->g.lprgEventObject, s->rgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
-
-   free(s);
-
-   //
-   // Success
-   //
-   return 0;
+    return TRUE;
 }
 
 static int
@@ -488,11 +410,11 @@ PAL_LoadGame_WIN(
    // Get all the data from the saved game struct.
    //
    if (!PAL_LoadGame_Common(iSaveSlot, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN)))
-	   return -1;
+       return -1;
 
    memcpy(gpGlobals->g.rgObject, s->rgObject, sizeof(gpGlobals->g.rgObject));
    memcpy(gpGlobals->g.lprgEventObject, s->rgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
-    
+
    free(s);
 
    //
@@ -506,100 +428,59 @@ PAL_LoadGame(
    int            iSaveSlot
 )
 {
-	return PAL_LoadGame_WIN(iSaveSlot);
+    return PAL_LoadGame_WIN(iSaveSlot);
 }
 
 static void
 PAL_SaveGame_Common(
-	int                iSaveSlot,
-	unsigned short               wSavedTimes,
-	SAVEDGAME_COMMON   *s,
-	size_t             size
-)
+    int                iSaveSlot,
+    unsigned short     wSavedTimes,
+    SAVEDGAME_COMMON   *s,
+    size_t             size)
 {
-	FILE *fp;
-	size_t i;
+    FILE *fp;
+    size_t i;
 
-	s->wSavedTimes = wSavedTimes;
-	s->wViewportX = PAL_X(gpGlobals->viewport);
-	s->wViewportY = PAL_Y(gpGlobals->viewport);
-	s->nPartyMember = gpGlobals->wMaxPartyMemberIndex;
-	s->wNumScene = gpGlobals->wNumScene;
-	s->wPaletteOffset = (gpGlobals->fNightPalette ? 0x180 : 0);
-	s->wPartyDirection = gpGlobals->wPartyDirection;
-	s->wNumMusic = gpGlobals->wNumMusic;
-	s->wNumBattleMusic = gpGlobals->wNumBattleMusic;
-	s->wNumBattleField = gpGlobals->wNumBattleField;
-	s->wScreenWave = gpGlobals->wScreenWave;
-	s->wCollectValue = gpGlobals->wCollectValue;
-	s->wLayer = gpGlobals->wLayer;
-	s->wChaseRange = gpGlobals->wChaseRange;
-	s->wChasespeedChangeCycles = gpGlobals->wChasespeedChangeCycles;
-	s->nFollower = gpGlobals->nFollower;
-	s->dwCash = gpGlobals->dwCash;
-	s->wBattleSpeed = 2;
+    s->wSavedTimes = wSavedTimes;
+    s->wViewportX = PAL_X(gpGlobals->viewport);
+    s->wViewportY = PAL_Y(gpGlobals->viewport);
+    s->nPartyMember = gpGlobals->wMaxPartyMemberIndex;
+    s->wNumScene = gpGlobals->wNumScene;
+    s->wPaletteOffset = (gpGlobals->fNightPalette ? 0x180 : 0);
+    s->wPartyDirection = gpGlobals->wPartyDirection;
+    s->wNumMusic = gpGlobals->wNumMusic;
+    s->wNumBattleMusic = gpGlobals->wNumBattleMusic;
+    s->wNumBattleField = gpGlobals->wNumBattleField;
+    s->wScreenWave = gpGlobals->wScreenWave;
+    s->wCollectValue = gpGlobals->wCollectValue;
+    s->wLayer = gpGlobals->wLayer;
+    s->wChaseRange = gpGlobals->wChaseRange;
+    s->wChasespeedChangeCycles = gpGlobals->wChasespeedChangeCycles;
+    s->nFollower = gpGlobals->nFollower;
+    s->dwCash = gpGlobals->dwCash;
+    s->wBattleSpeed = 2;
 
-	memcpy(s->rgParty, gpGlobals->rgParty, sizeof(gpGlobals->rgParty));
-	memcpy(s->rgTrail, gpGlobals->rgTrail, sizeof(gpGlobals->rgTrail));
-	s->Exp = gpGlobals->Exp;
-	s->PlayerRoles = gpGlobals->g.PlayerRoles;
-	memcpy(s->rgPoisonStatus, gpGlobals->rgPoisonStatus, sizeof(gpGlobals->rgPoisonStatus));
-	memcpy(s->rgInventory, gpGlobals->rgInventory, sizeof(gpGlobals->rgInventory));
-	memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
+    memcpy(s->rgParty, gpGlobals->rgParty, sizeof(gpGlobals->rgParty));
+    memcpy(s->rgTrail, gpGlobals->rgTrail, sizeof(gpGlobals->rgTrail));
+    s->Exp = gpGlobals->Exp;
+    s->PlayerRoles = gpGlobals->g.PlayerRoles;
+    memcpy(s->rgPoisonStatus, gpGlobals->rgPoisonStatus, sizeof(gpGlobals->rgPoisonStatus));
+    memcpy(s->rgInventory, gpGlobals->rgInventory, sizeof(gpGlobals->rgInventory));
+    memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
 
-	//
-	// Try writing to file
-	//
-	if ((fp = UTIL_OpenFileAtPathForMode(gConfig.pszSavePath, UTIL_va(UTIL_GlobalBuffer(1), PAL_GLOBAL_BUFFER_SIZE, "%d.rpg", iSaveSlot), "wb")) == NULL)
-	{
-		return;
-	}
+    //
+    // Try writing to file
+    //
+    if ((fp = UTIL_OpenFileAtPathForMode(gConfig.pszSavePath, UTIL_va(UTIL_GlobalBuffer(1), PAL_GLOBAL_BUFFER_SIZE, "%d.rpg", iSaveSlot), "wb")) == NULL)
+    {
+        return;
+    }
 
-	i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
-	i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
+    i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
+    i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
 
-	fwrite(s, i, 1, fp);
-	fclose(fp);
-}
-
-static void
-PAL_SaveGame_DOS(
-   int            iSaveSlot,
-   unsigned short           wSavedTimes
-)
-/*++
-  Purpose:
-
-    Save the current game state to file.
-
-  Parameters:
-
-    [IN]  szFileName - file name of saved game.
-
-  Return value:
-
-    None.
-
---*/
-{
-   SAVEDGAME_DOS   *s = (SAVEDGAME_DOS*)malloc(sizeof(SAVEDGAME_DOS));
-   unsigned int                    i;
-
-   //
-   // Convert the WIN-style data structure to DOS-style data structure
-   //
-   for (i = 0; i < MAX_OBJECTS; i++)
-   {
-      memcpy(&s->rgObject[i], &gpGlobals->g.rgObject[i], sizeof(OBJECT_DOS));
-      s->rgObject[i].rgwData[5] = gpGlobals->g.rgObject[i].rgwData[6];     // wFlags
-   }
-   memcpy(s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
-
-   //
-   // Put all the data to the saved game struct.
-   //
-   PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_DOS));
-   free(s);
+    fwrite(s, i, 1, fp);
+    fclose(fp);
 }
 
 static void
@@ -718,17 +599,17 @@ PAL_CountItem(
 )
 /*++
  Purpose:
- 
+
  Count the specified kind of item in the inventory AND in players' equipments.
- 
+
  Parameters:
- 
+
  [IN]  wObjectID - object number of the item.
- 
+
  Return value:
- 
+
  Counted value.
- 
+
  --*/
 {
     int          index;
@@ -739,10 +620,10 @@ PAL_CountItem(
     {
         return FALSE;
     }
-    
+
     index = 0;
     count = 0;
-    
+
     //
     // Search for the specified item in the inventory
     //
@@ -759,11 +640,11 @@ PAL_CountItem(
         }
         index++;
     }
-    
+
     for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
     {
         w = gpGlobals->rgParty[i].wPlayerRole;
-        
+
         for (j = 0; j < MAX_PLAYER_EQUIPMENTS; j++)
         {
             if (gpGlobals->g.PlayerRoles.rgwEquipment[j][w] == wObjectID)
@@ -1268,7 +1149,7 @@ PAL_AddPoisonForPlayer(
    {
       gpGlobals->rgPoisonStatus[i][index].wPoisonID = wPoisonID;
       gpGlobals->rgPoisonStatus[i][index].wPoisonScript =
-		  PAL_RunTriggerScript(gpGlobals->g.rgObject[wPoisonID].poison.wPlayerScript, wPlayerRole);
+          PAL_RunTriggerScript(gpGlobals->g.rgObject[wPoisonID].poison.wPlayerScript, wPlayerRole);
    }
 }
 

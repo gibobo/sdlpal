@@ -25,18 +25,17 @@
 #define SCREEN_W 320
 #define SCREEN_H 200
 
-typedef struct PAL_Surface
-{
-    int w, h;                   /**< Read-only */
-    int pitch;                  /**< Read-only */
-    void *pixels;               /**< Read-write */
+typedef struct PAL_Surface {
+    int w, h;              /**< Read-only */
+    int pitch;             /**< Read-only */
+    unsigned char *pixels; /**< Read-write */
 } PAL_Surface;
 
 typedef struct PAL_Rect {
-  int x;
-  int y;
-  int w;
-  int h;
+    int x;
+    int y;
+    int w;
+    int h;
 } PAL_Rect;
 
 #ifdef __cplusplus
@@ -46,60 +45,31 @@ extern "C" {
 extern PAL_Surface *gpScreen;
 extern PAL_Surface *gpScreenBak;
 
-int
-VIDEO_Startup(
-   void
-);
+int VIDEO_Startup(void);
 
-void
-VIDEO_Shutdown(
-   void
-);
+void VIDEO_Shutdown(void);
 
-void
-VIDEO_UpdateScreen(
-   const PAL_Rect *lpRect
-);
+void VIDEO_UpdateScreen(const PAL_Rect *lpRect);
 
 void VIDEO_SetPalette(const unsigned char *rgPalette);
 
 const unsigned char *VIDEO_GetPalette(void);
 
-void
-VIDEO_ShakeScreen(
-   unsigned short           wShakeTime,
-   unsigned short           wShakeLevel
-);
+void VIDEO_ShakeScreen(
+    unsigned short wShakeTime,
+    unsigned short wShakeLevel);
 
-void
-VIDEO_SwitchScreen(
-   unsigned short           wSpeed
-);
+void VIDEO_SwitchScreen(unsigned short wSpeed);
 
-void
-VIDEO_FadeScreen(
-   unsigned short           wSpeed
-);
+void VIDEO_FadeScreen(unsigned short wSpeed);
 
-void
-VIDEO_SetWindowTitle(
-	const char*   pszTitle
-);
+void VIDEO_SetWindowTitle(const char *pszTitle);
 
-PAL_Surface *
-VIDEO_DuplicateSurface(
-	const PAL_Rect *pRect
-);
+PAL_Surface *VIDEO_DuplicateSurface(const PAL_Rect *pRect);
 
-PAL_Surface *
-VIDEO_CreateCompatibleSizedSurface(
-	const PAL_Rect *pSize
-);
+PAL_Surface *VIDEO_CreateCompatibleSizedSurface(const PAL_Rect *pSize);
 
-void
-VIDEO_RenderPaused(
-	unsigned char flag
-);
+void VIDEO_RenderPaused(unsigned char flag);
 
 void VIDEO_CopySurface(
     PAL_Surface *src,
@@ -115,8 +85,7 @@ void VIDEO_BackupScreen(PAL_Surface *src);
 
 void VIDEO_RestoreScreen(PAL_Surface *dst);
 
-void PAL_FreeSurface(
-    PAL_Surface *surface);
+void PAL_FreeSurface(PAL_Surface *surface);
 
 void PAL_CleanScreen(void);
 

@@ -22,7 +22,6 @@
 #ifndef _PALUTILS_H
 #define _PALUTILS_H
 
-#include "util.h"
 #include "video/video.h"
 #include <stdio.h>
 
@@ -32,99 +31,82 @@
 #define PAL_XY_OFFSET(xy, x, y) (unsigned int)(((((int)(y) << 16) & 0xFFFF0000) + ((xy) & 0xFFFF0000)) | (((int)(x) & 0xFFFF) + ((xy) & 0xFFFF)))
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-    int
-    PAL_RLEBlitToSurface(
-        const unsigned char *lpBitmapRLE,
-        PAL_Surface *lpDstSurface,
-        unsigned int pos);
+int PAL_RLEBlitToSurface(
+    const unsigned char *lpBitmapRLE,
+    PAL_Surface *lpDstSurface,
+    unsigned int pos);
 
-    int
-    PAL_RLEBlitToSurfaceWithShadow(
-        const unsigned char *lpBitmapRLE,
-        PAL_Surface *lpDstSurface,
-        unsigned int pos,
-        int bShadow);
+int PAL_RLEBlitToSurfaceWithShadow(
+    const unsigned char *lpBitmapRLE,
+    PAL_Surface *lpDstSurface,
+    unsigned int pos,
+    int bShadow);
 
-    int
-    PAL_RLEBlitWithColorShift(
-        const unsigned char *lpBitmapRLE,
-        PAL_Surface *lpDstSurface,
-        unsigned int pos,
-        int iColorShift);
+int PAL_RLEBlitWithColorShift(
+    const unsigned char *lpBitmapRLE,
+    PAL_Surface *lpDstSurface,
+    unsigned int pos,
+    int iColorShift);
 
-    int
-    PAL_RLEBlitMonoColor(
-        const unsigned char *lpBitmapRLE,
-        PAL_Surface *lpDstSurface,
-        unsigned int pos,
-        unsigned char bColor,
-        int iColorShift);
+int PAL_RLEBlitMonoColor(
+    const unsigned char *lpBitmapRLE,
+    PAL_Surface *lpDstSurface,
+    unsigned int pos,
+    unsigned char bColor,
+    int iColorShift);
 
-    int
-    PAL_FBPBlitToSurface(
-        unsigned char *lpBitmapFBP,
-        PAL_Surface *lpDstSurface);
+int PAL_FBPBlitToSurface(
+    unsigned char *lpBitmapFBP,
+    PAL_Surface *lpDstSurface);
 
-    int
-    PAL_RLEGetWidth(
-        const unsigned char *lpBitmapRLE);
+int PAL_RLEGetWidth(
+    const unsigned char *lpBitmapRLE);
 
-    int
-    PAL_RLEGetHeight(
-        const unsigned char *lpBitmapRLE);
+int PAL_RLEGetHeight(
+    const unsigned char *lpBitmapRLE);
 
-    unsigned short
-    PAL_SpriteGetNumFrames(
-        const unsigned char *lpSprite);
+unsigned short PAL_SpriteGetNumFrames(
+    const unsigned char *lpSprite);
 
-    const unsigned char *
-    PAL_SpriteGetFrame(
-        const unsigned char *lpSprite,
-        int iFrameNum);
+const unsigned char *PAL_SpriteGetFrame(
+    const unsigned char *lpSprite,
+    int iFrameNum);
 
-    int
-    PAL_MKFGetChunkCount(
-        FILE *fp);
+int PAL_MKFGetChunkCount(FILE *fp);
 
-    int
-    PAL_MKFGetChunkSize(
-        unsigned int uiChunkNum,
-        FILE *fp);
+int PAL_MKFGetChunkSize(
+    unsigned int uiChunkNum,
+    FILE *fp);
 
-    int
-    PAL_MKFReadChunk(
-        unsigned char *lpBuffer,
-        unsigned int uiBufferSize,
-        unsigned int uiChunkNum,
-        FILE *fp);
+int PAL_MKFReadChunk(
+    unsigned char *lpBuffer,
+    unsigned int uiBufferSize,
+    unsigned int uiChunkNum,
+    FILE *fp);
 
-    int
-    PAL_MKFGetDecompressedSize(
-        unsigned int uiChunkNum,
-        FILE *fp);
+int PAL_MKFGetDecompressedSize(
+    unsigned int uiChunkNum,
+    FILE *fp);
 
-    int
-    PAL_MKFDecompressChunk(
-        unsigned char *lpBuffer,
-        unsigned int uiBufferSize,
-        unsigned int uiChunkNum,
-        FILE *fp);
+int PAL_MKFDecompressChunk(
+    unsigned char *lpBuffer,
+    unsigned int uiBufferSize,
+    unsigned int uiChunkNum,
+    FILE *fp);
 
-    // From yj1.c:
-    extern int (*Decompress)(
-        const void *Source,
-        void *Destination,
-        int DestSize);
+// From yj1.c:
+extern int (*Decompress)(
+    const void *Source,
+    void *Destination,
+    int DestSize);
 
-    int
-    YJ2_Decompress(
-        const void *Source,
-        void *Destination,
-        int DestSize);
+int YJ2_Decompress(
+    const void *Source,
+    void *Destination,
+    int DestSize);
 
 #ifdef __cplusplus
 }

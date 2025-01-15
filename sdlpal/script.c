@@ -1404,7 +1404,7 @@ PAL_InterpretInstruction(
          static unsigned char bufImage[2048];
          if (gpGlobals->g.rgObject[wObject].item.wBitmap != wPrevImageIndex)
          {
-            if (PAL_MKFReadChunk(bufImage, 2048,
+            if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
                                  gpGlobals->g.rgObject[wObject].item.wBitmap, gpGlobals->f.fpBALL) > 0)
             {
                wPrevImageIndex = gpGlobals->g.rgObject[wObject].item.wBitmap;

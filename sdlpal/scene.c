@@ -295,7 +295,7 @@ PAL_SceneDrawSprites(
       x = (short)lpEvtObj->x - PAL_X(gpGlobals->viewport);
       x -= PAL_RLEGetWidth(lpFrame) / 2;
 
-      if (x >= 320 || x < -(int)PAL_RLEGetWidth(lpFrame))
+      if (x >= SCREEN_W || x < -(int)PAL_RLEGetWidth(lpFrame))
       {
          //
          // outside the screen; skip it
@@ -387,7 +387,7 @@ void PAL_ApplyWave(
    int i, a, b;
    static int index = 0;
    unsigned char *p;
-   unsigned char buf[320];
+   unsigned char buf[SCREEN_W];
 
    gpGlobals->wScreenWave += gpGlobals->sWaveProgression;
 
@@ -416,7 +416,7 @@ void PAL_ApplyWave(
       // WARNING: assuming the screen width is 320
       //
       wave[i] = a * gpGlobals->wScreenWave / 256;
-      wave[i + 16] = 320 - wave[i];
+      wave[i + 16] = SCREEN_W - wave[i];
    }
 
    //
@@ -424,29 +424,25 @@ void PAL_ApplyWave(
    // WARNING: only works with 320x200 8-bit surface.
    //
    a = index;
-   p = (unsigned char *)lpSurface->pixels;
+   p = lpSurface->pixels;
 
    //
    // Loop through all lines in the screen buffer.
    //
-   for (i = 0; i < 200; i++)
+   for (i = 0; i < SCREEN_H; i++)
    {
       b = wave[a];
 
       if (b > 0)
       {
-         //
          // Do a shift on the current line with the calculated offset.
-         //
          memcpy(buf, p, b);
-         // memmove(p, p + b, 320 - b);
-         memmove(p, &p[b], 320 - b);
-         // memcpy(p + 320 - b, buf, b);
-         memcpy(&p[320 - b], buf, b);
+         memmove(p, p + b, SCREEN_W - b);
+         memcpy(p + SCREEN_W - b, buf, b);
       }
 
       a = (a + 1) % 32;
-      p += lpSurface->pitch;
+      p += lpSurface->w;
    }
 
    index = (index + 1) % 32;

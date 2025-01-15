@@ -25,9 +25,10 @@
 #include "mini_glloader.h"
 #include "palcfg.h"
 #include "video.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <string.h>
 
 static unsigned int gProgramId = 0;
 static int position = -1;
@@ -165,7 +166,7 @@ void VIDEO_GLSL_Setup(const char * rendererName) {
 
     char *glversion = (char*)glGetString(GL_VERSION);
     char *glslversion = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-    
+
 #ifdef GLES
     if(!strncmp(glversion, "OpenGL ES", 9)) {
         sscanf(glversion, "OpenGL ES %d.%d", &glversion_major, &glversion_minor);
@@ -181,13 +182,13 @@ void VIDEO_GLSL_Setup(const char * rendererName) {
 
     if(!strncmp(rendererName, "opengl", 6)) {
         assert(initGLExtensions(glversion_major));
-	}
+    }
     if( glversion_major >= 3 ) {
         GLint n;
         glGetIntegerv(GL_NUM_EXTENSIONS, &n);
     }
 
-    gProgramId = compileProgram(gConfig.pszShader, gConfig.pszShader, FALSE);
+    gProgramId = compileProgram(gConfig.pszShader, gConfig.pszShader, 0);
 
     position = glGetAttribLocation(gProgramId, "VertexCoord");
     glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, p_vex);
@@ -225,6 +226,6 @@ void VIDEO_GLSL_RenderCopy(void *data) {
 }
 
 void VIDEO_Resize(int w, int h) {
-  window_width = w;
-  window_height = h;
+    window_width = w;
+    window_height = h;
 }

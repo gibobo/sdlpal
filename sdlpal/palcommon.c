@@ -194,7 +194,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
             if (uiWidth - sx < k)
                k = uiWidth - sx;
             sx += k;
-            p = ((unsigned char *)lpDstSurface->pixels) + y * lpDstSurface->pitch;
+            p = lpDstSurface->pixels + y * lpDstSurface->w;
             if (bShadow)
             {
                j += k;
@@ -310,7 +310,7 @@ int PAL_RLEBlitWithColorShift(
    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
        uiHeight + dy <= 0 || dy >= lpDstSurface->h)
    {
-      goto end;
+      return 0;
    }
 
    //
@@ -356,7 +356,7 @@ int PAL_RLEBlitWithColorShift(
          }
          else if (y >= lpDstSurface->h)
          {
-            goto end; // No more pixels needed, break out
+            return 0; // No more pixels needed, break out
          }
 
          while (j < T)
@@ -380,21 +380,19 @@ int PAL_RLEBlitWithColorShift(
                y++;
                if (y >= lpDstSurface->h)
                {
-                  goto end; // No more pixels needed, break out
+                  return 0; // No more pixels needed, break out
                }
                continue;
             }
 
-            //
             // Put the pixels in row onto the surface
-            //
             k = T - j;
             if (lpDstSurface->w - x < k)
                k = lpDstSurface->w - x;
             if (uiWidth - sx < k)
                k = uiWidth - sx;
             sx += k;
-            p = ((unsigned char *)lpDstSurface->pixels) + y * lpDstSurface->pitch;
+            p = lpDstSurface->pixels + y * lpDstSurface->w;
             for (; k != 0; k--)
             {
                b = (lpBitmapRLE[j] & 0x0F);
@@ -423,7 +421,7 @@ int PAL_RLEBlitWithColorShift(
                y++;
                if (y >= lpDstSurface->h)
                {
-                  goto end; // No more pixels needed, break out
+                  return 0; // No more pixels needed, break out
                }
             }
          }
@@ -438,10 +436,7 @@ int PAL_RLEBlitWithColorShift(
       }
    }
 
-end:
-   //
    // Success
-   //
    return 0;
 }
 
@@ -600,7 +595,7 @@ int PAL_RLEBlitMonoColor(
             if (uiWidth - sx < k)
                k = uiWidth - sx;
             sx += k;
-            p = ((unsigned char *)lpDstSurface->pixels) + y * lpDstSurface->pitch;
+            p = lpDstSurface->pixels + y * lpDstSurface->w;
             for (; k != 0; k--)
             {
                b = lpBitmapRLE[j] & 0x0F;
@@ -672,30 +667,14 @@ int PAL_FBPBlitToSurface(
 
 --*/
 {
-   unsigned short y;
-   unsigned char *src;
-   unsigned char *dst;
-
    if (lpBitmapFBP == NULL || lpDstSurface == NULL ||
        lpDstSurface->w != SCREEN_W || lpDstSurface->h != SCREEN_H)
    {
       return -1;
    }
 
-   //
    // simply copy everything to the surface
-   //
-   src = (unsigned char *)lpDstSurface->pixels;
-   dst = lpBitmapFBP;
-   if (lpDstSurface->pitch == lpDstSurface->w) {
-     memcpy(src, dst, lpDstSurface->w * lpDstSurface->h);
-   } else {
-     for (y = 0; y < lpDstSurface->h; y++) {
-       memcpy(src, dst, lpDstSurface->w);
-       src += lpDstSurface->pitch;
-       dst += lpDstSurface->w;
-     }
-   }
+   memcpy(lpDstSurface->pixels, lpBitmapFBP, lpDstSurface->w * lpDstSurface->h);
    return 0;
 }
 
@@ -721,18 +700,14 @@ int PAL_RLEGetWidth(
       return 0;
    }
 
-   //
    // Skip the 0x00000002 in the file header.
-   //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
 
-   //
    // Return the width of the bitmap.
-   //
    return lpBitmapRLE[0] | (lpBitmapRLE[1] << 8);
 }
 
@@ -758,18 +733,14 @@ int PAL_RLEGetHeight(
       return 0;
    }
 
-   //
    // Skip the 0x00000002 in the file header.
-   //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
 
-   //
    // Return the height of the bitmap.
-   //
    return lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
 }
 

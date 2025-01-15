@@ -40,9 +40,7 @@
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;
 
-static void
-PAL_Init(
-    void)
+static void PAL_Init(void)
 /*++
   Purpose:
 
@@ -58,52 +56,47 @@ PAL_Init(
 
 --*/
 {
-   int e;
+    int e;
 
-   //
-   // Initialize subsystems.
-   //
-   e = PAL_InitGlobals();
-   if (e != 0)
-   {
-		PAL_Shutdown(255);
-      TerminateOnError("Could not initialize global data: %d.\n", e);
-   }
+    //
+    // Initialize subsystems.
+    //
+    e = PAL_InitGlobals();
+    if (e != 0) {
+        PAL_Shutdown(255);
+        TerminateOnError("Could not initialize global data: %d.\n", e);
+    }
 
-   e = VIDEO_Startup();
-   if (e != 0)
-   {
-		PAL_Shutdown(255);
-      TerminateOnError("Could not initialize Video: %d.\n", e);
-   }
+    e = VIDEO_Startup();
+    if (e != 0) {
+        PAL_Shutdown(255);
+        TerminateOnError("Could not initialize Video: %d.\n", e);
+    }
 
-   VIDEO_SetWindowTitle("Loading...");
+    VIDEO_SetWindowTitle("Loading...");
 
-   e = PAL_InitUI();
-   if (e != 0)
-   {
-		PAL_Shutdown(255);
-      TerminateOnError("Could not initialize UI subsystem: %d.\n", e);
-   }
+    e = PAL_InitUI();
+    if (e != 0) {
+        PAL_Shutdown(255);
+        TerminateOnError("Could not initialize UI subsystem: %d.\n", e);
+    }
 
-   e = PAL_InitText();
-   if (e != 0)
-   {
-		PAL_Shutdown(255);
-      TerminateOnError("Could not initialize text subsystem: %d.\n", e);
-   }
+    e = PAL_InitText();
+    if (e != 0) {
+        PAL_Shutdown(255);
+        TerminateOnError("Could not initialize text subsystem: %d.\n", e);
+    }
 
-   PAL_InitFont();
+    PAL_InitFont();
 
-   PAL_InitInput();
-   PAL_InitResources();
-   AUDIO_OpenDevice();
+    PAL_InitInput();
+    PAL_InitResources();
+    AUDIO_OpenDevice();
 
-   VIDEO_SetWindowTitle("Pal");
+    VIDEO_SetWindowTitle("Pal");
 }
 
-void PAL_Shutdown(
-    int exit_code)
+void PAL_Shutdown(int exit_code)
 /*++
   Purpose:
 
@@ -137,8 +130,7 @@ void PAL_Shutdown(
    longjmp(g_exit_jmp_buf, 1);
 }
 
-void PAL_TrademarkScreen(
-    void)
+void PAL_TrademarkScreen(void)
 /*++
   Purpose:
 
@@ -160,8 +152,7 @@ void PAL_TrademarkScreen(
    PAL_FadeOut(1);
 }
 
-void PAL_SplashScreen(
-    void)
+void PAL_SplashScreen(void)
 /*++
   Purpose:
 
@@ -288,14 +279,13 @@ void PAL_SplashScreen(
       VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
 
       // Draw the cranes...
-      for (i = 0; i < 9; i++)
-      {
-         const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane,
-                                                           cranepos[i][2] = (cranepos[i][2] + (iCraneFrame & 1)) % 8);
-         cranepos[i][1] += ((iImgPos > 1) && (iImgPos & 1)) ? 1 : 0;
-         PAL_RLEBlitToSurface(lpFrame, gpScreen,
-                              PAL_XY(cranepos[i][0], cranepos[i][1]));
-         cranepos[i][0]--;
+      for (i = 0; i < 9; i++) {
+        const unsigned char *lpFrame = PAL_SpriteGetFrame(
+            lpSpriteCrane,
+            cranepos[i][2] = (cranepos[i][2] + (iCraneFrame & 1)) % 8);
+        cranepos[i][1] += ((iImgPos > 1) && (iImgPos & 1)) ? 1 : 0;
+        PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i][0], cranepos[i][1]));
+        cranepos[i][0]--;
       }
       iCraneFrame++;
 
@@ -357,9 +347,7 @@ void PAL_SplashScreen(
    PAL_FadeOut(1);
 }
 
-int main(
-    int argc,
-    char *argv[])
+int main(int argc, char *argv[])
 /*++
   Purpose:
 
@@ -377,15 +365,14 @@ int main(
 
 --*/
 {
-   if (setjmp(g_exit_jmp_buf) != 0)
-   {
-      // A longjmp is made, should exit here
-      SDL_Quit();
-      UTIL_Platform_Quit();
-      return g_exit_code;
-   }
+  if (setjmp(g_exit_jmp_buf) != 0) {
+    // A longjmp is made, should exit here
+    SDL_Quit();
+    UTIL_Platform_Quit();
+    return g_exit_code;
+  }
 
-   // Initialize SDL
+  // Initialize SDL
 #ifdef PAL_HAS_JOYSTICKS
    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK) == -1)
 #else

@@ -24,6 +24,8 @@
 
 #include "palcfg.h"
 
+#define FONT_HEIGHT (16)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,7 +41,8 @@ extern "C" {
 
   Return value:
 
-    0 = success, -1 = failure.
+    None.
+
 --*/
 void PAL_InitFont(void);
 
@@ -65,10 +68,10 @@ void PAL_InitFont(void);
 --*/
 void
 PAL_DrawCharOnSurface(
-	unsigned short                 wChar,
-	PAL_Surface              *lpSurface,
-	unsigned int             pos,
-	unsigned char                  bColor
+    unsigned short                 wChar,
+    PAL_Surface              *lpSurface,
+    unsigned int             pos,
+    unsigned char                  bColor
 );
 
 /*++
@@ -85,29 +88,7 @@ PAL_DrawCharOnSurface(
     The width of the character in pixels, 16 for full-width char and 8 for half-width char.
 
 --*/
-int
-PAL_CharWidth(
-	unsigned short                 wChar
-);
-
-/*++
-  Purpose:
-
-    Get the height of the currently used font.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    The height of the font in pixels.
-
---*/
-int
-PAL_FontHeight(
-	void
-);
+int PAL_CharWidth(unsigned short wChar);
 
 #ifdef __cplusplus
 }

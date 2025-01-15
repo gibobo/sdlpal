@@ -20,8 +20,8 @@
 // mini_glloader.c: quick&dirty OpenGL extension loader by palxex, 2018
 //
 
-#include <SDL_video.h>
 #include "mini_glloader.h"
+#include <SDL_video.h>
 
 PFNGLCREATESHADERPROC glCreateShader;
 PFNGLSHADERSOURCEPROC glShaderSource;
@@ -88,7 +88,7 @@ int initGLExtensions(int major) {
     glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)SDL_GL_GetProcAddress("glGetUniformLocation");
     if( major >= 3 )
         glGetStringi = (PFNGLGETSTRINGIPROC)SDL_GL_GetProcAddress("glGetStringi") ;
-    
+
     return glCreateShader && glShaderSource && glCompileShader && glGetShaderiv &&
     glGetShaderInfoLog && glDeleteShader && glAttachShader && glCreateProgram &&
     glLinkProgram && glValidateProgram && glGetProgramiv && glGetProgramInfoLog &&

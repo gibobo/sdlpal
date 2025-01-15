@@ -28,10 +28,9 @@
 
 #define ReLU(A)  ((A) > 0 ? (A) : 0)
 
-static const int unicode_lower_top = 0xd800;
-static const int unicode_upper_base = 0xf900;
-static const int unicode_upper_top = 65534;
-#define _font_height (16)
+#define unicode_lower_top	0xD800
+#define unicode_upper_base  0xF900
+#define unicode_upper_top	0xFFFE
 
 static unsigned char reverseBits(unsigned char x) {
     unsigned char y = 0;
@@ -43,10 +42,7 @@ static unsigned char reverseBits(unsigned char x) {
     return y;
 }
 
-void
-PAL_InitFont(
-   void
-)
+void PAL_InitFont(void)
 {
     int         i, j;
 
@@ -62,104 +58,84 @@ PAL_InitFont(
     }
 }
 
-void
-PAL_DrawCharOnSurface(
-	unsigned short                 wChar,
-	PAL_Surface             *lpSurface,
-	unsigned int                  pos,
-	unsigned char                  bColor
-)
+void PAL_DrawCharOnSurface(
+    unsigned short wChar,
+    PAL_Surface *lpSurface,
+    unsigned int pos,
+    unsigned char bColor)
 {
-	int       i, j;
-	int       x = PAL_X(pos), y = PAL_Y(pos);
+    int       i, j;
+    int       x = PAL_X(pos);
+    int       y = PAL_Y(pos);
     int       x_offset = 0;
     int       y_offset = 0;
 
-	//
-	// Check for NULL pointer & invalid char code.
-	//
-	if ((lpSurface == NULL) ||
-		(wChar >= unicode_lower_top && wChar < unicode_upper_base) ||
-		(wChar >= unicode_upper_top))
-	{
-		return;
-	}
+    // Check for NULL pointer & invalid char code.
+    if ((lpSurface == NULL) ||
+        (wChar >= unicode_lower_top && wChar < unicode_upper_base) ||
+        (wChar >= unicode_upper_top))
+    {
+        return;
+    }
 
-	//
-	// Locate for this character in the font lib.
-	//
-	if (wChar >= unicode_upper_base)
-	{
-		wChar -= (unicode_upper_base - unicode_lower_top);
-	}
+    // Locate for this character in the font lib.
+    if (wChar >= unicode_upper_base)
+    {
+        wChar -= (unicode_upper_base - unicode_lower_top);
+    }
 
-	//
-	// Draw the character to the surface.
-	//
-	unsigned char * dest = (unsigned char *)lpSurface->pixels + ReLU(y + y_offset) * lpSurface->pitch + x;
-	unsigned char * top = (unsigned char *)lpSurface->pixels + lpSurface->h * lpSurface->pitch;
-	
-	if (font_width[wChar] == 32)
-	{
-		for (i = 0; i < _font_height * 2 && dest < top; i += 2, dest += lpSurface->pitch)
-		{
-			for (j = 0; j < 8 && x + j + x_offset < lpSurface->w && x + j + x_offset >= 0; j++)
-			{
-				if (unicode_font[wChar][i] & (1 << (7 - j)))
-				{
-					dest[j + x_offset] = bColor;
-				}
-			}
-			for (j = 0; j < 8 && x + j + 8 + x_offset < lpSurface->w && x + j + 8 + x_offset >= 0; j++)
-			{
-				if (unicode_font[wChar][i + 1] & (1 << (7 - j)))
-				{
-					dest[j + 8 + x_offset] = bColor;
-				}
-			}
-		}
-	}
-	else
-	{
-		for (i = 0; i < _font_height && dest < top; i++, dest += lpSurface->pitch)
-		{
-			for (j = 0; j < 8 && x + j + x_offset < lpSurface->w && x + j + x_offset >= 0; j++)
-			{
-				if (unicode_font[wChar][i] & (1 << (7 - j)))
-				{
-					dest[j + x_offset] = bColor;
-				}
-			}
-		}
-	}
-	
+    // Draw the character to the surface.
+    unsigned char *dest = lpSurface->pixels + ReLU(y + y_offset) * lpSurface->w + x;
+    unsigned char *top = lpSurface->pixels + lpSurface->h * lpSurface->w;
+
+    if (font_width[wChar] == 32)
+    {
+        for (i = 0; i < FONT_HEIGHT * 2 && dest < top; i += 2, dest += lpSurface->w)
+        {
+            for (j = 0; j < 8 && x + j + x_offset < lpSurface->w && x + j + x_offset >= 0; j++)
+            {
+                if (unicode_font[wChar][i] & (1 << (7 - j)))
+                {
+                    dest[j + x_offset] = bColor;
+                }
+            }
+            for (j = 0; j < 8 && x + j + 8 + x_offset < lpSurface->w && x + j + 8 + x_offset >= 0; j++)
+            {
+                if (unicode_font[wChar][i + 1] & (1 << (7 - j)))
+                {
+                    dest[j + 8 + x_offset] = bColor;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (i = 0; i < FONT_HEIGHT && dest < top; i++, dest += lpSurface->w)
+        {
+            for (j = 0; j < 8 && x + j + x_offset < lpSurface->w && x + j + x_offset >= 0; j++)
+            {
+                if (unicode_font[wChar][i] & (1 << (7 - j)))
+                {
+                    dest[j + x_offset] = bColor;
+                }
+            }
+        }
+    }
+
 }
 
-int
-PAL_CharWidth(
-	unsigned short                 wChar
-)
+int PAL_CharWidth(unsigned short wChar)
 {
-	if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || wChar >= unicode_upper_top)
-	{
-		return 0;
-	}
+    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || wChar >= unicode_upper_top)
+    {
+        return 0;
+    }
 
-	//
-	// Locate for this character in the font lib.
-	//
-	if (wChar >= unicode_upper_base)
-	{
-		wChar -= (unicode_upper_base - unicode_lower_top);
-	}
+    // Locate for this character in the font lib.
+    if (wChar >= unicode_upper_base)
+    {
+        wChar -= (unicode_upper_base - unicode_lower_top);
+    }
 
-	return font_width[wChar] >> 1;
-}
-
-int
-PAL_FontHeight(
-	void
-)
-{
-	return _font_height;
+    return font_width[wChar] >> 1;
 }

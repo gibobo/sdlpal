@@ -26,6 +26,7 @@
 #include "play.h"
 #include "res.h"
 #include "uigame.h"
+#include "util.h"
 
 void
 PAL_GameMain(
@@ -48,46 +49,31 @@ PAL_GameMain(
 {
    unsigned int       dwTime;
 
-   //
    // Show the opening menu.
-   //
    gpGlobals->bCurrentSaveSlot = (unsigned char)PAL_OpeningMenu();
    gpGlobals->fInMainGame = 1;
 
-   //
    // Initialize game data and set the flags to load the game resources.
-   //
    PAL_ReloadInNextTick(gpGlobals->bCurrentSaveSlot);
 
-   //
    // Run the main game loop.
-   //
    dwTime = UTIL_GetTicks();
+
    while (1)
    {
-      //
       // Load the game resources if needed.
-      //
       PAL_LoadResources();
 
-      //
       // Clear the input state of previous frame.
-      //
       PAL_ClearKeyState();
 
-      //
       // Wait for the time of one frame. Accept input here.
-      //
       PAL_DelayUntil(dwTime);
 
-      //
       // Set the time of the next frame.
-      //
       dwTime = UTIL_GetTicks() + FRAME_TIME;
 
-      //
       // Run the main frame routine.
-      //
       PAL_StartFrame();
    }
 }

@@ -84,14 +84,12 @@ static void PAL_ShowFBP(
       {
          for (j = 0; j < 6; j++)
          {
-            //
             // Blend the pixels in the 2 buffers, and put the result into the
             // backup buffer
-            //
             for (k = rgIndex[j]; k < SCREEN_W * SCREEN_H; k += 6)
             {
-               a = ((unsigned char *)p->pixels)[k];
-               b = ((unsigned char *)gpScreenBak->pixels)[k];
+               a = p->pixels[k];
+               b = gpScreenBak->pixels[k];
 
                if (i > 0)
                {
@@ -105,7 +103,7 @@ static void PAL_ShowFBP(
                   }
                }
 
-               ((unsigned char *)gpScreenBak->pixels)[k] = ((a & 0xF0) | (b & 0x0F));
+               gpScreenBak->pixels[k] = ((a & 0xF0) | (b & 0x0F));
             }
 
             VIDEO_RestoreScreen(gpScreen);

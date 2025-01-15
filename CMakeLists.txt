@@ -31,7 +31,10 @@ set (SDLPAL_DIR             sdlpal/)
 file(GLOB_RECURSE SDLPAL_SOURCES    ${SDLPAL_DIR}/*.c ${SDLPAL_DIR}/*.cpp)
 file(GLOB_RECURSE SDLPAL_HEADERS	${SDLPAL_DIR}/*.h)
 
+set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
+set(SDL_TEST   OFF CACHE BOOL "Build the SDL2_test library" FORCE)
 add_subdirectory(external/SDL)
+
 # add_subdirectory(external/libbinio)
 
 # if(WIN32)

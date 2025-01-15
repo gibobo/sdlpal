@@ -57,76 +57,53 @@
 //  d & 0x2000
 //
 
-typedef struct tagPALMAP
-{
-    unsigned int Tiles[128][64][2];
-    unsigned char *pTileSprite;
-    int iMapNum;
+typedef struct tagPALMAP {
+  unsigned int Tiles[128][64][2];
+  unsigned char *pTileSprite;
+  int iMapNum;
 } PALMAP;
 
-typedef const PALMAP *LPCPALMAP;
-
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-    PALMAP *PAL_LoadMap(
-        int iMapNum,
-        FILE *fpMapMKF,
-        FILE *fpGopMKF);
+PALMAP *PAL_LoadMap(
+    int iMapNum,
+    FILE *fpMapMKF,
+    FILE *fpGopMKF);
 
-    void PAL_FreeMap(
-        PALMAP *lpMap);
+void PAL_FreeMap(
+    PALMAP *lpMap);
 
-    const unsigned char *
-    PAL_MapGetTileBitmap(
-        unsigned char x,
-        unsigned char y,
-        unsigned char h,
-        unsigned char ucLayer,
-        LPCPALMAP lpMap);
+const unsigned char *PAL_MapGetTileBitmap(
+    unsigned char x,
+    unsigned char y,
+    unsigned char h,
+    unsigned char ucLayer,
+    PALMAP *lpMap);
 
-    int
-    PAL_MapTileIsBlocked(
-        unsigned char x,
-        unsigned char y,
-        unsigned char h,
-        LPCPALMAP lpMap);
+int PAL_MapTileIsBlocked(
+    unsigned char x,
+    unsigned char y,
+    unsigned char h,
+    PALMAP *lpMap);
 
-    unsigned char
-    PAL_MapGetTileHeight(
-        unsigned char x,
-        unsigned char y,
-        unsigned char h,
-        unsigned char ucLayer,
-        LPCPALMAP lpMap);
+unsigned char
+PAL_MapGetTileHeight(
+    unsigned char x,
+    unsigned char y,
+    unsigned char h,
+    unsigned char ucLayer,
+    PALMAP *lpMap);
 
-    void
-    PAL_MapBlitToSurface(
-        LPCPALMAP lpMap,
-        PAL_Surface *lpSurface,
-        const PAL_Rect *lpSrcRect,
-        unsigned char ucLayer);
+void PAL_MapBlitToSurface(
+    PALMAP *lpMap,
+    PAL_Surface *lpSurface,
+    const PAL_Rect *lpSrcRect,
+    unsigned char ucLayer);
 
 #ifdef __cplusplus
 }
 #endif
-
-//
-// Convert map location to the real location
-//
-#define PAL_XYH_TO_POS(x, y, h) \
-    unsigned int((x) * 32 + (h) * 16, (y) * 16 + (h) * 8)
-
-//
-// Convert real location to map location
-//
-#define PAL_POS_TO_XYH(pos, x, y, h)                             \
-    {                                                            \
-        (h) = (unsigned char)(((PAL_X(pos) % 32) != 0) ? 1 : 0); \
-        (x) = (unsigned char)(PAL_X(pos) / 32);                  \
-        (y) = (unsigned char)(PAL_Y(pos) / 16);                  \
-    }
 
 #endif

@@ -754,7 +754,7 @@ int PAL_MenuTextMaxWidth(
 
   Parameters:
 
-    [IN]  rgMenuItem - Pointer to the menu item array.
+   [IN]  rgMenuItem - Pointer to the menu item array.
    [IN]  nMenuItem - Number of menu items.
 
   Return value:
