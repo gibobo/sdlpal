@@ -1,4 +1,4 @@
-﻿# CMakeList.txt: 最上層的 CMake 專案檔，執行全域設定
+# CMakeList.txt: 最上層的 CMake 專案檔，執行全域設定
 # 並在這裡包含子專案。
 #
 cmake_minimum_required (VERSION 3.8)
@@ -26,7 +26,7 @@ set (BINIO_SOURCE_DIR       external/libbinio/src)
 set (BINIO_INCLUDE_DIR      external/libbinio/contrib/vs2015/libbinio)
 set (NUKED_DIR              external/nuked)
 set (ADPLUG_DIR             adplug)
-set (SDLPAL_DIR             sdlpal/)
+set (SDLPAL_DIR             src)
 
 file(GLOB_RECURSE SDLPAL_SOURCES    ${SDLPAL_DIR}/*.c ${SDLPAL_DIR}/*.cpp)
 file(GLOB_RECURSE SDLPAL_HEADERS	${SDLPAL_DIR}/*.h)
