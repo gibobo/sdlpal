@@ -584,27 +584,16 @@ void VIDEO_CopySurface(
     const PAL_Rect *srcrect,
     PAL_Surface *dst,
     PAL_Rect *dstrect) {
-    unsigned int sr_x = (srcrect) ? (srcrect->x) : 0;
-    unsigned int sr_y = (srcrect) ? (srcrect->y) : 0;
-    unsigned int sr_w = (srcrect) ? (srcrect->w) : src->w;
-    unsigned int sr_h = (srcrect) ? (srcrect->h) : src->h;
-    unsigned int dr_x = (dstrect) ? (dstrect->x) : 0;
-    unsigned int dr_y = (dstrect) ? (dstrect->y) : 0;
-    unsigned int dr_w = (dstrect) ? (dstrect->w) : dst->w;
-    unsigned int dr_h = (dstrect) ? (dstrect->h) : dst->h;
-
+    unsigned int sr_x = (srcrect) ? srcrect->x : 0;
+    unsigned int sr_y = (srcrect) ? srcrect->y : 0;
+    unsigned int sr_w = (srcrect) ? min(src->w, srcrect->x + srcrect->w) - sr_x : src->w;
+    unsigned int sr_h = (srcrect) ? min(src->h, srcrect->y + srcrect->h) - sr_y : src->h;
+    unsigned int dr_x = (dstrect) ? dstrect->x : 0;
+    unsigned int dr_y = (dstrect) ? dstrect->y : 0;
     unsigned char *p_src = src->pixels + sr_y * src->w + sr_x;
     unsigned char *p_dst = dst->pixels + dr_y * dst->w + dr_x;
-    unsigned int dx, dy;
-    unsigned int sx, sy;
-    for (dy = 0; dy < dr_h; dy++)
-    {
-        sy = (dy * sr_h) / dr_h;
-        for (dx = 0; dx < dr_w; dx++)
-        {
-            sx = (dx * sr_w) / dr_w;
-            p_dst[dx + dy * dst->w] = p_src[sx + sy * src->w];
-        }
+    for (unsigned int dy = 0; dy < sr_h; dy++) {
+        memcpy(p_dst + dy * dst->w, p_src + dy * src->w, sr_w);
     }
 }
 
