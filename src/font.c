@@ -19,7 +19,6 @@
 //
 
 #include "font.h"
-#include "ascii.h"
 #include "fontglyph.h"
 #include "palcommon.h"
 #include "text.h"
@@ -31,58 +30,39 @@
 #define unicode_upper_base  0xF900
 #define unicode_upper_top	0xFFFE
 
-static unsigned char reverseBits(unsigned char x) {
-    unsigned char y = 0;
-    for (int i = 0 ; i < 8; i++){
-        y <<= 1;
-        y |= (x & 1);
-        x >>= 1;
-    }
-    return y;
-}
+static unsigned char *p_font = NULL;
 
 void PAL_InitFont(void)
 {
-    int         i, j;
-
-    for (i = 0; i < sizeof(iso_font) / 15; i++)
-    {
-        for (j = 0; j < 15; j++)
-        {
-            unicode_font[i][j] = reverseBits(iso_font[i * 15 + j]);
-        }
-
-        unicode_font[i][15] = 0;
-        font_width[i] = 16;
+    p_font = (unsigned char *)UTIL_calloc(65535, 32);
+#if 1
+    FILE *fp = fopen(SOURCE_DIR "/unicode_font.dat", "rb");
+    fread(p_font, 32, 65535, fp);
+    fclose(fp);
+#endif
+#if 0
+    FILE *fp = fopen("unicode_font.dat", "wb");
+    for (size_t i = 0; i < 65535; i++) {
+      if (font_width[i] == 16)
+        memset(p_font + i * 32, 0, 16);
+      if (font_width[i] == 0)
+        memset(p_font + i * 32, 0, 32);
     }
-    #if 0
-    FILE *fp = fopen("unicode_font.txt","w");
-    for (size_t i = 0; i < 65535; i++)
-    {
-        fprintf(fp, "{");
-        for (size_t j = 0; j < 32; j++)
-        {
-            if(j)
-            fprintf(fp, ",%d", unicode_font[i][j]);
-            else
-            fprintf(fp, "%d", unicode_font[i][j]);
-        }
-        fprintf(fp, "},\n");
-    }
+    fwrite(p_font, 1, 65535 * 32, fp);
     fclose(fp);
 
-    fp = fopen("font_width.txt", "w");
-    fprintf(fp, "unsigned char font_width[] = {\r");
-    for (size_t i = 0; i < 65535; i++)
-    {
-        fprintf(fp, "%d ,", font_width[i]);
-        if (font_width[i] != 16 && font_width[i] != 32)
-            printf("?");
-        else
-            printf(".");
-    }
-    fprintf(fp, "};\n");
-    fclose(fp);
+    // fp = fopen("font_width.txt", "w");
+    // fprintf(fp, "unsigned char font_width[] = {\r");
+    // for (size_t i = 0; i < 65535; i++)
+    // {
+    //     fprintf(fp, "%d ,", font_width[i]);
+    //     if (font_width[i] != 16 && font_width[i] != 32)
+    //         printf("?");
+    //     else
+    //         printf(".");
+    // }
+    // fprintf(fp, "};\n");
+    // fclose(fp);
     #endif
 }
 
@@ -113,7 +93,7 @@ void PAL_DrawCharOnSurface(
     // Draw the character to the surface.
     unsigned char *dst = lpSurface->pixels + lpSurface->w * ReLU(y) + x;
     unsigned char *top = lpSurface->pixels + lpSurface->w * lpSurface->h;
-    unsigned char *font = unicode_font[wChar];
+    unsigned char *font = p_font + wChar * 32;
 
     for (i = 0; i < font_width[wChar] && dst < top; i++, dst += lpSurface->w)
     {
