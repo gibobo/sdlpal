@@ -68,9 +68,9 @@ void PAL_InitFont(void);
 void PAL_DrawCharOnSurface(
     unsigned short wChar,
     PAL_Surface *lpSurface,
-    unsigned int x,
-    unsigned int y,
-    unsigned char bColor);
+    const unsigned int x,
+    const unsigned int y,
+    const unsigned char bColor);
 
 /*++
   Purpose:
@@ -87,6 +87,8 @@ void PAL_DrawCharOnSurface(
 
 --*/
 int PAL_CharWidth(unsigned short wChar);
+
+void PAL_DeInitFont(void);
 
 #ifdef __cplusplus
 }

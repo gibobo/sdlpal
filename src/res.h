@@ -23,12 +23,12 @@
 
 #include "map.h"
 
-typedef enum tagLOADRESFLAG
+enum tagLOADRESFLAG
 {
    kLoadGlobalData     = (1 << 0),    // load global data
    kLoadScene          = (1 << 1),    // load a scene
    kLoadPlayerSprite   = (1 << 2),    // load player sprites
-} LOADRESFLAG, *LPLOADRESFLAG;
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,11 +58,6 @@ PALMAP *PAL_GetCurrentMap(void);
 
 unsigned char *
 PAL_GetPlayerSprite(
-   unsigned char      bPlayerIndex
-);
-
-unsigned char *
-PAL_GetBattleSprite(
    unsigned char      bPlayerIndex
 );
 

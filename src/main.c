@@ -114,6 +114,7 @@ void PAL_Shutdown(int exit_code)
    // global needs be free in last
    // since subsystems may needs config content during destroy
    // which also cleared here
+   PAL_DeInitFont();
    PAL_FreeGlobals();
 
    g_exit_code = exit_code;

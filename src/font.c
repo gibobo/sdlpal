@@ -19,59 +19,42 @@
 //
 
 #include "font.h"
-#include "fontglyph.h"
-#include "palcommon.h"
-#include "text.h"
-#include "util.h"
+#include <stdlib.h>
 
 #define ReLU(A)  ((A) > 0 ? (A) : 0)
-
 #define unicode_lower_top	0xD800
 #define unicode_upper_base  0xF900
 #define unicode_upper_top	0xFFFE
 
+static FILE *fp_font_data = NULL;
+static FILE *fp_font_width = NULL;
 static unsigned char *p_font = NULL;
+static unsigned char *p_font_width = NULL;
 
 void PAL_InitFont(void)
 {
-    p_font = (unsigned char *)UTIL_calloc(65535, 32);
-#if 1
-    FILE *fp = fopen(SOURCE_DIR "/unicode_font.dat", "rb");
-    fread(p_font, 32, 65535, fp);
-    fclose(fp);
-#endif
-#if 0
-    FILE *fp = fopen("unicode_font.dat", "wb");
-    for (size_t i = 0; i < 65535; i++) {
-      if (font_width[i] == 16)
-        memset(p_font + i * 32, 0, 16);
-      if (font_width[i] == 0)
-        memset(p_font + i * 32, 0, 32);
-    }
-    fwrite(p_font, 1, 65535 * 32, fp);
-    fclose(fp);
+    p_font = (unsigned char *)calloc(65536, 32);
+    p_font_width = (unsigned char *)calloc(65536, 1);
+    fp_font_data = fopen(SOURCE_DIR "/unicode_font.dat", "rb");
+    fp_font_width = fopen(SOURCE_DIR "/unicode_width.dat", "rb");
+    fread(p_font, 32, 65536, fp_font_data);
+    fread(p_font_width, 1, 65536, fp_font_width);
+}
 
-    // fp = fopen("font_width.txt", "w");
-    // fprintf(fp, "unsigned char font_width[] = {\r");
-    // for (size_t i = 0; i < 65535; i++)
-    // {
-    //     fprintf(fp, "%d ,", font_width[i]);
-    //     if (font_width[i] != 16 && font_width[i] != 32)
-    //         printf("?");
-    //     else
-    //         printf(".");
-    // }
-    // fprintf(fp, "};\n");
-    // fclose(fp);
-    #endif
+void PAL_DeInitFont(void)
+{
+    free(p_font);
+    free(p_font_width);
+    fclose(fp_font_data);
+    fclose(fp_font_width);
 }
 
 void PAL_DrawCharOnSurface(
     unsigned short wChar,
     PAL_Surface *lpSurface,
-    unsigned int x,
-    unsigned int y,
-    unsigned char bColor)
+    const unsigned int x,
+    const unsigned int y,
+    const unsigned char bColor)
 {
     int       i;
     int       j;
@@ -94,22 +77,23 @@ void PAL_DrawCharOnSurface(
     unsigned char *dst = lpSurface->pixels + lpSurface->w * ReLU(y) + x;
     unsigned char *top = lpSurface->pixels + lpSurface->w * lpSurface->h;
     unsigned char *font = p_font + wChar * 32;
+    unsigned char font_width = (p_font_width[wChar / 8] & (1 << (wChar % 8))) ? 32 : 16;
 
-    for (i = 0; i < font_width[wChar] && dst < top; i++, dst += lpSurface->w)
+    for (i = 0; i < font_width && dst < top; i++, dst += lpSurface->w)
     {
         for (j = 0; j < 8 && x + j < lpSurface->w && x + j >= 0; j++)
         {
-            if ((font[i] << j) & 0x80)
+            if (font[i] & (1 << j % 8))
             {
                 dst[j] = bColor;
             }
         }
-        if (font_width[wChar] == 32)
+        if (font_width == 32)
         {
             i++;
             for (j = 8; j < 16 && x + j < lpSurface->w && x + j >= 0; j++)
             {
-                if (font[i] & (1 << (15 - j)))
+                if (font[i] & (1 << j % 8))
                 {
                     dst[j] = bColor;
                 }
@@ -131,5 +115,5 @@ int PAL_CharWidth(unsigned short wChar)
         wChar -= (unicode_upper_base - unicode_lower_top);
     }
 
-    return font_width[wChar] >> 1;
+    return (p_font_width[wChar / 8] & (1 << (wChar % 8))) ? 16 : 8;;
 }
