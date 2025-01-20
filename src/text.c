@@ -641,21 +641,18 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
       if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
          g_TextLib.bDialogPosition != kDialogCenter)
       {
-         //
          // palette shift
-         //
-         t[0] = palette[0xF9*3+0];
-         t[1] = palette[0xF9*3+1];
-         t[2] = palette[0xF9*3+2];
-         for (i = 0xF9; i < 0xFE; i++)
-         {
-            palette[i*3+0] = palette[i + 3];
-            palette[i*3+1] = palette[i + 4];
-            palette[i*3+2] = palette[i + 5];
+         t[0] = palette[0xF9 * 3 + 0];
+         t[1] = palette[0xF9 * 3 + 1];
+         t[2] = palette[0xF9 * 3 + 2];
+         for (i = 0xF9; i < 0xFE; i++) {
+           palette[i * 3 + 0] = palette[i * 3 + 3];
+           palette[i * 3 + 1] = palette[i * 3 + 4];
+           palette[i * 3 + 2] = palette[i * 3 + 5];
          }
-         palette[0xFE*3+0] = t[0];
-         palette[0xFE*3+1] = t[1];
-         palette[0xFE*3+2] = t[2];
+         palette[0xFE * 3 + 0] = t[0];
+         palette[0xFE * 3 + 1] = t[1];
+         palette[0xFE * 3 + 2] = t[2];
 
          VIDEO_SetPalette(palette);
       }

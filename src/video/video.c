@@ -502,13 +502,12 @@ VIDEO_FadeScreen(
          {
              unsigned char *src = gpScreenBak->pixels;
              unsigned char *dst = bufScreenReal;
-             for (int j = 0; j < SCREEN_W * SCREEN_H; j++, src++, dst += 3)
-             {
-                 dst[0] = bufPalette[(*src)*3+0];
-                 dst[1] = bufPalette[(*src)*3+1];
-                 dst[2] = bufPalette[(*src)*3+2];
+             for (int j = 0; j < SCREEN_W * SCREEN_H; j++, src++, dst += 3) {
+               dst[0] = bufPalette[(*src) * 3 + 0];
+               dst[1] = bufPalette[(*src) * 3 + 1];
+               dst[2] = bufPalette[(*src) * 3 + 2];
              }
-             VIDEO_GLSL_RenderCopy(dst);
+             VIDEO_GLSL_RenderCopy(bufScreenReal);
          }
          SDL_GL_SwapWindowWithResult(gpWindow);
       }
@@ -538,10 +537,12 @@ PAL_Surface *VIDEO_CreateCompatibleSizedSurface(
 {
     // Create the surface
     PAL_Surface *dest;
-    dest = malloc(sizeof(PAL_Surface));
+    dest = (PAL_Surface *)malloc(sizeof(PAL_Surface));
+    memset(dest, 0, sizeof(PAL_Surface));
     dest->w = pSize ? pSize->w : SCREEN_W;
     dest->h = pSize ? pSize->h : SCREEN_H;
     dest->pixels = (unsigned char *)malloc(dest->w * dest->h);
+    memset(dest->pixels, 0, dest->w * dest->h);
     return dest;
 }
 
