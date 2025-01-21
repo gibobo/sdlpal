@@ -67,11 +67,6 @@ typedef struct tagSCREENLAYOUT {
 } SCREENLAYOUT;
 
 typedef struct tagCONFIGURATION {
-  union {
-    SCREENLAYOUT ScreenLayout;
-    unsigned int ScreenLayoutArray[sizeof(SCREENLAYOUT) / sizeof(unsigned int)];
-  };
-
   /* Configurable options */
   char *pszGamePath;
   char *pszSavePath;
@@ -79,14 +74,10 @@ typedef struct tagCONFIGURATION {
   unsigned int dwTextureWidth;
   unsigned int dwTextureHeight;
   int iAudioDevice;
-  int iSurroundOPLOffset;
   int iAudioChannels;
   int iSampleRate;
   int iOPLSampleRate;
   unsigned short wAudioBufferSize;
-  int fUseSurroundOPL;
-  int fKeepAspectRatio;
-  int fUseCustomScreenLayout;
   int fEnableKeyRepeat;
 } CONFIGURATION;
 

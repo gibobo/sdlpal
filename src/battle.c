@@ -929,11 +929,7 @@ PAL_LoadBattleBackground(
 
 --*/
 {
-   PAL_LARGE unsigned char buf[SCREEN_W * SCREEN_H];
-
-   //
    // Create the surface
-   //
    g_Battle.lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    if (g_Battle.lpBackground == NULL)
@@ -941,15 +937,12 @@ PAL_LoadBattleBackground(
       TerminateOnError("PAL_LoadBattleBackground(): failed to create surface!");
    }
 
-   //
    // Load the picture
-   //
-   PAL_MKFDecompressChunk(buf, SCREEN_W * SCREEN_H, gpGlobals->wNumBattleField, gpGlobals->f.fpFBP);
-
-   //
-   // Draw the picture to the surface.
-   //
-   PAL_FBPBlitToSurface(buf, g_Battle.lpBackground);
+   PAL_MKFDecompressChunk(
+       g_Battle.lpBackground->pixels,
+       g_Battle.lpBackground->w * g_Battle.lpBackground->h,
+       gpGlobals->wNumBattleField,
+       gpGlobals->f.fpFBP);
 }
 
 static void

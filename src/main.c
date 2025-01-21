@@ -160,48 +160,41 @@ void PAL_SplashScreen(void)
 --*/
 {
    unsigned char *palette = PAL_GetPalette(1, FALSE);
-   unsigned char rgCurrentPalette[256*3];
+   unsigned char rgCurrentPalette[256 * 3];
    PAL_Surface *lpBitmapDown;
    PAL_Surface *lpBitmapUp;
-   PAL_Rect srcrect, dstrect;
-   unsigned char *lpSpriteCrane;
-   unsigned char *lpBitmapTitle;
-   unsigned char *buf;
-   unsigned char *buf2;
-   int cranepos[9][3], i, iImgPos = 200, iCraneFrame = 0, iTitleHeight;
-   unsigned int dwTime, dwBeginTime;
+   PAL_Rect srcrect;
+   PAL_Rect dstrect;
+   unsigned char *lpSpriteCrane = NULL;
+   unsigned char *lpBitmapTitle = NULL;
+   unsigned char *lpTitleBuf = NULL;
+   int cranepos[9][3];
+   int i;
+   int iImgPos = 200;
+   int iCraneFrame = 0;
+   int iTitleHeight;
+   unsigned int dwTime;
+   unsigned int dwBeginTime;
 
-   if (palette == NULL)
-   {
+   if (palette == NULL) {
       fprintf(stderr, "ERROR: PAL_SplashScreen(): palette == NULL\n");
       return;
    }
 
    // Allocate all the needed memory at once for simplification
-   buf = (unsigned char *)UTIL_calloc(2, SCREEN_W * SCREEN_H);
-   buf2 = buf + SCREEN_W * SCREEN_H;
-   lpSpriteCrane = buf2 + 32000;
+   lpTitleBuf = (unsigned char *)malloc(4306);
+   lpSpriteCrane  = (unsigned char *)malloc(1652);
 
    // Create the surfaces
    lpBitmapDown = VIDEO_CreateCompatibleSizedSurface(NULL);
    lpBitmapUp = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    // Read the bitmaps
-   PAL_MKFReadChunk(buf, SCREEN_W * SCREEN_H, 0x03, gpGlobals->f.fpFBP);
-   Decompress(buf, buf2, SCREEN_W * SCREEN_H);
-   PAL_FBPBlitToSurface(buf2, lpBitmapUp);
-
-   PAL_MKFReadChunk(buf, SCREEN_W * SCREEN_H, 0x04, gpGlobals->f.fpFBP);
-   Decompress(buf, buf2, SCREEN_W * SCREEN_H);
-   PAL_FBPBlitToSurface(buf2, lpBitmapDown);
-
-   PAL_MKFReadChunk(buf, 32000, 0x47, gpGlobals->f.fpMGO);
-   Decompress(buf, buf2, 32000);
-   lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(buf2, 0);
-
-   PAL_MKFReadChunk(buf, 32000, 0x49, gpGlobals->f.fpMGO);
-   Decompress(buf, lpSpriteCrane, 32000);
-
+   PAL_MKFDecompressChunk(lpBitmapUp->pixels, SCREEN_W * SCREEN_H, 0x03, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(lpBitmapDown->pixels, SCREEN_W * SCREEN_H, 0x04, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(lpTitleBuf, 4306, 0x47, gpGlobals->f.fpMGO);
+   PAL_MKFDecompressChunk(lpSpriteCrane, 1652, 0x49, gpGlobals->f.fpMGO);
+   lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
    iTitleHeight = PAL_RLEGetHeight(lpBitmapTitle);
    lpBitmapTitle[2] = 0;
    lpBitmapTitle[3] = 0; // HACKHACK
@@ -331,7 +324,8 @@ void PAL_SplashScreen(void)
 
    PAL_FreeSurface(lpBitmapDown);
    PAL_FreeSurface(lpBitmapUp);
-   free(buf);
+   free(lpTitleBuf);
+   free(lpSpriteCrane);
 
    AUDIO_PlayMusic(0x00, FALSE, 1);
 

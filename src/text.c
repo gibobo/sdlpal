@@ -22,7 +22,6 @@
 //
 
 #include "text.h"
-#include "codepage.h"
 #include "common.h"
 #include "font.h"
 #include "global.h"
@@ -34,6 +33,7 @@
 #include "video/video.h"
 #include <errno.h>
 #include <wctype.h>
+#include <stdlib.h>
 
 #define   FONT_COLOR_DEFAULT        0x4F
 #define   FONT_COLOR_YELLOW         0x2D
@@ -49,6 +49,7 @@ static wchar_t  *MsgBuf;
 static wchar_t **lpWordBuf;
 static wchar_t **lpMsgBuf;
 static wchar_t internal_wbuffer[PAL_GLOBAL_BUFFER_SIZE];
+static wchar_t *lpcptbl_big5;
 
 TEXTLIB         g_TextLib;
 
@@ -112,13 +113,18 @@ PAL_InitText(
     // Close the words file
     fclose(fp);
 
+    fp = fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
+    lpcptbl_big5 = (wchar_t *)calloc(126 * 160, sizeof(wchar_t));
+    fread((void*)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
+    fclose(fp);
+
     // Split the words and do code page conversion
     for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
         int base = i * 10;
         int pos = base + 9;
         while (pos >= base && temp[pos] == ' ')
           temp[pos--] = 0;
-        wlen += PAL_MultiByteToWideCharCP((const char *)temp + base, 10, NULL, 0) + 1;
+        wlen += PAL_MultiByteToWideCharCP(temp + base, 10, NULL, 0) + 1;
     }
 
     WordBuf = (wchar_t*)malloc(wlen * sizeof(wchar_t));
@@ -134,7 +140,7 @@ PAL_InitText(
     {
         int l;
         lpWordBuf[i] = WordBuf + wpos;
-        l = PAL_MultiByteToWideCharCP((const char*)temp + i * 10, 10, lpWordBuf[i], wlen - wpos);
+        l = PAL_MultiByteToWideCharCP(temp + i * 10, 10, lpWordBuf[i], wlen - wpos);
         if (l > 0 && lpWordBuf[i][l - 1] == '1')
             lpWordBuf[i][l - 1] = 0;
         lpWordBuf[i][l] = 0;
@@ -178,7 +184,7 @@ PAL_InitText(
     // Split messages and do code page conversion here
     for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++)
     {
-        wlen += PAL_MultiByteToWideCharCP((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
+        wlen += PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
     }
     MsgBuf = (wchar_t*)malloc(wlen * sizeof(wchar_t));
     lpMsgBuf = (wchar_t**)malloc(g_TextLib.nMsgs * sizeof(wchar_t*));
@@ -194,7 +200,7 @@ PAL_InitText(
     {
         int l;
         lpMsgBuf[i] = MsgBuf + wpos;
-        l = PAL_MultiByteToWideCharCP((const char*)temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
+        l = PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
         lpMsgBuf[i][l] = 0;
         wpos += l + 1;
     }
@@ -245,10 +251,14 @@ void PAL_FreeText(
   if (lpWordBuf != NULL) {
     free(lpWordBuf);
   }
+  if (lpcptbl_big5 != NULL) {
+    free(lpcptbl_big5);
+  }
   MsgBuf = NULL;
   WordBuf = NULL;
   lpMsgBuf = NULL;
   lpWordBuf = NULL;
+  lpcptbl_big5 = NULL;
 }
 
 const wchar_t*
@@ -496,14 +506,13 @@ PAL_StartDialogWithOffset(
 
 --*/
 {
-   PAL_LARGE unsigned char buf[SCREEN_W * SCREEN_H];
-   PAL_Rect       rect;
+   unsigned char *buf = NULL;
+   const unsigned int buf_sz = SCREEN_W * SCREEN_H;
+   PAL_Rect rect;
 
-   if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
-   {
-      //
+   buf = (unsigned char *)malloc(buf_sz);
+   if (gpGlobals->fInBattle && !g_fUpdatedInBattle) {
       // Update the screen in battle, or the graphics may seem messed up
-      //
       VIDEO_UpdateScreen(NULL);
       g_fUpdatedInBattle = TRUE;
    }
@@ -530,10 +539,8 @@ PAL_StartDialogWithOffset(
    case kDialogUpper:
       if (iNumCharFace > 0)
       {
-         //
          // Display the character face at the upper part of the screen
-         //
-         if (PAL_MKFReadChunk(buf, sizeof(buf), iNumCharFace, gpGlobals->f.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gpGlobals->f.fpRGM) > 0)
          {
             rect.w = PAL_RLEGetWidth((const unsigned char*)buf);
             rect.h = PAL_RLEGetHeight((const unsigned char*)buf);
@@ -554,10 +561,8 @@ PAL_StartDialogWithOffset(
    case kDialogLower:
       if (iNumCharFace > 0)
       {
-         //
          // Display the character face at the lower part of the screen
-         //
-         if (PAL_MKFReadChunk(buf, sizeof(buf), iNumCharFace, gpGlobals->f.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gpGlobals->f.fpRGM) > 0)
          {
             rect.x = 270 - PAL_RLEGetWidth((const unsigned char*)buf) / 2 + xOff;
             rect.y = 144 - PAL_RLEGetHeight((const unsigned char*)buf) / 2 + yOff;
@@ -578,6 +583,7 @@ PAL_StartDialogWithOffset(
    g_TextLib.posDialogText = PAL_XY( PAL_X(g_TextLib.posDialogText) + xOff, PAL_Y(g_TextLib.posDialogText) + yOff);
 
    g_TextLib.bDialogPosition = bDialogLocation;
+   free(buf);
 }
 
 static void
@@ -1055,10 +1061,10 @@ PAL_DialogIsPlayingRNG(
 
 int
 PAL_MultiByteToWideCharCP(
-   const char   *mbs,
-   int           mbslength,
-   wchar_t*      wcs,
-   int           wcslength
+   const unsigned char *mbs,
+   int                  mbslength,
+   wchar_t*             wcs,
+   int                  wcslength
 )
 /*++
   Purpose:
@@ -1095,7 +1101,7 @@ PAL_MultiByteToWideCharCP(
         {
             if (state == 0)
             {
-                if ((unsigned char)mbs[i] <= 0x80 || (unsigned char)mbs[i] == 0xff)
+                if (mbs[i] <= 0x80 || mbs[i] == 0xff)
                     wlen++;
                 else
                     state = 1;
@@ -1111,32 +1117,32 @@ PAL_MultiByteToWideCharCP(
     }
     else
     {
-        wchar_t invalid_char = 0x3f;
         for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
         {
             if (state == 0)
             {
-                if ((unsigned char)mbs[i] <= 0x80)
+                if (mbs[i] <= 0x80)
                     wcs[wlen++] = mbs[i];
-                else if ((unsigned char)mbs[i] == 0xff)
+                else if (mbs[i] == 0xff)
                     wcs[wlen++] = 0xf8f8;
                 else
                     state = 1;
             }
             else
             {
-                if ((unsigned char)mbs[i] < 0x40 || ((unsigned char)mbs[i] >= 0x7f && (unsigned char)mbs[i] <= 0xa0))
-                    wcs[wlen++] = invalid_char;
-                else if ((unsigned char)mbs[i] <= 0x7e)
-                    wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x40];
-                else
-                    wcs[wlen++] = cptbl_big5[(unsigned char)mbs[i - 1] - 0x81][(unsigned char)mbs[i] - 0x60];
-                state = 0;
+              if ((mbs[i] >= 0x40 && mbs[i] <= 0x7E) || (mbs[i] >= 0xA1 && mbs[i] <= 0xFE)) {
+                unsigned short byte1 = mbs[i - 1] - 0x81;
+                unsigned short byte2 = mbs[i];
+                byte2 -= (mbs[i] <= 0x7E) ? 0x40 : 0x60;
+                wcs[wlen++] = lpcptbl_big5[byte1 * 160 + byte2];
+              } else
+                wcs[wlen++] = 0x003F;
+              state = 0;
             }
         }
         if (state != 0 && wlen < wcslength)
         {
-            wcs[wlen++] = invalid_char;
+            wcs[wlen++] = 0x003F;
         }
         if (null || (i < mbslength && !mbs[i]))
         {
@@ -1339,7 +1345,7 @@ PAL_swprintf(
                     else
                     {
                         buf = (wchar_t*)va_arg(ap, char*);
-                        len = PAL_MultiByteToWideCharCP((const char*)buf, -1, NULL, 0) - 1;
+                        len = PAL_MultiByteToWideCharCP((const unsigned char*)buf, -1, NULL, 0) - 1;
                     }
                 }
                 else
@@ -1349,7 +1355,8 @@ PAL_swprintf(
                         chr_buf[0] = va_arg(ap, wchar_t);
                     else
                         chr_buf[0] = va_arg(ap, int);
-                    buf = chr_buf; len = 1;
+                    buf = chr_buf;
+                    len = 1;
                 }
 
                 // Limit output length no longer then precision
@@ -1366,7 +1373,7 @@ PAL_swprintf(
 
                 // Convert or copy string (char) into output buffer
                 if (*format == 's' && !wide)
-                    PAL_MultiByteToWideCharCP((const char*)buf, -1, buffer, precision);
+                    PAL_MultiByteToWideCharCP((const unsigned char*)buf, -1, buffer, precision);
                 else
                     wcsncpy(buffer, buf, precision);
                 buffer += precision; count += precision;

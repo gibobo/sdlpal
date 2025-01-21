@@ -27,26 +27,26 @@
 #define unicode_upper_top	0xFFFE
 
 static FILE *fp_font_data = NULL;
-static FILE *fp_font_width = NULL;
+static FILE *fp_font_size = NULL;
 static unsigned char *p_font = NULL;
-static unsigned char *p_font_width = NULL;
+static unsigned char *p_font_size = NULL;
 
 void PAL_InitFont(void)
 {
     p_font = (unsigned char *)calloc(65536, 32);
-    p_font_width = (unsigned char *)calloc(65536, 1);
+    p_font_size = (unsigned char *)calloc(65536, 1);
     fp_font_data = fopen(SOURCE_DIR "/unicode_font.dat", "rb");
-    fp_font_width = fopen(SOURCE_DIR "/unicode_width.dat", "rb");
+    fp_font_size = fopen(SOURCE_DIR "/unicode_font_size.dat", "rb");
     fread(p_font, 32, 65536, fp_font_data);
-    fread(p_font_width, 1, 65536, fp_font_width);
+    fread(p_font_size, 1, 65536, fp_font_size);
 }
 
 void PAL_DeInitFont(void)
 {
     free(p_font);
-    free(p_font_width);
+    free(p_font_size);
     fclose(fp_font_data);
-    fclose(fp_font_width);
+    fclose(fp_font_size);
 }
 
 void PAL_DrawCharOnSurface(
@@ -77,9 +77,9 @@ void PAL_DrawCharOnSurface(
     unsigned char *dst = lpSurface->pixels + lpSurface->w * ReLU(y) + x;
     unsigned char *top = lpSurface->pixels + lpSurface->w * lpSurface->h;
     unsigned char *font = p_font + wChar * 32;
-    unsigned char font_width = (p_font_width[wChar / 8] & (1 << (wChar % 8))) ? 32 : 16;
+    unsigned char font_size = (p_font_size[wChar / 8] & (1 << (wChar % 8))) ? 32 : 16;
 
-    for (i = 0; i < font_width && dst < top; i++, dst += lpSurface->w)
+    for (i = 0; i < font_size && dst < top; i++, dst += lpSurface->w)
     {
         for (j = 0; j < 8 && x + j < lpSurface->w && x + j >= 0; j++)
         {
@@ -88,7 +88,7 @@ void PAL_DrawCharOnSurface(
                 dst[j] = bColor;
             }
         }
-        if (font_width == 32)
+        if (font_size == 32)
         {
             i++;
             for (j = 8; j < 16 && x + j < lpSurface->w && x + j >= 0; j++)
@@ -115,5 +115,5 @@ int PAL_CharWidth(unsigned short wChar)
         wChar -= (unicode_upper_base - unicode_lower_top);
     }
 
-    return (p_font_width[wChar / 8] & (1 << (wChar % 8))) ? 16 : 8;;
+    return (p_font_size[wChar / 8] & (1 << (wChar % 8))) ? 16 : 8;;
 }
