@@ -804,9 +804,8 @@ void SOUND_Shutdown(
             cursnd = cursnd->next;
             free(old);
         }
-        if (player->mkf)
-            fclose(player->mkf);
     }
+    UTIL_CloseFile(player->mkf);
 }
 
 static void
@@ -873,7 +872,7 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
-    FILE *mkf = UTIL_OpenFile("sounds.mkf");
+    FILE *mkf = fopen(RESOURCE_PATH "/sounds.mkf", "rb");
     if (mkf)
     {
         SOUNDPLAYER *player = (SOUNDPLAYER *)malloc(sizeof(SOUNDPLAYER));

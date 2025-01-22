@@ -222,7 +222,7 @@ AUDIO_OpenDevice(
    //
    // Initialize the music subsystem.
    //
-   gAudioDevice.pMusPlayer = RIX_Init(UTIL_GetFullPathName(UTIL_GlobalBuffer(0), PAL_GLOBAL_BUFFER_SIZE, gConfig.pszGamePath, "mus.mkf"));
+   gAudioDevice.pMusPlayer = RIX_Init(RESOURCE_PATH "/mus.mkf");
 
    //
    // Let the callback function run so that musics will be played.

@@ -19,6 +19,9 @@
 //
 
 #include "font.h"
+#include "util.h"
+#include "video/video.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 #define ReLU(A)  ((A) > 0 ? (A) : 0)
@@ -45,22 +48,21 @@ void PAL_DeInitFont(void)
 {
     free(p_font);
     free(p_font_size);
-    fclose(fp_font_data);
-    fclose(fp_font_size);
+    UTIL_CloseFile(fp_font_data);
+    UTIL_CloseFile(fp_font_size);
 }
 
 void PAL_DrawCharOnSurface(
     unsigned short wChar,
-    PAL_Surface *lpSurface,
     const unsigned int x,
     const unsigned int y,
     const unsigned char bColor)
 {
-    int       i;
-    int       j;
+    unsigned int i;
+    unsigned int j;
 
     // Check for NULL pointer & invalid char code.
-    if ((lpSurface == NULL) ||
+    if ((gpScreen == NULL) ||
         (wChar >= unicode_lower_top && wChar < unicode_upper_base) ||
         (wChar >= unicode_upper_top))
     {
@@ -74,14 +76,14 @@ void PAL_DrawCharOnSurface(
     }
 
     // Draw the character to the surface.
-    unsigned char *dst = lpSurface->pixels + lpSurface->w * ReLU(y) + x;
-    unsigned char *top = lpSurface->pixels + lpSurface->w * lpSurface->h;
+    unsigned char *dst = gpScreen->pixels + gpScreen->w * ReLU(y) + x;
+    unsigned char *top = gpScreen->pixels + gpScreen->w * gpScreen->h;
     unsigned char *font = p_font + wChar * 32;
     unsigned char font_size = (p_font_size[wChar / 8] & (1 << (wChar % 8))) ? 32 : 16;
 
-    for (i = 0; i < font_size && dst < top; i++, dst += lpSurface->w)
+    for (i = 0; i < font_size && dst < top; i++, dst += gpScreen->w)
     {
-        for (j = 0; j < 8 && x + j < lpSurface->w && x + j >= 0; j++)
+        for (j = 0; j < 8 && x + j < gpScreen->w && x + j >= 0; j++)
         {
             if (font[i] & (1 << j % 8))
             {
@@ -91,7 +93,7 @@ void PAL_DrawCharOnSurface(
         if (font_size == 32)
         {
             i++;
-            for (j = 8; j < 16 && x + j < lpSurface->w && x + j >= 0; j++)
+            for (j = 8; j < 16 && x + j < gpScreen->w && x + j >= 0; j++)
             {
                 if (font[i] & (1 << j % 8))
                 {

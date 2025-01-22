@@ -22,7 +22,6 @@
 //
 
 #include "palcfg.h"
-// #include "global.h"
 #include "palcommon.h"
 #include "common.h"
 // #include <stdint.h>
@@ -32,8 +31,6 @@ PAL_FreeConfig(
 	void
 )
 {
-	free(gConfig.pszGamePath);
-    free(gConfig.pszSavePath);
 	memset(&gConfig, 0, sizeof(CONFIGURATION));
 }
 
@@ -43,10 +40,6 @@ PAL_LoadConfig(
 )
 {
 	// Set configurable global options
-	if (!gConfig.pszSavePath)	gConfig.pszSavePath = strdup(SOURCE_DIR "/Pal98rqptw/");
-	if (!gConfig.pszGamePath)	gConfig.pszGamePath = strdup(SOURCE_DIR "/Pal98rqptw/");
-	if (!gConfig.pszShader)		gConfig.pszShader 	= strdup(SOURCE_DIR "/shaders/plain.glsl");
-
 	gConfig.fEnableKeyRepeat = FALSE;
 	gConfig.iAudioChannels = TRUE ? 2 : 1;
 	gConfig.iAudioDevice = -1;

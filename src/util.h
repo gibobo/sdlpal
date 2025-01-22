@@ -32,38 +32,6 @@ flength(
    FILE *fp
 );
 
-char *
-UTIL_GlobalBuffer(
-	int         index
-);
-
-/*++
-  Purpose:
-
-    Does a varargs printf into the user-supplied buffer,
-	so we don't need to have varargs versions of all text functions.
-
-  Parameters:
-
-    buffer - user-supplied buffer.
-	buflen - size of the buffer, including null-terminator.
-    format - the format string.
-
-  Return value:
-
-    The value of buffer if buffer is non-NULL and buflen > 0, otherwise NULL.
-
---*/
-char *
-UTIL_va(
-	char       *buffer,
-	int         buflen,
-	const char *format,
-	...
-);
-
-#define PAL_va(fmt, ...) UTIL_va(UTIL_GlobalBuffer(0), PAL_GLOBAL_BUFFER_SIZE, fmt, __VA_ARGS__)
-
 int
 RandomLong(
    int from,
@@ -98,107 +66,14 @@ UTIL_calloc(
    size_t               size
 );
 
-FILE *
-UTIL_OpenRequiredFileForMode(
-   const char*               lpszFileName,
-   const char*               szMode
-);
-
-FILE *
-UTIL_OpenFile(
-   const char*               lpszFileName
-);
-
-FILE *
-UTIL_OpenFileForMode(
-   const char*               lpszFileName,
-   const char*               szMode
-);
-
-FILE *
-UTIL_OpenFileAtPath(
-	const char*              lpszPath,
-	const char*              lpszFileName
-);
-
-/*++
-  Purpose:
-
-    Open a file in desired mode at the specific path.
-	If fails, return NULL.
-
-  Parameters:
-
-    [IN]  lpszPath - path to locate the file.
-    [IN]  lpszFileName - file name to open.
-    [IN]  szMode - file open mode.
-
-  Return value:
-
-    Pointer to the file.
-
---*/
-FILE *
-UTIL_OpenFileAtPathForMode(
-	const char*              lpszPath,
-	const char*              lpszFileName,
-	const char*              szMode
-);
-
 void
 UTIL_CloseFile(
    FILE                *fp
 );
 
-/*++
-  Purpose:
-
-    Combine the 'dir' and 'file' part into a single path string.
-	If 'dir' is non-NULL, then it ensures that the output string contains
-	'/' between 'dir' and 'file' (no matter whether 'file' is NULL or not).
-
-  Parameters:
-
-    buffer - user-supplied buffer.
-	buflen - size of the buffer, including null-terminator.
-    dir    - the directory path.
-	file   - the file path.
-
-  Return value:
-
-    The value of buffer if buffer is non-NULL and buflen > 0, otherwise NULL.
-
---*/
-const char *
-UTIL_CombinePath(
-	char       *buffer,
-	size_t      buflen,
-	int         numentry,
-	...
-);
-
-#define PAL_CombinePath(i, d, f) UTIL_CombinePath(UTIL_GlobalBuffer(i), PAL_GLOBAL_BUFFER_SIZE, 2, (d), (f))
-
-int
-UTIL_IsFileExist(
-    const char *path
-);
-
-const char *
-UTIL_GetFullPathName(
-	char       *buffer,
-	size_t      buflen,
-	const char *basepath,
-	const char *subpath
-);
-
-char *UTIL_basename(const char *path);
-
 /*
  * Platform-specific utilities
  */
-
-int UTIL_IsAbsolutePath(const char *lpszFileName);
 
 unsigned int UTIL_GetTicks(void);
 

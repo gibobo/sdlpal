@@ -68,9 +68,6 @@ typedef struct tagSCREENLAYOUT {
 
 typedef struct tagCONFIGURATION {
   /* Configurable options */
-  char *pszGamePath;
-  char *pszSavePath;
-  char *pszShader;
   unsigned int dwTextureWidth;
   unsigned int dwTextureHeight;
   int iAudioDevice;

@@ -24,7 +24,6 @@
 #include "common.h"
 #include "global.h"
 #include "input/input.h"
-#include "palcfg.h"
 #include "palcommon.h"
 #include "script.h"
 #include "text.h"

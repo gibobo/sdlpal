@@ -22,7 +22,6 @@
 #include "audio/audio.h"
 #include "common.h"
 #include "global.h"
-#include "palcfg.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
@@ -60,13 +59,13 @@ static void PAL_ShowFBP(
    int i, j, k;
    unsigned char a, b;
 
-   buf = (unsigned char *)UTIL_calloc(buf_sz, 1);
+   buf = (unsigned char *)UTIL_malloc(buf_sz);
    if (PAL_MKFDecompressChunk(buf, buf_sz, wChunkNum, gpGlobals->f.fpFBP) <= 0) {
      memset(buf, 0, buf_sz);
    }
 
    if (g_wCurEffectSprite != 0) {
-     bufSprite = (unsigned char *)UTIL_calloc(buf_sz, 1);
+     bufSprite = (unsigned char *)UTIL_malloc(buf_sz);
      if (PAL_MKFDecompressChunk(bufSprite, buf_sz, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0)
        memset(bufSprite, 0, buf_sz);
    }
@@ -167,7 +166,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
 
    if (g_wCurEffectSprite != 0)
    {
-      bufSprite = (unsigned char *)UTIL_calloc(buf_sz, 1);
+      bufSprite = (unsigned char *)UTIL_malloc(buf_sz);
       PAL_MKFDecompressChunk(bufSprite, buf_sz, g_wCurEffectSprite, gpGlobals->f.fpMGO);
    }
 
@@ -254,8 +253,8 @@ static void PAL_EndingAnimation(
    int yPosGirl = 180;
    int i;
 
-   buf = (unsigned char *)UTIL_calloc(buf_sz, 1);
-   bufGirl = (unsigned char *)UTIL_calloc(6000, 1);
+   buf = (unsigned char *)UTIL_malloc(buf_sz);
+   bufGirl = (unsigned char *)UTIL_malloc(6000);
 
    pUpper = VIDEO_CreateCompatibleSizedSurface(NULL);
    pLower = VIDEO_CreateCompatibleSizedSurface(NULL);

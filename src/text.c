@@ -26,7 +26,6 @@
 #include "font.h"
 #include "global.h"
 #include "input/input.h"
-#include "palcfg.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "util.h"
@@ -81,7 +80,7 @@ PAL_InitText(
     //
     // Open the message and word data files.
     //
-    fp = UTIL_OpenRequiredFileForMode("word.dat", "rb");
+    fp = fopen(RESOURCE_PATH "/word.dat", "rb");
     if (fp == NULL)
         return -1;
 
@@ -160,7 +159,7 @@ PAL_InitText(
     PAL_MKFReadChunk((unsigned char *)offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
     // Read the messages.
-    fp = UTIL_OpenRequiredFileForMode("m.msg", "rb");
+    fp = fopen(RESOURCE_PATH "/m.msg", "rb");
     if(fp == NULL)
         return -1;
 
@@ -417,11 +416,11 @@ PAL_DrawTextUnescape(
             // the text has triple shadows, while Win95 only has one layer.
             // It is suspected that there is a bug in the original Win95 version,
             // so sdlpal chose to use triple shadows for both.
-            PAL_DrawCharOnSurface(*lpszText, gpScreen, fontX + 1, fontY + 0, 0);
-            PAL_DrawCharOnSurface(*lpszText, gpScreen, fontX + 0, fontY + 1, 0);
-            PAL_DrawCharOnSurface(*lpszText, gpScreen, fontX + 1, fontY + 1, 0);
+            PAL_DrawCharOnSurface(*lpszText, fontX + 1, fontY + 0, 0);
+            PAL_DrawCharOnSurface(*lpszText, fontX + 0, fontY + 1, 0);
+            PAL_DrawCharOnSurface(*lpszText, fontX + 1, fontY + 1, 0);
          }
-         PAL_DrawCharOnSurface(*lpszText++, gpScreen, fontX, fontY, bColor);
+         PAL_DrawCharOnSurface(*lpszText++, fontX, fontY, bColor);
          fontX += char_width;
          urect.w += char_width;
       }

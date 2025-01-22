@@ -20,7 +20,6 @@
 
 #include "palcommon.h"
 #include "common.h"
-#include "palcfg.h"
 
 #define PAL_fread(buf, elem, num, fp)             \
    if (fread((buf), (elem), (num), (fp)) < (num)) \

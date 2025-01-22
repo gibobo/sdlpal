@@ -20,7 +20,6 @@
 
 #include "palette.h"
 #include "common.h"
-#include "game.h"
 #include "global.h"
 #include "input/input.h"
 #include "palcommon.h"
@@ -55,7 +54,7 @@ PAL_GetPalette(
    int i;
    FILE *fp;
 
-   fp = UTIL_OpenRequiredFileForMode("pat.mkf", "rb");
+   fp = fopen(RESOURCE_PATH "/pat.mkf", "rb");
 
    if (fp == NULL)
      return NULL;
@@ -65,7 +64,7 @@ PAL_GetPalette(
 
    // Read the palette data from the pat.mkf file
    i = PAL_MKFReadChunk(buf, sizeof(buf), iPaletteNum, fp);
-   fclose(fp);
+   UTIL_CloseFile(fp);
 
    if (i < 0)
    {

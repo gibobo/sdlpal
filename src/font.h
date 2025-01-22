@@ -21,8 +21,6 @@
 #ifndef FONT_H
 #define FONT_H
 
-#include "palcfg.h"
-
 #define FONT_HEIGHT (16)
 
 #ifdef __cplusplus
@@ -67,7 +65,6 @@ void PAL_InitFont(void);
 --*/
 void PAL_DrawCharOnSurface(
     unsigned short wChar,
-    PAL_Surface *lpSurface,
     const unsigned int x,
     const unsigned int y,
     const unsigned char bColor);

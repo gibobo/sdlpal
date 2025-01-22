@@ -537,7 +537,7 @@ PAL_Surface *VIDEO_CreateCompatibleSizedSurface(
 {
     // Create the surface
     PAL_Surface *dest = NULL;
-    dest = (PAL_Surface *)UTIL_calloc(1, sizeof(PAL_Surface));
+    dest = (PAL_Surface *)UTIL_malloc(sizeof(PAL_Surface));
     if (dest) {
       memset(dest, 0, sizeof(PAL_Surface));
       dest->w = pSize ? pSize->w : SCREEN_W;

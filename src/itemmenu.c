@@ -20,14 +20,13 @@
 
 #include "itemmenu.h"
 #include "common.h"
-#include "game.h"
 #include "global.h"
 #include "input/input.h"
-#include "palcfg.h"
 #include "palcommon.h"
 #include "scene.h"
 #include "script.h"
 #include "text.h"
+#include "util.h"
 #include "video/video.h"
 
 static int g_iNumInventory = 0;

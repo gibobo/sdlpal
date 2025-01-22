@@ -17,21 +17,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <SDL.h>
 
+#include "main.h"
 #include "audio/audio.h"
 #include "common.h"
+#include "driver.h"
 #include "font.h"
-#include "game.h"
 #include "global.h"
 #include "input/input.h"
-#include "main.h"
-#include "palcfg.h"
 #include "palcommon.h"
 #include "palette.h"
+#include "play.h"
 #include "res.h"
 #include "rngplay.h"
 #include "text.h"
+#include "uigame.h"
 #include "util.h"
 #include "video/video.h"
 #include <setjmp.h>
@@ -352,18 +352,13 @@ int main(int argc, char *argv[])
 {
   if (setjmp(g_exit_jmp_buf) != 0) {
     // A longjmp is made, should exit here
-    SDL_Quit();
+    DRIVER_DeInit();
     return g_exit_code;
   }
-
-  // Initialize SDL
-#ifdef PAL_HAS_JOYSTICKS
-   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK) == -1)
-#else
-   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE) == -1)
-#endif
+    
+   if (DRIVER_Init())
    {
-      TerminateOnError("Could not initialize SDL: %s.\n", SDL_GetError());
+      TerminateOnError("Could not initialize\n");
    }
 
    PAL_LoadConfig();
@@ -372,11 +367,38 @@ int main(int argc, char *argv[])
    PAL_Init();
 
    // Show the trademark screen and splash screen
-   PAL_TrademarkScreen();
-   PAL_SplashScreen();
+  //  PAL_TrademarkScreen();
+  //  PAL_SplashScreen();
+
+   // Show the opening menu.
+   gpGlobals->bCurrentSaveSlot = (unsigned char)PAL_OpeningMenu();
+
+   // Initialize game data and set the flags to load the game resources.
+   PAL_ReloadInNextTick(gpGlobals->bCurrentSaveSlot);
 
    // Run the main game routine
-   PAL_GameMain();
+
+   unsigned int       dwTime;
+   // Run the main game loop.
+   dwTime = UTIL_GetTicks();
+
+   while (1)
+   {
+      // Load the game resources if needed.
+      PAL_LoadResources();
+
+      // Clear the input state of previous frame.
+      PAL_ClearKeyState();
+
+      // Wait for the time of one frame. Accept input here.
+      PAL_DelayUntil(dwTime);
+
+      // Set the time of the next frame.
+      dwTime = UTIL_GetTicks() + FRAME_TIME;
+
+      // Run the main frame routine.
+      PAL_StartFrame();
+   }
 
    // Should not really reach here...
    assert(FALSE);

@@ -22,7 +22,6 @@
 
 #include "video_glsl.h"
 #include "mini_glloader.h"
-#include "palcfg.h"
 #include "video.h"
 #include <assert.h>
 #include <stdio.h>
@@ -42,7 +41,7 @@ static const float p_tex[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
 char *readShaderFile(const char *filename, GLuint type)
 {
-    FILE *fp = UTIL_OpenRequiredFileForMode(filename, "rb");
+    FILE *fp = fopen(filename, "rb");
     fseek(fp, 0, SEEK_END);
     long filesize = ftell(fp);
     char *buf = (char *)malloc(filesize + 1);
@@ -186,8 +185,9 @@ void VIDEO_GLSL_Setup(const char * rendererName) {
         GLint n;
         glGetIntegerv(GL_NUM_EXTENSIONS, &n);
     }
-
-    gProgramId = compileProgram(gConfig.pszShader, gConfig.pszShader, 0);
+    char *pszShader = strdup(SOURCE_DIR "/shaders/plain.glsl");
+    gProgramId = compileProgram(pszShader, pszShader, 0);
+    free(pszShader);
 
     position = glGetAttribLocation(gProgramId, "VertexCoord");
     glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, p_vex);

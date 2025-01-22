@@ -26,7 +26,6 @@
 #include "input/input.h"
 #include "itemmenu.h"
 #include "magicmenu.h"
-#include "palcfg.h"
 #include "palcommon.h"
 #include "text.h"
 #include "uigame.h"

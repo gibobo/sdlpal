@@ -1,7 +1,4 @@
-# CMakeList.txt: 最上層的 CMake 專案檔，執行全域設定
-# 並在這裡包含子專案。
-#
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.13)
 project(sdlpal_win32 C CXX)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -10,23 +7,25 @@ find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
 # find_package(EGL)
 # find_package(GLES)
-find_package (GLUT)
-
-add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+# find_package (GLUT)
 
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG       ${CMAKE_BINARY_DIR})
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE     ${CMAKE_BINARY_DIR})
 endif()
-#
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set (SDL2_DIR               external/SDL)
-set (BINIO_SOURCE_DIR       external/libbinio/src)
-set (BINIO_INCLUDE_DIR      external/libbinio/contrib/vs2015/libbinio)
-set (NUKED_DIR              external/nuked)
-set (ADPLUG_DIR             adplug)
-set (SDLPAL_DIR             src)
+set (SDL2_DIR           external/SDL)
+set (BINIO_SOURCE_DIR   external/libbinio/src)
+set (BINIO_INCLUDE_DIR  external/libbinio/contrib/vs2015/libbinio)
+set (NUKED_DIR          external/nuked)
+set (ADPLUG_DIR         adplug)
+set (SDLPAL_DIR         src)
+set (DRIVER_DIR         driver)
+set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource/)
 
 file(GLOB_RECURSE SDLPAL_SOURCES    ${SDLPAL_DIR}/*.c ${SDLPAL_DIR}/*.cpp)
 file(GLOB_RECURSE SDLPAL_HEADERS	${SDLPAL_DIR}/*.h)
@@ -34,6 +33,9 @@ file(GLOB_RECURSE SDLPAL_HEADERS	${SDLPAL_DIR}/*.h)
 set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
 set(SDL_TEST   OFF CACHE BOOL "Build the SDL2_test library" FORCE)
 add_subdirectory(external/SDL)
+
+add_definitions(-DSOURCE_DIR="${CMAKE_BINARY_DIR}")
+add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 
 # add_subdirectory(external/libbinio)
 
@@ -45,6 +47,7 @@ add_subdirectory(external/SDL)
 include(cmake/adplug.cmake)
 
 add_executable(${PROJECT_NAME}
+    ${DRIVER_DIR}/SDL.c
     ${SDLPAL_SOURCES}
 )
 
@@ -54,6 +57,7 @@ target_include_directories(${PROJECT_NAME}
         ${BINIO_INCLUDE_DIR}
         ${ADPLUG_DIR}
         ${SDLPAL_DIR}
+        ${DRIVER_DIR}
 )
 
 if(WIN32)
@@ -70,5 +74,22 @@ else()
         SDL2-static
         SDL2main
         adplug
+    )
+endif()
+
+if (MSVC)
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw/           DESTINATION ${RESOURCE_PATH})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/              DESTINATION ${CMAKE_BINARY_DIR}/shaders)
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cptbl_big5.dat        DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font.dat      DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font_size.dat DESTINATION ${CMAKE_BINARY_DIR})
+else()
+    add_custom_command(TARGET ${PROJECT_NAME}
+        POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw               ${CMAKE_BINARY_DIR}/resource
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/shaders                  ${CMAKE_BINARY_DIR}/shaders
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/cptbl_big5.dat           ${CMAKE_BINARY_DIR}/cptbl_big5.dat
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font.dat         ${CMAKE_BINARY_DIR}/unicode_font.dat
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font_size.dat    ${CMAKE_BINARY_DIR}/unicode_font_size.dat
     )
 endif()

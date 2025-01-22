@@ -23,7 +23,6 @@
 #include "global.h"
 #include "input/input.h"
 #include "main.h"
-#include "palcfg.h"
 #include <errno.h>
 #ifdef _WIN32
 #include <io.h>
@@ -34,43 +33,15 @@
 #include <unistd.h>
 #endif
 
-#define PAL_PATH_SEPARATORS "/"
-#define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
-#define PAL_MAX_GLOBAL_BUFFERS 4
-static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
-static char basename_buf[256];
-
 long flength(FILE *fp) {
-	long old_pos = ftell(fp), length;
+	long old_pos = ftell(fp);
 	if (old_pos == -1)
 		return -1;
 	if (fseek(fp, 0, SEEK_END) == -1)
 		return -1;
-	length = ftell(fp);
+	long length = ftell(fp);
 	fseek(fp, old_pos, SEEK_SET);
 	return length;
-}
-
-char *UTIL_va(
-	char *buffer,
-	int buflen,
-	const char *format,
-	...)
-{
-	if (buflen > 0 && buffer)
-	{
-		va_list argptr;
-
-		va_start(argptr, format);
-		vsnprintf(buffer, buflen, format, argptr);
-		va_end(argptr);
-
-		return buffer;
-	}
-	else
-	{
-		return NULL;
-	}
 }
 
 /*
@@ -111,14 +82,10 @@ char *UTIL_va(
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-//
 // Our random number generator's seed.
-//
 static int glSeed = 0;
 
-static void
-lsrand(
-	unsigned int iInitialSeed)
+static void lsrand(unsigned int iInitialSeed)
 /*++
   Purpose:
 
@@ -141,9 +108,7 @@ lsrand(
 	glSeed = 1664525L * iInitialSeed + 1013904223L;
 }
 
-static int
-lrand(
-	void)
+static int lrand(void)
 /*++
   Purpose:
 
@@ -257,6 +222,7 @@ UTIL_malloc(
 		TerminateOnError("UTIL_malloc() called with invalid buffer size: %d\n", buffer_size);
 
 	buffer = malloc(buffer_size); // allocate real memory space
+	memset(buffer, 0, buffer_size);
 
 	// last check, check if malloc call succeeded
 	if (buffer == NULL)
@@ -279,148 +245,13 @@ UTIL_calloc(
 		TerminateOnError("UTIL_calloc() called with invalid parameters\n");
 
 	buffer = calloc(n, size); // allocate real memory space
+	memset(buffer, 0, size * n);
 
 	// last check, check if malloc call succeeded
 	if (buffer == NULL)
 		TerminateOnError("UTIL_calloc() failure for %d bytes (out of memory?)\n", size * n);
 
 	return buffer; // nothing went wrong, so return buffer pointer
-}
-
-FILE *
-UTIL_OpenRequiredFileForMode(
-	const char *lpszFileName,
-	const char *szMode)
-/*++
-  Purpose:
-
-	Open a required file. If fails, quit the program.
-
-  Parameters:
-
-	[IN]  lpszFileName - file name to open.
-	[IN]  szMode - file open mode.
-
-  Return value:
-
-	Pointer to the file.
-
---*/
-{
-	FILE *fp = UTIL_OpenFileForMode(lpszFileName, szMode);
-
-	if (fp == NULL)
-	{
-		fp = fopen(lpszFileName, szMode);
-	}
-
-	if (fp == NULL)
-	{
-		TerminateOnError("File open error(%d): %s!\n", errno, lpszFileName);
-	}
-
-	return fp;
-}
-
-FILE *
-UTIL_OpenFile(
-	const char *lpszFileName)
-/*++
-  Purpose:
-
-	Open a file. If fails, return NULL.
-
-  Parameters:
-
-	[IN]  lpszFileName - file name to open.
-
-  Return value:
-
-	Pointer to the file.
-
---*/
-{
-	return UTIL_OpenFileForMode(lpszFileName, "rb");
-}
-
-FILE *
-UTIL_OpenFileForMode(
-	const char *lpszFileName,
-	const char *szMode)
-/*++
-  Purpose:
-
-	Open a file. If fails, return NULL.
-
-  Parameters:
-
-	[IN]  lpszFileName - file name to open.
-	[IN]  szMode - file open mode.
-
-  Return value:
-
-	Pointer to the file.
-
---*/
-{
-	//
-	// If lpszFileName is an absolute path, use its last element as filename
-	//
-	if (UTIL_IsAbsolutePath(lpszFileName))
-	{
-		char *temp = strdup(lpszFileName), *filename = temp;
-		FILE *fp = NULL;
-		for (char *next = strpbrk(filename, PAL_PATH_SEPARATORS); next; next = strpbrk(filename = next + 1, PAL_PATH_SEPARATORS))
-			;
-		if (*filename)
-		{
-			filename[-1] = '\0';
-			fp = UTIL_OpenFileAtPathForMode(*temp ? temp : "/", filename, szMode);
-		}
-		free(temp);
-		return fp;
-	}
-
-	return UTIL_OpenFileAtPathForMode(gConfig.pszGamePath, lpszFileName, szMode);
-}
-
-FILE *
-UTIL_OpenFileAtPath(
-	const char *lpszPath,
-	const char *lpszFileName)
-{
-	return UTIL_OpenFileAtPathForMode(lpszPath, lpszFileName, "rb");
-}
-
-FILE *
-UTIL_OpenFileAtPathForMode(
-	const char *lpszPath,
-	const char *lpszFileName,
-	const char *szMode)
-{
-	if (!lpszPath || !lpszFileName || !szMode)
-		return NULL;
-
-	//
-	// Construct full path according to lpszPath and lpszFileName
-	//
-	const char *path = UTIL_GetFullPathName(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, lpszPath, lpszFileName);
-
-	//
-	// If no matching path, check the open mode
-	//
-	if (path)
-	{
-		return fopen(path, szMode);
-	}
-	else if (szMode[0] != 'r')
-	{
-		return fopen(UTIL_CombinePath(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, 2, lpszPath, lpszFileName), szMode);
-	}
-	else
-	{
-		return NULL;
-	}
 }
 
 void UTIL_CloseFile(
@@ -444,131 +275,6 @@ void UTIL_CloseFile(
 	{
 		fclose(fp);
 	}
-}
-
-int UTIL_IsFileExist(
-	const char *path)
-{
-	if (UTIL_IsAbsolutePath(path))
-		return UTIL_GetFullPathName(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, "", path) != NULL;
-	else
-		return UTIL_GetFullPathName(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, gConfig.pszGamePath, path) != NULL;
-}
-
-const char *
-UTIL_GetFullPathName(
-	char *buffer,
-	size_t buflen,
-	const char *basepath,
-	const char *subpath)
-{
-	if (!buffer || !basepath || !subpath || buflen == 0)
-		return NULL;
-
-	size_t sublen = strlen(subpath);
-	if (sublen == 0)
-		return NULL;
-
-	char *_base = strdup(basepath), *_sub = strdup(subpath);
-	const char *result = NULL;
-
-	if (access(UTIL_CombinePath(internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE, 2, _base, _sub), 0) == 0)
-	{
-		result = internal_buffer[PAL_MAX_GLOBAL_BUFFERS];
-	}
-
-	if (result != NULL)
-	{
-		size_t dstlen = min(buflen - 1, strlen(result));
-		result = (char *)memmove(buffer, result, dstlen);
-		buffer[dstlen] = '\0';
-	}
-
-	free(_base);
-	free(_sub);
-
-	return result;
-}
-
-const char *
-UTIL_CombinePath(
-	char *buffer,
-	size_t buflen,
-	int numentry,
-	...)
-{
-	if (buffer && buflen > 0 && numentry > 0)
-	{
-		const char *retval = buffer;
-		va_list argptr;
-
-		va_start(argptr, numentry);
-		for (int i = 0; i < numentry && buflen > 1; i++)
-		{
-			const char *path = va_arg(argptr, const char *);
-			size_t path_len = path ? strlen(path) : 0;
-			int append_delim = (i < numentry - 1 && path_len > 0 && !PAL_IS_PATH_SEPARATOR(path[path_len - 1]));
-
-			for (size_t is_sep = 0, j = 0; j < path_len && buflen > (size_t)append_delim + 1; j++)
-			{
-				//
-				// Skip continuous path separators
-				//
-				if (PAL_IS_PATH_SEPARATOR(path[j]))
-				{
-					if (is_sep)
-						continue;
-					else
-						is_sep = 1;
-				}
-				else
-				{
-					is_sep = 0;
-				}
-				*buffer++ = path[j];
-				buflen--;
-			}
-			//
-			// Make sure a path delimeter is append to the destination if this is not the last entry
-			//
-			if (append_delim)
-			{
-				*buffer++ = PAL_PATH_SEPARATORS[0];
-				buflen--;
-			}
-		}
-		va_end(argptr);
-
-		*buffer = '\0';
-
-		return retval;
-	}
-	else
-	{
-		return NULL;
-	}
-}
-
-char *
-UTIL_GlobalBuffer(
-	int index)
-{
-	return (index >= 0 && index < PAL_MAX_GLOBAL_BUFFERS) ? internal_buffer[index] : NULL;
-}
-
-char *UTIL_basename(const char *filename)
-{
-	memset(basename_buf, 0, 256);
-	memcpy(basename_buf, filename, strlen(filename));
-
-	char *pos = NULL;
-	int broked = 0;
-	for (unsigned int i = 0; i < strlen(PAL_PATH_SEPARATORS); i++)
-		if ((pos = strrchr(basename_buf, PAL_PATH_SEPARATORS[i])) != NULL)
-			*pos = '\0', broked = 1;
-	if (!broked)
-		sprintf((char *)basename_buf, "./");
-	return (char *)basename_buf;
 }
 
 #ifdef _WIN32
@@ -610,10 +316,4 @@ void PAL_DelayUntil(unsigned int tm) {
 	do 	{
 		PAL_ProcessEvent();
 	} while (tm > UTIL_GetTicks());
-}
-
-int UTIL_IsAbsolutePath(const char *lpszFileName) {
-  if (lpszFileName == 0)
-    return FALSE;
-  return (lpszFileName[0] == '/' || lpszFileName[1] == ':');
 }

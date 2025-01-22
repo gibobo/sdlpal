@@ -325,7 +325,6 @@ PAL_MapGetTileHeight(
 
 void PAL_MapBlitToSurface(
     PALMAP *lpMap,
-    PAL_Surface *lpSurface,
     const PAL_Rect *lpSrcRect,
     unsigned char ucLayer)
 /*++
@@ -337,8 +336,6 @@ void PAL_MapBlitToSurface(
 
     [IN]  lpMap - Pointer to the map.
 
-    [OUT] lpSurface - Pointer to the destination surface.
-
     [IN]  lpSrcRect - Pointer to the source area.
 
     [IN]  ucLayer - The layer. 0 for bottom, 1 for top.
@@ -349,7 +346,8 @@ void PAL_MapBlitToSurface(
 
 --*/
 {
-   int sx, sy, dx, dy, x, y, h, xPos, yPos;
+   int sx, sy, dx, dy, xPos, yPos;
+   unsigned char x, y, h;
    const unsigned char *lpBitmap = NULL;
 
    //
@@ -371,7 +369,7 @@ void PAL_MapBlitToSurface(
          xPos = sx * 32 + h * 16 - 16 - lpSrcRect->x;
          for (x = sx; x < dx; x++, xPos += 32)
          {
-            lpBitmap = PAL_MapGetTileBitmap((unsigned char)x, (unsigned char)y, (unsigned char)h, ucLayer, lpMap);
+            lpBitmap = PAL_MapGetTileBitmap(x, y, h, ucLayer, lpMap);
             if (lpBitmap == NULL)
             {
                if (ucLayer)
@@ -380,7 +378,7 @@ void PAL_MapBlitToSurface(
                }
                lpBitmap = PAL_MapGetTileBitmap(0, 0, 0, ucLayer, lpMap);
             }
-            PAL_RLEBlitToSurface(lpBitmap, lpSurface, PAL_XY(xPos, yPos));
+            PAL_RLEBlitToSurfaceWithShadow(lpBitmap, gpScreen, PAL_XY(xPos, yPos), 0);
          }
       }
    }

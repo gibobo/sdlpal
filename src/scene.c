@@ -473,8 +473,8 @@ void PAL_MakeScene(
    rect.x = PAL_X(gpGlobals->viewport);
    rect.y = PAL_Y(gpGlobals->viewport);
 
-   PAL_MapBlitToSurface(PAL_GetCurrentMap(), gpScreen, &rect, 0);
-   PAL_MapBlitToSurface(PAL_GetCurrentMap(), gpScreen, &rect, 1);
+   PAL_MapBlitToSurface(PAL_GetCurrentMap(), &rect, 0);
+   PAL_MapBlitToSurface(PAL_GetCurrentMap(), &rect, 1);
 
    //
    // Step 2: Apply screen waving effects.

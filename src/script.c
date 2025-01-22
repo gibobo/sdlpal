@@ -27,7 +27,6 @@
 #include "common.h"
 #include "ending.h"
 #include "fight.h"
-#include "game.h"
 #include "global.h"
 #include "input/input.h"
 #include "main.h"

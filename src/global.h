@@ -542,7 +542,6 @@ typedef struct tagGLOBALVARS
    int iCurInvMenuItem;                // current inventory menu item number
    int iCurPlayingRNG;                 // current playing RNG animation
    unsigned char bCurrentSaveSlot;     // current save slot (1-5)
-   int fInMainGame;                    // TRUE if in main game
    int fEnteringScene;                 // TRUE if entering a new scene
    int fNeedToFadeIn;                  // TRUE if need to fade in when drawing scene
    int fInBattle;                      // TRUE if in battle

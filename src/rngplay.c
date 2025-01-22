@@ -301,7 +301,7 @@ PAL_RNGPlay(
 
 --*/
 {
-   FILE *fp = UTIL_OpenRequiredFileForMode("rng.mkf", "rb");
+   FILE *fp = fopen(RESOURCE_PATH "/rng.mkf", "rb");
    unsigned char *rng = (unsigned char *)malloc(65000);
    unsigned char *buf = (unsigned char *)malloc(65000);
    unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
@@ -332,7 +332,7 @@ PAL_RNGPlay(
      PAL_DelayUntil(iTime);
    }
 
-   fclose(fp);
+   UTIL_CloseFile(fp);
    free(rng);
    free(buf);
 }

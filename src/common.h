@@ -73,4 +73,7 @@
 
 #define PAL_GLOBAL_BUFFER_SIZE 1024
 
+#define    FPS             10
+#define    FRAME_TIME      (1000 / FPS)
+
 #endif

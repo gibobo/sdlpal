@@ -97,7 +97,6 @@ PAL_MapGetTileHeight(
 
 void PAL_MapBlitToSurface(
     PALMAP *lpMap,
-    PAL_Surface *lpSurface,
     const PAL_Rect *lpSrcRect,
     unsigned char ucLayer);
 

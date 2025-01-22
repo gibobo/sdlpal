@@ -20,7 +20,6 @@
 
 #include "magicmenu.h"
 #include "common.h"
-#include "game.h"
 #include "global.h"
 #include "input/input.h"
 #include "palcfg.h"

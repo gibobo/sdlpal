@@ -125,18 +125,23 @@ static const SCREENLAYOUT screen_layout = {
    .MagicDescMsgPos	= PAL_XY(102, 0),
 };
 
-static unsigned short GetSavedTimes(int iSaveSlot)
-{
-   FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, PAL_va("%d.rpg", iSaveSlot));
+static unsigned short GetSavedTimes(int iSaveSlot) {
+   char *save_path = NULL;
+   FILE *fp = NULL;
    unsigned short wSavedTimes = 0;
-   if (fp != NULL)
-   {
+   save_path = (char *)malloc(256);
+   if (save_path) {
+      sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
+      fp = fopen(save_path, "rb");
+      if (fp != NULL) {
       if (fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
          wSavedTimes = wSavedTimes;
       else
          wSavedTimes = 0;
-      fclose(fp);
+      }
+      free(save_path);
    }
+   UTIL_CloseFile(fp);
    return wSavedTimes;
 }
 

@@ -840,11 +840,9 @@ void PAL_LoadBattleSprites(
 
    PAL_FreeBattleSprites();
 
-   fp = UTIL_OpenRequiredFileForMode("abc.mkf", "rb");
+   fp = fopen(RESOURCE_PATH "/abc.mkf", "rb");
 
-   //
    // Load battle sprites for players
-   //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
       s = PAL_GetPlayerBattleSprite(gpGlobals->rgParty[i].wPlayerRole);
@@ -857,7 +855,7 @@ void PAL_LoadBattleSprites(
       }
       if (g_Battle.rgPlayer[i].lpSprite)
          free(g_Battle.rgPlayer[i].lpSprite);
-      g_Battle.rgPlayer[i].lpSprite = UTIL_calloc(l, 1);
+      g_Battle.rgPlayer[i].lpSprite = (unsigned char *)UTIL_malloc(l);
 
       PAL_MKFDecompressChunk(g_Battle.rgPlayer[i].lpSprite, l,
                              s, gpGlobals->f.fpF);
@@ -872,9 +870,7 @@ void PAL_LoadBattleSprites(
       g_Battle.rgPlayer[i].pos = PAL_XY(x, y);
    }
 
-   //
    // Load battle sprites for enemies
-   //
    for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
    {
       if (g_Battle.rgEnemy[i].wObjectID == 0)
@@ -891,7 +887,7 @@ void PAL_LoadBattleSprites(
       }
       if (g_Battle.rgEnemy[i].lpSprite)
          free(g_Battle.rgEnemy[i].lpSprite);
-      g_Battle.rgEnemy[i].lpSprite = UTIL_calloc(l, 1);
+      g_Battle.rgEnemy[i].lpSprite = (unsigned char *)UTIL_malloc(l);
 
       PAL_MKFDecompressChunk(g_Battle.rgEnemy[i].lpSprite, l,
                              gpGlobals->g.rgObject[g_Battle.rgEnemy[i].wObjectID].enemy.wEnemyID, fp);
@@ -908,7 +904,7 @@ void PAL_LoadBattleSprites(
       g_Battle.rgEnemy[i].pos = PAL_XY(x, y);
    }
 
-   fclose(fp);
+   UTIL_CloseFile(fp);
 }
 
 static void

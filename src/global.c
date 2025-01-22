@@ -53,14 +53,14 @@ PAL_InitGlobals(
    //
    // Open files
    //
-   gpGlobals->f.fpFBP = UTIL_OpenRequiredFileForMode("fbp.mkf", "rb");
-   gpGlobals->f.fpMGO = UTIL_OpenRequiredFileForMode("mgo.mkf", "rb");
-   gpGlobals->f.fpBALL = UTIL_OpenRequiredFileForMode("ball.mkf", "rb");
-   gpGlobals->f.fpDATA = UTIL_OpenRequiredFileForMode("data.mkf", "rb");
-   gpGlobals->f.fpF = UTIL_OpenRequiredFileForMode("f.mkf", "rb");
-   gpGlobals->f.fpFIRE = UTIL_OpenRequiredFileForMode("fire.mkf", "rb");
-   gpGlobals->f.fpRGM = UTIL_OpenRequiredFileForMode("rgm.mkf", "rb");
-   gpGlobals->f.fpSSS = UTIL_OpenRequiredFileForMode("sss.mkf", "rb");
+   gpGlobals->f.fpFBP = fopen(RESOURCE_PATH "/fbp.mkf", "rb");
+   gpGlobals->f.fpMGO = fopen(RESOURCE_PATH "/mgo.mkf", "rb");
+   gpGlobals->f.fpBALL = fopen(RESOURCE_PATH "/ball.mkf", "rb");
+   gpGlobals->f.fpDATA = fopen(RESOURCE_PATH "/data.mkf", "rb");
+   gpGlobals->f.fpF = fopen(RESOURCE_PATH "/f.mkf", "rb");
+   gpGlobals->f.fpFIRE = fopen(RESOURCE_PATH "/fire.mkf", "rb");
+   gpGlobals->f.fpRGM = fopen(RESOURCE_PATH "/rgm.mkf", "rb");
+   gpGlobals->f.fpSSS = fopen(RESOURCE_PATH "/sss.mkf", "rb");
 
    //
    // Set decompress function
@@ -331,15 +331,18 @@ PAL_LoadGame_Common(
 )
 {
     // Try to open the specified file
-    FILE *fp = UTIL_OpenFileAtPath(gConfig.pszSavePath, UTIL_va(UTIL_GlobalBuffer(1), PAL_GLOBAL_BUFFER_SIZE, "%d.rpg", iSaveSlot));
+    char *save_path = (char *)malloc(256);
+    if (save_path == NULL)
+        return FALSE;
+
+    sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
+    FILE *fp = fopen(save_path, "rb");
+    free(save_path);
 
     // Read all data from the file and close.
     size_t n = fp ? fread(s, 1, size, fp) : 0;
 
-    if (fp != NULL)
-    {
-        fclose(fp);
-    }
+    UTIL_CloseFile(fp);
 
     if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
     {
@@ -465,23 +468,24 @@ PAL_SaveGame_Common(
     memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
 
     // Try writing to file
-    if ((fp = UTIL_OpenFileAtPathForMode(gConfig.pszSavePath, UTIL_va(UTIL_GlobalBuffer(1), PAL_GLOBAL_BUFFER_SIZE, "%d.rpg", iSaveSlot), "wb")) == NULL)
-    {
-        return;
+    char *save_path = (char *)malloc(256);
+    if (save_path == NULL)
+      return;
+    sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
+
+    if ((fp = fopen(save_path, "wb"))) {
+      i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
+      i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
+      fwrite(s, i, 1, fp);
     }
-
-    i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
-    i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
-
-    fwrite(s, i, 1, fp);
-    fclose(fp);
+    UTIL_CloseFile(fp);
+    free(save_path);
 }
 
 static void
 PAL_SaveGame_WIN(
-   int            iSaveSlot,
-   unsigned short           wSavedTimes
-)
+    int iSaveSlot,
+    unsigned short wSavedTimes)
 /*++
   Purpose:
 
@@ -497,17 +501,17 @@ PAL_SaveGame_WIN(
 
 --*/
 {
-   SAVEDGAME_WIN   *s = (SAVEDGAME_WIN*)malloc(sizeof(SAVEDGAME_WIN));
+  SAVEDGAME_WIN *s = (SAVEDGAME_WIN *)malloc(sizeof(SAVEDGAME_WIN));
 
-   //
-   // Put all the data to the saved game struct.
-   //
-   memcpy(&s->rgObject, gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject));
-   memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
+  //
+  // Put all the data to the saved game struct.
+  //
+  memcpy(&s->rgObject, gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject));
+  memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
 
-   PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN));
+  PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN));
 
-   free(s);
+  free(s);
 }
 
 void
