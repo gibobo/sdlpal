@@ -25,6 +25,7 @@
 #include "players.h"
 #include "resampler.h"
 #include "util.h"
+#include <SDL_audio.h>
 
 #define     PAL_MAX_VOLUME               100
 
@@ -42,6 +43,7 @@ typedef struct tagAUDIODEVICE {
 } AUDIODEVICE;
 
 static AUDIODEVICE gAudioDevice;
+AUDIODEVICE *const gpAudioDevice = &gAudioDevice;
 
 PAL_FORCE_INLINE
 void
@@ -180,9 +182,7 @@ AUDIO_OpenDevice(
    gAudioDevice.iMusicVolume = SDL_MIX_MAXVOLUME;
    gAudioDevice.iSoundVolume = SDL_MIX_MAXVOLUME;
 
-   //
    // Initialize the resampler module
-   //
    resampler_init();
    const char *driver_name = SDL_GetCurrentAudioDriver();
    if (driver_name)
@@ -191,9 +191,7 @@ AUDIO_OpenDevice(
          gConfig.wAudioBufferSize = 512;
    }
 
-   //
    // Open the audio device.
-   //
    gAudioDevice.spec.freq = gConfig.iSampleRate;
    gAudioDevice.spec.format = AUDIO_S16SYS;
    gAudioDevice.spec.channels = gConfig.iAudioChannels;
@@ -213,19 +211,13 @@ AUDIO_OpenDevice(
 
    gAudioDevice.fOpened = TRUE;
 
-   //
    // Initialize the sound subsystem.
-   //
    gAudioDevice.pSoundPlayer = SOUND_Init();
 
-   //
    // Initialize the music subsystem.
-   //
-   gAudioDevice.pMusPlayer = RIX_Init(RESOURCE_PATH "/mus.mkf");
+   gAudioDevice.pMusPlayer = RIX_Init();
 
-   //
    // Let the callback function run so that musics will be played.
-   //
    SDL_PauseAudioDevice(gAudioDevice.id, 0);
 
    return 0;
@@ -273,12 +265,14 @@ AUDIO_CloseDevice(
    gAudioDevice.fOpened = FALSE;
 }
 
-SDL_AudioSpec*
-AUDIO_GetDeviceSpec(
-	void
-)
-{
-	return &gAudioDevice.spec;
+unsigned char AUDIO_GetDeviceChannels(void)
+{   
+	return gAudioDevice.spec.channels;
+}
+
+int AUDIO_GetDeviceFrequency(void)
+{   
+	return gAudioDevice.spec.freq;
 }
 
 static int

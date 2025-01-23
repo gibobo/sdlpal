@@ -27,6 +27,7 @@
 #include "resampler.h"
 #include "riff.h"
 #include "util.h"
+#include <SDL_audio.h>
 
 typedef struct tagWAVESPEC {
   int size;
@@ -672,7 +673,6 @@ SOUND_Play(
 --*/
 {
     SOUNDPLAYER *player = (SOUNDPLAYER *)object;
-    const SDL_AudioSpec *devspec = AUDIO_GetDeviceSpec();
     WAVESPEC wavespec;
     ResampleMixer mixer;
     WAVEDATA *cursnd;
@@ -706,25 +706,23 @@ SOUND_Play(
         return FALSE;
     }
 
-    //
     // Read the sound file from the MKF archive.
-    //
     PAL_MKFReadChunk(buf, len, iSoundNum, player->mkf);
 
-    snddata = player->LoadSound(buf, len, &wavespec);
+    snddata = SOUND_LoadWAVEData(buf, len, &wavespec);
     if (snddata == NULL)
     {
         free(buf);
         return FALSE;
     }
 
-    if (wavespec.channels == 1 && devspec->channels == 1)
+    if (wavespec.channels == 1 && AUDIO_GetDeviceChannels() == 1)
         mixer = (wavespec.format == AUDIO_S16) ? SOUND_ResampleMix_S16_Mono_Mono : SOUND_ResampleMix_U8_Mono_Mono;
-    else if (wavespec.channels == 1 && devspec->channels == 2)
+    else if (wavespec.channels == 1 && AUDIO_GetDeviceChannels() == 2)
         mixer = (wavespec.format == AUDIO_S16) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
-    else if (wavespec.channels == 2 && devspec->channels == 1)
+    else if (wavespec.channels == 2 && AUDIO_GetDeviceChannels() == 1)
         mixer = (wavespec.format == AUDIO_S16) ? SOUND_ResampleMix_S16_Stereo_Mono : SOUND_ResampleMix_U8_Stereo_Mono;
-    else if (wavespec.channels == 2 && devspec->channels == 2)
+    else if (wavespec.channels == 2 && AUDIO_GetDeviceChannels() == 2)
         mixer = (wavespec.format == AUDIO_S16) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
     else
     {
@@ -752,7 +750,7 @@ SOUND_Play(
         else
             resampler_clear(cursnd->resampler[i]);
         resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
-        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)devspec->freq);
+        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)AUDIO_GetDeviceFrequency());
     }
 
     cursnd->base = buf;

@@ -21,26 +21,17 @@
 #ifndef AUDIO_INTERNAL_H
 #define AUDIO_INTERNAL_H
 
-#include <SDL_audio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SDL_AudioSpec *
-AUDIO_GetDeviceSpec(
-   void
-);
+unsigned char AUDIO_GetDeviceChannels(void);
 
-void
-AUDIO_Lock(
-	void
-);
+int AUDIO_GetDeviceFrequency(void);
 
-void
-AUDIO_Unlock(
-	void
-);
+void AUDIO_Lock(void);
+
+void AUDIO_Unlock(void);
 
 #ifdef __cplusplus
 }
