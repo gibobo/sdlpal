@@ -21,14 +21,14 @@
 #include "play.h"
 #include "common.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "itemmenu.h"
 #include "palcommon.h"
 #include "scene.h"
 #include "script.h"
 #include "uigame.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 
 void
 PAL_GameUpdate(
@@ -508,73 +508,53 @@ PAL_StartFrame(
 
 --*/
 {
-   //
    // Run the game logic of one frame
-   //
    PAL_GameUpdate(TRUE);
    if (gpGlobals->fEnteringScene)
    {
       return;
    }
 
-   //
    // Update the positions and gestures of party members
-   //
    PAL_UpdateParty();
 
-   //
    // Update the scene
-   //
    PAL_MakeScene();
    VIDEO_UpdateScreen(NULL);
 
    if (PAL_GetKeyInput() & kKeyMenu)
    {
-      //
       // Show the in-game menu
-      //
       PAL_InGameMenu();
    }
    else if (PAL_GetKeyInput() & kKeyUseItem)
    {
-      //
       // Show the use item menu
-      //
       PAL_GameUseItem();
    }
    else if (PAL_GetKeyInput() & kKeyThrowItem)
    {
-      //
       // Show the equipment menu
-      //
       PAL_GameEquipItem();
    }
    else if (PAL_GetKeyInput() & kKeyForce)
    {
-      //
       // Show the magic menu
-      //
       PAL_InGameMagicMenu();
    }
    else if (PAL_GetKeyInput() & kKeyStatus)
    {
-      //
       // Show the player status
-      //
       PAL_PlayerStatus();
    }
    else if (PAL_GetKeyInput() & kKeySearch)
    {
-      //
       // Process search events
-      //
       PAL_Search();
    }
    else if (PAL_GetKeyInput() & kKeyFlee)
    {
-      //
       // Quit Game
-      //
       PAL_QuitGame();
    }
 }

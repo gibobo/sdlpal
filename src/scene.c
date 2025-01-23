@@ -23,11 +23,11 @@
 
 #include "scene.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "map.h"
 #include "palette.h"
 #include "res.h"
-#include "video/video.h"
+#include "video.h"
 #include "palcommon.h"
 #include "common.h"
 

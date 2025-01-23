@@ -23,12 +23,12 @@
 #include "battle.h"
 #include "common.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "palcommon.h"
 #include "script.h"
 #include "text.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 
 //#define INVINCIBLE 1
 extern BATTLE g_Battle;

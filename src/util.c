@@ -21,7 +21,7 @@
 #include "util.h"
 #include "common.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "main.h"
 #include <errno.h>
 #ifdef _WIN32

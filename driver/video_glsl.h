@@ -1,5 +1,4 @@
 //
-// Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
 //
@@ -17,36 +16,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// palcfg.c: Configuration definition.
-//  @Author: Lou Yihua <louyihua@21cn.com>, 2016.
+// video_glsl.h: hacky SDL2 renderer that compatible of retroarch-style
+// multipass shader preset header by palxex, 2018
 //
 
-#include "palcfg.h"
-#include "palcommon.h"
-#include "common.h"
-// #include <stdint.h>
 
-void
-PAL_FreeConfig(
-	void
-)
-{
-	memset(&gConfig, 0, sizeof(CONFIGURATION));
+#ifndef video_glsl_h
+#define video_glsl_h
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// #define GLES
+
+void VIDEO_GLSL_Setup(const char * rendererName);
+void VIDEO_GLSL_RenderCopy(void *data);
+void VIDEO_GLSL_Resize(int w, int h);
+
+#ifdef __cplusplus
 }
+#endif
 
-void
-PAL_LoadConfig(
-	void
-)
-{
-	// Set configurable global options
-	gConfig.fEnableKeyRepeat = FALSE;
-	gConfig.iAudioChannels = TRUE ? 2 : 1;
-	gConfig.iAudioDevice = -1;
-
-	gConfig.iSampleRate = 44100;
-	gConfig.iOPLSampleRate = 49716;
-	gConfig.wAudioBufferSize = 1024;
-	gConfig.dwTextureWidth  = 640;
-	gConfig.dwTextureHeight = 400;
-}
+#endif /* video_glsl_h */

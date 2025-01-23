@@ -28,9 +28,8 @@
 #include "ending.h"
 #include "fight.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "main.h"
-#include "palcfg.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
@@ -40,7 +39,7 @@
 #include "text.h"
 #include "uigame.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 
 int g_fScriptSuccess = TRUE;
 static int g_iCurEquipPart = -1;
@@ -2892,9 +2891,7 @@ PAL_InterpretInstruction(
       break;
 
    case 0x00A0:
-      //
       // Quit game
-      //
       PAL_EndingScreen();
       PAL_Shutdown(0);
       break;

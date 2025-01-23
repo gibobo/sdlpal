@@ -21,11 +21,11 @@
 #include "ui.h"
 #include "font.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "palcommon.h"
 #include "text.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 #include "common.h"
 
 unsigned char *gpSpriteUI = NULL;

@@ -23,11 +23,11 @@
 
 #include "rngplay.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 #include <stdlib.h>
 
 #define PAL_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1

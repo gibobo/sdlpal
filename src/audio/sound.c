@@ -21,7 +21,7 @@
 #include "audio.h"
 #include "audio_internal.h"
 #include "common.h"
-#include "palcfg.h"
+#include "global.h"
 #include "palcommon.h"
 #include "players.h"
 #include "resampler.h"

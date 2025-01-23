@@ -224,7 +224,7 @@ void VIDEO_GLSL_RenderCopy(void *data) {
     glUseProgram(0);
 }
 
-void VIDEO_Resize(int w, int h) {
+void VIDEO_GLSL_Resize(int w, int h) {
     window_width = w;
     window_height = h;
 }

@@ -21,19 +21,15 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#define PAL_HAS_JOYSTICKS
-
-enum PALDIRECTION
-{
+typedef enum {
    kDirSouth = 0,
    kDirWest,
    kDirNorth,
    kDirEast,
    kDirUnknown
-};
+} PALDIRECTION;
 
-enum PALKEY
-{
+typedef enum {
    kKeyNone        = 0,
    kKeyMenu        = (1 << 0),
    kKeySearch      = (1 << 1),
@@ -53,7 +49,7 @@ enum PALKEY
    kKeyForce       = (1 << 15),
    kKeyHome        = (1 << 16),
    kKeyEnd         = (1 << 17),
-};
+} PALKEY;
 
 typedef struct tagPALINPUTSTATE
 {
@@ -67,45 +63,24 @@ typedef struct tagPALINPUTSTATE
 extern "C" {
 #endif
 
-void
-PAL_ClearKeyState(
-   void
-);
+void PAL_ClearKeyState(void);
 
-void
-PAL_InitInput(
-   void
-);
+void PAL_InitInput(void);
 
-void
-PAL_ProcessEvent(
-   void
-);
+void PAL_ProcessEvent(void);
 
-void
-PAL_ShutdownInput(
-   void
-);
+void PAL_ShutdownInput(void);
 
-void
-PAL_SetKeyInput(
-   unsigned int key
-);
+void PAL_SetKeyInput(const PALKEY key);
 
-unsigned int
-PAL_GetKeyInput(
-   void
-);
+PALKEY PAL_GetKeyInput(void);
 
-void
-PAL_SetDirInput(
-   unsigned char dir
-);
+void PAL_SetDirInput(const PALDIRECTION dir);
 
-unsigned char
-PAL_GetDirInput(
-   void
-);
+PALDIRECTION PAL_GetDirInput(void);
+
+void PAL_KeyDown(PALKEY key, int fRepeat);
+void PAL_KeyUp(PALKEY key);
 
 #ifdef __cplusplus
 }

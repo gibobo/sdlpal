@@ -24,16 +24,17 @@
 #include "driver.h"
 #include "font.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
 #include "res.h"
 #include "rngplay.h"
 #include "text.h"
+#include "ui.h"
 #include "uigame.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 #include <setjmp.h>
 
 static jmp_buf g_exit_jmp_buf;
@@ -62,6 +63,12 @@ void PAL_Init(void)
     if (e != 0) {
         PAL_Shutdown(255);
         TerminateOnError("Could not initialize global data: %d.\n", e);
+    }
+  
+    e = DRIVER_Init();
+    if (e != 0) {
+        PAL_Shutdown(255);
+        TerminateOnError("Could not initialize driver work: %d.\n", e);
     }
 
     e = VIDEO_Startup();
@@ -190,8 +197,8 @@ void PAL_SplashScreen(void)
    lpBitmapUp = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    // Read the bitmaps
-   PAL_MKFDecompressChunk(lpBitmapUp->pixels, SCREEN_W * SCREEN_H, 0x03, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(lpBitmapDown->pixels, SCREEN_W * SCREEN_H, 0x04, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(lpBitmapUp->pixels, SCREEN_SIZE, 0x03, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(lpBitmapDown->pixels, SCREEN_SIZE, 0x04, gpGlobals->f.fpFBP);
    PAL_MKFDecompressChunk(lpTitleBuf, 4306, 0x47, gpGlobals->f.fpMGO);
    PAL_MKFDecompressChunk(lpSpriteCrane, 1652, 0x49, gpGlobals->f.fpMGO);
    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
@@ -355,13 +362,6 @@ int main(int argc, char *argv[])
     DRIVER_DeInit();
     return g_exit_code;
   }
-    
-   if (DRIVER_Init())
-   {
-      TerminateOnError("Could not initialize\n");
-   }
-
-   PAL_LoadConfig();
 
    // Initialize everything
    PAL_Init();

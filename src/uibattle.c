@@ -23,14 +23,14 @@
 #include "common.h"
 #include "fight.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "itemmenu.h"
 #include "magicmenu.h"
 #include "palcommon.h"
 #include "text.h"
 #include "uigame.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 
 static int g_iCurMiscMenuItem = 0;
 static int g_iCurSubMenuItem = 0;

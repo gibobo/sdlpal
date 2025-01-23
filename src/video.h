@@ -23,11 +23,12 @@
 
 #define SCREEN_W 320
 #define SCREEN_H 200
+#define SCREEN_SIZE (SCREEN_W * SCREEN_H)
 
 typedef struct PAL_Surface {
-    int w, h;              /**< Read-only */
-    int pitch;             /**< Read-only */
-    unsigned char *pixels; /**< Read-write */
+    unsigned short w;       /**< Read-only */
+    unsigned short h;       /**< Read-only */
+    unsigned char *pixels;  /**< Read-write */
 } PAL_Surface;
 
 typedef struct PAL_Rect {

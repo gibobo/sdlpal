@@ -22,7 +22,7 @@
 #define _MAP_H
 
 #include <stdio.h>
-#include "video/video.h"
+#include "video.h"
 
 //
 // Map format:

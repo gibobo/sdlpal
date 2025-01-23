@@ -21,7 +21,7 @@
 #ifndef _PALUTILS_H
 #define _PALUTILS_H
 
-#include "video/video.h"
+#include "video.h"
 #include <stdio.h>
 
 #define PAL_XY(x, y) (unsigned int)(((((unsigned short)(y)) << 16) & 0xFFFF0000) | (((unsigned short)(x)) & 0xFFFF))

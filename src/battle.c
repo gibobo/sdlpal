@@ -23,7 +23,7 @@
 #include "common.h"
 #include "fight.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
@@ -32,7 +32,7 @@
 #include "text.h"
 #include "ui.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 
 BATTLE g_Battle;
 
@@ -625,7 +625,7 @@ void PAL_BattleFadeScene(
 
          // Blend the pixels in the 2 buffers, and put the result into the
          // backup buffer
-         for (k = rgIndex[j]; k < SCREEN_W * SCREEN_H; k += 6)
+         for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
          {
             a = g_Battle.lpSceneBuf->pixels[k];
             b = gpScreenBak->pixels[k];

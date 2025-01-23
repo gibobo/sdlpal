@@ -21,11 +21,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include "map.h"
-#include "text.h"
-#include "ui.h"
-#include <stdio.h>
-
 //
 // SOME NOTES ON "AUTO SCRIPT" AND "TRIGGER SCRIPT":
 //
@@ -480,14 +475,14 @@ typedef struct tagGAMEDATA
 
 typedef struct tagFILES
 {
-   FILE *fpFBP;  // battlefield background images
-   FILE *fpMGO;  // sprites in scenes
-   FILE *fpBALL; // item bitmaps
-   FILE *fpDATA; // misc data
-   FILE *fpF;    // player sprites during battle
-   FILE *fpFIRE; // fire effect sprites
-   FILE *fpRGM;  // character face bitmaps
-   FILE *fpSSS;  // script data
+   void *fpFBP;   // battlefield background images
+   void *fpMGO;   // sprites in scenes
+   void *fpBALL;  // item bitmaps
+   void *fpDATA;  // misc data
+   void *fpF;     // player sprites during battle
+   void *fpFIRE;  // fire effect sprites
+   void *fpRGM;   // character face bitmaps
+   void *fpSSS;   // script data
 } FILES;
 
 // player party
@@ -579,12 +574,24 @@ typedef struct tagGLOBALVARS
    unsigned int dwFrameNum;
 } GLOBALVARS;
 
+typedef struct tagCONFIGURATION {
+  /* Configurable options */
+  unsigned int dwTextureWidth;
+  unsigned int dwTextureHeight;
+  int iAudioDevice;
+  int iAudioChannels;
+  int iSampleRate;
+  int iOPLSampleRate;
+  unsigned short wAudioBufferSize;
+  int fEnableKeyRepeat;
+} CONFIGURATION;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 extern GLOBALVARS *const gpGlobals;
-
+extern CONFIGURATION gConfig;
 
 int PAL_InitGlobals(
     void);

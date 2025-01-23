@@ -19,7 +19,6 @@
 //
 
 #include "global.h"
-#include "palcfg.h"
 #include "common.h"
 #include "palcommon.h"
 #include "res.h"
@@ -50,9 +49,19 @@ PAL_InitGlobals(
 
 --*/
 {
-   //
+   
+   // Set configurable global options
+   gConfig.fEnableKeyRepeat = 0;
+   gConfig.iAudioChannels = 2; // 2 or 1
+   gConfig.iAudioDevice = -1;
+
+   gConfig.iSampleRate = 44100;
+   gConfig.iOPLSampleRate = 49716;
+   gConfig.wAudioBufferSize = 1024;
+   gConfig.dwTextureWidth = 640;
+   gConfig.dwTextureHeight = 400;
+
    // Open files
-   //
    gpGlobals->f.fpFBP = fopen(RESOURCE_PATH "/fbp.mkf", "rb");
    gpGlobals->f.fpMGO = fopen(RESOURCE_PATH "/mgo.mkf", "rb");
    gpGlobals->f.fpBALL = fopen(RESOURCE_PATH "/ball.mkf", "rb");
@@ -62,9 +71,7 @@ PAL_InitGlobals(
    gpGlobals->f.fpRGM = fopen(RESOURCE_PATH "/rgm.mkf", "rb");
    gpGlobals->f.fpSSS = fopen(RESOURCE_PATH "/sss.mkf", "rb");
 
-   //
    // Set decompress function
-   //
    Decompress = YJ2_Decompress;
 
    gpGlobals->bCurrentSaveSlot = 1;
@@ -115,12 +122,9 @@ PAL_FreeGlobals(
    free(gpGlobals->g.lprgBattleField);
    free(gpGlobals->g.lprgLevelUpMagic);
 
-   //
    // Clear the instance
-   //
    memset(gpGlobals, 0, sizeof(GLOBALVARS));
-
-   PAL_FreeConfig();
+   memset(&gConfig, 0, sizeof(CONFIGURATION));
 }
 
 static void

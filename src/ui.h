@@ -21,7 +21,7 @@
 #ifndef UI_H
 #define UI_H
 
-#include "video/video.h"
+#include "video.h"
 #include <wchar.h>
 
 #define CHUNKNUM_SPRITEUI 9

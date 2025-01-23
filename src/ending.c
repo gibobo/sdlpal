@@ -28,7 +28,7 @@
 #include "rngplay.h"
 #include "scene.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 
 static unsigned short g_wCurEffectSprite = 0;
 
@@ -54,20 +54,20 @@ static void PAL_ShowFBP(
 {
    unsigned char *buf = NULL;
    unsigned char *bufSprite = NULL;
-   const unsigned int buf_sz = SCREEN_W * SCREEN_H;
-   const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
-   int i, j, k;
+   const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
+   unsigned char i, j;
+   unsigned int k;
    unsigned char a, b;
 
-   buf = (unsigned char *)UTIL_malloc(buf_sz);
-   if (PAL_MKFDecompressChunk(buf, buf_sz, wChunkNum, gpGlobals->f.fpFBP) <= 0) {
-     memset(buf, 0, buf_sz);
+   buf = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
+   if (PAL_MKFDecompressChunk(buf, SCREEN_SIZE, wChunkNum, gpGlobals->f.fpFBP) <= 0) {
+     memset(buf, 0, SCREEN_SIZE);
    }
 
    if (g_wCurEffectSprite != 0) {
-     bufSprite = (unsigned char *)UTIL_malloc(buf_sz);
-     if (PAL_MKFDecompressChunk(bufSprite, buf_sz, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0)
-       memset(bufSprite, 0, buf_sz);
+     bufSprite = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
+     if (PAL_MKFDecompressChunk(bufSprite, SCREEN_SIZE, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0)
+       memset(bufSprite, 0, SCREEN_SIZE);
    }
 
    if (wFade)
@@ -83,7 +83,7 @@ static void PAL_ShowFBP(
          {
             // Blend the pixels in the 2 buffers, and put the result into the
             // backup buffer
-            for (k = rgIndex[j]; k < buf_sz; k += 6)
+            for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
             {
                a = buf[k];
                b = gpScreenBak->pixels[k];
@@ -149,7 +149,6 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
 {
    PAL_Surface *p;
    unsigned char *bufSprite = NULL;
-   const unsigned int buf_sz = SCREEN_W * SCREEN_H;
    int i, l;
    PAL_Rect srcrect, dstrect;
 
@@ -159,15 +158,15 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
       return;
    }
 
-   if (PAL_MKFDecompressChunk(p->pixels, buf_sz, wChunkNum, gpGlobals->f.fpFBP) <= 0)
+   if (PAL_MKFDecompressChunk(p->pixels, SCREEN_SIZE, wChunkNum, gpGlobals->f.fpFBP) <= 0)
    {
       return;
    }
 
    if (g_wCurEffectSprite != 0)
    {
-      bufSprite = (unsigned char *)UTIL_malloc(buf_sz);
-      PAL_MKFDecompressChunk(bufSprite, buf_sz, g_wCurEffectSprite, gpGlobals->f.fpMGO);
+      bufSprite = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
+      PAL_MKFDecompressChunk(bufSprite, SCREEN_SIZE, g_wCurEffectSprite, gpGlobals->f.fpMGO);
    }
 
    VIDEO_BackupScreen(gpScreen);
@@ -242,7 +241,6 @@ static void PAL_EndingAnimation(
 
 --*/
 {
-   const unsigned int buf_sz = SCREEN_W * SCREEN_H;
    unsigned char *buf;
    unsigned char *bufGirl;
    PAL_Surface *pUpper;
@@ -253,15 +251,15 @@ static void PAL_EndingAnimation(
    int yPosGirl = 180;
    int i;
 
-   buf = (unsigned char *)UTIL_malloc(buf_sz);
+   buf = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
    bufGirl = (unsigned char *)UTIL_malloc(6000);
 
    pUpper = VIDEO_CreateCompatibleSizedSurface(NULL);
    pLower = VIDEO_CreateCompatibleSizedSurface(NULL);
 
-   PAL_MKFDecompressChunk(pUpper->pixels, buf_sz, 69, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(pLower->pixels, buf_sz, 70, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(buf, buf_sz, 571, gpGlobals->f.fpMGO);
+   PAL_MKFDecompressChunk(pUpper->pixels, SCREEN_SIZE, 69, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(pLower->pixels, SCREEN_SIZE, 70, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(buf, SCREEN_SIZE, 571, gpGlobals->f.fpMGO);
    PAL_MKFDecompressChunk(bufGirl, 6000, 572, gpGlobals->f.fpMGO);
 
    srcrect.x = 0;
@@ -348,7 +346,7 @@ void PAL_EndingScreen(
 {
    // Use AVI & WIN95's music if we can
    // Otherwise, simulate the ending of DOS version
-#if 1 // 不明音樂播放
+#if 1 // unknown music playing
    AUDIO_PlayMusic(-1, FALSE, 0);
    AUDIO_PlayMusic(0x1a, TRUE, 0);
    PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 110, 150, 7);
@@ -356,7 +354,7 @@ void PAL_EndingScreen(
 
    PAL_FadeOut(2);
 #endif
-#if 1 // 水魔獸 1
+#if 1 // beast sence 1
    AUDIO_PlayMusic(-1, FALSE, 0);
    AUDIO_PlayMusic(0x19, TRUE, 0);
 
@@ -366,13 +364,13 @@ void PAL_EndingScreen(
 
    PAL_FadeOut(1);
 #endif
-#if 1 // 水魔獸 2
+#if 1 // beast sence 2
    PAL_CleanScreen();
    gpGlobals->wNumPalette = 4;
    gpGlobals->fNeedToFadeIn = TRUE;
    PAL_EndingAnimation();
 #endif
-#if 1 // 水災
+#if 1 // disaster
    AUDIO_PlayMusic(-1, FALSE, 0);
    AUDIO_PlayMusic(0x00, FALSE, 2);
    PAL_ColorFade(7, 15, FALSE);
@@ -386,7 +384,7 @@ void PAL_EndingScreen(
 
    PAL_FadeOut(2);
 #endif
-#if 1 // 阿奴分離
+#if 1 // GIRL 3
    PAL_CleanScreen();
    gpGlobals->wNumPalette = 8;
    gpGlobals->fNeedToFadeIn = TRUE;
@@ -399,7 +397,7 @@ void PAL_EndingScreen(
    g_wCurEffectSprite = 0x27b;
    PAL_ShowFBP(76, 7);
 #endif
-#if 1 // 樹下月如
+#if 1 // GIRL 2
    PAL_SetPalette(5, FALSE);
    PAL_ShowFBP(73, 7);
    PAL_ScrollFBP(72);
@@ -414,17 +412,17 @@ void PAL_EndingScreen(
    AUDIO_PlayMusic(0x00, FALSE, 1);
    UTIL_Delay(500);
 #endif
-#if 1 // 工作人員名單
+#if 1 // staff list
    AUDIO_PlayMusic(-1, FALSE, 0);
    AUDIO_PlayMusic(9, TRUE, 0);
    PAL_ScrollFBP(67);
-   PAL_ScrollFBP(66); // 阿奴
+   PAL_ScrollFBP(66); // GIRL 3
    PAL_ScrollFBP(65);
-   PAL_ScrollFBP(64); // 林月如
+   PAL_ScrollFBP(64); // GIRL 2
    PAL_ScrollFBP(63);
-   PAL_ScrollFBP(62); // 趙靈兒
+   PAL_ScrollFBP(62); // GIRL 1
    PAL_ScrollFBP(61);
-   PAL_ScrollFBP(60); // 李逍遙
+   PAL_ScrollFBP(60); // BOY
    PAL_ScrollFBP(59);
 
    AUDIO_PlayMusic(0x00, FALSE, 6);

@@ -20,7 +20,7 @@
 
 #include "font.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 #include <stdio.h>
 #include <stdlib.h>
 

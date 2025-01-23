@@ -21,7 +21,7 @@
 #include "palette.h"
 #include "common.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "palcommon.h"
 #include "play.h"
 #include "scene.h"
@@ -492,7 +492,7 @@ void PAL_FadeToRed(
    palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
    memcpy(newpalette, palette, sizeof(newpalette));
 
-   for (i = 0; i < SCREEN_W * SCREEN_H; i++)
+   for (i = 0; i < SCREEN_SIZE; i++)
    {
       if (gpScreen->pixels[i] == 0x4F)
       {

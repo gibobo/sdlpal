@@ -23,13 +23,12 @@
 #include "common.h"
 #include "convertopl.h"
 #include "emuopls.h"
-#include "palcfg.h"
+#include "fprovide.h"
 #include "global.h"
-#include "util.h"
 #include "players.h"
 #include "resampler.h"
 #include "rix.h"
-#include "fprovide.h"
+#include "util.h"
 
 #define     PAL_MAX_SAMPLERATE           49716
 

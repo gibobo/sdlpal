@@ -25,14 +25,15 @@
 #include "common.h"
 #include "font.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "palcommon.h"
 #include "palette.h"
+#include "ui.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 #include <errno.h>
-#include <wctype.h>
 #include <stdlib.h>
+#include <wctype.h>
 
 #define   FONT_COLOR_DEFAULT        0x4F
 #define   FONT_COLOR_YELLOW         0x2D
@@ -506,7 +507,7 @@ PAL_StartDialogWithOffset(
 --*/
 {
    unsigned char *buf = NULL;
-   const unsigned int buf_sz = SCREEN_W * SCREEN_H;
+   const unsigned int buf_sz = 8192;   // SCREEN_SIZE
    PAL_Rect rect;
 
    buf = (unsigned char *)malloc(buf_sz);

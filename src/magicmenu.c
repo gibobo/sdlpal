@@ -21,14 +21,14 @@
 #include "magicmenu.h"
 #include "common.h"
 #include "global.h"
-#include "input/input.h"
-#include "palcfg.h"
+#include "input.h"
 #include "palcommon.h"
 #include "scene.h"
 #include "script.h"
 #include "text.h"
 #include "uibattle.h"
-#include "video/video.h"
+#include "util.h"
+#include "video.h"
 
 static struct MAGICITEM
 {

@@ -48,6 +48,8 @@ include(cmake/adplug.cmake)
 
 add_executable(${PROJECT_NAME}
     ${DRIVER_DIR}/SDL.c
+    ${DRIVER_DIR}/mini_glloader.c
+    ${DRIVER_DIR}/video_glsl.c
     ${SDLPAL_SOURCES}
 )
 

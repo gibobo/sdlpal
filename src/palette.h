@@ -21,7 +21,7 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
-#include "video/video.h"
+#include "video.h"
 
 #ifdef __cplusplus
 extern "C" {

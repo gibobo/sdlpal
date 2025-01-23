@@ -21,7 +21,7 @@
 #ifndef _SCENE_H
 #define _SCENE_H
 
-#include "video/video.h"
+#include "video.h"
 
 #ifdef __cplusplus
 extern "C"

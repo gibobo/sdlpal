@@ -21,13 +21,13 @@
 #include "itemmenu.h"
 #include "common.h"
 #include "global.h"
-#include "input/input.h"
+#include "input.h"
 #include "palcommon.h"
 #include "scene.h"
 #include "script.h"
 #include "text.h"
 #include "util.h"
-#include "video/video.h"
+#include "video.h"
 
 static int g_iNumInventory = 0;
 static unsigned short g_wItemFlags = 0;

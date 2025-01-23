@@ -23,6 +23,10 @@
 
 #include <stdio.h>
 
+#ifndef RESOURCE_PATH
+#define RESOURCE_PATH "."
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

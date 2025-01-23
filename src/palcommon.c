@@ -79,47 +79,35 @@ int PAL_RLEBlitToSurfaceWithShadow(
    int dy = PAL_Y(pos);
    unsigned char *p;
 
-   //
    // Check for NULL pointer.
-   //
    if (lpBitmapRLE == NULL || lpDstSurface == NULL)
    {
       return -1;
    }
 
-   //
    // Skip the 0x00000002 in the file header.
-   //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
 
-   //
    // Get the width and height of the bitmap.
-   //
    uiWidth = lpBitmapRLE[0] | (lpBitmapRLE[1] << 8);
    uiHeight = lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
 
-   //
    // Check whether bitmap intersects the surface.
-   //
    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
        uiHeight + dy <= 0 || dy >= lpDstSurface->h)
    {
-      goto end;
+      return 0;
    }
 
-   //
    // Calculate the total length of the bitmap.
    // The bitmap is 8-bpp, each pixel will use 1 byte.
-   //
    uiLen = uiWidth * uiHeight;
 
-   //
    // Start decoding and blitting the bitmap.
-   //
    lpBitmapRLE += 4;
    for (i = 0; i < uiLen;)
    {
@@ -136,17 +124,13 @@ int PAL_RLEBlitToSurfaceWithShadow(
       }
       else
       {
-         //
          // Prepare coordinates.
-         //
          j = 0;
          sx = uiSrcX;
          x = dx + uiSrcX;
          y = dy;
 
-         //
          // Skip the points which are out of the surface.
-         //
          if (y < 0)
          {
             j += -y * uiWidth;
@@ -154,14 +138,12 @@ int PAL_RLEBlitToSurfaceWithShadow(
          }
          else if (y >= lpDstSurface->h)
          {
-            goto end; // No more pixels needed, break out
+            return 0;   // No more pixels needed, break out
          }
 
          while (j < T)
          {
-            //
             // Skip the points which are out of the surface.
-            //
             if (x < 0)
             {
                j += -x;
@@ -178,14 +160,12 @@ int PAL_RLEBlitToSurfaceWithShadow(
                y++;
                if (y >= lpDstSurface->h)
                {
-                  goto end; // No more pixels needed, break out
+                  return 0;   // No more pixels needed, break out
                }
                continue;
             }
 
-            //
             // Put the pixels in row onto the surface
-            //
             k = T - j;
             if (lpDstSurface->w - x < k)
                k = lpDstSurface->w - x;
@@ -219,7 +199,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
                y++;
                if (y >= lpDstSurface->h)
                {
-                  goto end; // No more pixels needed, break out
+                  return 0;   // No more pixels needed, break out
                }
             }
          }
@@ -234,10 +214,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
       }
    }
 
-end:
-   //
    // Success
-   //
    return 0;
 }
 
@@ -479,47 +456,35 @@ int PAL_RLEBlitMonoColor(
    int dy = PAL_Y(pos);
    unsigned char *p;
 
-   //
    // Check for NULL pointer.
-   //
    if (lpBitmapRLE == NULL || lpDstSurface == NULL)
    {
       return -1;
    }
 
-   //
    // Skip the 0x00000002 in the file header.
-   //
    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
    {
       lpBitmapRLE += 4;
    }
 
-   //
    // Get the width and height of the bitmap.
-   //
    uiWidth = lpBitmapRLE[0] | (lpBitmapRLE[1] << 8);
    uiHeight = lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
 
-   //
    // Check whether bitmap intersects the surface.
-   //
    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
        uiHeight + dy <= 0 || dy >= lpDstSurface->h)
    {
-      goto end;
+      return 0;
    }
 
-   //
    // Calculate the total length of the bitmap.
    // The bitmap is 8-bpp, each pixel will use 1 byte.
-   //
    uiLen = uiWidth * uiHeight;
 
-   //
    // Start decoding and blitting the bitmap.
-   //
    lpBitmapRLE += 4;
    bColor &= 0xF0;
    for (i = 0; i < uiLen;)
@@ -537,17 +502,13 @@ int PAL_RLEBlitMonoColor(
       }
       else
       {
-         //
          // Prepare coordinates.
-         //
          j = 0;
          sx = uiSrcX;
          x = dx + uiSrcX;
          y = dy;
 
-         //
          // Skip the points which are out of the surface.
-         //
          if (y < 0)
          {
             j += -y * uiWidth;
@@ -555,14 +516,12 @@ int PAL_RLEBlitMonoColor(
          }
          else if (y >= lpDstSurface->h)
          {
-            goto end; // No more pixels needed, break out
+            return 0;   // No more pixels needed, break out
          }
 
          while (j < T)
          {
-            //
             // Skip the points which are out of the surface.
-            //
             if (x < 0)
             {
                j += -x;
@@ -579,7 +538,7 @@ int PAL_RLEBlitMonoColor(
                y++;
                if (y >= lpDstSurface->h)
                {
-                  goto end; // No more pixels needed, break out
+                  return 0;   // No more pixels needed, break out
                }
                continue;
             }
@@ -622,7 +581,7 @@ int PAL_RLEBlitMonoColor(
                y++;
                if (y >= lpDstSurface->h)
                {
-                  goto end; // No more pixels needed, break out
+                  return 0;   // No more pixels needed, break out
                }
             }
          }
@@ -637,10 +596,7 @@ int PAL_RLEBlitMonoColor(
       }
    }
 
-end:
-   //
    // Success
-   //
    return 0;
 }
 

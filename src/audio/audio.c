@@ -20,12 +20,11 @@
 
 #include "audio.h"
 #include "audio_internal.h"
+#include "common.h"
 #include "global.h"
-#include "palcfg.h"
 #include "players.h"
 #include "resampler.h"
 #include "util.h"
-#include "common.h"
 
 #define     PAL_MAX_VOLUME               100
 

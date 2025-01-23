@@ -20,19 +20,14 @@
 
 #include "video.h"
 #include "common.h"
-#include "input/input.h"
-#include "mini_glloader.h"
-#include "palcfg.h"
+#include "global.h"
+#include "input.h"
 #include "util.h"
-#include "video_glsl.h"
-#include <SDL_hints.h>
-#include <SDL_render.h>
+#include "driver.h"
 
 // The global palette
 PAL_Surface         *gpScreen           = NULL; // Screen buffer
 PAL_Surface         *gpScreenBak        = NULL; // Backup screen buffer
-SDL_Window          *gpWindow           = NULL;
-SDL_Renderer        *gpRenderer         = NULL;
 
 volatile unsigned char g_bRenderPaused = FALSE;
 static unsigned short g_wShakeTime = 0;
@@ -60,49 +55,11 @@ VIDEO_Startup(
 
 --*/
 {
-    int w = gConfig.dwTextureWidth;
-    int h = gConfig.dwTextureHeight;
-    SDL_RendererInfo rendererInfo;
-#ifdef GLES
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
-#if SDL_VIDEO_OPENGL_EGL && (SDL_VIDEO_DRIVER_EMSCRIPTEN || SDL_VIDEO_DRIVER_WINRT)
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-#else
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-#endif
 
-    // Before we can render anything, we need a window and a renderer.
-    gpWindow = SDL_CreateWindow(NULL,
-                                SDL_WINDOWPOS_UNDEFINED,
-                                SDL_WINDOWPOS_UNDEFINED,
-                                gConfig.dwTextureWidth, gConfig.dwTextureHeight,
-                                SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-    if (gpWindow == NULL)
-    {
-        return -1;
-    }
-
-    SDL_SetWindowTitle(gpWindow, "PAL");
-    gpRenderer = SDL_CreateRenderer(gpWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-    if (gpRenderer == NULL)
-    {
-        return -1;
-    }
-
-    SDL_GetRendererInfo(gpRenderer, &rendererInfo);
-    SDL_GetRendererOutputSize(gpRenderer, &w, &h);
-    VIDEO_GLSL_Setup(rendererInfo.name);
-    VIDEO_Resize(w, h);
-
-    //
     // Create the screen buffer and the backup screen buffer.
-    //
     gpScreen = VIDEO_CreateCompatibleSizedSurface(NULL);
     gpScreenBak = VIDEO_CreateCompatibleSizedSurface(NULL);
-    bufScreenReal = malloc(SCREEN_W * 3 * SCREEN_H);
+    bufScreenReal = malloc(SCREEN_SIZE * 3);
 
     // Create palette object
     bufPalette = malloc(256 * 3);
@@ -137,18 +94,6 @@ VIDEO_Shutdown(
 --*/
 {
     // since gConfig is cleared already we'd to detect on side effects
-    if (gpRenderer)
-    {
-        SDL_DestroyRenderer(gpRenderer);
-    }
-    gpRenderer = NULL;
-
-    if (gpWindow)
-    {
-        SDL_DestroyWindow(gpWindow);
-    }
-    gpWindow = NULL;
-
     PAL_FreeSurface(gpScreen);
     gpScreen = NULL;
 
@@ -264,7 +209,7 @@ void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
    {
       unsigned char *src = gpScreen->pixels;
       unsigned char *dst = bufScreenReal;
-      for (int i = 0; i < SCREEN_W * SCREEN_H; i++, src++, dst += 3)
+      for (int i = 0; i < SCREEN_SIZE; i++, src++, dst += 3)
       {
          dst[0] = bufPalette[(*src) * 3 + 0];
          dst[1] = bufPalette[(*src) * 3 + 1];
@@ -272,8 +217,7 @@ void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
       }
    }
 
-   VIDEO_GLSL_RenderCopy(bufScreenReal);
-   SDL_GL_SwapWindowWithResult(gpWindow);
+   DRIVER_FrameShow(bufScreenReal);
 }
 
 void VIDEO_SetPalette(const unsigned char *rgPalette)
@@ -373,7 +317,7 @@ VIDEO_SwitchScreen(
    for (i = 0; i < 6; i++)
    {
        // Draw the backup buffer to the screen
-       for (j = 0; j < SCREEN_W * SCREEN_H; j++)
+       for (j = 0; j < SCREEN_SIZE; j++)
        {
            if (j % 6 == rgIndex[i])
                srcBak[j] = src[j];
@@ -382,8 +326,7 @@ VIDEO_SwitchScreen(
            dst[j * 3 + 2] = bufPalette[srcBak[j]*3+2];
        }
 
-       VIDEO_GLSL_RenderCopy(bufScreenReal);
-       SDL_GL_SwapWindowWithResult(gpWindow);
+       DRIVER_FrameShow(bufScreenReal);
 
        UTIL_Delay(wSpeed);
    }
@@ -430,7 +373,7 @@ VIDEO_FadeScreen(
          // Blend the pixels in the 2 buffers, and put the result into the
          // backup buffer
          //
-         for (k = rgIndex[j]; k < SCREEN_W * SCREEN_H; k += 6)
+         for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
          {
             a = gpScreen->pixels[k];
             b = gpScreenBak->pixels[k];
@@ -495,21 +438,20 @@ VIDEO_FadeScreen(
             dstrect.h = g_wShakeLevel;
 
             memset(bufScreenReal + dstrect.y * (SCREEN_W * 3), 0, dstrect.h * (SCREEN_W * 3));
-            VIDEO_GLSL_RenderCopy(bufScreenReal);
+            DRIVER_FrameShow(bufScreenReal);
             g_wShakeTime--;
          }
          else
          {
              unsigned char *src = gpScreenBak->pixels;
              unsigned char *dst = bufScreenReal;
-             for (int j = 0; j < SCREEN_W * SCREEN_H; j++, src++, dst += 3) {
+             for (int j = 0; j < SCREEN_SIZE; j++, src++, dst += 3) {
                dst[0] = bufPalette[(*src) * 3 + 0];
                dst[1] = bufPalette[(*src) * 3 + 1];
                dst[2] = bufPalette[(*src) * 3 + 2];
              }
-             VIDEO_GLSL_RenderCopy(bufScreenReal);
+             DRIVER_FrameShow(bufScreenReal);
          }
-         SDL_GL_SwapWindowWithResult(gpWindow);
       }
    }
 
@@ -582,6 +524,11 @@ void VIDEO_RenderPaused(unsigned char flag)
     g_bRenderPaused = flag;
 }
 
+void VIDEO_Resize(int w, int h)
+{
+    DRIVER_FrameResize(w, h);
+}
+
 void VIDEO_CopySurface(
     PAL_Surface *src,
     const PAL_Rect *srcrect,
@@ -607,11 +554,11 @@ void VIDEO_CopyEntireSurface(
 }
 
 void VIDEO_BackupScreen(PAL_Surface *src) {
-    memcpy(gpScreenBak->pixels, src->pixels, SCREEN_W * SCREEN_H);
+    memcpy(gpScreenBak->pixels, src->pixels, SCREEN_SIZE);
 }
 
 void VIDEO_RestoreScreen(PAL_Surface *dst) {
-    memcpy(dst->pixels, gpScreenBak->pixels, SCREEN_W * SCREEN_H);
+    memcpy(dst->pixels, gpScreenBak->pixels, SCREEN_SIZE);
 }
 
 void PAL_FreeSurface(PAL_Surface *surface) {
@@ -623,5 +570,5 @@ void PAL_FreeSurface(PAL_Surface *surface) {
 }
 
 void PAL_CleanScreen(void) {
-    memset(gpScreen->pixels, 0, SCREEN_W * SCREEN_H);
+    memset(gpScreen->pixels, 0, SCREEN_SIZE);
 }
