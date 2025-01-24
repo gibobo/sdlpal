@@ -49,15 +49,13 @@ PAL_InitGlobals(
 
 --*/
 {
-   
    // Set configurable global options
    gConfig.fEnableKeyRepeat = 0;
    gConfig.iAudioChannels = 2; // 2 or 1
-   gConfig.iAudioDevice = -1;
 
    gConfig.iSampleRate = 44100;
    gConfig.iOPLSampleRate = 49716;
-   gConfig.wAudioBufferSize = 1024;
+   gConfig.wAudioBufferSize = 512;
    gConfig.dwTextureWidth = 640;
    gConfig.dwTextureHeight = 400;
 
@@ -145,17 +143,17 @@ PAL_ReadGlobalGameData(
 
 --*/
 {
-  const GAMEDATA *p = &gpGlobals->g;
-  PAL_MKFReadChunk((unsigned char *)p->lprgScriptEntry,        p->nScriptEntry * sizeof(SCRIPTENTRY), 4, gpGlobals->f.fpSSS);
-  PAL_MKFReadChunk((unsigned char *)p->lprgStore,              p->nStore * sizeof(STORE), 0, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk((unsigned char *)p->lprgEnemy,              p->nEnemy * sizeof(ENEMY), 1, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk((unsigned char *)p->lprgEnemyTeam,          p->nEnemyTeam * sizeof(ENEMYTEAM), 2, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk((unsigned char *)p->lprgMagic,              p->nMagic * sizeof(MAGIC), 4, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk((unsigned char *)p->lprgBattleField,        p->nBattleField * sizeof(BATTLEFIELD), 5, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk((unsigned char *)p->lprgLevelUpMagic,       p->nLevelUpMagic * sizeof(LEVELUPMAGIC_ALL), 6, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk((unsigned char *)p->rgwBattleEffectIndex,   sizeof(p->rgwBattleEffectIndex), 11, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk((unsigned char *)&p->EnemyPos,              sizeof(p->EnemyPos), 13, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk((unsigned char *)p->rgLevelUpExp,           sizeof(p->rgLevelUpExp), 14, gpGlobals->f.fpDATA);
+  GAMEDATA *p = &gpGlobals->g;
+  PAL_MKFReadChunk(p->lprgScriptEntry,        p->nScriptEntry * sizeof(SCRIPTENTRY), 4, gpGlobals->f.fpSSS);
+  PAL_MKFReadChunk(p->lprgStore,              p->nStore * sizeof(STORE), 0, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->lprgEnemy,              p->nEnemy * sizeof(ENEMY), 1, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->lprgEnemyTeam,          p->nEnemyTeam * sizeof(ENEMYTEAM), 2, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->lprgMagic,              p->nMagic * sizeof(MAGIC), 4, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->lprgBattleField,        p->nBattleField * sizeof(BATTLEFIELD), 5, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->lprgLevelUpMagic,       p->nLevelUpMagic * sizeof(LEVELUPMAGIC_ALL), 6, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->rgwBattleEffectIndex,   sizeof(p->rgwBattleEffectIndex), 11, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(&p->EnemyPos,              sizeof(p->EnemyPos), 13, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->rgLevelUpExp,           sizeof(p->rgLevelUpExp), 14, gpGlobals->f.fpDATA);
 }
 
 static void
@@ -186,9 +184,7 @@ PAL_InitGlobalGameData(
     }                                                                         \
   }
 
-  //
   // If the memory has not been allocated, allocate first.
-  //
   PAL_DOALLOCATE(gpGlobals->f.fpSSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
   PAL_DOALLOCATE(gpGlobals->f.fpSSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
   PAL_DOALLOCATE(gpGlobals->f.fpDATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
@@ -226,10 +222,10 @@ PAL_LoadDefaultGame(
    //
    // Load the default data from the game data files.
    //
-   PAL_MKFReadChunk((unsigned char *)p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gpGlobals->f.fpSSS);
-   PAL_MKFReadChunk((unsigned char *)p->rgScene, sizeof(p->rgScene), 1, gpGlobals->f.fpSSS);
-   PAL_MKFReadChunk((unsigned char *)p->rgObject, sizeof(p->rgObject), 2, gpGlobals->f.fpSSS);
-   PAL_MKFReadChunk((unsigned char *)&p->PlayerRoles, sizeof(PLAYERROLES), 3, gpGlobals->f.fpDATA);
+   PAL_MKFReadChunk(p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gpGlobals->f.fpSSS);
+   PAL_MKFReadChunk(p->rgScene, sizeof(p->rgScene), 1, gpGlobals->f.fpSSS);
+   PAL_MKFReadChunk(p->rgObject, sizeof(p->rgObject), 2, gpGlobals->f.fpSSS);
+   PAL_MKFReadChunk(&p->PlayerRoles, sizeof(PLAYERROLES), 3, gpGlobals->f.fpDATA);
 
    //
    // Set some other default data.

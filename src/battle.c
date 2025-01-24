@@ -835,7 +835,7 @@ void PAL_LoadBattleSprites(
 
 --*/
 {
-   int i, l, x, y, s;
+   int i, x, y, s;
    FILE *fp;
 
    PAL_FreeBattleSprites();
@@ -847,18 +847,8 @@ void PAL_LoadBattleSprites(
    {
       s = PAL_GetPlayerBattleSprite(gpGlobals->rgParty[i].wPlayerRole);
 
-      l = PAL_MKFGetDecompressedSize(s, gpGlobals->f.fpF);
-
-      if (l <= 0)
-      {
-         continue;
-      }
-      if (g_Battle.rgPlayer[i].lpSprite)
-         free(g_Battle.rgPlayer[i].lpSprite);
-      g_Battle.rgPlayer[i].lpSprite = (unsigned char *)UTIL_malloc(l);
-
-      PAL_MKFDecompressChunk(g_Battle.rgPlayer[i].lpSprite, l,
-                             s, gpGlobals->f.fpF);
+      if (PAL_MKFDecompressChunk(&g_Battle.rgPlayer[i].lpSprite, 0, s, gpGlobals->f.fpF) <= 0)
+        continue;
 
       //
       // Set the default position for this player
@@ -874,23 +864,10 @@ void PAL_LoadBattleSprites(
    for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
    {
       if (g_Battle.rgEnemy[i].wObjectID == 0)
-      {
          continue;
-      }
 
-      l = PAL_MKFGetDecompressedSize(
-          gpGlobals->g.rgObject[g_Battle.rgEnemy[i].wObjectID].enemy.wEnemyID, fp);
-
-      if (l <= 0)
-      {
-         continue;
-      }
-      if (g_Battle.rgEnemy[i].lpSprite)
-         free(g_Battle.rgEnemy[i].lpSprite);
-      g_Battle.rgEnemy[i].lpSprite = (unsigned char *)UTIL_malloc(l);
-
-      PAL_MKFDecompressChunk(g_Battle.rgEnemy[i].lpSprite, l,
-                             gpGlobals->g.rgObject[g_Battle.rgEnemy[i].wObjectID].enemy.wEnemyID, fp);
+      if (PAL_MKFDecompressChunk(&g_Battle.rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle.rgEnemy[i].wObjectID].enemy.wEnemyID, fp) <= 0)
+        continue;
 
       //
       // Set the default position for this enemy
@@ -934,11 +911,10 @@ PAL_LoadBattleBackground(
    }
 
    // Load the picture
-   PAL_MKFDecompressChunk(
-       g_Battle.lpBackground->pixels,
-       g_Battle.lpBackground->w * g_Battle.lpBackground->h,
-       gpGlobals->wNumBattleField,
-       gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(&g_Battle.lpBackground->pixels,
+                          g_Battle.lpBackground->w * g_Battle.lpBackground->h,
+                          gpGlobals->wNumBattleField,
+                          gpGlobals->f.fpFBP);
 }
 
 static void

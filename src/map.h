@@ -57,7 +57,7 @@
 //
 
 typedef struct tagPALMAP {
-  unsigned int Tiles[128][64][2];
+  unsigned int *Tiles;
   unsigned char *pTileSprite;
   int iMapNum;
 } PALMAP;

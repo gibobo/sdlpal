@@ -32,14 +32,7 @@
 
 #define PAL_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1
 
-static int
-PAL_RNGReadFrame(
-   unsigned char           *lpBuffer,
-   unsigned int            uiBufferSize,
-   unsigned int            uiRngNum,
-   unsigned int            uiFrameNum,
-   FILE                    *fpRngMKF
-)
+static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned int uiFrameNum, FILE *fpRngMKF)
 /*++
   Purpose:
 
@@ -65,67 +58,60 @@ PAL_RNGReadFrame(
 
 --*/
 {
-   unsigned int         uiOffset       = 0;
-   unsigned int         uiSubOffset    = 0;
-   unsigned int         uiNextOffset   = 0;
-   unsigned int         uiChunkCount   = 0;
-   int          iChunkLen      = 0;
+    unsigned int uiOffset = 0;
+    unsigned int uiSubOffset = 0;
+    unsigned int uiNextOffset = 0;
+    unsigned int uiChunkCount = 0;
+    int iChunkLen = 0;
 
-   if (lpBuffer == NULL || fpRngMKF == NULL || uiBufferSize == 0)
-   {
-      return -1;
-   }
+    if (fpRngMKF == NULL || lpBuffer == NULL ) {
+        return -1;
+    }
 
-   // Get the total number of chunks.
-   uiChunkCount = PAL_MKFGetChunkCount(fpRngMKF);
-   if (uiRngNum >= uiChunkCount)
-   {
-      return -1;
-   }
+    free(*lpBuffer);
+    *lpBuffer = NULL;
 
-   // Get the offset of the chunk.
-   fseek(fpRngMKF, 4 * uiRngNum, SEEK_SET);
-   PAL_fread(&uiOffset, sizeof(unsigned int), 1, fpRngMKF);
-   PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
+    // Get the total number of chunks.
+    uiChunkCount = PAL_MKFGetChunkCount(fpRngMKF);
+    if (uiRngNum >= uiChunkCount) {
+        return -1;
+    }
 
-   // Get the length of the chunk.
-   iChunkLen = uiNextOffset - uiOffset;
-   if (iChunkLen != 0)
-   {
-      fseek(fpRngMKF, uiOffset, SEEK_SET);
-   }
-   else
-   {
-      return -1;
-   }
+    // Get the offset of the chunk.
+    fseek(fpRngMKF, 4 * uiRngNum, SEEK_SET);
+    PAL_fread(&uiOffset, sizeof(unsigned int), 1, fpRngMKF);
+    PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
 
-   // Get the number of sub chunks.
-   PAL_fread(&uiChunkCount, sizeof(unsigned int), 1, fpRngMKF);
-   uiChunkCount = (uiChunkCount >> 2) - 1;
-   if (uiFrameNum >= uiChunkCount)
-   {
-      return -1;
-   }
+    // Get the length of the chunk.
+    iChunkLen = uiNextOffset - uiOffset;
+    if (iChunkLen != 0) {
+        fseek(fpRngMKF, uiOffset, SEEK_SET);
+    } else {
+        return -1;
+    }
 
-   // Get the offset of the sub chunk.
-   fseek(fpRngMKF, uiOffset + 4 * uiFrameNum, SEEK_SET);
-   PAL_fread(&uiSubOffset, sizeof(unsigned int), 1, fpRngMKF);
-   PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
+    // Get the number of sub chunks.
+    PAL_fread(&uiChunkCount, sizeof(unsigned int), 1, fpRngMKF);
+    uiChunkCount = (uiChunkCount >> 2) - 1;
+    if (uiFrameNum >= uiChunkCount) {
+        return -1;
+    }
 
-   // Get the length of the sub chunk.
-   iChunkLen = uiNextOffset - uiSubOffset;
-   if ((unsigned int)iChunkLen > uiBufferSize)
-   {
-      return -2;
-   }
+    // Get the offset of the sub chunk.
+    fseek(fpRngMKF, uiOffset + 4 * uiFrameNum, SEEK_SET);
+    PAL_fread(&uiSubOffset, sizeof(unsigned int), 1, fpRngMKF);
+    PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
 
-   if (iChunkLen != 0)
-   {
-      fseek(fpRngMKF, uiOffset + uiSubOffset, SEEK_SET);
-      return (int)fread(lpBuffer, 1, iChunkLen, fpRngMKF);
-   }
+    // Get the length of the sub chunk.
+    iChunkLen = uiNextOffset - uiSubOffset;
 
-   return -1;
+    if (iChunkLen != 0) {
+        *lpBuffer = (unsigned char *)UTIL_malloc(iChunkLen);
+        fseek(fpRngMKF, uiOffset + uiSubOffset, SEEK_SET);
+        return (int)fread(*lpBuffer, 1, iChunkLen, fpRngMKF);
+    }
+
+    return -1;
 }
 
 static int
@@ -301,23 +287,32 @@ PAL_RNGPlay(
 
 --*/
 {
-   FILE *fp = fopen(RESOURCE_PATH "/rng.mkf", "rb");
-   unsigned char *rng = (unsigned char *)malloc(65000);
-   unsigned char *buf = (unsigned char *)malloc(65000);
+   FILE *fp = NULL;
+   unsigned char *rng = NULL;
+   unsigned char *buf = NULL;
+   int rng_size = 0;
+   int buf_size = 0;
    unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
    unsigned int iTime = UTIL_GetTicks();
 
    // Avoid losing the last frame
    if (iEndFrame > 0) iEndFrame++;
 
-   for (; rng && buf && iStartFrame != iEndFrame; iStartFrame++) {
+   // buf = (unsigned char *)malloc(65000);
+   fp = fopen(RESOURCE_PATH "/rng.mkf", "rb");
+
+   for (; fp && iStartFrame != iEndFrame; iStartFrame++) {
      iTime += iDelay;
      // Read, decompress and render the frame
-     if (PAL_RNGReadFrame(buf, 65000, iNumRNG, iStartFrame, fp) < 0 ||
-         PAL_RNGBlitToSurface(rng, Decompress(buf, rng, 65000), gpScreen) < 0) {
-       // Failed to get the frame, don't go further
-       break;
-     }
+     buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fp);
+     if (buf_size < 0)
+       break; // Failed to get the frame, don't go further
+
+     free(rng);
+     rng_size = *(unsigned int *)buf;
+     rng = (unsigned char *)UTIL_malloc(rng_size);
+     if (PAL_RNGBlitToSurface(rng, Decompress(buf, rng, rng_size), gpScreen) < 0)
+       break; // Failed to get the frame, don't go further
 
      // Update the screen
      VIDEO_UpdateScreen(NULL);

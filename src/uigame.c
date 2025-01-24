@@ -151,7 +151,7 @@ void PAL_DrawOpeningMenuBackground(
 --*/
 {
    // Read the picture from fbp.mkf.
-   PAL_MKFDecompressChunk(gpScreen->pixels, gpScreen->w * gpScreen->h, 2, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(&gpScreen->pixels, gpScreen->w * gpScreen->h, 2, gpGlobals->f.fpFBP);
 
    // ...and blit it to the screen buffer.
    VIDEO_UpdateScreen(NULL);
@@ -1055,7 +1055,7 @@ void PAL_PlayerStatus(
 
    bufImage = (unsigned char *)malloc(bufImageSize);
 
-   PAL_MKFDecompressChunk(gpScreenBak->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(&gpScreenBak->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
 
    while (iCurrent >= 0 && iCurrent <= gpGlobals->wMaxPartyMemberIndex)
    {
@@ -1688,7 +1688,7 @@ void PAL_EquipItemMenu(
    bufImage = (unsigned char *)malloc(bufImageSize);
    gpGlobals->wLastUnequippedItem = wItem;
 
-   PAL_MKFDecompressChunk(gpScreenBak->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM,
+   PAL_MKFDecompressChunk(&gpScreenBak->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM,
                           gpGlobals->f.fpFBP);
 
    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;

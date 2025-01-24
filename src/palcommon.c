@@ -20,6 +20,7 @@
 
 #include "palcommon.h"
 #include "common.h"
+#include "util.h"
 
 #define PAL_fread(buf, elem, num, fp)             \
    if (fread((buf), (elem), (num), (fp)) < (num)) \
@@ -853,8 +854,9 @@ int PAL_MKFGetChunkSize(
    return uiNextOffset - uiOffset;
 }
 
+//TO DO
 int PAL_MKFReadChunk(
-    unsigned char *lpBuffer,
+    void *lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
     FILE *fp)
@@ -900,12 +902,10 @@ int PAL_MKFReadChunk(
       return -1;
    }
 
-   //
    // Get the offset of the chunk.
-   //
-   fseek(fp, 4 * uiChunkNum, SEEK_SET);
-   PAL_fread(&uiOffset, 4, 1, fp);
-   PAL_fread(&uiNextOffset, 4, 1, fp);
+   fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
+   PAL_fread(&uiOffset, sizeof(unsigned int), 1, fp);
+   PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
    //
    // Get the length of the chunk.
@@ -980,7 +980,7 @@ int PAL_MKFGetDecompressedSize(
 }
 
 int PAL_MKFDecompressChunk(
-    unsigned char *lpBuffer,
+    void **lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
     FILE *fp)
@@ -1025,7 +1025,13 @@ int PAL_MKFDecompressChunk(
 
    PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
 
-   len = Decompress(buf, lpBuffer, uiBufferSize);
+   if ((uiBufferSize == 0) || ((*lpBuffer) == NULL)) {
+     free(*lpBuffer);
+     uiBufferSize = *(unsigned int *)buf;
+     *lpBuffer = UTIL_malloc(uiBufferSize);
+   }
+
+   len = Decompress(buf, *lpBuffer, uiBufferSize);
    free(buf);
 
    return len;

@@ -20,7 +20,12 @@
 
 #include "map.h"
 #include "palcommon.h"
+#include "util.h"
 #include <stdlib.h>
+
+#define PALMAP_Y 128
+#define PALMAP_X 64
+#define PALMAP_Z 2
 
 PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
 /*++
@@ -92,10 +97,10 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
       return NULL;
    }
 
-   //
    // Decompress the tile data.
-   //
-   if (Decompress(buf, (unsigned char *)map->Tiles, sizeof(map->Tiles)) < 0)
+   unsigned int tile_size = PALMAP_Y * PALMAP_X * PALMAP_Z * sizeof(unsigned int);
+   map->Tiles = UTIL_malloc(tile_size);
+   if (Decompress(buf, map->Tiles, tile_size) < 0)
    {
       free(map);
       free(buf);
@@ -152,25 +157,24 @@ void PAL_FreeMap(PALMAP *lpMap)
 
 --*/
 {
-   //
    // Check for NULL pointer.
-   //
    if (lpMap == NULL)
    {
       return;
    }
 
-   //
    // Free the tile bitmaps.
-   //
    if (lpMap->pTileSprite != NULL)
    {
       free(lpMap->pTileSprite);
    }
-
-   //
+   
+   // Free the tiles.
+   if (lpMap->Tiles != NULL)
+   {
+      free(lpMap->Tiles);
+   }
    // Delete the instance.
-   //
    free(lpMap);
 }
 
@@ -206,27 +210,19 @@ const unsigned char *PAL_MapGetTileBitmap(
 {
   unsigned int d;
 
-  //
   // Check for invalid parameters.
-  //
-  if (x >= 64 || y >= 128 || h > 1 || lpMap == NULL) {
+  if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL) {
     return NULL;
   }
 
-  //
   // Get the tile data of the specified location.
-  //
-  d = lpMap->Tiles[y][x][h];
+   d = lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h];
 
-  if (ucLayer == 0) {
-    //
-    // Bottom layer
-    //
-    return PAL_SpriteGetFrame(lpMap->pTileSprite, (d & 0xFF) | ((d >> 4) & 0x100));
+   if (ucLayer == 0) {
+     // Bottom layer
+     return PAL_SpriteGetFrame(lpMap->pTileSprite, (d & 0xFF) | ((d >> 4) & 0x100));
   } else {
-    //
     // Top layer
-    //
     d >>= 16;
     return PAL_SpriteGetFrame(lpMap->pTileSprite, ((d & 0xFF) | ((d >> 4) & 0x100)) - 1);
   }
@@ -259,15 +255,13 @@ int PAL_MapTileIsBlocked(
 
 --*/
 {
-   //
    // Check for invalid parameters.
-   //
-   if (x >= 64 || y >= 128 || h > 1 || lpMap == NULL)
+   if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL)
    {
       return 1;
    }
 
-   return (lpMap->Tiles[y][x][h] & 0x2000) >> 13;
+   return (lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h] & 0x2000) >> 13;
 }
 
 unsigned char
@@ -307,12 +301,12 @@ PAL_MapGetTileHeight(
    //
    // Check for invalid parameters.
    //
-   if (y >= 128 || x >= 64 || h > 1 || lpMap == NULL)
+   if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL)
    {
       return 0;
    }
 
-   d = lpMap->Tiles[y][x][h];
+   d = lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h];
 
    if (ucLayer)
    {

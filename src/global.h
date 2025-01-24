@@ -578,7 +578,6 @@ typedef struct tagCONFIGURATION {
   /* Configurable options */
   unsigned int dwTextureWidth;
   unsigned int dwTextureHeight;
-  int iAudioDevice;
   int iAudioChannels;
   int iSampleRate;
   int iOPLSampleRate;

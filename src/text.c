@@ -157,7 +157,7 @@ PAL_InitText(
         return -1;
     }
     memset(offsets, 0, i * sizeof(unsigned int));
-    PAL_MKFReadChunk((unsigned char *)offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
+    PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
     // Read the messages.
     fp = fopen(RESOURCE_PATH "/m.msg", "rb");

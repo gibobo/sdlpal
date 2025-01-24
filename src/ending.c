@@ -59,16 +59,10 @@ static void PAL_ShowFBP(
    unsigned int k;
    unsigned char a, b;
 
-   buf = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
-   if (PAL_MKFDecompressChunk(buf, SCREEN_SIZE, wChunkNum, gpGlobals->f.fpFBP) <= 0) {
-     memset(buf, 0, SCREEN_SIZE);
-   }
+   PAL_MKFDecompressChunk(&buf, 0, wChunkNum, gpGlobals->f.fpFBP);
 
-   if (g_wCurEffectSprite != 0) {
-     bufSprite = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
-     if (PAL_MKFDecompressChunk(bufSprite, SCREEN_SIZE, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0)
-       memset(bufSprite, 0, SCREEN_SIZE);
-   }
+   if (g_wCurEffectSprite)
+     PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gpGlobals->f.fpMGO);
 
    if (wFade)
    {
@@ -105,7 +99,7 @@ static void PAL_ShowFBP(
 
             VIDEO_RestoreScreen(gpScreen);
 
-            if (g_wCurEffectSprite != 0)
+            if (bufSprite)
             {
                int f = UTIL_GetTicks() / 150;
                PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
@@ -158,15 +152,12 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
       return;
    }
 
-   if (PAL_MKFDecompressChunk(p->pixels, SCREEN_SIZE, wChunkNum, gpGlobals->f.fpFBP) <= 0)
-   {
+   if (PAL_MKFDecompressChunk(&p->pixels, p->w * p->h, wChunkNum, gpGlobals->f.fpFBP) <= 0) {
       return;
    }
 
-   if (g_wCurEffectSprite != 0)
-   {
-      bufSprite = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
-      PAL_MKFDecompressChunk(bufSprite, SCREEN_SIZE, g_wCurEffectSprite, gpGlobals->f.fpMGO);
+   if (PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0) {
+      return;
    }
 
    VIDEO_BackupScreen(gpScreen);
@@ -241,8 +232,8 @@ static void PAL_EndingAnimation(
 
 --*/
 {
-   unsigned char *buf;
-   unsigned char *bufGirl;
+   unsigned char *buf = NULL;
+   unsigned char *bufGirl = NULL;
    PAL_Surface *pUpper;
    PAL_Surface *pLower;
    PAL_Rect srcrect;
@@ -251,16 +242,13 @@ static void PAL_EndingAnimation(
    int yPosGirl = 180;
    int i;
 
-   buf = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
-   bufGirl = (unsigned char *)UTIL_malloc(6000);
-
    pUpper = VIDEO_CreateCompatibleSizedSurface(NULL);
    pLower = VIDEO_CreateCompatibleSizedSurface(NULL);
 
-   PAL_MKFDecompressChunk(pUpper->pixels, SCREEN_SIZE, 69, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(pLower->pixels, SCREEN_SIZE, 70, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(buf, SCREEN_SIZE, 571, gpGlobals->f.fpMGO);
-   PAL_MKFDecompressChunk(bufGirl, 6000, 572, gpGlobals->f.fpMGO);
+   PAL_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(&pLower->pixels, SCREEN_SIZE, 70, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(&buf, 0, 571, gpGlobals->f.fpMGO);
+   PAL_MKFDecompressChunk(&bufGirl, 0, 572, gpGlobals->f.fpMGO);
 
    srcrect.x = 0;
    dstrect.x = 0;

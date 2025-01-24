@@ -37,33 +37,27 @@ typedef struct tagWAVESPEC {
   uint8_t align;
 } WAVESPEC;
 
-typedef const void *(*SoundLoader)(const unsigned char *, unsigned int, WAVESPEC *);
 typedef int (*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, int, const void **);
 
 typedef struct tagWAVEDATA {
-  struct tagWAVEDATA *next;
-  void *resampler[2]; /* The resampler used for sound data */
-  ResampleMixer ResampleMix;
-  const void *base;
-  const void *current;
-  const void *end;
-  WAVESPEC spec;
+    struct tagWAVEDATA *next;
+    void *resampler[2]; /* The resampler used for sound data */
+    ResampleMixer ResampleMix;
+    const void *base;
+    const void *current;
+    const void *end;
+    WAVESPEC spec;
 } WAVEDATA;
 
 typedef struct tagSOUNDPLAYER {
-  AUDIOPLAYER_COMMONS;
-  FILE *mkf;             /* File pointer to the MKF file */
-  SoundLoader LoadSound; /* The function pointer for load WAVE/VOC data */
-  WAVEDATA soundlist;
-  int cursounds;
-  int lastSFX;
+    AUDIOPLAYER_COMMONS;
+    FILE *mkf;             /* File pointer to the MKF file */
+    WAVEDATA soundlist;
+    int cursounds;
+    int lastSFX;
 } SOUNDPLAYER;
 
-static const void *
-SOUND_LoadWAVEData(
-    const unsigned char *lpData,
-    unsigned int dwLen,
-    WAVESPEC *lpSpec)
+static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int dwLen, WAVESPEC *lpSpec)
 /*++
   Purpose:
 
@@ -90,41 +84,36 @@ SOUND_LoadWAVEData(
     uint32_t len, type;
 
     if (dwLen < sizeof(RIFFHeader) || lpRiff->signature != RIFF_RIFF ||
-        lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8))
-    {
+        lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8)) {
         return NULL;
     }
 
     lpChunk = (const RIFFChunkHeader *)(lpRiff + 1);
     dwLen -= sizeof(RIFFHeader);
-    while (dwLen >= sizeof(RIFFChunkHeader))
-    {
+    while (dwLen >= sizeof(RIFFChunkHeader)) {
         len = lpChunk->length;
         type = lpChunk->type;
         if (dwLen >= sizeof(RIFFChunkHeader) + len)
-            dwLen -= sizeof(RIFFChunkHeader) + len;
+        dwLen -= sizeof(RIFFChunkHeader) + len;
         else
-            return NULL;
+        return NULL;
 
-        switch (type)
-        {
+        switch (type) {
         case WAVE_fmt:
-            lpFormat = (const WAVEFormatPCM *)(lpChunk + 1);
-            if (len != sizeof(WAVEFormatPCM) || lpFormat->wFormatTag != 0x0001)
-            {
-                return NULL;
-            }
-            break;
+        lpFormat = (const WAVEFormatPCM *)(lpChunk + 1);
+        if (len != sizeof(WAVEFormatPCM) || lpFormat->wFormatTag != 0x0001) {
+            return NULL;
+        }
+        break;
         case WAVE_data:
-            lpWaveData = (const uint8_t *)(lpChunk + 1);
-            dwLen = 0;
-            break;
+        lpWaveData = (const uint8_t *)(lpChunk + 1);
+        dwLen = 0;
+        break;
         }
         lpChunk = (const RIFFChunkHeader *)((const uint8_t *)(lpChunk + 1) + len);
     }
 
-    if (lpFormat == NULL || lpWaveData == NULL)
-    {
+    if (lpFormat == NULL || lpWaveData == NULL) {
         return NULL;
     }
 
@@ -871,20 +860,16 @@ AUDIOPLAYER *SOUND_Init(void)
 --*/
 {
     FILE *mkf = fopen(RESOURCE_PATH "/sounds.mkf", "rb");
-    if (mkf)
-    {
-        SOUNDPLAYER *player = (SOUNDPLAYER *)malloc(sizeof(SOUNDPLAYER));
-        memset(&player->soundlist, 0, sizeof(WAVEDATA));
-        player->Play = SOUND_Play;
-        player->FillBuffer = SOUND_FillBuffer;
-        player->Shutdown = SOUND_Shutdown;
-
-        player->LoadSound = SOUND_LoadWAVEData;
-        player->mkf = mkf;
-        player->soundlist.resampler[0] = resampler_create();
-        player->soundlist.resampler[1] = resampler_create();
-        player->cursounds = 0;
-        return (AUDIOPLAYER *)player;
-    }
-    return NULL;
+    if (mkf == NULL)
+        return NULL;
+    SOUNDPLAYER *player = (SOUNDPLAYER *)malloc(sizeof(SOUNDPLAYER));
+    memset(&player->soundlist, 0, sizeof(WAVEDATA));
+    player->Play = SOUND_Play;
+    player->FillBuffer = SOUND_FillBuffer;
+    player->Shutdown = SOUND_Shutdown;
+    player->mkf = mkf;
+    player->soundlist.resampler[0] = resampler_create();
+    player->soundlist.resampler[1] = resampler_create();
+    player->cursounds = 0;
+    return (AUDIOPLAYER *)player;
 }
