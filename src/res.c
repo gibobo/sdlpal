@@ -216,8 +216,8 @@ void PAL_LoadResources(
    {
       FILE *fpMAP, *fpGOP;
 
-      fpMAP = fopen(RESOURCE_PATH "/map.mkf", "rb");
-      fpGOP = fopen(RESOURCE_PATH "/gop.mkf", "rb");
+      fpMAP = PAL_fopen(RESOURCE_PATH "/map.mkf", "rb");
+      fpGOP = PAL_fopen(RESOURCE_PATH "/gop.mkf", "rb");
 
       if (gpGlobals->fEnteringScene)
       {
@@ -236,8 +236,8 @@ void PAL_LoadResources(
 
       if (gpResources->lpMap == NULL)
       {
-         UTIL_CloseFile(fpMAP);
-         UTIL_CloseFile(fpGOP);
+         PAL_fclose(fpMAP);
+         PAL_fclose(fpGOP);
 
          TerminateOnError("PAL_LoadResources(): Fail to load map #%d (scene #%d) !",
                           gpGlobals->g.rgScene[i].wMapNum, gpGlobals->wNumScene);
@@ -261,8 +261,8 @@ void PAL_LoadResources(
 
       gpGlobals->partyoffset = PAL_XY(160, 112);
 
-      UTIL_CloseFile(fpGOP);
-      UTIL_CloseFile(fpMAP);
+      PAL_fclose(fpGOP);
+      PAL_fclose(fpMAP);
    }
 
    // Load player sprites

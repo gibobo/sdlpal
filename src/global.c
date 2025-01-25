@@ -60,14 +60,14 @@ PAL_InitGlobals(
    gConfig.dwTextureHeight = 400;
 
    // Open files
-   gpGlobals->f.fpFBP = fopen(RESOURCE_PATH "/fbp.mkf", "rb");
-   gpGlobals->f.fpMGO = fopen(RESOURCE_PATH "/mgo.mkf", "rb");
-   gpGlobals->f.fpBALL = fopen(RESOURCE_PATH "/ball.mkf", "rb");
-   gpGlobals->f.fpDATA = fopen(RESOURCE_PATH "/data.mkf", "rb");
-   gpGlobals->f.fpF = fopen(RESOURCE_PATH "/f.mkf", "rb");
-   gpGlobals->f.fpFIRE = fopen(RESOURCE_PATH "/fire.mkf", "rb");
-   gpGlobals->f.fpRGM = fopen(RESOURCE_PATH "/rgm.mkf", "rb");
-   gpGlobals->f.fpSSS = fopen(RESOURCE_PATH "/sss.mkf", "rb");
+   gpGlobals->f.fpFBP = PAL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
+   gpGlobals->f.fpMGO = PAL_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
+   gpGlobals->f.fpBALL = PAL_fopen(RESOURCE_PATH "/ball.mkf", "rb");
+   gpGlobals->f.fpDATA = PAL_fopen(RESOURCE_PATH "/data.mkf", "rb");
+   gpGlobals->f.fpF = PAL_fopen(RESOURCE_PATH "/f.mkf", "rb");
+   gpGlobals->f.fpFIRE = PAL_fopen(RESOURCE_PATH "/fire.mkf", "rb");
+   gpGlobals->f.fpRGM = PAL_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
+   gpGlobals->f.fpSSS = PAL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
 
    // Set decompress function
    Decompress = YJ2_Decompress;
@@ -99,14 +99,14 @@ PAL_FreeGlobals(
    //
    // Close all opened files
    //
-   UTIL_CloseFile(gpGlobals->f.fpFBP);
-   UTIL_CloseFile(gpGlobals->f.fpMGO);
-   UTIL_CloseFile(gpGlobals->f.fpBALL);
-   UTIL_CloseFile(gpGlobals->f.fpDATA);
-   UTIL_CloseFile(gpGlobals->f.fpF);
-   UTIL_CloseFile(gpGlobals->f.fpFIRE);
-   UTIL_CloseFile(gpGlobals->f.fpRGM);
-   UTIL_CloseFile(gpGlobals->f.fpSSS);
+   PAL_fclose(gpGlobals->f.fpFBP);
+   PAL_fclose(gpGlobals->f.fpMGO);
+   PAL_fclose(gpGlobals->f.fpBALL);
+   PAL_fclose(gpGlobals->f.fpDATA);
+   PAL_fclose(gpGlobals->f.fpF);
+   PAL_fclose(gpGlobals->f.fpFIRE);
+   PAL_fclose(gpGlobals->f.fpRGM);
+   PAL_fclose(gpGlobals->f.fpSSS);
 
    //
    // Free the game data
@@ -336,13 +336,13 @@ PAL_LoadGame_Common(
         return FALSE;
 
     sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
-    FILE *fp = fopen(save_path, "rb");
+    FILE *fp = PAL_fopen(save_path, "rb");
     free(save_path);
 
     // Read all data from the file and close.
-    size_t n = fp ? fread(s, 1, size, fp) : 0;
+    size_t n = fp ? PAL_fread(s, 1, size, fp) : 0;
 
-    UTIL_CloseFile(fp);
+    PAL_fclose(fp);
 
     if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
     {
@@ -473,12 +473,12 @@ PAL_SaveGame_Common(
       return;
     sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
 
-    if ((fp = fopen(save_path, "wb"))) {
+    if (fp = PAL_fopen(save_path, "wb")) {
       i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
       i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
-      fwrite(s, i, 1, fp);
+      PAL_fwrite(s, i, 1, fp);
     }
-    UTIL_CloseFile(fp);
+    PAL_fclose(fp);
     free(save_path);
 }
 

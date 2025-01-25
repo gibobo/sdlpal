@@ -54,7 +54,7 @@ PAL_GetPalette(
    int i;
    FILE *fp;
 
-   fp = fopen(RESOURCE_PATH "/pat.mkf", "rb");
+   fp = PAL_fopen(RESOURCE_PATH "/pat.mkf", "rb");
 
    if (fp == NULL)
      return NULL;
@@ -64,7 +64,7 @@ PAL_GetPalette(
 
    // Read the palette data from the pat.mkf file
    i = PAL_MKFReadChunk(buf, sizeof(buf), iPaletteNum, fp);
-   UTIL_CloseFile(fp);
+   PAL_fclose(fp);
 
    if (i < 0)
    {

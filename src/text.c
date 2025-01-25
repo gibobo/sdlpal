@@ -81,14 +81,14 @@ PAL_InitText(
     //
     // Open the message and word data files.
     //
-    fp = fopen(RESOURCE_PATH "/word.dat", "rb");
+    fp = PAL_fopen(RESOURCE_PATH "/word.dat", "rb");
     if (fp == NULL)
         return -1;
 
     // See how many words we have
     i = flength(fp);
     if (i <= 0) {
-        fclose(fp);
+        PAL_fclose(fp);
         return -1;
     }
 
@@ -98,25 +98,25 @@ PAL_InitText(
     // Read the words
     temp = (unsigned char *)malloc(10 * g_TextLib.nWords);
     if (temp == NULL) {
-        fclose(fp);
+        PAL_fclose(fp);
         return -1;
     }
     memset(temp, 0, 10 * g_TextLib.nWords);
 
-    if (fread(temp, 1, i, fp) < i)
+    if (PAL_fread(temp, 1, i, fp) < i)
     {
         free(temp);
-        fclose(fp);
+        PAL_fclose(fp);
         return -1;
     }
 
     // Close the words file
-    fclose(fp);
+    PAL_fclose(fp);
 
-    fp = fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
+    fp = PAL_fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
     lpcptbl_big5 = (wchar_t *)calloc(126 * 160, sizeof(wchar_t));
-    fread((void*)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
-    fclose(fp);
+    PAL_fread((void*)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
+    PAL_fclose(fp);
 
     // Split the words and do code page conversion
     for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
@@ -160,7 +160,7 @@ PAL_InitText(
     PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
     // Read the messages.
-    fp = fopen(RESOURCE_PATH "/m.msg", "rb");
+    fp = PAL_fopen(RESOURCE_PATH "/m.msg", "rb");
     if(fp == NULL)
         return -1;
 
@@ -168,18 +168,18 @@ PAL_InitText(
     temp = (unsigned char *)malloc(i);
     if (temp == NULL) {
         free(offsets);
-        fclose(fp);
+        PAL_fclose(fp);
         return -1;
     }
     memset(temp, 0, i);
 
-    if (fread(temp, 1, i, fp) < i) {
+    if (PAL_fread(temp, 1, i, fp) < i) {
         free(temp);
         free(offsets);
-        fclose(fp);
+        PAL_fclose(fp);
         return -1;
     }
-    fclose(fp);
+    PAL_fclose(fp);
 
     // Split messages and do code page conversion here
     for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++)

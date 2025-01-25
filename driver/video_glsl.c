@@ -23,6 +23,7 @@
 #include "video_glsl.h"
 #include "mini_glloader.h"
 #include "video.h"
+#include "util.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,13 +42,13 @@ static const float p_tex[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
 char *readShaderFile(const char *filename, GLuint type)
 {
-    FILE *fp = fopen(filename, "rb");
-    fseek(fp, 0, SEEK_END);
+    FILE *fp = PAL_fopen(filename, "rb");
+    PAL_fseek(fp, 0, SEEK_END);
     long filesize = ftell(fp);
     char *buf = (char *)malloc(filesize + 1);
-    fseek(fp, 0, SEEK_SET);
-    fread(buf, filesize, 1, fp);
-    fclose(fp);
+    PAL_fseek(fp, 0, SEEK_SET);
+    PAL_fread(buf, filesize, 1, fp);
+    PAL_fclose(fp);
     buf[filesize] = '\0';
     return buf;
 }

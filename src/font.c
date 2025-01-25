@@ -38,18 +38,18 @@ void PAL_InitFont(void)
 {
     p_font = (unsigned char *)calloc(65536, 32);
     p_font_size = (unsigned char *)calloc(65536, 1);
-    fp_font_data = fopen(SOURCE_DIR "/unicode_font.dat", "rb");
-    fp_font_size = fopen(SOURCE_DIR "/unicode_font_size.dat", "rb");
-    fread(p_font, 32, 65536, fp_font_data);
-    fread(p_font_size, 1, 65536, fp_font_size);
+    fp_font_data = PAL_fopen(SOURCE_DIR "/unicode_font.dat", "rb");
+    fp_font_size = PAL_fopen(SOURCE_DIR "/unicode_font_size.dat", "rb");
+    PAL_fread(p_font, 32, 65536, fp_font_data);
+    PAL_fread(p_font_size, 1, 65536, fp_font_size);
 }
 
 void PAL_DeInitFont(void)
 {
     free(p_font);
     free(p_font_size);
-    UTIL_CloseFile(fp_font_data);
-    UTIL_CloseFile(fp_font_size);
+    PAL_fclose(fp_font_data);
+    PAL_fclose(fp_font_size);
 }
 
 void PAL_DrawCharOnSurface(

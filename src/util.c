@@ -37,10 +37,10 @@ long flength(FILE *fp) {
 	long old_pos = ftell(fp);
 	if (old_pos == -1)
 		return -1;
-	if (fseek(fp, 0, SEEK_END) == -1)
+	if (PAL_fseek(fp, 0, SEEK_END) == -1)
 		return -1;
 	long length = ftell(fp);
-	fseek(fp, old_pos, SEEK_SET);
+	PAL_fseek(fp, old_pos, SEEK_SET);
 	return length;
 }
 
@@ -209,9 +209,7 @@ void TerminateOnError(
 	PAL_Shutdown(255);
 }
 
-void *
-UTIL_malloc(
-	size_t buffer_size)
+void *UTIL_malloc(size_t buffer_size)
 {
 	// handy wrapper for operations we always forget, like checking malloc's returned pointer.
 
@@ -222,19 +220,17 @@ UTIL_malloc(
 		TerminateOnError("UTIL_malloc() called with invalid buffer size: %d\n", buffer_size);
 
 	buffer = malloc(buffer_size); // allocate real memory space
-	memset(buffer, 0, buffer_size);
 
 	// last check, check if malloc call succeeded
 	if (buffer == NULL)
 		TerminateOnError("UTIL_malloc() failure for %d bytes (out of memory?)\n", buffer_size);
 
+	memset(buffer, 0, buffer_size);
+
 	return buffer; // nothing went wrong, so return buffer pointer
 }
 
-void *
-UTIL_calloc(
-	size_t n,
-	size_t size)
+void *UTIL_calloc(size_t n, size_t size)
 {
 	// handy wrapper for operations we always forget, like checking calloc's returned pointer.
 
@@ -245,17 +241,49 @@ UTIL_calloc(
 		TerminateOnError("UTIL_calloc() called with invalid parameters\n");
 
 	buffer = calloc(n, size); // allocate real memory space
-	memset(buffer, 0, size * n);
 
 	// last check, check if malloc call succeeded
 	if (buffer == NULL)
 		TerminateOnError("UTIL_calloc() failure for %d bytes (out of memory?)\n", size * n);
 
+	memset(buffer, 0, size * n);
+
 	return buffer; // nothing went wrong, so return buffer pointer
 }
 
-void UTIL_CloseFile(
-	FILE *fp)
+FILE *PAL_fopen(const char *_FileName, const char *_Mode)
+{
+	if (_FileName == NULL || _Mode == NULL)
+		TerminateOnError("PAL_fopen() called with invalid parameters\n");
+
+	return fopen(_FileName, _Mode);
+}
+
+int PAL_fseek(FILE *_Stream, long _Offset, int _Origin)
+{
+	if (_Stream == NULL)
+		TerminateOnError("PAL_fseek() called with invalid parameters\n");
+
+	return fseek(_Stream, _Offset, _Origin);
+}
+
+unsigned int PAL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, FILE *_Stream)
+{
+	if (_Buffer == NULL || _Stream == NULL)
+		TerminateOnError("PAL_fread() called with invalid parameters\n");
+
+	return fread(_Buffer, _ElementSize, _ElementCount, _Stream);
+}
+
+unsigned int PAL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, FILE *_Stream)
+{
+	if (_Buffer == NULL || _Stream == NULL)
+		TerminateOnError("PAL_fread() called with invalid parameters\n");
+
+	return fwrite(_Buffer, _ElementSize, _ElementCount, _Stream);
+}
+
+void PAL_fclose(FILE *fp)
 /*++
   Purpose:
 

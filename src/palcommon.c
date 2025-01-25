@@ -22,7 +22,7 @@
 #include "common.h"
 #include "util.h"
 
-#define PAL_fread(buf, elem, num, fp)             \
+#define Check_fread(buf, elem, num, fp)             \
    if (fread((buf), (elem), (num), (fp)) < (num)) \
    return -1
 
@@ -800,7 +800,7 @@ int PAL_MKFGetChunkCount(
       return 0;
    }
 
-   fseek(fp, 0, SEEK_SET);
+   PAL_fseek(fp, 0, SEEK_SET);
    if (fread(&iNumChunk, sizeof(int), 1, fp) == 1)
       return (iNumChunk >> 2) - 1;
    else
@@ -844,9 +844,9 @@ int PAL_MKFGetChunkSize(
    //
    // Get the offset of the specified chunk and the next chunk.
    //
-   fseek(fp, 4 * uiChunkNum, SEEK_SET);
-   PAL_fread(&uiOffset, sizeof(unsigned int), 1, fp);
-   PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
+   PAL_fseek(fp, 4 * uiChunkNum, SEEK_SET);
+   Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
+   Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
    //
    // Return the length of the chunk.
@@ -903,9 +903,9 @@ int PAL_MKFReadChunk(
    }
 
    // Get the offset of the chunk.
-   fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
-   PAL_fread(&uiOffset, sizeof(unsigned int), 1, fp);
-   PAL_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
+   PAL_fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
+   Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
+   Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
    //
    // Get the length of the chunk.
@@ -919,7 +919,7 @@ int PAL_MKFReadChunk(
 
    if (uiChunkLen != 0)
    {
-      fseek(fp, uiOffset, SEEK_SET);
+      PAL_fseek(fp, uiOffset, SEEK_SET);
       return (int)fread(lpBuffer, 1, uiChunkLen, fp);
    }
 
@@ -968,14 +968,14 @@ int PAL_MKFGetDecompressedSize(
    //
    // Get the offset of the chunk.
    //
-   fseek(fp, 4 * uiChunkNum, SEEK_SET);
-   PAL_fread(&uiOffset, 4, 1, fp);
+   PAL_fseek(fp, 4 * uiChunkNum, SEEK_SET);
+   Check_fread(&uiOffset, 4, 1, fp);
 
    //
    // Read the header.
    //
-   fseek(fp, uiOffset, SEEK_SET);
-   PAL_fread(buf, sizeof(unsigned int), 1, fp);
+   PAL_fseek(fp, uiOffset, SEEK_SET);
+   Check_fread(buf, sizeof(unsigned int), 1, fp);
    return (int)buf[0];
 }
 

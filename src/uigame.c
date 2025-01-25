@@ -120,16 +120,16 @@ static unsigned short GetSavedTimes(int iSaveSlot) {
    save_path = (char *)malloc(256);
    if (save_path) {
       sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
-      fp = fopen(save_path, "rb");
+      fp = PAL_fopen(save_path, "rb");
       if (fp != NULL) {
-      if (fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
+      if (PAL_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
          wSavedTimes = wSavedTimes;
       else
          wSavedTimes = 0;
       }
       free(save_path);
    }
-   UTIL_CloseFile(fp);
+   PAL_fclose(fp);
    return wSavedTimes;
 }
 
