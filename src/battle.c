@@ -21,6 +21,7 @@
 #include "battle.h"
 #include "audio/audio.h"
 #include "common.h"
+#include "driver.h"
 #include "fight.h"
 #include "global.h"
 #include "input.h"
@@ -840,7 +841,7 @@ void PAL_LoadBattleSprites(
 
    PAL_FreeBattleSprites();
 
-   fp = PAL_fopen(RESOURCE_PATH "/abc.mkf", "rb");
+   fp = DRIVER_fopen(RESOURCE_PATH "/abc.mkf", "rb");
 
    // Load battle sprites for players
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
@@ -881,7 +882,7 @@ void PAL_LoadBattleSprites(
       g_Battle.rgEnemy[i].pos = PAL_XY(x, y);
    }
 
-   PAL_fclose(fp);
+   DRIVER_fclose(fp);
 }
 
 static void

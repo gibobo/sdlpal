@@ -21,6 +21,7 @@
 #include "uigame.h"
 #include "audio/audio.h"
 #include "common.h"
+#include "driver.h"
 #include "global.h"
 #include "input.h"
 #include "itemmenu.h"
@@ -119,15 +120,15 @@ static unsigned short GetSavedTimes(int iSaveSlot) {
    unsigned short wSavedTimes = 0;
    save_path = (char *)UTIL_malloc(256);
    sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
-   fp = PAL_fopen(save_path, "rb");
+   fp = DRIVER_fopen(save_path, "rb");
    if (fp != NULL) {
-   if (PAL_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
+   if (DRIVER_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
       wSavedTimes = wSavedTimes;
    else
       wSavedTimes = 0;
    }
    free(save_path);
-   PAL_fclose(fp);
+   DRIVER_fclose(fp);
    return wSavedTimes;
 }
 

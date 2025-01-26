@@ -21,6 +21,7 @@
 #include "res.h"
 #include "audio/audio.h"
 #include "common.h"
+#include "driver.h"
 #include "global.h"
 #include "palcommon.h"
 #include "util.h"
@@ -216,8 +217,8 @@ void PAL_LoadResources(
    {
       FILE *fpMAP, *fpGOP;
 
-      fpMAP = PAL_fopen(RESOURCE_PATH "/map.mkf", "rb");
-      fpGOP = PAL_fopen(RESOURCE_PATH "/gop.mkf", "rb");
+      fpMAP = DRIVER_fopen(RESOURCE_PATH "/map.mkf", "rb");
+      fpGOP = DRIVER_fopen(RESOURCE_PATH "/gop.mkf", "rb");
 
       if (gpGlobals->fEnteringScene)
       {
@@ -236,8 +237,8 @@ void PAL_LoadResources(
 
       if (gpResources->lpMap == NULL)
       {
-         PAL_fclose(fpMAP);
-         PAL_fclose(fpGOP);
+         DRIVER_fclose(fpMAP);
+         DRIVER_fclose(fpGOP);
 
          TerminateOnError("PAL_LoadResources(): Fail to load map #%d (scene #%d) !",
                           gpGlobals->g.rgScene[i].wMapNum, gpGlobals->wNumScene);
@@ -261,8 +262,8 @@ void PAL_LoadResources(
 
       gpGlobals->partyoffset = PAL_XY(160, 112);
 
-      PAL_fclose(fpGOP);
-      PAL_fclose(fpMAP);
+      DRIVER_fclose(fpGOP);
+      DRIVER_fclose(fpMAP);
    }
 
    // Load player sprites

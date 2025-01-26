@@ -22,6 +22,7 @@
 //
 
 #include "rngplay.h"
+#include "driver.h"
 #include "global.h"
 #include "input.h"
 #include "palcommon.h"
@@ -78,14 +79,14 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
     }
 
     // Get the offset of the chunk.
-    PAL_fseek(fpRngMKF, 4 * uiRngNum, SEEK_SET);
+    DRIVER_fseek(fpRngMKF, 4 * uiRngNum, SEEK_SET);
     Check_fread(&uiOffset, sizeof(unsigned int), 1, fpRngMKF);
     Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
 
     // Get the length of the chunk.
     iChunkLen = uiNextOffset - uiOffset;
     if (iChunkLen != 0) {
-        PAL_fseek(fpRngMKF, uiOffset, SEEK_SET);
+        DRIVER_fseek(fpRngMKF, uiOffset, SEEK_SET);
     } else {
         return -1;
     }
@@ -98,7 +99,7 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
     }
 
     // Get the offset of the sub chunk.
-    PAL_fseek(fpRngMKF, uiOffset + 4 * uiFrameNum, SEEK_SET);
+    DRIVER_fseek(fpRngMKF, uiOffset + 4 * uiFrameNum, SEEK_SET);
     Check_fread(&uiSubOffset, sizeof(unsigned int), 1, fpRngMKF);
     Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
 
@@ -107,7 +108,7 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
 
     if (iChunkLen != 0) {
         *lpBuffer = (unsigned char *)UTIL_malloc(iChunkLen);
-        PAL_fseek(fpRngMKF, uiOffset + uiSubOffset, SEEK_SET);
+        DRIVER_fseek(fpRngMKF, uiOffset + uiSubOffset, SEEK_SET);
         return (int)fread(*lpBuffer, 1, iChunkLen, fpRngMKF);
     }
 
@@ -298,7 +299,7 @@ PAL_RNGPlay(
    // Avoid losing the last frame
    if (iEndFrame > 0) iEndFrame++;
 
-   fp = PAL_fopen(RESOURCE_PATH "/rng.mkf", "rb");
+   fp = DRIVER_fopen(RESOURCE_PATH "/rng.mkf", "rb");
 
    for (; fp && iStartFrame != iEndFrame; iStartFrame++) {
      iTime += iDelay;
@@ -326,7 +327,7 @@ PAL_RNGPlay(
      PAL_DelayUntil(iTime);
    }
 
-   PAL_fclose(fp);
+   DRIVER_fclose(fp);
    free(rng);
    free(buf);
 }

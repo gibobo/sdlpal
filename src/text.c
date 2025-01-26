@@ -23,6 +23,7 @@
 
 #include "text.h"
 #include "common.h"
+#include "driver.h"
 #include "font.h"
 #include "global.h"
 #include "input.h"
@@ -81,14 +82,14 @@ PAL_InitText(
     //
     // Open the message and word data files.
     //
-    fp = PAL_fopen(RESOURCE_PATH "/word.dat", "rb");
+    fp = DRIVER_fopen(RESOURCE_PATH "/word.dat", "rb");
     if (fp == NULL)
         return -1;
 
     // See how many words we have
     i = flength(fp);
     if (i <= 0) {
-        PAL_fclose(fp);
+        DRIVER_fclose(fp);
         return -1;
     }
 
@@ -98,20 +99,20 @@ PAL_InitText(
     // Read the words
     temp = (unsigned char *)UTIL_malloc(10 * g_TextLib.nWords);
 
-    if (PAL_fread(temp, 1, i, fp) < i)
+    if (DRIVER_fread(temp, 1, i, fp) < i)
     {
         free(temp);
-        PAL_fclose(fp);
+        DRIVER_fclose(fp);
         return -1;
     }
 
     // Close the words file
-    PAL_fclose(fp);
+    DRIVER_fclose(fp);
 
-    fp = PAL_fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
+    fp = DRIVER_fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
     lpcptbl_big5 = (wchar_t *)UTIL_calloc(126 * 160, sizeof(wchar_t));
-    PAL_fread((void*)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
-    PAL_fclose(fp);
+    DRIVER_fread((void*)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
+    DRIVER_fclose(fp);
 
     // Split the words and do code page conversion
     for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
@@ -145,20 +146,20 @@ PAL_InitText(
     PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
     // Read the messages.
-    fp = PAL_fopen(RESOURCE_PATH "/m.msg", "rb");
+    fp = DRIVER_fopen(RESOURCE_PATH "/m.msg", "rb");
     if(fp == NULL)
         return -1;
 
     i = flength(fp);
     temp = (unsigned char *)UTIL_malloc(i);
 
-    if (PAL_fread(temp, 1, i, fp) < i) {
+    if (DRIVER_fread(temp, 1, i, fp) < i) {
         free(temp);
         free(offsets);
-        PAL_fclose(fp);
+        DRIVER_fclose(fp);
         return -1;
     }
-    PAL_fclose(fp);
+    DRIVER_fclose(fp);
 
     // Split messages and do code page conversion here
     for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++)

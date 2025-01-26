@@ -24,6 +24,7 @@
 #include "mini_glloader.h"
 #include "video.h"
 #include "util.h"
+#include "driver.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,13 +43,13 @@ static const float p_tex[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
 char *readShaderFile(const char *filename, GLuint type)
 {
-    FILE *fp = PAL_fopen(filename, "rb");
-    PAL_fseek(fp, 0, SEEK_END);
+    FILE *fp = DRIVER_fopen(filename, "rb");
+    DRIVER_fseek(fp, 0, SEEK_END);
     long filesize = ftell(fp);
     char *buf = (char *)UTIL_malloc(filesize + 1);
-    PAL_fseek(fp, 0, SEEK_SET);
-    PAL_fread(buf, filesize, 1, fp);
-    PAL_fclose(fp);
+    DRIVER_fseek(fp, 0, SEEK_SET);
+    DRIVER_fread(buf, filesize, 1, fp);
+    DRIVER_fclose(fp);
     buf[filesize] = '\0';
     return buf;
 }
@@ -70,7 +71,7 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
     char *pShaderBuffer;
     char *source = (is_source) ? (char *)sourceOrFilename : readShaderFile(sourceOrFilename, shaderType);
     int lines = -1;
-    size_t sourceLen = strlen(source) * 2;
+    unsigned int sourceLen = (unsigned int)strlen(source) * 2U;
     pShaderBuffer = (char *)UTIL_malloc(sourceLen);
 
 #ifdef GLES

@@ -43,21 +43,11 @@ float RandomFloat(float from, float to);
 
 void TerminateOnError(const char *fmt, ...);
 
-void *UTIL_malloc(size_t buffer_size);
+void *UTIL_malloc(unsigned int buffer_size);
 
-void *UTIL_calloc(size_t n, size_t size);
+void *UTIL_calloc(unsigned int n, unsigned int size);
 
 // Platform-specific utilities
-FILE *PAL_fopen(const char *_FileName, const char *_Mode);
-
-int PAL_fseek(FILE *_Stream, long _Offset, int _Origin);
-
-unsigned int PAL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, FILE *_Stream);
-
-unsigned int PAL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, FILE *_Stream);
-
-void PAL_fclose(FILE *fp);
-
 void UTIL_Delay(unsigned int ms);
 
 unsigned int UTIL_GetTicks(void);

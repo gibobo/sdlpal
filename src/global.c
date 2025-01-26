@@ -20,20 +20,17 @@
 
 #include "global.h"
 #include "common.h"
+#include "driver.h"
 #include "palcommon.h"
 #include "res.h"
 #include "script.h"
 #include "util.h"
 
+CONFIGURATION gConfig;
 static GLOBALVARS _gGlobals;
 GLOBALVARS * const  gpGlobals = &_gGlobals;
 
-CONFIGURATION gConfig;
-
-int
-PAL_InitGlobals(
-   void
-)
+int PAL_InitGlobals(void)
 /*++
   Purpose:
 
@@ -60,14 +57,14 @@ PAL_InitGlobals(
    gConfig.dwTextureHeight = 400;
 
    // Open files
-   gpGlobals->f.fpFBP = PAL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
-   gpGlobals->f.fpMGO = PAL_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
-   gpGlobals->f.fpBALL = PAL_fopen(RESOURCE_PATH "/ball.mkf", "rb");
-   gpGlobals->f.fpDATA = PAL_fopen(RESOURCE_PATH "/data.mkf", "rb");
-   gpGlobals->f.fpF = PAL_fopen(RESOURCE_PATH "/f.mkf", "rb");
-   gpGlobals->f.fpFIRE = PAL_fopen(RESOURCE_PATH "/fire.mkf", "rb");
-   gpGlobals->f.fpRGM = PAL_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
-   gpGlobals->f.fpSSS = PAL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
+   gpGlobals->f.fpFBP = DRIVER_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
+   gpGlobals->f.fpMGO = DRIVER_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
+   gpGlobals->f.fpBALL = DRIVER_fopen(RESOURCE_PATH "/ball.mkf", "rb");
+   gpGlobals->f.fpDATA = DRIVER_fopen(RESOURCE_PATH "/data.mkf", "rb");
+   gpGlobals->f.fpF = DRIVER_fopen(RESOURCE_PATH "/f.mkf", "rb");
+   gpGlobals->f.fpFIRE = DRIVER_fopen(RESOURCE_PATH "/fire.mkf", "rb");
+   gpGlobals->f.fpRGM = DRIVER_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
+   gpGlobals->f.fpSSS = DRIVER_fopen(RESOURCE_PATH "/sss.mkf", "rb");
 
    // Set decompress function
    Decompress = YJ2_Decompress;
@@ -77,10 +74,7 @@ PAL_InitGlobals(
    return 0;
 }
 
-void
-PAL_FreeGlobals(
-   void
-)
+void PAL_FreeGlobals(void)
 /*++
   Purpose:
 
@@ -99,14 +93,14 @@ PAL_FreeGlobals(
    //
    // Close all opened files
    //
-   PAL_fclose(gpGlobals->f.fpFBP);
-   PAL_fclose(gpGlobals->f.fpMGO);
-   PAL_fclose(gpGlobals->f.fpBALL);
-   PAL_fclose(gpGlobals->f.fpDATA);
-   PAL_fclose(gpGlobals->f.fpF);
-   PAL_fclose(gpGlobals->f.fpFIRE);
-   PAL_fclose(gpGlobals->f.fpRGM);
-   PAL_fclose(gpGlobals->f.fpSSS);
+   DRIVER_fclose(gpGlobals->f.fpFBP);
+   DRIVER_fclose(gpGlobals->f.fpMGO);
+   DRIVER_fclose(gpGlobals->f.fpBALL);
+   DRIVER_fclose(gpGlobals->f.fpDATA);
+   DRIVER_fclose(gpGlobals->f.fpF);
+   DRIVER_fclose(gpGlobals->f.fpFIRE);
+   DRIVER_fclose(gpGlobals->f.fpRGM);
+   DRIVER_fclose(gpGlobals->f.fpSSS);
 
    //
    // Free the game data
@@ -125,9 +119,7 @@ PAL_FreeGlobals(
    memset(&gConfig, 0, sizeof(CONFIGURATION));
 }
 
-static void
-PAL_ReadGlobalGameData(
-    void)
+static void PAL_ReadGlobalGameData(void)
 /*++
   Purpose:
 
@@ -156,9 +148,7 @@ PAL_ReadGlobalGameData(
   PAL_MKFReadChunk(p->rgLevelUpExp,           sizeof(p->rgLevelUpExp), 14, gpGlobals->f.fpDATA);
 }
 
-static void
-PAL_InitGlobalGameData(
-    void)
+static void PAL_InitGlobalGameData(void)
 /*++
   Purpose:
 
@@ -194,10 +184,7 @@ PAL_InitGlobalGameData(
 #undef PAL_DOALLOCATE
 }
 
-static void
-PAL_LoadDefaultGame(
-   void
-)
+static void PAL_LoadDefaultGame(void)
 /*++
   Purpose:
 
@@ -216,17 +203,13 @@ PAL_LoadDefaultGame(
    GAMEDATA    *p = &gpGlobals->g;
    unsigned int       i;
 
-   //
    // Load the default data from the game data files.
-   //
    PAL_MKFReadChunk(p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gpGlobals->f.fpSSS);
    PAL_MKFReadChunk(p->rgScene, sizeof(p->rgScene), 1, gpGlobals->f.fpSSS);
    PAL_MKFReadChunk(p->rgObject, sizeof(p->rgObject), 2, gpGlobals->f.fpSSS);
    PAL_MKFReadChunk(&p->PlayerRoles, sizeof(PLAYERROLES), 3, gpGlobals->f.fpDATA);
 
-   //
    // Set some other default data.
-   //
    gpGlobals->dwCash = 0;
    gpGlobals->wNumMusic = 0;
    gpGlobals->wNumPalette = 0;
@@ -320,33 +303,26 @@ typedef struct tagSAVEDGAME_WIN
     EVENTOBJECT      rgEventObject[MAX_EVENT_OBJECTS];
 } SAVEDGAME_WIN;
 
-static int
-PAL_LoadGame_Common(
-    int                 iSaveSlot,
-    SAVEDGAME_COMMON    *s,
-    size_t              size
-)
+static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int size)
 {
     // Try to open the specified file
     char *save_path = (char *)UTIL_malloc(256);
 
     sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
-    FILE *fp = PAL_fopen(save_path, "rb");
+    FILE *fp = DRIVER_fopen(save_path, "rb");
     free(save_path);
 
     // Read all data from the file and close.
-    size_t n = fp ? PAL_fread(s, 1, size, fp) : 0;
+    unsigned int n = fp ? DRIVER_fread(s, 1, size, fp) : 0;
 
-    PAL_fclose(fp);
+    DRIVER_fclose(fp);
 
     if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
     {
         return FALSE;
     }
 
-    //
     // Get common data from the saved game struct.
-    //
     gpGlobals->viewport = PAL_XY(s->wViewportX, s->wViewportY);
     gpGlobals->wMaxPartyMemberIndex = s->nPartyMember;
     gpGlobals->wNumScene = s->wNumScene;
@@ -379,10 +355,7 @@ PAL_LoadGame_Common(
     return TRUE;
 }
 
-static int
-PAL_LoadGame_WIN(
-   int            iSaveSlot
-)
+static int PAL_LoadGame_WIN(int iSaveSlot)
 /*++
   Purpose:
 
@@ -417,23 +390,15 @@ PAL_LoadGame_WIN(
    return 0;
 }
 
-static int
-PAL_LoadGame(
-   int            iSaveSlot
-)
+static int PAL_LoadGame(int iSaveSlot)
 {
     return PAL_LoadGame_WIN(iSaveSlot);
 }
 
-static void
-PAL_SaveGame_Common(
-    int                iSaveSlot,
-    unsigned short     wSavedTimes,
-    SAVEDGAME_COMMON   *s,
-    size_t             size)
+static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVEDGAME_COMMON *s, unsigned int size)
 {
     FILE *fp;
-    size_t i;
+    unsigned int i;
 
     s->wSavedTimes = wSavedTimes;
     s->wViewportX = PAL_X(gpGlobals->viewport);
@@ -468,12 +433,12 @@ PAL_SaveGame_Common(
       return;
     sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
 
-    if (fp = PAL_fopen(save_path, "wb")) {
+    if (fp = DRIVER_fopen(save_path, "wb")) {
       i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
       i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
-      PAL_fwrite(s, i, 1, fp);
+      DRIVER_fwrite(s, i, 1, fp);
     }
-    PAL_fclose(fp);
+    DRIVER_fclose(fp);
     free(save_path);
 }
 

@@ -21,6 +21,7 @@
 #include "audio.h"
 #include "audio_internal.h"
 #include "common.h"
+#include "driver.h"
 #include "global.h"
 #include "palcommon.h"
 #include "players.h"
@@ -783,7 +784,7 @@ void SOUND_Shutdown(
             free(old);
         }
     }
-    PAL_fclose(player->mkf);
+    DRIVER_fclose(player->mkf);
 }
 
 static void
@@ -850,7 +851,7 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
-    FILE *mkf = PAL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
+    FILE *mkf = DRIVER_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
     if (mkf == NULL)
         return NULL;
     SOUNDPLAYER *player = (SOUNDPLAYER *)UTIL_malloc(sizeof(SOUNDPLAYER));

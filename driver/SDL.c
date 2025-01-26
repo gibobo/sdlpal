@@ -5,6 +5,7 @@
 #include "mini_glloader.h"
 #include "video.h"
 #include "video_glsl.h"
+#include <stdio.h>
 #include <SDL.h>
 // #include <SDL_events.h>
 // #include <SDL_hints.h>
@@ -379,4 +380,44 @@ None.
     res = SDL_Event_Filter(&evt);
   }
   return res;
+}
+
+void *DRIVER_fopen(const char *_FileName, const char *_Mode)
+{
+	if (_FileName == NULL || _Mode == NULL)
+		TerminateOnError("DRIVER_fopen() called with invalid parameters\n");
+
+	return fopen(_FileName, _Mode);
+}
+
+int DRIVER_fseek(void *_Stream, long _Offset, int _Origin)
+{
+	if (_Stream == NULL)
+		TerminateOnError("DRIVER_fseek() called with invalid parameters\n");
+
+	return fseek(_Stream, _Offset, _Origin);
+}
+
+unsigned int DRIVER_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream)
+{
+	if (_Buffer == NULL || _Stream == NULL)
+		TerminateOnError("DRIVER_fread() called with invalid parameters\n");
+
+  return (unsigned int)fread(_Buffer, _ElementSize, _ElementCount, _Stream);
+}
+
+unsigned int DRIVER_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream)
+{
+	if (_Buffer == NULL || _Stream == NULL)
+		TerminateOnError("DRIVER_fread() called with invalid parameters\n");
+
+	return (unsigned int)fwrite(_Buffer, _ElementSize, _ElementCount, _Stream);
+}
+
+void DRIVER_fclose(void *fp)
+{
+	if (fp != NULL)
+	{
+		fclose(fp);
+	}
 }
