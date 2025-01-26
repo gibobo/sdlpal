@@ -298,7 +298,6 @@ PAL_RNGPlay(
    // Avoid losing the last frame
    if (iEndFrame > 0) iEndFrame++;
 
-   // buf = (unsigned char *)malloc(65000);
    fp = PAL_fopen(RESOURCE_PATH "/rng.mkf", "rb");
 
    for (; fp && iStartFrame != iEndFrame; iStartFrame++) {

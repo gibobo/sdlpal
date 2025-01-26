@@ -30,11 +30,10 @@
 #define     PAL_MAX_VOLUME               100
 
 typedef struct tagAUDIODEVICE {
-    SDL_AudioSpec spec; /* Actual-used sound specification */
     AUDIOPLAYER *pMusPlayer;
     AUDIOPLAYER *pSoundPlayer;
     void *pSoundBuffer; /* The output buffer for sound */
-    SDL_AudioDeviceID id;
+    unsigned int id;
     int fMusicEnabled; /* Is BGM enabled? */
     int fSoundEnabled; /* Is sound effect enabled? */
     int fOpened;       /* Is the audio device opened? */
@@ -123,15 +122,14 @@ int AUDIO_OpenDevice(void)
     resampler_init();
 
     // Open the audio device.
-    gAudioDevice.spec.freq = gConfig.iSampleRate;
-    gAudioDevice.spec.format = AUDIO_S16SYS;
-    gAudioDevice.spec.channels = gConfig.iAudioChannels;
-    gAudioDevice.spec.samples = gConfig.wAudioBufferSize;
-    gAudioDevice.spec.callback = AUDIO_FillBuffer;
-    const char *device = NULL;  // SDL_GetAudioDeviceName(N, 0) 
-    gAudioDevice.id = SDL_OpenAudioDevice(device, 0, &gAudioDevice.spec, &spec, 0);
+    spec.freq = gConfig.iSampleRate;
+    spec.format = AUDIO_S16SYS;
+    spec.channels = gConfig.iAudioChannels;
+    spec.samples = gConfig.wAudioBufferSize;
+    spec.callback = AUDIO_FillBuffer;
+    gAudioDevice.id = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
 
-    if (gAudioDevice.id < 0)
+    if (gAudioDevice.id == 0)
         return -3; // Failed
 
     gAudioDevice.pSoundBuffer = UTIL_calloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels, sizeof(short));
@@ -184,16 +182,6 @@ void AUDIO_CloseDevice(void)
     }
 
     gAudioDevice.fOpened = FALSE;
-}
-
-unsigned char AUDIO_GetDeviceChannels(void)
-{
-    return gAudioDevice.spec.channels;
-}
-
-int AUDIO_GetDeviceFrequency(void)
-{
-    return gAudioDevice.spec.freq;
 }
 
 void AUDIO_PlaySound(int iSoundNum)

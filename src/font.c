@@ -36,8 +36,8 @@ static unsigned char *p_font_size = NULL;
 
 void PAL_InitFont(void)
 {
-    p_font = (unsigned char *)calloc(65536, 32);
-    p_font_size = (unsigned char *)calloc(65536, 1);
+    p_font = (unsigned char *)UTIL_calloc(65536, 32);
+    p_font_size = (unsigned char *)UTIL_calloc(65536, 1);
     fp_font_data = PAL_fopen(SOURCE_DIR "/unicode_font.dat", "rb");
     fp_font_size = PAL_fopen(SOURCE_DIR "/unicode_font_size.dat", "rb");
     PAL_fread(p_font, 32, 65536, fp_font_data);

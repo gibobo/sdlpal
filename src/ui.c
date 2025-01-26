@@ -32,7 +32,7 @@ unsigned char *gpSpriteUI = NULL;
 
 static BOX *PAL_CreateBoxInternal(
     const PAL_Rect *rect) {
-  BOX *lpBox = (BOX *)calloc(1, sizeof(BOX));
+  BOX *lpBox = (BOX *)UTIL_calloc(1, sizeof(BOX));
   if (lpBox == NULL) {
     return NULL;
   }
@@ -78,7 +78,7 @@ int PAL_InitUI(
       return -1;
    }
 
-   gpSpriteUI = (unsigned char *)calloc(1, iSize);
+   gpSpriteUI = (unsigned char *)UTIL_calloc(1, iSize);
    if (gpSpriteUI == NULL)
    {
       return -1;

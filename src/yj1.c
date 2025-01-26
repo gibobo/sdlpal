@@ -24,6 +24,7 @@
 // by Wei Mingzhi <whistler_wmz@users.sf.net>.
 //
 
+#include "util.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -107,17 +108,8 @@ static void yj2_adjust_tree(YJ2_Tree tree, unsigned short value)
 static int yj2_build_tree(YJ2_Tree *tree)
 {
     int i, ptr;
-    YJ2_TreeNode **list;
-    YJ2_TreeNode *node;
-    if ((tree->list = list = (YJ2_TreeNode **)malloc(sizeof(YJ2_TreeNode *) * 321)) == NULL)
-        return 0;
-    if ((tree->node = node = (YJ2_TreeNode *)malloc(sizeof(YJ2_TreeNode) * 641)) == NULL)
-    {
-        free(list);
-        return 0;
-    }
-    memset(list, 0, 321 * sizeof(YJ2_TreeNode *));
-    memset(node, 0, 641 * sizeof(YJ2_TreeNode));
+    YJ2_TreeNode **list = (YJ2_TreeNode **)UTIL_calloc(321, sizeof(YJ2_TreeNode *));
+    YJ2_TreeNode *node = (YJ2_TreeNode *)UTIL_calloc(641, sizeof(YJ2_TreeNode));
     for (i = 0; i <= 0x140; i++)
         list[i] = node + i;
     for (i = 0; i <= 0x280; i++)
@@ -125,7 +117,7 @@ static int yj2_build_tree(YJ2_Tree *tree)
         node[i].value = i;
         node[i].weight = 1;
     }
-    tree->node[0x280].parent = tree->node + 0x280;
+    node[0x280].parent = node + 0x280;
     for (i = 0, ptr = 0x141; ptr <= 0x280; i += 2, ptr++)
     {
         node[ptr].left = node + i;
@@ -133,6 +125,8 @@ static int yj2_build_tree(YJ2_Tree *tree)
         node[i].parent = node[i + 1].parent = node + ptr;
         node[ptr].weight = node[i].weight + node[i + 1].weight;
     }
+    tree->list = list;
+    tree->node = node;
     return 1;
 }
 

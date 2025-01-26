@@ -25,10 +25,6 @@
 extern "C" {
 #endif
 
-unsigned char AUDIO_GetDeviceChannels(void);
-
-int AUDIO_GetDeviceFrequency(void);
-
 void AUDIO_Lock(void);
 
 void AUDIO_Unlock(void);

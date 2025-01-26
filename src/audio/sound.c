@@ -27,12 +27,11 @@
 #include "resampler.h"
 #include "riff.h"
 #include "util.h"
-#include <SDL_audio.h>
 
 typedef struct tagWAVESPEC {
   int size;
   int freq;
-  SDL_AudioFormat format;
+  uint16_t format;
   uint8_t channels;
   uint8_t align;
 } WAVESPEC;
@@ -118,7 +117,7 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
     }
 
     lpSpec->channels = lpFormat->nChannels;
-    lpSpec->format = (lpFormat->wBitsPerSample == 16) ? AUDIO_S16 : AUDIO_U8;
+    lpSpec->format = (lpFormat->wBitsPerSample == 16);
     lpSpec->freq = lpFormat->nSamplesPerSec;
     lpSpec->size = len;
     lpSpec->align = (lpFormat->nChannels * lpFormat->wBitsPerSample) >> 3;
@@ -680,22 +679,15 @@ SOUND_Play(
 
     player->lastSFX = iSoundNum;
 
-    //
     // Get the length of the sound file.
-    //
     len = PAL_MKFGetChunkSize(iSoundNum, player->mkf);
     if (len <= 0)
     {
         return FALSE;
     }
 
-    buf = malloc(len);
-    if (buf == NULL)
-    {
-        return FALSE;
-    }
-
     // Read the sound file from the MKF archive.
+    buf = UTIL_malloc(len);
     PAL_MKFReadChunk(buf, len, iSoundNum, player->mkf);
 
     snddata = SOUND_LoadWAVEData(buf, len, &wavespec);
@@ -705,14 +697,14 @@ SOUND_Play(
         return FALSE;
     }
 
-    if (wavespec.channels == 1 && AUDIO_GetDeviceChannels() == 1)
-        mixer = (wavespec.format == AUDIO_S16) ? SOUND_ResampleMix_S16_Mono_Mono : SOUND_ResampleMix_U8_Mono_Mono;
-    else if (wavespec.channels == 1 && AUDIO_GetDeviceChannels() == 2)
-        mixer = (wavespec.format == AUDIO_S16) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
-    else if (wavespec.channels == 2 && AUDIO_GetDeviceChannels() == 1)
-        mixer = (wavespec.format == AUDIO_S16) ? SOUND_ResampleMix_S16_Stereo_Mono : SOUND_ResampleMix_U8_Stereo_Mono;
-    else if (wavespec.channels == 2 && AUDIO_GetDeviceChannels() == 2)
-        mixer = (wavespec.format == AUDIO_S16) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
+    if (wavespec.channels == 1 && gConfig.iAudioChannels == 1)
+        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Mono : SOUND_ResampleMix_U8_Mono_Mono;
+    else if (wavespec.channels == 1 && gConfig.iAudioChannels == 2)
+        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
+    else if (wavespec.channels == 2 && gConfig.iAudioChannels == 1)
+        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Mono : SOUND_ResampleMix_U8_Stereo_Mono;
+    else if (wavespec.channels == 2 && gConfig.iAudioChannels == 2)
+        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
     else
     {
         free(buf);
@@ -726,8 +718,7 @@ SOUND_Play(
         cursnd = cursnd->next;
     if (cursnd->base)
     {
-        WAVEDATA *obj = (WAVEDATA *)malloc(sizeof(WAVEDATA));
-        memset(obj, 0, sizeof(WAVEDATA));
+        WAVEDATA *obj = (WAVEDATA *)UTIL_malloc(sizeof(WAVEDATA));
         cursnd->next = obj;
         cursnd = cursnd->next;
     }
@@ -739,7 +730,7 @@ SOUND_Play(
         else
             resampler_clear(cursnd->resampler[i]);
         resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
-        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)AUDIO_GetDeviceFrequency());
+        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)gConfig.iSampleRate);
     }
 
     cursnd->base = buf;
@@ -862,8 +853,7 @@ AUDIOPLAYER *SOUND_Init(void)
     FILE *mkf = PAL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
     if (mkf == NULL)
         return NULL;
-    SOUNDPLAYER *player = (SOUNDPLAYER *)malloc(sizeof(SOUNDPLAYER));
-    memset(&player->soundlist, 0, sizeof(WAVEDATA));
+    SOUNDPLAYER *player = (SOUNDPLAYER *)UTIL_malloc(sizeof(SOUNDPLAYER));
     player->Play = SOUND_Play;
     player->FillBuffer = SOUND_FillBuffer;
     player->Shutdown = SOUND_Shutdown;

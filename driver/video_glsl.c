@@ -45,7 +45,7 @@ char *readShaderFile(const char *filename, GLuint type)
     FILE *fp = PAL_fopen(filename, "rb");
     PAL_fseek(fp, 0, SEEK_END);
     long filesize = ftell(fp);
-    char *buf = (char *)malloc(filesize + 1);
+    char *buf = (char *)UTIL_malloc(filesize + 1);
     PAL_fseek(fp, 0, SEEK_SET);
     PAL_fread(buf, filesize, 1, fp);
     PAL_fclose(fp);
@@ -71,8 +71,7 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
     char *source = (is_source) ? (char *)sourceOrFilename : readShaderFile(sourceOrFilename, shaderType);
     int lines = -1;
     size_t sourceLen = strlen(source) * 2;
-    pShaderBuffer = malloc(sourceLen);
-    memset(pShaderBuffer, 0, sourceLen);
+    pShaderBuffer = (char *)UTIL_malloc(sourceLen);
 
 #ifdef GLES
     sprintf(pShaderBuffer, "#version %d%02d %s\r\n", glslversion_major, glslversion_minor, glslversion_major >= 3 ? "es" : "");
@@ -121,7 +120,7 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
         glGetShaderiv(result, GL_INFO_LOG_LENGTH, &logLength);
         if (logLength > 0)
         {
-            GLchar *log = (GLchar *)malloc(logLength);
+            GLchar *log = (GLchar *)UTIL_malloc(logLength);
             glGetShaderInfoLog(result, logLength, &logLength, log);
             free(log);
         }

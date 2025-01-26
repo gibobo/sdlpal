@@ -96,12 +96,7 @@ PAL_InitText(
     g_TextLib.nWords = (i + 9) / 10;
 
     // Read the words
-    temp = (unsigned char *)malloc(10 * g_TextLib.nWords);
-    if (temp == NULL) {
-        PAL_fclose(fp);
-        return -1;
-    }
-    memset(temp, 0, 10 * g_TextLib.nWords);
+    temp = (unsigned char *)UTIL_malloc(10 * g_TextLib.nWords);
 
     if (PAL_fread(temp, 1, i, fp) < i)
     {
@@ -114,7 +109,7 @@ PAL_InitText(
     PAL_fclose(fp);
 
     fp = PAL_fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
-    lpcptbl_big5 = (wchar_t *)calloc(126 * 160, sizeof(wchar_t));
+    lpcptbl_big5 = (wchar_t *)UTIL_calloc(126 * 160, sizeof(wchar_t));
     PAL_fread((void*)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
     PAL_fclose(fp);
 
@@ -127,14 +122,8 @@ PAL_InitText(
         wlen += PAL_MultiByteToWideCharCP(temp + base, 10, NULL, 0) + 1;
     }
 
-    WordBuf = (wchar_t*)malloc(wlen * sizeof(wchar_t));
-    lpWordBuf = (wchar_t**)malloc(g_TextLib.nWords * sizeof(wchar_t*));
-    if (WordBuf == NULL || lpWordBuf == NULL) {
-      free(temp);
-      return -1;
-    }
-    memset(WordBuf, 0, wlen * sizeof(wchar_t));
-    memset(lpWordBuf, 0, g_TextLib.nWords * sizeof(wchar_t*));
+    WordBuf = (wchar_t*)UTIL_malloc(wlen * sizeof(wchar_t));
+    lpWordBuf = (wchar_t**)UTIL_malloc(g_TextLib.nWords * sizeof(wchar_t*));
 
     for (i = 0, wpos = 0; i < g_TextLib.nWords; i++)
     {
@@ -152,11 +141,7 @@ PAL_InitText(
     i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
     g_TextLib.nMsgs = i - 1;
 
-    offsets = (unsigned int *)malloc(i * sizeof(unsigned int));
-    if (offsets == NULL) {
-        return -1;
-    }
-    memset(offsets, 0, i * sizeof(unsigned int));
+    offsets = (unsigned int *)UTIL_malloc(i * sizeof(unsigned int));
     PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
     // Read the messages.
@@ -165,13 +150,7 @@ PAL_InitText(
         return -1;
 
     i = flength(fp);
-    temp = (unsigned char *)malloc(i);
-    if (temp == NULL) {
-        free(offsets);
-        PAL_fclose(fp);
-        return -1;
-    }
-    memset(temp, 0, i);
+    temp = (unsigned char *)UTIL_malloc(i);
 
     if (PAL_fread(temp, 1, i, fp) < i) {
         free(temp);
@@ -186,15 +165,8 @@ PAL_InitText(
     {
         wlen += PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
     }
-    MsgBuf = (wchar_t*)malloc(wlen * sizeof(wchar_t));
-    lpMsgBuf = (wchar_t**)malloc(g_TextLib.nMsgs * sizeof(wchar_t*));
-    if (MsgBuf == NULL || lpMsgBuf == NULL) {
-        free(temp);
-        free(offsets);
-        return -1;
-    }
-    memset(MsgBuf, 0, wlen * sizeof(wchar_t));
-    memset(lpMsgBuf, 0, g_TextLib.nWords * sizeof(wchar_t*));
+    MsgBuf = (wchar_t*)UTIL_malloc(wlen * sizeof(wchar_t));
+    lpMsgBuf = (wchar_t**)UTIL_malloc(g_TextLib.nMsgs * sizeof(wchar_t*));
 
     for (i = 0, wpos = 0; i < g_TextLib.nMsgs; i++)
     {
@@ -510,7 +482,7 @@ PAL_StartDialogWithOffset(
    const unsigned int buf_sz = 8192;   // SCREEN_SIZE
    PAL_Rect rect;
 
-   buf = (unsigned char *)malloc(buf_sz);
+   buf = (unsigned char *)UTIL_malloc(buf_sz);
    if (gpGlobals->fInBattle && !g_fUpdatedInBattle) {
       // Update the screen in battle, or the graphics may seem messed up
       VIDEO_UpdateScreen(NULL);

@@ -91,7 +91,7 @@ int PAL_MKFGetDecompressedSize(
     FILE *fp);
 
 int PAL_MKFDecompressChunk(
-    void **lpBuffer,
+    unsigned char **lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
     FILE *fp);

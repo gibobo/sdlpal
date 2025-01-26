@@ -111,7 +111,7 @@ RIX_FillBuffer(
             if (pRixPlayer->iTotalFadeOutSamples == pRixPlayer->iRemainingFadeSamples && pRixPlayer->iTotalFadeOutSamples > 0)
             {
                 unsigned int now = UTIL_GetTicks();
-                int passed_samples = (now > pRixPlayer->dwStartFadeTime) ? (int)((now - pRixPlayer->dwStartFadeTime) * AUDIO_GetDeviceFrequency() / 1000) : 0;
+                int passed_samples = (now > pRixPlayer->dwStartFadeTime) ? (int)((now - pRixPlayer->dwStartFadeTime) * gConfig.iSampleRate / 1000) : 0;
                 pRixPlayer->iRemainingFadeSamples -= passed_samples;
             }
             if (pRixPlayer->iMusic == -1 || pRixPlayer->iRemainingFadeSamples <= 0)
@@ -376,21 +376,10 @@ AUDIOPLAYER *RIX_Init(void)
 {
     RIXPLAYER *pRixPlayer;
     pRixPlayer = (RIXPLAYER *)UTIL_malloc(sizeof(RIXPLAYER));
-    if (pRixPlayer == NULL)
-    {
-        return NULL;
-    }
-
-    memset(pRixPlayer, 0, sizeof(RIXPLAYER));
     pRixPlayer->FillBuffer = RIX_FillBuffer;
     pRixPlayer->Shutdown = RIX_Shutdown;
     pRixPlayer->Play = RIX_Play;
     pRixPlayer->buf = (unsigned char *)UTIL_malloc((PAL_MAX_SAMPLERATE + 69) / 70 * sizeof(short) * 2);
-    if (NULL == pRixPlayer->buf)
-    {
-        delete pRixPlayer;
-        return NULL;
-    }
 
     Copl *opl = CEmuopl::CreateEmuopl(gConfig.iOPLSampleRate);
     if (NULL == opl)

@@ -174,14 +174,11 @@ PAL_InitGlobalGameData(
 
 --*/
 {
-#define PAL_DOALLOCATE(fp, num, type, ptr, n)                                 \
-  if (ptr == NULL) {                                                          \
-    int len = PAL_MKFGetChunkSize(num, fp);                                   \
-    ptr = (type *)malloc(len);                                                \
-    n = len / sizeof(type);                                                   \
-    if (ptr == NULL) {                                                        \
-      TerminateOnError("PAL_InitGlobalGameData(): Memory allocation error!"); \
-    }                                                                         \
+#define PAL_DOALLOCATE(fp, num, type, ptr, n)   \
+  if (ptr == NULL) {                            \
+    int len = PAL_MKFGetChunkSize(num, fp);     \
+    ptr = (type *)UTIL_malloc(len);             \
+    n = len / sizeof(type);                     \
   }
 
   // If the memory has not been allocated, allocate first.
@@ -331,9 +328,7 @@ PAL_LoadGame_Common(
 )
 {
     // Try to open the specified file
-    char *save_path = (char *)malloc(256);
-    if (save_path == NULL)
-        return FALSE;
+    char *save_path = (char *)UTIL_malloc(256);
 
     sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
     FILE *fp = PAL_fopen(save_path, "rb");
@@ -403,7 +398,7 @@ PAL_LoadGame_WIN(
 
 --*/
 {
-   SAVEDGAME_WIN   *s = (SAVEDGAME_WIN*)malloc(sizeof(SAVEDGAME_WIN));
+   SAVEDGAME_WIN *s = (SAVEDGAME_WIN *)UTIL_malloc(sizeof(SAVEDGAME_WIN));
 
    //
    // Get all the data from the saved game struct.
@@ -468,7 +463,7 @@ PAL_SaveGame_Common(
     memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
 
     // Try writing to file
-    char *save_path = (char *)malloc(256);
+    char *save_path = (char *)UTIL_malloc(256);
     if (save_path == NULL)
       return;
     sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
@@ -501,17 +496,17 @@ PAL_SaveGame_WIN(
 
 --*/
 {
-  SAVEDGAME_WIN *s = (SAVEDGAME_WIN *)malloc(sizeof(SAVEDGAME_WIN));
+   SAVEDGAME_WIN *s = (SAVEDGAME_WIN *)UTIL_malloc(sizeof(SAVEDGAME_WIN));
 
-  //
-  // Put all the data to the saved game struct.
-  //
-  memcpy(&s->rgObject, gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject));
-  memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
+   //
+   // Put all the data to the saved game struct.
+   //
+   memcpy(&s->rgObject, gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject));
+   memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
 
-  PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN));
+   PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN));
 
-  free(s);
+   free(s);
 }
 
 void

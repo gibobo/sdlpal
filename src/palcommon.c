@@ -980,7 +980,7 @@ int PAL_MKFGetDecompressedSize(
 }
 
 int PAL_MKFDecompressChunk(
-    void **lpBuffer,
+    unsigned char **lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
     FILE *fp)
@@ -1017,11 +1017,7 @@ int PAL_MKFDecompressChunk(
       return len;
    }
 
-   buf = (unsigned char *)malloc(len);
-   if (buf == NULL)
-   {
-      return -3;
-   }
+   buf = (unsigned char *)UTIL_malloc(len);
 
    PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
 

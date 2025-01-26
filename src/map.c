@@ -64,32 +64,16 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
       return NULL;
    }
 
-   //
    // Load the map tile data.
-   //
    size = PAL_MKFGetChunkSize(iMapNum, fpMapMKF);
 
-   //
    // Allocate a temporary buffer for the compressed data.
-   //
-   buf = (unsigned char *)malloc(size);
-   if (buf == NULL)
-   {
-      return NULL;
-   }
+   buf = (unsigned char *)UTIL_malloc(size);
 
-   //
    // Create the map instance.
-   //
-   map = (PALMAP *)malloc(sizeof(PALMAP));
-   if (map == NULL)
-   {
-      return NULL;
-   }
+   map = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
 
-   //
    // Read the map data.
-   //
    if (PAL_MKFReadChunk(buf, size, iMapNum, fpMapMKF) < 0)
    {
       free(buf);
@@ -99,7 +83,7 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
 
    // Decompress the tile data.
    unsigned int tile_size = PALMAP_Y * PALMAP_X * PALMAP_Z * sizeof(unsigned int);
-   map->Tiles = UTIL_malloc(tile_size);
+   map->Tiles = (unsigned int *)UTIL_malloc(tile_size);
    if (Decompress(buf, map->Tiles, tile_size) < 0)
    {
       free(map);
@@ -121,7 +105,7 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
       free(map);
       return NULL;
    }
-   map->pTileSprite = (unsigned char *)malloc(size);
+   map->pTileSprite = (unsigned char *)UTIL_malloc(size);
    if (map->pTileSprite == NULL)
    {
       free(map);

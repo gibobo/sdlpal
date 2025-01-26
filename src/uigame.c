@@ -117,18 +117,16 @@ static unsigned short GetSavedTimes(int iSaveSlot) {
    char *save_path = NULL;
    FILE *fp = NULL;
    unsigned short wSavedTimes = 0;
-   save_path = (char *)malloc(256);
-   if (save_path) {
-      sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
-      fp = PAL_fopen(save_path, "rb");
-      if (fp != NULL) {
-      if (PAL_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
-         wSavedTimes = wSavedTimes;
-      else
-         wSavedTimes = 0;
-      }
-      free(save_path);
+   save_path = (char *)UTIL_malloc(256);
+   sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
+   fp = PAL_fopen(save_path, "rb");
+   if (fp != NULL) {
+   if (PAL_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
+      wSavedTimes = wSavedTimes;
+   else
+      wSavedTimes = 0;
    }
+   free(save_path);
    PAL_fclose(fp);
    return wSavedTimes;
 }
@@ -1053,7 +1051,7 @@ void PAL_PlayerStatus(
    int j;
    unsigned short w;
 
-   bufImage = (unsigned char *)malloc(bufImageSize);
+   bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
 
    PAL_MKFDecompressChunk(&gpScreenBak->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
 
@@ -1065,8 +1063,7 @@ void PAL_PlayerStatus(
       VIDEO_RestoreScreen(gpScreen);
 
       // Draw the image of player role
-      if (PAL_MKFReadChunk(bufImage, bufImageSize,
-                           gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gpGlobals->f.fpRGM) > 0) {
+      if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gpGlobals->f.fpRGM) > 0) {
         PAL_RLEBlitToSurface(bufImage, gpScreen, RoleImage);
       }
 
@@ -1208,7 +1205,7 @@ PAL_ItemUseMenu(
    PAL_Rect rect = {110, 2, 200, 180};
    int i;
 
-   bufImage = (unsigned char *)malloc(bufImageSize);
+   bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
    dwColorChangeTime = 0;
 
@@ -1417,7 +1414,7 @@ PAL_BuyMenu_OnItemChange(
    x = 48;
    y = 15;
 
-   bufImage = (unsigned char *)malloc(bufImageSize);
+   bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
    if (PAL_MKFReadChunk(bufImage, bufImageSize,
                         gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
    {
@@ -1685,7 +1682,7 @@ void PAL_EquipItemMenu(
    unsigned char bSelectedColor;
    unsigned int dwColorChangeTime;
 
-   bufImage = (unsigned char *)malloc(bufImageSize);
+   bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
    gpGlobals->wLastUnequippedItem = wItem;
 
    PAL_MKFDecompressChunk(&gpScreenBak->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM,

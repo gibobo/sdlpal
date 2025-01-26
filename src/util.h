@@ -47,6 +47,7 @@ void *UTIL_malloc(size_t buffer_size);
 
 void *UTIL_calloc(size_t n, size_t size);
 
+// Platform-specific utilities
 FILE *PAL_fopen(const char *_FileName, const char *_Mode);
 
 int PAL_fseek(FILE *_Stream, long _Offset, int _Origin);
@@ -57,7 +58,6 @@ unsigned int PAL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _
 
 void PAL_fclose(FILE *fp);
 
-// Platform-specific utilities
 void UTIL_Delay(unsigned int ms);
 
 unsigned int UTIL_GetTicks(void);

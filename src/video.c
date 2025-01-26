@@ -59,10 +59,10 @@ VIDEO_Startup(
     // Create the screen buffer and the backup screen buffer.
     gpScreen = VIDEO_CreateCompatibleSizedSurface(NULL);
     gpScreenBak = VIDEO_CreateCompatibleSizedSurface(NULL);
-    bufScreenReal = malloc(SCREEN_SIZE * 3);
+    bufScreenReal = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
 
     // Create palette object
-    bufPalette = malloc(256 * 3);
+    bufPalette = (unsigned char *)UTIL_malloc(256 * 3);
 
     // Failed?
     if (gpScreen == NULL || gpScreenBak == NULL || bufScreenReal == NULL || bufPalette == NULL)
