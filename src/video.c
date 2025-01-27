@@ -26,19 +26,15 @@
 #include "driver.h"
 
 // The global palette
-PAL_Surface         *gpScreen           = NULL; // Screen buffer
-PAL_Surface         *gpScreenBak        = NULL; // Backup screen buffer
-
+PAL_Surface *gpScreen = NULL;    // Screen buffer
+PAL_Surface *gpScreenBak = NULL; // Backup screen buffer
 volatile unsigned char g_bRenderPaused = FALSE;
 static unsigned short g_wShakeTime = 0;
 static unsigned short g_wShakeLevel = 0;
 static unsigned char *bufScreenReal = NULL;
 static unsigned char *bufPalette = NULL;
 
-int
-VIDEO_Startup(
-   void
-)
+int VIDEO_Startup(void)
 /*++
   Purpose:
 
@@ -74,10 +70,7 @@ VIDEO_Startup(
     return 0;
 }
 
-void
-VIDEO_Shutdown(
-   void
-)
+void VIDEO_Shutdown(void)
 /*++
   Purpose:
 
@@ -129,95 +122,61 @@ void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
 
 --*/
 {
-   PAL_Rect        srcrect, dstrect;
+    int i = 0;
+    int j = 0;
+    int roi_h = SCREEN_H;
+    unsigned char *src = gpScreen->pixels;
+    unsigned char *dst = bufScreenReal;
+    if (g_bRenderPaused)
+    {
+        return;
+    }
 
-   if (g_bRenderPaused)
-   {
-       return;
-   }
+    if (lpRect != NULL)
+    {
+        int offset = (lpRect->y * SCREEN_W + lpRect->x);
+        src += offset;
+        dst += (offset * 3);
+        for (j = 0; j < lpRect->h; j++)
+        {
+            for (i = 0; i < lpRect->w; i++)
+            {
+                dst[i * 3 + 0] = bufPalette[src[i] * 3 + 0];
+                dst[i * 3 + 1] = bufPalette[src[i] * 3 + 1];
+                dst[i * 3 + 2] = bufPalette[src[i] * 3 + 2];
+            }
+            src += SCREEN_W;
+            dst += SCREEN_W * 3;
+        }
+    }
+    else
+    {
+        if (g_wShakeTime != 0)
+        {
+            // Shake the screen
+            roi_h -= g_wShakeLevel;
+            if (g_wShakeTime & 1)
+            {
+                memset(dst + roi_h * SCREEN_W * 3, 0, g_wShakeLevel * SCREEN_W * 3);
+                src += (SCREEN_W * g_wShakeLevel);
+            }
+            else
+            {
+                memset(dst, 0, g_wShakeLevel * SCREEN_W * 3);
+                dst += (g_wShakeLevel * SCREEN_W * 3);
+            }
+            g_wShakeTime--;
+        }
 
-   if (lpRect != NULL)
-   {
-       for (int j = lpRect->y; j < lpRect->y + lpRect->h; j++)
-       {
-           unsigned char *src = gpScreen->pixels + j * SCREEN_W;
-           unsigned char *dst = bufScreenReal + j * (SCREEN_W * 3);
-           for (int i = lpRect->x; i < lpRect->x + lpRect->w; i++)
-           {
-             dst[i * 3 + 0] = bufPalette[src[i] * 3 + 0];
-             dst[i * 3 + 1] = bufPalette[src[i] * 3 + 1];
-             dst[i * 3 + 2] = bufPalette[src[i] * 3 + 2];
-           }
-       }
-   }
-   else if (g_wShakeTime != 0)
-   {
-      // Shake the screen
-      srcrect.x = 0;
-      srcrect.y = 0;
-      srcrect.w = SCREEN_W;
-      srcrect.h = SCREEN_H - g_wShakeLevel;
+        for (i = 0; i < SCREEN_W * roi_h; i++, src++, dst += 3)
+        {
+            dst[0] = bufPalette[(*src) * 3 + 0];
+            dst[1] = bufPalette[(*src) * 3 + 1];
+            dst[2] = bufPalette[(*src) * 3 + 2];
+        }
+    }
 
-      dstrect.x = 0;
-      dstrect.y = 0;
-      dstrect.w = SCREEN_W;
-      dstrect.h = SCREEN_H - g_wShakeLevel;
-
-      if (g_wShakeTime & 1)
-      {
-         srcrect.y = g_wShakeLevel;
-      }
-      else
-      {
-         dstrect.y = g_wShakeLevel;
-      }
-
-      unsigned char *src = gpScreen->pixels;
-      unsigned char *dst = bufScreenReal;
-      int sx, sy, sw = SCREEN_W;
-      int dx, dy, dw = SCREEN_W * 3;
-      for (dy = dstrect.y; dy < dstrect.y + dstrect.h; dy++)
-      {
-          sy = (dy * srcrect.h) / dstrect.h;
-          for (dx = dstrect.x; dx < dstrect.x + dstrect.w; dx++)
-          {
-              sx = (dx * srcrect.w) / dstrect.w;
-              unsigned char val = src[sy * sw + sx];
-              unsigned int i = dy * dw + dx * 3;
-              dst[i + 0] = bufPalette[val * 3 + 0];
-              dst[i + 1] = bufPalette[val * 3 + 1];
-              dst[i + 2] = bufPalette[val * 3 + 2];
-          }
-      }
-
-      if (g_wShakeTime & 1)
-      {
-         dstrect.y = 200 - g_wShakeLevel;
-      }
-      else
-      {
-         dstrect.y = 0;
-      }
-
-      dstrect.h = g_wShakeLevel;
-
-      memset(bufScreenReal + dstrect.y * (SCREEN_W * 3), 0, dstrect.h * (SCREEN_W * 3));
-
-      g_wShakeTime--;
-   }
-   else
-   {
-      unsigned char *src = gpScreen->pixels;
-      unsigned char *dst = bufScreenReal;
-      for (int i = 0; i < SCREEN_SIZE; i++, src++, dst += 3)
-      {
-         dst[0] = bufPalette[(*src) * 3 + 0];
-         dst[1] = bufPalette[(*src) * 3 + 1];
-         dst[2] = bufPalette[(*src) * 3 + 2];
-      }
-   }
-
-   DRIVER_FrameShow(bufScreenReal);
+    DRIVER_FrameShow(bufScreenReal);
 }
 
 void VIDEO_SetPalette(const unsigned char *rgPalette)
@@ -259,11 +218,7 @@ const unsigned char *VIDEO_GetPalette(void)
   return (const unsigned char *)bufPalette;
 }
 
-void
-VIDEO_ShakeScreen(
-   unsigned short           wShakeTime,
-   unsigned short           wShakeLevel
-)
+void VIDEO_ShakeScreen(unsigned short wShakeTime, unsigned short wShakeLevel)
 /*++
   Purpose:
 
@@ -285,10 +240,7 @@ VIDEO_ShakeScreen(
    g_wShakeLevel = wShakeLevel;
 }
 
-void
-VIDEO_SwitchScreen(
-   unsigned short           wSpeed
-)
+void VIDEO_SwitchScreen(unsigned short wSpeed)
 /*++
   Purpose:
 
@@ -332,10 +284,7 @@ VIDEO_SwitchScreen(
    }
 }
 
-void
-VIDEO_FadeScreen(
-   unsigned short           wSpeed
-)
+void VIDEO_FadeScreen(unsigned short wSpeed)
 /*++
   Purpose:
 
@@ -364,103 +313,68 @@ VIDEO_FadeScreen(
 
    for (i = 0; i < 12; i++)
    {
-      for (j = 0; j < 6; j++)
-      {
-         PAL_DelayUntil(time);
-         time = UTIL_GetTicks() + wSpeed;
+       for (j = 0; j < 6; j++)
+       {
+           PAL_DelayUntil(time);
+           time = UTIL_GetTicks() + wSpeed;
 
-         //
-         // Blend the pixels in the 2 buffers, and put the result into the
-         // backup buffer
-         //
-         for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
-         {
-            a = gpScreen->pixels[k];
-            b = gpScreenBak->pixels[k];
+           // Blend the pixels in the 2 buffers, and put the result into the
+           // backup buffer
+           for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
+           {
+               a = gpScreen->pixels[k];
+               b = gpScreenBak->pixels[k];
 
-            if (i > 0)
-            {
-               if ((a & 0x0F) > (b & 0x0F))
+               if (i > 0)
                {
-                  b++;
+                   if ((a & 0x0F) > (b & 0x0F))
+                   {
+                       b++;
+                   }
+                   else if ((a & 0x0F) < (b & 0x0F))
+                   {
+                       b--;
+                   }
                }
-               else if ((a & 0x0F) < (b & 0x0F))
+               gpScreenBak->pixels[k] = ((a & 0xF0) | (b & 0x0F));
+           }
+
+           int roi_h = SCREEN_H;
+           unsigned char *src = gpScreenBak->pixels;
+           unsigned char *dst = bufScreenReal;
+
+           // Draw the backup buffer to the screen
+           if (g_wShakeTime != 0)
+           {
+               roi_h -= g_wShakeLevel;
+               if (g_wShakeTime & 1)
                {
-                  b--;
+                   memset(dst + roi_h * SCREEN_W * 3, 0, g_wShakeLevel * SCREEN_W * 3);
+                   src += (SCREEN_W * g_wShakeLevel);
                }
-            }
-            gpScreenBak->pixels[k] = ((a & 0xF0) | (b & 0x0F));
-         }
+               else
+               {
+                   memset(dst, 0, g_wShakeLevel * SCREEN_W * 3);
+                   dst += (g_wShakeLevel * SCREEN_W * 3);
+               }
+               g_wShakeTime--;
+           }
 
-         // Draw the backup buffer to the screen
-         if (g_wShakeTime != 0)
-         {
-            // Shake the screen
-            PAL_Rect srcrect = {0, 0, SCREEN_W, SCREEN_H - g_wShakeLevel};
-            PAL_Rect dstrect = {0, 0, SCREEN_W, SCREEN_H - g_wShakeLevel};
-
-            if (g_wShakeTime & 1)
-            {
-               srcrect.y = g_wShakeLevel;
-            }
-            else
-            {
-               dstrect.y = g_wShakeLevel;
-            }
-
-            unsigned char *src = gpScreenBak->pixels;
-            unsigned char *dst = bufScreenReal;
-            int sx, sy, sw = SCREEN_W;
-            int dx, dy, dw = (SCREEN_W * 3);
-            for (dy = dstrect.y; dy < dstrect.y + dstrect.h; dy++)
-            {
-                sy = (dy * srcrect.h) / dstrect.h;
-                for (dx = dstrect.x; dx < dstrect.x + dstrect.w; dx++)
-                {
-                    sx = (dx * srcrect.w) / dstrect.w;
-                    unsigned char val = src[sy * sw + sx];
-                    unsigned int i = dy * dw + dx * 3;
-                    dst[i + 0] = bufPalette[val*3+0];
-                    dst[i + 1] = bufPalette[val*3+1];
-                    dst[i + 2] = bufPalette[val*3+2];
-                }
-            }
-
-            if (g_wShakeTime & 1)
-            {
-               dstrect.y = 200 - g_wShakeLevel;
-            }
-            else
-            {
-               dstrect.y = 0;
-            }
-
-            dstrect.h = g_wShakeLevel;
-
-            memset(bufScreenReal + dstrect.y * (SCREEN_W * 3), 0, dstrect.h * (SCREEN_W * 3));
-            DRIVER_FrameShow(bufScreenReal);
-            g_wShakeTime--;
-         }
-         else
-         {
-             unsigned char *src = gpScreenBak->pixels;
-             unsigned char *dst = bufScreenReal;
-             for (int j = 0; j < SCREEN_SIZE; j++, src++, dst += 3) {
+           for (k = 0; k < SCREEN_W * roi_h; k++, src++, dst += 3)
+           {
                dst[0] = bufPalette[(*src) * 3 + 0];
                dst[1] = bufPalette[(*src) * 3 + 1];
                dst[2] = bufPalette[(*src) * 3 + 2];
-             }
-             DRIVER_FrameShow(bufScreenReal);
-         }
-      }
+           }
+           DRIVER_FrameShow(bufScreenReal);
+       }
    }
 
    // Draw the result buffer to the screen as the final step
    VIDEO_UpdateScreen(NULL);
 }
 
-PAL_Surface *VIDEO_CreateCompatibleSizedSurface(
-    const PAL_Rect *pSize)
+PAL_Surface *VIDEO_CreateCompatibleSizedSurface(const PAL_Rect *pSize)
 /*++
   Purpose:
 
@@ -481,18 +395,14 @@ PAL_Surface *VIDEO_CreateCompatibleSizedSurface(
     PAL_Surface *dest = NULL;
     dest = (PAL_Surface *)UTIL_malloc(sizeof(PAL_Surface));
     if (dest) {
-      memset(dest, 0, sizeof(PAL_Surface));
       dest->w = pSize ? pSize->w : SCREEN_W;
       dest->h = pSize ? pSize->h : SCREEN_H;
       dest->pixels = (unsigned char *)UTIL_calloc(dest->w * dest->h, sizeof(unsigned char));
-      if (dest->pixels)
-        memset(dest->pixels, 0, dest->w * dest->h);
     }
     return dest;
 }
 
-PAL_Surface *VIDEO_DuplicateSurface(
-    const PAL_Rect *pRect)
+PAL_Surface *VIDEO_DuplicateSurface(const PAL_Rect *pRect)
 /*++
   Purpose:
 

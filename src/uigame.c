@@ -150,7 +150,7 @@ void PAL_DrawOpeningMenuBackground(
 --*/
 {
    // Read the picture from fbp.mkf.
-   PAL_MKFDecompressChunk(&gpScreen->pixels, gpScreen->w * gpScreen->h, 2, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, 2, gpGlobals->f.fpFBP);
 
    // ...and blit it to the screen buffer.
    VIDEO_UpdateScreen(NULL);

@@ -694,8 +694,7 @@ PAL_InterpretInstruction(
 
          p = (unsigned short *)(&gpGlobals->rgEquipmentEffect[i]); // HACKHACK
 
-         p[pScript->rgwOperand[1] * MAX_PLAYER_ROLES + wEventObjectID] =
-             pScript->rgwOperand[2];
+         p[pScript->rgwOperand[1] * MAX_PLAYER_ROLES + wEventObjectID] = (signed short)pScript->rgwOperand[2];
       }
       break;
 
@@ -756,8 +755,7 @@ PAL_InterpretInstruction(
             iPlayerRole = pScript->rgwOperand[2] - 1;
          }
 
-         p[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] +=
-             pScript->rgwOperand[1];
+         p[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] += (signed short)pScript->rgwOperand[1];
       }
       break;
 
@@ -789,8 +787,7 @@ PAL_InterpretInstruction(
             iPlayerRole = pScript->rgwOperand[2] - 1;
          }
 
-         p[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] =
-             pScript->rgwOperand[1];
+         p[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] = (signed short)pScript->rgwOperand[1];
       }
       break;
 
@@ -807,7 +804,7 @@ PAL_InterpretInstruction(
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
-            if (PAL_IncreaseHPMP(w, pScript->rgwOperand[1], 0))
+            if (PAL_IncreaseHPMP(w, (signed short)pScript->rgwOperand[1], 0))
                g_fScriptSuccess = TRUE;
          }
       }
@@ -816,7 +813,7 @@ PAL_InterpretInstruction(
          //
          // Apply to one player. The wEventObjectID parameter should indicate the player role.
          //
-         if (!PAL_IncreaseHPMP(wEventObjectID, pScript->rgwOperand[1], 0))
+         if (!PAL_IncreaseHPMP(wEventObjectID, (signed short)pScript->rgwOperand[1], 0))
          {
             g_fScriptSuccess = FALSE;
          }
@@ -835,7 +832,7 @@ PAL_InterpretInstruction(
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
-            PAL_IncreaseHPMP(w, 0, (pScript->rgwOperand[1]));
+            PAL_IncreaseHPMP(w, 0, (signed short)(pScript->rgwOperand[1]));
          }
       }
       else
@@ -843,7 +840,7 @@ PAL_InterpretInstruction(
          //
          // Apply to one player. The wEventObjectID parameter should indicate the player role.
          //
-         if (!PAL_IncreaseHPMP(wEventObjectID, 0, (pScript->rgwOperand[1])))
+         if (!PAL_IncreaseHPMP(wEventObjectID, 0, (signed short)(pScript->rgwOperand[1])))
          {
             g_fScriptSuccess = FALSE;
          }
@@ -863,7 +860,7 @@ PAL_InterpretInstruction(
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
             PAL_IncreaseHPMP(w,
-                             (pScript->rgwOperand[1]), (pScript->rgwOperand[1]));
+                             (signed short)(pScript->rgwOperand[1]), (signed short)(pScript->rgwOperand[1]));
          }
       }
       else
@@ -872,7 +869,7 @@ PAL_InterpretInstruction(
          // Apply to one player. The wEventObjectID parameter should indicate the player role.
          //
          if (!PAL_IncreaseHPMP(wEventObjectID,
-                               (pScript->rgwOperand[1]), (pScript->rgwOperand[1])))
+                               (signed short)(pScript->rgwOperand[1]), (signed short)(pScript->rgwOperand[1])))
          {
             g_fScriptSuccess = FALSE;
          }
@@ -883,7 +880,7 @@ PAL_InterpretInstruction(
       //
       // Increase or decrease cash by the specified amount
       //
-      if ((pScript->rgwOperand[0]) < 0 &&
+      if ((signed short)(pScript->rgwOperand[0]) < 0 &&
           gpGlobals->dwCash < (unsigned short)(-(pScript->rgwOperand[0])))
       {
          //
@@ -893,7 +890,7 @@ PAL_InterpretInstruction(
       }
       else
       {
-         gpGlobals->dwCash += (pScript->rgwOperand[0]);
+         gpGlobals->dwCash += (signed short)(pScript->rgwOperand[0]);
       }
       break;
 
@@ -901,7 +898,7 @@ PAL_InterpretInstruction(
       //
       // Add item to inventory
       //
-      PAL_AddItemToInventory(pScript->rgwOperand[0], (pScript->rgwOperand[1]));
+      PAL_AddItemToInventory(pScript->rgwOperand[0], (signed short)(pScript->rgwOperand[1]));
       break;
 
    case 0x0020:
@@ -1338,8 +1335,7 @@ PAL_InterpretInstruction(
          }
 
          p[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] =
-             p1[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] *
-             pScript->rgwOperand[1] / 100;
+             p1[pScript->rgwOperand[0] * MAX_PLAYER_ROLES + iPlayerRole] * (signed short)pScript->rgwOperand[1] / 100;
       }
       break;
 
@@ -1539,7 +1535,7 @@ PAL_InterpretInstruction(
       //
       // Simulate a magic for player
       //
-      i = (pScript->rgwOperand[2]) - 1;
+      i = (signed short)(pScript->rgwOperand[2]) - 1;
       if (i < 0)
       {
          i = wEventObjectID;
@@ -1697,7 +1693,7 @@ PAL_InterpretInstruction(
       //
       VIDEO_UpdateScreen(NULL);
       PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
-                 ((pScript->rgwOperand[0]) > 0) ? pScript->rgwOperand[0] : 1);
+                 ((signed short)(pScript->rgwOperand[0]) > 0) ? pScript->rgwOperand[0] : 1);
       gpGlobals->fNeedToFadeIn = FALSE;
       break;
 
@@ -1771,7 +1767,7 @@ PAL_InterpretInstruction(
       // Jump if there is less than the specified number of the specified items
       // in the inventory
       //
-      if (PAL_GetItemAmount(pScript->rgwOperand[0]) < (pScript->rgwOperand[1]))
+      if (PAL_GetItemAmount(pScript->rgwOperand[0]) < (signed short)(pScript->rgwOperand[1]))
       {
          wScriptEntry = pScript->rgwOperand[2] - 1;
       }
@@ -1960,15 +1956,15 @@ PAL_InterpretInstruction(
       //
       // Blow away enemies
       //
-      g_Battle.iBlow = (pScript->rgwOperand[0]);
+      g_Battle.iBlow = (signed short)(pScript->rgwOperand[0]);
       break;
 
    case 0x006C:
       //
       // Walk the NPC in one step
       //
-      pCurrent->x += (pScript->rgwOperand[1]);
-      pCurrent->y += (pScript->rgwOperand[2]);
+      pCurrent->x += (signed short)(pScript->rgwOperand[1]);
+      pCurrent->y += (signed short)(pScript->rgwOperand[2]);
       PAL_NPCWalkOneStep(wCurEventObjectID, 0);
       break;
 
@@ -2011,8 +2007,8 @@ PAL_InterpretInstruction(
       gpGlobals->rgTrail[0].y = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
 
       gpGlobals->viewport = PAL_XY(
-          PAL_X(gpGlobals->viewport) + (pScript->rgwOperand[0]),
-          PAL_Y(gpGlobals->viewport) + (pScript->rgwOperand[1]));
+          PAL_X(gpGlobals->viewport) + (signed short)(pScript->rgwOperand[0]),
+          PAL_Y(gpGlobals->viewport) + (signed short)(pScript->rgwOperand[1]));
 
       gpGlobals->wLayer = pScript->rgwOperand[2] * 8;
 
@@ -2026,9 +2022,9 @@ PAL_InterpretInstruction(
       //
       // Sync the state of current event object with another event object
       //
-      if (pCurrent->sState == (pScript->rgwOperand[1]))
+      if (pCurrent->sState == (signed short)(pScript->rgwOperand[1]))
       {
-         pEvtObj->sState = (pScript->rgwOperand[1]);
+         pEvtObj->sState = (signed short)(pScript->rgwOperand[1]);
       }
       break;
 
@@ -2118,8 +2114,7 @@ PAL_InterpretInstruction(
       //
       // Stop current playing music
       //
-      AUDIO_PlayMusic(0x00, FALSE,
-                      (pScript->rgwOperand[0] == 0) ? 2.0f : (float)(pScript->rgwOperand[0]) * 3);
+      AUDIO_PlayMusic(0x00, FALSE, (pScript->rgwOperand[0] == 0) ? 2.0f : (float)(pScript->rgwOperand[0]) * 3);
       gpGlobals->wNumMusic = 0;
       break;
 
@@ -2180,15 +2175,15 @@ PAL_InterpretInstruction(
       //
       // Move the event object
       //
-      pCurrent->x += (pScript->rgwOperand[1]);
-      pCurrent->y += (pScript->rgwOperand[2]);
+      pCurrent->x += (signed short)(pScript->rgwOperand[1]);
+      pCurrent->y += (signed short)(pScript->rgwOperand[2]);
       break;
 
    case 0x007E:
       //
       // Set the layer of event object
       //
-      pCurrent->sLayer = (pScript->rgwOperand[1]);
+      pCurrent->sLayer = (signed short)(pScript->rgwOperand[1]);
       break;
 
    case 0x007F:
@@ -2225,8 +2220,8 @@ PAL_InterpretInstruction(
 
          i = 0;
 
-         x = (pScript->rgwOperand[0]);
-         y = (pScript->rgwOperand[1]);
+         x = (signed short)(pScript->rgwOperand[0]);
+         y = (signed short)(pScript->rgwOperand[1]);
 
          time = UTIL_GetTicks() + FRAME_TIME;
 
@@ -2276,7 +2271,7 @@ PAL_InterpretInstruction(
             //
             PAL_DelayUntil(time);
             time = UTIL_GetTicks() + FRAME_TIME;
-         } while (++i < (pScript->rgwOperand[2]));
+         } while (++i < (signed short)(pScript->rgwOperand[2]));
       }
       break;
 
@@ -2410,7 +2405,7 @@ PAL_InterpretInstruction(
       {
          pCurrent->x = x;
          pCurrent->y = y;
-         pCurrent->sState = (pScript->rgwOperand[1]);
+         pCurrent->sState = (signed short)(pScript->rgwOperand[1]);
       }
       break;
 
@@ -2491,8 +2486,7 @@ PAL_InterpretInstruction(
       //
       // Fade from/to color
       //
-      PAL_ColorFade(pScript->rgwOperand[1], (unsigned char)(pScript->rgwOperand[0]),
-                    pScript->rgwOperand[2]);
+      PAL_ColorFade(pScript->rgwOperand[1], (unsigned char)(pScript->rgwOperand[0]), pScript->rgwOperand[2]);
       gpGlobals->fNeedToFadeIn = FALSE;
       break;
 
@@ -2573,16 +2567,15 @@ PAL_InterpretInstruction(
       //
       // Fade the screen. Update scene in the process.
       //
-      PAL_SceneFade(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
-                    (pScript->rgwOperand[0]));
-      gpGlobals->fNeedToFadeIn = ((pScript->rgwOperand[0]) < 0);
+      PAL_SceneFade(gpGlobals->wNumPalette, gpGlobals->fNightPalette, (signed short)(pScript->rgwOperand[0]));
+      gpGlobals->fNeedToFadeIn = ((signed short)(pScript->rgwOperand[0]) < 0);
       break;
 
    case 0x0094:
       //
       // Jump if the state of event object is the specified one
       //
-      if (pCurrent->sState == (pScript->rgwOperand[1]))
+      if (pCurrent->sState == (signed short)(pScript->rgwOperand[1]))
       {
          wScriptEntry = pScript->rgwOperand[2] - 1;
       }
@@ -2785,7 +2778,7 @@ PAL_InterpretInstruction(
 
       x = 0;
       w = pScript->rgwOperand[0];
-      y = (((pScript->rgwOperand[1]) <= 0) ? 1 : pScript->rgwOperand[1]);
+      y = (((signed short)(pScript->rgwOperand[1]) <= 0) ? 1 : (signed short)pScript->rgwOperand[1]);
 
       if (w == 0 || w == 0xFFFF)
       {

@@ -2029,7 +2029,7 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
 
 --*/
 {
-   unsigned char *lpSpriteEffect;
+   unsigned char *lpSpriteEffect = NULL;
    int l, iMagicNum, iEffectNum, n, i, j, x, y;
    unsigned int dwTime = UTIL_GetTicks();
    short sLayerOffset;
@@ -2148,22 +2148,15 @@ PAL_BattleShowPlayerOffMagicAnim(
 
 --*/
 {
-   unsigned char *   lpSpriteEffect;
-   int        l, iMagicNum, iEffectNum, n, i, k, x, y, wave, blow;
-   unsigned int      dwTime = UTIL_GetTicks();
-   short      sLayerOffset;
+   unsigned char *lpSpriteEffect = NULL;
+   int iMagicNum, iEffectNum, n, i, k, l, x, y, wave, blow;
+   unsigned int dwTime = UTIL_GetTicks();
+   short sLayerOffset;
 
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
    iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-   l = PAL_MKFGetDecompressedSize(iEffectNum, gpGlobals->f.fpFIRE);
-   if (l <= 0)
-   {
-      return;
-   }
-
-   lpSpriteEffect = (unsigned char *)UTIL_malloc(l);
-   PAL_MKFDecompressChunk((unsigned char **)&lpSpriteEffect, l, iEffectNum, gpGlobals->f.fpFIRE);
+   PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, gpGlobals->f.fpFIRE);
 
    n = PAL_SpriteGetNumFrames(lpSpriteEffect);
 

@@ -280,11 +280,7 @@ void PAL_LoadResources(
          // Load player sprite
          wSpriteNum = gpGlobals->g.PlayerRoles.rgwSpriteNum[wPlayerID];
 
-         l = PAL_MKFGetDecompressedSize(wSpriteNum, gpGlobals->f.fpMGO);
-
-         gpResources->rglpPlayerSprite[i] = (unsigned char *)UTIL_malloc(l);
-
-         PAL_MKFDecompressChunk(&gpResources->rglpPlayerSprite[i], l, wSpriteNum,
+         PAL_MKFDecompressChunk(&gpResources->rglpPlayerSprite[i], 0, wSpriteNum,
                                 gpGlobals->f.fpMGO);
       }
 
@@ -293,11 +289,7 @@ void PAL_LoadResources(
          // Load the follower sprite
          wSpriteNum = gpGlobals->rgParty[(short)gpGlobals->wMaxPartyMemberIndex + i].wPlayerRole;
 
-         l = PAL_MKFGetDecompressedSize(wSpriteNum, gpGlobals->f.fpMGO);
-
-         gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i] = (unsigned char *)UTIL_malloc(l);
-
-         PAL_MKFDecompressChunk(&gpResources->rglpPlayerSprite[(short)gpGlobals->wMaxPartyMemberIndex + i], l, wSpriteNum,
+         PAL_MKFDecompressChunk(&gpResources->rglpPlayerSprite[(short)gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum,
                                 gpGlobals->f.fpMGO);
       }
    }
