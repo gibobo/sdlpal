@@ -156,7 +156,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
       return;
    }
 
-   if (PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0) {
+   if (g_wCurEffectSprite && PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0) {
       return;
    }
 
@@ -315,8 +315,7 @@ static void PAL_EndingAnimation(
    free(bufGirl);
 }
 
-void PAL_EndingScreen(
-    void)
+void PAL_EndingScreen(void)
 /*++
  Purpose:
 

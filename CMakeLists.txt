@@ -28,7 +28,9 @@ set (DRIVER_DIR         driver)
 set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource/)
 
 file(GLOB_RECURSE SDLPAL_SOURCES    ${SDLPAL_DIR}/*.c ${SDLPAL_DIR}/*.cpp)
-file(GLOB_RECURSE SDLPAL_HEADERS	${SDLPAL_DIR}/*.h)
+file(GLOB NUKED_SOURCES             ${NUKED_DIR}/*.c)
+file(GLOB BINIO_SOURCES             ${BINIO_SOURCE_DIR}/*.cpp)
+file(GLOB ADPLUG_SOURCES            ${ADPLUG_DIR}/*.cpp)
 
 set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
 set(SDL_TEST   OFF CACHE BOOL "Build the SDL2_test library" FORCE)
@@ -37,26 +39,22 @@ add_subdirectory(external/SDL)
 add_definitions(-DSOURCE_DIR="${CMAKE_BINARY_DIR}")
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 
-# add_subdirectory(external/libbinio)
-
-# if(WIN32)
-# include(cmake/SDL2.cmake)
-# include(cmake/SDL2main.cmake)
-# endif()
-
-include(cmake/adplug.cmake)
-
 add_executable(${PROJECT_NAME}
     ${DRIVER_DIR}/SDL.c
     ${DRIVER_DIR}/mini_glloader.c
     ${DRIVER_DIR}/video_glsl.c
     ${SDLPAL_SOURCES}
+    ${NUKED_SOURCES}
+    ${BINIO_SOURCES}
+    ${ADPLUG_SOURCES}
 )
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         ${SDL2_DIR}/include()
+        ${BINIO_SOURCE_DIR}
         ${BINIO_INCLUDE_DIR}
+        ${NUKED_DIR}
         ${ADPLUG_DIR}
         ${SDLPAL_DIR}
         ${DRIVER_DIR}
@@ -67,7 +65,6 @@ if(WIN32)
         ${OPENGL_LIBRARY}
         SDL2-static
         SDL2main
-        adplug
     )
 else()
     target_link_libraries(${PROJECT_NAME}
@@ -75,12 +72,15 @@ else()
         OpenGL::OpenGL OpenGL::EGL 
         SDL2-static
         SDL2main
-        adplug
     )
 endif()
 
 if (MSVC)
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw/           DESTINATION ${RESOURCE_PATH})
+    file(GLOB PAL_GAMEDATA
+        ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw/*.mkf
+        ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw/*.msg
+        ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw/*.dat)
+    file(COPY ${PAL_GAMEDATA}                                   DESTINATION ${RESOURCE_PATH})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/              DESTINATION ${CMAKE_BINARY_DIR}/shaders)
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cptbl_big5.dat        DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font.dat      DESTINATION ${CMAKE_BINARY_DIR})

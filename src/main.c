@@ -373,11 +373,6 @@ int main(int argc, char *argv[])
    PAL_ReloadInNextTick(gpGlobals->bCurrentSaveSlot);
 
    // Run the main game routine
-
-   unsigned int       dwTime;
-   // Run the main game loop.
-   dwTime = UTIL_GetTicks();
-
    while (1)
    {
       // Load the game resources if needed.
@@ -387,10 +382,7 @@ int main(int argc, char *argv[])
       PAL_ClearKeyState();
 
       // Wait for the time of one frame. Accept input here.
-      PAL_DelayUntil(dwTime);
-
-      // Set the time of the next frame.
-      dwTime = UTIL_GetTicks() + FRAME_TIME;
+      UTIL_Delay(FRAME_TIME);
 
       // Run the main frame routine.
       PAL_StartFrame();

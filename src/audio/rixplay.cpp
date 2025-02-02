@@ -19,7 +19,6 @@
 //
 
 #include "audio.h"
-#include "audio_internal.h"
 #include "common.h"
 #include "convertopl.h"
 #include "emuopls.h"

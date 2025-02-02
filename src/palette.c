@@ -255,7 +255,6 @@ void PAL_SceneFade(
    unsigned char *palette;
    unsigned char newpalette[256 * 3];
    int i, j;
-   unsigned int time;
 
    palette = PAL_GetPalette(iPaletteNum, fNight);
    memset(newpalette, 0, sizeof(newpalette));
@@ -276,8 +275,6 @@ void PAL_SceneFade(
    {
       for (i = 0; i < 64; i += iStep)
       {
-         time = UTIL_GetTicks() + 100;
-
          // Generate the scene
          PAL_ClearKeyState();
          PAL_SetDirInput(kDirUnknown);
@@ -292,15 +289,13 @@ void PAL_SceneFade(
          }
          VIDEO_SetPalette(newpalette);
 
-         PAL_DelayUntil(time);
+         UTIL_Delay(100);
       }
    }
    else
    {
       for (i = 63; i >= 0; i += iStep)
       {
-         time = UTIL_GetTicks() + 100;
-
          // Generate the scene
          PAL_ClearKeyState();
          PAL_SetDirInput(kDirUnknown);
@@ -315,7 +310,7 @@ void PAL_SceneFade(
          }
          VIDEO_SetPalette(newpalette);
 
-         PAL_DelayUntil(time);
+         UTIL_Delay(100);
       }
    }
 }
@@ -344,7 +339,6 @@ void PAL_PaletteFade(
 --*/
 {
    int i, j;
-   unsigned int time;
    unsigned char *newpalette = PAL_GetPalette(iPaletteNum, fNight);
    PAL_LARGE unsigned char palette[256 * 3];
    PAL_LARGE unsigned char t[256 * 3];
@@ -360,8 +354,6 @@ void PAL_PaletteFade(
    // Start fading...
    for (i = 0; i < 32; i++)
    {
-      time = UTIL_GetTicks() + (fUpdateScene ? FRAME_TIME : FRAME_TIME / 4);
-
       for (j = 0; j < 256 * 3; j++)
       {
          t[j] = (unsigned char)(((int)palette[j] * (31 - i) + (int)(newpalette[j]) * i) / 31);
@@ -377,7 +369,7 @@ void PAL_PaletteFade(
          VIDEO_UpdateScreen(NULL);
       }
 
-      PAL_DelayUntil(time);
+      UTIL_Delay(fUpdateScene ? FRAME_TIME : FRAME_TIME / 4);
    }
 }
 

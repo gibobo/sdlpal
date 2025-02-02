@@ -264,18 +264,15 @@ void VIDEO_SwitchScreen(unsigned short wSpeed)
    wSpeed *= 10;
 
    unsigned char *src = gpScreen->pixels;
-   unsigned char *srcBak = gpScreenBak->pixels;
    unsigned char *dst = bufScreenReal;
    for (i = 0; i < 6; i++)
    {
        // Draw the backup buffer to the screen
-       for (j = 0; j < SCREEN_SIZE; j++)
+       for (j = rgIndex[i]; j < SCREEN_SIZE; j += 6)
        {
-           if (j % 6 == rgIndex[i])
-               srcBak[j] = src[j];
-           dst[j * 3 + 0] = bufPalette[srcBak[j]*3+0];
-           dst[j * 3 + 1] = bufPalette[srcBak[j]*3+1];
-           dst[j * 3 + 2] = bufPalette[srcBak[j]*3+2];
+           dst[j * 3 + 0] = bufPalette[src[j] * 3 + 0];
+           dst[j * 3 + 1] = bufPalette[src[j] * 3 + 1];
+           dst[j * 3 + 2] = bufPalette[src[j] * 3 + 2];
        }
 
        DRIVER_FrameShow(bufScreenReal);
@@ -301,73 +298,60 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
 
 --*/
 {
-   unsigned int      i, j, k;
-   unsigned int      time;
-   unsigned char     a, b;
+   unsigned short i, j, k;
    const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
-
-   time = UTIL_GetTicks();
+   const int gain = 16;
+   unsigned char idx;
+   short a, b;
 
    wSpeed++;
    wSpeed *= 10;
 
    for (i = 0; i < 12; i++)
    {
-       for (j = 0; j < 6; j++)
-       {
-           PAL_DelayUntil(time);
-           time = UTIL_GetTicks() + wSpeed;
+      for (j = 0; j < 6; j++)
+      {
+         UTIL_Delay(wSpeed);
 
-           // Blend the pixels in the 2 buffers, and put the result into the
-           // backup buffer
-           for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
-           {
-               a = gpScreen->pixels[k];
-               b = gpScreenBak->pixels[k];
+         unsigned int roi_h = SCREEN_H;
+         unsigned char *src = gpScreen->pixels;
+         unsigned char *dst = bufScreenReal;
 
-               if (i > 0)
-               {
-                   if ((a & 0x0F) > (b & 0x0F))
-                   {
-                       b++;
-                   }
-                   else if ((a & 0x0F) < (b & 0x0F))
-                   {
-                       b--;
-                   }
-               }
-               gpScreenBak->pixels[k] = ((a & 0xF0) | (b & 0x0F));
-           }
+         // Draw the backup buffer to the screen
+         if (g_wShakeTime != 0)
+         {
+            roi_h -= g_wShakeLevel;
+            if (g_wShakeTime & 1)
+            {
+               memset(dst + roi_h * SCREEN_W * 3, 0, g_wShakeLevel * SCREEN_W * 3);
+               src += (SCREEN_W * g_wShakeLevel);
+            }
+            else
+            {
+               memset(dst, 0, g_wShakeLevel * SCREEN_W * 3);
+               dst += (g_wShakeLevel * SCREEN_W * 3);
+            }
+            g_wShakeTime--;
+         }
 
-           int roi_h = SCREEN_H;
-           unsigned char *src = gpScreenBak->pixels;
-           unsigned char *dst = bufScreenReal;
-
-           // Draw the backup buffer to the screen
-           if (g_wShakeTime != 0)
-           {
-               roi_h -= g_wShakeLevel;
-               if (g_wShakeTime & 1)
-               {
-                   memset(dst + roi_h * SCREEN_W * 3, 0, g_wShakeLevel * SCREEN_W * 3);
-                   src += (SCREEN_W * g_wShakeLevel);
-               }
+         for (k = rgIndex[j]; k < SCREEN_W * roi_h; k += 6)
+         {
+            // Blend the pixels in the 2 buffers, and put the result into the backup buffer
+            for (idx = 0; idx < 3; idx++)
+            {
+               a = dst[k * 3 + idx];
+               b = bufPalette[src[k] * 3 + idx];
+               if (a + gain < b)
+                  a += gain;
+               else if (a - gain > b)
+                  a -= gain;
                else
-               {
-                   memset(dst, 0, g_wShakeLevel * SCREEN_W * 3);
-                   dst += (g_wShakeLevel * SCREEN_W * 3);
-               }
-               g_wShakeTime--;
-           }
-
-           for (k = 0; k < SCREEN_W * roi_h; k++, src++, dst += 3)
-           {
-               dst[0] = bufPalette[(*src) * 3 + 0];
-               dst[1] = bufPalette[(*src) * 3 + 1];
-               dst[2] = bufPalette[(*src) * 3 + 2];
-           }
-           DRIVER_FrameShow(bufScreenReal);
-       }
+                  a = b;
+               dst[k * 3 + idx] = (unsigned char)a;
+            }
+         }
+         DRIVER_FrameShow(bufScreenReal);
+      }
    }
 
    // Draw the result buffer to the screen as the final step

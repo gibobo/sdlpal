@@ -381,7 +381,6 @@ PAL_BattleDelay(
 --*/
 {
    int    i, j;
-   unsigned int  dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
 
    for (i = 0; i < wDuration; i++)
    {
@@ -413,15 +412,8 @@ PAL_BattleDelay(
          }
       }
 
-      //
       // Wait for the time of one frame. Accept input here.
-      //
-      PAL_DelayUntil(dwTime);
-
-      //
-      // Set the time of the next frame.
-      //
-      dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
+      UTIL_Delay(BATTLE_FRAME_TIME);
 
       PAL_BattleMakeScene();
       VIDEO_CopyEntireSurface(g_Battle.lpSceneBuf, gpScreen);
@@ -1600,9 +1592,10 @@ PAL_BattleShowPlayerAttackAnim(
    short sTarget = g_Battle.rgPlayer[wPlayerIndex].action.sTarget;
 
    int index, i, j;
-   int enemy_x = 0, enemy_y = 0, enemy_h = 0, x, y, dist = 0;
-
-   unsigned int dwTime;
+   int enemy_x = 0;
+   int enemy_y = 0;
+   int enemy_h = 0;
+   int x, y, dist = 0;
 
    if (sTarget != -1)
    {
@@ -1698,25 +1691,14 @@ PAL_BattleShowPlayerAttackAnim(
    x = enemy_x;
    y = enemy_y - enemy_h / 3 + 10;
 
-   dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
-
    for (i = 0; i < 3; i++)
    {
       const unsigned char* b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, index++);
 
-      //
       // Wait for the time of one frame. Accept input here.
-      //
-      PAL_DelayUntil(dwTime);
+      UTIL_Delay(BATTLE_FRAME_TIME);
 
-      //
-      // Set the time of the next frame.
-      //
-      dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
-
-      //
       // Update the gesture of enemies.
-      //
       for (j = 0; j <= g_Battle.wMaxEnemyIndex; j++)
       {
          if (g_Battle.rgEnemy[j].wObjectID == 0 ||
@@ -1906,11 +1888,7 @@ PAL_BattleShowPlayerUseItemAnim(
    }
 }
 
-void
-PAL_BattleShowPlayerPreMagicAnim(
-   unsigned short         wPlayerIndex,
-   int         fSummon
-)
+void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
 /*++
   Purpose:
 
@@ -1928,15 +1906,14 @@ PAL_BattleShowPlayerPreMagicAnim(
 
 --*/
 {
-   int   i, j;
-   unsigned int dwTime = UTIL_GetTicks();
-   unsigned short  wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+   int i, j;
+   unsigned short wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
 
    for (i = 0; i < 4; i++)
    {
       g_Battle.rgPlayer[wPlayerIndex].pos =
-         PAL_XY(PAL_X(g_Battle.rgPlayer[wPlayerIndex].pos) - (4 - i),
-                PAL_Y(g_Battle.rgPlayer[wPlayerIndex].pos) - (4 - i) / 2);
+          PAL_XY(PAL_X(g_Battle.rgPlayer[wPlayerIndex].pos) - (4 - i),
+                 PAL_Y(g_Battle.rgPlayer[wPlayerIndex].pos) - (4 - i) / 2);
 
       PAL_BattleDelay(1, 0, TRUE);
    }
@@ -1955,29 +1932,20 @@ PAL_BattleShowPlayerPreMagicAnim(
       index = gpGlobals->g.rgwBattleEffectIndex[PAL_GetPlayerBattleSprite(wPlayerRole)][0];
       index *= 10;
       index += 15;
-		AUDIO_PlaySound(gpGlobals->g.PlayerRoles.rgwMagicSound[wPlayerRole]);
-	  for (i = 0; i < 10; i++)
+      AUDIO_PlaySound(gpGlobals->g.PlayerRoles.rgwMagicSound[wPlayerRole]);
+      for (i = 0; i < 10; i++)
       {
-         const unsigned char* b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, index++);
+         const unsigned char *b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, index++);
 
-         //
          // Wait for the time of one frame. Accept input here.
-         //
-		 PAL_DelayUntil(dwTime);
+         UTIL_Delay(BATTLE_FRAME_TIME);
 
-         //
-         // Set the time of the next frame.
-         //
-         dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
-
-         //
          // Update the gesture of enemies.
-         //
          for (j = 0; j <= g_Battle.wMaxEnemyIndex; j++)
          {
             if (g_Battle.rgEnemy[j].wObjectID == 0 ||
-               g_Battle.rgEnemy[j].rgwStatus[kStatusSleep] != 0 ||
-               g_Battle.rgEnemy[j].rgwStatus[kStatusParalyzed] != 0)
+                g_Battle.rgEnemy[j].rgwStatus[kStatusSleep] != 0 ||
+                g_Battle.rgEnemy[j].rgwStatus[kStatusParalyzed] != 0)
             {
                continue;
             }
@@ -1986,7 +1954,7 @@ PAL_BattleShowPlayerPreMagicAnim(
             {
                g_Battle.rgEnemy[j].wCurrentFrame++;
                g_Battle.rgEnemy[j].e.wIdleAnimSpeed =
-                  gpGlobals->g.lprgEnemy[gpGlobals->g.rgObject[g_Battle.rgEnemy[j].wObjectID].enemy.wEnemyID].wIdleAnimSpeed;
+                   gpGlobals->g.lprgEnemy[gpGlobals->g.rgObject[g_Battle.rgEnemy[j].wObjectID].enemy.wEnemyID].wIdleAnimSpeed;
             }
 
             if (g_Battle.rgEnemy[j].wCurrentFrame >= g_Battle.rgEnemy[j].e.wIdleFrames)
@@ -2030,8 +1998,9 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
 --*/
 {
    unsigned char *lpSpriteEffect = NULL;
-   int l, iMagicNum, iEffectNum, n, i, j, x, y;
-   unsigned int dwTime = UTIL_GetTicks();
+   int l, n, i, j, x, y;
+   int iMagicNum;
+   int iEffectNum;
    short sLayerOffset;
 
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
@@ -2052,10 +2021,7 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
          AUDIO_PlaySound(gpGlobals->g.lprgMagic[iMagicNum].wSound);
 
       // Wait for the time of one frame. Accept input here.
-      PAL_DelayUntil(dwTime);
-
-      // Set the time of the next frame.
-      dwTime = UTIL_GetTicks() + (gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10;
+      UTIL_Delay((gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10);
 
       // Magic layers offset
       sLayerOffset = (short)gpGlobals->g.lprgMagic[iMagicNum].rgSpecific.sLayerOffset;
@@ -2150,7 +2116,6 @@ PAL_BattleShowPlayerOffMagicAnim(
 {
    unsigned char *lpSpriteEffect = NULL;
    int iMagicNum, iEffectNum, n, i, k, l, x, y, wave, blow;
-   unsigned int dwTime = UTIL_GetTicks();
    short sLayerOffset;
 
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
@@ -2218,16 +2183,9 @@ PAL_BattleShowPlayerOffMagicAnim(
          VIDEO_ShakeScreen(i, 3);
          *b = PAL_SpriteGetFrame(lpSpriteEffect, (l - gpGlobals->g.lprgMagic[iMagicNum].wShake - 1) % n);
       }
-      //
-      // Wait for the time of one frame. Accept input here.
-      //
-      PAL_DelayUntil(dwTime);
 
-      //
-      // Set the time of the next frame.
-      //
-      dwTime = UTIL_GetTicks() +
-         (gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10;
+      // Wait for the time of one frame. Accept input here.
+      UTIL_Delay((gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10);
 
       //
       // Magic layers offset
@@ -2362,8 +2320,9 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
 --*/
 {
    unsigned char *lpSpriteEffect = NULL;
-   int l, iMagicNum, iEffectNum, n, i, k, x, y, wave, blow;
-   unsigned int dwTime = UTIL_GetTicks();
+   int l, n, i, k, x, y, wave, blow;
+   int iMagicNum;
+   int iEffectNum;
    short sLayerOffset;
 
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
@@ -2421,16 +2380,8 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
        *b = PAL_SpriteGetFrame(lpSpriteEffect, (l - gpGlobals->g.lprgMagic[iMagicNum].wShake - 1) % n);
      }
 
-     //
      // Wait for the time of one frame. Accept input here.
-     //
-     PAL_DelayUntil(dwTime);
-
-     //
-     // Set the time of the next frame.
-     //
-     dwTime = UTIL_GetTicks() +
-              (gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10;
+     UTIL_Delay((gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10);
 
      //
      // Magic layers offset
@@ -2553,7 +2504,6 @@ static void PAL_BattleShowPlayerSummonMagicAnim(unsigned short wPlayerIndex, uns
    int j;
    unsigned short wMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
    unsigned short wEffectMagicID = 0;
-   unsigned int dwTime = UTIL_GetTicks();
 
    for (wEffectMagicID = 0; wEffectMagicID < MAX_OBJECTS; wEffectMagicID++) {
       if (gpGlobals->g.rgObject[wEffectMagicID].magic.wMagicNumber ==
@@ -2601,11 +2551,7 @@ static void PAL_BattleShowPlayerSummonMagicAnim(unsigned short wPlayerIndex, uns
    //
    while (g_Battle.iSummonFrame < PAL_SpriteGetNumFrames(g_Battle.lpSummonSprite) - 1) {
       // Wait for the time of one frame. Accept input here.
-      PAL_DelayUntil(dwTime);
-
-      // Set the time of the next frame.
-      dwTime = UTIL_GetTicks() +
-               (gpGlobals->g.lprgMagic[wMagicNum].wSpeed + 5) * 10;
+      UTIL_Delay((gpGlobals->g.lprgMagic[wMagicNum].wSpeed + 5) * 10);
 
       PAL_BattleMakeScene();
       VIDEO_CopyEntireSurface(g_Battle.lpSceneBuf, gpScreen);
@@ -3925,15 +3871,13 @@ PAL_BattleEnemyPerformAction(
          PAL_BattleDelay(1, 0, TRUE);
       }
 
-      unsigned int dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
       x = (PAL_X(g_Battle.rgEnemy[wEnemyIndex].pos) + PAL_X(g_Battle.rgEnemy[iTarget].pos)) / 2;
       y = PAL_Y(g_Battle.rgEnemy[iTarget].pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.rgEnemy[iTarget].lpSprite, 0)) / 3 + 10;
       for( i=9; i<12; i++ )
       {
          const unsigned char* b = PAL_SpriteGetFrame(g_Battle.lpEffectSprite, i);
 
-         PAL_DelayUntil(dwTime);
-         dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
+         UTIL_Delay(BATTLE_FRAME_TIME);
 
          PAL_BattleMakeScene();
          VIDEO_CopyEntireSurface(g_Battle.lpSceneBuf, gpScreen);

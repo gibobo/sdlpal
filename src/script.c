@@ -144,22 +144,15 @@ PAL_PartyWalkTo(
 --*/
 {
    int xOffset, yOffset, i, dx, dy;
-   unsigned int t;
 
    xOffset = x * 32 + h * 16 - PAL_X(gpGlobals->viewport) - PAL_X(gpGlobals->partyoffset);
    yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
 
-   t = 0;
-
    while (xOffset != 0 || yOffset != 0)
    {
-      PAL_DelayUntil(t);
+      UTIL_Delay(FRAME_TIME);
 
-      t = UTIL_GetTicks() + FRAME_TIME;
-
-      //
       // Store trail
-      //
       for (i = 3; i >= 0; i--)
       {
          gpGlobals->rgTrail[i + 1] = gpGlobals->rgTrail[i];
@@ -248,7 +241,6 @@ PAL_PartyRideEventObject(
 --*/
 {
    int xOffset, yOffset, dx, dy, i;
-   unsigned int t;
    EVENTOBJECT *p;
 
    p = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
@@ -256,13 +248,9 @@ PAL_PartyRideEventObject(
    xOffset = x * 32 + h * 16 - PAL_X(gpGlobals->viewport) - PAL_X(gpGlobals->partyoffset);
    yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
 
-   t = 0;
-
    while (xOffset != 0 || yOffset != 0)
    {
-      PAL_DelayUntil(t);
-
-      t = UTIL_GetTicks() + FRAME_TIME;
+      UTIL_Delay(FRAME_TIME);
 
       if (yOffset < 0)
       {
@@ -2216,14 +2204,9 @@ PAL_InterpretInstruction(
       }
       else
       {
-         unsigned int time;
-
          i = 0;
-
          x = (signed short)(pScript->rgwOperand[0]);
          y = (signed short)(pScript->rgwOperand[1]);
-
-         time = UTIL_GetTicks() + FRAME_TIME;
 
          do
          {
@@ -2266,11 +2249,8 @@ PAL_InterpretInstruction(
             PAL_MakeScene();
             VIDEO_UpdateScreen(NULL);
 
-            //
             // Delay for one frame
-            //
-            PAL_DelayUntil(time);
-            time = UTIL_GetTicks() + FRAME_TIME;
+            UTIL_Delay(FRAME_TIME);
          } while (++i < (signed short)(pScript->rgwOperand[2]));
       }
       break;
@@ -3151,31 +3131,21 @@ PAL_RunTriggerScript(
          break;
 
       case 0x0009:
-         //
          // wait for the specified number of frames
-         //
+         PAL_ClearDialog(TRUE);
+
+         for (i = 0; i < (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1); i++)
          {
-            unsigned int time;
+            UTIL_Delay(FRAME_TIME);
 
-            PAL_ClearDialog(TRUE);
-
-            time = UTIL_GetTicks() + FRAME_TIME;
-
-            for (i = 0; i < (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1); i++)
+            if (pScript->rgwOperand[2])
             {
-               PAL_DelayUntil(time);
-
-               time = UTIL_GetTicks() + FRAME_TIME;
-
-               if (pScript->rgwOperand[2])
-               {
-                  PAL_UpdatePartyGestures(FALSE);
-               }
-
-               PAL_GameUpdate(pScript->rgwOperand[1] ? TRUE : FALSE);
-               PAL_MakeScene();
-               VIDEO_UpdateScreen(NULL);
+               PAL_UpdatePartyGestures(FALSE);
             }
+
+            PAL_GameUpdate(pScript->rgwOperand[1] ? TRUE : FALSE);
+            PAL_MakeScene();
+            VIDEO_UpdateScreen(NULL);
          }
          wScriptEntry++;
          break;

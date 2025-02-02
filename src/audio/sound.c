@@ -19,7 +19,6 @@
 //
 
 #include "audio.h"
-#include "audio_internal.h"
 #include "common.h"
 #include "driver.h"
 #include "global.h"
@@ -69,7 +68,7 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
 
     [IN]  dwLen - length of the buffer of the WAVE file.
 
-    [OUT] lpSpec - pointer to the SDL_AudioSpec structure, which contains
+    [OUT] lpSpec - pointer to the AudioSpec structure, which contains
                     some basic information about the WAVE file.
 
   Return value:
@@ -712,8 +711,6 @@ SOUND_Play(
         return FALSE;
     }
 
-    AUDIO_Lock();
-
     cursnd = &player->soundlist;
     while (cursnd->next && cursnd->base)
         cursnd = cursnd->next;
@@ -740,8 +737,6 @@ SOUND_Play(
     cursnd->spec = wavespec;
     cursnd->ResampleMix = mixer;
     player->cursounds++;
-
-    AUDIO_Unlock();
 
     return TRUE;
 }

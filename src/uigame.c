@@ -1054,14 +1054,13 @@ void PAL_PlayerStatus(
 
    bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
 
-   PAL_MKFDecompressChunk(&gpScreenBak->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
 
    while (iCurrent >= 0 && iCurrent <= gpGlobals->wMaxPartyMemberIndex)
    {
       iPlayerRole = gpGlobals->rgParty[iCurrent].wPlayerRole;
 
-      // Draw the background image
-      VIDEO_RestoreScreen(gpScreen);
+      // Draw the background image      
+      PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
 
       // Draw the image of player role
       if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gpGlobals->f.fpRGM) > 0) {
@@ -1686,8 +1685,6 @@ void PAL_EquipItemMenu(
    bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
    gpGlobals->wLastUnequippedItem = wItem;
 
-   PAL_MKFDecompressChunk(&gpScreenBak->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM,
-                          gpGlobals->f.fpFBP);
 
    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
    dwColorChangeTime = UTIL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
@@ -1697,7 +1694,8 @@ void PAL_EquipItemMenu(
       wItem = gpGlobals->wLastUnequippedItem;
 
       // Draw the background
-      VIDEO_RestoreScreen(gpScreen);
+      PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM,
+                           gpGlobals->f.fpFBP);
 
       // Draw the item picture
       if (PAL_MKFReadChunk(bufImage, bufImageSize,

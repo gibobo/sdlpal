@@ -19,7 +19,6 @@
 //
 
 #include "audio.h"
-#include "audio_internal.h"
 #include "common.h"
 #include "global.h"
 #include "players.h"
@@ -107,7 +106,7 @@ int AUDIO_OpenDevice(void)
 
 --*/
 {
-    SDL_AudioSpec spec;
+    SDL_AudioSpec audio_spec;
 
     if (gAudioDevice.fOpened) {
         // Already opened
@@ -122,12 +121,12 @@ int AUDIO_OpenDevice(void)
     resampler_init();
 
     // Open the audio device.
-    spec.freq = gConfig.iSampleRate;
-    spec.format = AUDIO_S16SYS;
-    spec.channels = gConfig.iAudioChannels;
-    spec.samples = gConfig.wAudioBufferSize;
-    spec.callback = AUDIO_FillBuffer;
-    gAudioDevice.id = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    audio_spec.freq = gConfig.iSampleRate;
+    audio_spec.format = AUDIO_S16SYS;
+    audio_spec.channels = gConfig.iAudioChannels;
+    audio_spec.samples = gConfig.wAudioBufferSize;
+    audio_spec.callback = AUDIO_FillBuffer;
+    gAudioDevice.id = SDL_OpenAudioDevice(NULL, 0, &audio_spec, NULL, 0);
 
     if (gAudioDevice.id == 0)
         return -3; // Failed
@@ -210,11 +209,9 @@ void AUDIO_PlaySound(int iSoundNum)
 }
 
 void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime) {
-    AUDIO_Lock();
     if (gAudioDevice.pMusPlayer) {
         gAudioDevice.pMusPlayer->Play(gAudioDevice.pMusPlayer, iNumRIX, fLoop, flFadeTime);
     }
-    AUDIO_Unlock();
 }
 
 void AUDIO_EnableMusic(int fEnable) {
@@ -231,12 +228,4 @@ void AUDIO_EnableSound(int fEnable) {
 
 int AUDIO_SoundEnabled(void) {
     return gAudioDevice.fSoundEnabled;
-}
-
-void AUDIO_Lock(void) {
-    SDL_LockAudioDevice(gAudioDevice.id);
-}
-
-void AUDIO_Unlock(void) {
-    SDL_UnlockAudioDevice(gAudioDevice.id);
 }

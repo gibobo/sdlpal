@@ -294,7 +294,6 @@ PAL_RNGPlay(
    int rng_size = 0;
    int buf_size = 0;
    unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
-   unsigned int iTime = UTIL_GetTicks();
 
    // Avoid losing the last frame
    if (iEndFrame > 0) iEndFrame++;
@@ -302,7 +301,6 @@ PAL_RNGPlay(
    fp = DRIVER_fopen(RESOURCE_PATH "/rng.mkf", "rb");
 
    for (; fp && iStartFrame != iEndFrame; iStartFrame++) {
-     iTime += iDelay;
      // Read, decompress and render the frame
      buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fp);
      if (buf_size < 0)
@@ -324,7 +322,7 @@ PAL_RNGPlay(
      }
 
      // Delay for a while
-     PAL_DelayUntil(iTime);
+     UTIL_Delay(iDelay);
    }
 
    DRIVER_fclose(fp);

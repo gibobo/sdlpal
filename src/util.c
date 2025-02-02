@@ -187,8 +187,7 @@ float RandomFloat(
 	return from + (float)lrand() / (INT_MAX / (to - from));
 }
 
-void UTIL_Delay(
-	unsigned int ms)
+void UTIL_Delay(unsigned int ms)
 {
 	PAL_DelayUntil(UTIL_GetTicks() + ms);
 }

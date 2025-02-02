@@ -611,25 +611,20 @@ void PAL_BattleFadeScene(
 --*/
 {
    int i, j, k;
-   unsigned int time;
    unsigned char a, b;
    const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
-
-   time = UTIL_GetTicks();
 
    for (i = 0; i < 12; i++)
    {
       for (j = 0; j < 6; j++)
       {
-         PAL_DelayUntil(time);
-         time = UTIL_GetTicks() + 16;
-
+         UTIL_Delay(16);
          // Blend the pixels in the 2 buffers, and put the result into the
          // backup buffer
          for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
          {
             a = g_Battle.lpSceneBuf->pixels[k];
-            b = gpScreenBak->pixels[k];
+            b = gpScreen->pixels[k];
 
             if (i > 0)
             {
@@ -643,12 +638,10 @@ void PAL_BattleFadeScene(
                }
             }
 
-            gpScreenBak->pixels[k] = (a & 0xF0) | (b & 0x0F);
+            gpScreen->pixels[k] = (a & 0xF0) | (b & 0x0F);
          }
 
          // Draw the backup buffer to the screen
-         VIDEO_RestoreScreen(gpScreen);
-
          PAL_BattleUIUpdate();
          VIDEO_UpdateScreen(NULL);
       }
@@ -682,7 +675,6 @@ PAL_BattleMain(
 --*/
 {
    int i;
-   unsigned int dwTime;
 
    VIDEO_BackupScreen(gpScreen);
 
@@ -736,8 +728,6 @@ PAL_BattleMain(
       g_Battle.BattleResult = kBattleResultOnGoing;
    }
 
-   dwTime = UTIL_GetTicks();
-
    PAL_ClearKeyState();
 
    //
@@ -745,32 +735,19 @@ PAL_BattleMain(
    //
    while (TRUE)
    {
-      //
       // Break out if the battle ended.
-      //
       if (g_Battle.BattleResult != kBattleResultOnGoing)
       {
          break;
       }
 
-      //
       // Wait for the time of one frame. Accept input here.
-      //
-      PAL_DelayUntil(dwTime);
+      UTIL_Delay(BATTLE_FRAME_TIME);
 
-      //
-      // Set the time of the next frame.
-      //
-      dwTime = UTIL_GetTicks() + BATTLE_FRAME_TIME;
-
-      //
       // Run the main frame routine.
-      //
       PAL_BattleStartFrame();
 
-      //
       // Update the screen.
-      //
       VIDEO_UpdateScreen(NULL);
    }
 
@@ -1063,8 +1040,7 @@ PAL_BattleWon(
 
          for (j = 0; j < 8; j++)
          {
-            PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ARROW),
-                                 gpScreen, PAL_XY(-offsetX + 180, 48 + 18 * j));
+            PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ARROW), gpScreen, PAL_XY(-offsetX + 180, 48 + 18 * j));
          }
 
          PAL_DrawText(PAL_GetWord(STATUS_LABEL_LEVEL), PAL_XY(offsetX + 100, 44), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
@@ -1079,66 +1055,37 @@ PAL_BattleWon(
          //
          // Draw the original stats and stats after level up
          //
-         PAL_DrawNumber(OrigPlayerRoles.rgwLevel[w], 4, PAL_XY(-offsetX + 133, 47),
-                        kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwLevel[w], 4, PAL_XY(-offsetX + 195, 47),
-                        kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(OrigPlayerRoles.rgwLevel[w], 4, PAL_XY(-offsetX + 133, 47), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwLevel[w], 4, PAL_XY(-offsetX + 195, 47), kNumColorYellow, kNumAlignRight);
 
-         PAL_DrawNumber(OrigPlayerRoles.rgwHP[w], 4, PAL_XY(-offsetX + 133, 64),
-                        kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(OrigPlayerRoles.rgwMaxHP[w], 4, PAL_XY(-offsetX + 154, 68),
-                        kNumColorBlue, kNumAlignRight);
-         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
-                              PAL_XY(-offsetX + 156, 66));
-         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwHP[w], 4, PAL_XY(-offsetX + 195, 64),
-                        kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxHP[w], 4, PAL_XY(-offsetX + 216, 68),
-                        kNumColorBlue, kNumAlignRight);
-         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
-                              PAL_XY(-offsetX + 218, 66));
+         PAL_DrawNumber(OrigPlayerRoles.rgwHP[w], 4, PAL_XY(-offsetX + 133, 64), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(OrigPlayerRoles.rgwMaxHP[w], 4, PAL_XY(-offsetX + 154, 68), kNumColorBlue, kNumAlignRight);
+         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, PAL_XY(-offsetX + 156, 66));
+         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwHP[w], 4, PAL_XY(-offsetX + 195, 64), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxHP[w], 4, PAL_XY(-offsetX + 216, 68), kNumColorBlue, kNumAlignRight);
+         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, PAL_XY(-offsetX + 218, 66));
 
-         PAL_DrawNumber(OrigPlayerRoles.rgwMP[w], 4, PAL_XY(-offsetX + 133, 82),
-                        kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(OrigPlayerRoles.rgwMaxMP[w], 4, PAL_XY(-offsetX + 154, 86),
-                        kNumColorBlue, kNumAlignRight);
-         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
-                              PAL_XY(-offsetX + 156, 84));
-         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMP[w], 4, PAL_XY(-offsetX + 195, 82),
-                        kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxMP[w], 4, PAL_XY(-offsetX + 216, 86),
-                        kNumColorBlue, kNumAlignRight);
-         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
-                              PAL_XY(-offsetX + 218, 84));
+         PAL_DrawNumber(OrigPlayerRoles.rgwMP[w], 4, PAL_XY(-offsetX + 133, 82), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(OrigPlayerRoles.rgwMaxMP[w], 4, PAL_XY(-offsetX + 154, 86), kNumColorBlue, kNumAlignRight);
+         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, PAL_XY(-offsetX + 156, 84));
+         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMP[w], 4, PAL_XY(-offsetX + 195, 82), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxMP[w], 4, PAL_XY(-offsetX + 216, 86), kNumColorBlue, kNumAlignRight);
+         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, PAL_XY(-offsetX + 218, 84));
 
-         PAL_DrawNumber(OrigPlayerRoles.rgwAttackStrength[w] + PAL_GetPlayerAttackStrength(w) -
-                            gpGlobals->g.PlayerRoles.rgwAttackStrength[w],
-                        4, PAL_XY(-offsetX + 133, 101), kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(PAL_GetPlayerAttackStrength(w), 4, PAL_XY(-offsetX + 195, 101),
-                        kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(OrigPlayerRoles.rgwAttackStrength[w] + PAL_GetPlayerAttackStrength(w) - gpGlobals->g.PlayerRoles.rgwAttackStrength[w], 4, PAL_XY(-offsetX + 133, 101), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(PAL_GetPlayerAttackStrength(w), 4, PAL_XY(-offsetX + 195, 101), kNumColorYellow, kNumAlignRight);
 
-         PAL_DrawNumber(OrigPlayerRoles.rgwMagicStrength[w] + PAL_GetPlayerMagicStrength(w) -
-                            gpGlobals->g.PlayerRoles.rgwMagicStrength[w],
-                        4, PAL_XY(-offsetX + 133, 119), kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(PAL_GetPlayerMagicStrength(w), 4, PAL_XY(-offsetX + 195, 119),
-                        kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(OrigPlayerRoles.rgwMagicStrength[w] + PAL_GetPlayerMagicStrength(w) - gpGlobals->g.PlayerRoles.rgwMagicStrength[w], 4, PAL_XY(-offsetX + 133, 119), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(PAL_GetPlayerMagicStrength(w), 4, PAL_XY(-offsetX + 195, 119), kNumColorYellow, kNumAlignRight);
 
-         PAL_DrawNumber(OrigPlayerRoles.rgwDefense[w] + PAL_GetPlayerDefense(w) -
-                            gpGlobals->g.PlayerRoles.rgwDefense[w],
-                        4, PAL_XY(-offsetX + 133, 137), kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(PAL_GetPlayerDefense(w), 4, PAL_XY(-offsetX + 195, 137),
-                        kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(OrigPlayerRoles.rgwDefense[w] + PAL_GetPlayerDefense(w) - gpGlobals->g.PlayerRoles.rgwDefense[w], 4, PAL_XY(-offsetX + 133, 137), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(PAL_GetPlayerDefense(w), 4, PAL_XY(-offsetX + 195, 137), kNumColorYellow, kNumAlignRight);
 
-         PAL_DrawNumber(OrigPlayerRoles.rgwDexterity[w] + PAL_GetPlayerDexterity(w) -
-                            gpGlobals->g.PlayerRoles.rgwDexterity[w],
-                        4, PAL_XY(-offsetX + 133, 155), kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(PAL_GetPlayerDexterity(w), 4, PAL_XY(-offsetX + 195, 155),
-                        kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(OrigPlayerRoles.rgwDexterity[w] + PAL_GetPlayerDexterity(w) - gpGlobals->g.PlayerRoles.rgwDexterity[w], 4, PAL_XY(-offsetX + 133, 155), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(PAL_GetPlayerDexterity(w), 4, PAL_XY(-offsetX + 195, 155), kNumColorYellow, kNumAlignRight);
 
-         PAL_DrawNumber(OrigPlayerRoles.rgwFleeRate[w] + PAL_GetPlayerFleeRate(w) -
-                            gpGlobals->g.PlayerRoles.rgwFleeRate[w],
-                        4, PAL_XY(-offsetX + 133, 173), kNumColorYellow, kNumAlignRight);
-         PAL_DrawNumber(PAL_GetPlayerFleeRate(w), 4, PAL_XY(-offsetX + 195, 173),
-                        kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(OrigPlayerRoles.rgwFleeRate[w] + PAL_GetPlayerFleeRate(w) - gpGlobals->g.PlayerRoles.rgwFleeRate[w], 4, PAL_XY(-offsetX + 133, 173), kNumColorYellow, kNumAlignRight);
+         PAL_DrawNumber(PAL_GetPlayerFleeRate(w), 4, PAL_XY(-offsetX + 195, 173), kNumColorYellow, kNumAlignRight);
 
          //
          // Update the screen and wait for key
