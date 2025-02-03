@@ -197,7 +197,7 @@ void PAL_LoadResources(
 
 --*/
 {
-   int i, index, l;
+   int i, index;
    unsigned short wPlayerID, wSpriteNum;
 
    if (gpResources == NULL || gpResources->bLoadFlags == 0)

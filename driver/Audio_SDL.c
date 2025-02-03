@@ -1,0 +1,52 @@
+#include "audio/audio.h"
+#include "global.h"
+#include <SDL_audio.h>
+#include <string.h>
+
+static unsigned int AudioDeviceId = 0;
+
+static void SDLCALL audio_callback(void *udata, unsigned char *stream, int len)
+/*++
+  Purpose:
+
+    SDL sound callback function.
+
+  Parameters:
+
+    [IN]  udata - pointer to user-defined parameters (Not used).
+
+    [OUT] stream - pointer to the stream buffer.
+
+    [IN]  len - Length of the buffer.
+
+  Return value:
+
+    None.
+
+--*/
+{
+  memset(stream, 0, len);
+  AUDIO_FillBuffer(stream, len);
+}
+
+int DRIVER_Init_Audio(void) {
+  SDL_AudioSpec audio_spec;
+  // Open the audio device.
+  audio_spec.freq = gConfig.iSampleRate;
+  audio_spec.format = AUDIO_S16SYS;
+  audio_spec.channels = gConfig.iAudioChannels;
+  audio_spec.samples = gConfig.wAudioBufferSize;
+  audio_spec.callback = audio_callback;
+  AudioDeviceId = SDL_OpenAudioDevice(NULL, 0, &audio_spec, NULL, 0);
+  if (AudioDeviceId == 0)
+    return -3; // Failed
+
+  // Let the callback function run so that musics will be played.
+  SDL_PauseAudioDevice(AudioDeviceId, 0);
+  return 0;
+}
+
+void DRIVER_DeInit_Audio(void) {
+  SDL_CloseAudioDevice(AudioDeviceId);
+  AudioDeviceId = 0;
+}

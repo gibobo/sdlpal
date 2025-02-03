@@ -111,6 +111,7 @@ void PAL_Shutdown(int exit_code)
 
 --*/
 {
+   DRIVER_DeInit();
    AUDIO_CloseDevice();
    PAL_FreeResources();
    PAL_FreeUI();
@@ -355,7 +356,6 @@ int main(int argc, char *argv[])
 {
   if (setjmp(g_exit_jmp_buf) != 0) {
     // A longjmp is made, should exit here
-    DRIVER_DeInit();
     return g_exit_code;
   }
 

@@ -6,6 +6,15 @@
 #define NULL 0
 #endif
 
+int DRIVER_Audio(void)
+{
+    return 0;
+}
+
+void DRIVER_DeInit_Audio(void)
+{
+}
+
 int DRIVER_Init(void)
 {
     return 0;

@@ -24,7 +24,6 @@
 #include "players.h"
 #include "resampler.h"
 #include "util.h"
-#include <SDL_audio.h>
 
 #define     PAL_MAX_VOLUME               100
 
@@ -53,27 +52,9 @@ PAL_FORCE_INLINE void AUDIO_MixNative(short *dst, short *src, int samples) {
     }
 }
 
-static void SDLCALL AUDIO_FillBuffer(void *udata, unsigned char *stream, int len)
-/*++
-  Purpose:
-
-    SDL sound callback function.
-
-  Parameters:
-
-    [IN]  udata - pointer to user-defined parameters (Not used).
-
-    [OUT] stream - pointer to the stream buffer.
-
-    [IN]  len - Length of the buffer.
-
-  Return value:
-
-    None.
-
---*/
-{
-    memset(stream, 0, len);
+void AUDIO_FillBuffer(void *stream, int len) {
+    if(gAudioDevice.fOpened == FALSE)
+        return;
 
     // Play music
     if (gAudioDevice.fMusicEnabled && gAudioDevice.pMusPlayer) {
@@ -86,7 +67,7 @@ static void SDLCALL AUDIO_FillBuffer(void *udata, unsigned char *stream, int len
         gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, len);
 
         // Mix sound & music
-        AUDIO_MixNative((short *)stream, gAudioDevice.pSoundBuffer, len >> 1);
+        AUDIO_MixNative((short *)stream, (short *)gAudioDevice.pSoundBuffer, len >> 1);
     }
 }
 
@@ -106,34 +87,19 @@ int AUDIO_OpenDevice(void)
 
 --*/
 {
-    SDL_AudioSpec audio_spec;
-
     if (gAudioDevice.fOpened) {
         // Already opened
         return -1;
     }
 
+    // Initialize the resampler module
+    resampler_init();
+
     gAudioDevice.fOpened = FALSE;
     gAudioDevice.fMusicEnabled = TRUE;
     gAudioDevice.fSoundEnabled = TRUE;
 
-    // Initialize the resampler module
-    resampler_init();
-
-    // Open the audio device.
-    audio_spec.freq = gConfig.iSampleRate;
-    audio_spec.format = AUDIO_S16SYS;
-    audio_spec.channels = gConfig.iAudioChannels;
-    audio_spec.samples = gConfig.wAudioBufferSize;
-    audio_spec.callback = AUDIO_FillBuffer;
-    gAudioDevice.id = SDL_OpenAudioDevice(NULL, 0, &audio_spec, NULL, 0);
-
-    if (gAudioDevice.id == 0)
-        return -3; // Failed
-
     gAudioDevice.pSoundBuffer = UTIL_calloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels, sizeof(short));
-
-    gAudioDevice.fOpened = TRUE;
 
     // Initialize the sound subsystem.
     gAudioDevice.pSoundPlayer = SOUND_Init();
@@ -141,8 +107,7 @@ int AUDIO_OpenDevice(void)
     // Initialize the music subsystem.
     gAudioDevice.pMusPlayer = RIX_Init();
 
-    // Let the callback function run so that musics will be played.
-    SDL_PauseAudioDevice(gAudioDevice.id, 0);
+    gAudioDevice.fOpened = TRUE;
 
     return 0;
 }
@@ -163,8 +128,6 @@ void AUDIO_CloseDevice(void)
 
 --*/
 {
-    SDL_CloseAudioDevice(gAudioDevice.id);
-
     if (gAudioDevice.pSoundPlayer != NULL) {
         gAudioDevice.pSoundPlayer->Shutdown(gAudioDevice.pSoundPlayer);
         gAudioDevice.pSoundPlayer = NULL;

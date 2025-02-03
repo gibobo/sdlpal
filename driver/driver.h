@@ -11,6 +11,9 @@ void DRIVER_FrameShow(unsigned char *frame_rgb);
 void DRIVER_FrameResize(unsigned int width, unsigned int height);
 int DRIVER_ProcessEvent(void);
 
+int DRIVER_Init_Audio(void);
+void DRIVER_DeInit_Audio(void);
+
 // Platform-specific utilities
 void *DRIVER_fopen(const char *_FileName, const char *_Mode);
 int DRIVER_fseek(void *_Stream, long _Offset, int _Origin);

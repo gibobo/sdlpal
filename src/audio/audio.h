@@ -29,6 +29,8 @@ int AUDIO_OpenDevice(void);
 
 void AUDIO_CloseDevice(void);
 
+void AUDIO_FillBuffer(void *stream, int len);
+
 void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime);
 
 void AUDIO_PlaySound(int iSoundNum);

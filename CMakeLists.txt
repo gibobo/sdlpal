@@ -41,6 +41,8 @@ add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 
 add_executable(${PROJECT_NAME}
     ${DRIVER_DIR}/SDL.c
+    ${DRIVER_DIR}/Audio_SDL.c
+    # ${DRIVER_DIR}/Audio_miniaudio.c
     ${DRIVER_DIR}/mini_glloader.c
     ${DRIVER_DIR}/video_glsl.c
     ${SDLPAL_SOURCES}
