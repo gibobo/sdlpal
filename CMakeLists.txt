@@ -54,10 +54,10 @@ add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         ${SDL2_DIR}/include()
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        external/
         ${BINIO_SOURCE_DIR}
         ${BINIO_INCLUDE_DIR}
-        ${NUKED_DIR}
-        ${ADPLUG_DIR}
         ${SDLPAL_DIR}
         ${DRIVER_DIR}
 )

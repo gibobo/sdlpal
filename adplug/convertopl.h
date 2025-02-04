@@ -135,7 +135,7 @@ protected:
 
 public:
     CConvertopl(Copl *opl, bool use16bit, bool stereo)
-        : Copl(opl->gettype()), opl(opl), buffer(NULL), bufsamples(0)
+        : Copl(opl->gettype()), opl(opl), buffer(0), bufsamples(0)
     {
         if (opl->getstereo())
         {

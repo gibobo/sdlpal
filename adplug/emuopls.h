@@ -43,75 +43,43 @@
 #ifndef SDLPAL_EMUOPLS_H
 #define SDLPAL_EMUOPLS_H
 
-// # ifdef _WIN32
-// #  include <malloc.h>
-// #  define VAR_STACK(type, var, size) type *var = ((type*)_alloca(sizeof(type)*(size)))
-// # else
-// #  ifdef HAVE_ALLOCA_H
-// #   include <alloca.h>
-// #  else
-// #   include <stdlib.h>
-// #  endif
-// #  if defined(__AROS__) && defined(__GNUC__)
-//  /* bypass __alloca_get_stack_limit() call in alloca.h
-//    from old AROS SDKs, directly use __builtin_alloca(). */
-// #   undef alloca
-// #   define alloca __builtin_alloca
-// #  endif
-// #  define VAR_STACK(type, var, size) type *var = ((type*) alloca(sizeof(type)*(size)))
-// # endif
-
 #include "opl.h"
-#include "oplcore.h"
+#include <stdint.h>
 
 // CEmuopl implements the base class of a OPL wrapper
 // The DUALOPL2 mode should be implemented by a OPL3 core
+
+class OPLCORE
+{
+public:
+    OPLCORE(uint32_t rate) : rate(rate) {}
+    virtual ~OPLCORE() {}
+    virtual void Reset() = 0;
+    virtual void Write(uint32_t reg, uint8_t val) = 0;
+    virtual void Generate(short *buf, int samples) = 0;
+    virtual OPLCORE *Duplicate() = 0;
+
+protected:
+    uint32_t rate;
+};
+
 class CEmuopl : public Copl
 {
 public:
     static Copl *CreateEmuopl(int rate);
 
-    ~CEmuopl()
-    {
-        delete opl[0];
-    }
+    ~CEmuopl();
 
     // Assumes a 16-bit, mono output sample buffer @ OPL2 mode
     // Assumes a 16-bit, stereo output sample buffer @ OPL3/DUAL_OPL2 mode
-    void update(short *buf, int samples)
-    {
-        opl[0]->Generate(buf, samples);
-    }
+    void update(short *buf, int samples);
 
-    void write(int reg, int val)
-    {
-        if (reg == 0x105 && currType == TYPE_OPL3)
-        {
-            opl3mode = ((val & 0x1) == 0x1);
-        }
-        else
-        {
-            reg &= opl3mode ? 0x1FF : 0xFF;
-        }
-        opl[currChip]->Write(reg, (uint8_t)val);
-    }
+    void write(int reg, int val);
 
-    void init()
-    {
-        opl[0]->Reset();
-        if (opl3mode)
-        {
-            opl[0]->Write(0x105, 1);
-        }
-    }
+    void init();
 
 protected:
-    CEmuopl(OPLCORE *core, ChipType type) : Copl(type), opl3mode(false)
-    {
-        opl[0] = core;
-        opl[1] = nullptr;
-        init();
-    }
+    CEmuopl(OPLCORE *core, ChipType type);
 
     OPLCORE *opl[2];
     bool opl3mode;

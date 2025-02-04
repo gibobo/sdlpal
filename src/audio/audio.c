@@ -21,7 +21,6 @@
 #include "audio.h"
 #include "common.h"
 #include "global.h"
-#include "players.h"
 #include "resampler.h"
 #include "util.h"
 

@@ -18,15 +18,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "adplug/convertopl.h"
+#include "adplug/emuopls.h"
+#include "adplug/fprovide.h"
+#include "adplug/rix.h"
 #include "audio.h"
 #include "common.h"
-#include "convertopl.h"
-#include "emuopls.h"
-#include "fprovide.h"
 #include "global.h"
-#include "players.h"
 #include "resampler.h"
-#include "rix.h"
 #include "util.h"
 #include <stdlib.h>
 

@@ -21,9 +21,16 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define AUDIOPLAYER_COMMONS             \
+  int iMusic;                           \
+  int fLoop;                            \
+  void (*Shutdown)(void *);             \
+  int (*Play)(void *, int, int, float); \
+  void (*FillBuffer)(void *, unsigned char *, int)
+
+typedef struct tagAUDIOPLAYER {
+  AUDIOPLAYER_COMMONS;
+} AUDIOPLAYER;
 
 int AUDIO_OpenDevice(void);
 
@@ -40,6 +47,16 @@ int AUDIO_MusicEnabled(void);
 
 void AUDIO_EnableSound(int fEnable);
 int AUDIO_SoundEnabled(void);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* RIX */
+AUDIOPLAYER *RIX_Init(void);
+
+/* SOUND */
+AUDIOPLAYER *SOUND_Init(void);
 
 #ifdef __cplusplus
 }
