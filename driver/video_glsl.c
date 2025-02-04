@@ -23,7 +23,6 @@
 #include "video_glsl.h"
 #include "mini_glloader.h"
 #include "video.h"
-#include "util.h"
 #include "driver.h"
 #include <assert.h>
 #include <stdio.h>
@@ -43,13 +42,13 @@ static const float p_tex[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
 char *readShaderFile(const char *filename, GLuint type)
 {
-    FILE *fp = DRIVER_fopen(filename, "rb");
-    DRIVER_fseek(fp, 0, SEEK_END);
+    FILE *fp = fopen(filename, "rb");
+    fseek(fp, 0, SEEK_END);
     long filesize = ftell(fp);
-    char *buf = (char *)UTIL_malloc(filesize + 1);
-    DRIVER_fseek(fp, 0, SEEK_SET);
-    DRIVER_fread(buf, filesize, 1, fp);
-    DRIVER_fclose(fp);
+    char *buf = (char *)malloc(filesize + 1);
+    fseek(fp, 0, SEEK_SET);
+    fread(buf, filesize, 1, fp);
+    fclose(fp);
     buf[filesize] = '\0';
     return buf;
 }
@@ -72,7 +71,8 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
     char *source = (is_source) ? (char *)sourceOrFilename : readShaderFile(sourceOrFilename, shaderType);
     int lines = -1;
     unsigned int sourceLen = (unsigned int)strlen(source) * 2U;
-    pShaderBuffer = (char *)UTIL_malloc(sourceLen);
+    pShaderBuffer = (char *)malloc(sourceLen);
+    memset(pShaderBuffer, 0, sourceLen);
 
 #ifdef GLES
     sprintf(pShaderBuffer, "#version %d%02d %s\r\n", glslversion_major, glslversion_minor, glslversion_major >= 3 ? "es" : "");
@@ -121,7 +121,7 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
         glGetShaderiv(result, GL_INFO_LOG_LENGTH, &logLength);
         if (logLength > 0)
         {
-            GLchar *log = (GLchar *)UTIL_malloc(logLength);
+            GLchar *log = (GLchar *)malloc(logLength);
             glGetShaderInfoLog(result, logLength, &logLength, log);
             free(log);
         }

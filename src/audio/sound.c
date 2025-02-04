@@ -764,7 +764,7 @@ void SOUND_Shutdown(void *object)
       free(old);
     }
   }
-  DRIVER_fclose(player->mkf);
+  UTIL_fclose(player->mkf);
 }
 
 static void SOUND_FillBuffer(
@@ -825,7 +825,7 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
-  FILE *mkf = DRIVER_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
+  FILE *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
   if (mkf == NULL)
     return NULL;
   SOUNDPLAYER *player = (SOUNDPLAYER *)UTIL_malloc(sizeof(SOUNDPLAYER));

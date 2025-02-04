@@ -818,7 +818,7 @@ void PAL_LoadBattleSprites(
 
    PAL_FreeBattleSprites();
 
-   fp = DRIVER_fopen(RESOURCE_PATH "/abc.mkf", "rb");
+   fp = UTIL_fopen(RESOURCE_PATH "/abc.mkf", "rb");
 
    // Load battle sprites for players
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
@@ -859,7 +859,7 @@ void PAL_LoadBattleSprites(
       g_Battle.rgEnemy[i].pos = PAL_XY(x, y);
    }
 
-   DRIVER_fclose(fp);
+   UTIL_fclose(fp);
 }
 
 static void

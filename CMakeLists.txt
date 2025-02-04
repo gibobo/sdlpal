@@ -38,10 +38,13 @@ add_subdirectory(external/SDL)
 
 add_definitions(-DSOURCE_DIR="${CMAKE_BINARY_DIR}")
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
+add_definitions(-DPAL_HAS_JOYSTICKS)
 
 add_executable(${PROJECT_NAME}
     ${DRIVER_DIR}/SDL.c
     ${DRIVER_DIR}/Audio_SDL.c
+    ${DRIVER_DIR}/Event_SDL.c
+    ${DRIVER_DIR}/Video_SDL.c
     # ${DRIVER_DIR}/Audio_miniaudio.c
     ${DRIVER_DIR}/mini_glloader.c
     ${DRIVER_DIR}/video_glsl.c

@@ -801,7 +801,7 @@ int PAL_MKFGetChunkCount(
       return 0;
    }
 
-   DRIVER_fseek(fp, 0, SEEK_SET);
+   UTIL_fseek(fp, 0, SEEK_SET);
    if (fread(&iNumChunk, sizeof(int), 1, fp) == 1)
       return (iNumChunk >> 2) - 1;
    else
@@ -845,7 +845,7 @@ int PAL_MKFGetChunkSize(
    //
    // Get the offset of the specified chunk and the next chunk.
    //
-   DRIVER_fseek(fp, 4 * uiChunkNum, SEEK_SET);
+   UTIL_fseek(fp, 4 * uiChunkNum, SEEK_SET);
    Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
@@ -904,7 +904,7 @@ int PAL_MKFReadChunk(
    }
 
    // Get the offset of the chunk.
-   DRIVER_fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
+   UTIL_fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
    Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
@@ -920,7 +920,7 @@ int PAL_MKFReadChunk(
 
    if (uiChunkLen != 0)
    {
-      DRIVER_fseek(fp, uiOffset, SEEK_SET);
+      UTIL_fseek(fp, uiOffset, SEEK_SET);
       return (int)fread(lpBuffer, 1, uiChunkLen, fp);
    }
 
@@ -969,13 +969,13 @@ int PAL_MKFGetDecompressedSize(
    //
    // Get the offset of the chunk.
    //
-   DRIVER_fseek(fp, 4 * uiChunkNum, SEEK_SET);
+   UTIL_fseek(fp, 4 * uiChunkNum, SEEK_SET);
    Check_fread(&uiOffset, 4, 1, fp);
 
    //
    // Read the header.
    //
-   DRIVER_fseek(fp, uiOffset, SEEK_SET);
+   UTIL_fseek(fp, uiOffset, SEEK_SET);
    Check_fread(buf, sizeof(unsigned int), 1, fp);
    return (int)buf[0];
 }

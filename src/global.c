@@ -57,14 +57,14 @@ int PAL_InitGlobals(void)
    gConfig.dwTextureHeight = 400;
 
    // Open files
-   gpGlobals->f.fpFBP = DRIVER_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
-   gpGlobals->f.fpMGO = DRIVER_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
-   gpGlobals->f.fpBALL = DRIVER_fopen(RESOURCE_PATH "/ball.mkf", "rb");
-   gpGlobals->f.fpDATA = DRIVER_fopen(RESOURCE_PATH "/data.mkf", "rb");
-   gpGlobals->f.fpF = DRIVER_fopen(RESOURCE_PATH "/f.mkf", "rb");
-   gpGlobals->f.fpFIRE = DRIVER_fopen(RESOURCE_PATH "/fire.mkf", "rb");
-   gpGlobals->f.fpRGM = DRIVER_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
-   gpGlobals->f.fpSSS = DRIVER_fopen(RESOURCE_PATH "/sss.mkf", "rb");
+   gpGlobals->f.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
+   gpGlobals->f.fpMGO = UTIL_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
+   gpGlobals->f.fpBALL = UTIL_fopen(RESOURCE_PATH "/ball.mkf", "rb");
+   gpGlobals->f.fpDATA = UTIL_fopen(RESOURCE_PATH "/data.mkf", "rb");
+   gpGlobals->f.fpF = UTIL_fopen(RESOURCE_PATH "/f.mkf", "rb");
+   gpGlobals->f.fpFIRE = UTIL_fopen(RESOURCE_PATH "/fire.mkf", "rb");
+   gpGlobals->f.fpRGM = UTIL_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
+   gpGlobals->f.fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
 
    // Set decompress function
    Decompress = YJ2_Decompress;
@@ -93,14 +93,14 @@ void PAL_FreeGlobals(void)
    //
    // Close all opened files
    //
-   DRIVER_fclose(gpGlobals->f.fpFBP);
-   DRIVER_fclose(gpGlobals->f.fpMGO);
-   DRIVER_fclose(gpGlobals->f.fpBALL);
-   DRIVER_fclose(gpGlobals->f.fpDATA);
-   DRIVER_fclose(gpGlobals->f.fpF);
-   DRIVER_fclose(gpGlobals->f.fpFIRE);
-   DRIVER_fclose(gpGlobals->f.fpRGM);
-   DRIVER_fclose(gpGlobals->f.fpSSS);
+   UTIL_fclose(gpGlobals->f.fpFBP);
+   UTIL_fclose(gpGlobals->f.fpMGO);
+   UTIL_fclose(gpGlobals->f.fpBALL);
+   UTIL_fclose(gpGlobals->f.fpDATA);
+   UTIL_fclose(gpGlobals->f.fpF);
+   UTIL_fclose(gpGlobals->f.fpFIRE);
+   UTIL_fclose(gpGlobals->f.fpRGM);
+   UTIL_fclose(gpGlobals->f.fpSSS);
 
    //
    // Free the game data
@@ -309,13 +309,13 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
     char *save_path = (char *)UTIL_malloc(256);
 
     sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
-    FILE *fp = DRIVER_fopen(save_path, "rb");
+    FILE *fp = UTIL_fopen(save_path, "rb");
     free(save_path);
 
     // Read all data from the file and close.
-    unsigned int n = fp ? DRIVER_fread(s, 1, size, fp) : 0;
+    unsigned int n = fp ? UTIL_fread(s, 1, size, fp) : 0;
 
-    DRIVER_fclose(fp);
+    UTIL_fclose(fp);
 
     if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
     {
@@ -433,12 +433,12 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
       return;
     sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
 
-    if (fp = DRIVER_fopen(save_path, "wb")) {
+    if (fp = UTIL_fopen(save_path, "wb")) {
       i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
       i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
-      DRIVER_fwrite(s, i, 1, fp);
+      UTIL_fwrite(s, i, 1, fp);
     }
-    DRIVER_fclose(fp);
+    UTIL_fclose(fp);
     free(save_path);
 }
 

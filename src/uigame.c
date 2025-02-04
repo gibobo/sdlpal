@@ -120,15 +120,15 @@ static unsigned short GetSavedTimes(int iSaveSlot) {
    unsigned short wSavedTimes = 0;
    save_path = (char *)UTIL_malloc(256);
    sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
-   fp = DRIVER_fopen(save_path, "rb");
+   fp = UTIL_fopen(save_path, "rb");
    if (fp != NULL) {
-   if (DRIVER_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
+   if (UTIL_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
       wSavedTimes = wSavedTimes;
    else
       wSavedTimes = 0;
    }
    free(save_path);
-   DRIVER_fclose(fp);
+   UTIL_fclose(fp);
    return wSavedTimes;
 }
 

@@ -54,10 +54,7 @@ static wchar_t *lpcptbl_big5;
 
 TEXTLIB         g_TextLib;
 
-int
-PAL_InitText(
-   void
-)
+int PAL_InitText(void)
 /*++
   Purpose:
 
@@ -74,111 +71,107 @@ PAL_InitText(
 
 --*/
 {
-    FILE            *fp;
-    unsigned int    *offsets;
-    unsigned char   *temp;
-    int wpos, wlen, i;
+   FILE *fp;
+   unsigned int *offsets;
+   unsigned char *temp;
+   int wpos, wlen, i;
 
-    //
-    // Open the message and word data files.
-    //
-    fp = DRIVER_fopen(RESOURCE_PATH "/word.dat", "rb");
-    if (fp == NULL)
-        return -1;
+   //
+   // Open the message and word data files.
+   //
+   fp = UTIL_fopen(RESOURCE_PATH "/word.dat", "rb");
+   if (fp == NULL)
+      return -1;
 
-    // See how many words we have
-    i = flength(fp);
-    if (i <= 0) {
-        DRIVER_fclose(fp);
-        return -1;
-    }
+   // See how many words we have
+   i = flength(fp);
+   if (i <= 0) {
+      UTIL_fclose(fp);
+      return -1;
+   }
 
-    // Each word has 10 bytes
-    g_TextLib.nWords = (i + 9) / 10;
+   // Each word has 10 bytes
+   g_TextLib.nWords = (i + 9) / 10;
 
-    // Read the words
-    temp = (unsigned char *)UTIL_malloc(10 * g_TextLib.nWords);
+   // Read the words
+   temp = (unsigned char *)UTIL_malloc(10 * g_TextLib.nWords);
 
-    if (DRIVER_fread(temp, 1, i, fp) < i)
-    {
-        free(temp);
-        DRIVER_fclose(fp);
-        return -1;
-    }
+   if (UTIL_fread(temp, 1, i, fp) < (unsigned int)i) {
+      free(temp);
+      UTIL_fclose(fp);
+      return -1;
+   }
 
-    // Close the words file
-    DRIVER_fclose(fp);
+   // Close the words file
+   UTIL_fclose(fp);
 
-    fp = DRIVER_fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
-    lpcptbl_big5 = (wchar_t *)UTIL_calloc(126 * 160, sizeof(wchar_t));
-    DRIVER_fread((void*)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
-    DRIVER_fclose(fp);
+   fp = UTIL_fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
+   lpcptbl_big5 = (wchar_t *)UTIL_calloc(126 * 160, sizeof(wchar_t));
+   UTIL_fread((void *)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
+   UTIL_fclose(fp);
 
-    // Split the words and do code page conversion
-    for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
-        int base = i * 10;
-        int pos = base + 9;
-        while (pos >= base && temp[pos] == ' ')
-          temp[pos--] = 0;
-        wlen += PAL_MultiByteToWideCharCP(temp + base, 10, NULL, 0) + 1;
-    }
+   // Split the words and do code page conversion
+   for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
+      int base = i * 10;
+      int pos = base + 9;
+      while (pos >= base && temp[pos] == ' ')
+      temp[pos--] = 0;
+      wlen += PAL_MultiByteToWideCharCP(temp + base, 10, NULL, 0) + 1;
+   }
 
-    WordBuf = (wchar_t*)UTIL_malloc(wlen * sizeof(wchar_t));
-    lpWordBuf = (wchar_t**)UTIL_malloc(g_TextLib.nWords * sizeof(wchar_t*));
+   WordBuf = (wchar_t *)UTIL_malloc(wlen * sizeof(wchar_t));
+   lpWordBuf = (wchar_t **)UTIL_malloc(g_TextLib.nWords * sizeof(wchar_t *));
 
-    for (i = 0, wpos = 0; i < g_TextLib.nWords; i++)
-    {
-        int l;
-        lpWordBuf[i] = WordBuf + wpos;
-        l = PAL_MultiByteToWideCharCP(temp + i * 10, 10, lpWordBuf[i], wlen - wpos);
-        if (l > 0 && lpWordBuf[i][l - 1] == '1')
-            lpWordBuf[i][l - 1] = 0;
-        lpWordBuf[i][l] = 0;
-        wpos += l + 1;
-    }
-    free(temp);
+   for (i = 0, wpos = 0; i < g_TextLib.nWords; i++) {
+      int l;
+      lpWordBuf[i] = WordBuf + wpos;
+      l = PAL_MultiByteToWideCharCP(temp + i * 10, 10, lpWordBuf[i], wlen - wpos);
+      if (l > 0 && lpWordBuf[i][l - 1] == '1')
+      lpWordBuf[i][l - 1] = 0;
+      lpWordBuf[i][l] = 0;
+      wpos += l + 1;
+   }
+   free(temp);
 
-    // Read the message offsets. The message offsets are in SSS.MKF #3
-    i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
-    g_TextLib.nMsgs = i - 1;
+   // Read the message offsets. The message offsets are in SSS.MKF #3
+   i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
+   g_TextLib.nMsgs = i - 1;
 
-    offsets = (unsigned int *)UTIL_malloc(i * sizeof(unsigned int));
-    PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
+   offsets = (unsigned int *)UTIL_malloc(i * sizeof(unsigned int));
+   PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
-    // Read the messages.
-    fp = DRIVER_fopen(RESOURCE_PATH "/m.msg", "rb");
-    if(fp == NULL)
-        return -1;
+   // Read the messages.
+   fp = UTIL_fopen(RESOURCE_PATH "/m.msg", "rb");
+   if (fp == NULL)
+      return -1;
 
-    i = flength(fp);
-    temp = (unsigned char *)UTIL_malloc(i);
+   i = flength(fp);
+   temp = (unsigned char *)UTIL_malloc(i);
 
-    if (DRIVER_fread(temp, 1, i, fp) < i) {
-        free(temp);
-        free(offsets);
-        DRIVER_fclose(fp);
-        return -1;
-    }
-    DRIVER_fclose(fp);
+   if (UTIL_fread(temp, 1, i, fp) < (unsigned int)i) {
+      free(temp);
+      free(offsets);
+      UTIL_fclose(fp);
+      return -1;
+   }
+   UTIL_fclose(fp);
 
-    // Split messages and do code page conversion here
-    for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++)
-    {
-        wlen += PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
-    }
-    MsgBuf = (wchar_t*)UTIL_malloc(wlen * sizeof(wchar_t));
-    lpMsgBuf = (wchar_t**)UTIL_malloc(g_TextLib.nMsgs * sizeof(wchar_t*));
+   // Split messages and do code page conversion here
+   for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++) {
+      wlen += PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
+   }
+   MsgBuf = (wchar_t *)UTIL_malloc(wlen * sizeof(wchar_t));
+   lpMsgBuf = (wchar_t **)UTIL_malloc(g_TextLib.nMsgs * sizeof(wchar_t *));
 
-    for (i = 0, wpos = 0; i < g_TextLib.nMsgs; i++)
-    {
-        int l;
-        lpMsgBuf[i] = MsgBuf + wpos;
-        l = PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
-        lpMsgBuf[i][l] = 0;
-        wpos += l + 1;
-    }
-    free(temp);
-    free(offsets);
+   for (i = 0, wpos = 0; i < g_TextLib.nMsgs; i++) {
+      int l;
+      lpMsgBuf[i] = MsgBuf + wpos;
+      l = PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
+      lpMsgBuf[i][l] = 0;
+      wpos += l + 1;
+   }
+   free(temp);
+   free(offsets);
 
    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
    g_TextLib.bIcon = 0;

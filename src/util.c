@@ -38,10 +38,10 @@ long flength(FILE *fp) {
 	long old_pos = ftell(fp);
 	if (old_pos == -1)
 		return -1;
-	if (DRIVER_fseek(fp, 0, SEEK_END) == -1)
+	if (UTIL_fseek(fp, 0, SEEK_END) == -1)
 		return -1;
 	long length = ftell(fp);
-	DRIVER_fseek(fp, old_pos, SEEK_SET);
+	UTIL_fseek(fp, old_pos, SEEK_SET);
 	return length;
 }
 
@@ -131,6 +131,12 @@ static int lrand(void)
 		lsrand((unsigned int)time(NULL));	  // initialize it first
 	glSeed = 1664525L * glSeed + 1013904223L; // do some twisted math (infinite suite)
 	return ((glSeed >> 1) + 1073741824L);	  // and return the result.
+}
+
+static void PAL_DelayUntil(unsigned int tm) {
+	do 	{
+		PAL_ProcessEvent();
+	} while (tm > UTIL_GetTicks());
 }
 
 int RandomLong(
@@ -284,10 +290,4 @@ void UTIL_Sleep(unsigned int tm) {
 #else
 	usleep(tm * 1000);
 #endif
-}
-
-void PAL_DelayUntil(unsigned int tm) {
-	do 	{
-		PAL_ProcessEvent();
-	} while (tm > UTIL_GetTicks());
 }

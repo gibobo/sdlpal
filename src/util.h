@@ -54,7 +54,15 @@ unsigned int UTIL_GetTicks(void);
 
 void UTIL_Sleep(unsigned int tm);
 
-void PAL_DelayUntil(unsigned int tm);
+void *UTIL_fopen(const char *_FileName, const char *_Mode);
+
+int UTIL_fseek(void *_Stream, long _Offset, int _Origin);
+
+unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream);
+
+unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream);
+
+void UTIL_fclose(void *fp);
 
 #ifdef __cplusplus
 }
