@@ -39,8 +39,8 @@ void PAL_InitFont(void)
 {
     p_font = (unsigned char *)UTIL_calloc(65536, 32);
     p_font_size = (unsigned char *)UTIL_calloc(65536, 1);
-    fp_font_data = UTIL_fopen(SOURCE_DIR "/unicode_font.dat", "rb");
-    fp_font_size = UTIL_fopen(SOURCE_DIR "/unicode_font_size.dat", "rb");
+    fp_font_data = UTIL_fopen("unicode_font.dat", "rb");
+    fp_font_size = UTIL_fopen("unicode_font_size.dat", "rb");
     UTIL_fread(p_font, 32, 65536, fp_font_data);
     UTIL_fread(p_font_size, 1, 65536, fp_font_size);
 }

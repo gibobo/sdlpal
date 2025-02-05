@@ -104,7 +104,7 @@ int PAL_InitText(void)
    // Close the words file
    UTIL_fclose(fp);
 
-   fp = UTIL_fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
+   fp = UTIL_fopen("cptbl_big5.dat", "rb");
    lpcptbl_big5 = (unsigned short *)UTIL_calloc(126 * 160, sizeof(unsigned short));
    UTIL_fread(lpcptbl_big5, sizeof(unsigned short), 126 * 160, fp);
    UTIL_fclose(fp);

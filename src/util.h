@@ -27,10 +27,6 @@
 #define RESOURCE_PATH "."
 #endif
 
-#ifndef SOURCE_DIR
-#define SOURCE_DIR "."
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

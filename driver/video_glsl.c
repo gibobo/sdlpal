@@ -186,7 +186,7 @@ void VIDEO_GLSL_Setup(const char * rendererName) {
         GLint n;
         glGetIntegerv(GL_NUM_EXTENSIONS, &n);
     }
-    char *pszShader = strdup(SOURCE_DIR "/shaders/plain.glsl");
+    char *pszShader = strdup("shaders/plain.glsl");
     gProgramId = compileProgram(pszShader, pszShader, 0);
     free(pszShader);
 

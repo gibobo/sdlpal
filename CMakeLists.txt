@@ -37,7 +37,6 @@ set(SDL_TEST                OFF CACHE BOOL "Build the SDL2_test library" FORCE)
 set(SDL2_DISABLE_SDL2MAIN   ON  CACHE BOOL "Disable building/installation of SDL2main" FORCE)
 add_subdirectory(external/SDL)
 
-add_definitions(-DSOURCE_DIR="${CMAKE_BINARY_DIR}")
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 add_definitions(-DPAL_HAS_JOYSTICKS)
 
