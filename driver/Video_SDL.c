@@ -1,5 +1,3 @@
-
-#include "mini_glloader.h"
 #include "video.h"
 #include "video_glsl.h"
 #include <SDL.h>

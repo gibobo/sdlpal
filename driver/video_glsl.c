@@ -21,9 +21,9 @@
 //
 
 #include "video_glsl.h"
+#include "driver.h"
 #include "mini_glloader.h"
 #include "video.h"
-#include "driver.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -179,13 +179,9 @@ void VIDEO_GLSL_Setup(const char * rendererName) {
 
     sscanf(glslversion, "%d.%d", &glslversion_major, &glslversion_minor);
 
-    if(!strncmp(rendererName, "opengl", 6)) {
+    if(!strncmp(rendererName, "opengl", 6))
         assert(initGLExtensions(glversion_major));
-    }
-    if( glversion_major >= 3 ) {
-        GLint n;
-        glGetIntegerv(GL_NUM_EXTENSIONS, &n);
-    }
+
     char *pszShader = strdup("shaders/plain.glsl");
     gProgramId = compileProgram(pszShader, pszShader, 0);
     free(pszShader);
@@ -207,7 +203,6 @@ void VIDEO_GLSL_Setup(const char * rendererName) {
 void VIDEO_GLSL_RenderCopy(void *data) {
     glViewport(0, 0, window_width, window_height);
 
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCREEN_W, SCREEN_H, GL_RGB, GL_UNSIGNED_BYTE, data);
 

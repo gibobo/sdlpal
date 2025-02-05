@@ -7,3 +7,6 @@
 [submodule "external/nuked"]
 	path = external/nuked
 	url = https://github.com/nukeykt/Nuked-OPL3.git
+[submodule "external/glfw"]
+	path = external/glfw
+	url = https://github.com/glfw/glfw.git
