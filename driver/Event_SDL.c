@@ -1,7 +1,7 @@
 #include "driver.h"
 #include "global.h"
 #include "input.h"
-// #include "util.h"
+#include "util.h"
 #include "video.h"
 #include <SDL_events.h>
 #include <stdio.h>

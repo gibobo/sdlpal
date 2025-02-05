@@ -18,7 +18,7 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set (SDL2_DIR           external/SDL)
+set (SDL_INCLUDE_DIR    external/SDL/include)
 set (BINIO_SOURCE_DIR   external/libbinio/src)
 set (BINIO_INCLUDE_DIR  external/libbinio/contrib/vs2015/libbinio)
 set (NUKED_DIR          external/nuked)
@@ -32,8 +32,9 @@ file(GLOB NUKED_SOURCES             ${NUKED_DIR}/*.c)
 file(GLOB BINIO_SOURCES             ${BINIO_SOURCE_DIR}/*.cpp)
 file(GLOB ADPLUG_SOURCES            ${ADPLUG_DIR}/*.cpp)
 
-set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
-set(SDL_TEST   OFF CACHE BOOL "Build the SDL2_test library" FORCE)
+set(SDL_SHARED              OFF CACHE BOOL "Build a shared version of the library" FORCE)
+set(SDL_TEST                OFF CACHE BOOL "Build the SDL2_test library" FORCE)
+set(SDL2_DISABLE_SDL2MAIN   ON  CACHE BOOL "Disable building/installation of SDL2main" FORCE)
 add_subdirectory(external/SDL)
 
 add_definitions(-DSOURCE_DIR="${CMAKE_BINARY_DIR}")
@@ -56,7 +57,7 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        ${SDL2_DIR}/include()
+        ${SDL_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
         external/
         ${BINIO_SOURCE_DIR}
@@ -68,15 +69,12 @@ target_include_directories(${PROJECT_NAME}
 if(WIN32)
     target_link_libraries(${PROJECT_NAME}
         ${OPENGL_LIBRARY}
-        SDL2-static
-        SDL2main
+        SDL2::SDL2
     )
 else()
     target_link_libraries(${PROJECT_NAME}
         ${OPENGL_LIBRARY}
-        OpenGL::OpenGL OpenGL::EGL 
-        SDL2-static
-        SDL2main
+        SDL2::SDL2
     )
 endif()
 
