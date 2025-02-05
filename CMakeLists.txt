@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.13)
-project(sdlpal_win32 C CXX)
+project(palgame C CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -22,6 +22,7 @@ set (SDL_INCLUDE_DIR    external/SDL/include)
 set (BINIO_SOURCE_DIR   external/libbinio/src)
 set (BINIO_INCLUDE_DIR  external/libbinio/contrib/vs2015/libbinio)
 set (NUKED_DIR          external/nuked)
+set (GLFW_DIR           external/glfw)
 set (ADPLUG_DIR         adplug)
 set (SDLPAL_DIR         src)
 set (DRIVER_DIR         driver)
@@ -37,10 +38,22 @@ set(SDL_TEST                OFF CACHE BOOL "Build the SDL2_test library" FORCE)
 set(SDL2_DISABLE_SDL2MAIN   ON  CACHE BOOL "Disable building/installation of SDL2main" FORCE)
 add_subdirectory(external/SDL)
 
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(external/glfw)
+
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 add_definitions(-DPAL_HAS_JOYSTICKS)
 
-add_executable(${PROJECT_NAME}
+include_directories(external)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${BINIO_SOURCE_DIR})
+include_directories(${BINIO_INCLUDE_DIR})
+include_directories(${SDLPAL_DIR})
+include_directories(${DRIVER_DIR})
+
+add_executable(${PROJECT_NAME}_sdl
     ${DRIVER_DIR}/SDL.c
     ${DRIVER_DIR}/Audio_SDL.c
     ${DRIVER_DIR}/Event_SDL.c
@@ -54,28 +67,38 @@ add_executable(${PROJECT_NAME}
     ${ADPLUG_SOURCES}
 )
 
-target_include_directories(${PROJECT_NAME}
-    PUBLIC
-        ${SDL_INCLUDE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        external/
-        ${BINIO_SOURCE_DIR}
-        ${BINIO_INCLUDE_DIR}
-        ${SDLPAL_DIR}
-        ${DRIVER_DIR}
+add_executable(${PROJECT_NAME}_glfw
+    ${DRIVER_DIR}/GLFW.c
+    ${DRIVER_DIR}/Audio_miniaudio.c
+    ${DRIVER_DIR}/Event_GLFW.c
+    ${DRIVER_DIR}/Video_GLFW.c
+    # ${DRIVER_DIR}/mini_glloader.c
+    # ${DRIVER_DIR}/video_glsl.c
+    ${SDLPAL_SOURCES}
+    ${NUKED_SOURCES}
+    ${BINIO_SOURCES}
+    ${ADPLUG_SOURCES}
 )
 
-if(WIN32)
-    target_link_libraries(${PROJECT_NAME}
-        ${OPENGL_LIBRARY}
-        SDL2::SDL2
-    )
-else()
-    target_link_libraries(${PROJECT_NAME}
-        ${OPENGL_LIBRARY}
-        SDL2::SDL2
-    )
-endif()
+target_include_directories(${PROJECT_NAME}_sdl
+    PUBLIC
+        ${SDL_INCLUDE_DIR}
+)
+
+target_include_directories(${PROJECT_NAME}_glfw
+    PUBLIC
+        ${GLFW_DIR}
+)
+
+target_link_libraries(${PROJECT_NAME}_sdl
+    ${OPENGL_LIBRARY}
+    SDL2::SDL2
+)
+
+target_link_libraries(${PROJECT_NAME}_glfw
+    ${OPENGL_LIBRARY}
+    glfw
+)
 
 if (MSVC)
     file(GLOB PAL_GAMEDATA
@@ -88,7 +111,7 @@ if (MSVC)
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font.dat      DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font_size.dat DESTINATION ${CMAKE_BINARY_DIR})
 else()
-    add_custom_command(TARGET ${PROJECT_NAME}
+    add_custom_command(TARGET ALL
         POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw               ${CMAKE_BINARY_DIR}/resource
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/shaders                  ${CMAKE_BINARY_DIR}/shaders
