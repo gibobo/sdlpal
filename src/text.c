@@ -42,7 +42,6 @@
 #define   FONT_COLOR_CYAN           0x8D
 #define   FONT_COLOR_CYAN_ALT       0x8C
 #define   FONT_COLOR_RED_ALT        0x17
-#define   MESSAGE_MAX_BUFFER_SIZE   512
 
 int g_fUpdatedInBattle = FALSE;
 static wchar_t  *WordBuf;
@@ -50,7 +49,7 @@ static wchar_t  *MsgBuf;
 static wchar_t **lpWordBuf;
 static wchar_t **lpMsgBuf;
 static wchar_t internal_wbuffer[PAL_GLOBAL_BUFFER_SIZE];
-static wchar_t *lpcptbl_big5;
+static unsigned short *lpcptbl_big5;
 
 TEXTLIB         g_TextLib;
 
@@ -106,8 +105,8 @@ int PAL_InitText(void)
    UTIL_fclose(fp);
 
    fp = UTIL_fopen(SOURCE_DIR "/cptbl_big5.dat", "rb");
-   lpcptbl_big5 = (wchar_t *)UTIL_calloc(126 * 160, sizeof(wchar_t));
-   UTIL_fread((void *)lpcptbl_big5, sizeof(wchar_t), 126 * 160, fp);
+   lpcptbl_big5 = (unsigned short *)UTIL_calloc(126 * 160, sizeof(unsigned short));
+   UTIL_fread(lpcptbl_big5, sizeof(unsigned short), 126 * 160, fp);
    UTIL_fclose(fp);
 
    // Split the words and do code page conversion
