@@ -22,12 +22,20 @@
 
 #include "video_glsl.h"
 #include "driver.h"
-#include "mini_glloader.h"
 #include "video.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(_GLLOADER_SDL)
+#include "mini_glloader.h"
+#elif defined(_GLLOADER_GLFW)
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/gl.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#endif
 
 static unsigned int gProgramId = 0;
 static int position = -1;
@@ -35,8 +43,6 @@ static int texcoord = -1;
 static int texture = -1;
 static int window_width = 0;
 static int window_height = 0;
-static int glversion_major, glversion_minor;
-static int glslversion_major, glslversion_minor;
 static const float p_vex[] = {-1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0};
 static const float p_tex[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
@@ -74,33 +80,6 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
     pShaderBuffer = (char *)malloc(sourceLen);
     memset(pShaderBuffer, 0, sourceLen);
 
-#ifdef GLES
-    sprintf(pShaderBuffer, "#version %d%02d %s\r\n", glslversion_major, glslversion_minor, glslversion_major >= 3 ? "es" : "");
-    lines++;
-    if (SDL_GL_ExtensionSupported("GL_OES_standard_derivatives"))
-    {
-        sprintf(pShaderBuffer, "%s#extension GL_OES_standard_derivatives : enable\r\n", pShaderBuffer);
-        lines++;
-    }
-    if (SDL_GL_ExtensionSupported("GL_EXT_shader_texture_lod"))
-    {
-        sprintf(pShaderBuffer, "%s#extension GL_EXT_shader_texture_lod : enable\r\n", pShaderBuffer);
-        lines++;
-    }
-
-    // should be deduced via GL_ES/GL_FRAGMENT_PRECISION_HIGH combination since both is predefined
-    // but unknown why manual define is a must for WebGL2
-    if (glslversion_major >= 3)
-    {
-        sprintf(pShaderBuffer, "%sprecision highp float;\r\n", pShaderBuffer);
-        lines++;
-    }
-#else
-    sprintf(pShaderBuffer, "#version %d%02d\r\n", glslversion_major, glslversion_minor);
-    lines++;
-#endif
-
-    sprintf(pShaderBuffer, "%s#line %d\r\n", pShaderBuffer, lines);
     sprintf(pShaderBuffer, "%s#define %s\r\n%s\r\n", pShaderBuffer, SHADER_TYPE(shaderType), is_source ? source : skip_version(source));
     if (!is_source)
         free((void *)source);
@@ -161,26 +140,17 @@ GLuint compileProgram(const char *vtx, const char *frag, int is_source)
     return programId;
 }
 
-void VIDEO_GLSL_Setup(const char * rendererName) {
+void VIDEO_GLSL_Setup(int width, int height) {
+    window_width = width;
+    window_height = height;
 
-    char *glversion = (char*)glGetString(GL_VERSION);
-    char *glslversion = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-
-#ifdef GLES
-    if(!strncmp(glversion, "OpenGL ES", 9)) {
-        sscanf(glversion, "OpenGL ES %d.%d", &glversion_major, &glversion_minor);
-    }
-    if(!strncmp(glslversion, "OpenGL ES GLSL ES", 17)) {
-        sscanf(glslversion, "OpenGL ES GLSL ES %d.%d", &glslversion_major, &glslversion_minor);
-    }
-#else
-    sscanf(glversion, "%d.%d", &glversion_major, &glversion_minor);
+    if (gProgramId)
+        return;
+#if defined(_GLLOADER_SDL)
+    assert(initGLExtensions(2));
+#elif defined(_GLLOADER_GLFW)
+    gladLoadGL(glfwGetProcAddress);
 #endif
-
-    sscanf(glslversion, "%d.%d", &glslversion_major, &glslversion_minor);
-
-    if(!strncmp(rendererName, "opengl", 6))
-        assert(initGLExtensions(glversion_major));
 
     char *pszShader = strdup("shaders/plain.glsl");
     gProgramId = compileProgram(pszShader, pszShader, 0);
@@ -218,9 +188,4 @@ void VIDEO_GLSL_RenderCopy(void *data) {
     glDisableVertexAttribArray(position);
     glDisableVertexAttribArray(texcoord);
     glUseProgram(0);
-}
-
-void VIDEO_GLSL_Resize(int w, int h) {
-    window_width = w;
-    window_height = h;
 }

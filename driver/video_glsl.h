@@ -28,11 +28,8 @@
 extern "C" {
 #endif
 
-// #define GLES
-
-void VIDEO_GLSL_Setup(const char * rendererName);
+void VIDEO_GLSL_Setup(int width, int height);
 void VIDEO_GLSL_RenderCopy(void *data);
-void VIDEO_GLSL_Resize(int w, int h);
 
 #ifdef __cplusplus
 }

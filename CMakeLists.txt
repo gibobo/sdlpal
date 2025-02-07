@@ -1,13 +1,10 @@
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required (VERSION 3.14)
 project(palgame C CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
-# find_package(EGL)
-# find_package(GLES)
-# find_package (GLUT)
 
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -16,7 +13,6 @@ if(MSVC)
     set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE     ${CMAKE_BINARY_DIR})
 endif()
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set (SDL_INCLUDE_DIR    external/SDL/include)
 set (BINIO_SOURCE_DIR   external/libbinio/src)
@@ -24,11 +20,11 @@ set (BINIO_INCLUDE_DIR  external/libbinio/contrib/vs2015/libbinio)
 set (NUKED_DIR          external/nuked)
 set (GLFW_DIR           external/glfw)
 set (ADPLUG_DIR         adplug)
-set (SDLPAL_DIR         src)
+set (GAME_DIR           src)
 set (DRIVER_DIR         driver)
 set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource/)
 
-file(GLOB_RECURSE SDLPAL_SOURCES    ${SDLPAL_DIR}/*.c ${SDLPAL_DIR}/*.cpp)
+file(GLOB_RECURSE GAME_SOURCES      ${GAME_DIR}/*.c ${GAME_DIR}/*.cpp)
 file(GLOB NUKED_SOURCES             ${NUKED_DIR}/*.c)
 file(GLOB BINIO_SOURCES             ${BINIO_SOURCE_DIR}/*.cpp)
 file(GLOB ADPLUG_SOURCES            ${ADPLUG_DIR}/*.cpp)
@@ -37,10 +33,9 @@ set(SDL_SHARED              OFF CACHE BOOL "Build a shared version of the librar
 set(SDL_TEST                OFF CACHE BOOL "Build the SDL2_test library" FORCE)
 set(SDL2_DISABLE_SDL2MAIN   ON  CACHE BOOL "Disable building/installation of SDL2main" FORCE)
 add_subdirectory(external/SDL)
-
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS         OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS        OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES     OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/glfw)
 
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
@@ -50,7 +45,8 @@ include_directories(external)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${BINIO_SOURCE_DIR})
 include_directories(${BINIO_INCLUDE_DIR})
-include_directories(${SDLPAL_DIR})
+include_directories(external/miniaudio)
+include_directories(${GAME_DIR})
 include_directories(${DRIVER_DIR})
 
 add_executable(${PROJECT_NAME}_sdl
@@ -61,7 +57,7 @@ add_executable(${PROJECT_NAME}_sdl
     # ${DRIVER_DIR}/Audio_miniaudio.c
     ${DRIVER_DIR}/mini_glloader.c
     ${DRIVER_DIR}/video_glsl.c
-    ${SDLPAL_SOURCES}
+    ${GAME_SOURCES}
     ${NUKED_SOURCES}
     ${BINIO_SOURCES}
     ${ADPLUG_SOURCES}
@@ -73,8 +69,8 @@ add_executable(${PROJECT_NAME}_glfw
     ${DRIVER_DIR}/Event_GLFW.c
     ${DRIVER_DIR}/Video_GLFW.c
     # ${DRIVER_DIR}/mini_glloader.c
-    # ${DRIVER_DIR}/video_glsl.c
-    ${SDLPAL_SOURCES}
+    ${DRIVER_DIR}/video_glsl.c
+    ${GAME_SOURCES}
     ${NUKED_SOURCES}
     ${BINIO_SOURCES}
     ${ADPLUG_SOURCES}
@@ -88,7 +84,11 @@ target_include_directories(${PROJECT_NAME}_sdl
 target_include_directories(${PROJECT_NAME}_glfw
     PUBLIC
         ${GLFW_DIR}
+        ${GLFW_DIR}/deps
 )
+
+target_compile_definitions(${PROJECT_NAME}_sdl  PRIVATE _GLLOADER_SDL)
+target_compile_definitions(${PROJECT_NAME}_glfw PRIVATE _GLLOADER_GLFW)
 
 target_link_libraries(${PROJECT_NAME}_sdl
     ${OPENGL_LIBRARY}

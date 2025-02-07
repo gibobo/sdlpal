@@ -38,6 +38,7 @@
 #define glGetProgramiv _glGetProgramiv
 #define glGetProgramInfoLog _glGetProgramInfoLog
 #define glUseProgram _glUseProgram
+#define glDeleteProgram _glDeleteProgram
 #define glGenVertexArrays _glGenVertexArrays
 #define glBindVertexArray _glBindVertexArray
 #define glGenBuffers _glGenBuffers
@@ -49,6 +50,7 @@
 #define glDisableVertexAttribArray _glDisableVertexAttribArray
 #define glVertexAttribPointer _glVertexAttribPointer
 #define glUniformMatrix4fv _glUniformMatrix4fv
+#define glUniform2f _glUniform2f
 #define glUniform2fv _glUniform2fv
 #define glUniform1iv _glUniform1iv
 #define glUniform1i _glUniform1i
@@ -56,6 +58,10 @@
 #define glActiveTexture _glActiveTexture
 #define glGetUniformLocation _glGetUniformLocation
 #define glGetStringi _glGetStringi
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern PFNGLCREATESHADERPROC glCreateShader;
 extern PFNGLSHADERSOURCEPROC glShaderSource;
@@ -70,6 +76,7 @@ extern PFNGLVALIDATEPROGRAMPROC glValidateProgram;
 extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
 extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
 extern PFNGLUSEPROGRAMPROC glUseProgram;
+extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 extern PFNGLGENBUFFERSPROC glGenBuffers;
@@ -81,6 +88,7 @@ extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 extern PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
 extern PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer;
 extern PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
+extern PFNGLUNIFORM2FPROC glUniform2f;
 extern PFNGLUNIFORM2FVPROC glUniform2fv;
 extern PFNGLUNIFORM1IVPROC glUniform1iv;
 extern PFNGLUNIFORM1IPROC glUniform1i;
@@ -90,5 +98,9 @@ extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 extern PFNGLGETSTRINGIPROC glGetStringi;
 
 extern int initGLExtensions(int major);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* mini_glloader_h */

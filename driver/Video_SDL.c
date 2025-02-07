@@ -3,66 +3,57 @@
 #include <SDL.h>
 
 static SDL_Window *gpWindow = NULL;
-static SDL_Renderer *gpRenderer = NULL;
+static SDL_GLContext gpContext = NULL;
+static int window_width = 320;
+static int window_height = 200;
 
 void DRIVER_FrameShow(unsigned char *frame_rgb) {
-  VIDEO_GLSL_RenderCopy(frame_rgb);
-  SDL_GL_SwapWindow(gpWindow);
+    VIDEO_GLSL_RenderCopy(frame_rgb);
+    SDL_GL_SwapWindow(gpWindow);
 }
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height) {
-  VIDEO_GLSL_Resize(width, height);
+    window_width = width;
+    window_height = height;
+    VIDEO_GLSL_Setup(window_width, window_height);
 }
 
 int DRIVER_Init_Video(void) {
-  int w = 320;
-  int h = 200;
-  //   int w = gConfig.dwTextureWidth;
-  //   int h = gConfig.dwTextureHeight;
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-  SDL_RendererInfo rendererInfo;
-#ifdef GLES
-  SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
-#if SDL_VIDEO_OPENGL_EGL && (SDL_VIDEO_DRIVER_EMSCRIPTEN || SDL_VIDEO_DRIVER_WINRT)
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-#else
-  SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-#endif
+    // Before we can render anything, we need a window and a renderer.
+    gpWindow = SDL_CreateWindow(
+        "PAL",
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        window_width, window_height,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    if (gpWindow == NULL)
+        return -1;
 
-  // Before we can render anything, we need a window and a renderer.
-  gpWindow = SDL_CreateWindow(NULL,
-                              SDL_WINDOWPOS_UNDEFINED,
-                              SDL_WINDOWPOS_UNDEFINED,
-                              w, h,
-                              SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-  if (gpWindow == NULL) {
-    return -1;
-  }
+    //Creates OpenGL context
+    gpContext = SDL_GL_CreateContext(gpWindow);
+    if (gpContext == NULL) {
+        SDL_DestroyWindow(gpWindow);
+        gpWindow = NULL;
+        return -1;
+    }
+    SDL_GL_MakeCurrent(gpWindow, gpContext);
+    SDL_GL_SetSwapInterval(1); // Enable vsync
 
-  SDL_SetWindowTitle(gpWindow, "PAL");
-  gpRenderer = SDL_CreateRenderer(gpWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-  if (gpRenderer == NULL) {
-    return -1;
-  }
-
-  SDL_GetRendererInfo(gpRenderer, &rendererInfo);
-  SDL_GetRendererOutputSize(gpRenderer, &w, &h);
-  VIDEO_GLSL_Setup(rendererInfo.name);
-  VIDEO_GLSL_Resize(w, h);
-  return 0;
+    VIDEO_GLSL_Setup(window_width, window_height);
+    return 0;
 }
 
 void DRIVER_DeInit_Video(void) {
-  if (gpRenderer) {
-    SDL_DestroyRenderer(gpRenderer);
-  }
-  gpRenderer = NULL;
+    if (gpContext)
+        SDL_GL_DeleteContext(gpContext);
+    if (gpWindow)
+        SDL_DestroyWindow(gpWindow);
 
-  if (gpWindow) {
-    SDL_DestroyWindow(gpWindow);
-  }
-  gpWindow = NULL;
+    gpContext = NULL;
+    gpWindow = NULL;
 }
