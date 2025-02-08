@@ -6,9 +6,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(OpenGL REQUIRED)
 
-if(MSVC)
+if(UNIX)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY             ${CMAKE_BINARY_DIR})
+else()
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS)
     set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG       ${CMAKE_BINARY_DIR})
     set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE     ${CMAKE_BINARY_DIR})
 endif()
@@ -42,7 +45,7 @@ add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 add_definitions(-DPAL_HAS_JOYSTICKS)
 
 include_directories(external)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${BINIO_SOURCE_DIR})
 include_directories(${BINIO_INCLUDE_DIR})
 include_directories(external/miniaudio)
@@ -101,22 +104,21 @@ target_link_libraries(${PROJECT_NAME}_glfw
 )
 
 if (MSVC)
-    file(GLOB PAL_GAMEDATA
-        ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw/*.mkf
-        ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw/*.msg
-        ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw/*.dat)
-    file(COPY ${PAL_GAMEDATA}                                   DESTINATION ${RESOURCE_PATH})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/              DESTINATION ${CMAKE_BINARY_DIR}/shaders)
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cptbl_big5.dat        DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font.dat      DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font_size.dat DESTINATION ${CMAKE_BINARY_DIR})
+    file(GLOB GAMEDATA
+        ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.mkf
+        ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.msg
+        ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.dat)
+    file(COPY ${GAMEDATA}                               DESTINATION ${RESOURCE_PATH})
+    file(COPY ${CMAKE_SOURCE_DIR}/shaders/              DESTINATION ${CMAKE_BINARY_DIR}/shaders)
+    file(COPY ${CMAKE_SOURCE_DIR}/cptbl_big5.dat        DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_SOURCE_DIR}/unicode_font.dat      DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_SOURCE_DIR}/unicode_font_size.dat DESTINATION ${CMAKE_BINARY_DIR})
 else()
-    add_custom_command(TARGET ALL
-        POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/Pal98rqptw               ${CMAKE_BINARY_DIR}/resource
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/shaders                  ${CMAKE_BINARY_DIR}/shaders
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/cptbl_big5.dat           ${CMAKE_BINARY_DIR}/cptbl_big5.dat
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font.dat         ${CMAKE_BINARY_DIR}/unicode_font.dat
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/unicode_font_size.dat    ${CMAKE_BINARY_DIR}/unicode_font_size.dat
+    add_custom_target(link_target ALL
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/Pal98rqptw               ${CMAKE_BINARY_DIR}/resource
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/shaders                  ${CMAKE_BINARY_DIR}/shaders
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/cptbl_big5.dat           ${CMAKE_BINARY_DIR}/cptbl_big5.dat
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/unicode_font.dat         ${CMAKE_BINARY_DIR}/unicode_font.dat
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/unicode_font_size.dat    ${CMAKE_BINARY_DIR}/unicode_font_size.dat
     )
 endif()

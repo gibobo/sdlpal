@@ -6,11 +6,11 @@ static int window_width = 320;
 static int window_height = 200;
 GLFWwindow *window = NULL;
 
+extern void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 void DRIVER_FrameShow(unsigned char *frame_rgb) {
     VIDEO_GLSL_RenderCopy(frame_rgb);
     glfwSwapBuffers(window);
-    /* Poll for and process events */
-    glfwPollEvents();
 }
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height) {
@@ -30,7 +30,7 @@ int DRIVER_Init_Video(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(window_width, window_height, "Shadertoy", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "GLFWPAL", NULL, NULL);
     if (window == NULL)
         return -1;
 

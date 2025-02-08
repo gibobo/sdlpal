@@ -58,19 +58,18 @@ static void SDL_UpdateKeyboardState(SDL_Keycode key) {
       unsigned char keyPress = keyState[keyCode];
 
       if (keyPress == SDL_PRESSED) {
-      if (dwCurrentTime > rgdwKeyLastTime[i]) {
-         PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
-         if (gConfig.fEnableKeyRepeat) {
-            rgdwKeyLastTime[i] = dwCurrentTime + (rgdwKeyLastTime[i] == 0 ? 200 : 75);
-         } else {
-            rgdwKeyLastTime[i] = 0xFFFFFFFF;
+         if (dwCurrentTime > rgdwKeyLastTime[i]) {
+            PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
+            if (gConfig.fEnableKeyRepeat) {
+               rgdwKeyLastTime[i] = dwCurrentTime + (rgdwKeyLastTime[i] == 0 ? 200 : 75);
+            } else {
+               rgdwKeyLastTime[i] = 0xFFFFFFFF;
+            }
          }
-      }
       } else {
-      if (rgdwKeyLastTime[i] > 0) {
-         PAL_KeyUp(g_KeyMap[i][1]);
+         if (rgdwKeyLastTime[i] > 0)
+            PAL_KeyUp(g_KeyMap[i][1]);
          rgdwKeyLastTime[i] = 0;
-      }
       }
    }
 }
@@ -216,7 +215,7 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
   return 0;
 }
 
-int DRIVER_Process_Event(void)
+int DRIVER_Process_Events(void)
 {
    int res = 0;
    SDL_Event evt;

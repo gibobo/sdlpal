@@ -32,7 +32,7 @@ void DRIVER_FrameResize(unsigned int width, unsigned int height)
 {
 }
 
-int DRIVER_Process_Event(void)
+int DRIVER_Process_Events(void)
 {
     return 0;
 }

@@ -26,7 +26,7 @@ int DRIVER_Init_Video(void) {
 
     // Before we can render anything, we need a window and a renderer.
     gpWindow = SDL_CreateWindow(
-        "PAL",
+        "SDLPAL",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         window_width, window_height,

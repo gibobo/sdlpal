@@ -181,7 +181,7 @@ void PAL_ProcessEvent(void)
 
 --*/
 {
-  if (DRIVER_Process_Event() == -1)
+  if (DRIVER_Process_Events() == -1)
     PAL_Shutdown(0);
 }
 

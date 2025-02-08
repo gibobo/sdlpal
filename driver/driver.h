@@ -18,7 +18,7 @@ void DRIVER_FrameResize(unsigned int width, unsigned int height);
 
 int DRIVER_Init_Event(void);
 void DRIVER_DeInit_Event(void);
-int DRIVER_Process_Event(void);
+int DRIVER_Process_Events(void);
 
 #ifdef __cplusplus
 }
