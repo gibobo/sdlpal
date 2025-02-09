@@ -1,4 +1,4 @@
-#include "audio/audio.h"
+#include "audio.h"
 #include "global.h"
 #include <SDL_audio.h>
 #include <string.h>
@@ -49,4 +49,12 @@ int DRIVER_Init_Audio(void) {
 void DRIVER_DeInit_Audio(void) {
   SDL_CloseAudioDevice(AudioDeviceId);
   AudioDeviceId = 0;
+}
+
+void DRIVER_Audio_Lock(void) {
+    SDL_LockAudioDevice(AudioDeviceId);
+}
+
+void DRIVER_Audio_Unlock(void) {
+    SDL_UnlockAudioDevice(AudioDeviceId);
 }

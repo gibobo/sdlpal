@@ -33,3 +33,14 @@ void UTIL_fclose(void *fp) {
     fclose(fp);
   }
 }
+
+long flength(FILE *fp) {
+	long old_pos = ftell(fp);
+	if (old_pos == -1)
+		return -1;
+	if (UTIL_fseek(fp, 0, SEEK_END) == -1)
+		return -1;
+	long length = ftell(fp);
+	UTIL_fseek(fp, old_pos, SEEK_SET);
+	return length;
+}

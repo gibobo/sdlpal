@@ -1,4 +1,4 @@
-#include "audio/audio.h"
+#include "audio.h"
 #include "global.h"
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
@@ -39,4 +39,10 @@ int DRIVER_Init_Audio(void) {
 
 void DRIVER_DeInit_Audio(void) {
   ma_device_uninit(&device);
+}
+
+void DRIVER_Audio_Lock(void){
+}
+
+void DRIVER_Audio_Unlock(void){
 }

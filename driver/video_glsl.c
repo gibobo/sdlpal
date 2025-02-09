@@ -31,8 +31,8 @@
 #if defined(_GLLOADER_SDL)
 #include "mini_glloader.h"
 #elif defined(_GLLOADER_GLFW)
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
+#define GLAD_GLES2_IMPLEMENTATION
+#include <glad/gles2.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #endif
@@ -140,7 +140,7 @@ GLuint compileProgram(const char *vtx, const char *frag, int is_source)
     return programId;
 }
 
-void VIDEO_GLSL_Setup(int width, int height) {
+void VIDEO_GLSL_Initialize(int width, int height) {
     window_width = width;
     window_height = height;
 
@@ -149,7 +149,7 @@ void VIDEO_GLSL_Setup(int width, int height) {
 #if defined(_GLLOADER_SDL)
     assert(initGLExtensions(2));
 #elif defined(_GLLOADER_GLFW)
-    gladLoadGL(glfwGetProcAddress);
+    gladLoadGLES2(glfwGetProcAddress);
 #endif
 
     char *pszShader = strdup("shaders/plain.glsl");
@@ -165,18 +165,19 @@ void VIDEO_GLSL_Setup(int width, int height) {
     glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void VIDEO_GLSL_RenderCopy(void *data) {
     glViewport(0, 0, window_width, window_height);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCREEN_W, SCREEN_H, GL_RGB, GL_UNSIGNED_BYTE, data);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    if (data)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCREEN_W, SCREEN_H, GL_RGB, GL_UNSIGNED_BYTE, data);
+    }
 
     glUseProgram(gProgramId);
 
@@ -188,4 +189,20 @@ void VIDEO_GLSL_RenderCopy(void *data) {
     glDisableVertexAttribArray(position);
     glDisableVertexAttribArray(texcoord);
     glUseProgram(0);
+}
+
+void VIDEO_GLSL_Destroy()
+{
+    if (gProgramId != 0)
+        glDeleteProgram(gProgramId);
+
+    if (texture != -1)
+        glDeleteTextures(1, &texture);
+
+    window_width = 0;
+    window_height = 0;
+    gProgramId = 0;
+    texture = -1;
+    position = -1;
+    texcoord = -1;
 }

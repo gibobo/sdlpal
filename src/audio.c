@@ -61,7 +61,7 @@ void AUDIO_FillBuffer(void *stream, int len) {
     }
 
     // Play sound
-    if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer) {
+    if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer && gAudioDevice.pSoundBuffer) {
         memset(gAudioDevice.pSoundBuffer, 0, len);
         gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, len);
 
@@ -87,24 +87,23 @@ int AUDIO_OpenDevice(void)
 --*/
 {
     if (gAudioDevice.fOpened) {
-        // Already opened
-        return -1;
+        return -1;  // Already opened
     }
+
+    memset(&gAudioDevice, 0, sizeof(AUDIODEVICE));
+    gAudioDevice.fOpened = FALSE;
 
     // Initialize the resampler module
     resampler_init();
 
-    gAudioDevice.fOpened = FALSE;
-    gAudioDevice.fMusicEnabled = TRUE;
-    gAudioDevice.fSoundEnabled = TRUE;
-
-    gAudioDevice.pSoundBuffer = UTIL_calloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels, sizeof(short));
+    // Initialize the music subsystem.
+    gAudioDevice.pMusPlayer = RIX_Init();
+    gAudioDevice.fMusicEnabled = (gAudioDevice.pMusPlayer) ? TRUE : FALSE;
 
     // Initialize the sound subsystem.
     gAudioDevice.pSoundPlayer = SOUND_Init();
-
-    // Initialize the music subsystem.
-    gAudioDevice.pMusPlayer = RIX_Init();
+    gAudioDevice.pSoundBuffer = (gAudioDevice.pSoundPlayer) ? UTIL_calloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels, sizeof(short)) : NULL;
+    gAudioDevice.fSoundEnabled = (gAudioDevice.pSoundBuffer) ? TRUE : FALSE;
 
     gAudioDevice.fOpened = TRUE;
 
@@ -172,7 +171,9 @@ void AUDIO_PlaySound(int iSoundNum)
 
 void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime) {
     if (gAudioDevice.pMusPlayer) {
+        DRIVER_Audio_Lock();
         gAudioDevice.pMusPlayer->Play(gAudioDevice.pMusPlayer, iNumRIX, fLoop, flFadeTime);
+        DRIVER_Audio_Unlock();
     }
 }
 

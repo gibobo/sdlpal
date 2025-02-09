@@ -19,7 +19,7 @@
 //
 
 #include "res.h"
-#include "audio/audio.h"
+#include "audio.h"
 #include "common.h"
 #include "driver.h"
 #include "global.h"

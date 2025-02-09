@@ -4,6 +4,7 @@ project(palgame C CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
 
 if(UNIX)
@@ -25,7 +26,7 @@ set (GLFW_DIR           external/glfw)
 set (ADPLUG_DIR         adplug)
 set (GAME_DIR           src)
 set (DRIVER_DIR         driver)
-set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource/)
+set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource)
 
 file(GLOB_RECURSE GAME_SOURCES      ${GAME_DIR}/*.c ${GAME_DIR}/*.cpp)
 file(GLOB NUKED_SOURCES             ${NUKED_DIR}/*.c)
@@ -79,6 +80,11 @@ add_executable(${PROJECT_NAME}_glfw
     ${ADPLUG_SOURCES}
 )
 
+# add_executable(${PROJECT_NAME}_dummy
+#     ${DRIVER_DIR}/driver.c
+#     ${GAME_SOURCES}
+# )
+
 target_include_directories(${PROJECT_NAME}_sdl
     PUBLIC
         ${SDL_INCLUDE_DIR}
@@ -103,7 +109,7 @@ target_link_libraries(${PROJECT_NAME}_glfw
     glfw
 )
 
-if (MSVC)
+if (WIN32)
     file(GLOB GAMEDATA
         ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.mkf
         ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.msg
@@ -115,7 +121,7 @@ if (MSVC)
     file(COPY ${CMAKE_SOURCE_DIR}/unicode_font_size.dat DESTINATION ${CMAKE_BINARY_DIR})
 else()
     add_custom_target(link_target ALL
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/Pal98rqptw               ${CMAKE_BINARY_DIR}/resource
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/Pal98rqptw               ${RESOURCE_PATH}
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/shaders                  ${CMAKE_BINARY_DIR}/shaders
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/cptbl_big5.dat           ${CMAKE_BINARY_DIR}/cptbl_big5.dat
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/unicode_font.dat         ${CMAKE_BINARY_DIR}/unicode_font.dat

@@ -19,7 +19,7 @@
 //
 
 #include "battle.h"
-#include "audio/audio.h"
+#include "audio.h"
 #include "common.h"
 #include "driver.h"
 #include "fight.h"

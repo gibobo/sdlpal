@@ -22,7 +22,7 @@
 //
 
 #include "script.h"
-#include "audio/audio.h"
+#include "audio.h"
 #include "battle.h"
 #include "common.h"
 #include "ending.h"

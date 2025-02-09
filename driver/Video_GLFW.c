@@ -9,14 +9,16 @@ GLFWwindow *window = NULL;
 extern void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 void DRIVER_FrameShow(unsigned char *frame_rgb) {
-    VIDEO_GLSL_RenderCopy(frame_rgb);
-    glfwSwapBuffers(window);
+    if(window) {
+        VIDEO_GLSL_RenderCopy(frame_rgb);
+        glfwSwapBuffers(window);
+    }
 }
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height) {
     window_width = width;
     window_height = height;
-    VIDEO_GLSL_Setup(window_width, window_height);
+    VIDEO_GLSL_Initialize(window_width, window_height);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -36,12 +38,14 @@ int DRIVER_Init_Video(void) {
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwGetWindowSize(window, &window_width, &window_height);
-    VIDEO_GLSL_Setup(window_width, window_height);
+    VIDEO_GLSL_Initialize(window_width, window_height);
+    glfwSwapInterval(1);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     return 0;
 }
 
 void DRIVER_DeInit_Video(void) {
+    VIDEO_GLSL_Destroy();
     glfwTerminate();
 }

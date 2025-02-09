@@ -1,12 +1,14 @@
 #include "driver.h"
-#include "global.h"
 #include "input.h"
-#include "util.h"
-#include "video.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 extern GLFWwindow *window;
+static unsigned char *rgdwKeyLastTime = NULL;
+static unsigned char rgdwKeyCount = 0;
+static unsigned int counter = 0; // Event index
 static const int g_KeyMap[][2] = {
     {GLFW_KEY_UP, kKeyUp},
     {GLFW_KEY_KP_8, kKeyUp},
@@ -41,28 +43,23 @@ static const int g_KeyMap[][2] = {
     {GLFW_KEY_Q, kKeyFlee},
     {GLFW_KEY_F, kKeyForce},
     {GLFW_KEY_S, kKeyStatus}};
-static unsigned int counter = 0; // Event index
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-  //  exit_flag = (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS);
-   static unsigned int rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
-   int i;
-   unsigned int dwCurrentTime = UTIL_GetTicks();
-
-   for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++) {
-      if (g_KeyMap[i][0] == key && action != GLFW_RELEASE) {
-         if (dwCurrentTime > rgdwKeyLastTime[i]) {
-         PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
-         if (gConfig.fEnableKeyRepeat) {
-            rgdwKeyLastTime[i] = dwCurrentTime + (rgdwKeyLastTime[i] == 0 ? 200 : 75);
-         } else {
-            rgdwKeyLastTime[i] = 0xFFFFFFFF;
+   unsigned char i;
+   for (i = 0; i < rgdwKeyCount; i++)
+   {
+      if (g_KeyMap[i][0] == key)
+      {
+         if (action != GLFW_RELEASE)
+         {
+            PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
+            rgdwKeyLastTime[i] = 0xFF;
          }
+         else
+         {
+            PAL_KeyUp(g_KeyMap[i][1]);
+            rgdwKeyLastTime[i] = 0;
          }
-      } else {
-         if (rgdwKeyLastTime[i] > 0)
-         PAL_KeyUp(g_KeyMap[i][1]);
-         rgdwKeyLastTime[i] = 0;
       }
    }
 }
@@ -113,6 +110,8 @@ int DRIVER_Process_Events(void) {
 int DRIVER_Init_Event(void) {
    glfwSetKeyCallback(window, key_callback);
    glfwSetJoystickCallback(joystick_callback);
+   rgdwKeyCount = sizeof(g_KeyMap) / sizeof(g_KeyMap[0]);
+   rgdwKeyLastTime = (unsigned char *)calloc(rgdwKeyCount, sizeof(unsigned char));
    return 0;
 }
 

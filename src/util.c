@@ -20,71 +20,17 @@
 
 #include "util.h"
 #include "common.h"
-#include "driver.h"
-#include "global.h"
 #include "input.h"
 #include "main.h"
 #include <errno.h>
 #ifdef _WIN32
-#include <io.h>
 #include <windows.h>
-#define access _access
 #else
 #include <sys/time.h>
 #include <unistd.h>
 #endif
 
-long flength(FILE *fp) {
-	long old_pos = ftell(fp);
-	if (old_pos == -1)
-		return -1;
-	if (UTIL_fseek(fp, 0, SEEK_END) == -1)
-		return -1;
-	long length = ftell(fp);
-	UTIL_fseek(fp, old_pos, SEEK_SET);
-	return length;
-}
-
-/*
- * RNG code based on RACC by Pierre-Marie Baty.
- * http://racc.bots-united.com
- *
- * Copyright (c) 2004, Pierre-Marie Baty
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or
- * without modification, are permitted provided that the following
- * conditions are met:
- *
- * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
- *
- * Neither the name of the RACC nor the names of its contributors
- * may be used to endorse or promote products derived from this
- * software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
- * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-
-// Our random number generator's seed.
-static int glSeed = 0;
+static int glSeed = 0;	// Our random number generator's seed.
 
 static void lsrand(unsigned int iInitialSeed)
 /*++
@@ -133,15 +79,7 @@ static int lrand(void)
 	return ((glSeed >> 1) + 1073741824L);	  // and return the result.
 }
 
-static void PAL_DelayUntil(unsigned int tm) {
-	do 	{
-		PAL_ProcessEvent();
-	} while (tm > UTIL_GetTicks());
-}
-
-int RandomLong(
-	int from,
-	int to)
+int RandomLong(int from, int to)
 /*++
   Purpose:
 
@@ -166,9 +104,7 @@ int RandomLong(
 	return from + lrand() / (INT_MAX / (to - from + 1));
 }
 
-float RandomFloat(
-	float from,
-	float to)
+float RandomFloat(float from, float to)
 /*++
   Purpose:
 
@@ -193,11 +129,6 @@ float RandomFloat(
 	return from + (float)lrand() / (INT_MAX / (to - from));
 }
 
-void UTIL_Delay(unsigned int ms)
-{
-	PAL_DelayUntil(UTIL_GetTicks() + ms);
-}
-
 void TerminateOnError(
 	const char *fmt,
 	...)
@@ -213,48 +144,6 @@ void TerminateOnError(
 	va_end(argptr);
 	fprintf(stderr, "\nFATAL ERROR: %s\n", string);
 	PAL_Shutdown(255);
-}
-
-void *UTIL_malloc(unsigned int buffer_size)
-{
-	// handy wrapper for operations we always forget, like checking malloc's returned pointer.
-
-	void *buffer;
-
-	// first off, check if buffer size is valid
-	if (buffer_size == 0)
-		TerminateOnError("UTIL_malloc() called with invalid buffer size: %d\n", buffer_size);
-
-	buffer = malloc(buffer_size); // allocate real memory space
-
-	// last check, check if malloc call succeeded
-	if (buffer == NULL)
-		TerminateOnError("UTIL_malloc() failure for %d bytes (out of memory?)\n", buffer_size);
-
-	memset(buffer, 0, buffer_size);
-
-	return buffer; // nothing went wrong, so return buffer pointer
-}
-
-void *UTIL_calloc(unsigned int n, unsigned int size)
-{
-	// handy wrapper for operations we always forget, like checking calloc's returned pointer.
-
-	void *buffer;
-
-	// first off, check if buffer size is valid
-	if (n == 0 || size == 0)
-		TerminateOnError("UTIL_calloc() called with invalid parameters\n");
-
-	buffer = calloc(n, size); // allocate real memory space
-
-	// last check, check if malloc call succeeded
-	if (buffer == NULL)
-		TerminateOnError("UTIL_calloc() failure for %d bytes (out of memory?)\n", size * n);
-
-	memset(buffer, 0, size * n);
-
-	return buffer; // nothing went wrong, so return buffer pointer
 }
 
 #ifdef _WIN32
@@ -290,4 +179,11 @@ void UTIL_Sleep(unsigned int tm) {
 #else
 	usleep(tm * 1000);
 #endif
+}
+
+void UTIL_Delay(unsigned int ms) {
+	unsigned int tm = UTIL_GetTicks() + ms;
+	while (tm > UTIL_GetTicks()) {
+		PAL_ProcessEvent();
+	}
 }

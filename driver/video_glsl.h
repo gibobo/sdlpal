@@ -28,8 +28,10 @@
 extern "C" {
 #endif
 
-void VIDEO_GLSL_Setup(int width, int height);
+void VIDEO_GLSL_Initialize(int width, int height);
 void VIDEO_GLSL_RenderCopy(void *data);
+void VIDEO_GLSL_Destroy(void);
+
 
 #ifdef __cplusplus
 }

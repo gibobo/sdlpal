@@ -15,7 +15,7 @@ void DRIVER_FrameShow(unsigned char *frame_rgb) {
 void DRIVER_FrameResize(unsigned int width, unsigned int height) {
     window_width = width;
     window_height = height;
-    VIDEO_GLSL_Setup(window_width, window_height);
+    VIDEO_GLSL_Initialize(window_width, window_height);
 }
 
 int DRIVER_Init_Video(void) {
@@ -44,11 +44,12 @@ int DRIVER_Init_Video(void) {
     SDL_GL_MakeCurrent(gpWindow, gpContext);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    VIDEO_GLSL_Setup(window_width, window_height);
+    VIDEO_GLSL_Initialize(window_width, window_height);
     return 0;
 }
 
 void DRIVER_DeInit_Video(void) {
+    VIDEO_GLSL_Destroy();
     if (gpContext)
         SDL_GL_DeleteContext(gpContext);
     if (gpWindow)
