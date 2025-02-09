@@ -119,16 +119,13 @@ static unsigned short GetSavedTimes(int iSaveSlot) {
    FILE *fp = NULL;
    unsigned short wSavedTimes = 0;
    save_path = (char *)UTIL_malloc(256);
-   sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
-   fp = UTIL_fopen(save_path, "rb");
-   if (fp != NULL) {
-   if (UTIL_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) == 1)
-      wSavedTimes = wSavedTimes;
-   else
-      wSavedTimes = 0;
+   sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
+   if (fp = UTIL_fopen(save_path, "rb")) {
+      if (UTIL_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) != 1)
+         wSavedTimes = 0;
+      UTIL_fclose(fp);
    }
-   free(save_path);
-   UTIL_fclose(fp);
+   UTIL_free(save_path);
    return wSavedTimes;
 }
 
@@ -1176,7 +1173,7 @@ void PAL_PlayerStatus(
          }
       }
    }
-   free(bufImage);
+   UTIL_free(bufImage);
 }
 
 unsigned short
@@ -1339,7 +1336,7 @@ PAL_ItemUseMenu(
 
       if (i <= 0)
       {
-         free(bufImage);
+         UTIL_free(bufImage);
          return MENUITEM_VALUE_CANCELLED;
       }
 
@@ -1365,12 +1362,12 @@ PAL_ItemUseMenu(
       }
       else if (PAL_GetKeyInput() & kKeySearch)
       {
-         free(bufImage);
+         UTIL_free(bufImage);
          return gpGlobals->rgParty[sSelectedPlayer].wPlayerRole;
       }
    }
 
-   free(bufImage);
+   UTIL_free(bufImage);
    return MENUITEM_VALUE_CANCELLED;
 }
 
@@ -1420,7 +1417,7 @@ PAL_BuyMenu_OnItemChange(
    {
       PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(x, y));
    }
-   free(bufImage);
+   UTIL_free(bufImage);
 
    // See how many of this item we have in the inventory
    n = 0;
@@ -1846,7 +1843,7 @@ void PAL_EquipItemMenu(
          }
       }
    }
-   free(bufImage);
+   UTIL_free(bufImage);
 }
 
 void PAL_QuitGame(

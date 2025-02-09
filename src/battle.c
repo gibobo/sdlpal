@@ -782,17 +782,17 @@ PAL_FreeBattleSprites(
    //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
-      free(g_Battle.rgPlayer[i].lpSprite);
+      UTIL_free(g_Battle.rgPlayer[i].lpSprite);
       g_Battle.rgPlayer[i].lpSprite = NULL;
    }
 
    for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
    {
-      free(g_Battle.rgEnemy[i].lpSprite);
+      UTIL_free(g_Battle.rgEnemy[i].lpSprite);
       g_Battle.rgEnemy[i].lpSprite = NULL;
    }
 
-   free(g_Battle.lpSummonSprite);
+   UTIL_free(g_Battle.lpSummonSprite);
    g_Battle.lpSummonSprite = NULL;
 }
 
@@ -850,8 +850,8 @@ void PAL_LoadBattleSprites(
       //
       // Set the default position for this enemy
       //
-      x = gpGlobals->g.EnemyPos.pos[i][g_Battle.wMaxEnemyIndex].x;
-      y = gpGlobals->g.EnemyPos.pos[i][g_Battle.wMaxEnemyIndex].y;
+      x = gpGlobals->g.EnemyPos[i * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex].x;
+      y = gpGlobals->g.EnemyPos[i * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex].y;
 
       y += g_Battle.rgEnemy[i].e.wYPosOffset;
 
@@ -1579,7 +1579,7 @@ PAL_StartBattle(
    // Free all the battle sprites
    //
    PAL_FreeBattleSprites();
-   free(g_Battle.lpEffectSprite);
+   UTIL_free(g_Battle.lpEffectSprite);
 
    //
    // Free the surfaces for the background picture and scene buffer

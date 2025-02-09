@@ -69,7 +69,7 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
         return -1;
     }
 
-    free(*lpBuffer);
+    UTIL_free(*lpBuffer);
     *lpBuffer = NULL;
 
     // Get the total number of chunks.
@@ -306,7 +306,7 @@ PAL_RNGPlay(
      if (buf_size < 0)
        break; // Failed to get the frame, don't go further
 
-     free(rng);
+     UTIL_free(rng);
      rng_size = *(unsigned int *)buf;
      rng = (unsigned char *)UTIL_malloc(rng_size);
      if (PAL_RNGBlitToSurface(rng, Decompress(buf, rng, rng_size), gpScreen) < 0)
@@ -326,6 +326,6 @@ PAL_RNGPlay(
    }
 
    UTIL_fclose(fp);
-   free(rng);
-   free(buf);
+   UTIL_free(rng);
+   UTIL_free(buf);
 }

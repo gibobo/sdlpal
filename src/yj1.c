@@ -207,8 +207,8 @@ int YJ2_Decompress(
         }
     }
 
-    free(tree.list);
-    free(tree.node);
+    UTIL_free(tree.list);
+    UTIL_free(tree.node);
     return Length;
 }
 

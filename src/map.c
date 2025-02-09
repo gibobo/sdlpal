@@ -76,8 +76,8 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
    // Read the map data.
    if (PAL_MKFReadChunk(buf, size, iMapNum, fpMapMKF) < 0)
    {
-      free(buf);
-      free(map);
+      UTIL_free(buf);
+      UTIL_free(map);
       return NULL;
    }
 
@@ -86,15 +86,15 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
    map->Tiles = (unsigned int *)UTIL_malloc(tile_size);
    if (Decompress(buf, map->Tiles, tile_size) < 0)
    {
-      free(map);
-      free(buf);
+      UTIL_free(map);
+      UTIL_free(buf);
       return NULL;
    }
 
    //
    // The compressed data is useless now; delete it.
    //
-   free(buf);
+   UTIL_free(buf);
 
    //
    // Load the tile bitmaps.
@@ -102,18 +102,13 @@ PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
    size = PAL_MKFGetChunkSize(iMapNum, fpGopMKF);
    if (size <= 0)
    {
-      free(map);
+      UTIL_free(map);
       return NULL;
    }
    map->pTileSprite = (unsigned char *)UTIL_malloc(size);
-   if (map->pTileSprite == NULL)
-   {
-      free(map);
-      return NULL;
-   }
    if (PAL_MKFReadChunk(map->pTileSprite, size, iMapNum, fpGopMKF) < 0)
    {
-      free(map);
+      UTIL_free(map);
       return NULL;
    }
 
@@ -148,18 +143,12 @@ void PAL_FreeMap(PALMAP *lpMap)
    }
 
    // Free the tile bitmaps.
-   if (lpMap->pTileSprite != NULL)
-   {
-      free(lpMap->pTileSprite);
-   }
+   UTIL_free(lpMap->pTileSprite);
    
    // Free the tiles.
-   if (lpMap->Tiles != NULL)
-   {
-      free(lpMap->Tiles);
-   }
+   UTIL_free(lpMap->Tiles);
    // Delete the instance.
-   free(lpMap);
+   UTIL_free(lpMap);
 }
 
 const unsigned char *PAL_MapGetTileBitmap(

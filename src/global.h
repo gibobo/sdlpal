@@ -427,11 +427,6 @@ typedef struct tagPALPOS
    unsigned short y;
 } PALPOS;
 
-typedef struct tagENEMYPOS
-{
-   PALPOS pos[MAX_ENEMIES_IN_TEAM][MAX_ENEMIES_IN_TEAM];
-} ENEMYPOS;
-
 // Exp. points needed for the next level
 typedef unsigned short LEVELUPEXP;
 
@@ -467,10 +462,10 @@ typedef struct tagGAMEDATA
    LEVELUPMAGIC_ALL *lprgLevelUpMagic;
    int nLevelUpMagic;
 
-   ENEMYPOS EnemyPos;
+   PALPOS EnemyPos[MAX_ENEMIES_IN_TEAM * MAX_ENEMIES_IN_TEAM];
    LEVELUPEXP rgLevelUpExp[MAX_LEVELS + 1];
 
-   unsigned short rgwBattleEffectIndex[10][2];
+   unsigned short rgwBattleEffectIndex[10 * 2];
 } GAMEDATA;
 
 typedef struct tagFILES

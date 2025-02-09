@@ -121,8 +121,8 @@ static void PAL_ShowFBP(
    }
 
    VIDEO_UpdateScreen(NULL);
-   free(buf);
-   free(bufSprite);
+   UTIL_free(buf);
+   UTIL_free(bufSprite);
 }
 
 static void PAL_ScrollFBP(unsigned short wChunkNum)
@@ -212,7 +212,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
    VIDEO_CopyEntireSurface(p, gpScreen);
    PAL_FreeSurface(p);
    VIDEO_UpdateScreen(NULL);
-   free(bufSprite);
+   UTIL_free(bufSprite);
 }
 
 static void PAL_EndingAnimation(
@@ -311,8 +311,8 @@ static void PAL_EndingAnimation(
 
    PAL_FreeSurface(pUpper);
    PAL_FreeSurface(pLower);
-   free(buf);
-   free(bufGirl);
+   UTIL_free(buf);
+   UTIL_free(bufGirl);
 }
 
 void PAL_EndingScreen(void)

@@ -105,14 +105,14 @@ void PAL_FreeGlobals(void)
    //
    // Free the game data
    //
-   free(gpGlobals->g.lprgEventObject);
-   free(gpGlobals->g.lprgScriptEntry);
-   free(gpGlobals->g.lprgStore);
-   free(gpGlobals->g.lprgEnemy);
-   free(gpGlobals->g.lprgEnemyTeam);
-   free(gpGlobals->g.lprgMagic);
-   free(gpGlobals->g.lprgBattleField);
-   free(gpGlobals->g.lprgLevelUpMagic);
+   UTIL_free(gpGlobals->g.lprgEventObject);
+   UTIL_free(gpGlobals->g.lprgScriptEntry);
+   UTIL_free(gpGlobals->g.lprgStore);
+   UTIL_free(gpGlobals->g.lprgEnemy);
+   UTIL_free(gpGlobals->g.lprgEnemyTeam);
+   UTIL_free(gpGlobals->g.lprgMagic);
+   UTIL_free(gpGlobals->g.lprgBattleField);
+   UTIL_free(gpGlobals->g.lprgLevelUpMagic);
 
    // Clear the instance
    memset(gpGlobals, 0, sizeof(GLOBALVARS));
@@ -144,7 +144,7 @@ static void PAL_ReadGlobalGameData(void)
   PAL_MKFReadChunk(p->lprgBattleField,        p->nBattleField * sizeof(BATTLEFIELD), 5, gpGlobals->f.fpDATA);
   PAL_MKFReadChunk(p->lprgLevelUpMagic,       p->nLevelUpMagic * sizeof(LEVELUPMAGIC_ALL), 6, gpGlobals->f.fpDATA);
   PAL_MKFReadChunk(p->rgwBattleEffectIndex,   sizeof(p->rgwBattleEffectIndex), 11, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(&p->EnemyPos,              sizeof(p->EnemyPos), 13, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->EnemyPos,               sizeof(p->EnemyPos), 13, gpGlobals->f.fpDATA);
   PAL_MKFReadChunk(p->rgLevelUpExp,           sizeof(p->rgLevelUpExp), 14, gpGlobals->f.fpDATA);
 }
 
@@ -203,11 +203,12 @@ static void PAL_LoadDefaultGame(void)
    GAMEDATA    *p = &gpGlobals->g;
    unsigned int       i;
 
+   unsigned short *pr = (unsigned short *)(&p->PlayerRoles); // HACKHACK
    // Load the default data from the game data files.
    PAL_MKFReadChunk(p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gpGlobals->f.fpSSS);
    PAL_MKFReadChunk(p->rgScene, sizeof(p->rgScene), 1, gpGlobals->f.fpSSS);
    PAL_MKFReadChunk(p->rgObject, sizeof(p->rgObject), 2, gpGlobals->f.fpSSS);
-   PAL_MKFReadChunk(&p->PlayerRoles, sizeof(PLAYERROLES), 3, gpGlobals->f.fpDATA);
+   PAL_MKFReadChunk(pr, sizeof(PLAYERROLES), 3, gpGlobals->f.fpDATA);
 
    // Set some other default data.
    gpGlobals->dwCash = 0;
@@ -307,10 +308,9 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
 {
     // Try to open the specified file
     char *save_path = (char *)UTIL_malloc(256);
-
-    sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
+    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
     FILE *fp = UTIL_fopen(save_path, "rb");
-    free(save_path);
+    UTIL_free(save_path);
 
     // Read all data from the file and close.
     unsigned int n = fp ? UTIL_fread(s, 1, size, fp) : 0;
@@ -382,7 +382,7 @@ static int PAL_LoadGame_WIN(int iSaveSlot)
    memcpy(gpGlobals->g.rgObject, s->rgObject, sizeof(gpGlobals->g.rgObject));
    memcpy(gpGlobals->g.lprgEventObject, s->rgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
 
-   free(s);
+   UTIL_free(s);
 
    //
    // Success
@@ -429,9 +429,7 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
 
     // Try writing to file
     char *save_path = (char *)UTIL_malloc(256);
-    if (save_path == NULL)
-      return;
-    sprintf(save_path, RESOURCE_PATH "%d.rpg", iSaveSlot);
+    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
 
     if (fp = UTIL_fopen(save_path, "wb")) {
       i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
@@ -439,7 +437,7 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
       UTIL_fwrite(s, i, 1, fp);
     }
     UTIL_fclose(fp);
-    free(save_path);
+    UTIL_free(save_path);
 }
 
 static void
@@ -471,7 +469,7 @@ PAL_SaveGame_WIN(
 
    PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN));
 
-   free(s);
+   UTIL_free(s);
 }
 
 void
@@ -985,8 +983,8 @@ PAL_RemoveEquipmentEffect(
 
 --*/
 {
-   unsigned short       *p;
-   int         i, j;
+   unsigned short *p;
+   int i, j;
 
    p = (unsigned short *)(&gpGlobals->rgEquipmentEffect[wEquipPart]); // HACKHACK
 

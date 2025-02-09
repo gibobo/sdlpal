@@ -15,6 +15,7 @@ enum {
 };
 
 void resampler_init(void);
+void resampler_deinit(void);
 void *resampler_create(void);
 void resampler_delete(void *);
 void resampler_set_quality(void *, int quality);

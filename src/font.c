@@ -47,8 +47,8 @@ void PAL_InitFont(void)
 
 void PAL_DeInitFont(void)
 {
-    free(p_font);
-    free(p_font_size);
+    UTIL_free(p_font);
+    UTIL_free(p_font_size);
     UTIL_fclose(fp_font_data);
     UTIL_fclose(fp_font_size);
 }

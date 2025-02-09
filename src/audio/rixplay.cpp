@@ -279,11 +279,10 @@ static void RIX_Shutdown(void *object)
         for (int i = 0; i < gConfig.iAudioChannels; i++)
             if (pRixPlayer->resampler[i])
                 resampler_delete(pRixPlayer->resampler[i]);
-        if (pRixPlayer->buf)
-            free(pRixPlayer->buf);
+        UTIL_free(pRixPlayer->buf);
         delete pRixPlayer->rix;
         delete pRixPlayer->opl;
-        free(pRixPlayer);
+        UTIL_free(pRixPlayer);
     }
 }
 

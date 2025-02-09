@@ -1023,13 +1023,13 @@ int PAL_MKFDecompressChunk(
    PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
 
    if ((uiBufferSize == 0) || ((*lpBuffer) == NULL)) {
-     free(*lpBuffer);
+     UTIL_free(*lpBuffer);
      uiBufferSize = *(unsigned int *)buf;
      *lpBuffer = UTIL_malloc(uiBufferSize);
    }
 
    len = Decompress(buf, *lpBuffer, uiBufferSize);
-   free(buf);
+   UTIL_free(buf);
 
    return len;
 }

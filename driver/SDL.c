@@ -24,8 +24,8 @@ int DRIVER_Init(void) {
 }
 
 void DRIVER_DeInit(void) {
+  DRIVER_DeInit_Event();
   DRIVER_DeInit_Audio();
   DRIVER_DeInit_Video();
-  DRIVER_DeInit_Event();
   SDL_Quit();
 }

@@ -137,9 +137,11 @@ void AUDIO_CloseDevice(void)
     }
 
     if (gAudioDevice.pSoundBuffer != NULL) {
-        free(gAudioDevice.pSoundBuffer);
+        UTIL_free(gAudioDevice.pSoundBuffer);
         gAudioDevice.pSoundBuffer = NULL;
     }
+
+    resampler_deinit();
 
     gAudioDevice.fOpened = FALSE;
 }

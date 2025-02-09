@@ -60,10 +60,10 @@ PAL_FreeEventObjectSprites(
    {
       for (i = 0; i < gpResources->nEventObject; i++)
       {
-         free(gpResources->lppEventObjectSprites[i]);
+         UTIL_free(gpResources->lppEventObjectSprites[i]);
       }
 
-      free(gpResources->lppEventObjectSprites);
+      UTIL_free(gpResources->lppEventObjectSprites);
 
       gpResources->lppEventObjectSprites = NULL;
       gpResources->nEventObject = 0;
@@ -92,7 +92,7 @@ PAL_FreePlayerSprites(
 
    for (i = 0; i < MAX_PLAYABLE_PLAYER_ROLES; i++)
    {
-      free(gpResources->rglpPlayerSprite[i]);
+      UTIL_free(gpResources->rglpPlayerSprite[i]);
       gpResources->rglpPlayerSprite[i] = NULL;
    }
 }
@@ -149,7 +149,7 @@ void PAL_FreeResources(
       //
       // Delete the instance
       //
-      free(gpResources);
+      UTIL_free(gpResources);
    }
 
    gpResources = NULL;

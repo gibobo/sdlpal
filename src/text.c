@@ -96,7 +96,7 @@ int PAL_InitText(void)
    temp = (unsigned char *)UTIL_malloc(10 * g_TextLib.nWords);
 
    if (UTIL_fread(temp, 1, i, fp) < (unsigned int)i) {
-      free(temp);
+      UTIL_free(temp);
       UTIL_fclose(fp);
       return -1;
    }
@@ -130,7 +130,7 @@ int PAL_InitText(void)
       lpWordBuf[i][l] = 0;
       wpos += l + 1;
    }
-   free(temp);
+   UTIL_free(temp);
 
    // Read the message offsets. The message offsets are in SSS.MKF #3
    i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
@@ -148,8 +148,8 @@ int PAL_InitText(void)
    temp = (unsigned char *)UTIL_malloc(i);
 
    if (UTIL_fread(temp, 1, i, fp) < (unsigned int)i) {
-      free(temp);
-      free(offsets);
+      UTIL_free(temp);
+      UTIL_free(offsets);
       UTIL_fclose(fp);
       return -1;
    }
@@ -169,8 +169,8 @@ int PAL_InitText(void)
       lpMsgBuf[i][l] = 0;
       wpos += l + 1;
    }
-   free(temp);
-   free(offsets);
+   UTIL_free(temp);
+   UTIL_free(offsets);
 
    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
    g_TextLib.bIcon = 0;
@@ -204,26 +204,16 @@ void PAL_FreeText(
 
 --*/
 {
-  if (MsgBuf != NULL) {
-    free(MsgBuf);
-  }
-  if (lpMsgBuf != NULL) {
-    free(lpMsgBuf);
-  }
-  if (WordBuf != NULL) {
-    free(WordBuf);
-  }
-  if (lpWordBuf != NULL) {
-    free(lpWordBuf);
-  }
-  if (lpcptbl_big5 != NULL) {
-    free(lpcptbl_big5);
-  }
-  MsgBuf = NULL;
-  WordBuf = NULL;
-  lpMsgBuf = NULL;
-  lpWordBuf = NULL;
-  lpcptbl_big5 = NULL;
+   UTIL_free(MsgBuf);
+   UTIL_free(lpMsgBuf);
+   UTIL_free(WordBuf);
+   UTIL_free(lpWordBuf);
+   UTIL_free(lpcptbl_big5);
+   MsgBuf = NULL;
+   lpMsgBuf = NULL;
+   WordBuf = NULL;
+   lpWordBuf = NULL;
+   lpcptbl_big5 = NULL;
 }
 
 const wchar_t*
@@ -548,7 +538,7 @@ PAL_StartDialogWithOffset(
    g_TextLib.posDialogText = PAL_XY( PAL_X(g_TextLib.posDialogText) + xOff, PAL_Y(g_TextLib.posDialogText) + yOff);
 
    g_TextLib.bDialogPosition = bDialogLocation;
-   free(buf);
+   UTIL_free(buf);
 }
 
 static void

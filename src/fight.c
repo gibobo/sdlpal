@@ -637,8 +637,7 @@ PAL_BattlePostActionCheck(
 
          AUDIO_PlaySound(g_Battle.rgEnemy[i].e.wDeathSound);
          g_Battle.rgEnemy[i].wObjectID = 0;
-         if (g_Battle.rgEnemy[i].lpSprite)
-             free(g_Battle.rgEnemy[i].lpSprite);
+         UTIL_free(g_Battle.rgEnemy[i].lpSprite);
          g_Battle.rgEnemy[i].lpSprite = NULL;
          fFade = TRUE;
 
@@ -783,7 +782,7 @@ end:
       PAL_BattleUpdateFighters();
       PAL_BattleDelay(1, 0, FALSE);
 
-      free(g_Battle.lpSummonSprite);
+      UTIL_free(g_Battle.lpSummonSprite);
       g_Battle.lpSummonSprite = NULL;
 
       g_Battle.sBackgroundColorShift = 0;
@@ -1615,7 +1614,7 @@ PAL_BattleShowPlayerAttackAnim(
       enemy_y = 100;
    }
 
-   index = gpGlobals->g.rgwBattleEffectIndex[PAL_GetPlayerBattleSprite(wPlayerRole)][1];
+   index = gpGlobals->g.rgwBattleEffectIndex[PAL_GetPlayerBattleSprite(wPlayerRole) * 2 + 1];
    index *= 3;
 
    //
@@ -1730,8 +1729,8 @@ PAL_BattleShowPlayerAttackAnim(
           {
               if (g_Battle.rgEnemy[j].wObjectID != 0)
               {
-                  x = gpGlobals->g.EnemyPos.pos[j][g_Battle.wMaxEnemyIndex].x;
-                  y = gpGlobals->g.EnemyPos.pos[j][g_Battle.wMaxEnemyIndex].y;
+                  x = gpGlobals->g.EnemyPos[j * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex].x;
+                  y = gpGlobals->g.EnemyPos[j * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex].y;
                   y += g_Battle.rgEnemy[j].e.wYPosOffset;
 
                   PAL_RLEBlitToSurface(b, gpScreen, PAL_XY(x - PAL_RLEGetWidth(b) / 2, y - PAL_RLEGetHeight(b)));
@@ -1929,7 +1928,7 @@ void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
       x = PAL_X(g_Battle.rgPlayer[wPlayerIndex].pos);
       y = PAL_Y(g_Battle.rgPlayer[wPlayerIndex].pos);
 
-      index = gpGlobals->g.rgwBattleEffectIndex[PAL_GetPlayerBattleSprite(wPlayerRole)][0];
+      index = gpGlobals->g.rgwBattleEffectIndex[PAL_GetPlayerBattleSprite(wPlayerRole) * 2 + 0];
       index *= 10;
       index += 15;
       AUDIO_PlaySound(gpGlobals->g.PlayerRoles.rgwMagicSound[wPlayerRole]);
@@ -2061,7 +2060,7 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
       VIDEO_UpdateScreen(NULL);
    }
 
-   free(lpSpriteEffect);
+   UTIL_free(lpSpriteEffect);
 
    for (i = 0; i < 6; i++) {
       if (gpGlobals->g.lprgMagic[iMagicNum].wType == kMagicTypeApplyToParty) {
@@ -2293,7 +2292,7 @@ PAL_BattleShowPlayerOffMagicAnim(
    gpGlobals->wScreenWave = wave;
    VIDEO_ShakeScreen(0, 0);
 
-   free(lpSpriteEffect);
+   UTIL_free(lpSpriteEffect);
 
    for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
    {
@@ -2475,7 +2474,7 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
    gpGlobals->wScreenWave = wave;
    VIDEO_ShakeScreen(0, 0);
 
-   free(lpSpriteEffect);
+   UTIL_free(lpSpriteEffect);
 
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++) {
      g_Battle.rgPlayer[i].pos = g_Battle.rgPlayer[i].posOriginal;

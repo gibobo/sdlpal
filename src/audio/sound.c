@@ -685,7 +685,7 @@ static int SOUND_Play(
 
   snddata = SOUND_LoadWAVEData(buf, len, &wavespec);
   if (snddata == NULL) {
-    free(buf);
+    UTIL_free(buf);
     return FALSE;
   }
 
@@ -698,7 +698,7 @@ static int SOUND_Play(
   else if (wavespec.channels == 2 && gConfig.iAudioChannels == 2)
     mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
   else {
-    free(buf);
+    UTIL_free(buf);
     return FALSE;
   }
 
@@ -755,13 +755,13 @@ void SOUND_Shutdown(void *object)
       if (cursnd->resampler[1])
         resampler_delete(cursnd->resampler[1]);
       if (cursnd->base)
-        free((void *)cursnd->base);
+        UTIL_free((void *)cursnd->base);
     } while ((cursnd = cursnd->next) != NULL);
     cursnd = player->soundlist.next;
     while (cursnd) {
       WAVEDATA *old = cursnd;
       cursnd = cursnd->next;
-      free(old);
+      UTIL_free(old);
     }
   }
   UTIL_fclose(player->mkf);
@@ -798,7 +798,7 @@ static void SOUND_FillBuffer(
         cursnd->ResampleMix(cursnd->resampler, cursnd->current, &cursnd->spec, stream, len, &cursnd->current);
         cursnd->spec.size = (int)((const uint8_t *)cursnd->end - (const uint8_t *)cursnd->current);
         if (cursnd->spec.size < cursnd->spec.align) {
-          free((void *)cursnd->base);
+          UTIL_free((void *)cursnd->base);
           cursnd->base = cursnd->current = cursnd->end = NULL;
           player->cursounds--;
           player->lastSFX = 0;

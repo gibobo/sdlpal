@@ -328,8 +328,8 @@ void PAL_SplashScreen(void)
 
    PAL_FreeSurface(lpBitmapDown);
    PAL_FreeSurface(lpBitmapUp);
-   free(lpTitleBuf);
-   free(lpSpriteCrane);
+   UTIL_free(lpTitleBuf);
+   UTIL_free(lpSpriteCrane);
 
    AUDIO_PlayMusic(0x00, FALSE, 1);
 

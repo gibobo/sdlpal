@@ -43,7 +43,7 @@ static BOX *PAL_CreateBoxInternal(
   lpBox->wWidth = (unsigned short)rect->h;
 
   if (lpBox->lpSavedArea == NULL) {
-    free(lpBox);
+    UTIL_free(lpBox);
     return NULL;
   }
 
@@ -106,11 +106,9 @@ void PAL_FreeUI(
 
 --*/
 {
-   if (gpSpriteUI != NULL)
-   {
-      free(gpSpriteUI);
-      gpSpriteUI = NULL;
-   }
+
+   UTIL_free(gpSpriteUI);
+   gpSpriteUI = NULL;
 }
 
 BOX *PAL_CreateBox(
@@ -381,7 +379,7 @@ void PAL_DeleteBox(BOX *lpBox)
    // Free the memory used by the box
    //
    PAL_FreeSurface(lpBox->lpSavedArea);
-   free(lpBox);
+   UTIL_free(lpBox);
 }
 
 unsigned short

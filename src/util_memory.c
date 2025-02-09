@@ -44,3 +44,9 @@ void *UTIL_calloc(unsigned int n, unsigned int size)
 
 	return buffer; // nothing went wrong, so return buffer pointer
 }
+
+void UTIL_free(void *ptr)
+{
+	if (ptr)
+		free(ptr);
+}

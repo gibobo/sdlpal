@@ -93,16 +93,10 @@ void VIDEO_Shutdown(void)
     PAL_FreeSurface(gpScreenBak);
     gpScreenBak = NULL;
 
-    if (bufScreenReal != NULL)
-    {
-        free(bufScreenReal);
-    }
+    UTIL_free(bufScreenReal);
     bufScreenReal = NULL;
 
-    if (bufPalette != NULL)
-    {
-        free(bufPalette);
-    }
+    UTIL_free(bufPalette);
     bufPalette = NULL;
 }
 
@@ -457,9 +451,8 @@ void VIDEO_RestoreScreen(PAL_Surface *dst) {
 
 void PAL_FreeSurface(PAL_Surface *surface) {
   if (surface) {
-    if (surface->pixels)
-      free(surface->pixels);
-    free(surface);
+    UTIL_free(surface->pixels);
+    UTIL_free(surface);
   }
 }
 
