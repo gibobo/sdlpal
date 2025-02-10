@@ -31,9 +31,9 @@
 #include "video.h"
 #include <stdlib.h>
 
-#define Check_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1
+#define Check_fread(buf, elem, num, fp) if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) return -1
 
-static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned int uiFrameNum, FILE *fpRngMKF)
+static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned int uiFrameNum, void *fpRngMKF)
 /*++
   Purpose:
 
@@ -109,7 +109,7 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
     if (iChunkLen != 0) {
         *lpBuffer = (unsigned char *)UTIL_malloc(iChunkLen);
         UTIL_fseek(fpRngMKF, uiOffset + uiSubOffset, SEEK_SET);
-        return (int)fread(*lpBuffer, 1, iChunkLen, fpRngMKF);
+        return (int)UTIL_fread(*lpBuffer, 1, iChunkLen, fpRngMKF);
     }
 
     return -1;
@@ -288,7 +288,7 @@ PAL_RNGPlay(
 
 --*/
 {
-   FILE *fp = NULL;
+   void *fp = NULL;
    unsigned char *rng = NULL;
    unsigned char *buf = NULL;
    int rng_size = 0;

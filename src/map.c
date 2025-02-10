@@ -27,7 +27,7 @@
 #define PALMAP_X 64
 #define PALMAP_Z 2
 
-PALMAP *PAL_LoadMap(int iMapNum, FILE *fpMapMKF, FILE *fpGopMKF)
+PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
 /*++
   Purpose:
 

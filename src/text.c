@@ -43,12 +43,12 @@
 #define   FONT_COLOR_CYAN_ALT       0x8C
 #define   FONT_COLOR_RED_ALT        0x17
 
-int g_fUpdatedInBattle = FALSE;
+int g_fUpdatedInBattle = false;
 static wchar_t  *WordBuf;
 static wchar_t  *MsgBuf;
 static wchar_t **lpWordBuf;
 static wchar_t **lpMsgBuf;
-static wchar_t internal_wbuffer[PAL_GLOBAL_BUFFER_SIZE];
+static wchar_t internal_wbuffer[1024];
 static unsigned short *lpcptbl_big5;
 
 TEXTLIB         g_TextLib;
@@ -70,7 +70,7 @@ int PAL_InitText(void)
 
 --*/
 {
-   FILE *fp;
+   void *fp;
    unsigned int *offsets;
    unsigned char *temp;
    int wpos, wlen, i;
@@ -180,7 +180,7 @@ int PAL_InitText(void)
    g_TextLib.posDialogTitle = PAL_XY(12, 8);
    g_TextLib.posDialogText = PAL_XY(44, 26);
    g_TextLib.bDialogPosition = kDialogUpper;
-   g_TextLib.fUserSkip = FALSE;
+   g_TextLib.fUserSkip = false;
 
    PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gpGlobals->f.fpDATA);
 
@@ -306,7 +306,7 @@ PAL_DrawText(
    int       fUse8x8Font
 )
 {
-    PAL_DrawTextUnescape(lpszText, pos, bColor, fShadow, fUpdate, fUse8x8Font, TRUE);
+    PAL_DrawTextUnescape(lpszText, pos, bColor, fShadow, fUpdate, fUse8x8Font, true);
 }
 
 void
@@ -332,13 +332,13 @@ PAL_DrawTextUnescape(
 
     [IN]  bColor - Color of the text.
 
-    [IN]  fShadow - TRUE if the text is shadowed or not.
+    [IN]  fShadow - true if the text is shadowed or not.
 
-    [IN]  fUpdate - TRUE if update the screen area.
+    [IN]  fUpdate - true if update the screen area.
 
-    [IN]  fUse8x8Font - TRUE if use 8x8 font.
+    [IN]  fUse8x8Font - true if use 8x8 font.
 
-    [IN]  fUnescape - TRUE if unescaping needed.
+    [IN]  fUnescape - true if unescaping needed.
 
   Return value:
 
@@ -469,14 +469,14 @@ PAL_StartDialogWithOffset(
    if (gpGlobals->fInBattle && !g_fUpdatedInBattle) {
       // Update the screen in battle, or the graphics may seem messed up
       VIDEO_UpdateScreen(NULL);
-      g_fUpdatedInBattle = TRUE;
+      g_fUpdatedInBattle = true;
    }
 
    g_TextLib.bIcon = 0;
    g_TextLib.posIcon = 0;
    g_TextLib.nCurrentDialogLine = 0;
    g_TextLib.posDialogTitle = PAL_XY(12, 8);
-   g_TextLib.fUserSkip = FALSE;
+   g_TextLib.fUserSkip = false;
 
    if (bFontColor != 0)
    {
@@ -486,7 +486,7 @@ PAL_StartDialogWithOffset(
    if (fPlayingRNG && iNumCharFace)
    {
       VIDEO_BackupScreen(gpScreen);
-      g_TextLib.fPlayingRNG = TRUE;
+      g_TextLib.fPlayingRNG = true;
    }
 
    switch (bDialogLocation)
@@ -595,7 +595,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
    PAL_ClearKeyState();
 
-   while (TRUE)
+   while (true)
    {
       UTIL_Delay(100);
 
@@ -637,7 +637,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
    PAL_ClearKeyState();
 
-   g_TextLib.fUserSkip = FALSE;
+   g_TextLib.fUserSkip = false;
 }
 
 int
@@ -736,7 +736,7 @@ TEXT_DisplayText(
             if( !isDialog )
                UTIL_Delay(wcstol(lpszText + 1, NULL, 10) * 80 / 7);
             g_TextLib.nCurrentDialogLine = -1;
-            g_TextLib.fUserSkip = FALSE;
+            g_TextLib.fUserSkip = false;
             return x; // don't go further
 
          case ')':
@@ -777,7 +777,7 @@ TEXT_DisplayText(
             if( isNumber )
                PAL_DrawNumber(text[0]-'0', 1, PAL_XY(x, y+4), kNumColorYellow, kNumAlignLeft);
             else
-               PAL_DrawTextUnescape(text, PAL_XY(x, y), color, !isDialog, !isDialog && !g_TextLib.fUserSkip, FALSE, FALSE);
+               PAL_DrawTextUnescape(text, PAL_XY(x, y), color, !isDialog, !isDialog && !g_TextLib.fUserSkip, false, false);
             x += PAL_CharWidth(text[0]);
 
             if (!isDialog && !g_TextLib.fUserSkip)
@@ -788,7 +788,7 @@ TEXT_DisplayText(
                if (PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
                {
                   // User pressed a key to skip the dialog
-                  g_TextLib.fUserSkip = TRUE;
+                  g_TextLib.fUserSkip = true;
                }
             }
       }
@@ -828,7 +828,7 @@ PAL_ShowDialogText(
       // Update the screen in battle, or the graphics may seem messed up
       //
       VIDEO_UpdateScreen(NULL);
-      g_fUpdatedInBattle = TRUE;
+      g_fUpdatedInBattle = true;
    }
 
    if (g_TextLib.nCurrentDialogLine > 3)
@@ -864,7 +864,7 @@ PAL_ShowDialogText(
          pos = PAL_XY(PAL_X(g_TextLib.posDialogText) - len * 4, PAL_Y(g_TextLib.posDialogText));
 
          // Follow behavior of original version
-         lpBox = PAL_CreateSingleLineBoxWithShadow(pos, (len + 1) / 2, FALSE, iDialogShadow);
+         lpBox = PAL_CreateSingleLineBoxWithShadow(pos, (len + 1) / 2, false, iDialogShadow);
 
          rect.x = PAL_X(pos);
          rect.y = PAL_Y(pos);
@@ -873,7 +873,7 @@ PAL_ShowDialogText(
          VIDEO_UpdateScreen(&rect);
 
          // Show the text on the screen
-         TEXT_DisplayText(lpszText, PAL_X(pos) + 8 + ((len & 1) << 2), PAL_Y(pos) + 10, TRUE);
+         TEXT_DisplayText(lpszText, PAL_X(pos) + 8 + ((len & 1) << 2), PAL_Y(pos) + 10, true);
          VIDEO_UpdateScreen(&rect);
 
          PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
@@ -898,7 +898,7 @@ PAL_ShowDialogText(
          //
          // name of character
          //
-         PAL_DrawText(lpszText, g_TextLib.posDialogTitle, FONT_COLOR_CYAN_ALT, TRUE, TRUE, FALSE);
+         PAL_DrawText(lpszText, g_TextLib.posDialogTitle, FONT_COLOR_CYAN_ALT, true, true, false);
       }
       else
       {
@@ -910,7 +910,7 @@ PAL_ShowDialogText(
             VIDEO_BackupScreen(gpScreen);
          }
 
-         x = TEXT_DisplayText(lpszText, x, y, FALSE);
+         x = TEXT_DisplayText(lpszText, x, y, false);
 
          // and update the full screen at once after all texts are drawn
          if (g_TextLib.fUserSkip)
@@ -978,7 +978,7 @@ PAL_EndDialog(
 
 --*/
 {
-   PAL_ClearDialog(TRUE);
+   PAL_ClearDialog(true);
 
    //
    // Set some default parameters, as there are some parts of script
@@ -988,8 +988,8 @@ PAL_EndDialog(
    g_TextLib.posDialogText = PAL_XY(44, 26);
    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
    g_TextLib.bDialogPosition = kDialogUpper;
-   g_TextLib.fUserSkip = FALSE;
-   g_TextLib.fPlayingRNG = FALSE;
+   g_TextLib.fUserSkip = false;
+   g_TextLib.fPlayingRNG = false;
 }
 
 int
@@ -1007,7 +1007,7 @@ PAL_DialogIsPlayingRNG(
 
   Return value:
 
-    TRUE if the script used the RNG playing parameter, FALSE if not.
+    true if the script used the RNG playing parameter, false if not.
 
 --*/
 {

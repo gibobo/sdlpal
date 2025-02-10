@@ -111,13 +111,13 @@ void PAL_Shutdown(int exit_code)
 
 --*/
 {
-   DRIVER_DeInit();
-   AUDIO_CloseDevice();
    PAL_FreeResources();
    PAL_FreeUI();
    PAL_FreeText();
    PAL_ShutdownInput();
+   AUDIO_CloseDevice();
    VIDEO_Shutdown();
+   DRIVER_DeInit();
 
    // global needs be free in last
    // since subsystems may needs config content during destroy
@@ -145,7 +145,7 @@ void PAL_TrademarkScreen(void)
 
 --*/
 {
-   PAL_SetPalette(3, FALSE);
+   PAL_SetPalette(3, false);
    PAL_RNGPlay(6, 0, -1, 25);
    UTIL_Delay(1000);
    PAL_FadeOut(1);
@@ -167,7 +167,7 @@ void PAL_SplashScreen(void)
 
 --*/
 {
-   unsigned char *palette = PAL_GetPalette(1, FALSE);
+   unsigned char *palette = PAL_GetPalette(1, false);
    unsigned char rgCurrentPalette[256 * 3];
    PAL_Surface *lpBitmapDown;
    PAL_Surface *lpBitmapUp;
@@ -185,7 +185,7 @@ void PAL_SplashScreen(void)
    unsigned int dwBeginTime;
 
    if (palette == NULL) {
-      fprintf(stderr, "ERROR: PAL_SplashScreen(): palette == NULL\n");
+      TerminateOnError("ERROR: PAL_SplashScreen(): palette == NULL\n");
       return;
    }
 
@@ -212,8 +212,8 @@ void PAL_SplashScreen(void)
    }
 
    // Play the title music
-   AUDIO_PlayMusic(-1, FALSE, 0);
-   AUDIO_PlayMusic(0x05, TRUE, 2);
+   AUDIO_PlayMusic(-1, false, 0);
+   AUDIO_PlayMusic(0x05, true, 2);
 
    // Clear all of the events and key states
    PAL_ProcessEvent();
@@ -226,7 +226,7 @@ void PAL_SplashScreen(void)
    dstrect.x = 0;
    dstrect.w = SCREEN_W;
 
-   while (TRUE)
+   while (true)
    {
       PAL_ProcessEvent();
       dwTime = UTIL_GetTicks() - dwBeginTime;
@@ -331,7 +331,7 @@ void PAL_SplashScreen(void)
    UTIL_free(lpTitleBuf);
    UTIL_free(lpSpriteCrane);
 
-   AUDIO_PlayMusic(0x00, FALSE, 1);
+   AUDIO_PlayMusic(0x00, false, 1);
 
    PAL_FadeOut(1);
 }
@@ -389,6 +389,6 @@ int main(int argc, char *argv[])
    }
 
    // Should not really reach here...
-   assert(FALSE);
+   assert(false);
    return 255;
 }

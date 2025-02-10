@@ -331,13 +331,13 @@ PAL_SceneDrawSprites(
    for (x = 0; x < g_nSpriteToDraw - 1; x++)
    {
       SPRITE_TO_DRAW tmp;
-      int fSwap = FALSE;
+      int fSwap = false;
 
       for (y = 0; y < g_nSpriteToDraw - 1 - x; y++)
       {
          if (PAL_Y(g_rgSpriteToDraw[y].pos) > PAL_Y(g_rgSpriteToDraw[y + 1].pos))
          {
-            fSwap = TRUE;
+            fSwap = true;
 
             tmp = g_rgSpriteToDraw[y];
             g_rgSpriteToDraw[y] = g_rgSpriteToDraw[y + 1];
@@ -493,7 +493,7 @@ void PAL_MakeScene(
    {
       VIDEO_UpdateScreen(NULL);
       PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-      gpGlobals->fNeedToFadeIn = FALSE;
+      gpGlobals->fNeedToFadeIn = false;
    }
 }
 
@@ -502,7 +502,7 @@ int PAL_CheckObstacle(
     int fCheckEventObjects,
     unsigned short wSelfObject)
 {
-   return PAL_CheckObstacleWithRange(pos, fCheckEventObjects, wSelfObject, FALSE);
+   return PAL_CheckObstacleWithRange(pos, fCheckEventObjects, wSelfObject, false);
 }
 
 int PAL_CheckObstacleWithRange(
@@ -519,7 +519,7 @@ int PAL_CheckObstacleWithRange(
 
      [IN]  pos - the position to check.
 
-     [IN]  fCheckEventObjects - TRUE if check for event objects, FALSE if only
+     [IN]  fCheckEventObjects - true if check for event objects, false if only
            check for the map.
 
      [IN]  wSelfObject - the event object which will be skipped.
@@ -528,7 +528,7 @@ int PAL_CheckObstacleWithRange(
 
    Return value:
 
-     TRUE if the location is obstacle, FALSE if not.
+     true if the location is obstacle, false if not.
 
 --*/
 {
@@ -548,7 +548,7 @@ int PAL_CheckObstacleWithRange(
    if (fCheckRange)
       if (x < blockX || x >= 2048 || y < blockY || y >= 2048)
       {
-         return TRUE;
+         return true;
       }
 
    xr = PAL_X(pos) % 32;
@@ -577,7 +577,7 @@ int PAL_CheckObstacleWithRange(
 
    if (PAL_MapTileIsBlocked(x, y, h, PAL_GetCurrentMap()))
    {
-      return TRUE;
+      return true;
    }
 
    if (fCheckEventObjects)
@@ -608,13 +608,13 @@ int PAL_CheckObstacleWithRange(
             //
             if (abs(p->x - PAL_X(pos)) + abs(p->y - PAL_Y(pos)) * 2 < 16)
             {
-               return TRUE;
+               return true;
             }
          }
       }
    }
 
-   return FALSE;
+   return false;
 }
 
 void PAL_UpdatePartyGestures(
@@ -694,7 +694,7 @@ void PAL_UpdatePartyGestures(
          //
          if (PAL_CheckObstacleWithRange(PAL_XY(gpGlobals->rgParty[i].x + PAL_X(gpGlobals->viewport),
                                                gpGlobals->rgParty[i].y + PAL_Y(gpGlobals->viewport)),
-                                        TRUE, 0, TRUE))
+                                        true, 0, true))
          {
             gpGlobals->rgParty[i].x = gpGlobals->rgTrail[1].x - PAL_X(gpGlobals->viewport);
             gpGlobals->rgParty[i].y = gpGlobals->rgTrail[1].y - PAL_Y(gpGlobals->viewport);
@@ -797,7 +797,7 @@ void PAL_UpdateParty(
       //
       // Check for obstacles on the destination location
       //
-      if (!PAL_CheckObstacleWithRange(PAL_XY(xTarget, yTarget), TRUE, 0, TRUE))
+      if (!PAL_CheckObstacleWithRange(PAL_XY(xTarget, yTarget), true, 0, true))
       {
          //
          // Player will actually be moved. Store trail.
@@ -820,13 +820,13 @@ void PAL_UpdateParty(
          //
          // Update gestures
          //
-         PAL_UpdatePartyGestures(TRUE);
+         PAL_UpdatePartyGestures(true);
 
          return; // don't go further
       }
    }
 
-   PAL_UpdatePartyGestures(FALSE);
+   PAL_UpdatePartyGestures(false);
 }
 
 void PAL_NPCWalkOneStep(

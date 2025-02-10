@@ -275,7 +275,7 @@ static void RIX_Shutdown(void *object)
 {
     if (object != NULL) {
         RIXPLAYER *pRixPlayer = (RIXPLAYER *)object;
-        pRixPlayer->fReady = FALSE;
+        pRixPlayer->fReady = false;
         for (int i = 0; i < gConfig.iAudioChannels; i++)
             if (pRixPlayer->resampler[i])
                 resampler_delete(pRixPlayer->resampler[i]);
@@ -318,7 +318,7 @@ RIX_Play(
     //
     if (pRixPlayer == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     if (iNumRIX == pRixPlayer->iMusic && pRixPlayer->iNextMusic == -1)
@@ -326,7 +326,7 @@ RIX_Play(
         /* Will play the same music without any pending play changes,
            just change the loop attribute */
         pRixPlayer->fLoop = fLoop;
-        return TRUE;
+        return true;
     }
 
     if (pRixPlayer->FadeType != FADE_OUT)
@@ -351,9 +351,9 @@ RIX_Play(
     pRixPlayer->iNextMusic = iNumRIX;
     pRixPlayer->FadeType = FADE_OUT;
     pRixPlayer->fNextLoop = fLoop;
-    pRixPlayer->fReady = TRUE;
+    pRixPlayer->fReady = true;
 
-    return TRUE;
+    return true;
 }
 
 AUDIOPLAYER *RIX_Init(void)
@@ -425,9 +425,9 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->FadeType = FADE_NONE;
     pRixPlayer->iMusic = pRixPlayer->iNextMusic = -1;
     pRixPlayer->pos = NULL;
-    pRixPlayer->fLoop = FALSE;
-    pRixPlayer->fNextLoop = FALSE;
-    pRixPlayer->fReady = FALSE;
+    pRixPlayer->fLoop = false;
+    pRixPlayer->fNextLoop = false;
+    pRixPlayer->fReady = false;
 
     return (AUDIOPLAYER *)pRixPlayer;
 }

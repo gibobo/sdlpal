@@ -53,12 +53,9 @@ PAL_GetPalette(
    PAL_LARGE unsigned char buf[256 * 3 * 2];
    unsigned char *ptr;
    int i;
-   FILE *fp;
+   void *fp;
 
    fp = UTIL_fopen(RESOURCE_PATH "/pat.mkf", "rb");
-
-   if (fp == NULL)
-     return NULL;
 
    memset(palette, 0, sizeof(palette));
    memset(buf, 0, sizeof(buf));
@@ -75,7 +72,7 @@ PAL_GetPalette(
    else if (i <= 256 * 3)
    {
       // There is no night colors in the palette
-      fNight = FALSE;
+      fNight = false;
    }
    ptr = buf + 256 * 3 * ((fNight) ? 1 : 0);
 
@@ -205,7 +202,7 @@ void PAL_FadeIn(
 
    // Start fading in...
    time = UTIL_GetTicks() + iDelay * 10 * 60;
-   while (TRUE)
+   while (true)
    {
       // Set the current palette...
       j = (int)(time - UTIL_GetTicks()) / iDelay / 10;
@@ -269,7 +266,7 @@ void PAL_SceneFade(
       iStep = 1;
    }
 
-   gpGlobals->fNeedToFadeIn = FALSE;
+   gpGlobals->fNeedToFadeIn = false;
 
    if (iStep > 0)
    {
@@ -278,7 +275,7 @@ void PAL_SceneFade(
          // Generate the scene
          PAL_ClearKeyState();
          PAL_SetDirInput(kDirUnknown);
-         PAL_GameUpdate(FALSE);
+         PAL_GameUpdate(false);
          PAL_MakeScene();
          VIDEO_UpdateScreen(NULL);
 
@@ -299,7 +296,7 @@ void PAL_SceneFade(
          // Generate the scene
          PAL_ClearKeyState();
          PAL_SetDirInput(kDirUnknown);
-         PAL_GameUpdate(FALSE);
+         PAL_GameUpdate(false);
          PAL_MakeScene();
          VIDEO_UpdateScreen(NULL);
 
@@ -330,7 +327,7 @@ void PAL_PaletteFade(
 
     [IN]  fNight - whether use the night palette or not.
 
-    [IN]  fUpdateScene - TRUE if update the scene in the progress.
+    [IN]  fUpdateScene - true if update the scene in the progress.
 
   Return value:
 
@@ -364,7 +361,7 @@ void PAL_PaletteFade(
       {
          PAL_ClearKeyState();
          PAL_SetDirInput(kDirUnknown);
-         PAL_GameUpdate(FALSE);
+         PAL_GameUpdate(false);
          PAL_MakeScene();
          VIDEO_UpdateScreen(NULL);
       }
@@ -388,7 +385,7 @@ void PAL_ColorFade(
 
     [IN]  bColor - the color to fade from/to.
 
-    [IN]  fFrom - if TRUE then fade from bColor, else fade to bColor.
+    [IN]  fFrom - if true then fade from bColor, else fade to bColor.
 
   Return value:
 

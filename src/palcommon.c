@@ -24,23 +24,15 @@
 #include "util.h"
 
 #define Check_fread(buf, elem, num, fp)             \
-   if (fread((buf), (elem), (num), (fp)) < (num)) \
+   if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
    return -1
-
-PAL_FORCE_INLINE
-unsigned char
-PAL_CalcShadowColor(
-    unsigned char bSourceColor)
-{
-   return ((bSourceColor & 0xF0) | ((bSourceColor & 0x0F) >> 1));
-}
 
 int PAL_RLEBlitToSurface(
     const unsigned char *lpBitmapRLE,
     PAL_Surface *lpDstSurface,
     unsigned int pos)
 {
-   return PAL_RLEBlitToSurfaceWithShadow(lpBitmapRLE, lpDstSurface, pos, FALSE);
+   return PAL_RLEBlitToSurfaceWithShadow(lpBitmapRLE, lpDstSurface, pos, false);
 }
 
 int PAL_RLEBlitToSurfaceWithShadow(
@@ -180,7 +172,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
                j += k;
                for (; k != 0; k--)
                {
-                  p[x] = PAL_CalcShadowColor(p[x]);
+                  p[x] = (p[x] & 0xF0) | ((p[x] & 0x0F) >> 1);
                   x++;
                }
             }
@@ -778,8 +770,7 @@ PAL_SpriteGetFrame(
    return &lpSprite[offset];
 }
 
-int PAL_MKFGetChunkCount(
-    FILE *fp)
+int PAL_MKFGetChunkCount(void *fp)
 /*++
   Purpose:
 
@@ -796,21 +787,18 @@ int PAL_MKFGetChunkCount(
 --*/
 {
    int iNumChunk;
-   if (fp == NULL)
-   {
+   if (fp == NULL) {
       return 0;
    }
 
    UTIL_fseek(fp, 0, SEEK_SET);
-   if (fread(&iNumChunk, sizeof(int), 1, fp) == 1)
+   if (UTIL_fread(&iNumChunk, sizeof(int), 1, fp) == 1)
       return (iNumChunk >> 2) - 1;
    else
       return 0;
 }
 
-int PAL_MKFGetChunkSize(
-    unsigned int uiChunkNum,
-    FILE *fp)
+int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
 /*++
   Purpose:
 
@@ -837,8 +825,7 @@ int PAL_MKFGetChunkSize(
    // Get the total number of chunks.
    //
    uiChunkCount = PAL_MKFGetChunkCount(fp);
-   if (uiChunkNum >= uiChunkCount)
-   {
+   if (uiChunkNum >= uiChunkCount) {
       return -1;
    }
 
@@ -860,7 +847,7 @@ int PAL_MKFReadChunk(
     void *lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
-    FILE *fp)
+    void *fp)
 /*++
   Purpose:
 
@@ -889,8 +876,7 @@ int PAL_MKFReadChunk(
    unsigned int uiChunkCount;
    unsigned int uiChunkLen;
 
-   if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0)
-   {
+   if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0) {
       return -1;
    }
 
@@ -898,8 +884,7 @@ int PAL_MKFReadChunk(
    // Get the total number of chunks.
    //
    uiChunkCount = PAL_MKFGetChunkCount(fp);
-   if (uiChunkNum >= uiChunkCount)
-   {
+   if (uiChunkNum >= uiChunkCount) {
       return -1;
    }
 
@@ -913,15 +898,13 @@ int PAL_MKFReadChunk(
    //
    uiChunkLen = uiNextOffset - uiOffset;
 
-   if (uiChunkLen > uiBufferSize)
-   {
+   if (uiChunkLen > uiBufferSize) {
       return -2;
    }
 
-   if (uiChunkLen != 0)
-   {
+   if (uiChunkLen != 0) {
       UTIL_fseek(fp, uiOffset, SEEK_SET);
-      return (int)fread(lpBuffer, 1, uiChunkLen, fp);
+      return (int)UTIL_fread(lpBuffer, 1, uiChunkLen, fp);
    }
 
    return -1;
@@ -929,7 +912,7 @@ int PAL_MKFReadChunk(
 
 int PAL_MKFGetDecompressedSize(
     unsigned int uiChunkNum,
-    FILE *fp)
+    void *fp)
 /*++
   Purpose:
 
@@ -952,8 +935,7 @@ int PAL_MKFGetDecompressedSize(
    unsigned int uiOffset;
    unsigned int uiChunkCount;
 
-   if (fp == NULL)
-   {
+   if (fp == NULL) {
       return -1;
    }
 
@@ -961,8 +943,7 @@ int PAL_MKFGetDecompressedSize(
    // Get the total number of chunks.
    //
    uiChunkCount = PAL_MKFGetChunkCount(fp);
-   if (uiChunkNum >= uiChunkCount)
-   {
+   if (uiChunkNum >= uiChunkCount) {
       return -1;
    }
 
@@ -984,7 +965,7 @@ int PAL_MKFDecompressChunk(
     unsigned char **lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
-    FILE *fp)
+    void *fp)
 /*++
   Purpose:
 
@@ -1013,8 +994,7 @@ int PAL_MKFDecompressChunk(
 
    len = PAL_MKFGetChunkSize(uiChunkNum, fp);
 
-   if (len <= 0)
-   {
+   if (len <= 0) {
       return len;
    }
 
@@ -1023,9 +1003,9 @@ int PAL_MKFDecompressChunk(
    PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
 
    if ((uiBufferSize == 0) || ((*lpBuffer) == NULL)) {
-     UTIL_free(*lpBuffer);
-     uiBufferSize = *(unsigned int *)buf;
-     *lpBuffer = UTIL_malloc(uiBufferSize);
+      UTIL_free(*lpBuffer);
+      uiBufferSize = *(unsigned int *)buf;
+      *lpBuffer = UTIL_malloc(uiBufferSize);
    }
 
    len = Decompress(buf, *lpBuffer, uiBufferSize);

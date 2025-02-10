@@ -126,7 +126,7 @@ PAL_MagicSelectionMenuUpdate(
    //
    // Create the box.
    //
-   PAL_CreateBoxWithShadow(PAL_XY(10, 42 + iBoxYOffset), iLinesPerPage - 1, 16, 1, FALSE, 0);
+   PAL_CreateBoxWithShadow(PAL_XY(10, 42 + iBoxYOffset), iLinesPerPage - 1, 16, 1, false, 0);
 
    wScript = gpGlobals->g.rgObject[rgMagicItem[g_iCurrentItem].wMagic].item.wScriptDesc;
    line = 0;
@@ -147,7 +147,7 @@ PAL_MagicSelectionMenuUpdate(
    //
    // Draw the MP of the selected magic.
    //
-   PAL_CreateSingleLineBox(PAL_XY(0, 0), PAL_X(PAL_XY(5, 0)), FALSE);
+   PAL_CreateSingleLineBox(PAL_XY(0, 0), PAL_X(PAL_XY(5, 0)), false);
    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen, PAL_XY(45, 14));
    PAL_DrawNumber(rgMagicItem[g_iCurrentItem].wMP, 4, PAL_XY(15, 14), kNumColorYellow, kNumAlignRight);
    PAL_DrawNumber(g_wPlayerMP, 4, PAL_XY(50, 14), kNumColorCyan, kNumAlignRight);
@@ -195,7 +195,7 @@ PAL_MagicSelectionMenuUpdate(
          //
          // Draw the text
          //
-         PAL_DrawText(PAL_GetWord(rgMagicItem[i].wMagic), PAL_XY(35 + k * iItemTextWidth, 54 + j * 18 + iBoxYOffset), bColor, TRUE, FALSE, FALSE);
+         PAL_DrawText(PAL_GetWord(rgMagicItem[i].wMagic), PAL_XY(35 + k * iItemTextWidth, 54 + j * 18 + iBoxYOffset), bColor, true, false, false);
 
          //
          // Draw the cursor on the current selected item
@@ -220,7 +220,7 @@ PAL_MagicSelectionMenuUpdate(
          j = 35 + j * iItemTextWidth;
          k = 54 + k * 18 + iBoxYOffset;
 
-         PAL_DrawText(PAL_GetWord(rgMagicItem[g_iCurrentItem].wMagic), PAL_XY(j, k), MENUITEM_COLOR_CONFIRMED, FALSE, TRUE, FALSE);
+         PAL_DrawText(PAL_GetWord(rgMagicItem[g_iCurrentItem].wMagic), PAL_XY(j, k), MENUITEM_COLOR_CONFIRMED, false, true, false);
 
          //
          // Draw the cursor on the current selected item
@@ -247,7 +247,7 @@ void PAL_MagicSelectionMenuInit(
 
     [IN]  wPlayerRole - the player ID.
 
-    [IN]  fInBattle - TRUE if in battle, FALSE if not.
+    [IN]  fInBattle - true if in battle, false if not.
 
     [IN]  wDefaultMagic - the default magic item.
 
@@ -278,11 +278,11 @@ void PAL_MagicSelectionMenuInit(
          w = gpGlobals->g.rgObject[w].magic.wMagicNumber;
          rgMagicItem[g_iNumMagic].wMP = gpGlobals->g.lprgMagic[w].wCostMP;
 
-         rgMagicItem[g_iNumMagic].fEnabled = TRUE;
+         rgMagicItem[g_iNumMagic].fEnabled = true;
 
          if (rgMagicItem[g_iNumMagic].wMP > g_wPlayerMP)
          {
-            rgMagicItem[g_iNumMagic].fEnabled = FALSE;
+            rgMagicItem[g_iNumMagic].fEnabled = false;
          }
 
          w = gpGlobals->g.rgObject[rgMagicItem[g_iNumMagic].wMagic].magic.wFlags;
@@ -290,14 +290,14 @@ void PAL_MagicSelectionMenuInit(
          {
             if (!(w & kMagicFlagUsableInBattle))
             {
-               rgMagicItem[g_iNumMagic].fEnabled = FALSE;
+               rgMagicItem[g_iNumMagic].fEnabled = false;
             }
          }
          else
          {
             if (!(w & kMagicFlagUsableOutsideBattle))
             {
-               rgMagicItem[g_iNumMagic].fEnabled = FALSE;
+               rgMagicItem[g_iNumMagic].fEnabled = false;
             }
          }
 
@@ -310,7 +310,7 @@ void PAL_MagicSelectionMenuInit(
    //
    for (i = 0; i < g_iNumMagic - 1; i++)
    {
-      int fCompleted = TRUE;
+      int fCompleted = true;
 
       for (j = 0; j < g_iNumMagic - 1 - i; j++)
       {
@@ -320,7 +320,7 @@ void PAL_MagicSelectionMenuInit(
             rgMagicItem[j] = rgMagicItem[j + 1];
             rgMagicItem[j + 1] = t;
 
-            fCompleted = FALSE;
+            fCompleted = false;
          }
       }
 
@@ -357,7 +357,7 @@ PAL_MagicSelectionMenu(
 
     [IN]  wPlayerRole - the player ID.
 
-    [IN]  fInBattle - TRUE if in battle, FALSE if not.
+    [IN]  fInBattle - true if in battle, false if not.
 
     [IN]  wDefaultMagic - the default magic item.
 
@@ -376,7 +376,7 @@ PAL_MagicSelectionMenu(
 
    dwTime = UTIL_GetTicks();
 
-   while (TRUE)
+   while (true)
    {
       PAL_MakeScene();
 
@@ -385,7 +385,7 @@ PAL_MagicSelectionMenu(
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          PAL_PlayerInfoBox(PAL_XY(w, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-                           TIMEMETER_COLOR_DEFAULT, FALSE);
+                           TIMEMETER_COLOR_DEFAULT, false);
          w += 78;
       }
 

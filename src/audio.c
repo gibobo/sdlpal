@@ -23,8 +23,16 @@
 #include "global.h"
 #include "resampler.h"
 #include "util.h"
+#include "driver.h"
 
-#define     PAL_MAX_VOLUME               100
+#ifndef PAL_FORCE_INLINE
+#if defined(_MSC_VER)
+#define PAL_FORCE_INLINE static __forceinline
+#else
+#define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
+#endif
+#endif
+#define PAL_MAX_VOLUME 100
 
 typedef struct tagAUDIODEVICE {
     AUDIOPLAYER *pMusPlayer;
@@ -52,7 +60,7 @@ PAL_FORCE_INLINE void AUDIO_MixNative(short *dst, short *src, int samples) {
 }
 
 void AUDIO_FillBuffer(void *stream, int len) {
-    if(gAudioDevice.fOpened == FALSE)
+    if(gAudioDevice.fOpened == false)
         return;
 
     // Play music
@@ -91,21 +99,21 @@ int AUDIO_OpenDevice(void)
     }
 
     memset(&gAudioDevice, 0, sizeof(AUDIODEVICE));
-    gAudioDevice.fOpened = FALSE;
+    gAudioDevice.fOpened = false;
 
     // Initialize the resampler module
     resampler_init();
 
     // Initialize the music subsystem.
     gAudioDevice.pMusPlayer = RIX_Init();
-    gAudioDevice.fMusicEnabled = (gAudioDevice.pMusPlayer) ? TRUE : FALSE;
+    gAudioDevice.fMusicEnabled = (gAudioDevice.pMusPlayer) ? true : false;
 
     // Initialize the sound subsystem.
     gAudioDevice.pSoundPlayer = SOUND_Init();
     gAudioDevice.pSoundBuffer = (gAudioDevice.pSoundPlayer) ? UTIL_calloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels, sizeof(short)) : NULL;
-    gAudioDevice.fSoundEnabled = (gAudioDevice.pSoundBuffer) ? TRUE : FALSE;
+    gAudioDevice.fSoundEnabled = (gAudioDevice.pSoundBuffer) ? true : false;
 
-    gAudioDevice.fOpened = TRUE;
+    gAudioDevice.fOpened = true;
 
     return 0;
 }
@@ -143,7 +151,7 @@ void AUDIO_CloseDevice(void)
 
     resampler_deinit();
 
-    gAudioDevice.fOpened = FALSE;
+    gAudioDevice.fOpened = false;
 }
 
 void AUDIO_PlaySound(int iSoundNum)
@@ -167,7 +175,7 @@ void AUDIO_PlaySound(int iSoundNum)
     // latency for large sound files. To prevent this latency affects audio playing,
     // the mutex lock is obtained inside the SOUND_Play function rather than here.
     if (gAudioDevice.pSoundPlayer) {
-        gAudioDevice.pSoundPlayer->Play(gAudioDevice.pSoundPlayer, abs(iSoundNum), FALSE, 0.0f);
+        gAudioDevice.pSoundPlayer->Play(gAudioDevice.pSoundPlayer, abs(iSoundNum), false, 0.0f);
     }
 }
 

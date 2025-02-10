@@ -20,8 +20,8 @@
  *                                           BSPAL <BSPAL.ys168.com>
  */
 
-#include "player.h"
 #include "fprovide.h"
+#include "player.h"
 #include <stdint.h>
 
 class CrixPlayer : public CPlayer

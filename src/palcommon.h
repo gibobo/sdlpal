@@ -22,7 +22,6 @@
 #define _PALUTILS_H
 
 #include "video.h"
-#include <stdio.h>
 
 #define PAL_XY(x, y) (unsigned int)(((((unsigned short)(y)) << 16) & 0xFFFF0000) | (((unsigned short)(x)) & 0xFFFF))
 #define PAL_X(xy) (short)((xy) & 0xFFFF)
@@ -74,27 +73,27 @@ const unsigned char *PAL_SpriteGetFrame(
     const unsigned char *lpSprite,
     int iFrameNum);
 
-int PAL_MKFGetChunkCount(FILE *fp);
+int PAL_MKFGetChunkCount(void *fp);
 
 int PAL_MKFGetChunkSize(
     unsigned int uiChunkNum,
-    FILE *fp);
+    void *fp);
 
 int PAL_MKFReadChunk(
     void *lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
-    FILE *fp);
+    void *fp);
 
 int PAL_MKFGetDecompressedSize(
     unsigned int uiChunkNum,
-    FILE *fp);
+    void *fp);
 
 int PAL_MKFDecompressChunk(
     unsigned char **lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
-    FILE *fp);
+    void *fp);
 
 // From yj1.c:
 extern int (*Decompress)(

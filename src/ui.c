@@ -219,7 +219,7 @@ BOX *PAL_CreateBoxWithShadow(
       for (j = 0; j < nColumns; j++)
       {
          n = (j == 0) ? 0 : ((j == nColumns - 1) ? 2 : 1);
-         PAL_RLEBlitToSurfaceWithShadow(rglpBorderBitmap[m][n], gpScreen, PAL_XY(x + nShadowOffset, rect.y + nShadowOffset), TRUE);
+         PAL_RLEBlitToSurfaceWithShadow(rglpBorderBitmap[m][n], gpScreen, PAL_XY(x + nShadowOffset, rect.y + nShadowOffset), true);
          PAL_RLEBlitToSurface(rglpBorderBitmap[m][n], gpScreen, PAL_XY(x, rect.y));
          x += PAL_RLEGetWidth(rglpBorderBitmap[m][n]);
       }
@@ -308,17 +308,17 @@ BOX *PAL_CreateSingleLineBoxWithShadow(
    //
    // Draw the shadow
    //
-   PAL_RLEBlitToSurfaceWithShadow(lpBitmapLeft, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), TRUE);
+   PAL_RLEBlitToSurfaceWithShadow(lpBitmapLeft, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
 
    rect.x += PAL_RLEGetWidth(lpBitmapLeft);
 
    for (i = 0; i < nLen; i++)
    {
-      PAL_RLEBlitToSurfaceWithShadow(lpBitmapMid, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), TRUE);
+      PAL_RLEBlitToSurfaceWithShadow(lpBitmapMid, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
       rect.x += PAL_RLEGetWidth(lpBitmapMid);
    }
 
-   PAL_RLEBlitToSurfaceWithShadow(lpBitmapRight, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), TRUE);
+   PAL_RLEBlitToSurfaceWithShadow(lpBitmapRight, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
 
    rect.x = xSaved;
    //
@@ -419,7 +419,7 @@ PAL_ReadMenu(
    //
    // Fix issue #166
    //
-   VIDEO_RenderPaused(TRUE);
+   VIDEO_RenderPaused(true);
    //
    // Draw all the menu texts.
    //
@@ -439,12 +439,12 @@ PAL_ReadMenu(
          }
       }
 
-      PAL_DrawText(PAL_GetWord(rgMenuItem[i].wNumWord), rgMenuItem[i].pos, bColor, TRUE, TRUE, FALSE);
+      PAL_DrawText(PAL_GetWord(rgMenuItem[i].wNumWord), rgMenuItem[i].pos, bColor, true, true, false);
    }
    //
    // Fix issue #166
    //
-   VIDEO_RenderPaused(FALSE);
+   VIDEO_RenderPaused(false);
    VIDEO_UpdateScreen(NULL);
 
    if (lpfnMenuItemChanged != NULL)
@@ -452,7 +452,7 @@ PAL_ReadMenu(
       (*lpfnMenuItemChanged)(rgMenuItem[wDefaultItem].wValue);
    }
 
-   while (TRUE)
+   while (true)
    {
       PAL_ClearKeyState();
 
@@ -462,7 +462,7 @@ PAL_ReadMenu(
       if (rgMenuItem[wCurrentItem].fEnabled)
       {
          PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                      rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, FALSE, TRUE, FALSE);
+                      rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
       }
 
       PAL_ProcessEvent();
@@ -472,7 +472,7 @@ PAL_ReadMenu(
          //
          // Fix issue #166
          //
-         VIDEO_RenderPaused(TRUE);
+         VIDEO_RenderPaused(true);
 
          //
          // User pressed the down or right arrow key
@@ -483,12 +483,12 @@ PAL_ReadMenu(
             // Dehighlight the unselected item.
             //
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, bLabelColor, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
          }
          else
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
          }
 
          wCurrentItem++;
@@ -504,17 +504,17 @@ PAL_ReadMenu(
          if (rgMenuItem[wCurrentItem].fEnabled)
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
          }
          else
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED_INACTIVE, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED_INACTIVE, false, true, false);
          }
          //
          // Fix issue #166
          //
-         VIDEO_RenderPaused(FALSE);
+         VIDEO_RenderPaused(false);
          VIDEO_UpdateScreen(NULL);
 
          if (lpfnMenuItemChanged != NULL)
@@ -527,7 +527,7 @@ PAL_ReadMenu(
          //
          // Fix issue #166
          //
-         VIDEO_RenderPaused(TRUE);
+         VIDEO_RenderPaused(true);
 
          //
          // User pressed the up or left arrow key
@@ -538,12 +538,12 @@ PAL_ReadMenu(
             // Dehighlight the unselected item.
             //
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, bLabelColor, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
          }
          else
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
          }
 
          if (wCurrentItem > 0)
@@ -561,17 +561,17 @@ PAL_ReadMenu(
          if (rgMenuItem[wCurrentItem].fEnabled)
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
          }
          else
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED_INACTIVE, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED_INACTIVE, false, true, false);
          }
          //
          // Fix issue #166
          //
-         VIDEO_RenderPaused(FALSE);
+         VIDEO_RenderPaused(false);
          VIDEO_UpdateScreen(NULL);
 
          if (lpfnMenuItemChanged != NULL)
@@ -587,12 +587,12 @@ PAL_ReadMenu(
          if (rgMenuItem[wCurrentItem].fEnabled)
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, bLabelColor, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
          }
          else
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
          }
 
          break;
@@ -605,7 +605,7 @@ PAL_ReadMenu(
          if (rgMenuItem[wCurrentItem].fEnabled)
          {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_CONFIRMED, FALSE, TRUE, FALSE);
+                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_CONFIRMED, false, true, false);
 
             return rgMenuItem[wCurrentItem].wValue;
          }

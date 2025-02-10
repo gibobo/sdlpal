@@ -22,7 +22,6 @@
 #include "driver.h"
 #include "util.h"
 #include "video.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 #define ReLU(A)  ((A) > 0 ? (A) : 0)
@@ -30,8 +29,8 @@
 #define unicode_upper_base  0xF900
 #define unicode_upper_top	0xFFFE
 
-static FILE *fp_font_data = NULL;
-static FILE *fp_font_size = NULL;
+static void *fp_font_data = NULL;
+static void *fp_font_size = NULL;
 static unsigned char *p_font = NULL;
 static unsigned char *p_font_size = NULL;
 

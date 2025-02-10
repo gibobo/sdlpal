@@ -48,14 +48,19 @@ static const float p_tex[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
 char *readShaderFile(const char *filename, GLuint type)
 {
-    FILE *fp = fopen(filename, "rb");
-    fseek(fp, 0, SEEK_END);
-    long filesize = ftell(fp);
-    char *buf = (char *)malloc(filesize + 1);
-    fseek(fp, 0, SEEK_SET);
-    fread(buf, filesize, 1, fp);
-    fclose(fp);
-    buf[filesize] = '\0';
+    long filesize = 0;
+    char *buf = NULL;
+    FILE *fp = NULL;
+    if(fp = fopen(filename, "rb"))
+    {
+        fseek(fp, 0, SEEK_END);
+        filesize = ftell(fp);
+        buf = (char *)malloc(filesize + 1);
+        fseek(fp, 0, SEEK_SET);
+        fread(buf, filesize, 1, fp);
+        fclose(fp);
+        buf[filesize] = '\0';
+    }
     return buf;
 }
 

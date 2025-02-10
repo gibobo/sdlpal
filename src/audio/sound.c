@@ -69,7 +69,7 @@ typedef struct tagWAVEDATA {
 
 typedef struct tagSOUNDPLAYER {
     AUDIOPLAYER_COMMONS;
-    FILE *mkf;             /* File pointer to the MKF file */
+    void *mkf;             /* File pointer to the MKF file */
     WAVEDATA soundlist;
     int cursounds;
     int lastSFX;
@@ -665,18 +665,18 @@ static int SOUND_Play(
 
   // Check for NULL pointer.
   if (player == NULL) {
-    return FALSE;
+    return false;
   }
 
   if (player->lastSFX == iSoundNum)
-    return FALSE;
+    return false;
 
   player->lastSFX = iSoundNum;
 
   // Get the length of the sound file.
   len = PAL_MKFGetChunkSize(iSoundNum, player->mkf);
   if (len <= 0) {
-    return FALSE;
+    return false;
   }
 
   // Read the sound file from the MKF archive.
@@ -686,7 +686,7 @@ static int SOUND_Play(
   snddata = SOUND_LoadWAVEData(buf, len, &wavespec);
   if (snddata == NULL) {
     UTIL_free(buf);
-    return FALSE;
+    return false;
   }
 
   if (wavespec.channels == 1 && gConfig.iAudioChannels == 1)
@@ -699,7 +699,7 @@ static int SOUND_Play(
     mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
   else {
     UTIL_free(buf);
-    return FALSE;
+    return false;
   }
 
   cursnd = &player->soundlist;
@@ -727,7 +727,7 @@ static int SOUND_Play(
   cursnd->ResampleMix = mixer;
   player->cursounds++;
 
-  return TRUE;
+  return true;
 }
 
 void SOUND_Shutdown(void *object)
@@ -825,7 +825,7 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
-  FILE *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
+  void *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
   if (mkf == NULL)
     return NULL;
   SOUNDPLAYER *player = (SOUNDPLAYER *)UTIL_malloc(sizeof(SOUNDPLAYER));

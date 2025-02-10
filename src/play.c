@@ -66,7 +66,7 @@ PAL_GameUpdate(
          //
          // Run the script for entering the scene
          //
-         gpGlobals->fEnteringScene = FALSE;
+         gpGlobals->fEnteringScene = false;
 
          i = gpGlobals->wNumScene - 1;
          gpGlobals->g.rgScene[i].wScriptOnEnter = PAL_RunTriggerScript(gpGlobals->g.rgScene[i].wScriptOnEnter, 0xFFFF);
@@ -149,7 +149,7 @@ PAL_GameUpdate(
                   //
                   // Redraw the scene
                   //
-                  PAL_UpdatePartyGestures(FALSE);
+                  PAL_UpdatePartyGestures(false);
 
                   PAL_MakeScene();
                   VIDEO_UpdateScreen(NULL);
@@ -223,7 +223,7 @@ PAL_GameUpdate(
 
             pos = PAL_XY(x, y);
 
-            if (!PAL_CheckObstacleWithRange(pos, TRUE, 0, TRUE))
+            if (!PAL_CheckObstacleWithRange(pos, true, 0, true))
             {
                //
                // move here
@@ -269,7 +269,7 @@ PAL_GameUseItem(
 {
    unsigned short         wObject;
 
-   while (TRUE)
+   while (true)
    {
       wObject = PAL_ItemSelectMenu(NULL, kItemFlagUsable);
 
@@ -285,7 +285,7 @@ PAL_GameUseItem(
          //
          unsigned short     wPlayer = 0;
 
-         while (TRUE)
+         while (true)
          {
             wPlayer = PAL_ItemUseMenu(wObject);
 
@@ -353,7 +353,7 @@ PAL_GameEquipItem(
 {
    unsigned short      wObject;
 
-   while (TRUE)
+   while (true)
    {
       wObject = PAL_ItemSelectMenu(NULL, kItemFlagEquipable);
 
@@ -509,7 +509,7 @@ PAL_StartFrame(
 --*/
 {
    // Run the game logic of one frame
-   PAL_GameUpdate(TRUE);
+   PAL_GameUpdate(true);
    if (gpGlobals->fEnteringScene)
    {
       return;
@@ -616,7 +616,7 @@ PAL_WaitForKey(
 
 --*/
 {
-   PAL_WaitForKeyInternal(wTimeOut, FALSE);
+   PAL_WaitForKeyInternal(wTimeOut, false);
 }
 
 void
@@ -638,5 +638,5 @@ PAL_WaitForAnyKey(
 
 --*/
 {
-   PAL_WaitForKeyInternal(wTimeOut, TRUE);
+   PAL_WaitForKeyInternal(wTimeOut, true);
 }

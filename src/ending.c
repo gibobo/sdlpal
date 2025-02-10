@@ -203,7 +203,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
       if (gpGlobals->fNeedToFadeIn)
       {
          PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-         gpGlobals->fNeedToFadeIn = FALSE;
+         gpGlobals->fNeedToFadeIn = false;
       }
 
       UTIL_Delay(800 / 15);
@@ -301,7 +301,7 @@ static void PAL_EndingAnimation(
       if (gpGlobals->fNeedToFadeIn)
       {
          PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-         gpGlobals->fNeedToFadeIn = FALSE;
+         gpGlobals->fNeedToFadeIn = false;
       }
 
       UTIL_Delay(50);
@@ -334,19 +334,19 @@ void PAL_EndingScreen(void)
    // Use AVI & WIN95's music if we can
    // Otherwise, simulate the ending of DOS version
 #if 1 // unknown music playing
-   AUDIO_PlayMusic(-1, FALSE, 0);
-   AUDIO_PlayMusic(0x1a, TRUE, 0);
+   AUDIO_PlayMusic(-1, false, 0);
+   AUDIO_PlayMusic(0x1a, true, 0);
    PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 110, 150, 7);
    PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 151, -1, 9);
 
    PAL_FadeOut(2);
 #endif
 #if 1 // beast sence 1
-   AUDIO_PlayMusic(-1, FALSE, 0);
-   AUDIO_PlayMusic(0x19, TRUE, 0);
+   AUDIO_PlayMusic(-1, false, 0);
+   AUDIO_PlayMusic(0x19, true, 0);
 
    PAL_ShowFBP(75, 0);
-   PAL_FadeIn(5, FALSE, 1);
+   PAL_FadeIn(5, false, 1);
    PAL_ScrollFBP(74);
 
    PAL_FadeOut(1);
@@ -354,19 +354,19 @@ void PAL_EndingScreen(void)
 #if 1 // beast sence 2
    PAL_CleanScreen();
    gpGlobals->wNumPalette = 4;
-   gpGlobals->fNeedToFadeIn = TRUE;
+   gpGlobals->fNeedToFadeIn = true;
    PAL_EndingAnimation();
 #endif
 #if 1 // disaster
-   AUDIO_PlayMusic(-1, FALSE, 0);
-   AUDIO_PlayMusic(0x00, FALSE, 2);
-   PAL_ColorFade(7, 15, FALSE);
+   AUDIO_PlayMusic(-1, false, 0);
+   AUDIO_PlayMusic(0x00, false, 2);
+   PAL_ColorFade(7, 15, false);
 
-   AUDIO_PlayMusic(-1, FALSE, 0);
-   AUDIO_PlayMusic(0x11, TRUE, 0);
+   AUDIO_PlayMusic(-1, false, 0);
+   AUDIO_PlayMusic(0x11, true, 0);
 
    PAL_CleanScreen();
-   PAL_SetPalette(0, FALSE);
+   PAL_SetPalette(0, false);
    PAL_RNGPlay(11, 0, -1, 7);
 
    PAL_FadeOut(2);
@@ -374,7 +374,7 @@ void PAL_EndingScreen(void)
 #if 1 // GIRL 3
    PAL_CleanScreen();
    gpGlobals->wNumPalette = 8;
-   gpGlobals->fNeedToFadeIn = TRUE;
+   gpGlobals->fNeedToFadeIn = true;
    PAL_RNGPlay(10, 0, -1, 6);
 
    g_wCurEffectSprite = 0;
@@ -385,7 +385,7 @@ void PAL_EndingScreen(void)
    PAL_ShowFBP(76, 7);
 #endif
 #if 1 // GIRL 2
-   PAL_SetPalette(5, FALSE);
+   PAL_SetPalette(5, false);
    PAL_ShowFBP(73, 7);
    PAL_ScrollFBP(72);
 
@@ -396,12 +396,12 @@ void PAL_EndingScreen(void)
    PAL_ShowFBP(68, 6);
 
    PAL_WaitForKey(0);
-   AUDIO_PlayMusic(0x00, FALSE, 1);
+   AUDIO_PlayMusic(0x00, false, 1);
    UTIL_Delay(500);
 #endif
 #if 1 // staff list
-   AUDIO_PlayMusic(-1, FALSE, 0);
-   AUDIO_PlayMusic(9, TRUE, 0);
+   AUDIO_PlayMusic(-1, false, 0);
+   AUDIO_PlayMusic(9, true, 0);
    PAL_ScrollFBP(67);
    PAL_ScrollFBP(66); // GIRL 3
    PAL_ScrollFBP(65);
@@ -412,7 +412,7 @@ void PAL_EndingScreen(void)
    PAL_ScrollFBP(60); // BOY
    PAL_ScrollFBP(59);
 
-   AUDIO_PlayMusic(0x00, FALSE, 6);
+   AUDIO_PlayMusic(0x00, false, 6);
    PAL_FadeOut(3); // 淡出
 #endif
 }

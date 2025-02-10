@@ -18,7 +18,7 @@ else()
 endif()
 
 
-set (SDL_INCLUDE_DIR    external/SDL/include)
+# set (SDL_INCLUDE_DIR    external/SDL/include)
 set (BINIO_SOURCE_DIR   external/libbinio/src)
 set (BINIO_INCLUDE_DIR  external/libbinio/contrib/vs2015/libbinio)
 set (NUKED_DIR          external/nuked)

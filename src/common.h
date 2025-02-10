@@ -28,7 +28,6 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -38,42 +37,11 @@
 #include <unistd.h>
 #endif
 
-#ifndef max
-# define max fmax
-#endif
-
-#ifndef min
-# define min fmin
-#endif
-
-#ifndef PAL_FORCE_INLINE
-#if defined(_MSC_VER)
-#define PAL_FORCE_INLINE static __forceinline
-#else
-#define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
-#endif
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifdef PATH_MAX
-#define PAL_MAX_PATH PATH_MAX
-#else
-#define PAL_MAX_PATH 1024
-#endif
-
 #ifndef PAL_LARGE
 #define PAL_LARGE
 #endif
 
-#define PAL_GLOBAL_BUFFER_SIZE 1024
-
-#define    FPS             10
-#define    FRAME_TIME      (1000 / FPS)
+#define BATTLE_FRAME_TIME (1000 / 25) // 25 FPS
+#define FRAME_TIME (1000 / 10)        // 10 FPS
 
 #endif

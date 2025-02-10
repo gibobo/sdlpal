@@ -21,7 +21,6 @@
 #ifndef _MAP_H
 #define _MAP_H
 
-#include <stdio.h>
 #include "video.h"
 
 //
@@ -68,8 +67,8 @@ extern "C" {
 
 PALMAP *PAL_LoadMap(
     int iMapNum,
-    FILE *fpMapMKF,
-    FILE *fpGopMKF);
+    void *fpMapMKF,
+    void *fpGopMKF);
 
 void PAL_FreeMap(
     PALMAP *lpMap);

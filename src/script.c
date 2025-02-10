@@ -41,7 +41,7 @@
 #include "util.h"
 #include "video.h"
 
-int g_fScriptSuccess = TRUE;
+int g_fScriptSuccess = true;
 static int g_iCurEquipPart = -1;
 extern BATTLE g_Battle;
 
@@ -73,8 +73,8 @@ PAL_NPCWalkTo(
 
   Return value:
 
-    TRUE if the event object has successfully moved to the specified position,
-    FALSE if still need more moving.
+    true if the event object has successfully moved to the specified position,
+    false if still need more moving.
 
 --*/
 {
@@ -108,10 +108,10 @@ PAL_NPCWalkTo(
    if (pEvtObj->x == x * 32 + h * 16 && pEvtObj->y == y * 16 + h * 8)
    {
       pEvtObj->wCurrentFrameNum = 0;
-      return TRUE;
+      return true;
    }
 
-   return FALSE;
+   return false;
 }
 
 static void
@@ -196,8 +196,8 @@ PAL_PartyWalkTo(
       //
       gpGlobals->viewport = PAL_XY(dx, dy);
 
-      PAL_UpdatePartyGestures(TRUE);
-      PAL_GameUpdate(FALSE);
+      PAL_UpdatePartyGestures(true);
+      PAL_GameUpdate(false);
       PAL_MakeScene();
       VIDEO_UpdateScreen(NULL);
 
@@ -205,7 +205,7 @@ PAL_PartyWalkTo(
       yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
    }
 
-   PAL_UpdatePartyGestures(FALSE);
+   PAL_UpdatePartyGestures(false);
 }
 
 static void
@@ -235,8 +235,8 @@ PAL_PartyRideEventObject(
 
   Return value:
 
-    TRUE if the party and event object has successfully moved to the specified
-    position, FALSE if still need more moving.
+    true if the party and event object has successfully moved to the specified
+    position, false if still need more moving.
 
 --*/
 {
@@ -300,7 +300,7 @@ PAL_PartyRideEventObject(
       p->x += dx;
       p->y += dy;
 
-      PAL_GameUpdate(FALSE);
+      PAL_GameUpdate(false);
       PAL_MakeScene();
       VIDEO_UpdateScreen(NULL);
 
@@ -328,7 +328,7 @@ PAL_MonsterChasePlayer(
 
     [IN]  wChaseRange - sensitive range of the monster.
 
-    [IN]  fFloating - TRUE if monster is floating (i.e., ignore the obstacles)
+    [IN]  fFloating - true if monster is floating (i.e., ignore the obstacles)
 
   Return value:
 
@@ -443,7 +443,7 @@ PAL_MonsterChasePlayer(
          }
          else
          {
-            if (!PAL_CheckObstacle(PAL_XY(x, y), TRUE, wEventObjectID))
+            if (!PAL_CheckObstacle(PAL_XY(x, y), true, wEventObjectID))
             {
                wMonsterSpeed = wSpeed;
             }
@@ -478,7 +478,7 @@ PAL_MonsterChasePlayer(
                   break;
                }
 
-               if (PAL_CheckObstacle(PAL_XY(pEvtObj->x, pEvtObj->y), FALSE, 0))
+               if (PAL_CheckObstacle(PAL_XY(pEvtObj->x, pEvtObj->y), false, 0))
                {
                   pEvtObj->x = prevx;
                   pEvtObj->y = prevy;
@@ -785,7 +785,7 @@ PAL_InterpretInstruction(
       //
       if (pScript->rgwOperand[0])
       {
-         g_fScriptSuccess = FALSE;
+         g_fScriptSuccess = false;
          //
          // Apply to everyone
          //
@@ -793,7 +793,7 @@ PAL_InterpretInstruction(
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
             if (PAL_IncreaseHPMP(w, (signed short)pScript->rgwOperand[1], 0))
-               g_fScriptSuccess = TRUE;
+               g_fScriptSuccess = true;
          }
       }
       else
@@ -803,7 +803,7 @@ PAL_InterpretInstruction(
          //
          if (!PAL_IncreaseHPMP(wEventObjectID, (signed short)pScript->rgwOperand[1], 0))
          {
-            g_fScriptSuccess = FALSE;
+            g_fScriptSuccess = false;
          }
       }
       break;
@@ -830,7 +830,7 @@ PAL_InterpretInstruction(
          //
          if (!PAL_IncreaseHPMP(wEventObjectID, 0, (signed short)(pScript->rgwOperand[1])))
          {
-            g_fScriptSuccess = FALSE;
+            g_fScriptSuccess = false;
          }
       }
       break;
@@ -859,7 +859,7 @@ PAL_InterpretInstruction(
          if (!PAL_IncreaseHPMP(wEventObjectID,
                                (signed short)(pScript->rgwOperand[1]), (signed short)(pScript->rgwOperand[1])))
          {
-            g_fScriptSuccess = FALSE;
+            g_fScriptSuccess = false;
          }
       }
       break;
@@ -965,7 +965,7 @@ PAL_InterpretInstruction(
          //
          // Apply to everyone
          //
-         g_fScriptSuccess = FALSE;
+         g_fScriptSuccess = false;
 
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
          {
@@ -981,7 +981,7 @@ PAL_InterpretInstruction(
                   PAL_RemovePlayerStatus(w, x);
                }
 
-               g_fScriptSuccess = TRUE;
+               g_fScriptSuccess = true;
             }
          }
       }
@@ -1003,7 +1003,7 @@ PAL_InterpretInstruction(
          }
          else
          {
-            g_fScriptSuccess = FALSE;
+            g_fScriptSuccess = false;
          }
       }
       break;
@@ -1277,7 +1277,7 @@ PAL_InterpretInstruction(
       //
       if (!PAL_SetPlayerStatus(wEventObjectID, pScript->rgwOperand[0], pScript->rgwOperand[1]))
       {
-         g_fScriptSuccess = FALSE;
+         g_fScriptSuccess = false;
       }
       break;
 
@@ -1369,7 +1369,7 @@ PAL_InterpretInstruction(
 
          PAL_AddItemToInventory(gpGlobals->g.lprgStore[0].rgwItems[i], 1);
 
-         PAL_StartDialogWithOffset(kDialogCenterWindow, 0, 0, FALSE, 0, -10);
+         PAL_StartDialogWithOffset(kDialogCenterWindow, 0, 0, false, 0, -10);
          PAL_swprintf(s, sizeof(s) / sizeof(wchar_t), L"%ls@%ls@", PAL_GetWord(42), PAL_GetWord(gpGlobals->g.lprgStore[0].rgwItems[i]));
          const unsigned char *pBG = PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX);
          int iBGWidth = PAL_RLEGetWidth(pBG);
@@ -1457,7 +1457,7 @@ PAL_InterpretInstruction(
          //
          // failed
          //
-         g_fScriptSuccess = FALSE;
+         g_fScriptSuccess = false;
          wScriptEntry = pScript->rgwOperand[0] - 1;
       }
       break;
@@ -1516,7 +1516,7 @@ PAL_InterpretInstruction(
       //
       // Mark the script as failed
       //
-      g_fScriptSuccess = FALSE;
+      g_fScriptSuccess = false;
       break;
 
    case 0x0042:
@@ -1672,7 +1672,7 @@ PAL_InterpretInstruction(
       //
       VIDEO_UpdateScreen(NULL);
       PAL_FadeOut(pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1);
-      gpGlobals->fNeedToFadeIn = TRUE;
+      gpGlobals->fNeedToFadeIn = true;
       break;
 
    case 0x0051:
@@ -1682,7 +1682,7 @@ PAL_InterpretInstruction(
       VIDEO_UpdateScreen(NULL);
       PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
                  ((signed short)(pScript->rgwOperand[0]) > 0) ? pScript->rgwOperand[0] : 1);
-      gpGlobals->fNeedToFadeIn = FALSE;
+      gpGlobals->fNeedToFadeIn = false;
       break;
 
    case 0x0052:
@@ -1697,14 +1697,14 @@ PAL_InterpretInstruction(
       //
       // use the day palette
       //
-      gpGlobals->fNightPalette = FALSE;
+      gpGlobals->fNightPalette = false;
       break;
 
    case 0x0054:
       //
       // use the night palette
       //
-      gpGlobals->fNightPalette = TRUE;
+      gpGlobals->fNightPalette = true;
       break;
 
    case 0x0055:
@@ -1773,7 +1773,7 @@ PAL_InterpretInstruction(
          //
          gpGlobals->wNumScene = pScript->rgwOperand[0];
          PAL_SetLoadFlags(kLoadScene);
-         gpGlobals->fEnteringScene = TRUE;
+         gpGlobals->fEnteringScene = true;
          gpGlobals->wLayer = 0;
       }
       break;
@@ -2002,7 +2002,7 @@ PAL_InterpretInstruction(
 
       if (pScript->rgwOperand[0] != 0 || pScript->rgwOperand[1] != 0)
       {
-         PAL_UpdatePartyGestures(TRUE);
+         PAL_UpdatePartyGestures(true);
       }
       break;
 
@@ -2102,7 +2102,7 @@ PAL_InterpretInstruction(
       //
       // Stop current playing music
       //
-      AUDIO_PlayMusic(0x00, FALSE, (pScript->rgwOperand[0] == 0) ? 2.0f : (float)(pScript->rgwOperand[0]) * 3);
+      AUDIO_PlayMusic(0x00, false, (pScript->rgwOperand[0] == 0) ? 2.0f : (float)(pScript->rgwOperand[0]) * 3);
       gpGlobals->wNumMusic = 0;
       break;
 
@@ -2243,7 +2243,7 @@ PAL_InterpretInstruction(
 
             if (pScript->rgwOperand[2] != 0xFFFF)
             {
-               PAL_GameUpdate(FALSE);
+               PAL_GameUpdate(false);
             }
 
             PAL_MakeScene();
@@ -2276,7 +2276,7 @@ PAL_InterpretInstruction(
             // The event object is not in the current scene
             //
             wScriptEntry = pScript->rgwOperand[2] - 1;
-            g_fScriptSuccess = FALSE;
+            g_fScriptSuccess = false;
             break;
          }
 
@@ -2308,7 +2308,7 @@ PAL_InterpretInstruction(
          else
          {
             wScriptEntry = pScript->rgwOperand[2] - 1;
-            g_fScriptSuccess = FALSE;
+            g_fScriptSuccess = false;
          }
       }
       break;
@@ -2335,7 +2335,7 @@ PAL_InterpretInstruction(
          // The event object is not in the current scene
          //
          wScriptEntry = pScript->rgwOperand[2] - 1;
-         g_fScriptSuccess = FALSE;
+         g_fScriptSuccess = false;
          break;
       }
 
@@ -2345,7 +2345,7 @@ PAL_InterpretInstruction(
       if (abs(x) + abs(y * 2) >= pScript->rgwOperand[1] * 32 + 16)
       {
          wScriptEntry = pScript->rgwOperand[2] - 1;
-         g_fScriptSuccess = FALSE;
+         g_fScriptSuccess = false;
       }
       break;
 
@@ -2360,7 +2360,7 @@ PAL_InterpretInstruction(
          // The event object is not in the current scene
          //
          wScriptEntry = pScript->rgwOperand[2] - 1;
-         g_fScriptSuccess = FALSE;
+         g_fScriptSuccess = false;
          break;
       }
 
@@ -2376,10 +2376,10 @@ PAL_InterpretInstruction(
                ? -8
                : 8);
 
-      if (PAL_CheckObstacle(PAL_XY(x, y), FALSE, 0))
+      if (PAL_CheckObstacle(PAL_XY(x, y), false, 0))
       {
          wScriptEntry = pScript->rgwOperand[2] - 1;
-         g_fScriptSuccess = FALSE;
+         g_fScriptSuccess = false;
       }
       else
       {
@@ -2400,7 +2400,7 @@ PAL_InterpretInstruction(
       //
       // Jump if the specified item is not equipped
       //
-      y = FALSE;
+      y = false;
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          w = gpGlobals->rgParty[i].wPlayerRole;
@@ -2408,7 +2408,7 @@ PAL_InterpretInstruction(
          {
             if (gpGlobals->g.PlayerRoles.rgwEquipment[x][w] == pScript->rgwOperand[0])
             {
-               y = TRUE;
+               y = true;
                i = 999;
                break;
             }
@@ -2448,7 +2448,7 @@ PAL_InterpretInstruction(
       //
       // Enable Auto-Battle for next battle
       //
-      gpGlobals->fAutoBattle = TRUE;
+      gpGlobals->fAutoBattle = true;
       break;
 
    case 0x008B:
@@ -2458,7 +2458,7 @@ PAL_InterpretInstruction(
       gpGlobals->wNumPalette = pScript->rgwOperand[0];
       if (!gpGlobals->fNeedToFadeIn)
       {
-         PAL_SetPalette(gpGlobals->wNumPalette, FALSE);
+         PAL_SetPalette(gpGlobals->wNumPalette, false);
       }
       break;
 
@@ -2467,7 +2467,7 @@ PAL_InterpretInstruction(
       // Fade from/to color
       //
       PAL_ColorFade(pScript->rgwOperand[1], (unsigned char)(pScript->rgwOperand[0]), pScript->rgwOperand[2]);
-      gpGlobals->fNeedToFadeIn = FALSE;
+      gpGlobals->fNeedToFadeIn = false;
       break;
 
    case 0x008D:
@@ -2524,7 +2524,7 @@ PAL_InterpretInstruction(
       {
          if (pScript->rgwOperand[0] != 0)
          {
-            PAL_BattleShowPlayerPreMagicAnim(pScript->rgwOperand[0] - 1, FALSE);
+            PAL_BattleShowPlayerPreMagicAnim(pScript->rgwOperand[0] - 1, false);
             g_Battle.rgPlayer[pScript->rgwOperand[0] - 1].wCurrentFrame = 6;
          }
 
@@ -2534,7 +2534,7 @@ PAL_InterpretInstruction(
             {
                g_Battle.rgPlayer[j].iColorShift = i * 2;
             }
-            PAL_BattleDelay(1, 0, TRUE);
+            PAL_BattleDelay(1, 0, true);
          }
          VIDEO_BackupScreen(g_Battle.lpSceneBuf);
          PAL_BattleUpdateFighters();
@@ -2738,11 +2738,11 @@ PAL_InterpretInstruction(
             g_Battle.rgEnemy[j].pos = PAL_XY(x, y);
          }
 
-         PAL_BattleDelay(1, 0, TRUE);
+         PAL_BattleDelay(1, 0, true);
       }
 
       PAL_BattleUpdateFighters();
-      PAL_BattleDelay(1, 0, TRUE);
+      PAL_BattleDelay(1, 0, true);
       break;
 
    case 0x009E:
@@ -2753,7 +2753,7 @@ PAL_InterpretInstruction(
       {
          g_Battle.rgEnemy[wEventObjectID].wCurrentFrame =
              g_Battle.rgEnemy[wEventObjectID].e.wIdleFrames + i;
-         PAL_BattleDelay(g_Battle.rgEnemy[wEventObjectID].e.wActWaitFrames, 0, FALSE);
+         PAL_BattleDelay(g_Battle.rgEnemy[wEventObjectID].e.wActWaitFrames, 0, false);
       }
 
       x = 0;
@@ -2816,7 +2816,7 @@ PAL_InterpretInstruction(
          PAL_BattleFadeScene();
 
          // avoid releasing gesture disappears before summon done
-         PAL_BattleDelay(2, 0, TRUE);
+         PAL_BattleDelay(2, 0, true);
 
          for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
          {
@@ -2850,7 +2850,7 @@ PAL_InterpretInstruction(
          for (i = 0; i < 6; i++)
          {
             g_Battle.rgEnemy[wEventObjectID].iColorShift = i;
-            PAL_BattleDelay(1, 0, FALSE);
+            PAL_BattleDelay(1, 0, false);
          }
 
          g_Battle.rgEnemy[wEventObjectID].iColorShift = 0;
@@ -2884,7 +2884,7 @@ PAL_InterpretInstruction(
          gpGlobals->rgParty[i].x = gpGlobals->rgParty[0].x;
          gpGlobals->rgParty[i].y = gpGlobals->rgParty[0].y - 1;
       }
-      PAL_UpdatePartyGestures(FALSE);
+      PAL_UpdatePartyGestures(false);
       break;
 
    case 0x00A2:
@@ -2899,7 +2899,7 @@ PAL_InterpretInstruction(
       // Play CD music. Use the RIX music for fallback.
       //
       gpGlobals->wNumMusic = pScript->rgwOperand[1];
-      AUDIO_PlayMusic(pScript->rgwOperand[1], TRUE, 0);
+      AUDIO_PlayMusic(pScript->rgwOperand[1], true, 0);
       break;
 
    case 0x00A4:
@@ -2963,8 +2963,8 @@ PAL_RunTriggerScript(
    extern int g_fUpdatedInBattle; // HACKHACK
 
    wNextScriptEntry = wScriptEntry;
-   fEnded = FALSE;
-   g_fUpdatedInBattle = FALSE;
+   fEnded = false;
+   g_fUpdatedInBattle = false;
 
    if (wEventObjectID == 0xFFFF)
    {
@@ -2978,7 +2978,7 @@ PAL_RunTriggerScript(
       pEvtObj = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
    }
 
-   g_fScriptSuccess = TRUE;
+   g_fScriptSuccess = true;
 
    //
    // Set the default dialog speed.
@@ -2995,14 +2995,14 @@ PAL_RunTriggerScript(
          //
          // Stop running
          //
-         fEnded = TRUE;
+         fEnded = true;
          break;
 
       case 0x0001:
          //
          // Stop running and replace the entry with the next line
          //
-         fEnded = TRUE;
+         fEnded = true;
          wNextScriptEntry = wScriptEntry + 1;
          break;
 
@@ -3013,7 +3013,7 @@ PAL_RunTriggerScript(
          if (pScript->rgwOperand[1] == 0 ||
              ++(pEvtObj->nScriptIdleFrame) < pScript->rgwOperand[1])
          {
-            fEnded = TRUE;
+            fEnded = true;
             wNextScriptEntry = pScript->rgwOperand[0];
          }
          else
@@ -3058,7 +3058,7 @@ PAL_RunTriggerScript(
          //
          // Redraw screen
          //
-         PAL_ClearDialog(TRUE);
+         PAL_ClearDialog(true);
 
          if (PAL_DialogIsPlayingRNG())
          {
@@ -3074,7 +3074,7 @@ PAL_RunTriggerScript(
          {
             if (pScript->rgwOperand[2])
             {
-               PAL_UpdatePartyGestures(FALSE);
+               PAL_UpdatePartyGestures(false);
             }
 
             PAL_MakeScene();
@@ -3119,7 +3119,7 @@ PAL_RunTriggerScript(
          {
             wScriptEntry++;
          }
-         gpGlobals->fAutoBattle = FALSE;
+         gpGlobals->fAutoBattle = false;
          break;
 
       case 0x0008:
@@ -3132,7 +3132,7 @@ PAL_RunTriggerScript(
 
       case 0x0009:
          // wait for the specified number of frames
-         PAL_ClearDialog(TRUE);
+         PAL_ClearDialog(true);
 
          for (i = 0; i < (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1); i++)
          {
@@ -3140,10 +3140,10 @@ PAL_RunTriggerScript(
 
             if (pScript->rgwOperand[2])
             {
-               PAL_UpdatePartyGestures(FALSE);
+               PAL_UpdatePartyGestures(false);
             }
 
-            PAL_GameUpdate(pScript->rgwOperand[1] ? TRUE : FALSE);
+            PAL_GameUpdate(pScript->rgwOperand[1] ? true : false);
             PAL_MakeScene();
             VIDEO_UpdateScreen(NULL);
          }
@@ -3154,7 +3154,7 @@ PAL_RunTriggerScript(
          //
          // Goto the specified address if player selected no
          //
-         PAL_ClearDialog(FALSE);
+         PAL_ClearDialog(false);
 
          if (!PAL_ConfirmMenu())
          {
@@ -3170,9 +3170,9 @@ PAL_RunTriggerScript(
          //
          // Show dialog in the middle part of the screen
          //
-         PAL_ClearDialog(TRUE);
+         PAL_ClearDialog(true);
          PAL_StartDialog(kDialogCenter, (unsigned char)pScript->rgwOperand[0], 0,
-                         pScript->rgwOperand[2] ? TRUE : FALSE);
+                         pScript->rgwOperand[2] ? true : false);
          wScriptEntry++;
          break;
 
@@ -3180,9 +3180,9 @@ PAL_RunTriggerScript(
          //
          // Show dialog in the upper part of the screen
          //
-         PAL_ClearDialog(TRUE);
+         PAL_ClearDialog(true);
          PAL_StartDialog(kDialogUpper, (unsigned char)pScript->rgwOperand[1],
-                         pScript->rgwOperand[0], pScript->rgwOperand[2] ? TRUE : FALSE);
+                         pScript->rgwOperand[0], pScript->rgwOperand[2] ? true : false);
          wScriptEntry++;
          break;
 
@@ -3190,9 +3190,9 @@ PAL_RunTriggerScript(
          //
          // Show dialog in the lower part of the screen
          //
-         PAL_ClearDialog(TRUE);
+         PAL_ClearDialog(true);
          PAL_StartDialog(kDialogLower, (unsigned char)pScript->rgwOperand[1],
-                         pScript->rgwOperand[0], pScript->rgwOperand[2] ? TRUE : FALSE);
+                         pScript->rgwOperand[0], pScript->rgwOperand[2] ? true : false);
          wScriptEntry++;
          break;
 
@@ -3200,8 +3200,8 @@ PAL_RunTriggerScript(
          //
          // Show text in a window at the center of the screen
          //
-         PAL_ClearDialog(TRUE);
-         PAL_StartDialog(kDialogCenterWindow, (unsigned char)pScript->rgwOperand[0], 0, FALSE);
+         PAL_ClearDialog(true);
+         PAL_StartDialog(kDialogCenterWindow, (unsigned char)pScript->rgwOperand[0], 0, false);
          wScriptEntry++;
          break;
 
@@ -3209,7 +3209,7 @@ PAL_RunTriggerScript(
          //
          // Restore the screen
          //
-         PAL_ClearDialog(TRUE);
+         PAL_ClearDialog(true);
          VIDEO_RestoreScreen(gpScreen);
          VIDEO_UpdateScreen(NULL);
          wScriptEntry++;
@@ -3224,7 +3224,7 @@ PAL_RunTriggerScript(
          break;
 
       default:
-         PAL_ClearDialog(TRUE);
+         PAL_ClearDialog(true);
          wScriptEntry = PAL_InterpretInstruction(wScriptEntry, wEventObjectID);
          break;
       }
@@ -3364,7 +3364,7 @@ begin:
       XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : PAL_XY(102, 0);
       YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 : 3;
       iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
-      PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
+      PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, true, false, false);
       wScriptEntry++;
       break;
 

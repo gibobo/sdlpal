@@ -197,7 +197,7 @@ void PAL_PlayerInfoBox(
          {
             PAL_DrawText(PAL_GetWord(rgwStatusWord[i]),
                          PAL_XY(PAL_X(pos) + rgStatusPos[i][0], PAL_Y(pos) + rgStatusPos[i][1]),
-                         rgbStatusColor[i], TRUE, FALSE, FALSE);
+                         rgbStatusColor[i], true, false, false);
          }
       }
    }
@@ -230,7 +230,7 @@ PAL_BattleUIIsActionValid(
 
   Return value:
 
-    TRUE if the action is valid, FALSE if not.
+    true if the action is valid, false if not.
 
 --*/
 {
@@ -248,14 +248,14 @@ PAL_BattleUIIsActionValid(
    case kBattleUIActionMagic:
       if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSilence] != 0)
       {
-         return FALSE;
+         return false;
       }
       break;
 
    case kBattleUIActionCoopMagic:
       if (gpGlobals->wMaxPartyMemberIndex == 0)
       {
-         return FALSE;
+         return false;
       }
       {
          int healthyNumber = 0;
@@ -267,7 +267,7 @@ PAL_BattleUIIsActionValid(
       break;
    }
 
-   return TRUE;
+   return true;
 }
 
 static void
@@ -283,7 +283,7 @@ PAL_BattleUIDrawMiscMenu(
 
     [IN]  wCurrentItem - the current selected menu item.
 
-    [IN]  fConfirmed - TRUE if confirmed, FALSE if not.
+    [IN]  fConfirmed - true if confirmed, false if not.
 
   Return value:
 
@@ -296,16 +296,16 @@ PAL_BattleUIDrawMiscMenu(
 
    MENUITEM rgMenuItem[] = {
        // value   label                     enabled   position
-       {0, BATTLEUI_LABEL_AUTO, TRUE, PAL_XY(16, 32)},
-       {1, BATTLEUI_LABEL_INVENTORY, TRUE, PAL_XY(16, 50)},
-       {2, BATTLEUI_LABEL_DEFEND, TRUE, PAL_XY(16, 68)},
-       {3, BATTLEUI_LABEL_FLEE, TRUE, PAL_XY(16, 86)},
-       {4, BATTLEUI_LABEL_STATUS, TRUE, PAL_XY(16, 104)}};
+       {0, BATTLEUI_LABEL_AUTO, true, PAL_XY(16, 32)},
+       {1, BATTLEUI_LABEL_INVENTORY, true, PAL_XY(16, 50)},
+       {2, BATTLEUI_LABEL_DEFEND, true, PAL_XY(16, 68)},
+       {3, BATTLEUI_LABEL_FLEE, true, PAL_XY(16, 86)},
+       {4, BATTLEUI_LABEL_STATUS, true, PAL_XY(16, 104)}};
 
    //
    // Draw the box
    //
-   PAL_CreateBox(PAL_XY(2, 20), 4, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, FALSE);
+   PAL_CreateBox(PAL_XY(2, 20), 4, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, false);
 
    //
    // Draw the menu items
@@ -326,7 +326,7 @@ PAL_BattleUIDrawMiscMenu(
          }
       }
 
-      PAL_DrawText(PAL_GetWord(rgMenuItem[i].wNumWord), rgMenuItem[i].pos, bColor, TRUE, FALSE, FALSE);
+      PAL_DrawText(PAL_GetWord(rgMenuItem[i].wNumWord), rgMenuItem[i].pos, bColor, true, false, false);
    }
 }
 
@@ -351,7 +351,7 @@ PAL_BattleUIMiscMenuUpdate(
    //
    // Draw the menu
    //
-   PAL_BattleUIDrawMiscMenu(g_iCurMiscMenuItem, FALSE);
+   PAL_BattleUIDrawMiscMenu(g_iCurMiscMenuItem, false);
 
    //
    // Process inputs
@@ -407,15 +407,15 @@ PAL_BattleUIMiscItemSubMenuUpdate(
 
    MENUITEM rgMenuItem[] = {
        // value   label                      enabled   position
-       {0, BATTLEUI_LABEL_USEITEM, TRUE, PAL_XY(44, 62)},
-       {1, BATTLEUI_LABEL_THROWITEM, TRUE, PAL_XY(44, 80)},
+       {0, BATTLEUI_LABEL_USEITEM, true, PAL_XY(44, 62)},
+       {1, BATTLEUI_LABEL_THROWITEM, true, PAL_XY(44, 80)},
    };
 
    //
    // Draw the menu
    //
-   PAL_BattleUIDrawMiscMenu(1, TRUE);
-   PAL_CreateBox(PAL_XY(30, 50), 1, PAL_MenuTextMaxWidth(rgMenuItem, 2) - 1, 0, FALSE);
+   PAL_BattleUIDrawMiscMenu(1, true);
+   PAL_CreateBox(PAL_XY(30, 50), 1, PAL_MenuTextMaxWidth(rgMenuItem, 2) - 1, 0, false);
 
    //
    // Draw the menu items
@@ -429,7 +429,7 @@ PAL_BattleUIMiscItemSubMenuUpdate(
          bColor = MENUITEM_COLOR_SELECTED;
       }
 
-      PAL_DrawText(PAL_GetWord(rgMenuItem[i].wNumWord), rgMenuItem[i].pos, bColor, TRUE, FALSE, FALSE);
+      PAL_DrawText(PAL_GetWord(rgMenuItem[i].wNumWord), rgMenuItem[i].pos, bColor, true, false, false);
    }
 
    //
@@ -706,13 +706,13 @@ void PAL_BattleUIUpdate(
       //
       if (PAL_GetKeyInput() & kKeyMenu)
       {
-         g_Battle.UI.fAutoAttack = FALSE;
+         g_Battle.UI.fAutoAttack = false;
       }
       else
       {
          const wchar_t *itemText = PAL_GetWord(BATTLEUI_LABEL_AUTO);
          PAL_DrawText(itemText, PAL_XY(312 - PAL_TextWidth(itemText), 10),
-                      MENUITEM_COLOR_CONFIRMED, TRUE, FALSE, FALSE);
+                      MENUITEM_COLOR_CONFIRMED, true, false, false);
       }
    }
 
@@ -753,7 +753,7 @@ void PAL_BattleUIUpdate(
             }
          }
 
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
       }
 
       goto end;
@@ -790,7 +790,7 @@ void PAL_BattleUIUpdate(
          }
 
          PAL_PlayerInfoBox(PAL_XY(91 + 77 * i, 165), wPlayerRole,
-                           w, j, FALSE);
+                           w, j, false);
       }
    }
 
@@ -818,7 +818,7 @@ void PAL_BattleUIUpdate(
             g_Battle.UI.iSelectedIndex = PAL_BattleSelectAutoTarget();
          }
 
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
          goto end; // don't go further
       }
 
@@ -830,14 +830,14 @@ void PAL_BattleUIUpdate(
           gpGlobals->rgPlayerStatus[wPlayerRole][kStatusParalyzed] != 0)
       {
          g_Battle.UI.wActionType = kBattleActionPass;
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
          goto end; // don't go further
       }
 
       if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusConfused] != 0)
       {
          g_Battle.UI.wActionType = kBattleActionAttackMate;
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
          goto end; // don't go further
       }
 
@@ -854,7 +854,7 @@ void PAL_BattleUIUpdate(
             g_Battle.UI.iSelectedIndex = PAL_BattleSelectAutoTarget();
          }
 
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
          goto end; // don't go further
       }
 
@@ -977,7 +977,7 @@ void PAL_BattleUIUpdate(
                   // Magic
                   //
                   g_Battle.UI.MenuState = kBattleMenuMagicSelect;
-                  PAL_MagicSelectionMenuInit(wPlayerRole, TRUE, 0);
+                  PAL_MagicSelectionMenuInit(wPlayerRole, true, 0);
                   break;
 
                case 2:
@@ -1030,7 +1030,7 @@ void PAL_BattleUIUpdate(
             else if (PAL_GetKeyInput() & kKeyDefend)
             {
                g_Battle.UI.wActionType = kBattleActionDefend;
-               PAL_BattleCommitAction(FALSE);
+               PAL_BattleCommitAction(false);
             }
             else if (PAL_GetKeyInput() & kKeyForce)
             {
@@ -1064,12 +1064,12 @@ void PAL_BattleUIUpdate(
                   }
                }
 
-               PAL_BattleCommitAction(FALSE);
+               PAL_BattleCommitAction(false);
             }
             else if (PAL_GetKeyInput() & kKeyFlee)
             {
                g_Battle.UI.wActionType = kBattleActionFlee;
-               PAL_BattleCommitAction(FALSE);
+               PAL_BattleCommitAction(false);
             }
             else if (PAL_GetKeyInput() & kKeyUseItem)
             {
@@ -1083,7 +1083,7 @@ void PAL_BattleUIUpdate(
             }
             else if (PAL_GetKeyInput() & kKeyRepeat)
             {
-               PAL_BattleCommitAction(TRUE);
+               PAL_BattleCommitAction(true);
             }
             else if (PAL_GetKeyInput() & kKeyMenu)
             {
@@ -1201,16 +1201,16 @@ void PAL_BattleUIUpdate(
 
                case 3: // defend
                   g_Battle.UI.wActionType = kBattleActionDefend;
-                  PAL_BattleCommitAction(FALSE);
+                  PAL_BattleCommitAction(false);
                   break;
 
                case 1: // auto
-                  g_Battle.UI.fAutoAttack = TRUE;
+                  g_Battle.UI.fAutoAttack = true;
                   break;
 
                case 4: // flee
                   g_Battle.UI.wActionType = kBattleActionFlee;
-                  PAL_BattleCommitAction(FALSE);
+                  PAL_BattleCommitAction(false);
                   break;
 
                case 5: // status
@@ -1285,7 +1285,7 @@ void PAL_BattleUIUpdate(
             for (g_Battle.UI.iSelectedIndex = 0; g_Battle.UI.iSelectedIndex < MAX_ENEMIES_IN_TEAM; g_Battle.UI.iSelectedIndex++)
                if (g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID != 0)
                   break;
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
          break;
       }
       if (g_Battle.UI.iSelectedIndex > x)
@@ -1331,7 +1331,7 @@ void PAL_BattleUIUpdate(
       else if (PAL_GetKeyInput() & kKeySearch)
       {
          //         g_Battle.UI.iPrevEnemyTarget = g_Battle.UI.iSelectedIndex; //disabled due to not same as both original version
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
       }
       else if (PAL_GetKeyInput() & (kKeyLeft | kKeyDown))
       {
@@ -1368,7 +1368,7 @@ void PAL_BattleUIUpdate(
       if (gpGlobals->wMaxPartyMemberIndex == 0)
       {
          g_Battle.UI.iSelectedIndex = 0;
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
       }
 
       for (i = 0; i < 4; i++)
@@ -1398,7 +1398,7 @@ void PAL_BattleUIUpdate(
       }
       else if (PAL_GetKeyInput() & kKeySearch)
       {
-         PAL_BattleCommitAction(FALSE);
+         PAL_BattleCommitAction(false);
       }
       else if (PAL_GetKeyInput() & (kKeyLeft | kKeyDown))
       {
@@ -1430,7 +1430,7 @@ void PAL_BattleUIUpdate(
       // Don't bother selecting
       //
       g_Battle.UI.iSelectedIndex = (unsigned short)-1;
-      PAL_BattleCommitAction(FALSE);
+      PAL_BattleCommitAction(false);
       break;
 
    case kBattleUISelectTargetPlayerAll:
@@ -1438,7 +1438,7 @@ void PAL_BattleUIUpdate(
       // Don't bother selecting
       //
       g_Battle.UI.iSelectedIndex = (unsigned short)-1;
-      PAL_BattleCommitAction(FALSE);
+      PAL_BattleCommitAction(false);
       break;
    }
 

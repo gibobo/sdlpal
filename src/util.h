@@ -21,17 +21,19 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <stdio.h>
-
 #ifndef RESOURCE_PATH
 #define RESOURCE_PATH "."
+#endif
+
+#ifndef SEEK_SET
+#define SEEK_SET 0
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-long flength(FILE *fp);
+long flength(void *fp);
 
 int RandomLong(int from, int to);
 
@@ -53,6 +55,8 @@ unsigned int UTIL_GetTicks(void);
 void UTIL_Sleep(unsigned int tm);
 
 void *UTIL_fopen(const char *_FileName, const char *_Mode);
+
+void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode);
 
 int UTIL_fseek(void *_Stream, long _Offset, int _Origin);
 

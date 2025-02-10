@@ -275,7 +275,7 @@ void PAL_BattleClearSpriteObject(
 void PAL_BattleSpriteAddUnlock(
     void)
 {
-   g_Battle.fSpriteAddLock = FALSE;
+   g_Battle.fSpriteAddLock = false;
 
    PAL_BattleClearSpriteObject();
 }
@@ -301,7 +301,7 @@ void PAL_BattleAddSpriteObject(
 
     [IN]  sLayerOffset - The layer offset of sprite object.
 
-    [IN]  fHaveColorShift - TRUE is the highest layer in battle.
+    [IN]  fHaveColorShift - true is the highest layer in battle.
 
   Return value:
 
@@ -483,14 +483,14 @@ void PAL_BattleDrawAllSprites(
    //
    // Draw all sprites to the battle screen buffer.
    //
-   PAL_BattleDrawAllSpritesWithColorShift(FALSE);
+   PAL_BattleDrawAllSpritesWithColorShift(false);
 
    //
    // Only draw sprites with color shift into the battle screen buffer.
    // Because in the original game,
    // sprites with color shift are directly overlaid on the original sprites.
    //
-   PAL_BattleDrawAllSpritesWithColorShift(TRUE);
+   PAL_BattleDrawAllSpritesWithColorShift(true);
 }
 
 void PAL_BattleDrawAllSpritesWithColorShift(
@@ -579,7 +579,7 @@ void PAL_BattleMakeScene(
    }
    else
    {
-      g_Battle.fSpriteAddLock = TRUE;
+      g_Battle.fSpriteAddLock = true;
    }
 
    //
@@ -687,7 +687,7 @@ PAL_BattleMain(
    //
    // Fade out the music and delay for a while
    //
-   AUDIO_PlayMusic(0x00, FALSE, 1);
+   AUDIO_PlayMusic(0x00, false, 1);
    UTIL_Delay(200);
 
    //
@@ -698,7 +698,7 @@ PAL_BattleMain(
    //
    // Play the battle music
    //
-   AUDIO_PlayMusic(gpGlobals->wNumBattleMusic, TRUE, 0);
+   AUDIO_PlayMusic(gpGlobals->wNumBattleMusic, true, 0);
 
    //
    // Fade in the screen when needed
@@ -706,7 +706,7 @@ PAL_BattleMain(
    if (gpGlobals->fNeedToFadeIn)
    {
       PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-      gpGlobals->fNeedToFadeIn = FALSE;
+      gpGlobals->fNeedToFadeIn = false;
    }
 
    //
@@ -733,7 +733,7 @@ PAL_BattleMain(
    //
    // Run the main battle loop.
    //
-   while (TRUE)
+   while (true)
    {
       // Break out if the battle ended.
       if (g_Battle.BattleResult != kBattleResultOnGoing)
@@ -814,7 +814,7 @@ void PAL_LoadBattleSprites(
 --*/
 {
    int i, x, y, s;
-   FILE *fp;
+   void *fp;
 
    PAL_FreeBattleSprites();
 
@@ -936,17 +936,17 @@ PAL_BattleWon(
       //
       // Play the "battle win" music
       //
-      AUDIO_PlayMusic(g_Battle.fIsBoss ? 2 : 3, FALSE, 0);
+      AUDIO_PlayMusic(g_Battle.fIsBoss ? 2 : 3, false, 0);
 
       //
       // Show the message about the total number of exp. and cash gained
       //
-      PAL_CreateSingleLineBox(PAL_XY(83 - ww1, 60), w1, FALSE);
-      PAL_CreateSingleLineBox(PAL_XY(65, 105), 10, FALSE);
+      PAL_CreateSingleLineBox(PAL_XY(83 - ww1, 60), w1, false);
+      PAL_CreateSingleLineBox(PAL_XY(65, 105), 10, false);
 
-      PAL_DrawText(PAL_GetWord(BATTLEWIN_GETEXP_LABEL), PAL_XY(95 - ww1, 70), 0, FALSE, FALSE, FALSE);
-      PAL_DrawText(PAL_GetWord(BATTLEWIN_BEATENEMY_LABEL), PAL_XY(77, 115), 0, FALSE, FALSE, FALSE);
-      PAL_DrawText(PAL_GetWord(BATTLEWIN_DOLLAR_LABEL), PAL_XY(197, 115), 0, FALSE, FALSE, FALSE);
+      PAL_DrawText(PAL_GetWord(BATTLEWIN_GETEXP_LABEL), PAL_XY(95 - ww1, 70), 0, false, false, false);
+      PAL_DrawText(PAL_GetWord(BATTLEWIN_BEATENEMY_LABEL), PAL_XY(77, 115), 0, false, false, false);
+      PAL_DrawText(PAL_GetWord(BATTLEWIN_DOLLAR_LABEL), PAL_XY(197, 115), 0, false, false, false);
 
       PAL_DrawNumber(g_Battle.iExpGained, 5, PAL_XY(182 + ww1, 74), kNumColorYellow, kNumAlignRight);
       PAL_DrawNumber(g_Battle.iCashGained, 5, PAL_XY(162, 119), kNumColorYellow, kNumAlignMid);
@@ -963,25 +963,25 @@ PAL_BattleWon(
    const MENUITEM rgFakeMenuItem[] =
        {
            // value  label                        enabled   pos
-           {1, gpGlobals->g.PlayerRoles.rgwName[0], TRUE, PAL_XY(0, 0)},
-           {2, gpGlobals->g.PlayerRoles.rgwName[1], TRUE, PAL_XY(0, 0)},
-           {3, gpGlobals->g.PlayerRoles.rgwName[2], TRUE, PAL_XY(0, 0)},
-           {4, gpGlobals->g.PlayerRoles.rgwName[3], TRUE, PAL_XY(0, 0)},
-           {5, gpGlobals->g.PlayerRoles.rgwName[4], TRUE, PAL_XY(0, 0)},
-           {6, gpGlobals->g.PlayerRoles.rgwName[5], TRUE, PAL_XY(0, 0)},
+           {1, gpGlobals->g.PlayerRoles.rgwName[0], true, PAL_XY(0, 0)},
+           {2, gpGlobals->g.PlayerRoles.rgwName[1], true, PAL_XY(0, 0)},
+           {3, gpGlobals->g.PlayerRoles.rgwName[2], true, PAL_XY(0, 0)},
+           {4, gpGlobals->g.PlayerRoles.rgwName[3], true, PAL_XY(0, 0)},
+           {5, gpGlobals->g.PlayerRoles.rgwName[4], true, PAL_XY(0, 0)},
+           {6, gpGlobals->g.PlayerRoles.rgwName[5], true, PAL_XY(0, 0)},
        };
    int maxNameWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem, sizeof(rgFakeMenuItem) / sizeof(MENUITEM));
    const MENUITEM rgFakeMenuItem2[] =
        {
            // value  label                        enabled   pos
-           {1, STATUS_LABEL_LEVEL, TRUE, PAL_XY(0, 0)},
-           {2, STATUS_LABEL_HP, TRUE, PAL_XY(0, 0)},
-           {3, STATUS_LABEL_MP, TRUE, PAL_XY(0, 0)},
-           {4, STATUS_LABEL_ATTACKPOWER, TRUE, PAL_XY(0, 0)},
-           {5, STATUS_LABEL_MAGICPOWER, TRUE, PAL_XY(0, 0)},
-           {6, STATUS_LABEL_RESISTANCE, TRUE, PAL_XY(0, 0)},
-           {7, STATUS_LABEL_DEXTERITY, TRUE, PAL_XY(0, 0)},
-           {8, STATUS_LABEL_FLEERATE, TRUE, PAL_XY(0, 0)},
+           {1, STATUS_LABEL_LEVEL, true, PAL_XY(0, 0)},
+           {2, STATUS_LABEL_HP, true, PAL_XY(0, 0)},
+           {3, STATUS_LABEL_MP, true, PAL_XY(0, 0)},
+           {4, STATUS_LABEL_ATTACKPOWER, true, PAL_XY(0, 0)},
+           {5, STATUS_LABEL_MAGICPOWER, true, PAL_XY(0, 0)},
+           {6, STATUS_LABEL_RESISTANCE, true, PAL_XY(0, 0)},
+           {7, STATUS_LABEL_DEXTERITY, true, PAL_XY(0, 0)},
+           {8, STATUS_LABEL_FLEERATE, true, PAL_XY(0, 0)},
        };
    int maxPropertyWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem2, sizeof(rgFakeMenuItem2) / sizeof(MENUITEM)) - 1;
    int propertyLength = maxPropertyWidth - 1;
@@ -993,7 +993,7 @@ PAL_BattleWon(
    //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
-      fLevelUp = FALSE;
+      fLevelUp = false;
 
       w = gpGlobals->rgParty[i].wPlayerRole;
       if (gpGlobals->g.PlayerRoles.rgwHP[w] == 0)
@@ -1015,7 +1015,7 @@ PAL_BattleWon(
 
          if (gpGlobals->g.PlayerRoles.rgwLevel[w] < MAX_LEVELS)
          {
-            fLevelUp = TRUE;
+            fLevelUp = true;
             PAL_PlayerLevelUp(w, 1);
 
             gpGlobals->g.PlayerRoles.rgwHP[w] = gpGlobals->g.PlayerRoles.rgwMaxHP[w];
@@ -1031,26 +1031,26 @@ PAL_BattleWon(
          //
          // Player has gained a level. Show the message
          //
-         PAL_CreateSingleLineBox(PAL_XY(offsetX + 80, 0), propertyLength + 10, FALSE);
-         PAL_CreateBox(PAL_XY(offsetX + 82, 32), 7, propertyLength + 8, 1, FALSE);
+         PAL_CreateSingleLineBox(PAL_XY(offsetX + 80, 0), propertyLength + 10, false);
+         PAL_CreateBox(PAL_XY(offsetX + 82, 32), 7, propertyLength + 8, 1, false);
 
          wchar_t buffer[256] = L"";
          PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_GetWord(STATUS_LABEL_LEVEL), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL));
-         PAL_DrawText(buffer, PAL_XY(110, 10), 0, FALSE, FALSE, FALSE);
+         PAL_DrawText(buffer, PAL_XY(110, 10), 0, false, false, false);
 
          for (j = 0; j < 8; j++)
          {
             PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ARROW), gpScreen, PAL_XY(-offsetX + 180, 48 + 18 * j));
          }
 
-         PAL_DrawText(PAL_GetWord(STATUS_LABEL_LEVEL), PAL_XY(offsetX + 100, 44), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
-         PAL_DrawText(PAL_GetWord(STATUS_LABEL_HP), PAL_XY(offsetX + 100, 62), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
-         PAL_DrawText(PAL_GetWord(STATUS_LABEL_MP), PAL_XY(offsetX + 100, 80), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
-         PAL_DrawText(PAL_GetWord(STATUS_LABEL_ATTACKPOWER), PAL_XY(offsetX + 100, 98), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
-         PAL_DrawText(PAL_GetWord(STATUS_LABEL_MAGICPOWER), PAL_XY(offsetX + 100, 116), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
-         PAL_DrawText(PAL_GetWord(STATUS_LABEL_RESISTANCE), PAL_XY(offsetX + 100, 134), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
-         PAL_DrawText(PAL_GetWord(STATUS_LABEL_DEXTERITY), PAL_XY(offsetX + 100, 152), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
-         PAL_DrawText(PAL_GetWord(STATUS_LABEL_FLEERATE), PAL_XY(offsetX + 100, 170), BATTLEWIN_LEVELUP_LABEL_COLOR, TRUE, FALSE, FALSE);
+         PAL_DrawText(PAL_GetWord(STATUS_LABEL_LEVEL), PAL_XY(offsetX + 100, 44), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
+         PAL_DrawText(PAL_GetWord(STATUS_LABEL_HP), PAL_XY(offsetX + 100, 62), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
+         PAL_DrawText(PAL_GetWord(STATUS_LABEL_MP), PAL_XY(offsetX + 100, 80), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
+         PAL_DrawText(PAL_GetWord(STATUS_LABEL_ATTACKPOWER), PAL_XY(offsetX + 100, 98), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
+         PAL_DrawText(PAL_GetWord(STATUS_LABEL_MAGICPOWER), PAL_XY(offsetX + 100, 116), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
+         PAL_DrawText(PAL_GetWord(STATUS_LABEL_RESISTANCE), PAL_XY(offsetX + 100, 134), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
+         PAL_DrawText(PAL_GetWord(STATUS_LABEL_DEXTERITY), PAL_XY(offsetX + 100, 152), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
+         PAL_DrawText(PAL_GetWord(STATUS_LABEL_FLEERATE), PAL_XY(offsetX + 100, 170), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
 
          //
          // Draw the original stats and stats after level up
@@ -1141,8 +1141,8 @@ PAL_BattleWon(
       {                                                                                                                                                                                           \
          wchar_t buffer[256] = L"";                                                                                                                                                        \
          PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_GetWord(label), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)); \
-         PAL_CreateSingleLineBox(PAL_XY(offsetX + 78, 60), maxNameWidth + maxPropertyWidth + PAL_TextWidth(PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)) / 32 + 4, FALSE);                                \
-         PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, FALSE, FALSE, FALSE);                                                                                                                  \
+         PAL_CreateSingleLineBox(PAL_XY(offsetX + 78, 60), maxNameWidth + maxPropertyWidth + PAL_TextWidth(PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)) / 32 + 4, false);                                \
+         PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, false, false, false);                                                                                                                  \
          PAL_DrawNumber(gpGlobals->g.PlayerRoles.statname[w] - OrigPlayerRoles.statname[w], 5, PAL_XY(183 + (maxNameWidth + maxPropertyWidth - 3) * 8, 74), kNumColorYellow, kNumAlignRight);     \
          VIDEO_UpdateScreen(&rect);                                                                                                                                                               \
          PAL_WaitForAnyKey(3000);                                                                                                                                                                 \
@@ -1191,11 +1191,11 @@ PAL_BattleWon(
             int w3 = (ww = PAL_WordWidth(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic)) > 5 ? ww : 5;
             ww = (w1 + w2 + w3 - 10) << 3;
 
-            PAL_CreateSingleLineBox(PAL_XY(65 - ww, 105), w1 + w2 + w3, FALSE);
+            PAL_CreateSingleLineBox(PAL_XY(65 - ww, 105), w1 + w2 + w3, false);
 
-            PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_XY(75 - ww, 115), 0, FALSE, FALSE, FALSE);
-            PAL_DrawText(PAL_GetWord(BATTLEWIN_ADDMAGIC_LABEL), PAL_XY(75 + 16 * w1 - ww, 115), 0, FALSE, FALSE, FALSE);
-            PAL_DrawText(PAL_GetWord(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic), PAL_XY(75 + 16 * (w1 + w2) - ww, 115), 0x1B, FALSE, FALSE, FALSE);
+            PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_XY(75 - ww, 115), 0, false, false, false);
+            PAL_DrawText(PAL_GetWord(BATTLEWIN_ADDMAGIC_LABEL), PAL_XY(75 + 16 * w1 - ww, 115), 0, false, false, false);
+            PAL_DrawText(PAL_GetWord(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic), PAL_XY(75 + 16 * (w1 + w2) - ww, 115), 0x1B, false, false, false);
 
             VIDEO_UpdateScreen(&rect);
             PAL_WaitForAnyKey(3000);
@@ -1244,7 +1244,7 @@ void PAL_BattleEnemyEscape(
 --*/
 {
    int j, x, y, w;
-   int f = TRUE;
+   int f = true;
 
    AUDIO_PlaySound(45);
 
@@ -1253,7 +1253,7 @@ void PAL_BattleEnemyEscape(
    //
    while (f)
    {
-      f = FALSE;
+      f = false;
 
       for (j = 0; j <= g_Battle.wMaxEnemyIndex; j++)
       {
@@ -1271,7 +1271,7 @@ void PAL_BattleEnemyEscape(
 
          if (x + w > 0)
          {
-            f = TRUE;
+            f = true;
          }
       }
 
@@ -1355,13 +1355,13 @@ void PAL_BattlePlayerEscape(
                break;
 
             default:
-               assert(FALSE); // Not possible
+               assert(false); // Not possible
                break;
             }
          }
       }
 
-      PAL_BattleDelay(1, 0, FALSE);
+      PAL_BattleDelay(1, 0, false);
    }
 
    //
@@ -1372,7 +1372,7 @@ void PAL_BattlePlayerEscape(
       g_Battle.rgPlayer[i].pos = PAL_XY(9999, 9999);
    }
 
-   PAL_BattleDelay(1, 0, FALSE);
+   PAL_BattleDelay(1, 0, false);
 
    g_Battle.BattleResult = kBattleResultFleed;
 }
@@ -1390,7 +1390,7 @@ PAL_StartBattle(
 
     [IN]  wEnemyTeam - the number of the enemy team.
 
-    [IN]  fIsBoss - TRUE for boss fight (not allowed to flee).
+    [IN]  fIsBoss - true for boss fight (not allowed to flee).
 
   Return value:
 
@@ -1478,9 +1478,9 @@ PAL_StartBattle(
       g_Battle.rgPlayer[i].flTimeMeter = 15.0f;
       g_Battle.rgPlayer[i].wHidingTime = 0;
       g_Battle.rgPlayer[i].state = kFighterWait;
-      g_Battle.rgPlayer[i].fDefending = FALSE;
+      g_Battle.rgPlayer[i].fDefending = false;
       g_Battle.rgPlayer[i].wCurrentFrame = 0;
-      g_Battle.rgPlayer[i].iColorShift = FALSE;
+      g_Battle.rgPlayer[i].iColorShift = false;
    }
 
    //
@@ -1505,8 +1505,8 @@ PAL_StartBattle(
    g_Battle.iCashGained = 0;
 
    g_Battle.fIsBoss = fIsBoss;
-   g_Battle.fEnemyCleared = FALSE;
-   g_Battle.fEnemyMoving = FALSE;
+   g_Battle.fEnemyCleared = false;
+   g_Battle.fEnemyMoving = false;
    g_Battle.iHidingTime = 0;
    g_Battle.wMovingPlayerIndex = 0;
 
@@ -1514,7 +1514,7 @@ PAL_StartBattle(
    g_Battle.UI.szNextMsg[0] = '\0';
    g_Battle.UI.dwMsgShowTime = 0;
    g_Battle.UI.state = kBattleUIWait;
-   g_Battle.UI.fAutoAttack = FALSE;
+   g_Battle.UI.fAutoAttack = false;
    g_Battle.UI.iSelectedIndex = 0;
    g_Battle.UI.iPrevEnemyTarget = -1;
 
@@ -1523,9 +1523,9 @@ PAL_StartBattle(
    g_Battle.lpSummonSprite = NULL;
    g_Battle.sBackgroundColorShift = 0;
 
-   gpGlobals->fInBattle = TRUE;
+   gpGlobals->fInBattle = true;
    g_Battle.BattleResult = kBattleResultPreBattle;
-   g_Battle.fSpriteAddLock = TRUE;
+   g_Battle.fSpriteAddLock = true;
 
    PAL_BattleUpdateFighters();
 
@@ -1538,11 +1538,11 @@ PAL_StartBattle(
    PAL_MKFReadChunk(g_Battle.lpEffectSprite, i, 10, gpGlobals->f.fpDATA);
 
    g_Battle.Phase = kBattlePhaseSelectAction;
-   g_Battle.fRepeat = FALSE;
-   g_Battle.fForce = FALSE;
-   g_Battle.fFlee = FALSE;
-   g_Battle.fPrevAutoAtk = FALSE;
-   g_Battle.fThisTurnCoop = FALSE;
+   g_Battle.fRepeat = false;
+   g_Battle.fForce = false;
+   g_Battle.fFlee = false;
+   g_Battle.fPrevAutoAtk = false;
+   g_Battle.fThisTurnCoop = false;
 
    //
    // Run the main battle routine.
@@ -1590,9 +1590,9 @@ PAL_StartBattle(
    g_Battle.lpBackground = NULL;
    g_Battle.lpSceneBuf = NULL;
 
-   gpGlobals->fInBattle = FALSE;
+   gpGlobals->fInBattle = false;
 
-   AUDIO_PlayMusic(gpGlobals->wNumMusic, TRUE, 1);
+   AUDIO_PlayMusic(gpGlobals->wNumMusic, true, 1);
 
    //
    // Restore the screen waving effects

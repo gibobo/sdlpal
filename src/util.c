@@ -23,6 +23,7 @@
 #include "input.h"
 #include "main.h"
 #include <errno.h>
+#include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
 #else

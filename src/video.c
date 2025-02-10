@@ -28,7 +28,7 @@
 // The global palette
 PAL_Surface *gpScreen = NULL;    // Screen buffer
 PAL_Surface *gpScreenBak = NULL; // Backup screen buffer
-volatile unsigned char g_bRenderPaused = FALSE;
+volatile unsigned char g_bRenderPaused = false;
 static unsigned short g_wShakeTime = 0;
 static unsigned short g_wShakeLevel = 0;
 static unsigned char *bufScreenReal = NULL;

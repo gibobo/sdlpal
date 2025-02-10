@@ -25,6 +25,7 @@
 #include "res.h"
 #include "script.h"
 #include "util.h"
+#include <stdio.h>
 
 CONFIGURATION gConfig;
 static GLOBALVARS _gGlobals;
@@ -216,7 +217,7 @@ static void PAL_LoadDefaultGame(void)
    gpGlobals->wNumPalette = 0;
    gpGlobals->wNumScene = 1;
    gpGlobals->wCollectValue = 0;
-   gpGlobals->fNightPalette = FALSE;
+   gpGlobals->fNightPalette = false;
    gpGlobals->wMaxPartyMemberIndex = 0;
    gpGlobals->viewport = PAL_XY(0, 0);
    gpGlobals->wLayer = 0;
@@ -241,7 +242,7 @@ static void PAL_LoadDefaultGame(void)
       gpGlobals->Exp.rgFleeExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
    }
 
-   gpGlobals->fEnteringScene = TRUE;
+   gpGlobals->fEnteringScene = true;
 }
 
 typedef struct tagSAVEDGAME_COMMON
@@ -309,7 +310,7 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
     // Try to open the specified file
     char *save_path = (char *)UTIL_malloc(256);
     sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
-    FILE *fp = UTIL_fopen(save_path, "rb");
+    void *fp = UTIL_fopen_without_checking(save_path, "rb");
     UTIL_free(save_path);
 
     // Read all data from the file and close.
@@ -319,7 +320,7 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
 
     if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
     {
-        return FALSE;
+        return false;
     }
 
     // Get common data from the saved game struct.
@@ -348,11 +349,11 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
     memcpy(gpGlobals->rgInventory, s->rgInventory, sizeof(gpGlobals->rgInventory));
     memcpy(gpGlobals->g.rgScene, s->rgScene, sizeof(gpGlobals->g.rgScene));
 
-    gpGlobals->fEnteringScene = FALSE;
+    gpGlobals->fEnteringScene = false;
 
     PAL_CompressInventory();
 
-    return TRUE;
+    return true;
 }
 
 static int PAL_LoadGame_WIN(int iSaveSlot)
@@ -397,47 +398,45 @@ static int PAL_LoadGame(int iSaveSlot)
 
 static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVEDGAME_COMMON *s, unsigned int size)
 {
-    FILE *fp;
-    unsigned int i;
+   s->wSavedTimes = wSavedTimes;
+   s->wViewportX = PAL_X(gpGlobals->viewport);
+   s->wViewportY = PAL_Y(gpGlobals->viewport);
+   s->nPartyMember = gpGlobals->wMaxPartyMemberIndex;
+   s->wNumScene = gpGlobals->wNumScene;
+   s->wPaletteOffset = (gpGlobals->fNightPalette ? 0x180 : 0);
+   s->wPartyDirection = gpGlobals->wPartyDirection;
+   s->wNumMusic = gpGlobals->wNumMusic;
+   s->wNumBattleMusic = gpGlobals->wNumBattleMusic;
+   s->wNumBattleField = gpGlobals->wNumBattleField;
+   s->wScreenWave = gpGlobals->wScreenWave;
+   s->wCollectValue = gpGlobals->wCollectValue;
+   s->wLayer = gpGlobals->wLayer;
+   s->wChaseRange = gpGlobals->wChaseRange;
+   s->wChasespeedChangeCycles = gpGlobals->wChasespeedChangeCycles;
+   s->nFollower = gpGlobals->nFollower;
+   s->dwCash = gpGlobals->dwCash;
+   s->wBattleSpeed = 2;
 
-    s->wSavedTimes = wSavedTimes;
-    s->wViewportX = PAL_X(gpGlobals->viewport);
-    s->wViewportY = PAL_Y(gpGlobals->viewport);
-    s->nPartyMember = gpGlobals->wMaxPartyMemberIndex;
-    s->wNumScene = gpGlobals->wNumScene;
-    s->wPaletteOffset = (gpGlobals->fNightPalette ? 0x180 : 0);
-    s->wPartyDirection = gpGlobals->wPartyDirection;
-    s->wNumMusic = gpGlobals->wNumMusic;
-    s->wNumBattleMusic = gpGlobals->wNumBattleMusic;
-    s->wNumBattleField = gpGlobals->wNumBattleField;
-    s->wScreenWave = gpGlobals->wScreenWave;
-    s->wCollectValue = gpGlobals->wCollectValue;
-    s->wLayer = gpGlobals->wLayer;
-    s->wChaseRange = gpGlobals->wChaseRange;
-    s->wChasespeedChangeCycles = gpGlobals->wChasespeedChangeCycles;
-    s->nFollower = gpGlobals->nFollower;
-    s->dwCash = gpGlobals->dwCash;
-    s->wBattleSpeed = 2;
+   memcpy(s->rgParty, gpGlobals->rgParty, sizeof(gpGlobals->rgParty));
+   memcpy(s->rgTrail, gpGlobals->rgTrail, sizeof(gpGlobals->rgTrail));
+   s->Exp = gpGlobals->Exp;
+   s->PlayerRoles = gpGlobals->g.PlayerRoles;
+   memcpy(s->rgPoisonStatus, gpGlobals->rgPoisonStatus, sizeof(gpGlobals->rgPoisonStatus));
+   memcpy(s->rgInventory, gpGlobals->rgInventory, sizeof(gpGlobals->rgInventory));
+   memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
 
-    memcpy(s->rgParty, gpGlobals->rgParty, sizeof(gpGlobals->rgParty));
-    memcpy(s->rgTrail, gpGlobals->rgTrail, sizeof(gpGlobals->rgTrail));
-    s->Exp = gpGlobals->Exp;
-    s->PlayerRoles = gpGlobals->g.PlayerRoles;
-    memcpy(s->rgPoisonStatus, gpGlobals->rgPoisonStatus, sizeof(gpGlobals->rgPoisonStatus));
-    memcpy(s->rgInventory, gpGlobals->rgInventory, sizeof(gpGlobals->rgInventory));
-    memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
-
-    // Try writing to file
-    char *save_path = (char *)UTIL_malloc(256);
-    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
-
-    if (fp = UTIL_fopen(save_path, "wb")) {
+   // Try writing to file
+   void *fp = NULL;
+   unsigned int i;
+   char *save_path = (char *)UTIL_malloc(256);
+   sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
+   if (fp = UTIL_fopen(save_path, "wb")) {
       i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
       i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
       UTIL_fwrite(s, i, 1, fp);
-    }
-    UTIL_fclose(fp);
-    UTIL_free(save_path);
+   }
+   UTIL_fclose(fp);
+   UTIL_free(save_path);
 }
 
 static void
@@ -502,8 +501,8 @@ PAL_ReloadInNextTick(
 {
     gpGlobals->bCurrentSaveSlot = (unsigned char)iSaveSlot;
     PAL_SetLoadFlags(kLoadGlobalData | kLoadScene | kLoadPlayerSprite);
-    gpGlobals->fEnteringScene = TRUE;
-    gpGlobals->fNeedToFadeIn = TRUE;
+    gpGlobals->fEnteringScene = true;
+    gpGlobals->fNeedToFadeIn = true;
     gpGlobals->dwFrameNum = 0;
 }
 
@@ -542,7 +541,7 @@ PAL_InitGameData(
    }
 
    gpGlobals->iCurInvMenuItem = 0;
-   gpGlobals->fInBattle = FALSE;
+   gpGlobals->fInBattle = false;
 
    memset(gpGlobals->rgPlayerStatus, 0, sizeof(gpGlobals->rgPlayerStatus));
 
@@ -574,7 +573,7 @@ PAL_CountItem(
 
     if (wObjectID == 0)
     {
-        return FALSE;
+        return false;
     }
 
     index = 0;
@@ -630,11 +629,11 @@ PAL_GetItemIndexToInventory(
 
   Return value:
 
-    TRUE if found it, FALSE if not found it.
+    true if found it, false if not found it.
 
 --*/
 {
-   int         fFound = FALSE;
+   int         fFound = false;
 
    *index = 0;
 
@@ -642,7 +641,7 @@ PAL_GetItemIndexToInventory(
    {
       if (gpGlobals->rgInventory[*index].wItem == wObjectID)
       {
-         fFound = TRUE;
+         fFound = true;
          break;
       }
       else if (gpGlobals->rgInventory[*index].wItem == 0)
@@ -673,7 +672,7 @@ PAL_AddItemToInventory(
 
   Return value:
 
-    TRUE if succeeded, FALSE if failed.
+    true if succeeded, false if failed.
 
 --*/
 {
@@ -682,7 +681,7 @@ PAL_AddItemToInventory(
 
    if (wObjectID == 0)
    {
-      return FALSE;
+      return false;
    }
 
    if (iNum == 0)
@@ -691,7 +690,7 @@ PAL_AddItemToInventory(
    }
 
    index = 0;
-   fFound = FALSE;
+   fFound = false;
 
    //
    // Search for the specified item in the inventory
@@ -708,7 +707,7 @@ PAL_AddItemToInventory(
          //
          // inventory is full. cannot add item
          //
-         return FALSE;
+         return false;
       }
 
       if (fFound)
@@ -732,7 +731,7 @@ PAL_AddItemToInventory(
          gpGlobals->rgInventory[index].nAmount = iNum;
       }
 
-      return TRUE;
+      return true;
    }
    else
    {
@@ -748,7 +747,7 @@ PAL_AddItemToInventory(
             // This item has been run out
             //
             gpGlobals->rgInventory[index].nAmount = 0;
-            return FALSE;
+            return false;
          }
 
          gpGlobals->rgInventory[index].nAmount -= iNum;
@@ -757,10 +756,10 @@ PAL_AddItemToInventory(
          //
          if(gpGlobals->rgInventory[index].nAmount == 0 && index == gpGlobals->iCurInvMenuItem && index+1 < MAX_INVENTORY && gpGlobals->rgInventory[index+1].nAmount <= 0)
             gpGlobals->iCurInvMenuItem --;
-         return TRUE;
+         return true;
       }
 
-      return FALSE;
+      return false;
    }
 }
 
@@ -866,11 +865,11 @@ PAL_IncreaseHPMP(
 
   Return value:
 
-    TRUE if the operation is succeeded, FALSE if not.
+    true if the operation is succeeded, false if not.
 
 --*/
 {
-   int           fSuccess = FALSE;
+   int           fSuccess = false;
    unsigned short           wOrigHP = gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole];
    unsigned short           wOrigMP = gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole];
 
@@ -916,7 +915,7 @@ PAL_IncreaseHPMP(
       //
       if (wOrigHP != gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] ||
           wOrigMP != gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole])
-         fSuccess = TRUE;
+         fSuccess = true;
    }
 
    return fSuccess;
@@ -1224,8 +1223,8 @@ PAL_IsPlayerPoisonedByLevel(
 
   Return value:
 
-    TRUE if the player is poisoned by poisons at a minimum level of wMinLevel;
-    FALSE if not.
+    true if the player is poisoned by poisons at a minimum level of wMinLevel;
+    false if not.
 
 --*/
 {
@@ -1242,7 +1241,7 @@ PAL_IsPlayerPoisonedByLevel(
 
    if (index > gpGlobals->wMaxPartyMemberIndex)
    {
-      return FALSE; // don't go further
+      return false; // don't go further
    }
 
    for (i = 0; i < MAX_POISONS; i++)
@@ -1269,11 +1268,11 @@ PAL_IsPlayerPoisonedByLevel(
 
       if (w >= wMinLevel)
       {
-         return TRUE;
+         return true;
       }
    }
 
-   return FALSE;
+   return false;
 }
 
 int
@@ -1294,8 +1293,8 @@ PAL_IsPlayerPoisonedByKind(
 
   Return value:
 
-    TRUE if player is poisoned by the specified poison;
-    FALSE if not.
+    true if player is poisoned by the specified poison;
+    false if not.
 
 --*/
 {
@@ -1311,18 +1310,18 @@ PAL_IsPlayerPoisonedByKind(
 
    if (index > gpGlobals->wMaxPartyMemberIndex)
    {
-      return FALSE; // don't go further
+      return false; // don't go further
    }
 
    for (i = 0; i < MAX_POISONS; i++)
    {
       if (gpGlobals->rgPoisonStatus[i][index].wPoisonID == wPoisonID)
       {
-         return TRUE;
+         return true;
       }
    }
 
-   return FALSE;
+   return false;
 }
 
 unsigned short
@@ -1648,20 +1647,20 @@ PAL_PlayerCanAttackAll(
 
   Return value:
 
-    TRUE if player can attack all of the enemies in one move, FALSE if not.
+    true if player can attack all of the enemies in one move, false if not.
 
 --*/
 {
    int       i;
    int      f;
 
-   f = FALSE;
+   f = false;
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
       if (gpGlobals->rgEquipmentEffect[i].rgwAttackAll[wPlayerRole] != 0)
       {
-         f = TRUE;
+         f = true;
          break;
       }
    }
@@ -1687,7 +1686,7 @@ PAL_AddMagic(
 
   Return value:
 
-    TRUE if succeeded, FALSE if failed.
+    true if succeeded, false if failed.
 
 --*/
 {
@@ -1700,7 +1699,7 @@ PAL_AddMagic(
          //
          // already have this magic
          //
-         return FALSE;
+         return false;
       }
    }
 
@@ -1717,11 +1716,11 @@ PAL_AddMagic(
       //
       // Not enough slots
       //
-      return FALSE;
+      return false;
    }
 
    gpGlobals->g.PlayerRoles.rgwMagic[i][wPlayerRole] = wMagic;
-   return TRUE;
+   return true;
 }
 
 void
@@ -1783,7 +1782,7 @@ PAL_SetPlayerStatus(
 
 --*/
 {
-   int           fSuccess = TRUE;
+   int           fSuccess = true;
 
    switch (wStatusID)
    {
@@ -1813,7 +1812,7 @@ PAL_SetPlayerStatus(
       }
       else
       {
-         fSuccess = FALSE;
+         fSuccess = false;
       }
       break;
 
@@ -1832,7 +1831,7 @@ PAL_SetPlayerStatus(
       break;
 
    default:
-      assert(FALSE);
+      assert(false);
       break;
    }
 

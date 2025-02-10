@@ -31,7 +31,7 @@
 
 static int g_iNumInventory = 0;
 static unsigned short g_wItemFlags = 0;
-static int g_fNoDesc = FALSE;
+static int g_fNoDesc = false;
 
 unsigned short
 PAL_ItemSelectMenuUpdate(
@@ -122,7 +122,7 @@ PAL_ItemSelectMenuUpdate(
    //
    // Redraw the box
    //
-   PAL_CreateBoxWithShadow(PAL_XY(2, 0), iLinesPerPage - 1, 17, 1, FALSE, 0);
+   PAL_CreateBoxWithShadow(PAL_XY(2, 0), iLinesPerPage - 1, 17, 1, false, 0);
 
    //
    // Draw the texts in the current page
@@ -192,7 +192,7 @@ PAL_ItemSelectMenuUpdate(
          //
          // Draw the text
          //
-         PAL_DrawText(PAL_GetWord(wObject), PAL_XY(15 + k * iItemTextWidth, 12 + j * 18), bColor, TRUE, FALSE, FALSE);
+         PAL_DrawText(PAL_GetWord(wObject), PAL_XY(15 + k * iItemTextWidth, 12 + j * 18), bColor, true, false, false);
 
          if (i == gpGlobals->iCurInvMenuItem)
          {
@@ -202,7 +202,7 @@ PAL_ItemSelectMenuUpdate(
             // Draw the picture of current selected item
             //
             PAL_RLEBlitToSurfaceWithShadow(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
-                                           PAL_XY(xBase + 5, yBase + 5 - iPictureYOffset), TRUE);
+                                           PAL_XY(xBase + 5, yBase + 5 - iPictureYOffset), true);
             PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
                                  PAL_XY(xBase, yBase - iPictureYOffset));
 
@@ -266,7 +266,7 @@ PAL_ItemSelectMenuUpdate(
             j = (gpGlobals->iCurInvMenuItem < iItemsPerLine * iPageLineOffset) ? (gpGlobals->iCurInvMenuItem / iItemsPerLine) : iPageLineOffset;
             k = gpGlobals->iCurInvMenuItem % iItemsPerLine;
 
-            PAL_DrawText(PAL_GetWord(wObject), PAL_XY(15 + k * iItemTextWidth, 12 + j * 18), MENUITEM_COLOR_CONFIRMED, FALSE, FALSE, FALSE);
+            PAL_DrawText(PAL_GetWord(wObject), PAL_XY(15 + k * iItemTextWidth, 12 + j * 18), MENUITEM_COLOR_CONFIRMED, false, false, false);
 
             //
             // Draw the cursor on the current selected item
@@ -378,13 +378,13 @@ PAL_ItemSelectMenu(
 
    if (lpfnMenuItemChanged != NULL)
    {
-      g_fNoDesc = TRUE;
+      g_fNoDesc = true;
       (*lpfnMenuItemChanged)(gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].wItem);
    }
 
    dwTime = UTIL_GetTicks();
 
-   while (TRUE)
+   while (true)
    {
       if (lpfnMenuItemChanged == NULL)
       {
@@ -411,7 +411,7 @@ PAL_ItemSelectMenu(
 
       if (w != 0xFFFF)
       {
-         g_fNoDesc = FALSE;
+         g_fNoDesc = false;
          return w;
       }
 
@@ -429,6 +429,6 @@ PAL_ItemSelectMenu(
       }
    }
 
-   assert(FALSE);
+   assert(false);
    return 0; // should not really reach here
 }
