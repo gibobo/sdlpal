@@ -202,11 +202,11 @@ RIX_FillBuffer(
                         int to_write = resampler_get_free_count(pRixPlayer->resampler[0]);
                         if (to_write)
                         {
-                            short *tempBuf = (short *)alloca(to_write * gConfig.iAudioChannels * sizeof(short));
-                            int temp_buf_read = 0;
+                            short *tempBuf = (short *)UTIL_calloc(to_write * gConfig.iAudioChannels, sizeof(short));
                             pRixPlayer->opl->update(tempBuf, to_write);
                             for (int i = 0; i < to_write * gConfig.iAudioChannels; i++)
-                                resampler_write_sample(pRixPlayer->resampler[i % gConfig.iAudioChannels], tempBuf[temp_buf_read++]);
+                                resampler_write_sample(pRixPlayer->resampler[i % gConfig.iAudioChannels], tempBuf[i]);
+                            UTIL_free(tempBuf);
                         }
 
                         int to_get = resampler_get_sample_count(pRixPlayer->resampler[0]);
@@ -378,7 +378,7 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->Play = RIX_Play;
     pRixPlayer->buf = (unsigned char *)UTIL_malloc((PAL_MAX_SAMPLERATE + 69) / 70 * sizeof(short) * 2);
 
-    Copl *opl = CEmuopl::CreateEmuopl(gConfig.iOPLSampleRate);
+    Copl *opl = new CEmuopl(gConfig.iOPLSampleRate);
     if (NULL == opl)
     {
         delete pRixPlayer;

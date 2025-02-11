@@ -14,95 +14,90 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * rix.h - Softstar RIX OPL Format Player by palxex <palxex.ys168.com>
  *                                           BSPAL <BSPAL.ys168.com>
  */
 
-#include "player.h"
+#include "opl.h"
 #include <stdint.h>
+#include <stdio.h>
 
-class CrixPlayer : public CPlayer
+class CrixPlayer
 {
 public:
-  static CPlayer *factory(Copl *newopl);
+   CrixPlayer(Copl *newopl);
+   ~CrixPlayer();
 
-  CrixPlayer(Copl *newopl);
-  ~CrixPlayer();
-
-  bool load(const std::string &filename);
-  bool update();
-  void rewind(int subsong);
-  void rewindReInit(int subsong, bool reinit); /* For seamless continuous */
-  float getrefresh();
-  unsigned int getsubsongs();
-
-  std::string gettype()
-  {
-    return std::string("Softstar RIX OPL Music Format");
-  };
-
+   bool load(const char *filename);
+   bool update();
+   void rewind(int subsong);
+   void rewindReInit(int subsong, bool reinit); /* For seamless continuous */
+   float getrefresh();
+   unsigned int getsubsongs();
 protected:
-  typedef struct
-  {
-    uint8_t v[14];
-  } ADDT;
+   typedef struct
+   {
+      uint8_t v[14];
+   } ADDT;
 
-  FILE *fp;
-  int subsongs;
-  uint8_t *rix_buf;       /* rix files' f_buffer */
-  uint16_t f_buffer[300]; // 9C0h-C18h
-  uint16_t a0b0_data2[11];
-  uint8_t a0b0_data3[18];
-  uint8_t a0b0_data4[18];
-  uint8_t a0b0_data5[96];
-  uint8_t addrs_head[96];
-  uint16_t insbuf[28];
-  uint16_t displace[11];
-  ADDT reg_bufs[18];
-  uint32_t pos, length;
-  uint32_t I, T;
-  uint16_t mus_block;
-  uint16_t ins_block;
-  uint8_t rhythm;
-  uint8_t music_on;
-  uint8_t pause_flag;
-  uint16_t band;
-  uint8_t band_low;
-  uint16_t e0_reg_flag;
-  uint8_t bd_modify;
-  int sustain;
-  int play_end;
+   Copl *opl; // our OPL chip
+   FILE *fp;
+   int songs;
+   uint8_t *rix_buf;       /* rix files' f_buffer */
+   uint16_t f_buffer[300]; // 9C0h-C18h
+   uint16_t a0b0_data2[11];
+   uint8_t a0b0_data3[18];
+   uint8_t a0b0_data4[18];
+   uint8_t a0b0_data5[96];
+   uint8_t addrs_head[96];
+   uint16_t insbuf[28];
+   uint16_t displace[11];
+   ADDT reg_bufs[18];
+   uint32_t pos, length;
+   uint8_t for40reg[18];
+   uint32_t I, T;
+   uint16_t mus_block;
+   uint16_t ins_block;
+   uint8_t rhythm;
+   uint8_t music_on;
+   uint8_t pause_flag;
+   uint16_t band;
+   uint8_t band_low;
+   uint16_t e0_reg_flag;
+   uint8_t bd_modify;
+   int sustain;
+   int play_end;
 
-#define ad_08_reg() ad_bop(8, 0)                    /**/
-  void ad_20_reg(uint16_t);                         /**/
-  void ad_40_reg(uint16_t);                         /**/
-  void ad_60_reg(uint16_t);                         /**/
-  void ad_80_reg(uint16_t);                         /**/
-  void ad_a0b0_reg(uint16_t);                       /**/
-  void ad_a0b0l_reg(uint16_t, uint16_t, uint16_t);  /**/
-  void ad_a0b0l_reg_(uint16_t, uint16_t, uint16_t); /**/
-  void ad_bd_reg();                                 /**/
-  void ad_bop(uint16_t, uint16_t);                  /**/
-  void ad_C0_reg(uint16_t);                         /**/
-  void ad_E0_reg(uint16_t);                         /**/
-  uint16_t ad_initial();                            /**/
-  uint16_t ad_test();                               /**/
-  void crc_trans(uint16_t, uint16_t);               /**/
-  void data_initial();                              /* done */
-  void init();                                      /**/
-  void ins_to_reg(uint16_t, uint16_t *, uint16_t);  /**/
-  void int_08h_entry();                             /**/
-  void music_ctrl();                                /**/
-  void Pause();                                     /**/
-  void prepare_a0b0(uint16_t, uint16_t);            /**/
-  void rix_90_pro(uint16_t);                        /**/
-  void rix_A0_pro(uint16_t, uint16_t);              /**/
-  void rix_B0_pro(uint16_t, uint16_t);              /**/
-  void rix_C0_pro(uint16_t, uint16_t);              /**/
-  void rix_get_ins();                               /**/
-  uint16_t rix_proc();                              /**/
-  void set_new_int();
-  void switch_ad_bd(uint16_t); /**/
+#define ad_08_reg() ad_bop(8, 0)                            /**/
+   inline void ad_20_reg(uint16_t);                         /**/
+   inline void ad_40_reg(uint16_t);                         /**/
+   inline void ad_60_reg(uint16_t);                         /**/
+   inline void ad_80_reg(uint16_t);                         /**/
+   inline void ad_a0b0_reg(uint16_t);                       /**/
+   inline void ad_a0b0l_reg(uint16_t, uint16_t, uint16_t);  /**/
+   inline void ad_a0b0l_reg_(uint16_t, uint16_t, uint16_t); /**/
+   inline void ad_bd_reg();                                 /**/
+   inline void ad_bop(uint16_t, uint16_t);                  /**/
+   inline void ad_C0_reg(uint16_t);                         /**/
+   inline void ad_E0_reg(uint16_t);                         /**/
+   inline uint16_t ad_initial();                            /**/
+   inline uint16_t ad_test();                               /**/
+   inline void crc_trans(uint16_t, uint16_t);               /**/
+   inline void data_initial();                              /* done */
+   inline void init();                                      /**/
+   inline void ins_to_reg(uint16_t, uint16_t *, uint16_t);  /**/
+   inline void int_08h_entry();                             /**/
+   inline void music_ctrl();                                /**/
+   inline void Pause();                                     /**/
+   inline void prepare_a0b0(uint16_t, uint16_t);            /**/
+   inline void rix_90_pro(uint16_t);                        /**/
+   inline void rix_A0_pro(uint16_t, uint16_t);              /**/
+   inline void rix_B0_pro(uint16_t, uint16_t);              /**/
+   inline void rix_C0_pro(uint16_t, uint16_t);              /**/
+   inline void rix_get_ins();                               /**/
+   inline uint16_t rix_proc();                              /**/
+   inline void set_new_int();
+   inline void switch_ad_bd(uint16_t); /**/
 };

@@ -47,68 +47,19 @@
 #include "opl.h"
 #include <stdint.h>
 
-#define OPL3_4OP_REGISTER 0x104
-#define OPL3_MODE_REGISTER 0x105
-
-class NUKEDOPL3 {
+class CEmuopl : public Copl
+{
 public:
-   NUKEDOPL3(uint32_t samplerate) : rate(samplerate) {}
-   void Reset() { OPL3_Reset(&chip, rate); }
-   void Write(uint32_t reg, uint8_t val) {
-      if (reg == OPL3_4OP_REGISTER || reg == OPL3_MODE_REGISTER) {
-         OPL3_WriteReg(&chip, (uint16_t)reg, val);
-      } else {
-         OPL3_WriteRegBuffered(&chip, (uint16_t)reg, val);
-      }
-   }
-   void Generate(short *buf, int samples) { OPL3_GenerateStream(&chip, buf, samples); }
+   CEmuopl(uint32_t samplerate) : rate(samplerate), Copl() { init(); };
+   ~CEmuopl() {};
+
+   void update(short *buf, int samples) { OPL3_GenerateStream(&chip, buf, samples); };
+   void write(int reg, int val) { OPL3_WriteRegBuffered(&chip, ((uint16_t)reg) & 0xFF, val); };
+   void init() { OPL3_Reset(&chip, rate); };
 
 private:
    uint32_t rate;
    opl3_chip chip;
-};
-
-class CEmuopl : public Copl {
-public:
-   static Copl *CreateEmuopl(uint32_t rate) {
-      return new CEmuopl(new NUKEDOPL3(rate), TYPE_OPL3);
-   }
-
-   ~CEmuopl() {
-      delete opl[0];
-   };
-
-   // Assumes a 16-bit, mono output sample buffer @ OPL2 mode
-   // Assumes a 16-bit, stereo output sample buffer @ OPL3/DUAL_OPL2 mode
-   void update(short *buf, int samples) {
-      opl[0]->Generate(buf, samples);
-   };
-
-   void write(int reg, int val) {
-      if (reg == 0x105 && currType == TYPE_OPL3) {
-         opl3mode = ((val & 0x1) == 0x1);
-      } else {
-         reg &= opl3mode ? 0x1FF : 0xFF;
-      }
-      opl[currChip]->Write(reg, (uint8_t)val);
-   };
-
-   void init() {
-      opl[0]->Reset();
-      if (opl3mode) {
-         opl[0]->Write(0x105, 1);
-      }
-   };
-
-   protected:
-   CEmuopl(NUKEDOPL3 *core, ChipType type) : Copl(type), opl3mode(false) {
-      opl[0] = core;
-      opl[1] = nullptr;
-      init();
-   };
-
-   NUKEDOPL3 *opl[2];
-   bool opl3mode;
 };
 
 #endif
