@@ -69,7 +69,7 @@ CrixPlayer::~CrixPlayer()
     free(rix_buf);
 }
 
-bool CrixPlayer::load(const std::string &filename, const CFileProvider &cfp)
+bool CrixPlayer::load(const std::string &filename)
 {
   fp = fopen(filename.c_str(), "rb");
   if (!fp)

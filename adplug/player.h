@@ -24,7 +24,6 @@
 
 #include <string>
 
-#include "fprovide.h"
 #include "opl.h"
 
 class CPlayer
@@ -36,11 +35,10 @@ public:
    /***** Operational methods *****/
    void seek(unsigned long ms);
 
-   virtual bool load(const std::string &filename, // loads file
-                     const CFileProvider &fp = CProvider_Filesystem()) = 0;
-   virtual bool update() = 0;                 // executes replay code for 1 tick
-   virtual void rewind(int subsong = -1) = 0; // rewinds to specified subsong
-   virtual float getrefresh() = 0;            // returns needed timer refresh rate
+   virtual bool load(const std::string &filename) = 0; // loads file
+   virtual bool update() = 0;                          // executes replay code for 1 tick
+   virtual void rewind(int subsong = -1) = 0;          // rewinds to specified subsong
+   virtual float getrefresh() = 0;                     // returns needed timer refresh rate
 
    /***** Informational methods *****/
    unsigned long songlength(int subsong = -1);

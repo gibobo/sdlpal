@@ -20,7 +20,6 @@
  *                                           BSPAL <BSPAL.ys168.com>
  */
 
-#include "fprovide.h"
 #include "player.h"
 #include <stdint.h>
 
@@ -32,7 +31,7 @@ public:
   CrixPlayer(Copl *newopl);
   ~CrixPlayer();
 
-  bool load(const std::string &filename, const CFileProvider &fp);
+  bool load(const std::string &filename);
   bool update();
   void rewind(int subsong);
   void rewindReInit(int subsong, bool reinit); /* For seamless continuous */

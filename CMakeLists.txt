@@ -17,10 +17,6 @@ else()
     set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE     ${CMAKE_BINARY_DIR})
 endif()
 
-
-# set (SDL_INCLUDE_DIR    external/SDL/include)
-set (BINIO_SOURCE_DIR   external/libbinio/src)
-set (BINIO_INCLUDE_DIR  external/libbinio/contrib/vs2015/libbinio)
 set (NUKED_DIR          external/nuked)
 set (GLFW_DIR           external/glfw)
 set (ADPLUG_DIR         adplug)
@@ -30,7 +26,6 @@ set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource)
 
 file(GLOB_RECURSE GAME_SOURCES      ${GAME_DIR}/*.c ${GAME_DIR}/*.cpp)
 file(GLOB NUKED_SOURCES             ${NUKED_DIR}/*.c)
-file(GLOB BINIO_SOURCES             ${BINIO_SOURCE_DIR}/*.cpp)
 file(GLOB ADPLUG_SOURCES            ${ADPLUG_DIR}/*.cpp)
 
 set(SDL_SHARED              OFF CACHE BOOL "Build a shared version of the library" FORCE)
@@ -47,8 +42,6 @@ add_definitions(-DPAL_HAS_JOYSTICKS)
 
 include_directories(external)
 include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${BINIO_SOURCE_DIR})
-include_directories(${BINIO_INCLUDE_DIR})
 include_directories(external/miniaudio)
 include_directories(${GAME_DIR})
 include_directories(${DRIVER_DIR})
@@ -63,7 +56,6 @@ add_executable(${PROJECT_NAME}_sdl
     ${DRIVER_DIR}/video_glsl.c
     ${GAME_SOURCES}
     ${NUKED_SOURCES}
-    ${BINIO_SOURCES}
     ${ADPLUG_SOURCES}
 )
 
@@ -76,7 +68,6 @@ add_executable(${PROJECT_NAME}_glfw
     ${DRIVER_DIR}/video_glsl.c
     ${GAME_SOURCES}
     ${NUKED_SOURCES}
-    ${BINIO_SOURCES}
     ${ADPLUG_SOURCES}
 )
 
@@ -84,7 +75,6 @@ add_executable(${PROJECT_NAME}_dummy
     ${DRIVER_DIR}/driver.c
     ${GAME_SOURCES}
     ${NUKED_SOURCES}
-    ${BINIO_SOURCES}
     ${ADPLUG_SOURCES}
 )
 

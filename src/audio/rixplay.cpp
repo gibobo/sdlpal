@@ -20,7 +20,6 @@
 
 #include "adplug/convertopl.h"
 #include "adplug/emuopls.h"
-#include "adplug/fprovide.h"
 #include "adplug/rix.h"
 #include "audio.h"
 #include "global.h"
@@ -403,7 +402,7 @@ AUDIOPLAYER *RIX_Init(void)
     }
 
     // Load the MKF file.
-    if (!pRixPlayer->rix->load(RESOURCE_PATH "/mus.mkf", CProvider_Filesystem()))
+    if (!pRixPlayer->rix->load(RESOURCE_PATH "/mus.mkf"))
     {
         delete pRixPlayer->rix;
         delete pRixPlayer->opl;
