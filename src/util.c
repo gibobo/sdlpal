@@ -19,11 +19,13 @@
 //
 
 #include "util.h"
-#include "common.h"
 #include "input.h"
 #include "main.h"
 #include <errno.h>
+#include <limits.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <time.h>
 #ifdef _WIN32
 #include <windows.h>
 #else

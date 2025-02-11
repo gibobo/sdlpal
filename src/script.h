@@ -39,7 +39,7 @@ PAL_RunAutoScript(
    unsigned short           wEventObjectID
 );
 
-extern int       g_fScriptSuccess;
+extern unsigned char       g_fScriptSuccess;
 
 #ifdef __cplusplus
 }

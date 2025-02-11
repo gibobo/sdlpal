@@ -19,9 +19,10 @@
 //
 
 #include "palcommon.h"
-#include "common.h"
 #include "driver.h"
 #include "util.h"
+#include <stdbool.h>
+#include <string.h>
 
 #define Check_fread(buf, elem, num, fp)             \
    if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
@@ -1008,7 +1009,7 @@ int PAL_MKFDecompressChunk(
       *lpBuffer = UTIL_malloc(uiBufferSize);
    }
 
-   len = Decompress(buf, *lpBuffer, uiBufferSize);
+   len = YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
    UTIL_free(buf);
 
    return len;

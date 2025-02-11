@@ -24,7 +24,6 @@
 #include "script.h"
 #include "audio.h"
 #include "battle.h"
-#include "common.h"
 #include "ending.h"
 #include "fight.h"
 #include "global.h"
@@ -40,8 +39,11 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
-int g_fScriptSuccess = true;
+unsigned char g_fScriptSuccess = true;
 static int g_iCurEquipPart = -1;
 extern BATTLE g_Battle;
 
@@ -2960,7 +2962,7 @@ PAL_RunTriggerScript(
    EVENTOBJECT *pEvtObj = NULL;
    int i;
 
-   extern int g_fUpdatedInBattle; // HACKHACK
+   extern unsigned char g_fUpdatedInBattle; // HACKHACK
 
    wNextScriptEntry = wScriptEntry;
    fEnded = false;

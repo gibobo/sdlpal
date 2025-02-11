@@ -20,7 +20,6 @@
 
 #include "battle.h"
 #include "audio.h"
-#include "common.h"
 #include "driver.h"
 #include "fight.h"
 #include "global.h"
@@ -34,6 +33,9 @@
 #include "ui.h"
 #include "util.h"
 #include "video.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <string.h>
 
 BATTLE g_Battle;
 

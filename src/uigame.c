@@ -20,7 +20,6 @@
 
 #include "uigame.h"
 #include "audio.h"
-#include "common.h"
 #include "driver.h"
 #include "global.h"
 #include "input.h"
@@ -35,8 +34,13 @@
 #include "uibattle.h"
 #include "util.h"
 #include "video.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 
+#ifndef max
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
 #define bufImageSize 8192  //bigger than 5034
 static int __buymenu_firsttime_render;
 // Equipment Screen

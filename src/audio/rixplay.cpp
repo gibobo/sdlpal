@@ -23,11 +23,12 @@
 #include "adplug/fprovide.h"
 #include "adplug/rix.h"
 #include "audio.h"
-#include "common.h"
 #include "global.h"
 #include "resampler.h"
 #include "util.h"
+#include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define PAL_MAX_SAMPLERATE 49716
 #define PAL_MIX_MAXVOLUME 128

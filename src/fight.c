@@ -21,7 +21,6 @@
 #include "fight.h"
 #include "audio.h"
 #include "battle.h"
-#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "palcommon.h"
@@ -29,7 +28,13 @@
 #include "text.h"
 #include "util.h"
 #include "video.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <string.h>
 
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 //#define INVINCIBLE 1
 extern BATTLE g_Battle;
 

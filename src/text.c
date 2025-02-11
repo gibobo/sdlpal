@@ -22,7 +22,6 @@
 //
 
 #include "text.h"
-#include "common.h"
 #include "driver.h"
 #include "font.h"
 #include "global.h"
@@ -33,7 +32,13 @@
 #include "util.h"
 #include "video.h"
 #include <errno.h>
+#include <float.h>
+#include <limits.h>
+#include <math.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <wctype.h>
 
 #define   FONT_COLOR_DEFAULT        0x4F
@@ -42,8 +47,14 @@
 #define   FONT_COLOR_CYAN           0x8D
 #define   FONT_COLOR_CYAN_ALT       0x8C
 #define   FONT_COLOR_RED_ALT        0x17
+#ifndef max
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
-int g_fUpdatedInBattle = false;
+unsigned char g_fUpdatedInBattle = false;
 static wchar_t  *WordBuf;
 static wchar_t  *MsgBuf;
 static wchar_t **lpWordBuf;
@@ -564,7 +575,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
    unsigned char *pCurrentPalette;
    unsigned char  t[3];
    int         i;
-   uint32_t    dwBeginningTicks = UTIL_GetTicks();
+   unsigned int    dwBeginningTicks = UTIL_GetTicks();
 
    //
    // get the current palette

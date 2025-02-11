@@ -19,7 +19,6 @@
 //
 
 #include "itemmenu.h"
-#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "palcommon.h"
@@ -28,10 +27,12 @@
 #include "text.h"
 #include "util.h"
 #include "video.h"
+#include <assert.h>
+#include <stdbool.h>
 
 static int g_iNumInventory = 0;
 static unsigned short g_wItemFlags = 0;
-static int g_fNoDesc = false;
+static unsigned char g_fNoDesc = false;
 
 unsigned short
 PAL_ItemSelectMenuUpdate(

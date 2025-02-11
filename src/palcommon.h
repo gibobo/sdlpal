@@ -96,11 +96,6 @@ int PAL_MKFDecompressChunk(
     void *fp);
 
 // From yj1.c:
-extern int (*Decompress)(
-    const void *Source,
-    void *Destination,
-    int DestSize);
-
 int YJ2_Decompress(
     const void *Source,
     void *Destination,

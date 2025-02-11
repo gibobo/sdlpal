@@ -20,7 +20,6 @@
 
 #include "ending.h"
 #include "audio.h"
-#include "common.h"
 #include "global.h"
 #include "palcommon.h"
 #include "palette.h"
@@ -29,6 +28,8 @@
 #include "scene.h"
 #include "util.h"
 #include "video.h"
+#include <stdbool.h>
+#include <stddef.h>
 
 static unsigned short g_wCurEffectSprite = 0;
 

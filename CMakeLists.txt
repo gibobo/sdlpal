@@ -80,10 +80,13 @@ add_executable(${PROJECT_NAME}_glfw
     ${ADPLUG_SOURCES}
 )
 
-# add_executable(${PROJECT_NAME}_dummy
-#     ${DRIVER_DIR}/driver.c
-#     ${GAME_SOURCES}
-# )
+add_executable(${PROJECT_NAME}_dummy
+    ${DRIVER_DIR}/driver.c
+    ${GAME_SOURCES}
+    ${NUKED_SOURCES}
+    ${BINIO_SOURCES}
+    ${ADPLUG_SOURCES}
+)
 
 target_include_directories(${PROJECT_NAME}_sdl
     PUBLIC

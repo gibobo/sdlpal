@@ -25,11 +25,14 @@
 #include "global.h"
 #include "input.h"
 #include "map.h"
+#include "palcommon.h"
 #include "palette.h"
 #include "res.h"
 #include "video.h"
-#include "palcommon.h"
-#include "common.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define MAX_SPRITE_TO_DRAW 2048
 

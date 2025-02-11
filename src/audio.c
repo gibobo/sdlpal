@@ -19,11 +19,15 @@
 //
 
 #include "audio.h"
-#include "common.h"
+#include "driver.h"
 #include "global.h"
 #include "resampler.h"
 #include "util.h"
-#include "driver.h"
+#include <limits.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef PAL_FORCE_INLINE
 #if defined(_MSC_VER)

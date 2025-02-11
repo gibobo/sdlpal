@@ -20,7 +20,6 @@
 
 #include "main.h"
 #include "audio.h"
-#include "common.h"
 #include "driver.h"
 #include "font.h"
 #include "global.h"
@@ -35,7 +34,9 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
+#include <assert.h>
 #include <setjmp.h>
+#include <stdbool.h>
 
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;

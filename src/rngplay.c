@@ -309,7 +309,7 @@ PAL_RNGPlay(
      UTIL_free(rng);
      rng_size = *(unsigned int *)buf;
      rng = (unsigned char *)UTIL_malloc(rng_size);
-     if (PAL_RNGBlitToSurface(rng, Decompress(buf, rng, rng_size), gpScreen) < 0)
+     if (PAL_RNGBlitToSurface(rng, YJ2_Decompress(buf, rng, rng_size), gpScreen) < 0)
        break; // Failed to get the frame, don't go further
 
      // Update the screen

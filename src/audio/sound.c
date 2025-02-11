@@ -19,40 +19,40 @@
 //
 
 #include "audio.h"
-#include "common.h"
 #include "driver.h"
 #include "global.h"
 #include "palcommon.h"
 #include "resampler.h"
 #include "util.h"
-#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 typedef struct RIFFHeader {
-  uint32_t signature; /* 'RIFF' */
-  uint32_t length;    /* Total length minus eight, little-endian */
-  uint32_t type;      /* 'WAVE', 'AVI ', ... */
+  unsigned int signature; /* 'RIFF' */
+  unsigned int length;    /* Total length minus eight, little-endian */
+  unsigned int type;      /* 'WAVE', 'AVI ', ... */
 } RIFFHeader;
 
 typedef struct RIFFChunkHeader {
-  uint32_t type;   /* 'fmt ', 'hdrl', 'movi' and so on */
-  uint32_t length; /* Total chunk length minus eight, little-endian */
+  unsigned int type;   /* 'fmt ', 'hdrl', 'movi' and so on */
+  unsigned int length; /* Total chunk length minus eight, little-endian */
 } RIFFChunkHeader;
 
 typedef struct WAVEFormatPCM {
-  uint16_t wFormatTag;      /* format type */
-  uint8_t nChannels;        /* number of channels (i.e. mono, stereo, etc.) */
-  uint32_t nSamplesPerSec;  /* sample rate */
-  uint32_t nAvgBytesPerSec; /* for buffer estimation */
-  uint16_t nBlockAlign;     /* block size of data */
-  uint16_t wBitsPerSample;
+  unsigned short wFormatTag;    /* format type */
+  unsigned char nChannels;      /* number of channels (i.e. mono, stereo, etc.) */
+  unsigned int nSamplesPerSec;  /* sample rate */
+  unsigned int nAvgBytesPerSec; /* for buffer estimation */
+  unsigned short nBlockAlign;   /* block size of data */
+  unsigned short wBitsPerSample;
 } WAVEFormatPCM;
 
 typedef struct tagWAVESPEC {
   int size;
   int freq;
-  uint16_t format;
-  uint8_t channels;
-  uint8_t align;
+  unsigned short format;
+  unsigned char channels;
+  unsigned char align;
 } WAVESPEC;
 
 typedef int (*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, int, const void **);
@@ -82,10 +82,10 @@ typedef struct tagVOCHEADER {
   unsigned short version_checksum;
 } VOCHEADER;
 
-#define RIFF_RIFF (((uint32_t)'R') | (((uint32_t)'I') << 8) | (((uint32_t)'F') << 16) | (((uint32_t)'F') << 24))
-#define RIFF_WAVE (((uint32_t)'W') | (((uint32_t)'A') << 8) | (((uint32_t)'V') << 16) | (((uint32_t)'E') << 24))
-#define WAVE_fmt  (((uint32_t)'f') | (((uint32_t)'m') << 8) | (((uint32_t)'t') << 16) | (((uint32_t)' ') << 24))
-#define WAVE_data (((uint32_t)'d') | (((uint32_t)'a') << 8) | (((uint32_t)'t') << 16) | (((uint32_t)'a') << 24))
+#define RIFF_RIFF (((unsigned int)'R') | (((unsigned int)'I') << 8) | (((unsigned int)'F') << 16) | (((unsigned int)'F') << 24))
+#define RIFF_WAVE (((unsigned int)'W') | (((unsigned int)'A') << 8) | (((unsigned int)'V') << 16) | (((unsigned int)'E') << 24))
+#define WAVE_fmt  (((unsigned int)'f') | (((unsigned int)'m') << 8) | (((unsigned int)'t') << 16) | (((unsigned int)' ') << 24))
+#define WAVE_data (((unsigned int)'d') | (((unsigned int)'a') << 8) | (((unsigned int)'t') << 16) | (((unsigned int)'a') << 24))
 
 static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int dwLen, WAVESPEC *lpSpec)
 /*++
@@ -110,8 +110,8 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
     const RIFFHeader *lpRiff = (const RIFFHeader *)lpData;
     const RIFFChunkHeader *lpChunk = NULL;
     const WAVEFormatPCM *lpFormat = NULL;
-    const uint8_t *lpWaveData = NULL;
-    uint32_t len, type;
+    const unsigned char *lpWaveData = NULL;
+    unsigned int len, type;
 
     if (dwLen < sizeof(RIFFHeader) || lpRiff->signature != RIFF_RIFF ||
         lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8)) {
@@ -136,11 +136,11 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
         }
         break;
       case WAVE_data:
-        lpWaveData = (const uint8_t *)(lpChunk + 1);
+        lpWaveData = (const unsigned char *)(lpChunk + 1);
         dwLen = 0;
         break;
       }
-      lpChunk = (const RIFFChunkHeader *)((const uint8_t *)(lpChunk + 1) + len);
+      lpChunk = (const RIFFChunkHeader *)((const unsigned char *)(lpChunk + 1) + len);
     }
 
     if (lpFormat == NULL || lpWaveData == NULL) {
@@ -189,7 +189,7 @@ static int SOUND_ResampleMix_U8_Mono_Mono(
 --*/
 {
   int src_samples = lpSpec->size;
-  const uint8_t *src = (const uint8_t *)lpData;
+  const unsigned char *src = (const unsigned char *)lpData;
   short *dst = (short *)lpBuffer;
   int channel_len = iBufLen, total_bytes = 0;
 
@@ -246,7 +246,7 @@ static int SOUND_ResampleMix_U8_Mono_Stereo(
 --*/
 {
   int src_samples = lpSpec->size;
-  const uint8_t *src = (const uint8_t *)lpData;
+  const unsigned char *src = (const unsigned char *)lpData;
   short *dst = (short *)lpBuffer;
   int channel_len = iBufLen >> 1, total_bytes = 0;
 
@@ -304,7 +304,7 @@ static int SOUND_ResampleMix_U8_Stereo_Mono(
 --*/
 {
   int src_samples = lpSpec->size >> 1;
-  const uint8_t *src = (const uint8_t *)lpData;
+  const unsigned char *src = (const unsigned char *)lpData;
   short *dst = (short *)lpBuffer;
   int channel_len = iBufLen, total_bytes = 0;
 
@@ -364,7 +364,7 @@ static int SOUND_ResampleMix_U8_Stereo_Stereo(
 --*/
 {
   int src_samples = lpSpec->size >> 1;
-  const uint8_t *src = (const uint8_t *)lpData;
+  const unsigned char *src = (const unsigned char *)lpData;
   short *dst = (short *)lpBuffer;
   int channel_len = iBufLen >> 1, total_bytes = 0;
 
@@ -722,7 +722,7 @@ static int SOUND_Play(
 
   cursnd->base = buf;
   cursnd->current = snddata;
-  cursnd->end = (const uint8_t *)snddata + wavespec.size;
+  cursnd->end = (const unsigned char *)snddata + wavespec.size;
   cursnd->spec = wavespec;
   cursnd->ResampleMix = mixer;
   player->cursounds++;
@@ -796,7 +796,7 @@ static void SOUND_FillBuffer(
     do {
       if (cursnd->base) {
         cursnd->ResampleMix(cursnd->resampler, cursnd->current, &cursnd->spec, stream, len, &cursnd->current);
-        cursnd->spec.size = (int)((const uint8_t *)cursnd->end - (const uint8_t *)cursnd->current);
+        cursnd->spec.size = (int)((const unsigned char *)cursnd->end - (const unsigned char *)cursnd->current);
         if (cursnd->spec.size < cursnd->spec.align) {
           UTIL_free((void *)cursnd->base);
           cursnd->base = cursnd->current = cursnd->end = NULL;

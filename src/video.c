@@ -19,12 +19,19 @@
 //
 
 #include "video.h"
-#include "common.h"
+#include "driver.h"
 #include "global.h"
 #include "input.h"
 #include "util.h"
-#include "driver.h"
+#include <stdbool.h>
+#include <string.h>
 
+#ifndef max
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 // The global palette
 PAL_Surface *gpScreen = NULL;    // Screen buffer
 PAL_Surface *gpScreenBak = NULL; // Backup screen buffer

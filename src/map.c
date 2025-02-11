@@ -54,14 +54,11 @@ PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
    unsigned int size;
    PALMAP *map;
 
-   //
    // Check for invalid map number.
-   //
    if (iMapNum >= PAL_MKFGetChunkCount(fpMapMKF) ||
        iMapNum >= PAL_MKFGetChunkCount(fpGopMKF) ||
-       iMapNum <= 0)
-   {
-      return NULL;
+       iMapNum <= 0) {
+     return NULL;
    }
 
    // Load the map tile data.
@@ -74,8 +71,7 @@ PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
    map = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
 
    // Read the map data.
-   if (PAL_MKFReadChunk(buf, size, iMapNum, fpMapMKF) < 0)
-   {
+   if (PAL_MKFReadChunk(buf, size, iMapNum, fpMapMKF) < 0) {
       UTIL_free(buf);
       UTIL_free(map);
       return NULL;
@@ -84,37 +80,33 @@ PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
    // Decompress the tile data.
    unsigned int tile_size = PALMAP_Y * PALMAP_X * PALMAP_Z * sizeof(unsigned int);
    map->Tiles = (unsigned int *)UTIL_malloc(tile_size);
-   if (Decompress(buf, map->Tiles, tile_size) < 0)
-   {
-      UTIL_free(map);
+   if (YJ2_Decompress(buf, map->Tiles, tile_size) < 0) {
       UTIL_free(buf);
+      UTIL_free(map->Tiles);
+      UTIL_free(map);
       return NULL;
    }
 
-   //
    // The compressed data is useless now; delete it.
-   //
    UTIL_free(buf);
 
-   //
    // Load the tile bitmaps.
-   //
    size = PAL_MKFGetChunkSize(iMapNum, fpGopMKF);
-   if (size <= 0)
-   {
-      UTIL_free(map);
-      return NULL;
-   }
-   map->pTileSprite = (unsigned char *)UTIL_malloc(size);
-   if (PAL_MKFReadChunk(map->pTileSprite, size, iMapNum, fpGopMKF) < 0)
-   {
+   if (size <= 0) {
+      UTIL_free(map->Tiles);
       UTIL_free(map);
       return NULL;
    }
 
-   //
+   map->pTileSprite = (unsigned char *)UTIL_malloc(size);
+   if (PAL_MKFReadChunk(map->pTileSprite, size, iMapNum, fpGopMKF) < 0) {
+      UTIL_free(map->pTileSprite);
+      UTIL_free(map->Tiles);
+      UTIL_free(map);
+      return NULL;
+   }
+
    // Done.
-   //
    map->iMapNum = iMapNum;
 
    return map;

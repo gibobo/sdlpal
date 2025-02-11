@@ -26,7 +26,7 @@
 #include "text.h"
 #include "util.h"
 #include "video.h"
-#include "common.h"
+#include <stdbool.h>
 
 unsigned char *gpSpriteUI = NULL;
 

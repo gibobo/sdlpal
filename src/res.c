@@ -20,11 +20,12 @@
 
 #include "res.h"
 #include "audio.h"
-#include "common.h"
 #include "driver.h"
 #include "global.h"
 #include "palcommon.h"
 #include "util.h"
+#include <assert.h>
+#include <stddef.h>
 
 typedef struct tagRESOURCES {
   unsigned char bLoadFlags;

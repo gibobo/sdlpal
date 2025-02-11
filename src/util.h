@@ -29,6 +29,8 @@
 #define SEEK_SET 0
 #endif
 
+#define FRAME_TIME (1000 / 10)        // 10 FPS
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -19,7 +19,6 @@
 //
 
 #include "play.h"
-#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "itemmenu.h"
@@ -29,6 +28,8 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
+#include <stdbool.h>
+#include <stdlib.h>
 
 void
 PAL_GameUpdate(

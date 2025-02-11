@@ -19,7 +19,6 @@
 //
 
 #include "magicmenu.h"
-#include "common.h"
 #include "global.h"
 #include "input.h"
 #include "palcommon.h"
@@ -29,6 +28,7 @@
 #include "uibattle.h"
 #include "util.h"
 #include "video.h"
+#include <stdbool.h>
 
 static struct MAGICITEM
 {

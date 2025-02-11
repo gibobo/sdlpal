@@ -19,13 +19,15 @@
 //
 
 #include "global.h"
-#include "common.h"
 #include "driver.h"
 #include "palcommon.h"
 #include "res.h"
 #include "script.h"
 #include "util.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 CONFIGURATION gConfig;
 static GLOBALVARS _gGlobals;
@@ -66,9 +68,6 @@ int PAL_InitGlobals(void)
    gpGlobals->f.fpFIRE = UTIL_fopen(RESOURCE_PATH "/fire.mkf", "rb");
    gpGlobals->f.fpRGM = UTIL_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
    gpGlobals->f.fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
-
-   // Set decompress function
-   Decompress = YJ2_Decompress;
 
    gpGlobals->bCurrentSaveSlot = 1;
 

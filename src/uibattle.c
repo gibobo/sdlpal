@@ -20,7 +20,6 @@
 
 #include "uibattle.h"
 #include "battle.h"
-#include "common.h"
 #include "fight.h"
 #include "global.h"
 #include "input.h"
@@ -31,6 +30,7 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
+#include <stdbool.h>
 
 static int g_iCurMiscMenuItem = 0;
 static int g_iCurSubMenuItem = 0;
