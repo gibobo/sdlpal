@@ -384,8 +384,8 @@ void PAL_DeleteBox(BOX *lpBox)
 
 unsigned short
 PAL_ReadMenu(
-    LPITEMCHANGED_CALLBACK lpfnMenuItemChanged,
-    LPCMENUITEM rgMenuItem,
+   void (*lpfnMenuItemChanged)(unsigned short),
+    const MENUITEM * rgMenuItem,
     int nMenuItem,
     unsigned short wDefaultItem,
     unsigned char bLabelColor)
@@ -742,7 +742,7 @@ PAL_TextWidth(
 }
 
 int PAL_MenuTextMaxWidth(
-    LPCMENUITEM rgMenuItem,
+    const MENUITEM *rgMenuItem,
     int nMenuItem)
 /*++
   Purpose:
@@ -760,19 +760,17 @@ int PAL_MenuTextMaxWidth(
 
 --*/
 {
-   int i;
-   int r = 0;
-   int w;
-   for (i = 0; i < nMenuItem; i++)
-   {
-      const wchar_t *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
-      w = (int)((PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4);
-      if (r < w)
-      {
-         r = w;
-      }
-   }
-   return r;
+  int i;
+  int r = 0;
+  int w;
+  for (i = 0; i < nMenuItem; i++) {
+    const wchar_t *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
+    w = (int)((PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4);
+    if (r < w) {
+      r = w;
+    }
+  }
+  return r;
 }
 
 int PAL_WordMaxWidth(

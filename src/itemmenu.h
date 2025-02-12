@@ -21,22 +21,10 @@
 #ifndef ITEMMENU_H
 #define ITEMMENU_H
 
-#include "ui.h"
+unsigned short PAL_ItemSelectMenuUpdate(void);
 
-unsigned short
-PAL_ItemSelectMenuUpdate(
-   void
-);
+void PAL_ItemSelectMenuInit(unsigned short wItemFlags);
 
-void
-PAL_ItemSelectMenuInit(
-   unsigned short                      wItemFlags
-);
-
-unsigned short
-PAL_ItemSelectMenu(
-   LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
-   unsigned short                      wItemFlags
-);
+unsigned short PAL_ItemSelectMenu(void (*lpfnMenuItemChanged)(unsigned short), unsigned short wItemFlags);
 
 #endif

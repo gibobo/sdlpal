@@ -25,6 +25,7 @@
 #include "palcommon.h"
 #include "scene.h"
 #include "script.h"
+#include "ui.h"
 #include "uigame.h"
 #include "util.h"
 #include "video.h"

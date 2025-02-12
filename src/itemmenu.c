@@ -25,6 +25,7 @@
 #include "scene.h"
 #include "script.h"
 #include "text.h"
+#include "ui.h"
 #include "util.h"
 #include "video.h"
 #include <assert.h>
@@ -348,7 +349,7 @@ void PAL_ItemSelectMenuInit(
 
 unsigned short
 PAL_ItemSelectMenu(
-    LPITEMCHANGED_CALLBACK lpfnMenuItemChanged,
+   void (*lpfnMenuItemChanged)(unsigned short),
     unsigned short wItemFlags)
 /*++
   Purpose:

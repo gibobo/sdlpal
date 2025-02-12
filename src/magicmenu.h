@@ -21,23 +21,10 @@
 #ifndef MAGICMENU_H
 #define MAGICMENU_H
 
-unsigned short
-PAL_MagicSelectionMenuUpdate(
-   void
-);
+unsigned short PAL_MagicSelectionMenuUpdate(void);
 
-void
-PAL_MagicSelectionMenuInit(
-   unsigned short         wPlayerRole,
-   int         fInBattle,
-   unsigned short         wDefaultMagic
-);
+void PAL_MagicSelectionMenuInit(unsigned short wPlayerRole, int fInBattle, unsigned short wDefaultMagic);
 
-unsigned short
-PAL_MagicSelectionMenu(
-   unsigned short         wPlayerRole,
-   int         fInBattle,
-   unsigned short         wDefaultMagic
-);
+unsigned short PAL_MagicSelectionMenu(unsigned short wPlayerRole, int fInBattle, unsigned short wDefaultMagic);
 
 #endif

@@ -21,9 +21,6 @@
 #ifndef ENDGAME_H
 #define ENDGAME_H
 
-void
-PAL_EndingScreen(
-   void
-);
+void PAL_EndingScreen(void);
 
 #endif

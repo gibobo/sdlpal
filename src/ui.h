@@ -133,10 +133,6 @@ typedef struct tagMENUITEM
     unsigned int pos;
 } MENUITEM;
 
-typedef const MENUITEM *LPCMENUITEM;
-
-typedef void (*LPITEMCHANGED_CALLBACK)(unsigned short);
-
 #define MENUITEM_VALUE_CANCELLED 0xFFFF
 
 typedef enum tagNUMCOLOR
@@ -190,8 +186,8 @@ void PAL_DeleteBox(
 
 unsigned short
 PAL_ReadMenu(
-    LPITEMCHANGED_CALLBACK lpfnMenuItemChanged,
-    LPCMENUITEM rgMenuItem,
+    void (*lpfnMenuItemChanged)(unsigned short),
+    const MENUITEM *rgMenuItem,
     int nMenuItem,
     unsigned short wDefaultItem,
     unsigned char bLabelColor);
@@ -208,7 +204,7 @@ PAL_TextWidth(
     const wchar_t *lpszItemText);
 
 int PAL_MenuTextMaxWidth(
-    LPCMENUITEM rgMenuItem,
+    const MENUITEM *rgMenuItem,
     int nMenuItem);
 
 int PAL_WordMaxWidth(
