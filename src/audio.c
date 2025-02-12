@@ -21,7 +21,6 @@
 #include "audio.h"
 #include "driver.h"
 #include "global.h"
-#include "resampler.h"
 #include "util.h"
 #include <limits.h>
 #include <math.h>
@@ -105,9 +104,6 @@ int AUDIO_OpenDevice(void)
     memset(&gAudioDevice, 0, sizeof(AUDIODEVICE));
     gAudioDevice.fOpened = false;
 
-    // Initialize the resampler module
-    resampler_init();
-
     // Initialize the music subsystem.
     gAudioDevice.pMusPlayer = RIX_Init();
     gAudioDevice.fMusicEnabled = (gAudioDevice.pMusPlayer) ? true : false;
@@ -152,8 +148,6 @@ void AUDIO_CloseDevice(void)
         UTIL_free(gAudioDevice.pSoundBuffer);
         gAudioDevice.pSoundBuffer = NULL;
     }
-
-    resampler_deinit();
 
     gAudioDevice.fOpened = false;
 }

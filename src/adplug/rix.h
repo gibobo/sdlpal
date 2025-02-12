@@ -1,6 +1,6 @@
 /*
  * Adplug - Replayer for many OPL2/OPL3 audio file formats.
- * Copyright (C) 1999 - 2007 Simon Peter, <dn.tlp@gmx.net>, et al.
+ * Copyright (C) 1999 - 2006 Simon Peter, <dn.tlp@gmx.net>, et al.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -14,22 +14,19 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * opl.h - OPL base class, by Simon Peter <dn.tlp@gmx.net>
+ * rix.h - Softstar RIX OPL Format Player by palxex <palxex.ys168.com>
+ *                                           BSPAL <BSPAL.ys168.com>
  */
 
-#ifndef H_ADPLUG_OPL
-#define H_ADPLUG_OPL
+#ifndef _RIX_H_
+#define _RIX_H_
 
-class Copl
-{
-public:
-   Copl(void) {}
-   virtual ~Copl() {}
-   virtual void init(void) = 0;                      // reinitialize OPL chip(s)
-   virtual void write(int reg, int val) = 0;         // combined register select + data write
-   virtual void update(short *buf, int samples) = 0; // Emulation only: fill buffer
-};
+void CrixPlayer_deinit(void);
+unsigned char CrixPlayer_load(const char *filename);
+unsigned char CrixPlayer_update();
+void CrixPlayer_rewind(unsigned int subsong);
+void CrixPlayer_rewindReInit(unsigned int subsong, unsigned char reinit); /* For seamless continuous */
 
 #endif

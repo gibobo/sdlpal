@@ -19,14 +19,11 @@ endif()
 
 set (NUKED_DIR          external/nuked)
 set (GLFW_DIR           external/glfw)
-set (ADPLUG_DIR         adplug)
 set (GAME_DIR           src)
 set (DRIVER_DIR         driver)
 set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource)
 
-file(GLOB_RECURSE GAME_SOURCES      ${GAME_DIR}/*.c ${GAME_DIR}/*.cpp)
-file(GLOB NUKED_SOURCES             ${NUKED_DIR}/*.c)
-file(GLOB ADPLUG_SOURCES            ${ADPLUG_DIR}/*.cpp)
+file(GLOB_RECURSE GAME_SOURCES      ${GAME_DIR}/*.c ${NUKED_DIR}/*.c)
 
 set(SDL_SHARED              OFF CACHE BOOL "Build a shared version of the library" FORCE)
 set(SDL_TEST                OFF CACHE BOOL "Build the SDL2_test library" FORCE)
@@ -51,12 +48,9 @@ add_executable(${PROJECT_NAME}_sdl
     ${DRIVER_DIR}/Audio_SDL.c
     ${DRIVER_DIR}/Event_SDL.c
     ${DRIVER_DIR}/Video_SDL.c
-    # ${DRIVER_DIR}/Audio_miniaudio.c
     ${DRIVER_DIR}/mini_glloader.c
     ${DRIVER_DIR}/video_glsl.c
     ${GAME_SOURCES}
-    ${NUKED_SOURCES}
-    ${ADPLUG_SOURCES}
 )
 
 add_executable(${PROJECT_NAME}_glfw
@@ -64,18 +58,13 @@ add_executable(${PROJECT_NAME}_glfw
     ${DRIVER_DIR}/Audio_miniaudio.c
     ${DRIVER_DIR}/Event_GLFW.c
     ${DRIVER_DIR}/Video_GLFW.c
-    # ${DRIVER_DIR}/mini_glloader.c
     ${DRIVER_DIR}/video_glsl.c
     ${GAME_SOURCES}
-    ${NUKED_SOURCES}
-    ${ADPLUG_SOURCES}
 )
 
 add_executable(${PROJECT_NAME}_dummy
     ${DRIVER_DIR}/driver.c
     ${GAME_SOURCES}
-    ${NUKED_SOURCES}
-    ${ADPLUG_SOURCES}
 )
 
 target_include_directories(${PROJECT_NAME}_sdl
@@ -113,6 +102,7 @@ if (WIN32)
     file(COPY ${CMAKE_SOURCE_DIR}/unicode_font.dat      DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_SOURCE_DIR}/unicode_font_size.dat DESTINATION ${CMAKE_BINARY_DIR})
 else()
+    target_link_libraries(${PROJECT_NAME}_dummy m)
     add_custom_target(link_target ALL
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/Pal98rqptw               ${RESOURCE_PATH}
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/shaders                  ${CMAKE_BINARY_DIR}/shaders

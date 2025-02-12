@@ -746,25 +746,26 @@ void SOUND_Shutdown(void *object)
 
 --*/
 {
-  SOUNDPLAYER *player = (SOUNDPLAYER *)object;
-  if (player) {
-    WAVEDATA *cursnd = &player->soundlist;
-    do {
-      if (cursnd->resampler[0])
-        resampler_delete(cursnd->resampler[0]);
-      if (cursnd->resampler[1])
-        resampler_delete(cursnd->resampler[1]);
-      if (cursnd->base)
-        UTIL_free((void *)cursnd->base);
-    } while ((cursnd = cursnd->next) != NULL);
-    cursnd = player->soundlist.next;
-    while (cursnd) {
-      WAVEDATA *old = cursnd;
-      cursnd = cursnd->next;
-      UTIL_free(old);
-    }
-  }
-  UTIL_fclose(player->mkf);
+   SOUNDPLAYER *player = (SOUNDPLAYER *)object;
+   if (player) {
+      WAVEDATA *cursnd = &player->soundlist;
+      do {
+         if (cursnd->resampler[0])
+            resampler_delete(cursnd->resampler[0]);
+         if (cursnd->resampler[1])
+            resampler_delete(cursnd->resampler[1]);
+         if (cursnd->base)
+            UTIL_free((void *)cursnd->base);
+      } while ((cursnd = cursnd->next) != NULL);
+      cursnd = player->soundlist.next;
+      while (cursnd) {
+         WAVEDATA *old = cursnd;
+         cursnd = cursnd->next;
+         UTIL_free(old);
+      }
+   }
+   UTIL_fclose(player->mkf);
+   resampler_deinit();
 }
 
 static void SOUND_FillBuffer(
@@ -825,16 +826,19 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
-  void *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
-  if (mkf == NULL)
-    return NULL;
-  SOUNDPLAYER *player = (SOUNDPLAYER *)UTIL_malloc(sizeof(SOUNDPLAYER));
-  player->Play = SOUND_Play;
-  player->FillBuffer = SOUND_FillBuffer;
-  player->Shutdown = SOUND_Shutdown;
-  player->mkf = mkf;
-  player->soundlist.resampler[0] = resampler_create();
-  player->soundlist.resampler[1] = resampler_create();
-  player->cursounds = 0;
-  return (AUDIOPLAYER *)player;
+   void *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
+   if (mkf == NULL)
+      return NULL;
+   // Initialize the resampler module
+   resampler_init();
+
+   SOUNDPLAYER *player = (SOUNDPLAYER *)UTIL_malloc(sizeof(SOUNDPLAYER));
+   player->Play = SOUND_Play;
+   player->FillBuffer = SOUND_FillBuffer;
+   player->Shutdown = SOUND_Shutdown;
+   player->mkf = mkf;
+   player->soundlist.resampler[0] = resampler_create();
+   player->soundlist.resampler[1] = resampler_create();
+   player->cursounds = 0;
+   return (AUDIOPLAYER *)player;
 }

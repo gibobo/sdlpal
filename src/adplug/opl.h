@@ -1,6 +1,6 @@
 /*
  * Adplug - Replayer for many OPL2/OPL3 audio file formats.
- * Copyright (C) 1999 - 2005 Simon Peter, <dn.tlp@gmx.net>, et al.
+ * Copyright (C) 1999 - 2007 Simon Peter, <dn.tlp@gmx.net>, et al.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,30 +36,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * -------------------------------------------------------------------------
  *
- * emuopls.h - Wrapper of several OPL2 emulators by Lou Yihua.
- *
+ * opl.h - OPL base class, by Simon Peter <dn.tlp@gmx.net>
  */
 
-#ifndef SDLPAL_EMUOPLS_H
-#define SDLPAL_EMUOPLS_H
+#ifndef _OPL_H_
+#define _OPL_H_
 
-#include "nuked/opl3.h"
-#include "opl.h"
-#include <stdint.h>
-
-class CEmuopl : public Copl
-{
-public:
-   CEmuopl(uint32_t samplerate) : rate(samplerate), Copl() { init(); };
-   ~CEmuopl() {};
-
-   void update(short *buf, int samples) { OPL3_GenerateStream(&chip, buf, samples); };
-   void write(int reg, int val) { OPL3_WriteRegBuffered(&chip, ((uint16_t)reg) & 0xFF, val); };
-   void init() { OPL3_Reset(&chip, rate); };
-
-private:
-   uint32_t rate;
-   opl3_chip chip;
-};
+void Copl_init(unsigned int samplerate, unsigned char stereo);
+void Copl_deinit(void);
+void Copl_reset(void);                     // reinitialize OPL chip(s)
+void Copl_write(int reg, int val);         // combined register select + data write
+void Copl_update(short *buf, int samples); // Emulation only: fill buffer
 
 #endif

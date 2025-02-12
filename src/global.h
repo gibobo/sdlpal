@@ -575,9 +575,7 @@ typedef struct tagCONFIGURATION {
   unsigned int dwTextureHeight;
   int iAudioChannels;
   int iSampleRate;
-  int iOPLSampleRate;
   unsigned short wAudioBufferSize;
-  int fEnableKeyRepeat;
 } CONFIGURATION;
 
 #ifdef __cplusplus

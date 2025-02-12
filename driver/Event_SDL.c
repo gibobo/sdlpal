@@ -60,11 +60,7 @@ static void SDL_UpdateKeyboardState(SDL_Keycode key) {
       if (keyPress == SDL_PRESSED) {
          if (dwCurrentTime > rgdwKeyLastTime[i]) {
             PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
-            if (gConfig.fEnableKeyRepeat) {
-               rgdwKeyLastTime[i] = dwCurrentTime + (rgdwKeyLastTime[i] == 0 ? 200 : 75);
-            } else {
-               rgdwKeyLastTime[i] = 0xFFFFFFFF;
-            }
+            rgdwKeyLastTime[i] = 0xFFFFFFFF;
          }
       } else {
          if (rgdwKeyLastTime[i] > 0)

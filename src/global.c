@@ -50,11 +50,8 @@ int PAL_InitGlobals(void)
 --*/
 {
    // Set configurable global options
-   gConfig.fEnableKeyRepeat = 0;
    gConfig.iAudioChannels = 2; // 2 or 1
-
    gConfig.iSampleRate = 44100;
-   gConfig.iOPLSampleRate = 49716;
    gConfig.wAudioBufferSize = 512;
    gConfig.dwTextureWidth = 640;
    gConfig.dwTextureHeight = 400;

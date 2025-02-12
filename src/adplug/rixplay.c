@@ -18,14 +18,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "adplug/convertopl.h"
-#include "adplug/emuopls.h"
-#include "adplug/rix.h"
 #include "audio.h"
 #include "global.h"
-#include "resampler.h"
+#include "opl.h"
+#include "rix.h"
 #include "util.h"
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,9 +39,6 @@ enum {
 
 typedef struct tagRIXPLAYER {
   AUDIOPLAYER_COMMONS;
-  Copl *opl;
-  CrixPlayer *rix;
-  void *resampler[2];
   unsigned char *buf;
   unsigned char *pos;
   int iNextMusic; // the next music number to switch to
@@ -128,11 +124,8 @@ RIX_FillBuffer(
                         pRixPlayer->dwStartFadeTime = UTIL_GetTicks();
                     pRixPlayer->iTotalFadeOutSamples = 0;
                     pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeInSamples;
-                    pRixPlayer->rix->rewind(pRixPlayer->iMusic);
-                    if (pRixPlayer->resampler[0])
-                        resampler_clear(pRixPlayer->resampler[0]);
-                    if (pRixPlayer->resampler[1])
-                        resampler_clear(pRixPlayer->resampler[1]);
+                    CrixPlayer_rewind(pRixPlayer->iMusic);
+                    
                     continue;
                 }
                 else
@@ -166,7 +159,7 @@ RIX_FillBuffer(
             if (pRixPlayer->pos == NULL || pRixPlayer->pos - pRixPlayer->buf >= buf_max_len)
             {
                 pRixPlayer->pos = pRixPlayer->buf;
-                if (!pRixPlayer->rix->update())
+                if (!CrixPlayer_update())
                 {
                     if (!pRixPlayer->fLoop)
                     {
@@ -180,8 +173,8 @@ RIX_FillBuffer(
                         }
                         return;
                     }
-                    pRixPlayer->rix->rewindReInit(pRixPlayer->iMusic, false);
-                    if (!pRixPlayer->rix->update())
+                    CrixPlayer_rewindReInit(pRixPlayer->iMusic, false);
+                    if (!CrixPlayer_update())
                     {
                         //
                         // Something must be wrong
@@ -191,44 +184,14 @@ RIX_FillBuffer(
                         return;
                     }
                 }
-                int sample_count = gConfig.iSampleRate / 70;
-                if (pRixPlayer->resampler[0])
-                {
-                    unsigned int samples_written = 0;
-                    short *finalBuf = (short *)pRixPlayer->buf;
-
-                    while (sample_count)
-                    {
-                        int to_write = resampler_get_free_count(pRixPlayer->resampler[0]);
-                        if (to_write)
-                        {
-                            short *tempBuf = (short *)UTIL_calloc(to_write * gConfig.iAudioChannels, sizeof(short));
-                            pRixPlayer->opl->update(tempBuf, to_write);
-                            for (int i = 0; i < to_write * gConfig.iAudioChannels; i++)
-                                resampler_write_sample(pRixPlayer->resampler[i % gConfig.iAudioChannels], tempBuf[i]);
-                            UTIL_free(tempBuf);
-                        }
-
-                        int to_get = resampler_get_sample_count(pRixPlayer->resampler[0]);
-                        if (to_get > sample_count)
-                            to_get = sample_count;
-                        for (int i = 0; i < to_get * gConfig.iAudioChannels; i++)
-                            finalBuf[samples_written++] = resampler_get_and_remove_sample(pRixPlayer->resampler[i % gConfig.iAudioChannels]);
-                        sample_count -= to_get;
-                    }
-                }
-                else
-                {
-                    pRixPlayer->opl->update((short *)(pRixPlayer->buf), sample_count);
-                }
+                
+                Copl_update((short *)pRixPlayer->buf, gConfig.iSampleRate / 70);
             }
 
             int l = buf_max_len - (int)(pRixPlayer->pos - pRixPlayer->buf);
             l = (l > len) ? len / sizeof(short) : l / sizeof(short);
 
-            //
             // Put audio data into buffer and adjust volume
-            //
             if (pRixPlayer->FadeType != FADE_NONE)
             {
                 short *ptr = (short *)stream;
@@ -276,12 +239,9 @@ static void RIX_Shutdown(void *object)
     if (object != NULL) {
         RIXPLAYER *pRixPlayer = (RIXPLAYER *)object;
         pRixPlayer->fReady = false;
-        for (int i = 0; i < gConfig.iAudioChannels; i++)
-            if (pRixPlayer->resampler[i])
-                resampler_delete(pRixPlayer->resampler[i]);
         UTIL_free(pRixPlayer->buf);
-        delete pRixPlayer->rix;
-        delete pRixPlayer->opl;
+        CrixPlayer_deinit();
+        Copl_deinit();
         UTIL_free(pRixPlayer);
     }
 }
@@ -376,49 +336,15 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->FillBuffer = RIX_FillBuffer;
     pRixPlayer->Shutdown = RIX_Shutdown;
     pRixPlayer->Play = RIX_Play;
-    pRixPlayer->buf = (unsigned char *)UTIL_malloc((PAL_MAX_SAMPLERATE + 69) / 70 * sizeof(short) * 2);
+    pRixPlayer->buf = (unsigned char *)UTIL_calloc((PAL_MAX_SAMPLERATE + 69) / 70 * 2, sizeof(short));
 
-    Copl *opl = new CEmuopl(gConfig.iOPLSampleRate);
-    if (NULL == opl)
-    {
-        delete pRixPlayer;
-        return NULL;
-    }
-
-    pRixPlayer->opl = new CConvertopl(opl, true, gConfig.iAudioChannels == 2);
-    if (pRixPlayer->opl == NULL)
-    {
-        delete opl;
-        delete pRixPlayer;
-        return NULL;
-    }
-
-    pRixPlayer->rix = new CrixPlayer(pRixPlayer->opl);
-    if (pRixPlayer->rix == NULL)
-    {
-        delete pRixPlayer->opl;
-        delete pRixPlayer;
-        return NULL;
-    }
+    Copl_init(gConfig.iSampleRate, gConfig.iAudioChannels == 2);
 
     // Load the MKF file.
-    if (!pRixPlayer->rix->load(RESOURCE_PATH "/mus.mkf"))
-    {
-        delete pRixPlayer->rix;
-        delete pRixPlayer->opl;
-        delete pRixPlayer;
-        pRixPlayer = NULL;
-        return NULL;
-    }
-
-    if (gConfig.iOPLSampleRate != gConfig.iSampleRate)
-    {
-        for (int i = 0; i < gConfig.iAudioChannels; i++)
-        {
-            pRixPlayer->resampler[i] = resampler_create();
-            resampler_set_quality(pRixPlayer->resampler[i], ((gConfig.iOPLSampleRate % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % gConfig.iOPLSampleRate) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
-            resampler_set_rate(pRixPlayer->resampler[i], (double)gConfig.iOPLSampleRate / (double)gConfig.iSampleRate);
-        }
+    if (!CrixPlayer_load(RESOURCE_PATH "/mus.mkf")) {
+      UTIL_free(pRixPlayer);
+      pRixPlayer = NULL;
+      return NULL;
     }
 
     // Success.

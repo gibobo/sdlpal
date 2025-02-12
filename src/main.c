@@ -364,7 +364,7 @@ int main(int argc, char *argv[])
    PAL_Init();
 
    // Show the trademark screen and splash screen
-   PAL_TrademarkScreen();
+   // PAL_TrademarkScreen();
    PAL_SplashScreen();
 
    // Show the opening menu.
