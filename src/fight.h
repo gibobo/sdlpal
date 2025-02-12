@@ -21,10 +21,6 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 int
 PAL_BattleSelectAutoTargetFrom(
    int
@@ -100,9 +96,5 @@ PAL_BattleSimulateMagic(
    unsigned short       wMagicObjectID,
    unsigned short       wBaseDamage
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

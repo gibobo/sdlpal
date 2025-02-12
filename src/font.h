@@ -23,10 +23,6 @@
 
 #define FONT_HEIGHT (16)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*++
   Purpose:
 
@@ -86,9 +82,5 @@ void PAL_DrawCharOnSurface(
 int PAL_CharWidth(unsigned short wChar);
 
 void PAL_DeInitFont(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

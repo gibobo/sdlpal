@@ -578,10 +578,6 @@ typedef struct tagCONFIGURATION {
   unsigned short wAudioBufferSize;
 } CONFIGURATION;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern GLOBALVARS *const gpGlobals;
 extern CONFIGURATION gConfig;
 
@@ -713,9 +709,5 @@ void PAL_ClearAllPlayerStatus(
 void PAL_PlayerLevelUp(
     unsigned short wPlayerRole,
     unsigned short wNumLevel);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

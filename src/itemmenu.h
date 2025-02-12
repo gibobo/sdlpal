@@ -23,10 +23,6 @@
 
 #include "ui.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 unsigned short
 PAL_ItemSelectMenuUpdate(
    void
@@ -42,9 +38,5 @@ PAL_ItemSelectMenu(
    LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
    unsigned short                      wItemFlags
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

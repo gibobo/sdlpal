@@ -28,10 +28,6 @@
 #define PAL_Y(xy) (short)(((xy) >> 16) & 0xFFFF)
 #define PAL_XY_OFFSET(xy, x, y) (unsigned int)(((((int)(y) << 16) & 0xFFFF0000) + ((xy) & 0xFFFF0000)) | (((int)(x) & 0xFFFF) + ((xy) & 0xFFFF)))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 int PAL_RLEBlitToSurface(
     const unsigned char *lpBitmapRLE,
     PAL_Surface *lpDstSurface,
@@ -100,9 +96,5 @@ int YJ2_Decompress(
     const void *Source,
     void *Destination,
     int DestSize);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // _PALUTILS_H

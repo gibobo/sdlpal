@@ -1,7 +1,7 @@
 #include "audio.h"
 #include "global.h"
 #define MINIAUDIO_IMPLEMENTATION
-#include "miniaudio.h"
+#include "miniaudio/miniaudio.h"
 #include <string.h>
 
 static ma_device device;

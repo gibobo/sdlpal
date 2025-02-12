@@ -110,10 +110,6 @@ typedef struct tagBATTLEUI
    SHOWNUM rgShowNum[BATTLEUI_MAX_SHOWNUM];
 } BATTLEUI;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void PAL_PlayerInfoBox(
     unsigned int pos,
     unsigned short wPlayerRole,
@@ -135,9 +131,5 @@ void PAL_BattleUIShowNum(
     unsigned short wNum,
     unsigned int pos,
     NUMCOLOR color);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -20,21 +20,11 @@
 // multipass shader preset header by palxex, 2018
 //
 
-
 #ifndef video_glsl_h
 #define video_glsl_h
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 void VIDEO_GLSL_Initialize(int width, int height);
 void VIDEO_GLSL_RenderCopy(void *data);
 void VIDEO_GLSL_Destroy(void);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* video_glsl_h */

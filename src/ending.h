@@ -21,17 +21,9 @@
 #ifndef ENDGAME_H
 #define ENDGAME_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void
 PAL_EndingScreen(
    void
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

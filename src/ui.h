@@ -153,10 +153,6 @@ typedef enum tagNUMALIGN
     kNumAlignRight
 } NUMALIGN;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 int PAL_InitUI(
     void);
 
@@ -223,9 +219,5 @@ int PAL_WordWidth(
     int nWordIndex);
 
 extern unsigned char *gpSpriteUI;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

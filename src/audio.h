@@ -48,18 +48,10 @@ int AUDIO_MusicEnabled(void);
 void AUDIO_EnableSound(int fEnable);
 int AUDIO_SoundEnabled(void);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* RIX */
 AUDIOPLAYER *RIX_Init(void);
 
 /* SOUND */
 AUDIOPLAYER *SOUND_Init(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

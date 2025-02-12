@@ -23,7 +23,11 @@ set (GAME_DIR           src)
 set (DRIVER_DIR         driver)
 set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource)
 
-file(GLOB_RECURSE GAME_SOURCES      ${GAME_DIR}/*.c ${NUKED_DIR}/*.c)
+file(GLOB GAME_SOURCES
+    ${GAME_DIR}/*.c
+    ${GAME_DIR}/adplug/*.c
+    ${GAME_DIR}/sound/*.c
+    ${NUKED_DIR}/*.c)
 
 set(SDL_SHARED              OFF CACHE BOOL "Build a shared version of the library" FORCE)
 set(SDL_TEST                OFF CACHE BOOL "Build the SDL2_test library" FORCE)
@@ -38,8 +42,6 @@ add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 add_definitions(-DPAL_HAS_JOYSTICKS)
 
 include_directories(external)
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories(external/miniaudio)
 include_directories(${GAME_DIR})
 include_directories(${DRIVER_DIR})
 

@@ -21,17 +21,9 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void PAL_TrademarkScreen(void);
 void PAL_SplashScreen(void);
 void PAL_Init(void);
 void PAL_Shutdown(int exit_code);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

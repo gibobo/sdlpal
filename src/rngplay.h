@@ -21,10 +21,6 @@
 #ifndef RNGPLAY_H
 #define RNGPLAY_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void
 PAL_RNGPlay(
    int           iNumRNG,
@@ -32,9 +28,5 @@ PAL_RNGPlay(
    int           iNumFrames,
    int           iSpeed
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

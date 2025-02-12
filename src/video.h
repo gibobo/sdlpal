@@ -38,10 +38,6 @@ typedef struct PAL_Rect {
     int h;
 } PAL_Rect;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern PAL_Surface *gpScreen;
 extern PAL_Surface *gpScreenBak;
 
@@ -88,9 +84,5 @@ void PAL_FreeSurface(PAL_Surface *surface);
 void PAL_CleanScreen(void);
 
 void VIDEO_Resize(int w, int h);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

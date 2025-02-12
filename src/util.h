@@ -31,10 +31,6 @@
 
 #define FRAME_TIME (1000 / 10)        // 10 FPS
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 long flength(void *fp);
 
 int RandomLong(int from, int to);
@@ -67,9 +63,5 @@ unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _
 unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream);
 
 void UTIL_fclose(void *fp);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

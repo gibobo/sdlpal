@@ -23,10 +23,6 @@
 
 #define PAL_ITEM_DESC_BOTTOM	(1 << 15)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 unsigned short
 PAL_RunTriggerScript(
    unsigned short           wScriptEntry,
@@ -40,9 +36,5 @@ PAL_RunAutoScript(
 );
 
 extern unsigned char       g_fScriptSuccess;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

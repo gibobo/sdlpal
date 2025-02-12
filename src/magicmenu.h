@@ -21,10 +21,6 @@
 #ifndef MAGICMENU_H
 #define MAGICMENU_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 unsigned short
 PAL_MagicSelectionMenuUpdate(
    void
@@ -43,9 +39,5 @@ PAL_MagicSelectionMenu(
    int         fInBattle,
    unsigned short         wDefaultMagic
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

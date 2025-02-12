@@ -30,10 +30,6 @@ enum tagLOADRESFLAG
    kLoadPlayerSprite   = (1 << 2),    // load player sprites
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void
 PAL_InitResources(
    void
@@ -65,9 +61,5 @@ unsigned char *
 PAL_GetEventObjectSprite(
    unsigned short      wEventObjectID
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

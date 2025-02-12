@@ -21,10 +21,6 @@
 #ifndef UIGAME_H
 #define UIGAME_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void
 PAL_DrawOpeningMenuBackground(
    void
@@ -94,9 +90,5 @@ void
 PAL_QuitGame(
    void
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

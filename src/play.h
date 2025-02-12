@@ -21,10 +21,6 @@
 #ifndef PLAY_H
 #define PLAY_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void
 PAL_GameUpdate(
    int       fTrigger
@@ -54,9 +50,5 @@ void
 PAL_WaitForAnyKey(
    unsigned short      wTimeOut
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
