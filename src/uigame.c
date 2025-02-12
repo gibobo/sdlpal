@@ -133,32 +133,7 @@ static unsigned short GetSavedTimes(int iSaveSlot) {
    return wSavedTimes;
 }
 
-void PAL_DrawOpeningMenuBackground(
-    void)
-/*++
-  Purpose:
-
-    Draw the background of the main menu.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-   // Read the picture from fbp.mkf.
-   PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, 2, gpGlobals->f.fpFBP);
-
-   // ...and blit it to the screen buffer.
-   VIDEO_UpdateScreen(NULL);
-}
-
-int PAL_OpeningMenu(
-    void)
+int PAL_OpeningMenu(void)
 /*++
   Purpose:
 
@@ -183,37 +158,31 @@ int PAL_OpeningMenu(
        {0, MAINMENU_LABEL_NEWGAME, true, PAL_XY(125 - (w[0] > 4 ? (w[0] - 4) * 8 : 0), 95)},
        {1, MAINMENU_LABEL_LOADGAME, true, PAL_XY(125 - (w[1] > 4 ? (w[1] - 4) * 8 : 0), 112)}};
 
-   //
    // Play the background music
-   //
    AUDIO_PlayMusic(0x04, true, 1);
 
-   //
    // Draw the background
-   //
-   PAL_DrawOpeningMenuBackground();
+   // Read the picture from fbp.mkf.
+   PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, 2, gpGlobals->f.fpFBP);
+
+   // ...and blit it to the screen buffer.
+   VIDEO_UpdateScreen(NULL);
    PAL_FadeIn(0, false, 1);
 
    while (true)
    {
-      //
       // Activate the menu
-      //
       wItemSelected = PAL_ReadMenu(NULL, rgMainMenuItem, 2, wDefaultItem, MENUITEM_COLOR);
 
       if (wItemSelected == 0 || wItemSelected == MENUITEM_VALUE_CANCELLED)
       {
-         //
          // Start a new game
-         //
          wItemSelected = 0;
          break;
       }
       else
       {
-         //
          // Load game
-         //
          VIDEO_BackupScreen(gpScreen);
          wItemSelected = PAL_SaveSlotMenu(1);
          VIDEO_RestoreScreen(gpScreen);
@@ -226,9 +195,7 @@ int PAL_OpeningMenu(
       }
    }
 
-   //
    // Fade out the screen and the music
-   //
    AUDIO_PlayMusic(0x00, false, 1);
    PAL_FadeOut(1);
 

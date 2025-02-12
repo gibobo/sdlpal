@@ -21,15 +21,15 @@
 #ifndef UIGAME_H
 #define UIGAME_H
 
-void
-PAL_DrawOpeningMenuBackground(
-   void
-);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int
-PAL_OpeningMenu(
-   void
-);
+int PAL_OpeningMenu(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 int
 PAL_SaveSlotMenu(

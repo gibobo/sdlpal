@@ -384,8 +384,8 @@ void PAL_DeleteBox(BOX *lpBox)
 
 unsigned short
 PAL_ReadMenu(
-   void (*lpfnMenuItemChanged)(unsigned short),
-    const MENUITEM * rgMenuItem,
+    void (*lpfnMenuItemChanged)(unsigned short),
+    const MENUITEM *rgMenuItem,
     int nMenuItem,
     unsigned short wDefaultItem,
     unsigned char bLabelColor)

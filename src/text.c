@@ -55,14 +55,13 @@
 #endif
 
 unsigned char g_fUpdatedInBattle = false;
-static wchar_t  *WordBuf;
-static wchar_t  *MsgBuf;
-static wchar_t **lpWordBuf;
-static wchar_t **lpMsgBuf;
-static wchar_t internal_wbuffer[1024];
-static unsigned short *lpcptbl_big5;
-
-TEXTLIB         g_TextLib;
+static wchar_t *WordBuf = NULL;
+static wchar_t *MsgBuf = NULL;
+static wchar_t **lpWordBuf = NULL;
+static wchar_t **lpMsgBuf = NULL;
+static wchar_t internal_wbuffer[256];
+static void *fp_cptbl_big5 = NULL;
+TEXTLIB g_TextLib;
 
 int PAL_InitText(void)
 /*++
@@ -86,9 +85,7 @@ int PAL_InitText(void)
    unsigned char *temp;
    int wpos, wlen, i;
 
-   //
    // Open the message and word data files.
-   //
    fp = UTIL_fopen(RESOURCE_PATH "/word.dat", "rb");
    if (fp == NULL)
       return -1;
@@ -115,10 +112,7 @@ int PAL_InitText(void)
    // Close the words file
    UTIL_fclose(fp);
 
-   fp = UTIL_fopen("cptbl_big5.dat", "rb");
-   lpcptbl_big5 = (unsigned short *)UTIL_calloc(126 * 160, sizeof(unsigned short));
-   UTIL_fread(lpcptbl_big5, sizeof(unsigned short), 126 * 160, fp);
-   UTIL_fclose(fp);
+   fp_cptbl_big5 = UTIL_fopen("cptbl_big5.dat", "rb");
 
    // Split the words and do code page conversion
    for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
@@ -219,12 +213,12 @@ void PAL_FreeText(
    UTIL_free(lpMsgBuf);
    UTIL_free(WordBuf);
    UTIL_free(lpWordBuf);
-   UTIL_free(lpcptbl_big5);
+   UTIL_fclose(fp_cptbl_big5);
    MsgBuf = NULL;
    lpMsgBuf = NULL;
    WordBuf = NULL;
    lpWordBuf = NULL;
-   lpcptbl_big5 = NULL;
+   fp_cptbl_big5 = NULL;
 }
 
 const wchar_t*
@@ -271,10 +265,7 @@ PAL_GetMsg(
    return (iNumMsg >= g_TextLib.nMsgs || !lpMsgBuf[iNumMsg]) ? L"" : lpMsgBuf[iNumMsg];
 }
 
-wchar_t*
-PAL_UnescapeText(
-   const wchar_t *lpszText
-)
+wchar_t *PAL_UnescapeText(const wchar_t *lpszText)
 {
    wchar_t *buf = internal_wbuffer;
 
@@ -1100,7 +1091,10 @@ PAL_MultiByteToWideCharCP(
                 unsigned short byte1 = mbs[i - 1] - 0x81;
                 unsigned short byte2 = mbs[i];
                 byte2 -= (mbs[i] <= 0x7E) ? 0x40 : 0x60;
-                wcs[wlen++] = lpcptbl_big5[byte1 * 160 + byte2];
+                unsigned short cptbl_big5;
+                UTIL_fseek(fp_cptbl_big5, sizeof(unsigned short) * (byte1 * 160 + byte2), SEEK_SET);
+                UTIL_fread(&cptbl_big5, sizeof(unsigned short), 1, fp_cptbl_big5);
+                wcs[wlen++] = cptbl_big5;
               } else
                 wcs[wlen++] = 0x003F;
               state = 0;

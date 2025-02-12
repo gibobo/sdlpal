@@ -594,8 +594,15 @@ void PAL_SaveGame(
 void PAL_InitGameData(
     int iSaveSlot);
 
-void PAL_ReloadInNextTick(
-    int iSaveSlot);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void PAL_ReloadInNextTick(int iSaveSlot);
+
+#ifdef __cplusplus
+}
+#endif
 
 int PAL_CountItem(
     unsigned short wObjectID);
