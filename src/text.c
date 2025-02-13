@@ -55,12 +55,13 @@
 #endif
 
 unsigned char g_fUpdatedInBattle = false;
+static void *fp_cptbl_big5 = NULL;
 static wchar_t *WordBuf = NULL;
 static wchar_t *MsgBuf = NULL;
 static wchar_t **lpWordBuf = NULL;
 static wchar_t **lpMsgBuf = NULL;
-static wchar_t internal_wbuffer[256];
-static void *fp_cptbl_big5 = NULL;
+static wchar_t *internal_wbuffer;
+static unsigned int internal_wbuffer_size = 0;
 TEXTLIB g_TextLib;
 
 int PAL_InitText(void)
@@ -84,98 +85,90 @@ int PAL_InitText(void)
    unsigned int *offsets;
    unsigned char *temp;
    int wpos, wlen, i;
-
-   // Open the message and word data files.
-   fp = UTIL_fopen(RESOURCE_PATH "/word.dat", "rb");
-   if (fp == NULL)
-      return -1;
-
-   // See how many words we have
-   i = flength(fp);
-   if (i <= 0) {
-      UTIL_fclose(fp);
-      return -1;
-   }
-
-   // Each word has 10 bytes
-   g_TextLib.nWords = (i + 9) / 10;
-
-   // Read the words
-   temp = (unsigned char *)UTIL_malloc(10 * g_TextLib.nWords);
-
-   if (UTIL_fread(temp, 1, i, fp) < (unsigned int)i) {
-      UTIL_free(temp);
-      UTIL_fclose(fp);
-      return -1;
-   }
-
-   // Close the words file
-   UTIL_fclose(fp);
+   int len;
 
    fp_cptbl_big5 = UTIL_fopen("cptbl_big5.dat", "rb");
+   internal_wbuffer_size = 0;
 
-   // Split the words and do code page conversion
-   for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
-      int base = i * 10;
-      int pos = base + 9;
-      while (pos >= base && temp[pos] == ' ')
-      temp[pos--] = 0;
-      wlen += PAL_MultiByteToWideCharCP(temp + base, 10, NULL, 0) + 1;
+   // Open the message and word data files.
+   {
+     fp = UTIL_fopen(RESOURCE_PATH "/word.dat", "rb");
+     // See how many words we have
+     i = flength(fp);
+     // Each word has 10 bytes
+     g_TextLib.nWords = (i + 9) / 10;
+     // Read the words
+     temp = (unsigned char *)UTIL_malloc(10 * g_TextLib.nWords);
+     UTIL_fread(temp, sizeof(unsigned char), i, fp);
+     // Close the words file
+     UTIL_fclose(fp);
+
+     // Split the words and do code page conversion
+     for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
+       int base = i * 10;
+       int pos = base + 9;
+       while (pos >= base && temp[pos] == ' ')
+         temp[pos--] = 0;
+       len = PAL_MultiByteToWideCharCP(temp + base, 10, NULL, 0);
+       wlen += (len + 1);
+     }
+
+     WordBuf = (wchar_t *)UTIL_malloc(wlen * sizeof(wchar_t));
+     lpWordBuf = (wchar_t **)UTIL_malloc(g_TextLib.nWords * sizeof(wchar_t *));
+
+     for (i = 0, wpos = 0; i < g_TextLib.nWords; i++) {
+       int base = i * 10;
+       lpWordBuf[i] = WordBuf + wpos;
+       len = PAL_MultiByteToWideCharCP(temp + base, 10, lpWordBuf[i], wlen - wpos);
+       if (len > 0 && lpWordBuf[i][len - 1] == '1')
+         lpWordBuf[i][len - 1] = 0;
+       lpWordBuf[i][len] = 0;
+       wpos += (len + 1);
+       if ((int)internal_wbuffer_size < len)
+         internal_wbuffer_size = len;
+     }
+     UTIL_free(temp);
    }
 
-   WordBuf = (wchar_t *)UTIL_malloc(wlen * sizeof(wchar_t));
-   lpWordBuf = (wchar_t **)UTIL_malloc(g_TextLib.nWords * sizeof(wchar_t *));
 
-   for (i = 0, wpos = 0; i < g_TextLib.nWords; i++) {
-      int l;
-      lpWordBuf[i] = WordBuf + wpos;
-      l = PAL_MultiByteToWideCharCP(temp + i * 10, 10, lpWordBuf[i], wlen - wpos);
-      if (l > 0 && lpWordBuf[i][l - 1] == '1')
-      lpWordBuf[i][l - 1] = 0;
-      lpWordBuf[i][l] = 0;
-      wpos += l + 1;
-   }
-   UTIL_free(temp);
 
-   // Read the message offsets. The message offsets are in SSS.MKF #3
-   i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
-   g_TextLib.nMsgs = i - 1;
+   {
+      // Read the message offsets. The message offsets are in SSS.MKF #3
+      i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
+      g_TextLib.nMsgs = i - 1;
 
-   offsets = (unsigned int *)UTIL_malloc(i * sizeof(unsigned int));
-   PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
+      offsets = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs + 1, sizeof(unsigned int));
+      PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
 
-   // Read the messages.
-   fp = UTIL_fopen(RESOURCE_PATH "/m.msg", "rb");
-   if (fp == NULL)
-      return -1;
+      // Read the messages.
+      fp = UTIL_fopen(RESOURCE_PATH "/m.msg", "rb");
+      i = flength(fp);
+      temp = (unsigned char *)UTIL_malloc(i);
+      UTIL_fread(temp, sizeof(unsigned char), i, fp);
+      UTIL_fclose(fp);
 
-   i = flength(fp);
-   temp = (unsigned char *)UTIL_malloc(i);
+      // Split messages and do code page conversion here
+      for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++) {
+         len = PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0);
+         wlen += (len + 1);
+      }
+      MsgBuf = (wchar_t *)UTIL_malloc(wlen * sizeof(wchar_t));
+      lpMsgBuf = (wchar_t **)UTIL_malloc(g_TextLib.nMsgs * sizeof(wchar_t *));
 
-   if (UTIL_fread(temp, 1, i, fp) < (unsigned int)i) {
+      for (i = 0, wpos = 0; i < g_TextLib.nMsgs; i++) {
+         lpMsgBuf[i] = MsgBuf + wpos;
+         len = PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
+         lpMsgBuf[i][len] = 0;
+         wpos += (len + 1);
+         if ((int)internal_wbuffer_size < len)
+            internal_wbuffer_size = len;
+      }
       UTIL_free(temp);
       UTIL_free(offsets);
-      UTIL_fclose(fp);
-      return -1;
    }
-   UTIL_fclose(fp);
 
-   // Split messages and do code page conversion here
-   for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++) {
-      wlen += PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0) + 1;
-   }
-   MsgBuf = (wchar_t *)UTIL_malloc(wlen * sizeof(wchar_t));
-   lpMsgBuf = (wchar_t **)UTIL_malloc(g_TextLib.nMsgs * sizeof(wchar_t *));
-
-   for (i = 0, wpos = 0; i < g_TextLib.nMsgs; i++) {
-      int l;
-      lpMsgBuf[i] = MsgBuf + wpos;
-      l = PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
-      lpMsgBuf[i][l] = 0;
-      wpos += l + 1;
-   }
-   UTIL_free(temp);
-   UTIL_free(offsets);
+   internal_wbuffer_size++;
+   internal_wbuffer = UTIL_calloc(internal_wbuffer_size, sizeof(wchar_t));
 
    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
    g_TextLib.bIcon = 0;
@@ -213,11 +206,13 @@ void PAL_FreeText(
    UTIL_free(lpMsgBuf);
    UTIL_free(WordBuf);
    UTIL_free(lpWordBuf);
+   UTIL_free(internal_wbuffer);
    UTIL_fclose(fp_cptbl_big5);
    MsgBuf = NULL;
    lpMsgBuf = NULL;
    WordBuf = NULL;
    lpWordBuf = NULL;
+   internal_wbuffer = NULL;
    fp_cptbl_big5 = NULL;
 }
 
@@ -272,7 +267,7 @@ wchar_t *PAL_UnescapeText(const wchar_t *lpszText)
    if(wcsstr(lpszText, L"\\") == NULL)
       return (wchar_t*)lpszText;
 
-   memset(internal_wbuffer, 0, sizeof(internal_wbuffer));
+   memset(internal_wbuffer, 0, sizeof(wchar_t) * internal_wbuffer_size);
 
    while (*lpszText != L'\0')
    {
@@ -1016,13 +1011,7 @@ PAL_DialogIsPlayingRNG(
    return g_TextLib.fPlayingRNG;
 }
 
-int
-PAL_MultiByteToWideCharCP(
-   const unsigned char *mbs,
-   int                  mbslength,
-   wchar_t*             wcs,
-   int                  wcslength
-)
+int PAL_MultiByteToWideCharCP(const unsigned char *mbs, int mbslength, wchar_t *wcs, int wcslength)
 /*++
   Purpose:
 
@@ -1044,75 +1033,68 @@ PAL_MultiByteToWideCharCP(
 
 --*/
 {
-    int i = 0, state = 0, wlen = 0, null = 0;
+   int i = 0;
+   int state = 0;
+   int wlen = 0;
+   int null = 0;
 
-    if (mbslength == -1)
-    {
-        mbslength = (int)strlen(mbs);
-        null = 1;
-    }
+   if (!wcs) {
+      for (i = 0; i < mbslength && mbs[i]; i++) {
+         if (state == 0) {
+            if (mbs[i] <= 0x80)
+               wlen++;
+            else if (mbs[i] == 0xff)
+               wlen++;
+            else
+               state = 1;
+         } else {
+            wlen++;
+            state = 0;
+         }
+      }
+      if (!mbs[i])
+         null = 1;
+      return wlen + null + (state != 0);
+   } else {
+      for (i = 0; i < mbslength && mbs[i]; i++) {
+         if (wlen >= wcslength)
+            break;
+         if (state == 0) {
+            if (mbs[i] <= 0x80) {
+               wcs[wlen] = mbs[i];
+               wlen++;
+            } else if (mbs[i] == 0xff) {
+               wcs[wlen] = 0xf8f8;
+               wlen++;
+            } else
+               state = 1;
+         } else {
+            if ((mbs[i] >= 0x40 && mbs[i] <= 0x7E) || (mbs[i] >= 0xA1 && mbs[i] <= 0xFE)) {
+               unsigned short byte1 = mbs[i - 1] - 0x81;
+               unsigned short byte2 = mbs[i];
+               byte2 -= (mbs[i] <= 0x7E) ? 0x40 : 0x60;
+               unsigned short cptbl_big5;
+               UTIL_fseek(fp_cptbl_big5, sizeof(unsigned short) * (byte1 * 160 + byte2), SEEK_SET);
+               UTIL_fread(&cptbl_big5, sizeof(unsigned short), 1, fp_cptbl_big5);
+               wcs[wlen] = cptbl_big5;
+            } else {
+               wcs[wlen] = 0x003F;
+            }
+            wlen++;
+            state = 0;
+         }
+      }
+      if (state != 0 && wlen < wcslength)
+         wcs[wlen++] = 0x003F;
 
-    if (!wcs)
-    {
-        for (i = 0; i < mbslength && mbs[i]; i++)
-        {
-            if (state == 0)
-            {
-                if (mbs[i] <= 0x80 || mbs[i] == 0xff)
-                    wlen++;
-                else
-                    state = 1;
-            }
-            else
-            {
-                wlen++;
-                state = 0;
-            }
-        }
-        if (i < mbslength && !mbs[i]) null = 1;
-        return wlen + null + (state != 0);
-    }
-    else
-    {
-        for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
-        {
-            if (state == 0)
-            {
-                if (mbs[i] <= 0x80)
-                    wcs[wlen++] = mbs[i];
-                else if (mbs[i] == 0xff)
-                    wcs[wlen++] = 0xf8f8;
-                else
-                    state = 1;
-            }
-            else
-            {
-              if ((mbs[i] >= 0x40 && mbs[i] <= 0x7E) || (mbs[i] >= 0xA1 && mbs[i] <= 0xFE)) {
-                unsigned short byte1 = mbs[i - 1] - 0x81;
-                unsigned short byte2 = mbs[i];
-                byte2 -= (mbs[i] <= 0x7E) ? 0x40 : 0x60;
-                unsigned short cptbl_big5;
-                UTIL_fseek(fp_cptbl_big5, sizeof(unsigned short) * (byte1 * 160 + byte2), SEEK_SET);
-                UTIL_fread(&cptbl_big5, sizeof(unsigned short), 1, fp_cptbl_big5);
-                wcs[wlen++] = cptbl_big5;
-              } else
-                wcs[wlen++] = 0x003F;
-              state = 0;
-            }
-        }
-        if (state != 0 && wlen < wcslength)
-        {
-            wcs[wlen++] = 0x003F;
-        }
-        if (null || (i < mbslength && !mbs[i]))
-        {
-            if (wlen < wcslength)
-                wcs[wlen++] = 0;
-            else
-                wcs[wlen - 1] = 0;
-        }
-        return wlen;
-    }
+      if (null || (i < mbslength && !mbs[i])) {
+         if (wlen < wcslength)
+         wcs[wlen++] = 0;
+         else
+         wcs[wlen - 1] = 0;
+      }
+      return wlen;
+   }
 }
 
 int

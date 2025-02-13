@@ -163,8 +163,8 @@ PAL_CalcCoverTiles(
 
             for (l = 0; l < 2; l++)
             {
-               lpTile = PAL_MapGetTileBitmap(dx, dy, dh, l, PAL_GetCurrentMap());
-               iTileHeight = (signed char)PAL_MapGetTileHeight(dx, dy, dh, l, PAL_GetCurrentMap());
+               lpTile = PAL_MapGetTileBitmap(dx, dy, dh, l, (PALMAP *)PAL_GetCurrentMap());
+               iTileHeight = (signed char)PAL_MapGetTileHeight(dx, dy, dh, l, (PALMAP *)PAL_GetCurrentMap());
 
                //
                // Check if this tile may cover the sprites
@@ -369,7 +369,7 @@ PAL_SceneDrawSprites(
 }
 
 void PAL_ApplyWave(
-    PAL_Surface *lpSurface)
+    unsigned char *pixels)
 /*++
    Purpose:
 
@@ -426,7 +426,7 @@ void PAL_ApplyWave(
    // WARNING: only works with 320x200 8-bit surface.
    //
    a = index;
-   p = lpSurface->pixels;
+   p = pixels;
 
    //
    // Loop through all lines in the screen buffer.
@@ -444,7 +444,7 @@ void PAL_ApplyWave(
       }
 
       a = (a + 1) % 32;
-      p += lpSurface->w;
+      p += SCREEN_W;
    }
 
    index = (index + 1) % 32;
@@ -476,13 +476,13 @@ void PAL_MakeScene(
    rect.x = PAL_X(gpGlobals->viewport);
    rect.y = PAL_Y(gpGlobals->viewport);
 
-   PAL_MapBlitToSurface(PAL_GetCurrentMap(), &rect, 0);
-   PAL_MapBlitToSurface(PAL_GetCurrentMap(), &rect, 1);
+   PAL_MapBlitToSurface((PALMAP *)PAL_GetCurrentMap(), &rect, 0);
+   PAL_MapBlitToSurface((PALMAP *)PAL_GetCurrentMap(), &rect, 1);
 
    //
    // Step 2: Apply screen waving effects.
    //
-   PAL_ApplyWave(gpScreen);
+   PAL_ApplyWave(gpScreen->pixels);
 
    //
    // Step 3: Draw all the sprites.
@@ -578,7 +578,7 @@ int PAL_CheckObstacleWithRange(
       }
    }
 
-   if (PAL_MapTileIsBlocked(x, y, h, PAL_GetCurrentMap()))
+   if (PAL_MapTileIsBlocked(x, y, h, (PALMAP *)PAL_GetCurrentMap()))
    {
       return true;
    }

@@ -1358,7 +1358,7 @@ PAL_InterpretInstruction(
       //
       if (gpGlobals->wCollectValue > 0)
       {
-         wchar_t s[256];
+         wchar_t s[32] = L"";
 
          i = RandomLong(1, gpGlobals->wCollectValue);
          if (i > 9)

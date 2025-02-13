@@ -21,7 +21,6 @@
 #ifndef UI_H
 #define UI_H
 
-#include "video.h"
 #include <wchar.h>
 
 #define CHUNKNUM_SPRITEUI 9
@@ -122,7 +121,7 @@ typedef struct tagBOX
     unsigned int pos;
     unsigned short wWidth;
     unsigned short wHeight;
-    PAL_Surface *lpSavedArea;
+    void *lpSavedArea;
 } BOX;
 
 typedef struct tagMENUITEM

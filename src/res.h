@@ -21,8 +21,6 @@
 #ifndef RES_H
 #define RES_H
 
-#include "map.h"
-
 enum tagLOADRESFLAG
 {
    kLoadGlobalData     = (1 << 0),    // load global data
@@ -30,36 +28,18 @@ enum tagLOADRESFLAG
    kLoadPlayerSprite   = (1 << 2),    // load player sprites
 };
 
-void
-PAL_InitResources(
-   void
-);
+void PAL_InitResources(void);
 
-void
-PAL_FreeResources(
-   void
-);
+void PAL_FreeResources(void);
 
-void
-PAL_SetLoadFlags(
-   unsigned char       bFlags
-);
+void PAL_SetLoadFlags(unsigned char bFlags);
 
-void
-PAL_LoadResources(
-   void
-);
+void PAL_LoadResources(void);
 
-PALMAP *PAL_GetCurrentMap(void);
+void *PAL_GetCurrentMap(void);
 
-unsigned char *
-PAL_GetPlayerSprite(
-   unsigned char      bPlayerIndex
-);
+unsigned char *PAL_GetPlayerSprite(unsigned char bPlayerIndex);
 
-unsigned char *
-PAL_GetEventObjectSprite(
-   unsigned short      wEventObjectID
-);
+unsigned char *PAL_GetEventObjectSprite(unsigned short wEventObjectID);
 
 #endif

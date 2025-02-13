@@ -21,49 +21,20 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
-#include "video.h"
+unsigned char *PAL_GetPalette(int iPaletteNum, int fNight);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+void PAL_SetPalette(int iPaletteNum, int fNight);
 
-unsigned char *
-PAL_GetPalette(
-    int iPaletteNum,
-    int fNight);
+void PAL_FadeOut(int iDelay);
 
-void PAL_SetPalette(
-    int iPaletteNum,
-    int fNight);
+void PAL_FadeIn(int iPaletteNum, int fNight, int iDelay);
 
-void PAL_FadeOut(
-    int iDelay);
+void PAL_SceneFade(int iPaletteNum, int fNight, int iStep);
 
-void PAL_FadeIn(
-    int iPaletteNum,
-    int fNight,
-    int iDelay);
+void PAL_PaletteFade(int iPaletteNum, int fNight, int fUpdateScene);
 
-void PAL_SceneFade(
-    int iPaletteNum,
-    int fNight,
-    int iStep);
+void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom);
 
-void PAL_PaletteFade(
-    int iPaletteNum,
-    int fNight,
-    int fUpdateScene);
-
-void PAL_ColorFade(
-    int iDelay,
-    unsigned char bColor,
-    int fFrom);
-
-void PAL_FadeToRed(
-    void);
-
-#ifdef __cplusplus
-}
-#endif
+void PAL_FadeToRed(void);
 
 #endif

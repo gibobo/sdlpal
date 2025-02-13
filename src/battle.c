@@ -39,16 +39,15 @@
 
 BATTLE g_Battle;
 
-unsigned short
-    g_rgPlayerPos[3][3][2] = {
-        {{240, 170}},                        // one player
-        {{200, 176}, {256, 152}},            // two players
-        {{180, 180}, {234, 170}, {270, 146}} // three players
+unsigned short g_rgPlayerPos[3][3][2] = {
+    {{240, 170}},                        // one player
+    {{200, 176}, {256, 152}},            // two players
+    {{180, 180}, {234, 170}, {270, 146}} // three players
 };
 
 void PAL_GetPlayerPos(unsigned char PlayerIndex, int *posX, int *posY) {
-  (*posX) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][0];
-  (*posY) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][1];
+   (*posX) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][0];
+   (*posY) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][1];
 }
 
 void PAL_BattleDrawBackground(
@@ -97,7 +96,7 @@ void PAL_BattleDrawBackground(
       ++pDst;
    }
 
-   PAL_ApplyWave(g_Battle.lpSceneBuf);
+   PAL_ApplyWave(g_Battle.lpSceneBuf->pixels);
 }
 
 void PAL_BattleDrawEnemySprites(
@@ -1036,7 +1035,7 @@ PAL_BattleWon(
          PAL_CreateSingleLineBox(PAL_XY(offsetX + 80, 0), propertyLength + 10, false);
          PAL_CreateBox(PAL_XY(offsetX + 82, 32), 7, propertyLength + 8, 1, false);
 
-         wchar_t buffer[256] = L"";
+         wchar_t buffer[32] = L"";
          PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_GetWord(STATUS_LABEL_LEVEL), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL));
          PAL_DrawText(buffer, PAL_XY(110, 10), 0, false, false, false);
 
@@ -1141,7 +1140,7 @@ PAL_BattleWon(
                                                                                                                                                                                                   \
       if (gpGlobals->g.PlayerRoles.statname[w] != OrigPlayerRoles.statname[w])                                                                                                                    \
       {                                                                                                                                                                                           \
-         wchar_t buffer[256] = L"";                                                                                                                                                        \
+         wchar_t buffer[32] = L"";                                                                                                                                                        \
          PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles.rgwName[w]), PAL_GetWord(label), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)); \
          PAL_CreateSingleLineBox(PAL_XY(offsetX + 78, 60), maxNameWidth + maxPropertyWidth + PAL_TextWidth(PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)) / 32 + 4, false);                                \
          PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, false, false, false);                                                                                                                  \
@@ -1404,19 +1403,15 @@ PAL_StartBattle(
    unsigned short w, wPrevWaveLevel;
    short sPrevWaveProgression;
 
-   //
    // Set the screen waving effects
-   //
    wPrevWaveLevel = gpGlobals->wScreenWave;
    sPrevWaveProgression = gpGlobals->sWaveProgression;
 
    gpGlobals->sWaveProgression = 0;
    gpGlobals->wScreenWave = gpGlobals->g.lprgBattleField[gpGlobals->wNumBattleField].wScreenWave;
 
-   //
    // Make sure everyone in the party is alive, also clear all hidden
    // EXP count records
-   //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
       w = gpGlobals->rgParty[i].wPlayerRole;
@@ -1436,17 +1431,13 @@ PAL_StartBattle(
       gpGlobals->Exp.rgFleeExp[w].wCount = 0;
    }
 
-   //
    // Clear all item-using records
-   //
    for (i = 0; i < MAX_INVENTORY; i++)
    {
       gpGlobals->rgInventory[i].nAmountInUse = 0;
    }
 
-   //
    // Store all enemies
-   //
    for (i = 0, j = 0; j < MAX_ENEMIES_IN_TEAM; j++)
    {
       memset(&(g_Battle.rgEnemy[j]), 0, sizeof(BATTLEENEMY));
@@ -1485,21 +1476,12 @@ PAL_StartBattle(
       g_Battle.rgPlayer[i].iColorShift = false;
    }
 
-   //
    // Load sprites and background
-   //
    PAL_LoadBattleSprites();
    PAL_LoadBattleBackground();
 
-   //
    // Create the surface for scene buffer
-   //
    g_Battle.lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(NULL);
-
-   if (g_Battle.lpSceneBuf == NULL)
-   {
-      TerminateOnError("PAL_StartBattle(): creating surface for scene buffer failed!");
-   }
 
    PAL_UpdateEquipments();
 
@@ -1546,30 +1528,22 @@ PAL_StartBattle(
    g_Battle.fPrevAutoAtk = false;
    g_Battle.fThisTurnCoop = false;
 
-   //
    // Run the main battle routine.
-   //
    i = PAL_BattleMain();
 
    if (i == kBattleResultWon)
    {
-      //
       // Player won the battle. Add the Experience points.
-      //
       PAL_BattleWon();
    }
 
-   //
    // Clear all item-using records
-   //
    for (w = 0; w < MAX_INVENTORY; w++)
    {
       gpGlobals->rgInventory[w].nAmountInUse = 0;
    }
 
-   //
    // Clear all player status, poisons and temporary effects
-   //
    PAL_ClearAllPlayerStatus();
    for (w = 0; w < MAX_PLAYER_ROLES; w++)
    {
@@ -1577,15 +1551,11 @@ PAL_StartBattle(
       PAL_RemoveEquipmentEffect(w, kBodyPartExtra);
    }
 
-   //
    // Free all the battle sprites
-   //
    PAL_FreeBattleSprites();
    UTIL_free(g_Battle.lpEffectSprite);
 
-   //
    // Free the surfaces for the background picture and scene buffer
-   //
    PAL_FreeSurface(g_Battle.lpBackground);
    PAL_FreeSurface(g_Battle.lpSceneBuf);
 
@@ -1596,9 +1566,7 @@ PAL_StartBattle(
 
    AUDIO_PlayMusic(gpGlobals->wNumMusic, true, 1);
 
-   //
    // Restore the screen waving effects
-   //
    gpGlobals->sWaveProgression = sPrevWaveProgression;
    gpGlobals->wScreenWave = wPrevWaveLevel;
 

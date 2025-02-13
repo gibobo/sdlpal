@@ -23,6 +23,7 @@
 
 #include "global.h"
 #include "uibattle.h"
+#include "video.h"
 
 #define BATTLE_FRAME_TIME (1000 / 25) // 25 FPS
 #define MAX_BATTLE_MAGICSPRITE_ITEMS 3
@@ -194,10 +195,6 @@ typedef struct tagBATTLE {
     int fThisTurnCoop;
 } BATTLE;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void PAL_LoadBattleSprites(void);
 
 void PAL_BattleDrawBackground(void);
@@ -252,9 +249,5 @@ void PAL_GetPlayerPos(
     unsigned char PlayerIndex,
     int *posX,
     int *posY);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

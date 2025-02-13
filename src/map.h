@@ -56,51 +56,21 @@
 //
 
 typedef struct tagPALMAP {
-  unsigned int *Tiles;
-  unsigned char *pTileSprite;
-  int iMapNum;
+   unsigned int *Tiles;
+   unsigned char *pTileSprite;
+   int iMapNum;
 } PALMAP;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF);
 
-PALMAP *PAL_LoadMap(
-    int iMapNum,
-    void *fpMapMKF,
-    void *fpGopMKF);
+void PAL_FreeMap(PALMAP *lpMap);
 
-void PAL_FreeMap(
-    PALMAP *lpMap);
+const unsigned char *PAL_MapGetTileBitmap(unsigned char x, unsigned char y, unsigned char h, unsigned char ucLayer, PALMAP *lpMap);
 
-const unsigned char *PAL_MapGetTileBitmap(
-    unsigned char x,
-    unsigned char y,
-    unsigned char h,
-    unsigned char ucLayer,
-    PALMAP *lpMap);
+int PAL_MapTileIsBlocked(unsigned char x, unsigned char y, unsigned char h, PALMAP *lpMap);
 
-int PAL_MapTileIsBlocked(
-    unsigned char x,
-    unsigned char y,
-    unsigned char h,
-    PALMAP *lpMap);
+unsigned char PAL_MapGetTileHeight(unsigned char x, unsigned char y, unsigned char h, unsigned char ucLayer, PALMAP *lpMap);
 
-unsigned char
-PAL_MapGetTileHeight(
-    unsigned char x,
-    unsigned char y,
-    unsigned char h,
-    unsigned char ucLayer,
-    PALMAP *lpMap);
-
-void PAL_MapBlitToSurface(
-    PALMAP *lpMap,
-    const PAL_Rect *lpSrcRect,
-    unsigned char ucLayer);
-
-#ifdef __cplusplus
-}
-#endif
+void PAL_MapBlitToSurface(PALMAP *lpMap, const PAL_Rect *lpSrcRect, unsigned char ucLayer);
 
 #endif

@@ -190,7 +190,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
 
       VIDEO_CopySurface(p, &srcrect, gpScreen, &dstrect);
 
-      PAL_ApplyWave(gpScreen);
+      PAL_ApplyWave(gpScreen->pixels);
 
       if (g_wCurEffectSprite != 0)
       {
@@ -279,7 +279,7 @@ static void PAL_EndingAnimation(
 
       VIDEO_CopySurface(pUpper, &srcrect, gpScreen, &dstrect);
 
-      PAL_ApplyWave(gpScreen);
+      PAL_ApplyWave(gpScreen->pixels);
 
       // Draw the beast
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(buf, 0), gpScreen, PAL_XY(0, -400 + i));

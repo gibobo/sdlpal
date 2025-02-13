@@ -22,6 +22,7 @@
 #include "audio.h"
 #include "driver.h"
 #include "global.h"
+#include "map.h"
 #include "palcommon.h"
 #include "util.h"
 #include <assert.h>
@@ -290,7 +291,7 @@ void PAL_LoadResources(void)
    gpResources->bLoadFlags = 0;
 }
 
-PALMAP *PAL_GetCurrentMap(void)
+void *PAL_GetCurrentMap(void)
 /*++
   Purpose:
 
@@ -311,7 +312,7 @@ PALMAP *PAL_GetCurrentMap(void)
       return NULL;
    }
 
-   return gpResources->lpMap;
+   return (void *)gpResources->lpMap;
 }
 
 unsigned char *

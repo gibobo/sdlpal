@@ -25,6 +25,6 @@ unsigned short PAL_ItemSelectMenuUpdate(void);
 
 void PAL_ItemSelectMenuInit(unsigned short wItemFlags);
 
-unsigned short PAL_ItemSelectMenu(void (*lpfnMenuItemChanged)(unsigned short), unsigned short wItemFlags);
+unsigned short PAL_ItemSelectMenu(void (*)(unsigned short), unsigned short wItemFlags);
 
 #endif

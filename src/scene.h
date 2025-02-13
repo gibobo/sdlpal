@@ -21,42 +21,18 @@
 #ifndef _SCENE_H
 #define _SCENE_H
 
-#include "video.h"
+void PAL_ApplyWave(unsigned char *pixels);
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+void PAL_MakeScene(void);
 
-void PAL_ApplyWave(
-    PAL_Surface *lpSurface);
+int PAL_CheckObstacleWithRange(unsigned int pos, int fCheckEventObjects, unsigned short wSelfObject, int fCheckRange);
 
-void PAL_MakeScene(
-    void);
+int PAL_CheckObstacle(unsigned int pos, int fCheckEventObjects, unsigned short wSelfObject);
 
-int PAL_CheckObstacleWithRange(
-    unsigned int pos,
-    int fCheckEventObjects,
-    unsigned short wSelfObject,
-    int fCheckRange);
+void PAL_UpdatePartyGestures(int fWalking);
 
-int PAL_CheckObstacle(
-    unsigned int pos,
-    int fCheckEventObjects,
-    unsigned short wSelfObject);
+void PAL_UpdateParty(void);
 
-void PAL_UpdatePartyGestures(
-    int fWalking);
-
-void PAL_UpdateParty(
-    void);
-
-void PAL_NPCWalkOneStep(
-    unsigned short wEventObjectID,
-    int iSpeed);
-
-#ifdef __cplusplus
-}
-#endif
+void PAL_NPCWalkOneStep(unsigned short wEventObjectID, int iSpeed);
 
 #endif

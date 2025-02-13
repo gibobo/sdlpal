@@ -31,11 +31,6 @@ typedef enum tagDIALOGPOSITION
     kDialogCenterWindow
 } DIALOGLOCATION;
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 typedef struct tagTEXTLIB {
   int nWords;
   int nMsgs;
@@ -131,9 +126,5 @@ int PAL_swprintf(
     int count,
     const wchar_t *format,
     ...);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

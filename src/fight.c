@@ -4427,7 +4427,7 @@ PAL_BattleStealFromEnemy(
 {
    int   iPlayerIndex = g_Battle.wMovingPlayerIndex;
    int   offset, x, y, i;
-   wchar_t s[256] = L"";
+   wchar_t s[32] = L"";
 
    g_Battle.rgPlayer[iPlayerIndex].wCurrentFrame = 10;
    offset = ((int)wTarget - iPlayerIndex) * 8;

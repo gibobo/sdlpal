@@ -747,23 +747,15 @@ PAL_SpriteGetFrame(
       return NULL;
    }
 
-   //
-   // Hack for broken sprites like the Bloody-Mouth Bug
-   //
-   //   imagecount = (lpSprite[0] | (lpSprite[1] << 8)) - 1;
    imagecount = (lpSprite[0] | (lpSprite[1] << 8));
 
    if (iFrameNum < 0 || iFrameNum >= imagecount)
    {
-      //
       // The frame does not exist
-      //
       return NULL;
    }
 
-   //
    // Get the offset of the frame
-   //
    iFrameNum <<= 1;
    offset = ((lpSprite[iFrameNum] | (lpSprite[iFrameNum + 1] << 8)) << 1);
    if (offset == 0x18444)
