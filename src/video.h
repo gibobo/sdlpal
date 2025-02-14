@@ -39,7 +39,6 @@ typedef struct PAL_Rect {
 } PAL_Rect;
 
 extern PAL_Surface *gpScreen;
-extern PAL_Surface *gpScreenBak;
 
 int VIDEO_Startup(void);
 
@@ -84,5 +83,7 @@ void PAL_FreeSurface(PAL_Surface *surface);
 void PAL_CleanScreen(void);
 
 void VIDEO_Resize(int w, int h);
+
+PAL_Surface *VIDEO_GetBackupSurface(unsigned char idx);
 
 #endif

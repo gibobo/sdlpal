@@ -884,14 +884,9 @@ PAL_LoadBattleBackground(
    // Create the surface
    g_Battle.lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
 
-   if (g_Battle.lpBackground == NULL)
-   {
-      TerminateOnError("PAL_LoadBattleBackground(): failed to create surface!");
-   }
-
    // Load the picture
    PAL_MKFDecompressChunk(&g_Battle.lpBackground->pixels,
-                          g_Battle.lpBackground->w * g_Battle.lpBackground->h,
+                          SCREEN_SIZE,
                           gpGlobals->wNumBattleField,
                           gpGlobals->f.fpFBP);
 }

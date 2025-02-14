@@ -59,6 +59,7 @@ static void PAL_ShowFBP(
    unsigned char i, j;
    unsigned int k;
    unsigned char a, b;
+   PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
 
    PAL_MKFDecompressChunk(&buf, 0, wChunkNum, gpGlobals->f.fpFBP);
 
@@ -142,24 +143,18 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
 
 --*/
 {
-   PAL_Surface *p;
    unsigned char *bufSprite = NULL;
    int i, l;
-   PAL_Rect srcrect, dstrect;
+   PAL_Rect srcrect;
+   PAL_Rect dstrect;
+   PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
+   PAL_Surface *p = VIDEO_GetBackupSurface(1);
 
-   p = VIDEO_CreateCompatibleSizedSurface(NULL);
-   if (p == NULL)
-   {
+   if (PAL_MKFDecompressChunk(&p->pixels, SCREEN_SIZE, wChunkNum, gpGlobals->f.fpFBP) <= 0)
       return;
-   }
 
-   if (PAL_MKFDecompressChunk(&p->pixels, p->w * p->h, wChunkNum, gpGlobals->f.fpFBP) <= 0) {
+   if (g_wCurEffectSprite && PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0)
       return;
-   }
-
-   if (g_wCurEffectSprite && PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0) {
-      return;
-   }
 
    VIDEO_BackupScreen(gpScreen);
 
@@ -171,19 +166,19 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
    for (l = 0; l < 220; l++)
    {
       i = l;
-      if (i > 200)
+      if (i > SCREEN_H)
       {
-         i = 200;
+         i = SCREEN_H;
       }
 
       srcrect.y = 0;
       dstrect.y = i;
-      srcrect.h = 200 - i;
-      dstrect.h = 200 - i;
+      srcrect.h = SCREEN_H - i;
+      dstrect.h = SCREEN_H - i;
 
       VIDEO_CopySurface(gpScreenBak, &srcrect, gpScreen, &dstrect);
 
-      srcrect.y = 200 - i;
+      srcrect.y = SCREEN_H - i;
       dstrect.y = 0;
       srcrect.h = i;
       dstrect.h = i;
@@ -211,13 +206,11 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
    }
 
    VIDEO_CopyEntireSurface(p, gpScreen);
-   PAL_FreeSurface(p);
    VIDEO_UpdateScreen(NULL);
    UTIL_free(bufSprite);
 }
 
-static void PAL_EndingAnimation(
-    void)
+static void PAL_EndingAnimation(void)
 /*++
   Purpose:
 
@@ -233,87 +226,70 @@ static void PAL_EndingAnimation(
 
 --*/
 {
-   unsigned char *buf = NULL;
-   unsigned char *bufGirl = NULL;
-   PAL_Surface *pUpper;
-   PAL_Surface *pLower;
-   PAL_Rect srcrect;
-   PAL_Rect dstrect;
+  unsigned char *buf = NULL;
+  unsigned char *bufGirl = NULL;
+  PAL_Surface *pUpper = VIDEO_GetBackupSurface(0);
+  PAL_Surface *pLower = VIDEO_GetBackupSurface(1);
+  PAL_Rect srcrect;
+  PAL_Rect dstrect;
+  int yPosGirl = 180;
+  int i;
 
-   int yPosGirl = 180;
-   int i;
+  PAL_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, gpGlobals->f.fpFBP);
+  PAL_MKFDecompressChunk(&pLower->pixels, SCREEN_SIZE, 70, gpGlobals->f.fpFBP);
+  PAL_MKFDecompressChunk(&buf, 0, 571, gpGlobals->f.fpMGO);
+  PAL_MKFDecompressChunk(&bufGirl, 0, 572, gpGlobals->f.fpMGO);
 
-   pUpper = VIDEO_CreateCompatibleSizedSurface(NULL);
-   pLower = VIDEO_CreateCompatibleSizedSurface(NULL);
+  srcrect.x = 0;
+  dstrect.x = 0;
+  srcrect.w = SCREEN_W;
+  dstrect.w = SCREEN_W;
 
-   PAL_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(&pLower->pixels, SCREEN_SIZE, 70, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(&buf, 0, 571, gpGlobals->f.fpMGO);
-   PAL_MKFDecompressChunk(&bufGirl, 0, 572, gpGlobals->f.fpMGO);
+  gpGlobals->wScreenWave = 2;
 
-   srcrect.x = 0;
-   dstrect.x = 0;
-   srcrect.w = SCREEN_W;
-   dstrect.w = SCREEN_W;
+  for (i = 0; i < (SCREEN_H * 2); i++) {
 
-   gpGlobals->wScreenWave = 2;
+    // Draw the background
+    srcrect.y = 0;
+    dstrect.y = i / 2;
+    srcrect.h = SCREEN_H - i / 2;
+    dstrect.h = SCREEN_H - i / 2;
+    VIDEO_CopySurface(pLower, &srcrect, gpScreen, &dstrect);
 
-   for (i = 0; i < 400; i++)
-   {
-      //
-      // Draw the background
-      //
-      srcrect.y = 0;
-      srcrect.h = 200 - i / 2;
+    srcrect.y = SCREEN_H - i / 2;
+    dstrect.y = 0;
+    srcrect.h = i / 2;
+    dstrect.h = i / 2;
+    VIDEO_CopySurface(pUpper, &srcrect, gpScreen, &dstrect);
 
-      dstrect.y = i / 2;
-      dstrect.h = 200 - i / 2;
+    PAL_ApplyWave(gpScreen->pixels);
 
-      VIDEO_CopySurface(pLower, &srcrect, gpScreen, &dstrect);
+    // Draw the beast
+    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(buf, 0), gpScreen, PAL_XY(0, -(SCREEN_H * 2) + i));
+    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(buf, 1), gpScreen, PAL_XY(0, -SCREEN_H + i));
 
-      srcrect.y = 200 - i / 2;
-      srcrect.h = i / 2;
+    // Draw the girl
+    yPosGirl -= i & 1;
+    if (yPosGirl < 80)
+      yPosGirl = 80;
 
-      dstrect.y = 0;
-      dstrect.h = i / 2;
+    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (UTIL_GetTicks() / 50) % 4),
+                         gpScreen, PAL_XY(220, yPosGirl));
 
-      VIDEO_CopySurface(pUpper, &srcrect, gpScreen, &dstrect);
+    // Update the screen
+    VIDEO_UpdateScreen(NULL);
+    if (gpGlobals->fNeedToFadeIn) {
+      PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
+      gpGlobals->fNeedToFadeIn = false;
+    }
 
-      PAL_ApplyWave(gpScreen->pixels);
+    UTIL_Delay(50);
+  }
 
-      // Draw the beast
-      PAL_RLEBlitToSurface(PAL_SpriteGetFrame(buf, 0), gpScreen, PAL_XY(0, -400 + i));
-      PAL_RLEBlitToSurface(PAL_SpriteGetFrame(buf, 1), gpScreen, PAL_XY(0, -200 + i));
+  gpGlobals->wScreenWave = 0;
 
-      // Draw the girl
-      yPosGirl -= i & 1;
-      if (yPosGirl < 80)
-      {
-         yPosGirl = 80;
-      }
-
-      PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (UTIL_GetTicks() / 50) % 4),
-                           gpScreen, PAL_XY(220, yPosGirl));
-
-      //
-      // Update the screen
-      //
-      VIDEO_UpdateScreen(NULL);
-      if (gpGlobals->fNeedToFadeIn)
-      {
-         PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-         gpGlobals->fNeedToFadeIn = false;
-      }
-
-      UTIL_Delay(50);
-   }
-
-   gpGlobals->wScreenWave = 0;
-
-   PAL_FreeSurface(pUpper);
-   PAL_FreeSurface(pLower);
-   UTIL_free(buf);
-   UTIL_free(bufGirl);
+  UTIL_free(buf);
+  UTIL_free(bufGirl);
 }
 
 void PAL_EndingScreen(void)

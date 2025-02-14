@@ -30,24 +30,13 @@
 
 unsigned char *gpSpriteUI = NULL;
 
-static BOX *PAL_CreateBoxInternal(
-    const PAL_Rect *rect) {
-  BOX *lpBox = (BOX *)UTIL_calloc(1, sizeof(BOX));
-  if (lpBox == NULL) {
-    return NULL;
-  }
-
-  lpBox->pos = PAL_XY(rect->x, rect->y);
-  lpBox->lpSavedArea = VIDEO_DuplicateSurface(rect);
-  lpBox->wHeight = (unsigned short)rect->w;
-  lpBox->wWidth = (unsigned short)rect->h;
-
-  if (lpBox->lpSavedArea == NULL) {
-    UTIL_free(lpBox);
-    return NULL;
-  }
-
-  return lpBox;
+static BOX *PAL_CreateBoxInternal(const PAL_Rect *rect) {
+   BOX *lpBox = (BOX *)UTIL_calloc(1, sizeof(BOX));
+   lpBox->pos = PAL_XY(rect->x, rect->y);
+   lpBox->lpSavedArea = VIDEO_DuplicateSurface(rect);
+   lpBox->wHeight = (unsigned short)rect->w;
+   lpBox->wWidth = (unsigned short)rect->h;
+   return lpBox;
 }
 
 int PAL_InitUI(
@@ -195,12 +184,7 @@ BOX *PAL_CreateBoxWithShadow(
    rect.h += nShadowOffset;
 
    if (fSaveScreen)
-   {
-      //
-      // Save the used part of the screen
-      //
-      lpBox = PAL_CreateBoxInternal(&rect);
-   }
+      lpBox = PAL_CreateBoxInternal(&rect); // Save the used part of the screen
 
    //
    // Border takes 2 additional rows and columns...
@@ -373,7 +357,7 @@ void PAL_DeleteBox(BOX *lpBox)
    rect.w = lpBox->wWidth;
    rect.h = lpBox->wHeight;
 
-   VIDEO_CopySurface(lpBox->lpSavedArea, NULL, gpScreen, &rect);
+   VIDEO_CopySurface(lpBox->lpSavedArea, NULL, gpScreen, NULL);
 
    //
    // Free the memory used by the box

@@ -170,8 +170,8 @@ void PAL_SplashScreen(void)
 {
    unsigned char *palette = PAL_GetPalette(1, false);
    unsigned char rgCurrentPalette[256 * 3];
-   PAL_Surface *lpBitmapDown;
-   PAL_Surface *lpBitmapUp;
+   PAL_Surface *lpBitmapUp= VIDEO_GetBackupSurface(0);
+   PAL_Surface *lpBitmapDown= VIDEO_GetBackupSurface(1);
    PAL_Rect srcrect;
    PAL_Rect dstrect;
    unsigned char *lpTitleBuf = NULL;
@@ -179,20 +179,16 @@ void PAL_SplashScreen(void)
    unsigned char *lpBitmapTitle = NULL;
    int cranepos[9][3];
    int i;
-   int iImgPos = 200;
+   int iImgPos = SCREEN_H;
    int iCraneFrame = 0;
    int iTitleHeight;
-   unsigned int dwTime;
-   unsigned int dwBeginTime;
+   unsigned int dwTime = 0;
+   unsigned int dwBeginTime = 0;
 
    if (palette == NULL) {
       TerminateOnError("ERROR: PAL_SplashScreen(): palette == NULL\n");
       return;
    }
-
-   // Create the surfaces
-   lpBitmapDown = VIDEO_CreateCompatibleSizedSurface(NULL);
-   lpBitmapUp = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    // Read the bitmaps
    PAL_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, gpGlobals->f.fpFBP);
@@ -233,48 +229,41 @@ void PAL_SplashScreen(void)
       dwTime = UTIL_GetTicks() - dwBeginTime;
 
       // Set the palette
-      if (dwTime < 15000)
-      {
-         for (i = 0; i < 256 * 3; i++)
-         {
-            rgCurrentPalette[i] = (unsigned char)(((unsigned int)palette[i] * dwTime) / 15000);
-         }
-      }
-
-      VIDEO_SetPalette(rgCurrentPalette);
+      if (dwTime < 15000) {
+        for (i = 0; i < 256 * 3; i++) {
+          rgCurrentPalette[i] = (unsigned char)(((unsigned int)palette[i] * dwTime) / 15000U);
+        }
+        VIDEO_SetPalette(rgCurrentPalette);
+      } else
+        VIDEO_SetPalette(palette);
 
       // Draw the screen
-      if (iImgPos > 1)
-      {
+      if (iImgPos)
          iImgPos--;
-      }
-
-      // The upper part...
-      srcrect.y = iImgPos;
-      srcrect.h = 200 - iImgPos;
-
-      dstrect.y = 0;
-      dstrect.h = srcrect.h;
-
-      VIDEO_CopySurface(lpBitmapUp, &srcrect, gpScreen, &dstrect);
 
       // The lower part...
       srcrect.y = 0;
+      dstrect.y = SCREEN_H - iImgPos;
       srcrect.h = iImgPos;
-
-      dstrect.y = 200 - iImgPos;
       dstrect.h = srcrect.h;
-
-      VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
+      if (srcrect.h && dstrect.h)
+        VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
+      // The upper part...
+      srcrect.y = iImgPos;
+      dstrect.y = 0;
+      srcrect.h = SCREEN_H - iImgPos;
+      dstrect.h = srcrect.h;
+      if (srcrect.h && dstrect.h)
+        VIDEO_CopySurface(lpBitmapUp, &srcrect, gpScreen, &dstrect);
 
       // Draw the cranes...
       for (i = 0; i < 9; i++) {
-        const unsigned char *lpFrame = PAL_SpriteGetFrame(
-            lpSpriteCrane,
-            cranepos[i][2] = (cranepos[i][2] + (iCraneFrame & 1)) % 8);
-        cranepos[i][1] += ((iImgPos > 1) && (iImgPos & 1)) ? 1 : 0;
-        PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i][0], cranepos[i][1]));
-        cranepos[i][0]--;
+         const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane, cranepos[i][2]);
+         PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i][0], cranepos[i][1]));
+         cranepos[i][0]--;
+         cranepos[i][1] +=(iImgPos & 1) ? 1 : 0;
+         if (iCraneFrame & 1)
+            cranepos[i][2] = (cranepos[i][2] + 1) % 8;
       }
       iCraneFrame++;
 
@@ -327,8 +316,6 @@ void PAL_SplashScreen(void)
       } while (UTIL_GetTicks() < dwTime + dwBeginTime + 85);
    }
 
-   PAL_FreeSurface(lpBitmapDown);
-   PAL_FreeSurface(lpBitmapUp);
    UTIL_free(lpTitleBuf);
    UTIL_free(lpSpriteCrane);
 
