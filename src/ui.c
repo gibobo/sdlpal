@@ -357,7 +357,7 @@ void PAL_DeleteBox(BOX *lpBox)
    rect.w = lpBox->wWidth;
    rect.h = lpBox->wHeight;
 
-   VIDEO_CopySurface(lpBox->lpSavedArea, NULL, gpScreen, NULL);
+   VIDEO_CopySurface(lpBox->lpSavedArea, NULL, gpScreen, &rect);
 
    //
    // Free the memory used by the box

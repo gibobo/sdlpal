@@ -34,8 +34,8 @@
 #endif
 
 // The global palette
-PAL_Surface *gpScreen = NULL;            // Screen buffer
-PAL_Surface *gpBackup[2] = {NULL, NULL}; // Backup screen buffer
+PAL_Surface *gpScreen = NULL;                  // Screen buffer
+static PAL_Surface *gpBackup[] = {NULL, NULL}; // Backup screen buffer
 volatile unsigned char g_bRenderPaused = false;
 static unsigned short g_wShakeTime = 0;
 static unsigned short g_wShakeLevel = 0;
@@ -108,6 +108,45 @@ void VIDEO_Shutdown(void)
    bufPalette = NULL;
 }
 
+void DRIVER_PreFrameShow(const unsigned char *frame_src, const PAL_Rect *roi_src, const PAL_Rect *roi_dst) {
+  if (frame_src) {
+      unsigned short x = 0;
+      unsigned short y = 0;
+      unsigned char *src = (unsigned char *)frame_src;
+      unsigned char *dst = bufScreenReal;
+      if (roi_src) {
+         for (y = roi_src->y; y < (roi_src->y + roi_src->h); y++) {
+            for (x = roi_src->x; x < (roi_src->x + roi_src->w); x++) {
+               unsigned int offset = x + y * SCREEN_W;
+               dst[offset * 3 + 0] = bufPalette[src[offset] * 3 + 0];
+               dst[offset * 3 + 1] = bufPalette[src[offset] * 3 + 1];
+               dst[offset * 3 + 2] = bufPalette[src[offset] * 3 + 2];
+            }
+         }
+      } else {
+         unsigned short roi_x1 = (roi_dst) ? roi_dst->x : 0;
+         unsigned short roi_y1 = (roi_dst) ? roi_dst->y : 0;
+         unsigned short roi_x2 = (roi_dst) ? (roi_dst->x + roi_dst->w) : SCREEN_W;
+         unsigned short roi_y2 = (roi_dst) ? (roi_dst->y + roi_dst->h) : SCREEN_H;
+         for (y = 0; y < SCREEN_H; y++) {
+            if ((y < roi_y1) || (roi_y2 <= y)) {
+               memset(dst, 0, SCREEN_W * 3);
+            } else {
+               for (x = 0; x < SCREEN_W; x++) {
+                  unsigned char flag = (roi_x1 <= x) && (x < roi_x2);
+                  dst[x * 3 + 0] = (flag) ? bufPalette[src[x] * 3 + 0] : 0;
+                  dst[x * 3 + 1] = (flag) ? bufPalette[src[x] * 3 + 1] : 0;
+                  dst[x * 3 + 2] = (flag) ? bufPalette[src[x] * 3 + 2] : 0;
+               }
+               src += SCREEN_W;
+            }
+            dst += SCREEN_W * 3;
+         }
+      }
+      DRIVER_FrameShow(bufScreenReal);
+  }
+}
+
 void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
 /*++
   Purpose:
@@ -126,46 +165,24 @@ void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
 {
    int i = 0;
    int j = 0;
-   int roi_h = SCREEN_H;
-   unsigned char *src = gpScreen->pixels;
-   unsigned char *dst = bufScreenReal;
+   PAL_Rect ROI;
+   ROI.x = (lpRect) ? lpRect->x : 0;
+   ROI.y = (lpRect) ? lpRect->y : 0;
+   ROI.w = (lpRect) ? lpRect->w : SCREEN_W;
+   ROI.h = (lpRect) ? lpRect->h : SCREEN_H;
    if (g_bRenderPaused)
       return;
 
    if (lpRect != NULL) {
-      int offset = (lpRect->y * SCREEN_W + lpRect->x);
-      src += offset;
-      dst += (offset * 3);
-      for (j = 0; j < lpRect->h; j++) {
-         for (i = 0; i < lpRect->w; i++) {
-            dst[i * 3 + 0] = bufPalette[src[i] * 3 + 0];
-            dst[i * 3 + 1] = bufPalette[src[i] * 3 + 1];
-            dst[i * 3 + 2] = bufPalette[src[i] * 3 + 2];
-         }
-         src += SCREEN_W;
-         dst += SCREEN_W * 3;
-      }
+     DRIVER_PreFrameShow(gpScreen->pixels, lpRect, NULL);
    } else {
-      if (g_wShakeTime != 0) {
-         // Shake the screen
-         roi_h -= g_wShakeLevel;
-         if (g_wShakeTime & 1) {
-            memset(dst + roi_h * SCREEN_W * 3, 0, g_wShakeLevel * SCREEN_W * 3);
-            src += (SCREEN_W * g_wShakeLevel);
-         } else {
-            memset(dst, 0, g_wShakeLevel * SCREEN_W * 3);
-            dst += (g_wShakeLevel * SCREEN_W * 3);
-         }
-         g_wShakeTime--;
-      }
-
-      for (i = 0; i < SCREEN_W * roi_h; i++, src++, dst += 3) {
-         dst[0] = bufPalette[(*src) * 3 + 0];
-         dst[1] = bufPalette[(*src) * 3 + 1];
-         dst[2] = bufPalette[(*src) * 3 + 2];
-      }
+     if (g_wShakeTime != 0) {
+       ROI.y = (g_wShakeTime & 1) ? g_wShakeLevel : 0;
+       ROI.h -= g_wShakeLevel;
+       g_wShakeTime--;
+     }
+     DRIVER_PreFrameShow(gpScreen->pixels, NULL, &ROI);
    }
-   DRIVER_FrameShow(bufScreenReal);
 }
 
 void VIDEO_SetPalette(const unsigned char *rgPalette)
@@ -249,19 +266,14 @@ void VIDEO_SwitchScreen(unsigned short wSpeed)
    int i, j;
    const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
-   wSpeed++;
-   wSpeed *= 10;
+   wSpeed = (wSpeed + 1) * 10;
 
-   unsigned char *src = gpScreen->pixels;
-   unsigned char *dst = bufScreenReal;
    for (i = 0; i < 6; i++) {
       // Draw the backup buffer to the screen
-      for (j = rgIndex[i]; j < SCREEN_SIZE; j += 6) {
-         dst[j * 3 + 0] = bufPalette[src[j] * 3 + 0];
-         dst[j * 3 + 1] = bufPalette[src[j] * 3 + 1];
-         dst[j * 3 + 2] = bufPalette[src[j] * 3 + 2];
-      }
-      DRIVER_FrameShow(bufScreenReal);
+      for (j = rgIndex[i]; j < SCREEN_SIZE; j += 6)
+         gpBackup[0]->pixels[j] = gpScreen->pixels[j];
+
+      DRIVER_PreFrameShow(gpBackup[0]->pixels, NULL, NULL);
       UTIL_Delay(wSpeed);
    }
 }
@@ -286,48 +298,40 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
    unsigned short i, j, k;
    const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
    const int gain = 16;
-   unsigned char idx;
-   short a, b;
+   unsigned char a, b;
+   PAL_Rect ROI;
 
    wSpeed++;
    wSpeed *= 10;
 
+   ROI.x = 0;
+   ROI.y = 0;
+   ROI.w = SCREEN_W;
+   ROI.h = SCREEN_H;
+
    for (i = 0; i < 12; i++) {
       for (j = 0; j < 6; j++) {
          UTIL_Delay(wSpeed);
-
-         unsigned int roi_h = SCREEN_H;
-         unsigned char *src = gpScreen->pixels;
-         unsigned char *dst = bufScreenReal;
-
          // Draw the backup buffer to the screen
          if (g_wShakeTime != 0) {
-            roi_h -= g_wShakeLevel;
-            if (g_wShakeTime & 1) {
-               memset(dst + roi_h * SCREEN_W * 3, 0, g_wShakeLevel * SCREEN_W * 3);
-               src += (SCREEN_W * g_wShakeLevel);
-            } else {
-               memset(dst, 0, g_wShakeLevel * SCREEN_W * 3);
-               dst += (g_wShakeLevel * SCREEN_W * 3);
-            }
+            ROI.y = (g_wShakeTime & 1) ? g_wShakeLevel : 0;
+            ROI.h -= g_wShakeLevel;
             g_wShakeTime--;
          }
 
-         for (k = rgIndex[j]; k < SCREEN_W * roi_h; k += 6) {
+         for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6) {
             // Blend the pixels in the 2 buffers, and put the result into the backup buffer
-            for (idx = 0; idx < 3; idx++) {
-               a = dst[k * 3 + idx];
-               b = bufPalette[src[k] * 3 + idx];
-               if (a + gain < b)
-                  a += gain;
-               else if (a - gain > b)
-                  a -= gain;
-               else
-                  a = b;
-               dst[k * 3 + idx] = (unsigned char)a;
+            a = gpScreen->pixels[k];
+            b = gpBackup[0]->pixels[k];
+            if (i > 0) {
+               if ((a & 0x0F) > (b & 0x0F))
+                  b++;
+               else if ((a & 0x0F) < (b & 0x0F))
+                  b--;
             }
+            gpBackup[0]->pixels[k] = (a & 0xF0) | (b & 0x0F);
          }
-         DRIVER_FrameShow(bufScreenReal);
+         DRIVER_PreFrameShow(gpBackup[0]->pixels, NULL, &ROI);
       }
    }
 
