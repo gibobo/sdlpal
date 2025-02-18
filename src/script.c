@@ -528,21 +528,16 @@ PAL_InterpretInstruction(
 
 --*/
 {
-   EVENTOBJECT *pEvtObj;
-   EVENTOBJECT *pCurrent;
-   SCRIPTENTRY *pScript;
+   EVENTOBJECT *pEvtObj = NULL;
+   EVENTOBJECT *pCurrent = NULL;
+   SCRIPTENTRY *pScript = NULL;
    int iPlayerRole, i, j, x, y;
    unsigned short w, wCurEventObjectID;
 
-   pScript = &(gpGlobals->g.lprgScriptEntry[wScriptEntry]);
+   pScript = &gpGlobals->g.lprgScriptEntry[wScriptEntry];
 
-   if (wEventObjectID != 0)
-   {
-      pEvtObj = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
-   }
-   else
-   {
-      pEvtObj = NULL;
+   if (wEventObjectID != 0) {
+      pEvtObj = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
    }
 
    if (pScript->rgwOperand[0] == 0 || pScript->rgwOperand[0] == 0xFFFF)
@@ -577,24 +572,22 @@ PAL_InterpretInstruction(
    case 0x000C:
    case 0x000D:
    case 0x000E:
-      //
       // walk one step
-      //
-      pEvtObj->wDirection = pScript->wOperation - 0x000B;
-      PAL_NPCWalkOneStep(wEventObjectID, 2);
+      if (pEvtObj) {
+        pEvtObj->wDirection = pScript->wOperation - 0x000B;
+        PAL_NPCWalkOneStep(wEventObjectID, 2);
+      }
       break;
 
    case 0x000F:
-      //
       // Set the direction and/or gesture for event object
-      //
-      if (pScript->rgwOperand[0] != 0xFFFF)
-      {
-         pEvtObj->wDirection = pScript->rgwOperand[0];
-      }
-      if (pScript->rgwOperand[1] != 0xFFFF)
-      {
-         pEvtObj->wCurrentFrameNum = pScript->rgwOperand[1];
+      if (pEvtObj) {
+         if (pScript->rgwOperand[0] != 0xFFFF) {
+            pEvtObj->wDirection = pScript->rgwOperand[0];
+         }
+         if (pScript->rgwOperand[1] != 0xFFFF) {
+            pEvtObj->wCurrentFrameNum = pScript->rgwOperand[1];
+         }
       }
       break;
 
@@ -646,11 +639,11 @@ PAL_InterpretInstruction(
       break;
 
    case 0x0014:
-      //
       // Set the gesture of the event object
-      //
-      pEvtObj->wCurrentFrameNum = pScript->rgwOperand[0];
-      pEvtObj->wDirection = kDirSouth;
+      if (pEvtObj) {
+         pEvtObj->wCurrentFrameNum = pScript->rgwOperand[0];
+         pEvtObj->wDirection = kDirSouth;
+      }
       break;
 
    case 0x0015:
@@ -1620,10 +1613,9 @@ PAL_InterpretInstruction(
       break;
 
    case 0x004B:
-      //
       // Nullify the event object for a short while
-      //
-      pEvtObj->sVanishTime = -15;
+      if (pEvtObj)
+         pEvtObj->sVanishTime = -15;
       break;
 
    case 0x004C:
@@ -1688,11 +1680,11 @@ PAL_InterpretInstruction(
       break;
 
    case 0x0052:
-      //
       // hide the event object for a while, default 800 frames
-      //
-      pEvtObj->sState *= -1;
-      pEvtObj->sVanishTime = (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 800);
+      if (pEvtObj) {
+         pEvtObj->sState *= -1;
+         pEvtObj->sVanishTime = (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 800);
+      }
       break;
 
    case 0x0053:
@@ -2064,23 +2056,17 @@ PAL_InterpretInstruction(
       gpGlobals->wMaxPartyMemberIndex = 0;
       for (i = 0; i < 3; i++)
       {
-         if (pScript->rgwOperand[i] != 0)
-         {
-            gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex].wPlayerRole =
-                pScript->rgwOperand[i] - 1;
-
-            gpGlobals->wMaxPartyMemberIndex++;
-         }
+        if (pScript->rgwOperand[i] != 0) {
+            gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex].wPlayerRole = pScript->rgwOperand[i] - 1;
+            gpGlobals->wMaxPartyMemberIndex = min(gpGlobals->wMaxPartyMemberIndex + 1, MAX_PLAYERS_IN_PARTY - 1);
+        }
       }
 
+      // HACK for Dream 2.11
       if (gpGlobals->wMaxPartyMemberIndex == 0)
-      {
-         // HACK for Dream 2.11
          gpGlobals->rgParty[0].wPlayerRole = 0;
-         gpGlobals->wMaxPartyMemberIndex = 1;
-      }
-
-      gpGlobals->wMaxPartyMemberIndex--;
+      else
+         gpGlobals->wMaxPartyMemberIndex--;
 
       //
       // Reload the player sprites
@@ -2713,11 +2699,10 @@ PAL_InterpretInstruction(
       }
       g_Battle.rgEnemy[wCurEventObjectID].e.wHealth = (g_Battle.rgEnemy[wEventObjectID].e.wHealth + y) / x;
 
-      w = 0;
+      g_Battle.wMaxEnemyIndex = 0;
       for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
          if (g_Battle.rgEnemy[i].wObjectID != 0)
-            w = i;
-      g_Battle.wMaxEnemyIndex = w;
+             g_Battle.wMaxEnemyIndex = (unsigned short)i;
 
       PAL_LoadBattleSprites();
 
@@ -3009,41 +2994,31 @@ PAL_RunTriggerScript(
          break;
 
       case 0x0002:
-         //
          // Stop running and replace the entry with the specified one
-         //
-         if (pScript->rgwOperand[1] == 0 ||
-             ++(pEvtObj->nScriptIdleFrame) < pScript->rgwOperand[1])
-         {
-            fEnded = true;
-            wNextScriptEntry = pScript->rgwOperand[0];
-         }
-         else
-         {
-            //
-            // failed
-            //
-            pEvtObj->nScriptIdleFrame = 0;
-            wScriptEntry++;
+         if (pEvtObj) {
+            if (pScript->rgwOperand[1] == 0 ||
+                  ++(pEvtObj->nScriptIdleFrame) < pScript->rgwOperand[1]) {
+               fEnded = true;
+               wNextScriptEntry = pScript->rgwOperand[0];
+            } else {
+               // failed
+               pEvtObj->nScriptIdleFrame = 0;
+               wScriptEntry++;
+            }
          }
          break;
 
       case 0x0003:
-         //
          // unconditional jump
-         //
-         if (pScript->rgwOperand[1] == 0 ||
-             ++(pEvtObj->nScriptIdleFrame) < pScript->rgwOperand[1])
-         {
-            wScriptEntry = pScript->rgwOperand[0];
-         }
-         else
-         {
-            //
-            // failed
-            //
-            pEvtObj->nScriptIdleFrame = 0;
-            wScriptEntry++;
+         if (pEvtObj) {
+            if (pScript->rgwOperand[1] == 0 ||
+               ++(pEvtObj->nScriptIdleFrame) < pScript->rgwOperand[1]) {
+               wScriptEntry = pScript->rgwOperand[0];
+            } else {
+               // failed
+               pEvtObj->nScriptIdleFrame = 0;
+               wScriptEntry++;
+            }
          }
          break;
 

@@ -321,7 +321,7 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
 
     // Get common data from the saved game struct.
     gpGlobals->viewport = PAL_XY(s->wViewportX, s->wViewportY);
-    gpGlobals->wMaxPartyMemberIndex = s->nPartyMember;
+    gpGlobals->wMaxPartyMemberIndex = min(max(s->nPartyMember, 0), MAX_PLAYERS_IN_PARTY - 1);
     gpGlobals->wNumScene = s->wNumScene;
     gpGlobals->fNightPalette = (s->wPaletteOffset != 0);
     gpGlobals->wPartyDirection = s->wPartyDirection;
@@ -750,8 +750,12 @@ PAL_AddItemToInventory(
          //
          /// Need process last item
          //
-         if(gpGlobals->rgInventory[index].nAmount == 0 && index == gpGlobals->iCurInvMenuItem && index+1 < MAX_INVENTORY && gpGlobals->rgInventory[index+1].nAmount <= 0)
-            gpGlobals->iCurInvMenuItem --;
+         if (gpGlobals->rgInventory[index].nAmount == 0 &&
+             index == gpGlobals->iCurInvMenuItem &&
+             index + 1 < MAX_INVENTORY &&
+             gpGlobals->rgInventory[index + 1].nAmount <= 0 &&
+             gpGlobals->iCurInvMenuItem > 0)
+            gpGlobals->iCurInvMenuItem--;
          return true;
       }
 

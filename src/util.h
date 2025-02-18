@@ -31,6 +31,13 @@
 
 #define FRAME_TIME (1000 / 10)        // 10 FPS
 
+#ifndef max
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
 long flength(void *fp);
 
 int RandomLong(int from, int to);

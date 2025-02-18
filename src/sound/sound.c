@@ -763,8 +763,8 @@ void SOUND_Shutdown(void *object)
          cursnd = cursnd->next;
          UTIL_free(old);
       }
+      UTIL_fclose(player->mkf);
    }
-   UTIL_fclose(player->mkf);
    resampler_deinit();
 }
 

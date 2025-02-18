@@ -47,12 +47,6 @@
 #define   FONT_COLOR_CYAN           0x8D
 #define   FONT_COLOR_CYAN_ALT       0x8C
 #define   FONT_COLOR_RED_ALT        0x17
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 
 unsigned char g_fUpdatedInBattle = false;
 static void *fp_cptbl_big5 = NULL;
@@ -1331,8 +1325,11 @@ PAL_swprintf(
                 va_list apd;
 
                 // We copy this argument's format string into internal buffer
-                if (fmt_len < (int)(format - fmt_start + 1))
-                    cur_fmt = (wchar_t *)realloc(cur_fmt, ((fmt_len = (int)(format - fmt_start + 1)) + 1) * sizeof(wchar_t));
+                if (fmt_len < (int)(format - fmt_start + 1)) {
+                    UTIL_free(cur_fmt);
+                    fmt_len = (int)(format - fmt_start) + 2;
+                    cur_fmt = (wchar_t *)UTIL_calloc(fmt_len, sizeof(wchar_t));
+                }
                 wcsncpy(cur_fmt, fmt_start, fmt_len);
                 cur_fmt[fmt_len] = L'\0';
                 // And pass it into vswprintf to get the output

@@ -114,12 +114,7 @@ PAL_ItemSelectMenuUpdate(
    //
    // Make sure the current menu item index is in bound
    //
-   if (gpGlobals->iCurInvMenuItem + item_delta < 0)
-      gpGlobals->iCurInvMenuItem = 0;
-   else if (gpGlobals->iCurInvMenuItem + item_delta >= g_iNumInventory)
-      gpGlobals->iCurInvMenuItem = g_iNumInventory - 1;
-   else
-      gpGlobals->iCurInvMenuItem += item_delta;
+   gpGlobals->iCurInvMenuItem = min(max(gpGlobals->iCurInvMenuItem + item_delta, 0), g_iNumInventory - 1);
 
    //
    // Redraw the box

@@ -113,15 +113,8 @@ PAL_MagicSelectionMenuUpdate(
       item_delta = 0;
    }
 
-   //
    // Make sure the current menu item index is in bound
-   //
-   if (g_iCurrentItem + item_delta < 0)
-      g_iCurrentItem = 0;
-   else if (g_iCurrentItem + item_delta >= g_iNumMagic)
-      g_iCurrentItem = g_iNumMagic - 1;
-   else
-      g_iCurrentItem += item_delta;
+   g_iCurrentItem = min(max(g_iCurrentItem + item_delta, 0), g_iNumMagic - 1);
 
    //
    // Create the box.

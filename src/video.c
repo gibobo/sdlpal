@@ -26,13 +26,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
 // The global palette
 PAL_Surface *gpScreen = NULL;                  // Screen buffer
 static PAL_Surface *gpBackup[] = {NULL, NULL}; // Backup screen buffer

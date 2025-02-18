@@ -39,7 +39,7 @@
 
 BATTLE g_Battle;
 
-unsigned short g_rgPlayerPos[3][3][2] = {
+unsigned short g_rgPlayerPos[MAX_PLAYERS_IN_PARTY][3][2] = {
     {{240, 170}},                        // one player
     {{200, 176}, {256, 152}},            // two players
     {{180, 180}, {234, 170}, {270, 146}} // three players
@@ -1456,7 +1456,7 @@ PAL_StartBattle(
       g_Battle.rgEnemy[i++].wObjectID = w;
    }
 
-   g_Battle.wMaxEnemyIndex = i - 1;
+   g_Battle.wMaxEnemyIndex = min(max(i - 1, 0), MAX_ENEMIES_IN_TEAM - 1);
 
    //
    // Store all players

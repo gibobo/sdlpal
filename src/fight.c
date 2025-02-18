@@ -32,9 +32,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 //#define INVINCIBLE 1
 extern BATTLE g_Battle;
 
@@ -253,7 +250,7 @@ PAL_CalcMagicDamage(
 
       if (wElem <= NUM_MAGIC_ELEMENTAL)
       {
-         sDamage *= 10 + gpGlobals->g.lprgBattleField[gpGlobals->wNumBattleField].rgsMagicEffect[wElem - 1];
+         sDamage *= 10 + gpGlobals->g.lprgBattleField[gpGlobals->wNumBattleField].rgsMagicEffect[max(wElem - 1, 0)];
          sDamage /= 10;
       }
    }
@@ -1057,7 +1054,7 @@ PAL_BattleStartFrame(
                //
                // Skip other players if someone selected coopmagic
                //
-               i = gpGlobals->wMaxPartyMemberIndex + 1;
+               i = min(gpGlobals->wMaxPartyMemberIndex + 1, MAX_PLAYERS_IN_PARTY - 1);
                break;
             }
          }
@@ -1734,8 +1731,9 @@ PAL_BattleShowPlayerAttackAnim(
           {
               if (g_Battle.rgEnemy[j].wObjectID != 0)
               {
-                  x = gpGlobals->g.EnemyPos[j * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex].x;
-                  y = gpGlobals->g.EnemyPos[j * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex].y;
+                  unsigned char idx = max(min(j * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex, 24), 0);
+                  x = gpGlobals->g.EnemyPos[idx].x;
+                  y = gpGlobals->g.EnemyPos[idx].y;
                   y += g_Battle.rgEnemy[j].e.wYPosOffset;
 
                   PAL_RLEBlitToSurface(b, gpScreen, PAL_XY(x - PAL_RLEGetWidth(b) / 2, y - PAL_RLEGetHeight(b)));

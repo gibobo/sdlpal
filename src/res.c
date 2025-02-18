@@ -267,7 +267,7 @@ void PAL_LoadResources(void)
       // Free previous loaded player sprites
       PAL_FreePlayerSprites();
 
-      for (i = 0; i <= (short)gpGlobals->wMaxPartyMemberIndex; i++) {
+      for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++) {
          wPlayerID = gpGlobals->rgParty[i].wPlayerRole;
          assert(wPlayerID < MAX_PLAYER_ROLES);
 
@@ -280,9 +280,9 @@ void PAL_LoadResources(void)
 
       for (i = 1; i <= gpGlobals->nFollower; i++) {
          // Load the follower sprite
-         wSpriteNum = gpGlobals->rgParty[(short)gpGlobals->wMaxPartyMemberIndex + i].wPlayerRole;
+         wSpriteNum = gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].wPlayerRole;
 
-         PAL_MKFDecompressChunk(&gpResources->rglpPlayerSprite[(short)gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum,
+         PAL_MKFDecompressChunk(&gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum,
                               gpGlobals->f.fpMGO);
       }
    }

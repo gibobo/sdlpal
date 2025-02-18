@@ -38,10 +38,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
 #define bufImageSize 8192  //bigger than 5034
+
 static int __buymenu_firsttime_render;
 // Equipment Screen
 static const unsigned int EquipImageBox = PAL_XY(8, 8);
@@ -1169,7 +1167,7 @@ PAL_ItemUseMenu(
    unsigned char bColor, bSelectedColor;
    unsigned char *bufImage;
    unsigned int dwColorChangeTime;
-   static short sSelectedPlayer = 0;
+   static unsigned short sSelectedPlayer = 0;
    PAL_Rect rect = {110, 2, 200, 180};
    int i;
 
@@ -1644,7 +1642,7 @@ void PAL_EquipItemMenu(
 {
    unsigned char *bufImage;
    unsigned short w;
-   int iCurrentPlayer = 0;
+   unsigned short iCurrentPlayer = 0;
    int i;
    unsigned char bColor;
    unsigned char bSelectedColor;
@@ -1783,19 +1781,11 @@ void PAL_EquipItemMenu(
 
       if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
       {
-         iCurrentPlayer--;
-         if (iCurrentPlayer < 0)
-         {
-            iCurrentPlayer = gpGlobals->wMaxPartyMemberIndex;
-         }
+         iCurrentPlayer = (iCurrentPlayer + gpGlobals->wMaxPartyMemberIndex - 1) % gpGlobals->wMaxPartyMemberIndex;
       }
       else if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
       {
-         iCurrentPlayer++;
-         if (iCurrentPlayer > gpGlobals->wMaxPartyMemberIndex)
-         {
-            iCurrentPlayer = 0;
-         }
+         iCurrentPlayer = (iCurrentPlayer + gpGlobals->wMaxPartyMemberIndex + 1) % gpGlobals->wMaxPartyMemberIndex;
       }
       else if (PAL_GetKeyInput() & kKeyMenu)
       {
