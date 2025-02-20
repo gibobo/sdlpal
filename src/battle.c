@@ -826,7 +826,7 @@ void PAL_LoadBattleSprites(
    {
       s = PAL_GetPlayerBattleSprite(gpGlobals->rgParty[i].wPlayerRole);
 
-      if (PAL_MKFDecompressChunk(&g_Battle.rgPlayer[i].lpSprite, 0, s, gpGlobals->f.fpF) <= 0)
+      if (PAL_MKFDecompressChunk(&g_Battle.rgPlayer[i].lpSprite, 0, s, gFiles.fpF) <= 0)
         continue;
 
       //
@@ -888,7 +888,7 @@ PAL_LoadBattleBackground(
    PAL_MKFDecompressChunk(&g_Battle.lpBackground->pixels,
                           SCREEN_SIZE,
                           gpGlobals->wNumBattleField,
-                          gpGlobals->f.fpFBP);
+                          gFiles.fpFBP);
 }
 
 static void
@@ -909,8 +909,8 @@ PAL_BattleWon(
 
 --*/
 {
-   const PAL_Rect rect = {0, 60, 320, 100};
-   PAL_Rect rect1 = {80, 0, 180, 200};
+   const PAL_Rect rect = {0, 60, SCREEN_W, 100};
+   PAL_Rect rect1 = {80, 0, 180, SCREEN_H};
 
    int i, j, iTotalCount;
    unsigned int dwExp;
@@ -1170,7 +1170,7 @@ PAL_BattleWon(
       //
       j = 0;
 
-      while (j < gpGlobals->g.nLevelUpMagic)
+      while (j < BATTLEWIN_LEVELUP_MAGIC)
       {
          if (gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic == 0 ||
              gpGlobals->g.lprgLevelUpMagic[j].m[w].wLevel > gpGlobals->g.PlayerRoles.rgwLevel[w])
@@ -1511,10 +1511,10 @@ PAL_StartBattle(
    //
    // Load the battle effect sprite.
    //
-   i = PAL_MKFGetChunkSize(10, gpGlobals->f.fpDATA);
+   i = PAL_MKFGetChunkSize(10, gFiles.fpDATA);
    g_Battle.lpEffectSprite = UTIL_malloc(i);
 
-   PAL_MKFReadChunk(g_Battle.lpEffectSprite, i, 10, gpGlobals->f.fpDATA);
+   PAL_MKFReadChunk(g_Battle.lpEffectSprite, i, 10, gFiles.fpDATA);
 
    g_Battle.Phase = kBattlePhaseSelectAction;
    g_Battle.fRepeat = false;

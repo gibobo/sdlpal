@@ -83,7 +83,7 @@ PAL_NPCWalkTo(
    EVENTOBJECT *pEvtObj;
    int xOffset, yOffset;
 
-   pEvtObj = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
+   pEvtObj = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
 
    xOffset = (x * 32 + h * 16) - pEvtObj->x;
    yOffset = (y * 16 + h * 8) - pEvtObj->y;
@@ -245,7 +245,7 @@ PAL_PartyRideEventObject(
    int xOffset, yOffset, dx, dy, i;
    EVENTOBJECT *p;
 
-   p = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
+   p = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
 
    xOffset = x * 32 + h * 16 - PAL_X(gpGlobals->viewport) - PAL_X(gpGlobals->partyoffset);
    yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
@@ -553,7 +553,7 @@ PAL_InterpretInstruction(
          // HACK for Dream 2.11 to avoid crash
          i -= 0x9000;
       }
-      pCurrent = &(gpGlobals->g.lprgEventObject[i]);
+      pCurrent = &gpGlobals->g.lprgEventObject[i];
       wCurEventObjectID = pScript->rgwOperand[0];
    }
 
@@ -675,9 +675,9 @@ PAL_InterpretInstruction(
 
          i = pScript->rgwOperand[0] - 0xB;
 
-         p = (unsigned short *)(&gpGlobals->rgEquipmentEffect[i]); // HACKHACK
+         p = (unsigned short *)&gpGlobals->rgEquipmentEffect[i]; // HACKHACK
 
-         p[pScript->rgwOperand[1] * MAX_PLAYER_ROLES + wEventObjectID] = (signed short)pScript->rgwOperand[2];
+         p[pScript->rgwOperand[1] * MAX_PLAYER_ROLES + wEventObjectID] = pScript->rgwOperand[2];
       }
       break;
 
@@ -754,7 +754,7 @@ PAL_InterpretInstruction(
             //
             // In the progress of equipping items
             //
-            p = (unsigned short *)&(gpGlobals->rgEquipmentEffect[g_iCurEquipPart]);
+            p = (unsigned short *)&gpGlobals->rgEquipmentEffect[g_iCurEquipPart];
          }
 
          if (pScript->rgwOperand[2] == 0)
@@ -1305,8 +1305,8 @@ PAL_InterpretInstruction(
       // Increase player's stat temporarily by percent
       //
       {
-         unsigned short *p = (unsigned short *)(&gpGlobals->rgEquipmentEffect[kBodyPartExtra]); // HACKHACK
-         unsigned short *p1 = (unsigned short *)(&gpGlobals->g.PlayerRoles);
+         unsigned short *p = (unsigned short *)&gpGlobals->rgEquipmentEffect[kBodyPartExtra]; // HACKHACK
+         unsigned short *p1 = (unsigned short *)&gpGlobals->g.PlayerRoles;
 
          if (pScript->rgwOperand[2] == 0)
          {
@@ -1381,7 +1381,7 @@ PAL_InterpretInstruction(
          if (gpGlobals->g.rgObject[wObject].item.wBitmap != wPrevImageIndex)
          {
             if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
-                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gFiles.fpBALL) > 0)
             {
                wPrevImageIndex = gpGlobals->g.rgObject[wObject].item.wBitmap;
             }
@@ -2962,7 +2962,7 @@ PAL_RunTriggerScript(
 
    if (wEventObjectID != 0)
    {
-      pEvtObj = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
+      pEvtObj = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
    }
 
    g_fScriptSuccess = true;
@@ -3241,8 +3241,8 @@ PAL_RunAutoScript(
    int iDescLine;
 
 begin:
-   pScript = &(gpGlobals->g.lprgScriptEntry[wScriptEntry]);
-   pEvtObj = &(gpGlobals->g.lprgEventObject[wEventObjectID - 1]);
+   pScript = &gpGlobals->g.lprgScriptEntry[wScriptEntry];
+   pEvtObj = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
 
    //
    // For autoscript, we should interpret one instruction per frame (except

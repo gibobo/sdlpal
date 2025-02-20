@@ -29,9 +29,9 @@
 #include <stdio.h>
 #include <string.h>
 
+FILES gFiles;
 CONFIGURATION gConfig;
-static GLOBALVARS _gGlobals;
-GLOBALVARS * const  gpGlobals = &_gGlobals;
+GLOBALVARS *gpGlobals = NULL;
 
 int PAL_InitGlobals(void)
 /*++
@@ -57,16 +57,15 @@ int PAL_InitGlobals(void)
    gConfig.dwTextureHeight = 400;
 
    // Open files
-   gpGlobals->f.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
-   gpGlobals->f.fpMGO = UTIL_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
-   gpGlobals->f.fpBALL = UTIL_fopen(RESOURCE_PATH "/ball.mkf", "rb");
-   gpGlobals->f.fpDATA = UTIL_fopen(RESOURCE_PATH "/data.mkf", "rb");
-   gpGlobals->f.fpF = UTIL_fopen(RESOURCE_PATH "/f.mkf", "rb");
-   gpGlobals->f.fpFIRE = UTIL_fopen(RESOURCE_PATH "/fire.mkf", "rb");
-   gpGlobals->f.fpRGM = UTIL_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
-   gpGlobals->f.fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
-
-   gpGlobals->bCurrentSaveSlot = 1;
+   gFiles.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
+   gFiles.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
+   gFiles.fpMGO = UTIL_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
+   gFiles.fpBALL = UTIL_fopen(RESOURCE_PATH "/ball.mkf", "rb");
+   gFiles.fpDATA = UTIL_fopen(RESOURCE_PATH "/data.mkf", "rb");
+   gFiles.fpF = UTIL_fopen(RESOURCE_PATH "/f.mkf", "rb");
+   gFiles.fpFIRE = UTIL_fopen(RESOURCE_PATH "/fire.mkf", "rb");
+   gFiles.fpRGM = UTIL_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
+   gFiles.fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
 
    return 0;
 }
@@ -90,14 +89,14 @@ void PAL_FreeGlobals(void)
    //
    // Close all opened files
    //
-   UTIL_fclose(gpGlobals->f.fpFBP);
-   UTIL_fclose(gpGlobals->f.fpMGO);
-   UTIL_fclose(gpGlobals->f.fpBALL);
-   UTIL_fclose(gpGlobals->f.fpDATA);
-   UTIL_fclose(gpGlobals->f.fpF);
-   UTIL_fclose(gpGlobals->f.fpFIRE);
-   UTIL_fclose(gpGlobals->f.fpRGM);
-   UTIL_fclose(gpGlobals->f.fpSSS);
+   UTIL_fclose(gFiles.fpFBP);
+   UTIL_fclose(gFiles.fpMGO);
+   UTIL_fclose(gFiles.fpBALL);
+   UTIL_fclose(gFiles.fpDATA);
+   UTIL_fclose(gFiles.fpF);
+   UTIL_fclose(gFiles.fpFIRE);
+   UTIL_fclose(gFiles.fpRGM);
+   UTIL_fclose(gFiles.fpSSS);
 
    //
    // Free the game data
@@ -114,6 +113,8 @@ void PAL_FreeGlobals(void)
    // Clear the instance
    memset(gpGlobals, 0, sizeof(GLOBALVARS));
    memset(&gConfig, 0, sizeof(CONFIGURATION));
+   UTIL_free(gpGlobals);
+   gpGlobals = NULL;
 }
 
 static void PAL_ReadGlobalGameData(void)
@@ -133,16 +134,16 @@ static void PAL_ReadGlobalGameData(void)
 --*/
 {
   GAMEDATA *p = &gpGlobals->g;
-  PAL_MKFReadChunk(p->lprgScriptEntry,        p->nScriptEntry * sizeof(SCRIPTENTRY), 4, gpGlobals->f.fpSSS);
-  PAL_MKFReadChunk(p->lprgStore,              p->nStore * sizeof(STORE), 0, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(p->lprgEnemy,              p->nEnemy * sizeof(ENEMY), 1, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(p->lprgEnemyTeam,          p->nEnemyTeam * sizeof(ENEMYTEAM), 2, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(p->lprgMagic,              p->nMagic * sizeof(MAGIC), 4, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(p->lprgBattleField,        p->nBattleField * sizeof(BATTLEFIELD), 5, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(p->lprgLevelUpMagic,       p->nLevelUpMagic * sizeof(LEVELUPMAGIC_ALL), 6, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(p->rgwBattleEffectIndex,   sizeof(p->rgwBattleEffectIndex), 11, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(p->EnemyPos,               sizeof(p->EnemyPos), 13, gpGlobals->f.fpDATA);
-  PAL_MKFReadChunk(p->rgLevelUpExp,           sizeof(p->rgLevelUpExp), 14, gpGlobals->f.fpDATA);
+  PAL_MKFReadChunk(p->lprgScriptEntry,        p->nScriptEntry * sizeof(SCRIPTENTRY), 4, gFiles.fpSSS);
+  PAL_MKFReadChunk(p->lprgStore,              p->nStore * sizeof(STORE), 0, gFiles.fpDATA);
+  PAL_MKFReadChunk(p->lprgEnemy,              p->nEnemy * sizeof(ENEMY), 1, gFiles.fpDATA);
+  PAL_MKFReadChunk(p->lprgEnemyTeam,          p->nEnemyTeam * sizeof(ENEMYTEAM), 2, gFiles.fpDATA);
+  PAL_MKFReadChunk(p->lprgMagic,              p->nMagic * sizeof(MAGIC), 4, gFiles.fpDATA);
+  PAL_MKFReadChunk(p->lprgBattleField,        p->nBattleField * sizeof(BATTLEFIELD), 5, gFiles.fpDATA);
+  PAL_MKFReadChunk(p->lprgLevelUpMagic,       p->nLevelUpMagic * sizeof(LEVELUPMAGIC_ALL), 6, gFiles.fpDATA);
+  PAL_MKFReadChunk(p->rgwBattleEffectIndex,   sizeof(p->rgwBattleEffectIndex), 11, gFiles.fpDATA);
+  PAL_MKFReadChunk(p->EnemyPos,               sizeof(p->EnemyPos), 13, gFiles.fpDATA);
+  PAL_MKFReadChunk(p->rgLevelUpExp,           sizeof(p->rgLevelUpExp), 14, gFiles.fpDATA);
 }
 
 static void PAL_InitGlobalGameData(void)
@@ -169,14 +170,14 @@ static void PAL_InitGlobalGameData(void)
   }
 
   // If the memory has not been allocated, allocate first.
-  PAL_DOALLOCATE(gpGlobals->f.fpSSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
-  PAL_DOALLOCATE(gpGlobals->f.fpSSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
-  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
-  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
-  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 2, ENEMYTEAM, gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
-  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 4, MAGIC, gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
-  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 5, BATTLEFIELD, gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
-  PAL_DOALLOCATE(gpGlobals->f.fpDATA, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
+  PAL_DOALLOCATE(gFiles.fpSSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
+  PAL_DOALLOCATE(gFiles.fpSSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
+  PAL_DOALLOCATE(gFiles.fpDATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
+  PAL_DOALLOCATE(gFiles.fpDATA, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
+  PAL_DOALLOCATE(gFiles.fpDATA, 2, ENEMYTEAM, gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
+  PAL_DOALLOCATE(gFiles.fpDATA, 4, MAGIC, gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
+  PAL_DOALLOCATE(gFiles.fpDATA, 5, BATTLEFIELD, gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
+  PAL_DOALLOCATE(gFiles.fpDATA, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
   PAL_ReadGlobalGameData();
 #undef PAL_DOALLOCATE
 }
@@ -202,10 +203,10 @@ static void PAL_LoadDefaultGame(void)
 
    unsigned short *pr = (unsigned short *)(&p->PlayerRoles); // HACKHACK
    // Load the default data from the game data files.
-   PAL_MKFReadChunk(p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gpGlobals->f.fpSSS);
-   PAL_MKFReadChunk(p->rgScene, sizeof(p->rgScene), 1, gpGlobals->f.fpSSS);
-   PAL_MKFReadChunk(p->rgObject, sizeof(p->rgObject), 2, gpGlobals->f.fpSSS);
-   PAL_MKFReadChunk(pr, sizeof(PLAYERROLES), 3, gpGlobals->f.fpDATA);
+   PAL_MKFReadChunk(p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gFiles.fpSSS);
+   PAL_MKFReadChunk(p->rgScene, sizeof(p->rgScene), 1, gFiles.fpSSS);
+   PAL_MKFReadChunk(p->rgObject, sizeof(p->rgObject), 2, gFiles.fpSSS);
+   PAL_MKFReadChunk(pr, sizeof(PLAYERROLES), 3, gFiles.fpDATA);
 
    // Set some other default data.
    gpGlobals->dwCash = 0;
@@ -241,8 +242,7 @@ static void PAL_LoadDefaultGame(void)
    gpGlobals->fEnteringScene = true;
 }
 
-typedef struct tagSAVEDGAME_COMMON
-{
+typedef struct tagSAVEDGAME_COMMON {
     unsigned short             wSavedTimes;             // saved times
     unsigned short             wViewportX, wViewportY;  // viewport location
     unsigned short             nPartyMember;            // number of members in party
@@ -270,8 +270,7 @@ typedef struct tagSAVEDGAME_COMMON
     SCENE            rgScene[MAX_SCENES];
 } SAVEDGAME_COMMON;
 
-typedef struct tagSAVEDGAME_WIN
-{
+typedef struct tagSAVEDGAME_WIN {
     unsigned short             wSavedTimes;             // saved times
     unsigned short             wViewportX, wViewportY;  // viewport location
     unsigned short             nPartyMember;            // number of members in party
@@ -301,55 +300,53 @@ typedef struct tagSAVEDGAME_WIN
     EVENTOBJECT      rgEventObject[MAX_EVENT_OBJECTS];
 } SAVEDGAME_WIN;
 
-static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int size)
-{
-    // Try to open the specified file
-    char *save_path = (char *)UTIL_malloc(256);
-    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
-    void *fp = UTIL_fopen_without_checking(save_path, "rb");
-    UTIL_free(save_path);
+static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int size) {
+   // Try to open the specified file
+   char *save_path = (char *)UTIL_malloc(256);
+   sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
+   void *fp = UTIL_fopen_without_checking(save_path, "rb");
+   UTIL_free(save_path);
 
-    // Read all data from the file and close.
-    unsigned int n = fp ? UTIL_fread(s, 1, size, fp) : 0;
+   // Read all data from the file and close.
+   unsigned int n = fp ? UTIL_fread(s, 1, size, fp) : 0;
 
-    UTIL_fclose(fp);
+   UTIL_fclose(fp);
 
-    if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
-    {
-        return false;
-    }
+   if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS) {
+      return false;
+   }
 
-    // Get common data from the saved game struct.
-    gpGlobals->viewport = PAL_XY(s->wViewportX, s->wViewportY);
-    gpGlobals->wMaxPartyMemberIndex = min(max(s->nPartyMember, 0), MAX_PLAYERS_IN_PARTY - 1);
-    gpGlobals->wNumScene = s->wNumScene;
-    gpGlobals->fNightPalette = (s->wPaletteOffset != 0);
-    gpGlobals->wPartyDirection = s->wPartyDirection;
-    gpGlobals->wNumMusic = s->wNumMusic;
-    gpGlobals->wNumBattleMusic = s->wNumBattleMusic;
-    gpGlobals->wNumBattleField = s->wNumBattleField;
-    gpGlobals->wScreenWave = s->wScreenWave;
-    gpGlobals->sWaveProgression = 0;
-    gpGlobals->wCollectValue = s->wCollectValue;
-    gpGlobals->wLayer = s->wLayer;
-    gpGlobals->wChaseRange = s->wChaseRange;
-    gpGlobals->wChasespeedChangeCycles = s->wChasespeedChangeCycles;
-    gpGlobals->nFollower = s->nFollower;
-    gpGlobals->dwCash = s->dwCash;
+   // Get common data from the saved game struct.
+   gpGlobals->viewport = PAL_XY(s->wViewportX, s->wViewportY);
+   gpGlobals->wMaxPartyMemberIndex = min(max(s->nPartyMember, 0), MAX_PLAYERS_IN_PARTY - 1);
+   gpGlobals->wNumScene = s->wNumScene;
+   gpGlobals->fNightPalette = (s->wPaletteOffset != 0);
+   gpGlobals->wPartyDirection = s->wPartyDirection;
+   gpGlobals->wNumMusic = s->wNumMusic;
+   gpGlobals->wNumBattleMusic = s->wNumBattleMusic;
+   gpGlobals->wNumBattleField = s->wNumBattleField;
+   gpGlobals->wScreenWave = s->wScreenWave;
+   gpGlobals->sWaveProgression = 0;
+   gpGlobals->wCollectValue = s->wCollectValue;
+   gpGlobals->wLayer = s->wLayer;
+   gpGlobals->wChaseRange = s->wChaseRange;
+   gpGlobals->wChasespeedChangeCycles = s->wChasespeedChangeCycles;
+   gpGlobals->nFollower = s->nFollower;
+   gpGlobals->dwCash = s->dwCash;
 
-    memcpy(gpGlobals->rgParty, s->rgParty, sizeof(gpGlobals->rgParty));
-    memcpy(gpGlobals->rgTrail, s->rgTrail, sizeof(gpGlobals->rgTrail));
-    gpGlobals->Exp = s->Exp;
-    gpGlobals->g.PlayerRoles = s->PlayerRoles;
-    memset(gpGlobals->rgPoisonStatus, 0, sizeof(gpGlobals->rgPoisonStatus));
-    memcpy(gpGlobals->rgInventory, s->rgInventory, sizeof(gpGlobals->rgInventory));
-    memcpy(gpGlobals->g.rgScene, s->rgScene, sizeof(gpGlobals->g.rgScene));
+   memcpy(gpGlobals->rgParty, s->rgParty, sizeof(PARTY) * MAX_PLAYABLE_PLAYER_ROLES);
+   memcpy(gpGlobals->rgTrail, s->rgTrail, sizeof(TRAIL) * MAX_PLAYABLE_PLAYER_ROLES);
+   gpGlobals->Exp = s->Exp;
+   gpGlobals->g.PlayerRoles = s->PlayerRoles;
+   memset(gpGlobals->rgPoisonStatus, 0, sizeof(POISONSTATUS) * MAX_POISONS * MAX_PLAYABLE_PLAYER_ROLES);
+   memcpy(gpGlobals->rgInventory, s->rgInventory, sizeof(INVENTORY) * MAX_INVENTORY);
+   memcpy(gpGlobals->g.rgScene, s->rgScene, sizeof(SCENE) * MAX_SCENES);
 
-    gpGlobals->fEnteringScene = false;
+   gpGlobals->fEnteringScene = false;
 
-    PAL_CompressInventory();
+   PAL_CompressInventory();
 
-    return true;
+   return true;
 }
 
 static int PAL_LoadGame_WIN(int iSaveSlot)
@@ -377,7 +374,7 @@ static int PAL_LoadGame_WIN(int iSaveSlot)
        return -1;
 
    memcpy(gpGlobals->g.rgObject, s->rgObject, sizeof(gpGlobals->g.rgObject));
-   memcpy(gpGlobals->g.lprgEventObject, s->rgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
+   memcpy(gpGlobals->g.lprgEventObject, s->rgEventObject, sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS);
 
    UTIL_free(s);
 
@@ -427,7 +424,7 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
    char *save_path = (char *)UTIL_malloc(256);
    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
    if (fp = UTIL_fopen(save_path, "wb")) {
-      i = PAL_MKFGetChunkSize(0, gpGlobals->f.fpSSS);
+      i = PAL_MKFGetChunkSize(0, gFiles.fpSSS);
       i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
       UTIL_fwrite(s, i, 1, fp);
    }
@@ -460,7 +457,7 @@ PAL_SaveGame_WIN(
    // Put all the data to the saved game struct.
    //
    memcpy(&s->rgObject, gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject));
-   memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
+   memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS);
 
    PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN));
 
@@ -476,10 +473,7 @@ PAL_SaveGame(
    PAL_SaveGame_WIN(iSaveSlot, wSavedTimes);
 }
 
-void
-PAL_ReloadInNextTick(
-    int           iSaveSlot
-)
+void PAL_ReloadInNextTick(int iSaveSlot)
 /*++
   Purpose:
 
@@ -495,11 +489,13 @@ PAL_ReloadInNextTick(
 
 --*/
 {
-    gpGlobals->bCurrentSaveSlot = (unsigned char)iSaveSlot;
-    PAL_SetLoadFlags(kLoadGlobalData | kLoadScene | kLoadPlayerSprite);
-    gpGlobals->fEnteringScene = true;
-    gpGlobals->fNeedToFadeIn = true;
-    gpGlobals->dwFrameNum = 0;
+   if (gpGlobals == NULL)
+      gpGlobals = (GLOBALVARS *)UTIL_malloc(sizeof(GLOBALVARS));
+   gpGlobals->bCurrentSaveSlot = (unsigned char)iSaveSlot;
+   PAL_SetLoadFlags(kLoadGlobalData | kLoadScene | kLoadPlayerSprite);
+   gpGlobals->fEnteringScene = true;
+   gpGlobals->fNeedToFadeIn = true;
+   gpGlobals->dwFrameNum = 0;
 }
 
 void
@@ -943,7 +939,7 @@ PAL_UpdateEquipments(
    int      i, j;
    unsigned short     w;
 
-   memset(&(gpGlobals->rgEquipmentEffect), 0, sizeof(gpGlobals->rgEquipmentEffect));
+   memset(gpGlobals->rgEquipmentEffect, 0, sizeof(PLAYERROLES)*(MAX_PLAYER_EQUIPMENTS + 1));
 
    for (i = 0; i < MAX_PLAYER_ROLES; i++)
    {
@@ -985,9 +981,9 @@ PAL_RemoveEquipmentEffect(
    unsigned short *p;
    int i, j;
 
-   p = (unsigned short *)(&gpGlobals->rgEquipmentEffect[wEquipPart]); // HACKHACK
+   p = (unsigned short *)&gpGlobals->rgEquipmentEffect[wEquipPart]; // HACKHACK
 
-   for (i = 0; i < sizeof(PLAYERROLES) / sizeof(PLAYERS); i++)
+   for (i = 0; i < sizeof(PLAYERROLES) / (sizeof(unsigned short) * MAX_PLAYER_ROLES); i++)
    {
       p[i * MAX_PLAYER_ROLES + wPlayerRole] = 0;
    }

@@ -30,10 +30,8 @@
 #include <string.h>
 
 #define PALETTE_SIZE (256 * 3)
-unsigned char *
-PAL_GetPalette(
-    int iPaletteNum,
-    int fNight)
+
+unsigned char *PAL_GetPalette(int iPaletteNum, int fNight)
 /*++
   Purpose:
 
@@ -53,35 +51,26 @@ PAL_GetPalette(
 {
    static unsigned char palette[PALETTE_SIZE];
    unsigned char buf[PALETTE_SIZE * 2];
-   unsigned char *ptr;
+   unsigned char *ptr = buf;
    int i;
-   void *fp;
-
-   fp = UTIL_fopen(RESOURCE_PATH "/pat.mkf", "rb");
-
+   void *fp = NULL;
    memset(palette, 0, sizeof(palette));
    memset(buf, 0, sizeof(buf));
 
    // Read the palette data from the pat.mkf file
+   fp = UTIL_fopen(RESOURCE_PATH "/pat.mkf", "rb");
    i = PAL_MKFReadChunk(buf, sizeof(buf), iPaletteNum, fp);
    UTIL_fclose(fp);
 
    if (i < 0)
-   {
-      // Read failed
-      return NULL;
-   }
+      return NULL; // Read failed
    else if (i <= PALETTE_SIZE)
-   {
-      // There is no night colors in the palette
-      fNight = false;
-   }
+      fNight = false; // There is no night colors in the palette
+
    ptr = buf + PALETTE_SIZE * ((fNight) ? 1 : 0);
 
    for (i = 0; i < PALETTE_SIZE; i++)
-   {
       palette[i] = ptr[i] << 2;
-   }
 
    return palette;
 }

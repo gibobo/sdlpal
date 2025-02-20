@@ -441,7 +441,7 @@ PAL_Search(
       for (k = gpGlobals->g.rgScene[gpGlobals->wNumScene - 1].wEventObjectIndex;
          k < gpGlobals->g.rgScene[gpGlobals->wNumScene].wEventObjectIndex; k++)
       {
-         p = &(gpGlobals->g.lprgEventObject[k]);
+         p = &gpGlobals->g.lprgEventObject[k];
          ex = p->x / 32;
          ey = p->y / 16;
          eh = ((p->x % 32) ? 1 : 0);

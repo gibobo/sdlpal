@@ -204,7 +204,7 @@ PAL_ItemSelectMenuUpdate(
                                  PAL_XY(xBase, yBase - iPictureYOffset));
 
             if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
-                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gFiles.fpBALL) > 0)
             {
                PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(xBase + 8, yBase + 7 - iPictureYOffset));
             }

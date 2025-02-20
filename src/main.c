@@ -191,10 +191,10 @@ void PAL_SplashScreen(void)
    }
 
    // Read the bitmaps
-   PAL_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, gpGlobals->f.fpFBP);
-   PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, gpGlobals->f.fpMGO);
-   PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, gpGlobals->f.fpMGO);
+   PAL_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, gFiles.fpFBP);
+   PAL_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, gFiles.fpFBP);
+   PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, gFiles.fpMGO);
+   PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, gFiles.fpMGO);
    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
    iTitleHeight = PAL_RLEGetHeight(lpBitmapTitle);
    lpBitmapTitle[2] = 0;
@@ -355,10 +355,10 @@ int main(int argc, char *argv[])
    PAL_SplashScreen();
 
    // Show the opening menu.
-   gpGlobals->bCurrentSaveSlot = (unsigned char)PAL_OpeningMenu();
+   int iSlot = (unsigned char)PAL_OpeningMenu();
 
    // Initialize game data and set the flags to load the game resources.
-   PAL_ReloadInNextTick(gpGlobals->bCurrentSaveSlot);
+   PAL_ReloadInNextTick(iSlot);
 
    // Run the main game routine
    while (1)

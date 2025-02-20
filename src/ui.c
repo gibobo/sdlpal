@@ -61,7 +61,7 @@ int PAL_InitUI(
    //
    // Load the UI sprite.
    //
-   iSize = PAL_MKFGetChunkSize(CHUNKNUM_SPRITEUI, gpGlobals->f.fpDATA);
+   iSize = PAL_MKFGetChunkSize(CHUNKNUM_SPRITEUI, gFiles.fpDATA);
    if (iSize < 0)
    {
       return -1;
@@ -73,7 +73,7 @@ int PAL_InitUI(
       return -1;
    }
 
-   PAL_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, gpGlobals->f.fpDATA);
+   PAL_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, gFiles.fpDATA);
 
    return 0;
 }

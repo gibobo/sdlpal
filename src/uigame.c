@@ -161,7 +161,7 @@ int PAL_OpeningMenu(void)
 
    // Draw the background
    // Read the picture from fbp.mkf.
-   PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, 2, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, 2, gFiles.fpFBP);
 
    // ...and blit it to the screen buffer.
    VIDEO_UpdateScreen(NULL);
@@ -1026,10 +1026,10 @@ void PAL_PlayerStatus(
       iPlayerRole = gpGlobals->rgParty[iCurrent].wPlayerRole;
 
       // Draw the background image      
-      PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, gpGlobals->f.fpFBP);
+      PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, gFiles.fpFBP);
 
       // Draw the image of player role
-      if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gpGlobals->f.fpRGM) > 0) {
+      if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles.rgwAvatar[iPlayerRole], gFiles.fpRGM) > 0) {
         PAL_RLEBlitToSurface(bufImage, gpScreen, RoleImage);
       }
 
@@ -1046,7 +1046,7 @@ void PAL_PlayerStatus(
          }
 
          // Draw the image
-         if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[w].item.wBitmap, gpGlobals->f.fpBALL) > 0) {
+         if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[w].item.wBitmap, gFiles.fpBALL) > 0) {
            PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY_OFFSET(RoleEquipImageBoxes[i], 1, 1));
          }
 
@@ -1244,7 +1244,7 @@ PAL_ItemUseMenu(
          // Draw the picture of the item
          //
          if (PAL_MKFReadChunk(bufImage, bufImageSize,
-                              gpGlobals->g.rgObject[wItemToUse].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                              gpGlobals->g.rgObject[wItemToUse].item.wBitmap, gFiles.fpBALL) > 0)
          {
             PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(127, 88));
          }
@@ -1382,7 +1382,7 @@ PAL_BuyMenu_OnItemChange(
 
    bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
    if (PAL_MKFReadChunk(bufImage, bufImageSize,
-                        gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                        gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, gFiles.fpBALL) > 0)
    {
       PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(x, y));
    }
@@ -1661,11 +1661,11 @@ void PAL_EquipItemMenu(
 
       // Draw the background
       PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM,
-                           gpGlobals->f.fpFBP);
+                           gFiles.fpFBP);
 
       // Draw the item picture
       if (PAL_MKFReadChunk(bufImage, bufImageSize,
-                           gpGlobals->g.rgObject[wItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+                           gpGlobals->g.rgObject[wItem].item.wBitmap, gFiles.fpBALL) > 0)
       {
          PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY_OFFSET(EquipImageBox, 8, 8));
       }
@@ -1807,12 +1807,9 @@ void PAL_EquipItemMenu(
    UTIL_free(bufImage);
 }
 
-void PAL_QuitGame(
-    void)
-{
+void PAL_QuitGame(void) {
    unsigned short wReturnValue = PAL_ConfirmMenu(); // No config menu available
-   if (wReturnValue == 1 || wReturnValue == 2)
-   {
+   if (wReturnValue == 1 || wReturnValue == 2) {
       AUDIO_PlayMusic(0x00, false, 2);
       PAL_FadeOut(2);
       PAL_Shutdown(0);

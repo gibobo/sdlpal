@@ -32,7 +32,7 @@ typedef struct tagRESOURCES {
   unsigned char bLoadFlags;
   PALMAP *lpMap;                                              // current loaded map
   unsigned char **lppEventObjectSprites;                      // event object sprites
-  int nEventObject;                                           // number of event objects
+  int nEventObjectSprites;                                           // number of event objects
   unsigned char *rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
 } RESOURCES;
 
@@ -60,7 +60,7 @@ PAL_FreeEventObjectSprites(
 
    if (gpResources->lppEventObjectSprites != NULL)
    {
-      for (i = 0; i < gpResources->nEventObject; i++)
+      for (i = 0; i < gpResources->nEventObjectSprites; i++)
       {
          UTIL_free(gpResources->lppEventObjectSprites[i]);
       }
@@ -68,7 +68,7 @@ PAL_FreeEventObjectSprites(
       UTIL_free(gpResources->lppEventObjectSprites);
 
       gpResources->lppEventObjectSprites = NULL;
-      gpResources->nEventObject = 0;
+      gpResources->nEventObjectSprites = 0;
    }
 }
 
@@ -213,10 +213,8 @@ void PAL_LoadResources(void)
 
    // Load scene
    if (gpResources->bLoadFlags & kLoadScene) {
-      void *fpMAP, *fpGOP;
-
-      fpMAP = UTIL_fopen(RESOURCE_PATH "/map.mkf", "rb");
-      fpGOP = UTIL_fopen(RESOURCE_PATH "/gop.mkf", "rb");
+      void *fpMAP = UTIL_fopen(RESOURCE_PATH "/map.mkf", "rb");
+      void *fpGOP = UTIL_fopen(RESOURCE_PATH "/gop.mkf", "rb");
 
       if (gpGlobals->fEnteringScene) {
          gpGlobals->wScreenWave = 0;
@@ -242,19 +240,18 @@ void PAL_LoadResources(void)
 
       // Load sprites
       index = gpGlobals->g.rgScene[i].wEventObjectIndex;
-      gpResources->nEventObject = gpGlobals->g.rgScene[i + 1].wEventObjectIndex;
-      gpResources->nEventObject -= index;
+      gpResources->nEventObjectSprites = gpGlobals->g.rgScene[i + 1].wEventObjectIndex;
+      gpResources->nEventObjectSprites -= index;
 
-      if (gpResources->nEventObject > 0) {
-         gpResources->lppEventObjectSprites = (unsigned char **)UTIL_calloc(gpResources->nEventObject, sizeof(unsigned char *));
+      if (gpResources->nEventObjectSprites > 0) {
+         gpResources->lppEventObjectSprites = (unsigned char **)UTIL_calloc(gpResources->nEventObjectSprites, sizeof(unsigned char *));
       }
 
-      for (i = 0; i < gpResources->nEventObject; i++, index++) {
+      for (i = 0; i < gpResources->nEventObjectSprites; i++, index++) {
          gpResources->lppEventObjectSprites[i] = NULL;
-         if (PAL_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, gpGlobals->f.fpMGO) > 0) {
+         if (PAL_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, gFiles.fpMGO) > 0)
          gpGlobals->g.lprgEventObject[index].nSpriteFramesAuto = PAL_SpriteGetNumFrames(gpResources->lppEventObjectSprites[i]);
          }
-      }
 
       gpGlobals->partyoffset = PAL_XY(160, 112);
 
@@ -274,16 +271,16 @@ void PAL_LoadResources(void)
          // Load player sprite
          wSpriteNum = gpGlobals->g.PlayerRoles.rgwSpriteNum[wPlayerID];
 
-         PAL_MKFDecompressChunk(&gpResources->rglpPlayerSprite[i], 0, wSpriteNum,
-                              gpGlobals->f.fpMGO);
+         PAL_MKFDecompressChunk(
+            &gpResources->rglpPlayerSprite[i], 0, wSpriteNum, gFiles.fpMGO);
       }
 
       for (i = 1; i <= gpGlobals->nFollower; i++) {
          // Load the follower sprite
          wSpriteNum = gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].wPlayerRole;
 
-         PAL_MKFDecompressChunk(&gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum,
-                              gpGlobals->f.fpMGO);
+         PAL_MKFDecompressChunk(
+            &gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum, gFiles.fpMGO);
       }
    }
 
@@ -362,7 +359,7 @@ PAL_GetEventObjectSprite(
    wEventObjectID -= gpGlobals->g.rgScene[gpGlobals->wNumScene - 1].wEventObjectIndex;
    wEventObjectID--;
 
-   if (gpResources == NULL || wEventObjectID >= gpResources->nEventObject)
+   if (gpResources == NULL || wEventObjectID >= gpResources->nEventObjectSprites)
    {
       return NULL;
    }

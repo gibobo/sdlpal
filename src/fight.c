@@ -2008,7 +2008,7 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
    iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-   if (PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, gpGlobals->f.fpFIRE) <= 0)
+   if (PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, gFiles.fpFIRE) <= 0)
       return;
 
    n = PAL_SpriteGetNumFrames(lpSpriteEffect);
@@ -2123,7 +2123,7 @@ PAL_BattleShowPlayerOffMagicAnim(
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
    iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-   PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, gpGlobals->f.fpFIRE);
+   PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, gFiles.fpFIRE);
 
    n = PAL_SpriteGetNumFrames(lpSpriteEffect);
 
@@ -2330,7 +2330,7 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
    iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-   if (PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, gpGlobals->f.fpFIRE) <= 0)
+   if (PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, gFiles.fpFIRE) <= 0)
      return;
 
    n = PAL_SpriteGetNumFrames(lpSpriteEffect);
@@ -2531,7 +2531,7 @@ static void PAL_BattleShowPlayerSummonMagicAnim(unsigned short wPlayerIndex, uns
    VIDEO_BackupScreen(g_Battle.lpSceneBuf);
 
    // Load the sprite of the summoned god
-   PAL_MKFDecompressChunk(&g_Battle.lpSummonSprite, 0, gpGlobals->g.lprgMagic[wMagicNum].rgSpecific.wSummonEffect + 10, gpGlobals->f.fpF);
+   PAL_MKFDecompressChunk(&g_Battle.lpSummonSprite, 0, gpGlobals->g.lprgMagic[wMagicNum].rgSpecific.wSummonEffect + 10, gFiles.fpF);
 
    g_Battle.iSummonFrame = 0;
    g_Battle.posSummon = PAL_XY(240 + (short)(gpGlobals->g.lprgMagic[wMagicNum].wXOffset),

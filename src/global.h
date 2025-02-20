@@ -65,13 +65,15 @@
 
 // maximum number of event objects (should be somewhat more than the original,
 // as there are some modified versions which has more)
-#define MAX_EVENT_OBJECTS 5500
+#define MAX_EVENT_OBJECTS 5074
 
 // maximum number of effective poisons to players
 #define MAX_POISONS 16
 
 // maximum number of level
 #define MAX_LEVELS 99
+
+#define BATTLEWIN_LEVELUP_MAGIC 20
 
 // status of characters
 enum tagSTATUS
@@ -323,45 +325,43 @@ typedef struct tagENEMYTEAM
    unsigned short rgwEnemy[MAX_ENEMIES_IN_TEAM];
 } ENEMYTEAM;
 
-typedef unsigned short PLAYERS[MAX_PLAYER_ROLES];
-
 typedef struct tagPLAYERROLES
 {
-   PLAYERS rgwAvatar;                                                            // avatar (shown in status view)
-   PLAYERS rgwSpriteNumInBattle;                                                 // sprite displayed in battle (in F.MKF)
-   PLAYERS rgwSpriteNum;                                                         // sprite displayed in normal scene (in MGO.MKF)
-   PLAYERS rgwName;                                                              // name of player class (in unsigned short.DAT)
-   PLAYERS rgwAttackAll;                                                         // whether player can attack everyone in a bulk or not
-   PLAYERS rgwUnknown1;                                                          // FIXME: ???
-   PLAYERS rgwLevel;                                                             // level
-   PLAYERS rgwMaxHP;                                                             // maximum HP
-   PLAYERS rgwMaxMP;                                                             // maximum MP
-   PLAYERS rgwHP;                                                                // current HP
-   PLAYERS rgwMP;                                                                // current MP
+   unsigned short rgwAvatar[MAX_PLAYER_ROLES];                                                            // avatar (shown in status view)
+   unsigned short rgwSpriteNumInBattle[MAX_PLAYER_ROLES];                                                 // sprite displayed in battle (in F.MKF)
+   unsigned short rgwSpriteNum[MAX_PLAYER_ROLES];                                                         // sprite displayed in normal scene (in MGO.MKF)
+   unsigned short rgwName[MAX_PLAYER_ROLES];                                                              // name of player class (in unsigned short.DAT)
+   unsigned short rgwAttackAll[MAX_PLAYER_ROLES];                                                         // whether player can attack everyone in a bulk or not
+   unsigned short rgwUnknown1[MAX_PLAYER_ROLES];                                                          // FIXME: ???
+   unsigned short rgwLevel[MAX_PLAYER_ROLES];                                                             // level
+   unsigned short rgwMaxHP[MAX_PLAYER_ROLES];                                                             // maximum HP
+   unsigned short rgwMaxMP[MAX_PLAYER_ROLES];                                                             // maximum MP
+   unsigned short rgwHP[MAX_PLAYER_ROLES];                                                                // current HP
+   unsigned short rgwMP[MAX_PLAYER_ROLES];                                                                // current MP
    unsigned short rgwEquipment[MAX_PLAYER_EQUIPMENTS][MAX_PLAYER_ROLES];         // equipments
-   PLAYERS rgwAttackStrength;                                                    // normal attack strength
-   PLAYERS rgwMagicStrength;                                                     // magical attack strength
-   PLAYERS rgwDefense;                                                           // resistance to all kinds of attacking
-   PLAYERS rgwDexterity;                                                         // dexterity
-   PLAYERS rgwFleeRate;                                                          // chance of successful fleeing
-   PLAYERS rgwPoisonResistance;                                                  // resistance to poison
+   unsigned short rgwAttackStrength[MAX_PLAYER_ROLES];                                                    // normal attack strength
+   unsigned short rgwMagicStrength[MAX_PLAYER_ROLES];                                                     // magical attack strength
+   unsigned short rgwDefense[MAX_PLAYER_ROLES];                                                           // resistance to all kinds of attacking
+   unsigned short rgwDexterity[MAX_PLAYER_ROLES];                                                         // dexterity
+   unsigned short rgwFleeRate[MAX_PLAYER_ROLES];                                                          // chance of successful fleeing
+   unsigned short rgwPoisonResistance[MAX_PLAYER_ROLES];                                                  // resistance to poison
    unsigned short rgwElementalResistance[NUM_MAGIC_ELEMENTAL][MAX_PLAYER_ROLES]; // resistance to elemental magics
-   PLAYERS rgwUnknown2;                                                          // FIXME: ???
-   PLAYERS rgwUnknown3;                                                          // FIXME: ???
-   PLAYERS rgwUnknown4;                                                          // FIXME: ???
-   PLAYERS rgwCoveredBy;                                                         // who will cover me when I am low of HP or not sane
+   unsigned short rgwUnknown2[MAX_PLAYER_ROLES];                                                          // FIXME: ???
+   unsigned short rgwUnknown3[MAX_PLAYER_ROLES];                                                          // FIXME: ???
+   unsigned short rgwUnknown4[MAX_PLAYER_ROLES];                                                          // FIXME: ???
+   unsigned short rgwCoveredBy[MAX_PLAYER_ROLES];                                                         // who will cover me when I am low of HP or not sane
    unsigned short rgwMagic[MAX_PLAYER_MAGICS][MAX_PLAYER_ROLES];                 // magics
-   PLAYERS rgwWalkFrames;                                                        // walk frame (???)
-   PLAYERS rgwCooperativeMagic;                                                  // cooperative magic
-   PLAYERS rgwUnknown5;                                                          // FIXME: ???
-   PLAYERS rgwUnknown6;                                                          // FIXME: ???
-   PLAYERS rgwDeathSound;                                                        // sound played when player dies
-   PLAYERS rgwAttackSound;                                                       // sound played when player attacks
-   PLAYERS rgwWeaponSound;                                                       // weapon sound (???)
-   PLAYERS rgwCriticalSound;                                                     // sound played when player make critical hits
-   PLAYERS rgwMagicSound;                                                        // sound played when player is casting a magic
-   PLAYERS rgwCoverSound;                                                        // sound played when player cover others
-   PLAYERS rgwDyingSound;                                                        // sound played when player is dying
+   unsigned short rgwWalkFrames[MAX_PLAYER_ROLES];                                                        // walk frame (???)
+   unsigned short rgwCooperativeMagic[MAX_PLAYER_ROLES];                                                  // cooperative magic
+   unsigned short rgwUnknown5[MAX_PLAYER_ROLES];                                                          // FIXME: ???
+   unsigned short rgwUnknown6[MAX_PLAYER_ROLES];                                                          // FIXME: ???
+   unsigned short rgwDeathSound[MAX_PLAYER_ROLES];                                                        // sound played when player dies
+   unsigned short rgwAttackSound[MAX_PLAYER_ROLES];                                                       // sound played when player attacks
+   unsigned short rgwWeaponSound[MAX_PLAYER_ROLES];                                                       // weapon sound (???)
+   unsigned short rgwCriticalSound[MAX_PLAYER_ROLES];                                                     // sound played when player make critical hits
+   unsigned short rgwMagicSound[MAX_PLAYER_ROLES];                                                        // sound played when player is casting a magic
+   unsigned short rgwCoverSound[MAX_PLAYER_ROLES];                                                        // sound played when player cover others
+   unsigned short rgwDyingSound[MAX_PLAYER_ROLES];                                                        // sound played when player is dying
 } PLAYERROLES;
 
 typedef enum tagMAGIC_TYPE
@@ -524,7 +524,6 @@ typedef struct tagPOISONSTATUS
 
 typedef struct tagGLOBALVARS
 {
-   FILES f;
    GAMEDATA g;
 
    int iCurMainMenuItem;               // current main menu item number
@@ -578,8 +577,9 @@ typedef struct tagCONFIGURATION {
   unsigned short wAudioBufferSize;
 } CONFIGURATION;
 
-extern GLOBALVARS *const gpGlobals;
+extern GLOBALVARS *gpGlobals;
 extern CONFIGURATION gConfig;
+extern FILES gFiles;
 
 int PAL_InitGlobals(
     void);

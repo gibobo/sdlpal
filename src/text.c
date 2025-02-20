@@ -128,11 +128,11 @@ int PAL_InitText(void)
 
    {
       // Read the message offsets. The message offsets are in SSS.MKF #3
-      i = PAL_MKFGetChunkSize(3, gpGlobals->f.fpSSS) / sizeof(unsigned int);
+      i = PAL_MKFGetChunkSize(3, gFiles.fpSSS) / sizeof(unsigned int);
       g_TextLib.nMsgs = i - 1;
 
-      offsets = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs + 1, sizeof(unsigned int));
-      PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gpGlobals->f.fpSSS);
+      offsets = (unsigned int *)UTIL_calloc(i, sizeof(unsigned int));
+      PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gFiles.fpSSS);
 
       // Read the messages.
       fp = UTIL_fopen(RESOURCE_PATH "/m.msg", "rb");
@@ -174,7 +174,7 @@ int PAL_InitText(void)
    g_TextLib.bDialogPosition = kDialogUpper;
    g_TextLib.fUserSkip = false;
 
-   PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gpGlobals->f.fpDATA);
+   PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gFiles.fpDATA);
 
    return 0;
 }
@@ -486,7 +486,7 @@ PAL_StartDialogWithOffset(
       if (iNumCharFace > 0)
       {
          // Display the character face at the upper part of the screen
-         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gpGlobals->f.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles.fpRGM) > 0)
          {
             rect.w = PAL_RLEGetWidth((const unsigned char*)buf);
             rect.h = PAL_RLEGetHeight((const unsigned char*)buf);
@@ -508,7 +508,7 @@ PAL_StartDialogWithOffset(
       if (iNumCharFace > 0)
       {
          // Display the character face at the lower part of the screen
-         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gpGlobals->f.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles.fpRGM) > 0)
          {
             rect.x = 270 - PAL_RLEGetWidth((const unsigned char*)buf) / 2 + xOff;
             rect.y = 144 - PAL_RLEGetHeight((const unsigned char*)buf) / 2 + yOff;

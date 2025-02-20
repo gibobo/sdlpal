@@ -61,10 +61,10 @@ static void PAL_ShowFBP(
    unsigned char a, b;
    PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
 
-   PAL_MKFDecompressChunk(&buf, 0, wChunkNum, gpGlobals->f.fpFBP);
+   PAL_MKFDecompressChunk(&buf, 0, wChunkNum, gFiles.fpFBP);
 
    if (g_wCurEffectSprite)
-     PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gpGlobals->f.fpMGO);
+     PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gFiles.fpMGO);
 
    if (wFade)
    {
@@ -150,10 +150,10 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
    PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
    PAL_Surface *p = VIDEO_GetBackupSurface(1);
 
-   if (PAL_MKFDecompressChunk(&p->pixels, SCREEN_SIZE, wChunkNum, gpGlobals->f.fpFBP) <= 0)
+   if (PAL_MKFDecompressChunk(&p->pixels, SCREEN_SIZE, wChunkNum, gFiles.fpFBP) <= 0)
       return;
 
-   if (g_wCurEffectSprite && PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gpGlobals->f.fpMGO) <= 0)
+   if (g_wCurEffectSprite && PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, gFiles.fpMGO) <= 0)
       return;
 
    VIDEO_BackupScreen(gpScreen);
@@ -235,10 +235,10 @@ static void PAL_EndingAnimation(void)
   int yPosGirl = 180;
   int i;
 
-  PAL_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, gpGlobals->f.fpFBP);
-  PAL_MKFDecompressChunk(&pLower->pixels, SCREEN_SIZE, 70, gpGlobals->f.fpFBP);
-  PAL_MKFDecompressChunk(&buf, 0, 571, gpGlobals->f.fpMGO);
-  PAL_MKFDecompressChunk(&bufGirl, 0, 572, gpGlobals->f.fpMGO);
+  PAL_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, gFiles.fpFBP);
+  PAL_MKFDecompressChunk(&pLower->pixels, SCREEN_SIZE, 70, gFiles.fpFBP);
+  PAL_MKFDecompressChunk(&buf, 0, 571, gFiles.fpMGO);
+  PAL_MKFDecompressChunk(&bufGirl, 0, 572, gFiles.fpMGO);
 
   srcrect.x = 0;
   dstrect.x = 0;
