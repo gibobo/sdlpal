@@ -37,7 +37,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-BATTLE g_Battle;
+BATTLE *g_Battle = NULL;
 
 unsigned short g_rgPlayerPos[MAX_PLAYERS_IN_PARTY][3][2] = {
     {{240, 170}},                        // one player
@@ -73,13 +73,13 @@ void PAL_BattleDrawBackground(
    unsigned char b;
 
    // Draw the background
-   pSrc = g_Battle.lpBackground->pixels;
-   pDst = g_Battle.lpSceneBuf->pixels;
+   pSrc = g_Battle->lpBackground->pixels;
+   pDst = g_Battle->lpSceneBuf->pixels;
 
-   for (i = 0; i < g_Battle.lpSceneBuf->w * g_Battle.lpSceneBuf->h; i++)
+   for (i = 0; i < g_Battle->lpSceneBuf->w * g_Battle->lpSceneBuf->h; i++)
    {
       b = (*pSrc & 0x0F);
-      b += g_Battle.sBackgroundColorShift;
+      b += g_Battle->sBackgroundColorShift;
 
       if (b & 0x80)
       {
@@ -96,7 +96,7 @@ void PAL_BattleDrawBackground(
       ++pDst;
    }
 
-   PAL_ApplyWave(g_Battle.lpSceneBuf->pixels);
+   PAL_ApplyWave(g_Battle->lpSceneBuf->pixels);
 }
 
 void PAL_BattleDrawEnemySprites(
@@ -122,29 +122,29 @@ void PAL_BattleDrawEnemySprites(
    unsigned int pos;
 
    // Draw the enemies
-   pos = g_Battle.rgEnemy[wEnemyIndex].pos;
+   pos = g_Battle->rgEnemy[wEnemyIndex].pos;
 
-   if (g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusConfused] > 0 &&
-       g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusSleep] == 0 &&
-       g_Battle.rgEnemy[wEnemyIndex].rgwStatus[kStatusParalyzed] == 0)
+   if (g_Battle->rgEnemy[wEnemyIndex].rgwStatus[kStatusConfused] > 0 &&
+       g_Battle->rgEnemy[wEnemyIndex].rgwStatus[kStatusSleep] == 0 &&
+       g_Battle->rgEnemy[wEnemyIndex].rgwStatus[kStatusParalyzed] == 0)
    {
       // Enemy is confused
       pos = PAL_XY(PAL_X(pos) + RandomLong(-1, 1), PAL_Y(pos));
    }
 
-   pos = PAL_XY(PAL_X(pos) - PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle.rgEnemy[wEnemyIndex].lpSprite, g_Battle.rgEnemy[wEnemyIndex].wCurrentFrame)) / 2,
-                PAL_Y(pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.rgEnemy[wEnemyIndex].lpSprite, g_Battle.rgEnemy[wEnemyIndex].wCurrentFrame)));
+   pos = PAL_XY(PAL_X(pos) - PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle->rgEnemy[wEnemyIndex].lpSprite, g_Battle->rgEnemy[wEnemyIndex].wCurrentFrame)) / 2,
+                PAL_Y(pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle->rgEnemy[wEnemyIndex].lpSprite, g_Battle->rgEnemy[wEnemyIndex].wCurrentFrame)));
 
-   if (g_Battle.rgEnemy[wEnemyIndex].wObjectID != 0)
+   if (g_Battle->rgEnemy[wEnemyIndex].wObjectID != 0)
    {
-      if (g_Battle.rgEnemy[wEnemyIndex].iColorShift)
+      if (g_Battle->rgEnemy[wEnemyIndex].iColorShift)
       {
-         PAL_RLEBlitWithColorShift(PAL_SpriteGetFrame(g_Battle.rgEnemy[wEnemyIndex].lpSprite, g_Battle.rgEnemy[wEnemyIndex].wCurrentFrame),
-                                   lpDstSurface, pos, g_Battle.rgEnemy[wEnemyIndex].iColorShift);
+         PAL_RLEBlitWithColorShift(PAL_SpriteGetFrame(g_Battle->rgEnemy[wEnemyIndex].lpSprite, g_Battle->rgEnemy[wEnemyIndex].wCurrentFrame),
+                                   lpDstSurface, pos, g_Battle->rgEnemy[wEnemyIndex].iColorShift);
       }
       else
       {
-         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(g_Battle.rgEnemy[wEnemyIndex].lpSprite, g_Battle.rgEnemy[wEnemyIndex].wCurrentFrame),
+         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(g_Battle->rgEnemy[wEnemyIndex].lpSprite, g_Battle->rgEnemy[wEnemyIndex].wCurrentFrame),
                               lpDstSurface, pos);
       }
    }
@@ -177,12 +177,12 @@ void PAL_BattleDrawPlayerSprites(
       //
       // Draw the summoned god
       //
-      if (g_Battle.lpSummonSprite != NULL)
+      if (g_Battle->lpSummonSprite != NULL)
       {
-         pos = PAL_XY(PAL_X(g_Battle.posSummon) - PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle.lpSummonSprite, g_Battle.iSummonFrame)) / 2,
-                      PAL_Y(g_Battle.posSummon) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.lpSummonSprite, g_Battle.iSummonFrame)));
+         pos = PAL_XY(PAL_X(g_Battle->posSummon) - PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle->lpSummonSprite, g_Battle->iSummonFrame)) / 2,
+                      PAL_Y(g_Battle->posSummon) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle->lpSummonSprite, g_Battle->iSummonFrame)));
 
-         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(g_Battle.lpSummonSprite, g_Battle.iSummonFrame),
+         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(g_Battle->lpSummonSprite, g_Battle->iSummonFrame),
                               lpDstSurface, pos);
       }
    }
@@ -191,7 +191,7 @@ void PAL_BattleDrawPlayerSprites(
       //
       // Draw the players
       //
-      pos = g_Battle.rgPlayer[wPlayerIndex].pos;
+      pos = g_Battle->rgPlayer[wPlayerIndex].pos;
 
       if (gpGlobals->rgPlayerStatus[gpGlobals->rgParty[wPlayerIndex].wPlayerRole][kStatusConfused] != 0 &&
           gpGlobals->rgPlayerStatus[gpGlobals->rgParty[wPlayerIndex].wPlayerRole][kStatusSleep] == 0 &&
@@ -205,17 +205,17 @@ void PAL_BattleDrawPlayerSprites(
          pos = PAL_XY(PAL_X(pos), PAL_Y(pos) + RandomLong(-1, 1));
       }
 
-      pos = PAL_XY(PAL_X(pos) - PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle.rgPlayer[wPlayerIndex].lpSprite, g_Battle.rgPlayer[wPlayerIndex].wCurrentFrame)) / 2,
-                   PAL_Y(pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.rgPlayer[wPlayerIndex].lpSprite, g_Battle.rgPlayer[wPlayerIndex].wCurrentFrame)));
+      pos = PAL_XY(PAL_X(pos) - PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle->rgPlayer[wPlayerIndex].lpSprite, g_Battle->rgPlayer[wPlayerIndex].wCurrentFrame)) / 2,
+                   PAL_Y(pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle->rgPlayer[wPlayerIndex].lpSprite, g_Battle->rgPlayer[wPlayerIndex].wCurrentFrame)));
 
-      if (g_Battle.rgPlayer[wPlayerIndex].iColorShift != 0)
+      if (g_Battle->rgPlayer[wPlayerIndex].iColorShift != 0)
       {
-         PAL_RLEBlitWithColorShift(PAL_SpriteGetFrame(g_Battle.rgPlayer[wPlayerIndex].lpSprite, g_Battle.rgPlayer[wPlayerIndex].wCurrentFrame),
-                                   lpDstSurface, pos, g_Battle.rgPlayer[wPlayerIndex].iColorShift);
+         PAL_RLEBlitWithColorShift(PAL_SpriteGetFrame(g_Battle->rgPlayer[wPlayerIndex].lpSprite, g_Battle->rgPlayer[wPlayerIndex].wCurrentFrame),
+                                   lpDstSurface, pos, g_Battle->rgPlayer[wPlayerIndex].iColorShift);
       }
-      else if (g_Battle.iHidingTime == 0)
+      else if (g_Battle->iHidingTime == 0)
       {
-         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(g_Battle.rgPlayer[wPlayerIndex].lpSprite, g_Battle.rgPlayer[wPlayerIndex].wCurrentFrame),
+         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(g_Battle->rgPlayer[wPlayerIndex].lpSprite, g_Battle->rgPlayer[wPlayerIndex].wCurrentFrame),
                               lpDstSurface, pos);
       }
    }
@@ -243,7 +243,7 @@ void PAL_BattleDrawMagicSprites(
 --*/
 {
    short x, y;
-   const unsigned char *lpBitmap = g_Battle.lpMagicBitmap;
+   const unsigned char *lpBitmap = g_Battle->lpMagicBitmap;
 
    x = PAL_X(pos);
    y = PAL_Y(pos);
@@ -268,15 +268,15 @@ void PAL_BattleClearSpriteObject(
 
 --*/
 {
-   memset(&g_Battle.SpriteDrawSeq, 0, sizeof(g_Battle.SpriteDrawSeq));
+   memset(&g_Battle->SpriteDrawSeq, 0, sizeof(g_Battle->SpriteDrawSeq));
 
-   g_Battle.wMaxSpriteDrawSeqIndex = 0;
+   g_Battle->wMaxSpriteDrawSeqIndex = 0;
 }
 
 void PAL_BattleSpriteAddUnlock(
     void)
 {
-   g_Battle.fSpriteAddLock = false;
+   g_Battle->fSpriteAddLock = false;
 
    PAL_BattleClearSpriteObject();
 }
@@ -310,12 +310,12 @@ void PAL_BattleAddSpriteObject(
 
 --*/
 {
-   unsigned short *wMaxIndex = &g_Battle.wMaxSpriteDrawSeqIndex;
+   unsigned short *wMaxIndex = &g_Battle->wMaxSpriteDrawSeqIndex;
    BATTLESPRITESEQ *SpriteObject;
 
    if (*wMaxIndex + 1 < MAX_BATTLESPRITESEQ_ITEMS)
    {
-      SpriteObject = &g_Battle.SpriteDrawSeq[*wMaxIndex];
+      SpriteObject = &g_Battle->SpriteDrawSeq[*wMaxIndex];
 
       SpriteObject->wType = wType;
       SpriteObject->wObjectIndex = wObjectIndex;
@@ -348,11 +348,11 @@ void PAL_BattleRemoveSpriteObject(
 
    if (wSpriteObjectIndex < MAX_BATTLESPRITESEQ_ITEMS)
    {
-      SpriteObject = &g_Battle.SpriteDrawSeq[wSpriteObjectIndex];
+      SpriteObject = &g_Battle->SpriteDrawSeq[wSpriteObjectIndex];
 
       memset(SpriteObject, 0, sizeof(*SpriteObject));
 
-      g_Battle.wMaxSpriteDrawSeqIndex--;
+      g_Battle->wMaxSpriteDrawSeqIndex--;
    }
 }
 
@@ -378,17 +378,17 @@ void PAL_BattleAddFighterSpriteObject(
    //
    // Place enemies in the drawing sequence.
    //
-   for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
+   for (i = 0; i <= g_Battle->wMaxEnemyIndex; i++)
    {
-      PAL_BattleAddSpriteObject(kBattleSpriteTypeEnemy, i, g_Battle.rgEnemy[i].pos, 0, g_Battle.rgEnemy[i].iColorShift);
+      PAL_BattleAddSpriteObject(kBattleSpriteTypeEnemy, i, g_Battle->rgEnemy[i].pos, 0, g_Battle->rgEnemy[i].iColorShift);
    }
 
-   if (g_Battle.lpSummonSprite != NULL)
+   if (g_Battle->lpSummonSprite != NULL)
    {
       //
       // Place summon god in the drawing sequence.
       //
-      PAL_BattleAddSpriteObject(kBattleSpriteTypePlayer, -1, g_Battle.posSummon, 0, g_Battle.fSummonColorShift);
+      PAL_BattleAddSpriteObject(kBattleSpriteTypePlayer, -1, g_Battle->posSummon, 0, g_Battle->fSummonColorShift);
    }
    else
    {
@@ -397,7 +397,7 @@ void PAL_BattleAddFighterSpriteObject(
       //
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
-         PAL_BattleAddSpriteObject(kBattleSpriteTypePlayer, i, g_Battle.rgPlayer[i].pos, 0, g_Battle.rgPlayer[i].iColorShift);
+         PAL_BattleAddSpriteObject(kBattleSpriteTypePlayer, i, g_Battle->rgPlayer[i].pos, 0, g_Battle->rgPlayer[i].iColorShift);
       }
    }
 }
@@ -426,12 +426,12 @@ void PAL_BattleSortSpriteObjecByPos(
    //
    // Sort the players drawing order by Y coordinate
    //
-   for (i = 0; i < g_Battle.wMaxSpriteDrawSeqIndex; i++)
+   for (i = 0; i < g_Battle->wMaxSpriteDrawSeqIndex; i++)
    {
-      for (j = i + 1; j <= g_Battle.wMaxSpriteDrawSeqIndex - 1; j++)
+      for (j = i + 1; j <= g_Battle->wMaxSpriteDrawSeqIndex - 1; j++)
       {
-         this = &g_Battle.SpriteDrawSeq[i];
-         next = &g_Battle.SpriteDrawSeq[j];
+         this = &g_Battle->SpriteDrawSeq[i];
+         next = &g_Battle->SpriteDrawSeq[j];
 
          thisPosY = PAL_Y(this->pos) + this->sLayerOffset;
          nextPosY = PAL_Y(next->pos) + next->sLayerOffset;
@@ -519,9 +519,9 @@ void PAL_BattleDrawAllSpritesWithColorShift(
    //
    PAL_BattleSortSpriteObjecByPos();
 
-   for (i = 0; i <= g_Battle.wMaxSpriteDrawSeqIndex; i++)
+   for (i = 0; i <= g_Battle->wMaxSpriteDrawSeqIndex; i++)
    {
-      SpriteObject = &g_Battle.SpriteDrawSeq[i];
+      SpriteObject = &g_Battle->SpriteDrawSeq[i];
 
       if (fColorShift)
       {
@@ -538,15 +538,15 @@ void PAL_BattleDrawAllSpritesWithColorShift(
          break;
 
       case kBattleSpriteTypeEnemy:
-         PAL_BattleDrawEnemySprites(SpriteObject->wObjectIndex, g_Battle.lpSceneBuf);
+         PAL_BattleDrawEnemySprites(SpriteObject->wObjectIndex, g_Battle->lpSceneBuf);
          break;
 
       case kBattleSpriteTypePlayer:
-         PAL_BattleDrawPlayerSprites(SpriteObject->wObjectIndex, g_Battle.lpSceneBuf);
+         PAL_BattleDrawPlayerSprites(SpriteObject->wObjectIndex, g_Battle->lpSceneBuf);
          break;
 
       case kBattleSpriteTypeMagic:
-         PAL_BattleDrawMagicSprites(SpriteObject->wObjectIndex, g_Battle.lpSceneBuf, SpriteObject->pos);
+         PAL_BattleDrawMagicSprites(SpriteObject->wObjectIndex, g_Battle->lpSceneBuf, SpriteObject->pos);
          break;
       }
    }
@@ -571,7 +571,7 @@ void PAL_BattleMakeScene(
 {
    PAL_BattleDrawBackground();
 
-   if (g_Battle.fSpriteAddLock)
+   if (g_Battle->fSpriteAddLock)
    {
       //
       // Initialize the drawing sequence
@@ -580,7 +580,7 @@ void PAL_BattleMakeScene(
    }
    else
    {
-      g_Battle.fSpriteAddLock = true;
+      g_Battle->fSpriteAddLock = true;
    }
 
    //
@@ -624,7 +624,7 @@ void PAL_BattleFadeScene(
          // backup buffer
          for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
          {
-            a = g_Battle.lpSceneBuf->pixels[k];
+            a = g_Battle->lpSceneBuf->pixels[k];
             b = gpScreen->pixels[k];
 
             if (i > 0)
@@ -651,7 +651,7 @@ void PAL_BattleFadeScene(
    //
    // Draw the result buffer to the screen as the final step
    //
-   VIDEO_CopyEntireSurface(g_Battle.lpSceneBuf, gpScreen);
+   VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
    PAL_BattleUIUpdate();
 
    VIDEO_UpdateScreen(NULL);
@@ -683,7 +683,7 @@ PAL_BattleMain(
    // Generate the scene and draw the scene to the screen buffer
    //
    PAL_BattleMakeScene();
-   VIDEO_CopyEntireSurface(g_Battle.lpSceneBuf, gpScreen);
+   VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
 
    //
    // Fade out the music and delay for a while
@@ -713,20 +713,20 @@ PAL_BattleMain(
    //
    // Run the pre-battle scripts for each enemies
    //
-   for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
+   for (i = 0; i <= g_Battle->wMaxEnemyIndex; i++)
    {
-      g_Battle.rgEnemy[i].wScriptOnTurnStart =
-          PAL_RunTriggerScript(g_Battle.rgEnemy[i].wScriptOnTurnStart, i);
+      g_Battle->rgEnemy[i].wScriptOnTurnStart =
+          PAL_RunTriggerScript(g_Battle->rgEnemy[i].wScriptOnTurnStart, i);
 
-      if (g_Battle.BattleResult != kBattleResultPreBattle)
+      if (g_Battle->BattleResult != kBattleResultPreBattle)
       {
          break;
       }
    }
 
-   if (g_Battle.BattleResult == kBattleResultPreBattle)
+   if (g_Battle->BattleResult == kBattleResultPreBattle)
    {
-      g_Battle.BattleResult = kBattleResultOnGoing;
+      g_Battle->BattleResult = kBattleResultOnGoing;
    }
 
    PAL_ClearKeyState();
@@ -737,7 +737,7 @@ PAL_BattleMain(
    while (true)
    {
       // Break out if the battle ended.
-      if (g_Battle.BattleResult != kBattleResultOnGoing)
+      if (g_Battle->BattleResult != kBattleResultOnGoing)
       {
          break;
       }
@@ -755,7 +755,7 @@ PAL_BattleMain(
    //
    // Return the battle result
    //
-   return g_Battle.BattleResult;
+   return g_Battle->BattleResult;
 }
 
 static void
@@ -783,18 +783,18 @@ PAL_FreeBattleSprites(
    //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
-      UTIL_free(g_Battle.rgPlayer[i].lpSprite);
-      g_Battle.rgPlayer[i].lpSprite = NULL;
+      UTIL_free(g_Battle->rgPlayer[i].lpSprite);
+      g_Battle->rgPlayer[i].lpSprite = NULL;
    }
 
-   for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
+   for (i = 0; i <= g_Battle->wMaxEnemyIndex; i++)
    {
-      UTIL_free(g_Battle.rgEnemy[i].lpSprite);
-      g_Battle.rgEnemy[i].lpSprite = NULL;
+      UTIL_free(g_Battle->rgEnemy[i].lpSprite);
+      g_Battle->rgEnemy[i].lpSprite = NULL;
    }
 
-   UTIL_free(g_Battle.lpSummonSprite);
-   g_Battle.lpSummonSprite = NULL;
+   UTIL_free(g_Battle->lpSummonSprite);
+   g_Battle->lpSummonSprite = NULL;
 }
 
 void PAL_LoadBattleSprites(
@@ -826,7 +826,7 @@ void PAL_LoadBattleSprites(
    {
       s = PAL_GetPlayerBattleSprite(gpGlobals->rgParty[i].wPlayerRole);
 
-      if (PAL_MKFDecompressChunk(&g_Battle.rgPlayer[i].lpSprite, 0, s, gFiles.fpF) <= 0)
+      if (PAL_MKFDecompressChunk(&g_Battle->rgPlayer[i].lpSprite, 0, s, gFiles.fpF) <= 0)
         continue;
 
       //
@@ -835,29 +835,29 @@ void PAL_LoadBattleSprites(
       x = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][i][0];
       y = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][i][1];
 
-      g_Battle.rgPlayer[i].posOriginal = PAL_XY(x, y);
-      g_Battle.rgPlayer[i].pos = PAL_XY(x, y);
+      g_Battle->rgPlayer[i].posOriginal = PAL_XY(x, y);
+      g_Battle->rgPlayer[i].pos = PAL_XY(x, y);
    }
 
    // Load battle sprites for enemies
    for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
    {
-      if (g_Battle.rgEnemy[i].wObjectID == 0)
+      if (g_Battle->rgEnemy[i].wObjectID == 0)
          continue;
 
-      if (PAL_MKFDecompressChunk(&g_Battle.rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle.rgEnemy[i].wObjectID].enemy.wEnemyID, fp) <= 0)
+      if (PAL_MKFDecompressChunk(&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, fp) <= 0)
         continue;
 
       //
       // Set the default position for this enemy
       //
-      x = gpGlobals->g.EnemyPos[i * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex].x;
-      y = gpGlobals->g.EnemyPos[i * MAX_ENEMIES_IN_TEAM + g_Battle.wMaxEnemyIndex].y;
+      x = gpGlobals->g.EnemyPos[i * MAX_ENEMIES_IN_TEAM + g_Battle->wMaxEnemyIndex].x;
+      y = gpGlobals->g.EnemyPos[i * MAX_ENEMIES_IN_TEAM + g_Battle->wMaxEnemyIndex].y;
 
-      y += g_Battle.rgEnemy[i].e.wYPosOffset;
+      y += g_Battle->rgEnemy[i].e.wYPosOffset;
 
-      g_Battle.rgEnemy[i].posOriginal = PAL_XY(x, y);
-      g_Battle.rgEnemy[i].pos = PAL_XY(x, y);
+      g_Battle->rgEnemy[i].posOriginal = PAL_XY(x, y);
+      g_Battle->rgEnemy[i].pos = PAL_XY(x, y);
    }
 
    UTIL_fclose(fp);
@@ -882,10 +882,10 @@ PAL_LoadBattleBackground(
 --*/
 {
    // Create the surface
-   g_Battle.lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
+   g_Battle->lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    // Load the picture
-   PAL_MKFDecompressChunk(&g_Battle.lpBackground->pixels,
+   PAL_MKFDecompressChunk(&g_Battle->lpBackground->pixels,
                           SCREEN_SIZE,
                           gpGlobals->wNumBattleField,
                           gFiles.fpFBP);
@@ -925,14 +925,14 @@ PAL_BattleWon(
 
    VIDEO_BackupScreen(gpScreen);
 
-   if (g_Battle.iExpGained > 0)
+   if (g_Battle->iExpGained > 0)
    {
       int w1 = PAL_WordWidth(BATTLEWIN_GETEXP_LABEL) + 3;
       int ww1 = (w1 - 8) << 3;
       //
       // Play the "battle win" music
       //
-      AUDIO_PlayMusic(g_Battle.fIsBoss ? 2 : 3, false, 0);
+      AUDIO_PlayMusic(g_Battle->fIsBoss ? 2 : 3, false, 0);
 
       //
       // Show the message about the total number of exp. and cash gained
@@ -944,17 +944,17 @@ PAL_BattleWon(
       PAL_DrawText(PAL_GetWord(BATTLEWIN_BEATENEMY_LABEL), PAL_XY(77, 115), 0, false, false, false);
       PAL_DrawText(PAL_GetWord(BATTLEWIN_DOLLAR_LABEL), PAL_XY(197, 115), 0, false, false, false);
 
-      PAL_DrawNumber(g_Battle.iExpGained, 5, PAL_XY(182 + ww1, 74), kNumColorYellow, kNumAlignRight);
-      PAL_DrawNumber(g_Battle.iCashGained, 5, PAL_XY(162, 119), kNumColorYellow, kNumAlignMid);
+      PAL_DrawNumber(g_Battle->iExpGained, 5, PAL_XY(182 + ww1, 74), kNumColorYellow, kNumAlignRight);
+      PAL_DrawNumber(g_Battle->iCashGained, 5, PAL_XY(162, 119), kNumColorYellow, kNumAlignMid);
 
       VIDEO_UpdateScreen(&rect);
-      PAL_WaitForAnyKey(g_Battle.fIsBoss ? 5500 : 3000);
+      PAL_WaitForAnyKey(g_Battle->fIsBoss ? 5500 : 3000);
    }
 
    //
    // Add the cash value
    //
-   gpGlobals->dwCash += g_Battle.iCashGained;
+   gpGlobals->dwCash += g_Battle->iCashGained;
 
    const MENUITEM rgFakeMenuItem[] =
        {
@@ -998,7 +998,7 @@ PAL_BattleWon(
       }
 
       dwExp = gpGlobals->Exp.rgPrimaryExp[w].wExp;
-      dwExp += g_Battle.iExpGained;
+      dwExp += g_Battle->iExpGained;
 
       if (gpGlobals->g.PlayerRoles.rgwLevel[w] > MAX_LEVELS)
       {
@@ -1109,7 +1109,7 @@ PAL_BattleWon(
       {
 #define CHECK_HIDDEN_EXP(expname, statname, label)                                                                                                                                                \
    {                                                                                                                                                                                              \
-      dwExp = g_Battle.iExpGained;                                                                                                                                                                \
+      dwExp = g_Battle->iExpGained;                                                                                                                                                                \
       dwExp *= gpGlobals->Exp.expname[w].wCount;                                                                                                                                                  \
       dwExp /= iTotalCount;                                                                                                                                                                       \
       dwExp *= 2;                                                                                                                                                                                 \
@@ -1204,9 +1204,9 @@ PAL_BattleWon(
    //
    // Run the post-battle scripts
    //
-   for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
+   for (i = 0; i <= g_Battle->wMaxEnemyIndex; i++)
    {
-      PAL_RunTriggerScript(g_Battle.rgEnemy[i].wScriptOnBattleEnd, i);
+      PAL_RunTriggerScript(g_Battle->rgEnemy[i].wScriptOnBattleEnd, i);
    }
 
    //
@@ -1251,19 +1251,19 @@ void PAL_BattleEnemyEscape(
    {
       f = false;
 
-      for (j = 0; j <= g_Battle.wMaxEnemyIndex; j++)
+      for (j = 0; j <= g_Battle->wMaxEnemyIndex; j++)
       {
-         if (g_Battle.rgEnemy[j].wObjectID == 0)
+         if (g_Battle->rgEnemy[j].wObjectID == 0)
          {
             continue;
          }
 
-         x = PAL_X(g_Battle.rgEnemy[j].pos) - 5;
-         y = PAL_Y(g_Battle.rgEnemy[j].pos);
+         x = PAL_X(g_Battle->rgEnemy[j].pos) - 5;
+         y = PAL_Y(g_Battle->rgEnemy[j].pos);
 
-         g_Battle.rgEnemy[j].pos = PAL_XY(x, y);
+         g_Battle->rgEnemy[j].pos = PAL_XY(x, y);
 
-         w = PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle.rgEnemy[j].lpSprite, 0));
+         w = PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle->rgEnemy[j].lpSprite, 0));
 
          if (x + w > 0)
          {
@@ -1272,14 +1272,14 @@ void PAL_BattleEnemyEscape(
       }
 
       PAL_BattleMakeScene();
-      VIDEO_CopyEntireSurface(g_Battle.lpSceneBuf, gpScreen);
+      VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
       VIDEO_UpdateScreen(NULL);
 
       UTIL_Delay(10);
    }
 
    UTIL_Delay(500);
-   g_Battle.BattleResult = kBattleResultTerminated;
+   g_Battle->BattleResult = kBattleResultTerminated;
 }
 
 void PAL_BattlePlayerEscape(
@@ -1312,7 +1312,7 @@ void PAL_BattlePlayerEscape(
 
       if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] > 0)
       {
-         g_Battle.rgPlayer[i].wCurrentFrame = 0;
+         g_Battle->rgPlayer[i].wCurrentFrame = 0;
       }
    }
 
@@ -1332,22 +1332,22 @@ void PAL_BattlePlayerEscape(
             case 0:
                if (gpGlobals->wMaxPartyMemberIndex > 0)
                {
-                  g_Battle.rgPlayer[j].pos =
-                      PAL_XY(PAL_X(g_Battle.rgPlayer[j].pos) + 4,
-                             PAL_Y(g_Battle.rgPlayer[j].pos) + 6);
+                  g_Battle->rgPlayer[j].pos =
+                      PAL_XY(PAL_X(g_Battle->rgPlayer[j].pos) + 4,
+                             PAL_Y(g_Battle->rgPlayer[j].pos) + 6);
                   break;
                }
 
             case 1:
-               g_Battle.rgPlayer[j].pos =
-                   PAL_XY(PAL_X(g_Battle.rgPlayer[j].pos) + 4,
-                          PAL_Y(g_Battle.rgPlayer[j].pos) + 4);
+               g_Battle->rgPlayer[j].pos =
+                   PAL_XY(PAL_X(g_Battle->rgPlayer[j].pos) + 4,
+                          PAL_Y(g_Battle->rgPlayer[j].pos) + 4);
                break;
 
             case 2:
-               g_Battle.rgPlayer[j].pos =
-                   PAL_XY(PAL_X(g_Battle.rgPlayer[j].pos) + 6,
-                          PAL_Y(g_Battle.rgPlayer[j].pos) + 3);
+               g_Battle->rgPlayer[j].pos =
+                   PAL_XY(PAL_X(g_Battle->rgPlayer[j].pos) + 6,
+                          PAL_Y(g_Battle->rgPlayer[j].pos) + 3);
                break;
 
             default:
@@ -1365,12 +1365,12 @@ void PAL_BattlePlayerEscape(
    //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
-      g_Battle.rgPlayer[i].pos = PAL_XY(9999, 9999);
+      g_Battle->rgPlayer[i].pos = PAL_XY(9999, 9999);
    }
 
    PAL_BattleDelay(1, 0, false);
 
-   g_Battle.BattleResult = kBattleResultFleed;
+   g_Battle->BattleResult = kBattleResultFleed;
 }
 
 BATTLERESULT
@@ -1397,6 +1397,8 @@ PAL_StartBattle(
    int i, j;
    unsigned short w, wPrevWaveLevel;
    short sPrevWaveProgression;
+
+   g_Battle = (BATTLE *)UTIL_malloc(sizeof(BATTLE));
 
    // Set the screen waving effects
    wPrevWaveLevel = gpGlobals->wScreenWave;
@@ -1435,7 +1437,7 @@ PAL_StartBattle(
    // Store all enemies
    for (i = 0, j = 0; j < MAX_ENEMIES_IN_TEAM; j++)
    {
-      memset(&(g_Battle.rgEnemy[j]), 0, sizeof(BATTLEENEMY));
+      memset(&g_Battle->rgEnemy[j], 0, sizeof(BATTLEENEMY));
       w = gpGlobals->g.lprgEnemyTeam[wEnemyTeam].rgwEnemy[j];
 
       if (w == 0xFFFF)
@@ -1445,30 +1447,30 @@ PAL_StartBattle(
 
       if (w != 0)
       {
-         g_Battle.rgEnemy[i].e = gpGlobals->g.lprgEnemy[gpGlobals->g.rgObject[w].enemy.wEnemyID];
-         g_Battle.rgEnemy[i].state = kFighterWait;
-         g_Battle.rgEnemy[i].wScriptOnTurnStart = gpGlobals->g.rgObject[w].enemy.wScriptOnTurnStart;
-         g_Battle.rgEnemy[i].wScriptOnBattleEnd = gpGlobals->g.rgObject[w].enemy.wScriptOnBattleEnd;
-         g_Battle.rgEnemy[i].wScriptOnReady = gpGlobals->g.rgObject[w].enemy.wScriptOnReady;
-         g_Battle.rgEnemy[i].iColorShift = 0;
+         g_Battle->rgEnemy[i].e = gpGlobals->g.lprgEnemy[gpGlobals->g.rgObject[w].enemy.wEnemyID];
+         g_Battle->rgEnemy[i].state = kFighterWait;
+         g_Battle->rgEnemy[i].wScriptOnTurnStart = gpGlobals->g.rgObject[w].enemy.wScriptOnTurnStart;
+         g_Battle->rgEnemy[i].wScriptOnBattleEnd = gpGlobals->g.rgObject[w].enemy.wScriptOnBattleEnd;
+         g_Battle->rgEnemy[i].wScriptOnReady = gpGlobals->g.rgObject[w].enemy.wScriptOnReady;
+         g_Battle->rgEnemy[i].iColorShift = 0;
       }
 
-      g_Battle.rgEnemy[i++].wObjectID = w;
+      g_Battle->rgEnemy[i++].wObjectID = w;
    }
 
-   g_Battle.wMaxEnemyIndex = min(max(i - 1, 0), MAX_ENEMIES_IN_TEAM - 1);
+   g_Battle->wMaxEnemyIndex = min(max(i - 1, 0), MAX_ENEMIES_IN_TEAM - 1);
 
    //
    // Store all players
    //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
-      g_Battle.rgPlayer[i].flTimeMeter = 15.0f;
-      g_Battle.rgPlayer[i].wHidingTime = 0;
-      g_Battle.rgPlayer[i].state = kFighterWait;
-      g_Battle.rgPlayer[i].fDefending = false;
-      g_Battle.rgPlayer[i].wCurrentFrame = 0;
-      g_Battle.rgPlayer[i].iColorShift = false;
+      g_Battle->rgPlayer[i].flTimeMeter = 15.0f;
+      g_Battle->rgPlayer[i].wHidingTime = 0;
+      g_Battle->rgPlayer[i].state = kFighterWait;
+      g_Battle->rgPlayer[i].fDefending = false;
+      g_Battle->rgPlayer[i].wCurrentFrame = 0;
+      g_Battle->rgPlayer[i].iColorShift = false;
    }
 
    // Load sprites and background
@@ -1476,35 +1478,35 @@ PAL_StartBattle(
    PAL_LoadBattleBackground();
 
    // Create the surface for scene buffer
-   g_Battle.lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(NULL);
+   g_Battle->lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(NULL);
 
    PAL_UpdateEquipments();
 
-   g_Battle.iExpGained = 0;
-   g_Battle.iCashGained = 0;
+   g_Battle->iExpGained = 0;
+   g_Battle->iCashGained = 0;
 
-   g_Battle.fIsBoss = fIsBoss;
-   g_Battle.fEnemyCleared = false;
-   g_Battle.fEnemyMoving = false;
-   g_Battle.iHidingTime = 0;
-   g_Battle.wMovingPlayerIndex = 0;
+   g_Battle->fIsBoss = fIsBoss;
+   g_Battle->fEnemyCleared = false;
+   g_Battle->fEnemyMoving = false;
+   g_Battle->iHidingTime = 0;
+   g_Battle->wMovingPlayerIndex = 0;
 
-   g_Battle.UI.szMsg[0] = '\0';
-   g_Battle.UI.szNextMsg[0] = '\0';
-   g_Battle.UI.dwMsgShowTime = 0;
-   g_Battle.UI.state = kBattleUIWait;
-   g_Battle.UI.fAutoAttack = false;
-   g_Battle.UI.iSelectedIndex = 0;
-   g_Battle.UI.iPrevEnemyTarget = -1;
+   g_Battle->UI.szMsg[0] = '\0';
+   g_Battle->UI.szNextMsg[0] = '\0';
+   g_Battle->UI.dwMsgShowTime = 0;
+   g_Battle->UI.state = kBattleUIWait;
+   g_Battle->UI.fAutoAttack = false;
+   g_Battle->UI.iSelectedIndex = 0;
+   g_Battle->UI.iPrevEnemyTarget = -1;
 
-   memset(g_Battle.UI.rgShowNum, 0, sizeof(g_Battle.UI.rgShowNum));
+   memset(g_Battle->UI.rgShowNum, 0, sizeof(g_Battle->UI.rgShowNum));
 
-   g_Battle.lpSummonSprite = NULL;
-   g_Battle.sBackgroundColorShift = 0;
+   g_Battle->lpSummonSprite = NULL;
+   g_Battle->sBackgroundColorShift = 0;
 
    gpGlobals->fInBattle = true;
-   g_Battle.BattleResult = kBattleResultPreBattle;
-   g_Battle.fSpriteAddLock = true;
+   g_Battle->BattleResult = kBattleResultPreBattle;
+   g_Battle->fSpriteAddLock = true;
 
    PAL_BattleUpdateFighters();
 
@@ -1512,16 +1514,16 @@ PAL_StartBattle(
    // Load the battle effect sprite.
    //
    i = PAL_MKFGetChunkSize(10, gFiles.fpDATA);
-   g_Battle.lpEffectSprite = UTIL_malloc(i);
+   g_Battle->lpEffectSprite = UTIL_malloc(i);
 
-   PAL_MKFReadChunk(g_Battle.lpEffectSprite, i, 10, gFiles.fpDATA);
+   PAL_MKFReadChunk(g_Battle->lpEffectSprite, i, 10, gFiles.fpDATA);
 
-   g_Battle.Phase = kBattlePhaseSelectAction;
-   g_Battle.fRepeat = false;
-   g_Battle.fForce = false;
-   g_Battle.fFlee = false;
-   g_Battle.fPrevAutoAtk = false;
-   g_Battle.fThisTurnCoop = false;
+   g_Battle->Phase = kBattlePhaseSelectAction;
+   g_Battle->fRepeat = false;
+   g_Battle->fForce = false;
+   g_Battle->fFlee = false;
+   g_Battle->fPrevAutoAtk = false;
+   g_Battle->fThisTurnCoop = false;
 
    // Run the main battle routine.
    i = PAL_BattleMain();
@@ -1548,14 +1550,16 @@ PAL_StartBattle(
 
    // Free all the battle sprites
    PAL_FreeBattleSprites();
-   UTIL_free(g_Battle.lpEffectSprite);
+   UTIL_free(g_Battle->lpEffectSprite);
 
    // Free the surfaces for the background picture and scene buffer
-   PAL_FreeSurface(g_Battle.lpBackground);
-   PAL_FreeSurface(g_Battle.lpSceneBuf);
+   PAL_FreeSurface(g_Battle->lpBackground);
+   PAL_FreeSurface(g_Battle->lpSceneBuf);
 
-   g_Battle.lpBackground = NULL;
-   g_Battle.lpSceneBuf = NULL;
+   g_Battle->lpBackground = NULL;
+   g_Battle->lpSceneBuf = NULL;
+   UTIL_free(g_Battle);
+   g_Battle = NULL;
 
    gpGlobals->fInBattle = false;
 

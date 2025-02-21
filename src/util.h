@@ -50,6 +50,8 @@ void *UTIL_malloc(unsigned int buffer_size);
 
 void *UTIL_calloc(unsigned int n, unsigned int size);
 
+void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size);
+
 void UTIL_free(void *ptr);
 
 // Platform-specific utilities

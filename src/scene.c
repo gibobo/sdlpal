@@ -206,7 +206,6 @@ PAL_SceneDrawSprites(
    int i, x, y, vy;
 
    g_nSpriteToDraw = 0;
-
    //
    // Put all the sprites to be drawn into our array.
    //
@@ -214,7 +213,7 @@ PAL_SceneDrawSprites(
    //
    // Players
    //
-   for (i = 0; i <= (short)gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; i++)
+   for (i = 0; i <= (gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower); i++)
    {
       const unsigned char *lpBitmap =
           PAL_SpriteGetFrame(PAL_GetPlayerSprite((unsigned char)i), gpGlobals->rgParty[i].wFrame);
