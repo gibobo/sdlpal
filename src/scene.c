@@ -28,13 +28,12 @@
 #include "palcommon.h"
 #include "palette.h"
 #include "res.h"
+#include "util.h"
 #include "video.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define MAX_SPRITE_TO_DRAW 2048
 
 typedef struct tagSPRITE_TO_DRAW
 {
@@ -43,8 +42,8 @@ typedef struct tagSPRITE_TO_DRAW
    int iLayer;                         // logical layer
 } SPRITE_TO_DRAW;
 
-static SPRITE_TO_DRAW g_rgSpriteToDraw[MAX_SPRITE_TO_DRAW];
-static int g_nSpriteToDraw;
+static SPRITE_TO_DRAW *g_rgSpriteToDraw = NULL;
+static int g_nSpriteToDraw = 0;
 
 static void
 PAL_AddSpriteToDraw(
@@ -73,7 +72,7 @@ PAL_AddSpriteToDraw(
 
 --*/
 {
-   assert(g_nSpriteToDraw < MAX_SPRITE_TO_DRAW);
+   g_rgSpriteToDraw = UTIL_realloc(g_rgSpriteToDraw, g_nSpriteToDraw + 1, sizeof(SPRITE_TO_DRAW));
 
    g_rgSpriteToDraw[g_nSpriteToDraw].lpSpriteFrame = lpSpriteFrame;
    g_rgSpriteToDraw[g_nSpriteToDraw].pos = PAL_XY(x, y);
@@ -365,6 +364,9 @@ PAL_SceneDrawSprites(
 
       PAL_RLEBlitToSurface(p->lpSpriteFrame, gpScreen, PAL_XY(x, y));
    }
+   UTIL_free(g_rgSpriteToDraw);
+   g_rgSpriteToDraw = NULL;
+   g_nSpriteToDraw = 0;
 }
 
 void PAL_ApplyWave(

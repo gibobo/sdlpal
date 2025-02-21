@@ -101,19 +101,22 @@ void PAL_FreeGlobals(void)
    //
    // Free the game data
    //
-   UTIL_free(gpGlobals->g.lprgEventObject);
-   UTIL_free(gpGlobals->g.lprgScriptEntry);
-   UTIL_free(gpGlobals->g.lprgStore);
-   UTIL_free(gpGlobals->g.lprgEnemy);
-   UTIL_free(gpGlobals->g.lprgEnemyTeam);
-   UTIL_free(gpGlobals->g.lprgMagic);
-   UTIL_free(gpGlobals->g.lprgBattleField);
-   UTIL_free(gpGlobals->g.lprgLevelUpMagic);
+   if(gpGlobals)
+   {
+      UTIL_free(gpGlobals->g.lprgEventObject);
+      UTIL_free(gpGlobals->g.lprgScriptEntry);
+      UTIL_free(gpGlobals->g.lprgStore);
+      UTIL_free(gpGlobals->g.lprgEnemy);
+      UTIL_free(gpGlobals->g.lprgEnemyTeam);
+      UTIL_free(gpGlobals->g.lprgMagic);
+      UTIL_free(gpGlobals->g.lprgBattleField);
+      UTIL_free(gpGlobals->g.lprgLevelUpMagic);
+      memset(gpGlobals, 0, sizeof(GLOBALVARS));
+      UTIL_free(gpGlobals);
+   }
 
    // Clear the instance
-   memset(gpGlobals, 0, sizeof(GLOBALVARS));
    memset(&gConfig, 0, sizeof(CONFIGURATION));
-   UTIL_free(gpGlobals);
    gpGlobals = NULL;
 }
 

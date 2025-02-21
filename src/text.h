@@ -32,9 +32,8 @@ typedef enum tagDIALOGPOSITION
 } DIALOGLOCATION;
 
 typedef struct tagTEXTLIB {
-  int nWords;
-  int nMsgs;
-  int nIndices;
+  unsigned int nWords;
+  unsigned int nMsgs;
 
   int nCurrentDialogLine;
   unsigned char bCurrentFontColor;
@@ -56,9 +55,9 @@ int PAL_InitText(
 void PAL_FreeText(
     void);
 
-const wchar_t *PAL_GetWord(int iNumWord);
+const wchar_t *PAL_GetWord(unsigned int iNumWord);
 
-const wchar_t *PAL_GetMsg(int iNumMsg);
+const wchar_t *PAL_GetMsg(unsigned int iNumMsg);
 
 wchar_t *PAL_UnescapeText(const wchar_t *lpszText);
 

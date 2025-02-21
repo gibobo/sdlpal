@@ -50,8 +50,6 @@
 
 unsigned char g_fUpdatedInBattle = false;
 static void *fp_cptbl_big5 = NULL;
-static wchar_t *WordBuf = NULL;
-static wchar_t *MsgBuf = NULL;
 static wchar_t **lpWordBuf = NULL;
 static wchar_t **lpMsgBuf = NULL;
 static wchar_t *internal_wbuffer;
@@ -76,88 +74,74 @@ int PAL_InitText(void)
 --*/
 {
    void *fp;
-   unsigned int *offsets;
-   unsigned char *temp;
-   int wpos, wlen, i;
-   int len;
+   unsigned int i;
+   unsigned int len;
 
    fp_cptbl_big5 = UTIL_fopen("cptbl_big5.dat", "rb");
    internal_wbuffer_size = 0;
 
    // Open the message and word data files.
    {
-     fp = UTIL_fopen(RESOURCE_PATH "/word.dat", "rb");
-     // See how many words we have
-     i = flength(fp);
-     // Each word has 10 bytes
-     g_TextLib.nWords = (i + 9) / 10;
-     // Read the words
-     temp = (unsigned char *)UTIL_malloc(10 * g_TextLib.nWords);
-     UTIL_fread(temp, sizeof(unsigned char), i, fp);
-     // Close the words file
-     UTIL_fclose(fp);
-
-     // Split the words and do code page conversion
-     for (i = 0, wlen = 0; i < g_TextLib.nWords; i++) {
-       int base = i * 10;
-       int pos = base + 9;
-       while (pos >= base && temp[pos] == ' ')
-         temp[pos--] = 0;
-       len = PAL_MultiByteToWideCharCP(temp + base, 10, NULL, 0);
-       wlen += (len + 1);
-     }
-
-     WordBuf = (wchar_t *)UTIL_malloc(wlen * sizeof(wchar_t));
-     lpWordBuf = (wchar_t **)UTIL_malloc(g_TextLib.nWords * sizeof(wchar_t *));
-
-     for (i = 0, wpos = 0; i < g_TextLib.nWords; i++) {
-       int base = i * 10;
-       lpWordBuf[i] = WordBuf + wpos;
-       len = PAL_MultiByteToWideCharCP(temp + base, 10, lpWordBuf[i], wlen - wpos);
-       if (len > 0 && lpWordBuf[i][len - 1] == '1')
-         lpWordBuf[i][len - 1] = 0;
-       lpWordBuf[i][len] = 0;
-       wpos += (len + 1);
-       if ((int)internal_wbuffer_size < len)
-         internal_wbuffer_size = len;
-     }
-     UTIL_free(temp);
+      unsigned char temp[10];
+      fp = UTIL_fopen(RESOURCE_PATH "/word.dat", "rb");
+      // See how many words we have
+      i = flength(fp);
+      // Each word has 10 bytes
+      g_TextLib.nWords = (i + 9) / 10;
+      // Split the words and do code page conversion
+      lpWordBuf = (wchar_t **)UTIL_calloc(g_TextLib.nWords, sizeof(wchar_t *));
+      for (i = 0; i < g_TextLib.nWords; i++) {
+         // Read the words
+         UTIL_fread(temp, sizeof(unsigned char), 10, fp);
+         int pos = 9;
+         while (pos >= 0 && temp[pos] == 0x20)
+            temp[pos--] = 0;
+         len = PAL_MultiByteToWideCharCP(temp, 10, NULL, 0);
+         lpWordBuf[i] = (wchar_t *)UTIL_calloc(len + 1, sizeof(wchar_t));
+         len = PAL_MultiByteToWideCharCP(temp, 10, lpWordBuf[i], len + 1);
+         if (len > 0 && lpWordBuf[i][len - 1] == '1')
+           lpWordBuf[i][len - 1] = 0;
+         lpWordBuf[i][len] = 0;
+         if (internal_wbuffer_size < (len + 1))
+            internal_wbuffer_size = len + 1;
+      }
+      // Close the words file
+      UTIL_fclose(fp);
    }
 
-
-
    {
+      unsigned char *temp;
+      unsigned int *offsets;
+      unsigned int msg_len;
+
       // Read the message offsets. The message offsets are in SSS.MKF #3
       i = PAL_MKFGetChunkSize(3, gFiles.fpSSS) / sizeof(unsigned int);
-      g_TextLib.nMsgs = i - 1;
-
       offsets = (unsigned int *)UTIL_calloc(i, sizeof(unsigned int));
       PAL_MKFReadChunk(offsets, i * sizeof(unsigned int), 3, gFiles.fpSSS);
+      g_TextLib.nMsgs = i - 1;
 
       // Read the messages.
       fp = UTIL_fopen(RESOURCE_PATH "/m.msg", "rb");
       i = flength(fp);
-      temp = (unsigned char *)UTIL_malloc(i);
-      UTIL_fread(temp, sizeof(unsigned char), i, fp);
-      UTIL_fclose(fp);
 
       // Split messages and do code page conversion here
-      for (i = 0, wlen = 0; i < g_TextLib.nMsgs; i++) {
-         len = PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], NULL, 0);
-         wlen += (len + 1);
-      }
-      MsgBuf = (wchar_t *)UTIL_malloc(wlen * sizeof(wchar_t));
-      lpMsgBuf = (wchar_t **)UTIL_malloc(g_TextLib.nMsgs * sizeof(wchar_t *));
+      lpMsgBuf = (wchar_t **)UTIL_calloc(g_TextLib.nMsgs, sizeof(wchar_t *));
+      for (i = 0; i < g_TextLib.nMsgs; i++) {
+         msg_len = offsets[i + 1] - offsets[i];
+         temp = (unsigned char *)UTIL_malloc(msg_len);
+         UTIL_fread(temp, sizeof(unsigned char), msg_len, fp);
 
-      for (i = 0, wpos = 0; i < g_TextLib.nMsgs; i++) {
-         lpMsgBuf[i] = MsgBuf + wpos;
-         len = PAL_MultiByteToWideCharCP(temp + offsets[i], offsets[i + 1] - offsets[i], lpMsgBuf[i], wlen - wpos);
+         len = PAL_MultiByteToWideCharCP(temp, msg_len, NULL, 0);
+         lpMsgBuf[i] = (wchar_t *)UTIL_calloc(len + 1, sizeof(wchar_t));
+         len = PAL_MultiByteToWideCharCP(temp, msg_len, lpMsgBuf[i], len + 1);
          lpMsgBuf[i][len] = 0;
-         wpos += (len + 1);
-         if ((int)internal_wbuffer_size < len)
-            internal_wbuffer_size = len;
+         if (internal_wbuffer_size < (len + 1))
+            internal_wbuffer_size = len + 1;
+         memset(temp, 0, msg_len * sizeof(unsigned char));
+         UTIL_free(temp);
+         temp = NULL;
       }
-      UTIL_free(temp);
+      UTIL_fclose(fp);
       UTIL_free(offsets);
    }
 
@@ -196,24 +180,26 @@ void PAL_FreeText(
 
 --*/
 {
-   UTIL_free(MsgBuf);
+   unsigned int i = 0;
+   for (i = 0; i < g_TextLib.nMsgs; i++) {
+      UTIL_free(lpMsgBuf[i]);
+      lpMsgBuf[i] = NULL;
+   }
+   for (i = 0; i < g_TextLib.nWords; i++) {
+      UTIL_free(lpWordBuf[i]);
+      lpWordBuf[i] = NULL;
+   }
    UTIL_free(lpMsgBuf);
-   UTIL_free(WordBuf);
    UTIL_free(lpWordBuf);
    UTIL_free(internal_wbuffer);
    UTIL_fclose(fp_cptbl_big5);
-   MsgBuf = NULL;
    lpMsgBuf = NULL;
-   WordBuf = NULL;
    lpWordBuf = NULL;
    internal_wbuffer = NULL;
    fp_cptbl_big5 = NULL;
 }
 
-const wchar_t*
-PAL_GetWord(
-   int        iNumWord
-)
+const wchar_t *PAL_GetWord(unsigned int iNumWord)
 /*++
   Purpose:
 
@@ -232,10 +218,7 @@ PAL_GetWord(
    return (iNumWord >= g_TextLib.nWords || !lpWordBuf[iNumWord]) ? L"" : lpWordBuf[iNumWord];
 }
 
-const wchar_t*
-PAL_GetMsg(
-   int        iNumMsg
-)
+const wchar_t *PAL_GetMsg(unsigned int iNumMsg)
 /*++
   Purpose:
 
@@ -1301,7 +1284,10 @@ PAL_swprintf(
 
                 // Left-side padding
                 for (i = 0; !left_aligned && i < width - precision && buffer < buffer_end; i++)
-                    *buffer++ = L' ', count++;
+                {
+                    *buffer++ = L' ';
+                    count++;
+                }
 
                 // Do not overflow the output buffer
                 if (buffer + precision > buffer_end)
@@ -1312,11 +1298,15 @@ PAL_swprintf(
                     PAL_MultiByteToWideCharCP((const unsigned char*)buf, -1, buffer, precision);
                 else
                     wcsncpy(buffer, buf, precision);
-                buffer += precision; count += precision;
+                buffer += precision;
+                count += precision;
 
                 // Right-side padding
                 for (i = 0; left_aligned && i < width - precision && buffer < buffer_end; i++)
-                    *buffer++ = L' ', count++;
+                {
+                    *buffer++ = L' ';
+                    count++;
+                }
             }
             else
             {
