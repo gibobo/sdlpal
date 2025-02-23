@@ -34,12 +34,20 @@ void PAL_FreeResources(void);
 
 void PAL_SetLoadFlags(unsigned char bFlags);
 
-void PAL_LoadResources(void);
-
 void *PAL_GetCurrentMap(void);
 
 unsigned char *PAL_GetPlayerSprite(unsigned char bPlayerIndex);
 
 unsigned char *PAL_GetEventObjectSprite(unsigned short wEventObjectID);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void PAL_LoadResources(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

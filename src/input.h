@@ -59,8 +59,6 @@ typedef struct tagPALINPUTSTATE
    unsigned int           dwKeyMaxCount;
 } PALINPUTSTATE;
 
-void PAL_ClearKeyState(void);
-
 void PAL_InitInput(void);
 
 void PAL_ProcessEvent(void);
@@ -78,5 +76,15 @@ PALDIRECTION PAL_GetDirInput(void);
 void PAL_KeyDown(PALKEY key, int fRepeat);
 
 void PAL_KeyUp(PALKEY key);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void PAL_ClearKeyState(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

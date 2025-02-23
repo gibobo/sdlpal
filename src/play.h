@@ -27,10 +27,18 @@ void PAL_GameUseItem(void);
 
 void PAL_GameEquipItem(void);
 
-void PAL_StartFrame(void);
-
 void PAL_WaitForKey(unsigned short wTimeOut);
 
 void PAL_WaitForAnyKey(unsigned short wTimeOut);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void PAL_StartFrame(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

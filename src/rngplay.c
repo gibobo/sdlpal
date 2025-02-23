@@ -301,28 +301,31 @@ PAL_RNGPlay(
    fp = UTIL_fopen(RESOURCE_PATH "/rng.mkf", "rb");
 
    for (; fp && iStartFrame != iEndFrame; iStartFrame++) {
-     // Read, decompress and render the frame
-     buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fp);
-     if (buf_size < 0)
-       break; // Failed to get the frame, don't go further
+      // Read, decompress and render the frame
+      buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fp);
+      if (buf_size < 0)
+         break; // Failed to get the frame, don't go further
 
-     UTIL_free(rng);
-     rng_size = *(unsigned int *)buf;
-     rng = (unsigned char *)UTIL_malloc(rng_size);
-     if (PAL_RNGBlitToSurface(rng, YJ2_Decompress(buf, rng, rng_size), gpScreen) < 0)
-       break; // Failed to get the frame, don't go further
+      UTIL_free(rng);
+      rng_size = *(unsigned int *)buf;
+      rng = (unsigned char *)UTIL_malloc(rng_size);
+      if (PAL_RNGBlitToSurface(rng, YJ2_Decompress(buf, rng, rng_size), gpScreen) < 0)
+         break; // Failed to get the frame, don't go further
 
-     // Update the screen
-     VIDEO_UpdateScreen(NULL);
+      // Update the screen
+      VIDEO_UpdateScreen(NULL);
 
-     // Fade in the screen if needed
-     if (gpGlobals->fNeedToFadeIn) {
-       PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-       gpGlobals->fNeedToFadeIn = 0;
-     }
+      // Fade in the screen if needed
 
-     // Delay for a while
-     UTIL_Delay(iDelay);
+      if (gpGlobals)
+      {
+         if (gpGlobals->fNeedToFadeIn)
+            PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
+         gpGlobals->fNeedToFadeIn = 0;
+      }
+
+      // Delay for a while
+      UTIL_Delay(iDelay);
    }
 
    UTIL_fclose(fp);

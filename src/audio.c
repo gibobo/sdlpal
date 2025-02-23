@@ -103,7 +103,7 @@ int AUDIO_OpenDevice(void)
 
     memset(&gAudioDevice, 0, sizeof(AUDIODEVICE));
     gAudioDevice.fOpened = false;
-
+#if 1
     // Initialize the music subsystem.
     gAudioDevice.pMusPlayer = RIX_Init();
     gAudioDevice.fMusicEnabled = (gAudioDevice.pMusPlayer) ? true : false;
@@ -112,7 +112,7 @@ int AUDIO_OpenDevice(void)
     gAudioDevice.pSoundPlayer = SOUND_Init();
     gAudioDevice.pSoundBuffer = (gAudioDevice.pSoundPlayer) ? UTIL_calloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels, sizeof(short)) : NULL;
     gAudioDevice.fSoundEnabled = (gAudioDevice.pSoundBuffer) ? true : false;
-
+#endif
     gAudioDevice.fOpened = true;
 
     return 0;

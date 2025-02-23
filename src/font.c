@@ -34,8 +34,8 @@ static void *fp_font_size = NULL;
 
 void PAL_InitFont(void)
 {
-    fp_font_data = UTIL_fopen("unicode_font.dat", "rb");
-    fp_font_size = UTIL_fopen("unicode_font_size.dat", "rb");
+    fp_font_data = UTIL_fopen(RESOURCE_PATH "/unicode_font.dat", "rb");
+    fp_font_size = UTIL_fopen(RESOURCE_PATH "/unicode_font_size.dat", "rb");
 }
 
 void PAL_DeInitFont(void)

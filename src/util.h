@@ -55,8 +55,6 @@ void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size);
 void UTIL_free(void *ptr);
 
 // Platform-specific utilities
-void UTIL_Delay(unsigned int ms);
-
 unsigned int UTIL_GetTicks(void);
 
 void UTIL_Sleep(unsigned int tm);
@@ -72,5 +70,15 @@ unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _
 unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream);
 
 void UTIL_fclose(void *fp);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void UTIL_Delay(unsigned int ms);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
