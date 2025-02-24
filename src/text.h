@@ -114,12 +114,6 @@ void PAL_EndDialog(
 int PAL_DialogIsPlayingRNG(
     void);
 
-int PAL_MultiByteToWideCharCP(
-    const unsigned char *mbs,
-    int mbslength,
-    wchar_t *wcs,
-    int wcslength);
-
 int PAL_swprintf(
     wchar_t *buffer,
     int count,

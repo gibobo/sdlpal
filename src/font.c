@@ -31,17 +31,21 @@
 
 static void *fp_font_data = NULL;
 static void *fp_font_size = NULL;
+static unsigned char font_size = 0;
+static unsigned char font_data[32];
+static unsigned short font_wChar = -1;
 
-void PAL_InitFont(void)
-{
+void PAL_InitFont(void) {
     fp_font_data = UTIL_fopen(RESOURCE_PATH "/unicode_font.bin", "rb");
     fp_font_size = UTIL_fopen(RESOURCE_PATH "/unicode_font_size.bin", "rb");
+    font_wChar = -1;
 }
 
-void PAL_DeInitFont(void)
-{
+void PAL_DeInitFont(void) {
     UTIL_fclose(fp_font_data);
     UTIL_fclose(fp_font_size);
+    fp_font_data = NULL;
+    fp_font_size = NULL;
 }
 
 void PAL_DrawCharOnSurface(
@@ -70,37 +74,28 @@ void PAL_DrawCharOnSurface(
     }
 
     // Draw the character to the surface.
-    unsigned char font_size;
-    unsigned char font_data[32];
     unsigned char *dst = gpScreen->pixels + gpScreen->w * ReLU(y) + x;
     unsigned char *top = gpScreen->pixels + gpScreen->w * gpScreen->h;
 
-    UTIL_fseek(fp_font_size, sizeof(unsigned char) * wChar / 8, SEEK_SET);
-    UTIL_fread(&font_size, sizeof(unsigned char), 1, fp_font_size);
+    if (font_wChar != wChar) {
+        font_wChar = wChar;
+        UTIL_fseek(fp_font_size, sizeof(unsigned char) * wChar / 8, SEEK_SET);
+        UTIL_fread(&font_size, sizeof(unsigned char), 1, fp_font_size);
 
-    UTIL_fseek(fp_font_data, sizeof(unsigned char) * wChar * 32, SEEK_SET);
-    UTIL_fread(font_data, sizeof(unsigned char), 32, fp_font_data);
+        UTIL_fseek(fp_font_data, sizeof(unsigned char) * wChar * 32, SEEK_SET);
+        UTIL_fread(font_data, sizeof(unsigned char), 32, fp_font_data);
 
-    font_size = (font_size & (1 << (wChar % 8))) ? 32 : 16;
+        font_size = (font_size & (1 << (wChar % 8))) ? 32 : 16;
+    }
 
-    for (i = 0; i < font_size && dst < top; i++, dst += gpScreen->w)
+    int columns = (font_size == 32 ? 16 : 8);
+    for (i = 0; i < font_size && dst < top; i += (font_size == 32 ? 2 : 1), dst += gpScreen->w)
     {
-        for (j = 0; j < 8 && x + j < gpScreen->w && x + j >= 0; j++)
+        for (j = 0; j < columns && x + j < gpScreen->w && x + j >= 0; j++)
         {
-            if (font_data[i] & (1 << j % 8))
+            if (font_data[i + ((font_size == 32 && j >= 8) ? 1 : 0)] & (1 << (j % 8)))
             {
                 dst[j] = bColor;
-            }
-        }
-        if (font_size == 32)
-        {
-            i++;
-            for (j = 8; j < 16 && x + j < gpScreen->w && x + j >= 0; j++)
-            {
-                if (font_data[i] & (1 << j % 8))
-                {
-                    dst[j] = bColor;
-                }
             }
         }
     }

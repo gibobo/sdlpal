@@ -50,7 +50,6 @@
 #define   FONT_COLOR_RED_ALT        0x17
 
 unsigned char g_fUpdatedInBattle = false;
-static void *fp_cptbl_big5 = NULL;
 static void *fp_word = NULL;
 static void *fp_msg = NULL;
 static unsigned int *WordLen = NULL;
@@ -87,7 +86,6 @@ int PAL_InitText(void)
    char path[128];
    unsigned char data;
 
-   fp_cptbl_big5 = UTIL_fopen(RESOURCE_PATH "/cptbl_big5.bin", "rb");
    sprintf(path, "%s/word_%db.bin", RESOURCE_PATH, (int)sizeof(wchar_t));
    fp_word = UTIL_fopen(path, "rb");
    sprintf(path, "%s/msg_%db.bin", RESOURCE_PATH, (int)sizeof(wchar_t));
@@ -166,7 +164,6 @@ void PAL_FreeText(
    UTIL_free(WordBuffer);
    UTIL_free(MsgBuffer);
    UTIL_free(internal_wbuffer);
-   UTIL_fclose(fp_cptbl_big5);
    UTIL_fclose(fp_word);
    UTIL_fclose(fp_msg);
    
@@ -177,7 +174,6 @@ void PAL_FreeText(
    WordBuffer = NULL;
    MsgBuffer = NULL;
    internal_wbuffer = NULL;
-   fp_cptbl_big5 = NULL;
    fp_word = NULL;
    fp_msg = NULL;
 }
@@ -985,92 +981,6 @@ PAL_DialogIsPlayingRNG(
    return g_TextLib.fPlayingRNG;
 }
 
-int PAL_MultiByteToWideCharCP(const unsigned char *mbs, int mbslength, wchar_t *wcs, int wcslength)
-/*++
-  Purpose:
-
-    Convert multi-byte string into the corresponding unicode string.
-
-  Parameters:
-
-    [IN]  mbs - Pointer to the multi-byte string.
-    [IN]  mbslength - Length of the multi-byte string, or -1 for auto-detect.
-    [IN]  wcs - Pointer to the wide string buffer.
-    [IN]  wcslength - Length of the wide string buffer.
-
-  Return value:
-
-    The length of converted wide string. If mbslength is set to -1, the returned
-    value includes the terminal null-char; otherwise, the null-char is not included.
-    If wcslength is set to 0, wcs can be set to NULL and the return value is the
-    required length of the wide string buffer.
-
---*/
-{
-   int i = 0;
-   int state = 0;
-   int wlen = 0;
-   int null = 0;
-
-   if (!wcs) {
-      for (i = 0; i < mbslength && mbs[i]; i++) {
-         if (state == 0) {
-            if (mbs[i] <= 0x80)
-               wlen++;
-            else if (mbs[i] == 0xff)
-               wlen++;
-            else
-               state = 1;
-         } else {
-            wlen++;
-            state = 0;
-         }
-      }
-      if (!mbs[i])
-         null = 1;
-      return wlen + null + (state != 0);
-   } else {
-      for (i = 0; i < mbslength && mbs[i]; i++) {
-         if (wlen >= wcslength)
-            break;
-         if (state == 0) {
-            if (mbs[i] <= 0x80) {
-               wcs[wlen] = mbs[i];
-               wlen++;
-            } else if (mbs[i] == 0xff) {
-               wcs[wlen] = 0xf8f8;
-               wlen++;
-            } else
-               state = 1;
-         } else {
-            if ((mbs[i] >= 0x40 && mbs[i] <= 0x7E) || (mbs[i] >= 0xA1 && mbs[i] <= 0xFE)) {
-               unsigned short byte1 = mbs[i - 1] - 0x81;
-               unsigned short byte2 = mbs[i];
-               byte2 -= (mbs[i] <= 0x7E) ? 0x40 : 0x60;
-               unsigned short cptbl_big5;
-               UTIL_fseek(fp_cptbl_big5, sizeof(unsigned short) * (byte1 * 160 + byte2), SEEK_SET);
-               UTIL_fread(&cptbl_big5, sizeof(unsigned short), 1, fp_cptbl_big5);
-               wcs[wlen] = cptbl_big5;
-            } else {
-               wcs[wlen] = 0x003F;
-            }
-            wlen++;
-            state = 0;
-         }
-      }
-      if (state != 0 && wlen < wcslength)
-         wcs[wlen++] = 0x003F;
-
-      if (null || (i < mbslength && !mbs[i])) {
-         if (wlen < wcslength)
-         wcs[wlen++] = 0;
-         else
-         wcs[wlen - 1] = 0;
-      }
-      return wlen;
-   }
-}
-
 int
 PAL_swprintf(
     wchar_t* buffer,
@@ -1250,19 +1160,8 @@ PAL_swprintf(
 
                 if (*format == 's')
                 {
-                    // For ANSI string, convert it through PAL_MultiByteToWideCharCP
-                    // To improve effciency, here just test the length and left
-                    // actual conversion later directly into the output buffer
-                    if (wide)
-                    {
-                        buf = va_arg(ap, wchar_t*);
-                        len = (int)wcslen(buf);
-                    }
-                    else
-                    {
-                        buf = (wchar_t*)va_arg(ap, char*);
-                        len = PAL_MultiByteToWideCharCP((const unsigned char*)buf, -1, NULL, 0) - 1;
-                    }
+                    buf = va_arg(ap, wchar_t*);
+                    len = (int)wcslen(buf);
                 }
                 else
                 {
@@ -1291,10 +1190,7 @@ PAL_swprintf(
                     precision = (int)(buffer_end - buffer);
 
                 // Convert or copy string (char) into output buffer
-                if (*format == 's' && !wide)
-                    PAL_MultiByteToWideCharCP((const unsigned char*)buf, -1, buffer, precision);
-                else
-                    wcsncpy(buffer, buf, precision);
+                wcsncpy(buffer, buf, precision);
                 buffer += precision;
                 count += precision;
 
