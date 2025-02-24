@@ -83,7 +83,7 @@ int PAL_InitText(void)
    unsigned int wpos, wlen, i;
    unsigned int len;
 
-   fp_cptbl_big5 = UTIL_fopen(RESOURCE_PATH "/cptbl_big5.dat", "rb");
+   fp_cptbl_big5 = UTIL_fopen(RESOURCE_PATH "/cptbl_big5.bin", "rb");
    internal_wbuffer_size = 0;
 
    // Open the message and word data files.
@@ -127,7 +127,7 @@ int PAL_InitText(void)
 #if 1
      {
       fp  = UTIL_fopen(RESOURCE_PATH "/word.bin", "wb");
-      fp2  = UTIL_fopen(RESOURCE_PATH "/word_size.bin", "wb");
+      fp2  = UTIL_fopen(RESOURCE_PATH "/word_len.bin", "wb");
       for (i = 0, wpos = 0; i < g_TextLib.nWords; i++)
       {
          len = 0;
@@ -148,10 +148,9 @@ int PAL_InitText(void)
 
       {
          fp = UTIL_fopen(RESOURCE_PATH "/word.bin", "rb");
-         fp2 = UTIL_fopen(RESOURCE_PATH "/word_size.bin", "rb");
+         fp2 = UTIL_fopen(RESOURCE_PATH "/word_len.bin", "rb");
          unsigned int size1 = flength(fp);
-         unsigned int size2 = flength(fp2);
-         g_TextLib.nWords = size2;
+         g_TextLib.nWords = flength(fp2);
 
          WordBuf = (wchar_t *)UTIL_malloc(size1);
          lpWordBuf = (wchar_t **)UTIL_calloc(g_TextLib.nWords, sizeof(wchar_t *));
@@ -207,8 +206,8 @@ int PAL_InitText(void)
       UTIL_free(offsets);
 #if 1
      {
-      fp  = UTIL_fopen(RESOURCE_PATH "/m.bin", "wb");
-      fp2  = UTIL_fopen(RESOURCE_PATH "/m_size.bin", "wb");
+      fp  = UTIL_fopen(RESOURCE_PATH "/msg.bin", "wb");
+      fp2  = UTIL_fopen(RESOURCE_PATH "/msg_len.bin", "wb");
       for (i = 0, wpos = 0; i < g_TextLib.nMsgs; i++)
       {
          len = 0;
@@ -228,12 +227,10 @@ int PAL_InitText(void)
       g_TextLib.nMsgs = 0;
 
       {
-         fp = UTIL_fopen(RESOURCE_PATH "/m.bin", "rb");
-         fp2 = UTIL_fopen(RESOURCE_PATH "/m_size.bin", "rb");
+         fp = UTIL_fopen(RESOURCE_PATH "/msg.bin", "rb");
+         fp2 = UTIL_fopen(RESOURCE_PATH "/msg_len.bin", "rb");
          unsigned int size1 = flength(fp);
-         unsigned int size2 = flength(fp2);
-         g_TextLib.nMsgs = size2;
-
+         g_TextLib.nMsgs = flength(fp2);
          MsgBuf = (wchar_t *)UTIL_malloc(size1);
          lpMsgBuf = (wchar_t **)UTIL_calloc(g_TextLib.nMsgs, sizeof(wchar_t *));
          UTIL_fread(MsgBuf, size1, 1, fp);

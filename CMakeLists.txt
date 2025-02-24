@@ -8,6 +8,7 @@ find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
 
 if(UNIX)
+    add_definitions(-fshort-wchar)
     set (CMAKE_RUNTIME_OUTPUT_DIRECTORY             ${CMAKE_BINARY_DIR})
 else()
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -93,23 +94,16 @@ target_link_libraries(${PROJECT_NAME}_glfw
     glfw
 )
 
-if (WIN32)
-    file(GLOB GAMEDATA
-        ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.mkf
-        ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.msg
-        ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.dat)
-    file(COPY ${GAMEDATA}                               DESTINATION ${RESOURCE_PATH})
-    file(COPY ${CMAKE_SOURCE_DIR}/shaders/              DESTINATION ${CMAKE_BINARY_DIR}/shaders)
-    file(COPY ${CMAKE_SOURCE_DIR}/cptbl_big5.dat        DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${CMAKE_SOURCE_DIR}/unicode_font.dat      DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${CMAKE_SOURCE_DIR}/unicode_font_size.dat DESTINATION ${CMAKE_BINARY_DIR})
-else()
+if (NOT WIN32)
     target_link_libraries(${PROJECT_NAME}_dummy m)
-    add_custom_target(link_target ALL
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/Pal98rqptw               ${RESOURCE_PATH}
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/shaders                  ${CMAKE_BINARY_DIR}/shaders
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/cptbl_big5.dat           ${RESOURCE_PATH}/cptbl_big5.dat
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/unicode_font.dat         ${RESOURCE_PATH}/unicode_font.dat
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/unicode_font_size.dat    ${RESOURCE_PATH}/unicode_font_size.dat
-    )
 endif()
+
+
+file(GLOB GAMEDATA
+    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.mkf
+    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.msg
+    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.dat)
+file(GLOB CACHEDATA ${CMAKE_SOURCE_DIR}/cache_data/*.bin)
+file(COPY ${GAMEDATA}                       DESTINATION ${RESOURCE_PATH})
+file(COPY ${CACHEDATA}                      DESTINATION ${RESOURCE_PATH})
+file(COPY ${CMAKE_SOURCE_DIR}/shaders/      DESTINATION ${CMAKE_BINARY_DIR}/shaders)
