@@ -8,7 +8,6 @@ find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
 
 if(UNIX)
-    add_definitions(-fshort-wchar)
     set (CMAKE_RUNTIME_OUTPUT_DIRECTORY             ${CMAKE_BINARY_DIR})
 else()
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
