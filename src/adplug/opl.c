@@ -1,5 +1,5 @@
 #include "opl.h"
-#include "nuked/opl3.h"
+#include "opl3.h"
 #include "util.h"
 #include <stdio.h>
 #include <string.h>
