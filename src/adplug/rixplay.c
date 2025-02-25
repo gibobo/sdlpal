@@ -124,7 +124,7 @@ RIX_FillBuffer(
                         pRixPlayer->dwStartFadeTime = UTIL_GetTicks();
                     pRixPlayer->iTotalFadeOutSamples = 0;
                     pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeInSamples;
-                    CrixPlayer_rewind(pRixPlayer->iMusic);
+                    CrixPlayer_rewind(pRixPlayer->iMusic, true);
                     
                     continue;
                 }
@@ -173,7 +173,7 @@ RIX_FillBuffer(
                         }
                         return;
                     }
-                    CrixPlayer_rewindReInit(pRixPlayer->iMusic, false);
+                    CrixPlayer_rewind(pRixPlayer->iMusic, false);
                     if (!CrixPlayer_update())
                     {
                         //

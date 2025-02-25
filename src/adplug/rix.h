@@ -26,7 +26,6 @@
 void CrixPlayer_deinit(void);
 unsigned char CrixPlayer_load(const char *filename);
 unsigned char CrixPlayer_update();
-void CrixPlayer_rewind(unsigned int subsong);
-void CrixPlayer_rewindReInit(unsigned int subsong, unsigned char reinit); /* For seamless continuous */
+void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit); /* For seamless continuous */
 
 #endif

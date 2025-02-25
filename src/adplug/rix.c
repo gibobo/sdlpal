@@ -48,7 +48,7 @@ static const unsigned char bd_reg_data[] = {
 static void *fp = NULL;
 static unsigned char *rix_buf = NULL; /* rix files' f_buffer */
 static int songs = 0;
-static unsigned short f_buffer[300];  // 9C0h-C18h
+static unsigned short f_buffer[25 * 12]; // 9C0h-C18h
 static unsigned short a0b0_data2[11];
 static unsigned char a0b0_data3[18];
 static unsigned char a0b0_data4[18];
@@ -57,7 +57,7 @@ static unsigned char addrs_head[96];
 static unsigned short insbuf[28];
 static unsigned short displace[11];
 static unsigned char reg_bufs[18][14];
-static unsigned int pos, length;
+static unsigned int pos, length, subsong_id;
 static unsigned char for40reg[18];
 static unsigned int I, T;
 static unsigned short mus_block;
@@ -98,12 +98,17 @@ unsigned short rix_proc();
 void switch_ad_bd(unsigned short);
 
 /*** public methods *************************************/
+unsigned char CrixPlayer_update() {
+   int_08h_entry();
+   return !play_end;
+}
 
 void CrixPlayer_deinit(void) {
    UTIL_fclose(fp);
    UTIL_free(rix_buf);
    fp = NULL;
    rix_buf = NULL;
+   subsong_id = -1;
 }
 
 unsigned char CrixPlayer_load(const char *filename) {
@@ -122,20 +127,12 @@ unsigned char CrixPlayer_load(const char *filename) {
       return false;
    }
    songs /= 4;
-   CrixPlayer_rewind(0);
+   subsong_id = -1;
+   CrixPlayer_rewind(0, true);
    return true;
 }
 
-unsigned char CrixPlayer_update() {
-   int_08h_entry();
-   return !play_end;
-}
-
-void CrixPlayer_rewind(unsigned int subsong) {
-   CrixPlayer_rewindReInit(subsong, true);
-}
-
-void CrixPlayer_rewindReInit(unsigned int subsong, unsigned char reinit) {
+void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit) {
    play_end = 0;
    pos = 0;
 
@@ -165,19 +162,20 @@ void CrixPlayer_rewindReInit(unsigned int subsong, unsigned char reinit) {
       memset(for40reg, 0x7F, sizeof(for40reg));
    }
 
-   int index, index2;
-   UTIL_fseek(fp, subsong * 4, SEEK_SET);
-   UTIL_fread(&index, 1, sizeof(index), fp);
-   UTIL_fread(&index2, 1, sizeof(index2), fp);
-   length = index2 - index;
+   if (subsong != subsong_id) {
+      subsong_id = subsong;
+      int index[2];
+      UTIL_fseek(fp, subsong * 4, SEEK_SET);
+      UTIL_fread(index, sizeof(int), 2, fp);
+      length = index[1] - index[0];
 
-   if (length == 0)
-      return;
-   UTIL_fseek(fp, index, SEEK_SET);
-   
-   UTIL_free(rix_buf);
-   rix_buf = (unsigned char *)UTIL_calloc(length, sizeof(unsigned char));
-   UTIL_fread(rix_buf, length, sizeof(unsigned char), fp);
+      if (length == 0)
+         return;
+      UTIL_fseek(fp, index[0], SEEK_SET);
+      UTIL_free(rix_buf);
+      rix_buf = (unsigned char *)UTIL_calloc(length, sizeof(unsigned char));
+      UTIL_fread(rix_buf, length, sizeof(unsigned char), fp);
+   }
 
    if (reinit) {
       Copl_reset();

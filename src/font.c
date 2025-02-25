@@ -88,16 +88,12 @@ void PAL_DrawCharOnSurface(
         font_size = (font_size & (1 << (wChar % 8))) ? 32 : 16;
     }
 
-    int columns = (font_size == 32 ? 16 : 8);
-    for (i = 0; i < font_size && dst < top; i += (font_size == 32 ? 2 : 1), dst += gpScreen->w)
-    {
-        for (j = 0; j < columns && x + j < gpScreen->w && x + j >= 0; j++)
-        {
-            if (font_data[i + ((font_size == 32 && j >= 8) ? 1 : 0)] & (1 << (j % 8)))
-            {
-                dst[j] = bColor;
-            }
+    for (i = 0; i < font_size && dst < top; i += (font_size >> 4), dst += gpScreen->w) {
+      for (j = 0; j < (font_size >> 1) && x + j < gpScreen->w && x + j >= 0; j++) {
+        if (font_data[i + ((font_size == 32 && j >= 8) ? 1 : 0)] & (1 << (j % 8))) {
+          dst[j] = bColor;
         }
+      }
     }
 }
 

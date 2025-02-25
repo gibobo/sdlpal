@@ -17,7 +17,6 @@ else()
     set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE     ${CMAKE_BINARY_DIR})
 endif()
 
-set (NUKED_DIR          external/nuked)
 set (GLFW_DIR           external/glfw)
 set (GAME_DIR           src)
 set (DRIVER_DIR         driver)
@@ -26,8 +25,7 @@ set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource)
 file(GLOB GAME_SOURCES
     ${GAME_DIR}/*.c
     ${GAME_DIR}/adplug/*.c
-    ${GAME_DIR}/sound/*.c
-    ${NUKED_DIR}/*.c)
+    ${GAME_DIR}/sound/*.c)
 
 set(SDL_SHARED              OFF CACHE BOOL "Build a shared version of the library" FORCE)
 set(SDL_TEST                OFF CACHE BOOL "Build the SDL2_test library" FORCE)
