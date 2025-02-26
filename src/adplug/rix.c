@@ -22,7 +22,7 @@
 
 #include "rix.h"
 #include "opl.h"
-#include "util.h"
+#include "../util.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>

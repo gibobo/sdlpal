@@ -1,5 +1,5 @@
-#include "audio.h"
-#include "global.h"
+#include "src/audio.h"
+#include "src/global.h"
 #include <SDL_audio.h>
 #include <string.h>
 

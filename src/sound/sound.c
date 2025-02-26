@@ -18,12 +18,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "driver.h"
 #include "resampler.h"
-#include "src/audio.h"
-#include "src/global.h"
-#include "src/palcommon.h"
-#include "src/util.h"
+#include "../audio.h"
+#include "../global.h"
+#include "../palcommon.h"
+#include "../util.h"
 #include <stdbool.h>
 #include <stddef.h>
 

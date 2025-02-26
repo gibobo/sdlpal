@@ -20,8 +20,8 @@
 
 #include "opl.h"
 #include "rix.h"
-#include "src/audio.h"
-#include "src/util.h"
+#include "../audio.h"
+#include "../util.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
