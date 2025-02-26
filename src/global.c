@@ -30,7 +30,6 @@
 #include <string.h>
 
 FILES gFiles;
-CONFIGURATION gConfig;
 GLOBALVARS *gpGlobals = NULL;
 
 int PAL_InitGlobals(void)
@@ -49,13 +48,6 @@ int PAL_InitGlobals(void)
 
 --*/
 {
-   // Set configurable global options
-   gConfig.iAudioChannels = 2; // 2 or 1
-   gConfig.iSampleRate = 44100;
-   gConfig.wAudioBufferSize = 512;
-   gConfig.dwTextureWidth = 640;
-   gConfig.dwTextureHeight = 400;
-
    // Open files
    gFiles.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
    gFiles.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
@@ -86,9 +78,7 @@ void PAL_FreeGlobals(void)
 
 --*/
 {
-   //
    // Close all opened files
-   //
    UTIL_fclose(gFiles.fpFBP);
    UTIL_fclose(gFiles.fpMGO);
    UTIL_fclose(gFiles.fpBALL);
@@ -98,9 +88,7 @@ void PAL_FreeGlobals(void)
    UTIL_fclose(gFiles.fpRGM);
    UTIL_fclose(gFiles.fpSSS);
 
-   //
    // Free the game data
-   //
    if(gpGlobals)
    {
       UTIL_free(gpGlobals->g.lprgEventObject);
@@ -115,8 +103,6 @@ void PAL_FreeGlobals(void)
       UTIL_free(gpGlobals);
    }
 
-   // Clear the instance
-   memset(&gConfig, 0, sizeof(CONFIGURATION));
    gpGlobals = NULL;
 }
 

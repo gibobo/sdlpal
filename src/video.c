@@ -32,7 +32,6 @@ static PAL_Surface *gpBackup[] = {NULL, NULL}; // Backup screen buffer
 volatile unsigned char g_bRenderPaused = false;
 static unsigned short g_wShakeTime = 0;
 static unsigned short g_wShakeLevel = 0;
-static unsigned char *bufScreenReal = NULL;
 static unsigned char *bufPalette = NULL;
 
 int VIDEO_Startup(void)
@@ -59,10 +58,9 @@ int VIDEO_Startup(void)
    gpScreen = VIDEO_CreateCompatibleSizedSurface(NULL);
    gpBackup[0] = VIDEO_CreateCompatibleSizedSurface(NULL);
    gpBackup[1] = VIDEO_CreateCompatibleSizedSurface(NULL);
-   bufScreenReal = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
 
    // Failed?
-   if (gpScreen == NULL || gpBackup[0] == NULL || gpBackup[1] == NULL || bufScreenReal == NULL || bufPalette == NULL)
+   if (gpScreen == NULL || gpBackup[0] == NULL || gpBackup[1] == NULL || bufPalette == NULL)
    {
       VIDEO_Shutdown();
       return -2;
@@ -87,57 +85,15 @@ void VIDEO_Shutdown(void)
 
 --*/
 {
-   // since gConfig is cleared already we'd to detect on side effects
    PAL_FreeSurface(gpScreen);
    PAL_FreeSurface(gpBackup[0]);
    PAL_FreeSurface(gpBackup[1]);
-   UTIL_free(bufScreenReal);
    UTIL_free(bufPalette);
 
    gpScreen = NULL;
    gpBackup[0] = NULL;
    gpBackup[1] = NULL;
-   bufScreenReal = NULL;
    bufPalette = NULL;
-}
-
-void DRIVER_PreFrameShow(const unsigned char *frame_src, const PAL_Rect *roi_src, const PAL_Rect *roi_dst) {
-  if (frame_src) {
-      unsigned short x = 0;
-      unsigned short y = 0;
-      unsigned char *src = (unsigned char *)frame_src;
-      unsigned char *dst = bufScreenReal;
-      if (roi_src) {
-         for (y = roi_src->y; y < (roi_src->y + roi_src->h); y++) {
-            for (x = roi_src->x; x < (roi_src->x + roi_src->w); x++) {
-               unsigned int offset = x + y * SCREEN_W;
-               dst[offset * 3 + 0] = bufPalette[src[offset] * 3 + 0];
-               dst[offset * 3 + 1] = bufPalette[src[offset] * 3 + 1];
-               dst[offset * 3 + 2] = bufPalette[src[offset] * 3 + 2];
-            }
-         }
-      } else {
-         unsigned short roi_x1 = (roi_dst) ? roi_dst->x : 0;
-         unsigned short roi_y1 = (roi_dst) ? roi_dst->y : 0;
-         unsigned short roi_x2 = (roi_dst) ? (roi_dst->x + roi_dst->w) : SCREEN_W;
-         unsigned short roi_y2 = (roi_dst) ? (roi_dst->y + roi_dst->h) : SCREEN_H;
-         for (y = 0; y < SCREEN_H; y++) {
-            if ((y < roi_y1) || (roi_y2 <= y)) {
-               memset(dst, 0, SCREEN_W * 3);
-            } else {
-               for (x = 0; x < SCREEN_W; x++) {
-                  unsigned char flag = (roi_x1 <= x) && (x < roi_x2);
-                  dst[x * 3 + 0] = (flag) ? bufPalette[src[x] * 3 + 0] : 0;
-                  dst[x * 3 + 1] = (flag) ? bufPalette[src[x] * 3 + 1] : 0;
-                  dst[x * 3 + 2] = (flag) ? bufPalette[src[x] * 3 + 2] : 0;
-               }
-               src += SCREEN_W;
-            }
-            dst += SCREEN_W * 3;
-         }
-      }
-      DRIVER_FrameShow(bufScreenReal);
-  }
 }
 
 void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
@@ -156,26 +112,16 @@ void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
 
 --*/
 {
-   int i = 0;
-   int j = 0;
-   PAL_Rect ROI;
-   ROI.x = (lpRect) ? lpRect->x : 0;
-   ROI.y = (lpRect) ? lpRect->y : 0;
-   ROI.w = (lpRect) ? lpRect->w : SCREEN_W;
-   ROI.h = (lpRect) ? lpRect->h : SCREEN_H;
    if (g_bRenderPaused)
       return;
 
    if (lpRect != NULL) {
-     DRIVER_PreFrameShow(gpScreen->pixels, lpRect, NULL);
-   } else {
-     if (g_wShakeTime != 0) {
-       ROI.y = (g_wShakeTime & 1) ? g_wShakeLevel : 0;
-       ROI.h -= g_wShakeLevel;
-       g_wShakeTime--;
-     }
-     DRIVER_PreFrameShow(gpScreen->pixels, NULL, &ROI);
-   }
+      DRIVER_FrameShow(gpScreen->pixels, bufPalette, lpRect->x, lpRect->y, lpRect->w, lpRect->h, 0);
+   } else if (g_wShakeTime != 0) {
+      g_wShakeTime--;
+      DRIVER_FrameShow(gpScreen->pixels, bufPalette, 0, (g_wShakeTime & 0x1) * g_wShakeLevel, SCREEN_W, SCREEN_H - g_wShakeLevel, 1);
+   } else
+      DRIVER_FrameShow(gpScreen->pixels, bufPalette, 0, 0, SCREEN_W, SCREEN_H, 0);
 }
 
 void VIDEO_SetPalette(const unsigned char *rgPalette)
@@ -265,8 +211,7 @@ void VIDEO_SwitchScreen(unsigned short wSpeed)
       // Draw the backup buffer to the screen
       for (j = rgIndex[i]; j < SCREEN_SIZE; j += 6)
          gpBackup[0]->pixels[j] = gpScreen->pixels[j];
-
-      DRIVER_PreFrameShow(gpBackup[0]->pixels, NULL, NULL);
+      DRIVER_FrameShow(gpBackup[0]->pixels, bufPalette, 0, 0, SCREEN_W, SCREEN_H, 0);
       UTIL_Delay(wSpeed);
    }
 }
@@ -324,7 +269,7 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
             }
             gpBackup[0]->pixels[k] = (a & 0xF0) | (b & 0x0F);
          }
-         DRIVER_PreFrameShow(gpBackup[0]->pixels, NULL, &ROI);
+         DRIVER_FrameShow(gpBackup[0]->pixels, bufPalette, ROI.x, ROI.y, ROI.w, ROI.h, 1);
       }
    }
 

@@ -1,5 +1,5 @@
 #include "driver.h"
-#include "input.h"
+#include "src/input.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>

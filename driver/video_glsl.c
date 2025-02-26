@@ -22,7 +22,7 @@
 
 #include "video_glsl.h"
 #include "driver.h"
-#include "video.h"
+#include "src/video.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -175,7 +175,7 @@ void VIDEO_GLSL_Initialize(int width, int height) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 }
 
-void VIDEO_GLSL_RenderCopy(void *data) {
+void VIDEO_GLSL_RenderCopy(const void *data) {
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     if (data)

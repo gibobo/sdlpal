@@ -21,6 +21,10 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
+#define PAL_AUDIO_CHANNEL_NUM (2)
+#define PAL_AUDIO_SAMPLE_RATE (44100)
+#define PAL_AUDIO_BUFFER_SIZE (512)
+
 #define AUDIOPLAYER_COMMONS             \
   int iMusic;                           \
   int fLoop;                            \

@@ -1,18 +1,61 @@
-#include "video.h"
+#include "driver.h"
+#include "src/util.h"
+#include "src/video.h"
 #include "video_glsl.h"
 #include <GLFW/glfw3.h>
+#include <string.h>
 
 static int window_width = 320;
 static int window_height = 200;
+static unsigned char *framebuffer = NULL;   // RGB888
 GLFWwindow *window = NULL;
 
 extern void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-void DRIVER_FrameShow(unsigned char *frame_rgb) {
-    if(window) {
-        VIDEO_GLSL_RenderCopy(frame_rgb);
-        glfwSwapBuffers(window);
+unsigned char *DRIVER_FrameBuffer() {
+    return framebuffer;
+}
+
+void DRIVER_FrameShow(
+    unsigned char *frame,
+    const unsigned char *palette,
+    const unsigned short roi_x,
+    const unsigned short roi_y,
+    const unsigned short roi_w,
+    const unsigned short roi_h,
+    const unsigned char padding_flag) {
+    if (window == NULL)
+        return;
+
+    unsigned short x, y;
+    unsigned short roi_x2 = roi_x + roi_w;
+    unsigned short roi_y2 = roi_y + roi_h;
+    unsigned char *src = (unsigned char *)frame;
+    unsigned char *dst = DRIVER_FrameBuffer();
+
+    for (y = 0; y < SCREEN_H; y++) {
+        if ((y >= roi_y) && (y < roi_y2)) {
+            for (x = 0; x < SCREEN_W; x++) {
+                if ((x >= roi_x) && (x < roi_x2)) {
+                    dst[x * 3 + 0] = palette[src[x] * 3 + 0];
+                    dst[x * 3 + 1] = palette[src[x] * 3 + 1];
+                    dst[x * 3 + 2] = palette[src[x] * 3 + 2];
+                } else if (padding_flag) {
+                    dst[x * 3 + 0] = 0;
+                    dst[x * 3 + 1] = 0;
+                    dst[x * 3 + 2] = 0;
+                }
+            }
+            src += SCREEN_W;
+        } else if (padding_flag)
+            memset(dst, 0, SCREEN_W * 3);
+        else
+            src += SCREEN_W;
+        dst += SCREEN_W * 3;
     }
+
+    VIDEO_GLSL_RenderCopy(framebuffer);
+    glfwSwapBuffers(window);
 }
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height) {
@@ -39,6 +82,7 @@ int DRIVER_Init_Video(void) {
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
     glfwGetWindowSize(window, &window_width, &window_height);
+    framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
     VIDEO_GLSL_Initialize(window_width, window_height);
     glfwSwapInterval(1);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -47,5 +91,8 @@ int DRIVER_Init_Video(void) {
 
 void DRIVER_DeInit_Video(void) {
     VIDEO_GLSL_Destroy();
+    UTIL_free(framebuffer);
     glfwTerminate();
+    window = NULL;
+    framebuffer = NULL;
 }

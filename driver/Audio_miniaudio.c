@@ -1,5 +1,5 @@
-#include "audio.h"
-#include "global.h"
+#include "src/audio.h"
+#include "src/global.h"
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio/miniaudio.h"
 #include <string.h>
@@ -7,7 +7,7 @@
 static ma_device device;
 
 static void audio_callback(ma_device *pDevice, void *stream, const void *pInput, ma_uint32 frameCount) {
-  int len = frameCount * gConfig.iAudioChannels * sizeof(short);
+  int len = frameCount * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
   memset(stream, 0, len);
   AUDIO_FillBuffer(stream, len);
 }
@@ -16,12 +16,10 @@ int DRIVER_Init_Audio(void) {
   ma_device_config deviceConfig;
   deviceConfig = ma_device_config_init(ma_device_type_playback);
   deviceConfig.playback.format = ma_format_s16;
-  deviceConfig.playback.channels = gConfig.iAudioChannels;
-  deviceConfig.sampleRate = gConfig.iSampleRate;
+  deviceConfig.playback.channels = PAL_AUDIO_CHANNEL_NUM;
+  deviceConfig.sampleRate = PAL_AUDIO_SAMPLE_RATE;
   deviceConfig.dataCallback = audio_callback;
   deviceConfig.pUserData = NULL;
-  //  deviceConfig.periodSizeInFrames = gConfig.wAudioBufferSize;
-  //  deviceConfig.periods = 2;
 
   if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
     printf("Failed to initialize playback device.\n");

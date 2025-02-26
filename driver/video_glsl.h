@@ -24,7 +24,7 @@
 #define video_glsl_h
 
 void VIDEO_GLSL_Initialize(int width, int height);
-void VIDEO_GLSL_RenderCopy(void *data);
+void VIDEO_GLSL_RenderCopy(const void *data);
 void VIDEO_GLSL_Destroy(void);
 
 #endif /* video_glsl_h */

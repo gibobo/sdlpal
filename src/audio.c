@@ -110,7 +110,7 @@ int AUDIO_OpenDevice(void)
 
     // Initialize the sound subsystem.
     gAudioDevice.pSoundPlayer = SOUND_Init();
-    gAudioDevice.pSoundBuffer = (gAudioDevice.pSoundPlayer) ? UTIL_calloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels, sizeof(short)) : NULL;
+    gAudioDevice.pSoundBuffer = (gAudioDevice.pSoundPlayer) ? UTIL_calloc(PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM, sizeof(short)) : NULL;
     gAudioDevice.fSoundEnabled = (gAudioDevice.pSoundBuffer) ? true : false;
 #endif
     gAudioDevice.fOpened = true;

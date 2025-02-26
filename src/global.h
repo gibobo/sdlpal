@@ -568,17 +568,7 @@ typedef struct tagGLOBALVARS
    unsigned int dwFrameNum;
 } GLOBALVARS;
 
-typedef struct tagCONFIGURATION {
-  /* Configurable options */
-  unsigned int dwTextureWidth;
-  unsigned int dwTextureHeight;
-  int iAudioChannels;
-  int iSampleRate;
-  unsigned short wAudioBufferSize;
-} CONFIGURATION;
-
 extern GLOBALVARS *gpGlobals;
-extern CONFIGURATION gConfig;
 extern FILES gFiles;
 
 int PAL_InitGlobals(

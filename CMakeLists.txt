@@ -40,7 +40,6 @@ add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 add_definitions(-DPAL_HAS_JOYSTICKS)
 
 include_directories(external)
-include_directories(${GAME_DIR})
 include_directories(${DRIVER_DIR})
 
 add_executable(${PROJECT_NAME}_sdl

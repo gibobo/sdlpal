@@ -18,11 +18,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "audio.h"
-#include "global.h"
 #include "opl.h"
 #include "rix.h"
-#include "util.h"
+#include "src/audio.h"
+#include "src/util.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -30,6 +29,7 @@
 
 #define PAL_MAX_SAMPLERATE 49716
 #define PAL_MIX_MAXVOLUME 128
+#define AUDIO_CHUNK_PER_SECOND 70
 
 enum {
   FADE_NONE,
@@ -97,7 +97,7 @@ RIX_FillBuffer(
             else
             {
                 volume = (int)(PAL_MIX_MAXVOLUME * (1.0 - (double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples));
-                delta_samples = (pRixPlayer->iTotalFadeInSamples / PAL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1);
+                delta_samples = (pRixPlayer->iTotalFadeInSamples / PAL_MIX_MAXVOLUME) & ~(PAL_AUDIO_CHANNEL_NUM - 1);
                 vol_delta = 1;
             }
             break;
@@ -105,7 +105,7 @@ RIX_FillBuffer(
             if (pRixPlayer->iTotalFadeOutSamples == pRixPlayer->iRemainingFadeSamples && pRixPlayer->iTotalFadeOutSamples > 0)
             {
                 unsigned int now = UTIL_GetTicks();
-                int passed_samples = (now > pRixPlayer->dwStartFadeTime) ? (int)((now - pRixPlayer->dwStartFadeTime) * gConfig.iSampleRate / 1000) : 0;
+                int passed_samples = (now > pRixPlayer->dwStartFadeTime) ? (int)((now - pRixPlayer->dwStartFadeTime) * PAL_AUDIO_SAMPLE_RATE / 1000) : 0;
                 pRixPlayer->iRemainingFadeSamples -= passed_samples;
             }
             if (pRixPlayer->iMusic == -1 || pRixPlayer->iRemainingFadeSamples <= 0)
@@ -119,7 +119,7 @@ RIX_FillBuffer(
                     pRixPlayer->fLoop = pRixPlayer->fNextLoop;
                     pRixPlayer->FadeType = FADE_IN;
                     if (pRixPlayer->iMusic > 0)
-                        pRixPlayer->dwStartFadeTime += pRixPlayer->iTotalFadeOutSamples * 1000 / gConfig.iSampleRate;
+                        pRixPlayer->dwStartFadeTime += pRixPlayer->iTotalFadeOutSamples * 1000 / PAL_AUDIO_SAMPLE_RATE;
                     else
                         pRixPlayer->dwStartFadeTime = UTIL_GetTicks();
                     pRixPlayer->iTotalFadeOutSamples = 0;
@@ -138,7 +138,7 @@ RIX_FillBuffer(
             else
             {
                 volume = (int)(PAL_MIX_MAXVOLUME * ((double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeOutSamples));
-                delta_samples = (pRixPlayer->iTotalFadeOutSamples / PAL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1);
+                delta_samples = (pRixPlayer->iTotalFadeOutSamples / PAL_MIX_MAXVOLUME) & ~(PAL_AUDIO_CHANNEL_NUM - 1);
                 vol_delta = -1;
             }
             break;
@@ -152,7 +152,7 @@ RIX_FillBuffer(
         //
         // Fill the buffer with sound data
         //
-        int buf_max_len = gConfig.iSampleRate / 70 * gConfig.iAudioChannels * sizeof(short);
+        int buf_max_len = PAL_AUDIO_SAMPLE_RATE / AUDIO_CHUNK_PER_SECOND * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
         char fContinue = true;
         while (len > 0 && fContinue)
         {
@@ -185,7 +185,7 @@ RIX_FillBuffer(
                     }
                 }
                 
-                Copl_update((short *)pRixPlayer->buf, gConfig.iSampleRate / 70);
+                Copl_update((short *)pRixPlayer->buf, PAL_AUDIO_SAMPLE_RATE / AUDIO_CHUNK_PER_SECOND);
             }
 
             int l = buf_max_len - (int)(pRixPlayer->pos - pRixPlayer->buf);
@@ -299,13 +299,13 @@ RIX_Play(
         {
             pRixPlayer->dwStartFadeTime = UTIL_GetTicks();
         }
-        pRixPlayer->iTotalFadeOutSamples = (int)round(flFadeTime / 2.0f * gConfig.iSampleRate) * gConfig.iAudioChannels;
+        pRixPlayer->iTotalFadeOutSamples = (int)round(flFadeTime / 2.0f * PAL_AUDIO_SAMPLE_RATE) * PAL_AUDIO_CHANNEL_NUM;
         pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeOutSamples;
         pRixPlayer->iTotalFadeInSamples = pRixPlayer->iTotalFadeOutSamples;
     }
     else
     {
-        pRixPlayer->iTotalFadeInSamples = (int)round(flFadeTime / 2.0f * gConfig.iSampleRate) * gConfig.iAudioChannels;
+        pRixPlayer->iTotalFadeInSamples = (int)round(flFadeTime / 2.0f * PAL_AUDIO_SAMPLE_RATE) * PAL_AUDIO_CHANNEL_NUM;
     }
 
     pRixPlayer->iNextMusic = iNumRIX;
@@ -336,9 +336,9 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->FillBuffer = RIX_FillBuffer;
     pRixPlayer->Shutdown = RIX_Shutdown;
     pRixPlayer->Play = RIX_Play;
-    pRixPlayer->buf = (unsigned char *)UTIL_calloc((PAL_MAX_SAMPLERATE + 69) / 70 * 2, sizeof(short));
+    pRixPlayer->buf = (unsigned char *)UTIL_calloc((PAL_MAX_SAMPLERATE + AUDIO_CHUNK_PER_SECOND - 1) / AUDIO_CHUNK_PER_SECOND * PAL_AUDIO_CHANNEL_NUM, sizeof(short));
 
-    Copl_init(gConfig.iSampleRate, gConfig.iAudioChannels == 2);
+    Copl_init(PAL_AUDIO_SAMPLE_RATE, PAL_AUDIO_CHANNEL_NUM == 2);
 
     // Load the MKF file.
     if (!CrixPlayer_load(RESOURCE_PATH "/mus.mkf")) {

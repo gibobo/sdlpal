@@ -89,7 +89,7 @@ void PAL_DrawCharOnSurface(
     }
 
     for (i = 0; i < font_size && dst < top; i += (font_size >> 4), dst += gpScreen->w) {
-      for (j = 0; j < (font_size >> 1) && x + j < gpScreen->w && x + j >= 0; j++) {
+      for (j = 0; (j < (font_size >> 1)) && ((x + j) < gpScreen->w); j++) {
         if (font_data[i + ((font_size == 32 && j >= 8) ? 1 : 0)] & (1 << (j % 8))) {
           dst[j] = bColor;
         }

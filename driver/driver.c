@@ -1,6 +1,7 @@
 #include "driver.h"
-#include "input.h"
-#include "util.h"
+#include "src/input.h"
+#include "src/util.h"
+#include "src/video.h"
 
 #ifndef NULL
 #define NULL 0
@@ -18,7 +19,16 @@ int DRIVER_Init(void) { return 0; }
 
 void DRIVER_DeInit(void) {}
 
-void DRIVER_FrameShow(unsigned char *frame_rgb) {}
+unsigned char *DRIVER_FrameBuffer() { return NULL; }
+
+void DRIVER_FrameShow(
+    unsigned char *frame,
+    const unsigned char *palette,
+    const unsigned short roi_x,
+    const unsigned short roi_y,
+    const unsigned short roi_w,
+    const unsigned short roi_h,
+    const unsigned char padding_flag) {}
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height) {}
 

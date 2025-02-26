@@ -32,10 +32,10 @@ static void SDLCALL audio_callback(void *udata, unsigned char *stream, int len)
 int DRIVER_Init_Audio(void) {
   SDL_AudioSpec audio_spec;
   // Open the audio device.
-  audio_spec.freq = gConfig.iSampleRate;
+  audio_spec.freq = PAL_AUDIO_SAMPLE_RATE;
   audio_spec.format = AUDIO_S16SYS;
-  audio_spec.channels = gConfig.iAudioChannels;
-  audio_spec.samples = gConfig.wAudioBufferSize;
+  audio_spec.channels = PAL_AUDIO_CHANNEL_NUM;
+  audio_spec.samples = PAL_AUDIO_BUFFER_SIZE;
   audio_spec.callback = audio_callback;
   AudioDeviceId = SDL_OpenAudioDevice(NULL, 0, &audio_spec, NULL, 0);
   if (AudioDeviceId == 0)
