@@ -11,7 +11,7 @@ void *UTIL_fopen(const char *_FileName, const char *_Mode) {
 
    if (fp == NULL)
       TerminateOnError("%s() open %s returns a null pointer\n", __func__, _FileName);
-
+   printf("File %s loaded\n", _FileName);
    return fp;
 }
 
@@ -20,7 +20,7 @@ void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode) {
       TerminateOnError("%s() called with invalid parameters\n", __func__);
    else
       return fopen(_FileName, _Mode);
-
+   printf("File %s loaded\n", _FileName);
    return NULL;
 }
 

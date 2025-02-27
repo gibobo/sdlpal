@@ -50,7 +50,6 @@ int PAL_InitGlobals(void)
 {
    // Open files
    gFiles.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
-   gFiles.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
    gFiles.fpMGO = UTIL_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
    gFiles.fpBALL = UTIL_fopen(RESOURCE_PATH "/ball.mkf", "rb");
    gFiles.fpDATA = UTIL_fopen(RESOURCE_PATH "/data.mkf", "rb");

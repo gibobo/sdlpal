@@ -18,11 +18,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "resampler.h"
 #include "../audio.h"
 #include "../global.h"
 #include "../palcommon.h"
 #include "../util.h"
+#include "resampler.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -826,8 +826,6 @@ AUDIOPLAYER *SOUND_Init(void)
 --*/
 {
    void *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
-   if (mkf == NULL)
-      return NULL;
    // Initialize the resampler module
    resampler_init();
 

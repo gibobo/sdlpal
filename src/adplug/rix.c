@@ -21,8 +21,8 @@
  */
 
 #include "rix.h"
-#include "opl.h"
 #include "../util.h"
+#include "opl.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -113,11 +113,8 @@ void CrixPlayer_deinit(void) {
 
 unsigned char CrixPlayer_load(const char *filename) {
    fp = UTIL_fopen(filename, "rb");
-   if (!fp)
-      return false;
-
    UTIL_fseek(fp, 0, SEEK_SET);
-   UTIL_fread(&songs, sizeof(songs), 1, fp);
+   UTIL_fread(&songs, sizeof(int), 1, fp);
    UTIL_fseek(fp, songs, SEEK_SET);
 
    unsigned short signature;

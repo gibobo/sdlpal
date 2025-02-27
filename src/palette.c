@@ -100,6 +100,7 @@ void PAL_SetPalette(
    if (p != NULL)
    {
       VIDEO_SetPalette(p);
+      VIDEO_UpdateScreen(NULL);
    }
 }
 
@@ -151,12 +152,14 @@ void PAL_FadeOut(
       }
 
       VIDEO_SetPalette(newpalette);
+      VIDEO_UpdateScreen(NULL);
 
       UTIL_Delay(10);
    }
 
    memset(newpalette, 0, sizeof(newpalette));
    VIDEO_SetPalette(newpalette);
+   VIDEO_UpdateScreen(NULL);
 }
 
 void PAL_FadeIn(
@@ -210,11 +213,13 @@ void PAL_FadeIn(
       }
 
       VIDEO_SetPalette(newpalette);
+      VIDEO_UpdateScreen(NULL);
 
       UTIL_Delay(10);
    }
 
    VIDEO_SetPalette(palette);
+   VIDEO_UpdateScreen(NULL);
 }
 
 void PAL_SceneFade(
@@ -276,6 +281,7 @@ void PAL_SceneFade(
             newpalette[j] = (palette[j] * i) >> 6;
          }
          VIDEO_SetPalette(newpalette);
+         VIDEO_UpdateScreen(NULL);
 
          UTIL_Delay(100);
       }
@@ -297,6 +303,7 @@ void PAL_SceneFade(
             newpalette[j] = (palette[j] * i) >> 6;
          }
          VIDEO_SetPalette(newpalette);
+         VIDEO_UpdateScreen(NULL);
 
          UTIL_Delay(100);
       }
@@ -347,6 +354,7 @@ void PAL_PaletteFade(
          t[j] = (unsigned char)(((int)palette[j] * (31 - i) + (int)(newpalette[j]) * i) / 31);
       }
       VIDEO_SetPalette(t);
+      VIDEO_UpdateScreen(NULL);
 
       if (fUpdateScene)
       {
@@ -417,10 +425,12 @@ void PAL_ColorFade(
          }
 
          VIDEO_SetPalette(newpalette);
+         VIDEO_UpdateScreen(NULL);
          UTIL_Delay(iDelay);
       }
 
       VIDEO_SetPalette(palette);
+      VIDEO_UpdateScreen(NULL);
    }
    else
    {
@@ -436,6 +446,7 @@ void PAL_ColorFade(
          }
 
          VIDEO_SetPalette(newpalette);
+         VIDEO_UpdateScreen(NULL);
          UTIL_Delay(iDelay);
       }
 
@@ -445,6 +456,7 @@ void PAL_ColorFade(
       }
 
       VIDEO_SetPalette(newpalette);
+      VIDEO_UpdateScreen(NULL);
    }
 }
 
@@ -484,29 +496,27 @@ void PAL_FadeToRed(
    VIDEO_UpdateScreen(NULL);
 
    for (i = 0; i < 32; i++) {
-   for (j = 0; j < 256; j++) {
-      if (j == 0x4F) {
-         continue; // so that texts will not be affected
+      for (j = 0; j < 256; j++) {
+         if (j == 0x4F) {
+            continue; // so that texts will not be affected
+         }
+
+         color = ((int)palette[j * 3 + 0] + (int)palette[j * 3 + 1] + (int)palette[j * 3 + 2]) / 4 + 64;
+
+         if (newpalette[j * 3 + 0] > color)
+            newpalette[j * 3 + 0] -= (newpalette[j * 3 + 0] - color > 8 ? 8 : newpalette[j * 3 + 0] - color);
+         else if (newpalette[j * 3 + 0] < color)
+            newpalette[j * 3 + 0] += (color - newpalette[j * 3 + 0] > 8 ? 8 : color - newpalette[j * 3 + 0]);
+
+         if (newpalette[j * 3 + 1] > 0)
+            newpalette[j * 3 + 1] -= (newpalette[j * 3 + 1] > 8 ? 8 : newpalette[j * 3 + 1]);
+
+         if (newpalette[j * 3 + 2] > 0)
+            newpalette[j * 3 + 2] -= (newpalette[j * 3 + 2] > 8 ? 8 : newpalette[j * 3 + 2]);
       }
 
-      color = ((int)palette[j * 3 + 0] + (int)palette[j * 3 + 1] + (int)palette[j * 3 + 2]) / 4 + 64;
-
-      if (newpalette[j * 3 + 0] > color) {
-         newpalette[j * 3 + 0] -= (newpalette[j * 3 + 0] - color > 8 ? 8 : newpalette[j * 3 + 0] - color);
-      } else if (newpalette[j * 3 + 0] < color) {
-         newpalette[j * 3 + 0] += (color - newpalette[j * 3 + 0] > 8 ? 8 : color - newpalette[j * 3 + 0]);
-      }
-
-      if (newpalette[j * 3 + 1] > 0) {
-         newpalette[j * 3 + 1] -= (newpalette[j * 3 + 1] > 8 ? 8 : newpalette[j * 3 + 1]);
-      }
-
-      if (newpalette[j * 3 + 2] > 0) {
-         newpalette[j * 3 + 2] -= (newpalette[j * 3 + 2] > 8 ? 8 : newpalette[j * 3 + 2]);
-      }
-   }
-
-     VIDEO_SetPalette(newpalette);
-     UTIL_Delay(75);
+      VIDEO_SetPalette(newpalette);
+      VIDEO_UpdateScreen(NULL);
+      UTIL_Delay(75);
    }
 }

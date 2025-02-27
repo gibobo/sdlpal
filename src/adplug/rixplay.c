@@ -18,10 +18,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "opl.h"
-#include "rix.h"
 #include "../audio.h"
 #include "../util.h"
+#include "opl.h"
+#include "rix.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>

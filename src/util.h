@@ -75,7 +75,7 @@ void UTIL_fclose(void *fp);
 extern "C" {
 #endif
 
-void UTIL_Delay(unsigned int ms);
+void UTIL_Delay(int ms);
 
 #ifdef __cplusplus
 }

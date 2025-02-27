@@ -583,6 +583,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
          palette[0xFE * 3 + 2] = t[2];
 
          VIDEO_SetPalette(palette);
+         VIDEO_UpdateScreen(NULL);
       }
 
       if (fabs(fMaxSeconds) > FLT_EPSILON && UTIL_GetTicks() - dwBeginningTicks > 1000 * fMaxSeconds)

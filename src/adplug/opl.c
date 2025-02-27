@@ -1,6 +1,6 @@
 #include "opl.h"
-#include "opl3.h"
 #include "../util.h"
+#include "opl3.h"
 #include <stdio.h>
 #include <string.h>
 

@@ -177,13 +177,12 @@ void PAL_SplashScreen(void)
    unsigned char *lpTitleBuf = NULL;
    unsigned char *lpSpriteCrane = NULL;
    unsigned char *lpBitmapTitle = NULL;
-   int cranepos[9][3];
-   int i;
-   int iImgPos = SCREEN_H;
-   int iCraneFrame = 0;
-   int iTitleHeight;
+   const unsigned char crane_num = 9;
+   int *cranepos = NULL;
+   unsigned int i;
+   unsigned int iImgPos = SCREEN_H;
+   unsigned int iTitleHeight;
    unsigned int dwTime = 0;
-   unsigned int dwBeginTime = 0;
 
    if (palette == NULL) {
       TerminateOnError("ERROR: PAL_SplashScreen(): palette == NULL\n");
@@ -196,16 +195,16 @@ void PAL_SplashScreen(void)
    PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, gFiles.fpMGO);
    PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, gFiles.fpMGO);
    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
-   iTitleHeight = PAL_RLEGetHeight(lpBitmapTitle);
+   iTitleHeight = lpBitmapTitle[2] | (lpBitmapTitle[3] << 8);
    lpBitmapTitle[2] = 0;
    lpBitmapTitle[3] = 0; // HACKHACK
 
    // Generate the positions of the cranes
-   for (i = 0; i < 9; i++)
-   {
-      cranepos[i][0] = RandomLong(300, 600);
-      cranepos[i][1] = RandomLong(0, 80);
-      cranepos[i][2] = RandomLong(0, 8);
+   cranepos = (int *)UTIL_calloc(crane_num * 3, sizeof(int));
+   for (i = 0; i < crane_num; i++) {
+     cranepos[i * 3 + 0] = RandomLong(300, 600);
+     cranepos[i * 3 + 1] = RandomLong(0, 80);
+     cranepos[i * 3 + 2] = RandomLong(0, 8);
    }
 
    // Play the title music
@@ -216,26 +215,22 @@ void PAL_SplashScreen(void)
    PAL_ProcessEvent();
    PAL_ClearKeyState();
 
-   dwBeginTime = UTIL_GetTicks();
-
    srcrect.x = 0;
    srcrect.w = SCREEN_W;
    dstrect.x = 0;
    dstrect.w = SCREEN_W;
 
+   unsigned int Time_LightUP = 15000;
    while (true)
    {
-      PAL_ProcessEvent();
-      dwTime = UTIL_GetTicks() - dwBeginTime;
-
+      dwTime++;
       // Set the palette
-      if (dwTime < 15000) {
-        for (i = 0; i < 256 * 3; i++) {
-          rgCurrentPalette[i] = (unsigned char)(((unsigned int)palette[i] * dwTime) / 15000U);
-        }
-        VIDEO_SetPalette(rgCurrentPalette);
+      if (dwTime < iTitleHeight) {
+         for (i = 0; i < 256 * 3; i++)
+            rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
+         VIDEO_SetPalette(rgCurrentPalette);
       } else
-        VIDEO_SetPalette(palette);
+         VIDEO_SetPalette(palette);
 
       // Draw the screen
       if (iImgPos)
@@ -257,70 +252,58 @@ void PAL_SplashScreen(void)
         VIDEO_CopySurface(lpBitmapUp, &srcrect, gpScreen, &dstrect);
 
       // Draw the cranes...
-      for (i = 0; i < 9; i++) {
-         const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane, cranepos[i][2]);
-         PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i][0], cranepos[i][1]));
-         cranepos[i][0]--;
-         cranepos[i][1] +=(iImgPos & 1) ? 1 : 0;
-         if (iCraneFrame & 1)
-            cranepos[i][2] = (cranepos[i][2] + 1) % 8;
+      for (i = 0; i < crane_num; i++) {
+         if (cranepos[i * 3 + 0] > -35) {
+            const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane, cranepos[i * 3 + 2]);
+            PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i * 3 + 0], cranepos[i * 3 + 1]));
+            cranepos[i * 3 + 0]--;
+            cranepos[i * 3 + 1] += (iImgPos & 1) ? 1 : 0;
+            cranepos[i * 3 + 2] += (dwTime & 1);
+            cranepos[i * 3 + 2] %= 8;
+         }
       }
-      iCraneFrame++;
 
       // Draw the title...
-      if (PAL_RLEGetHeight(lpBitmapTitle) < iTitleHeight)
+      if (dwTime < iTitleHeight)
       {
-         // HACKHACK
-         unsigned short w = lpBitmapTitle[2] | (lpBitmapTitle[3] << 8);
-         w++;
-         lpBitmapTitle[2] = (w & 0xFF);
-         lpBitmapTitle[3] = (w >> 8);
+         lpBitmapTitle[2] = (dwTime & 0xFF);
+         lpBitmapTitle[3] = (dwTime >> 8) & 0xFF;
       }
 
       PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
       VIDEO_UpdateScreen(NULL);
 
-      // Check for keypress...
-      if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
-      {
-         // User has pressed a key...
-         lpBitmapTitle[2] = iTitleHeight & 0xFF;
-         lpBitmapTitle[3] = iTitleHeight >> 8; // HACKHACK
-
-         PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
-
-         VIDEO_UpdateScreen(NULL);
-
-         // If the picture has not completed fading in, complete the rest
-         while (dwTime < 15000)
-         {
-            for (i = 0; i < 256 * 3; i++)
-            {
-               rgCurrentPalette[i] = (unsigned char)(palette[i] * ((float)dwTime / 15000));
-            }
-            VIDEO_SetPalette(rgCurrentPalette);
-            UTIL_Delay(8);
-            dwTime += 250;
-         }
-         if (dwTime < 15250)
-            UTIL_Delay(500);
-
-         // Quit the splash screen
-         break;
-      }
-
       // Delay a while...
-      do {
-        PAL_ProcessEvent();
-        UTIL_Sleep(1);
-      } while (UTIL_GetTicks() < dwTime + dwBeginTime + 85);
-   }
+      UTIL_Delay(85);
 
+      // Check for keypress...
+      PAL_ProcessEvent();
+      if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
+         break;
+   }
+   // Quit the splash screen
+   lpBitmapTitle[2] = iTitleHeight & 0xFF;
+   lpBitmapTitle[3] = iTitleHeight >> 8; // HACKHACK
+   PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
+
+   // If the picture has not completed fading in, complete the rest
+   while (dwTime < iTitleHeight) {
+      for (i = 0; i < 256 * 3; i++)
+         rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
+      VIDEO_SetPalette(rgCurrentPalette);
+      VIDEO_UpdateScreen(NULL);
+      UTIL_Sleep(8);
+      dwTime += 4;
+   }
+   VIDEO_SetPalette(palette);
+   VIDEO_UpdateScreen(NULL);
+
+   UTIL_free(cranepos);
    UTIL_free(lpTitleBuf);
    UTIL_free(lpSpriteCrane);
+   UTIL_Sleep(500);
 
    AUDIO_PlayMusic(0x00, false, 1);
-
    PAL_FadeOut(1);
 }
 

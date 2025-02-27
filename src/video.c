@@ -141,7 +141,6 @@ void VIDEO_SetPalette(const unsigned char *rgPalette)
 --*/
 {
    memcpy(bufPalette, rgPalette, 256 * 3);
-   VIDEO_UpdateScreen(NULL);
 }
 
 const unsigned char *VIDEO_GetPalette(void)
