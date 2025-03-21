@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PAL_MAX_SAMPLERATE 49716
 #define PAL_MIX_MAXVOLUME 128
 #define AUDIO_CHUNK_PER_SECOND 70
 
@@ -40,6 +39,7 @@ enum {
 typedef struct tagRIXPLAYER {
   AUDIOPLAYER_COMMONS;
   unsigned char *buf;
+  int buf_max_len;
   unsigned char *pos;
   int iNextMusic; // the next music number to switch to
   unsigned int dwStartFadeTime;
@@ -152,11 +152,10 @@ RIX_FillBuffer(
         //
         // Fill the buffer with sound data
         //
-        int buf_max_len = PAL_AUDIO_SAMPLE_RATE / AUDIO_CHUNK_PER_SECOND * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
         char fContinue = true;
         while (len > 0 && fContinue)
         {
-            if (pRixPlayer->pos == NULL || pRixPlayer->pos - pRixPlayer->buf >= buf_max_len)
+            if (pRixPlayer->pos == NULL || (int)(pRixPlayer->pos - pRixPlayer->buf) >= pRixPlayer->buf_max_len)
             {
                 pRixPlayer->pos = pRixPlayer->buf;
                 if (!CrixPlayer_update())
@@ -188,7 +187,7 @@ RIX_FillBuffer(
                 Copl_update((short *)pRixPlayer->buf, PAL_AUDIO_SAMPLE_RATE / AUDIO_CHUNK_PER_SECOND);
             }
 
-            int l = buf_max_len - (int)(pRixPlayer->pos - pRixPlayer->buf);
+            int l = pRixPlayer->buf_max_len - (int)(pRixPlayer->pos - pRixPlayer->buf);
             l = (l > len) ? len / sizeof(short) : l / sizeof(short);
 
             // Put audio data into buffer and adjust volume
@@ -239,9 +238,9 @@ static void RIX_Shutdown(void *object)
     if (object != NULL) {
         RIXPLAYER *pRixPlayer = (RIXPLAYER *)object;
         pRixPlayer->fReady = false;
-        UTIL_free(pRixPlayer->buf);
         CrixPlayer_deinit();
         Copl_deinit();
+        UTIL_free(pRixPlayer->buf);
         UTIL_free(pRixPlayer);
     }
 }
@@ -336,8 +335,8 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->FillBuffer = RIX_FillBuffer;
     pRixPlayer->Shutdown = RIX_Shutdown;
     pRixPlayer->Play = RIX_Play;
-    pRixPlayer->buf = (unsigned char *)UTIL_calloc((PAL_MAX_SAMPLERATE + AUDIO_CHUNK_PER_SECOND - 1) / AUDIO_CHUNK_PER_SECOND * PAL_AUDIO_CHANNEL_NUM, sizeof(short));
-
+    pRixPlayer->buf_max_len = (PAL_AUDIO_SAMPLE_RATE + AUDIO_CHUNK_PER_SECOND - 1) / AUDIO_CHUNK_PER_SECOND * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
+    pRixPlayer->buf = (unsigned char *)UTIL_malloc(pRixPlayer->buf_max_len);
     Copl_init(PAL_AUDIO_SAMPLE_RATE, PAL_AUDIO_CHANNEL_NUM == 2);
 
     // Load the MKF file.

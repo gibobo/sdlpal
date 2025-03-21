@@ -982,27 +982,22 @@ int PAL_MKFDecompressChunk(
 
 --*/
 {
-   unsigned char *buf;
-   int len;
+   int len = PAL_MKFGetChunkSize(uiChunkNum, fp);
 
-   len = PAL_MKFGetChunkSize(uiChunkNum, fp);
+   if (len > 0) {
+      unsigned char *buf = (unsigned char *)UTIL_malloc(len);
 
-   if (len <= 0) {
-      return len;
+      PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
+
+      if ((uiBufferSize == 0) || ((*lpBuffer) == NULL)) {
+         UTIL_free(*lpBuffer);
+         uiBufferSize = *(unsigned int *)buf;
+         *lpBuffer = UTIL_malloc(uiBufferSize);
+      }
+
+      len = YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
+      UTIL_free(buf);
    }
-
-   buf = (unsigned char *)UTIL_malloc(len);
-
-   PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
-
-   if ((uiBufferSize == 0) || ((*lpBuffer) == NULL)) {
-      UTIL_free(*lpBuffer);
-      uiBufferSize = *(unsigned int *)buf;
-      *lpBuffer = UTIL_malloc(uiBufferSize);
-   }
-
-   len = YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
-   UTIL_free(buf);
 
    return len;
 }

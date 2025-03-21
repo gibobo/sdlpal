@@ -626,12 +626,13 @@ void *resampler_create(void)
     return r;
 }
 
-void resampler_delete(void *_r)
-{
-    resampler *r = (resampler *)_r;
-    UTIL_free(r->buffer_in);
-    UTIL_free(r->buffer_out);
-    UTIL_free(r);
+void resampler_delete(void *_r) {
+    if (_r) {
+        resampler *r = (resampler *)_r;
+        UTIL_free(r->buffer_in);
+        UTIL_free(r->buffer_out);
+        UTIL_free(r);
+    }
 }
 
 void resampler_set_quality(void *_r, int quality)
