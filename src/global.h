@@ -451,7 +451,8 @@ typedef struct tagGAMEDATA
    ENEMYTEAM *lprgEnemyTeam;
    int nEnemyTeam;
 
-   PLAYERROLES PlayerRoles;
+   PLAYERROLES *PlayerRoles;
+   int nPlayerRoles;
 
    MAGIC *lprgMagic;
    int nMagic;
@@ -468,17 +469,25 @@ typedef struct tagGAMEDATA
    unsigned short rgwBattleEffectIndex[10 * 2];
 } GAMEDATA;
 
-typedef struct tagFILES
+// status of characters
+typedef enum tagPALRES
 {
-   void *fpFBP;   // battlefield background images
-   void *fpMGO;   // sprites in scenes
-   void *fpBALL;  // item bitmaps
-   void *fpDATA;  // misc data
-   void *fpF;     // player sprites during battle
-   void *fpFIRE;  // fire effect sprites
-   void *fpRGM;   // character face bitmaps
-   void *fpSSS;   // script data
-} FILES;
+   Res_FBP = 0, // battlefield background images
+   Res_MGO,     // sprites in scenes
+   Res_BALL,    // item bitmaps
+   Res_DATA,    // misc data
+   Res_F,       // player sprites during battle
+   Res_FIRE,    // fire effect sprites
+   Res_RGM,     // character face bitmaps
+   Res_SSS,     // script data
+   Res_ALL
+}PALRES;
+
+typedef struct tagPALFILE
+{
+   char *name;
+   void *fp;
+}PALFILE;
 
 // player party
 typedef struct tagPARTY
@@ -569,7 +578,7 @@ typedef struct tagGLOBALVARS
 } GLOBALVARS;
 
 extern GLOBALVARS *gpGlobals;
-extern FILES gFiles;
+extern PALFILE gFiles[];
 
 int PAL_InitGlobals(
     void);

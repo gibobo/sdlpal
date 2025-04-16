@@ -169,7 +169,7 @@ void PAL_SplashScreen(void)
 --*/
 {
    unsigned char *palette = PAL_GetPalette(1, false);
-   unsigned char rgCurrentPalette[256 * 3];
+   unsigned char rgCurrentPalette[PALETTE_SIZE];
    PAL_Surface *lpBitmapUp= VIDEO_GetBackupSurface(0);
    PAL_Surface *lpBitmapDown= VIDEO_GetBackupSurface(1);
    PAL_Rect srcrect;
@@ -190,10 +190,10 @@ void PAL_SplashScreen(void)
    }
 
    // Read the bitmaps
-   PAL_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, gFiles.fpFBP);
-   PAL_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, gFiles.fpFBP);
-   PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, gFiles.fpMGO);
-   PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, gFiles.fpMGO);
+   PAL_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, gFiles[Res_FBP].fp);
+   PAL_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, gFiles[Res_FBP].fp);
+   PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, gFiles[Res_MGO].fp);
+   PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, gFiles[Res_MGO].fp);
    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
    iTitleHeight = lpBitmapTitle[2] | (lpBitmapTitle[3] << 8);
    lpBitmapTitle[2] = 0;
@@ -225,12 +225,11 @@ void PAL_SplashScreen(void)
    {
       dwTime++;
       // Set the palette
-      if (dwTime < iTitleHeight) {
-         for (i = 0; i < 256 * 3; i++)
-            rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
-         VIDEO_SetPalette(rgCurrentPalette);
-      } else
-         VIDEO_SetPalette(palette);
+      if (dwTime <= iTitleHeight) {
+        for (i = 0; i < PALETTE_SIZE; i++)
+          rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
+        VIDEO_SetPalette(rgCurrentPalette);
+      }
 
       // Draw the screen
       if (iImgPos)
@@ -288,7 +287,7 @@ void PAL_SplashScreen(void)
 
    // If the picture has not completed fading in, complete the rest
    while (dwTime < iTitleHeight) {
-      for (i = 0; i < 256 * 3; i++)
+      for (i = 0; i < PALETTE_SIZE; i++)
          rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
       VIDEO_SetPalette(rgCurrentPalette);
       VIDEO_UpdateScreen(NULL);
@@ -334,6 +333,8 @@ int main(int argc, char *argv[])
    PAL_Init();
 
    // Show the trademark screen and splash screen
+   // PAL_ReloadInNextTick(0);
+   // PAL_EndingScreen();
    PAL_TrademarkScreen();
    PAL_SplashScreen();
 

@@ -21,6 +21,8 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
+#define PALETTE_SIZE (256 * 3)
+
 unsigned char *PAL_GetPalette(int iPaletteNum, int fNight);
 
 void PAL_SetPalette(int iPaletteNum, int fNight);

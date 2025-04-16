@@ -29,7 +29,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define PALETTE_SIZE (256 * 3)
+static unsigned char gPalette[PALETTE_SIZE];
 
 unsigned char *PAL_GetPalette(int iPaletteNum, int fNight)
 /*++
@@ -49,12 +49,11 @@ unsigned char *PAL_GetPalette(int iPaletteNum, int fNight)
 
 --*/
 {
-   static unsigned char palette[PALETTE_SIZE];
    unsigned char buf[PALETTE_SIZE * 2];
    unsigned char *ptr = buf;
    int i;
    void *fp = NULL;
-   memset(palette, 0, sizeof(palette));
+   memset(gPalette, 0, sizeof(gPalette));
    memset(buf, 0, sizeof(buf));
 
    // Read the palette data from the pat.mkf file
@@ -70,14 +69,12 @@ unsigned char *PAL_GetPalette(int iPaletteNum, int fNight)
    ptr = buf + PALETTE_SIZE * ((fNight) ? 1 : 0);
 
    for (i = 0; i < PALETTE_SIZE; i++)
-      palette[i] = ptr[i] << 2;
+      gPalette[i] = ptr[i] << 2;
 
-   return palette;
+   return gPalette;
 }
 
-void PAL_SetPalette(
-    int iPaletteNum,
-    int fNight)
+void PAL_SetPalette(int iPaletteNum, int fNight)
 /*++
   Purpose:
 
@@ -104,8 +101,7 @@ void PAL_SetPalette(
    }
 }
 
-void PAL_FadeOut(
-    int iDelay)
+void PAL_FadeOut(int iDelay)
 /*++
   Purpose:
 
@@ -127,12 +123,12 @@ void PAL_FadeOut(
 {
    int i, j;
    unsigned int time;
-   unsigned char palette[PALETTE_SIZE];
-   unsigned char newpalette[PALETTE_SIZE];
+   unsigned char org_palette[PALETTE_SIZE];
+   unsigned char new_palette[PALETTE_SIZE];
 
    // Get the original palette...
-   memcpy(palette, VIDEO_GetPalette(), sizeof(palette));
-   memset(newpalette, 0, sizeof(newpalette));
+   memcpy(org_palette, gPalette, PALETTE_SIZE);
+   memset(new_palette, 0, PALETTE_SIZE);
 
    //
    // Start fading out...
@@ -148,24 +144,20 @@ void PAL_FadeOut(
 
       for (i = 0; i < PALETTE_SIZE; i++)
       {
-         newpalette[i] = (palette[i] * j) >> 6;
+         new_palette[i] = (org_palette[i] * j) >> 6;
       }
 
-      VIDEO_SetPalette(newpalette);
+      VIDEO_SetPalette(new_palette);
       VIDEO_UpdateScreen(NULL);
-
       UTIL_Delay(10);
    }
 
-   memset(newpalette, 0, sizeof(newpalette));
-   VIDEO_SetPalette(newpalette);
+   memset(new_palette, 0, sizeof(new_palette));
+   VIDEO_SetPalette(new_palette);
    VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_FadeIn(
-    int iPaletteNum,
-    int fNight,
-    int iDelay)
+void PAL_FadeIn(int iPaletteNum, int fNight, int iDelay)
 /*++
   Purpose:
 
@@ -222,10 +214,7 @@ void PAL_FadeIn(
    VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_SceneFade(
-    int iPaletteNum,
-    int fNight,
-    int iStep)
+void PAL_SceneFade(int iPaletteNum, int fNight, int iStep)
 /*++
   Purpose:
 
@@ -310,10 +299,7 @@ void PAL_SceneFade(
    }
 }
 
-void PAL_PaletteFade(
-    int iPaletteNum,
-    int fNight,
-    int fUpdateScene)
+void PAL_PaletteFade(int iPaletteNum, int fNight, int fUpdateScene)
 /*++
   Purpose:
 
@@ -334,26 +320,22 @@ void PAL_PaletteFade(
 --*/
 {
    int i, j;
-   unsigned char *newpalette = PAL_GetPalette(iPaletteNum, fNight);
-   unsigned char palette[PALETTE_SIZE];
-   unsigned char t[PALETTE_SIZE];
+   unsigned char *new_palette = NULL;
+   unsigned char org_palette[PALETTE_SIZE];
+   unsigned char tmp_palette[PALETTE_SIZE];
 
-   if (newpalette == NULL)
-   {
-      return;
-   }
-
-   memcpy(palette, VIDEO_GetPalette(), sizeof(unsigned char) * PALETTE_SIZE);
-   memset(t, 0, sizeof(unsigned char) * PALETTE_SIZE);
+   memcpy(org_palette, gPalette,  PALETTE_SIZE);
+   memset(tmp_palette, 0, PALETTE_SIZE);
+   new_palette = PAL_GetPalette(iPaletteNum, fNight);
 
    // Start fading...
    for (i = 0; i < 32; i++)
    {
       for (j = 0; j < PALETTE_SIZE; j++)
       {
-         t[j] = (unsigned char)(((int)palette[j] * (31 - i) + (int)(newpalette[j]) * i) / 31);
+         tmp_palette[j] = (unsigned char)(((int)org_palette[j] * (31 - i) + (int)(new_palette[j]) * i) / 31);
       }
-      VIDEO_SetPalette(t);
+      VIDEO_SetPalette(tmp_palette);
       VIDEO_UpdateScreen(NULL);
 
       if (fUpdateScene)
@@ -369,10 +351,7 @@ void PAL_PaletteFade(
    }
 }
 
-void PAL_ColorFade(
-    int iDelay,
-    unsigned char bColor,
-    int fFrom)
+void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom)
 /*++
   Purpose:
 
@@ -392,12 +371,12 @@ void PAL_ColorFade(
 
 --*/
 {
-   unsigned char *palette;
-   unsigned char newpalette[PALETTE_SIZE];
    int i, j;
+   unsigned char *org_palette = NULL;
+   unsigned char new_palette[PALETTE_SIZE];
 
-   palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
-   memset(newpalette, 0, sizeof(newpalette));
+   org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
+   memset(new_palette, 0, sizeof(new_palette));
 
    iDelay *= 10;
    if (iDelay == 0)
@@ -410,58 +389,57 @@ void PAL_ColorFade(
    {
       for (i = 0; i < 256; i++)
       {
-        newpalette[i * 3 + 0] = palette[bColor * 3 + 0];
-        newpalette[i * 3 + 1] = palette[bColor * 3 + 1];
-        newpalette[i * 3 + 2] = palette[bColor * 3 + 2];
+        new_palette[i * 3 + 0] = org_palette[bColor * 3 + 0];
+        new_palette[i * 3 + 1] = org_palette[bColor * 3 + 1];
+        new_palette[i * 3 + 2] = org_palette[bColor * 3 + 2];
       }
 
       for (i = 0; i < 64; i++)
       {
          for (j = 0; j < 256; j++)
          {
-           Converge(newpalette[j * 3 + 0], palette[j * 3 + 0]);
-           Converge(newpalette[j * 3 + 1], palette[j * 3 + 1]);
-           Converge(newpalette[j * 3 + 2], palette[j * 3 + 2]);
+           Converge(new_palette[j * 3 + 0], org_palette[j * 3 + 0]);
+           Converge(new_palette[j * 3 + 1], org_palette[j * 3 + 1]);
+           Converge(new_palette[j * 3 + 2], org_palette[j * 3 + 2]);
          }
 
-         VIDEO_SetPalette(newpalette);
+         VIDEO_SetPalette(new_palette);
          VIDEO_UpdateScreen(NULL);
          UTIL_Delay(iDelay);
       }
 
-      VIDEO_SetPalette(palette);
+      VIDEO_SetPalette(org_palette);
       VIDEO_UpdateScreen(NULL);
    }
    else
    {
-      memcpy(newpalette, palette, sizeof(newpalette));
+      memcpy(new_palette, org_palette, sizeof(new_palette));
 
       for (i = 0; i < 64; i++)
       {
          for (j = 0; j < 256; j++)
          {
-           Converge(newpalette[j * 3 + 0], palette[bColor * 3 + 0]);
-           Converge(newpalette[j * 3 + 1], palette[bColor * 3 + 1]);
-           Converge(newpalette[j * 3 + 2], palette[bColor * 3 + 2]);
+           Converge(new_palette[j * 3 + 0], org_palette[bColor * 3 + 0]);
+           Converge(new_palette[j * 3 + 1], org_palette[bColor * 3 + 1]);
+           Converge(new_palette[j * 3 + 2], org_palette[bColor * 3 + 2]);
          }
 
-         VIDEO_SetPalette(newpalette);
+         VIDEO_SetPalette(new_palette);
          VIDEO_UpdateScreen(NULL);
          UTIL_Delay(iDelay);
       }
 
       for (i = 0; i < 256; i++)
       {
-         newpalette[i] = palette[bColor];
+         new_palette[i] = org_palette[bColor];
       }
 
-      VIDEO_SetPalette(newpalette);
+      VIDEO_SetPalette(new_palette);
       VIDEO_UpdateScreen(NULL);
    }
 }
 
-void PAL_FadeToRed(
-    void)
+void PAL_FadeToRed(void)
 /*++
   Purpose:
 
@@ -477,13 +455,13 @@ void PAL_FadeToRed(
 
 --*/
 {
-   unsigned char *palette;
-   unsigned char newpalette[PALETTE_SIZE];
    int i, j;
    unsigned char color;
+   unsigned char *org_palette = NULL;
+   unsigned char new_palette[PALETTE_SIZE];
 
-   palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
-   memcpy(newpalette, palette, sizeof(newpalette));
+   org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
+   memcpy(new_palette, org_palette, PALETTE_SIZE);
 
    for (i = 0; i < SCREEN_SIZE; i++)
    {
@@ -501,21 +479,21 @@ void PAL_FadeToRed(
             continue; // so that texts will not be affected
          }
 
-         color = ((int)palette[j * 3 + 0] + (int)palette[j * 3 + 1] + (int)palette[j * 3 + 2]) / 4 + 64;
+         color = ((int)org_palette[j * 3 + 0] + (int)org_palette[j * 3 + 1] + (int)org_palette[j * 3 + 2]) / 4 + 64;
 
-         if (newpalette[j * 3 + 0] > color)
-            newpalette[j * 3 + 0] -= (newpalette[j * 3 + 0] - color > 8 ? 8 : newpalette[j * 3 + 0] - color);
-         else if (newpalette[j * 3 + 0] < color)
-            newpalette[j * 3 + 0] += (color - newpalette[j * 3 + 0] > 8 ? 8 : color - newpalette[j * 3 + 0]);
+         if (new_palette[j * 3 + 0] > color)
+            new_palette[j * 3 + 0] -= (new_palette[j * 3 + 0] - color > 8 ? 8 : new_palette[j * 3 + 0] - color);
+         else if (new_palette[j * 3 + 0] < color)
+            new_palette[j * 3 + 0] += (color - new_palette[j * 3 + 0] > 8 ? 8 : color - new_palette[j * 3 + 0]);
 
-         if (newpalette[j * 3 + 1] > 0)
-            newpalette[j * 3 + 1] -= (newpalette[j * 3 + 1] > 8 ? 8 : newpalette[j * 3 + 1]);
+         if (new_palette[j * 3 + 1] > 0)
+            new_palette[j * 3 + 1] -= (new_palette[j * 3 + 1] > 8 ? 8 : new_palette[j * 3 + 1]);
 
-         if (newpalette[j * 3 + 2] > 0)
-            newpalette[j * 3 + 2] -= (newpalette[j * 3 + 2] > 8 ? 8 : newpalette[j * 3 + 2]);
+         if (new_palette[j * 3 + 2] > 0)
+            new_palette[j * 3 + 2] -= (new_palette[j * 3 + 2] > 8 ? 8 : new_palette[j * 3 + 2]);
       }
 
-      VIDEO_SetPalette(newpalette);
+      VIDEO_SetPalette(new_palette);
       VIDEO_UpdateScreen(NULL);
       UTIL_Delay(75);
    }

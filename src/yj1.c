@@ -28,29 +28,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-// 常數定義
-#define MAX_TREE_NODES 641    // 總節點數 (0x280 + 1)
-#define MAX_LEAF_NODES 321    // 葉節點數 (0x140 + 1)
-#define ROOT_NODE_VALUE 0x280 // 樹根節點值
-#define MAX_WEIGHT 0x8000     // 最大權重值
-#define END_MARKER 0xfff      // 結束標記
+typedef struct _YJ2_TreeNode
+{
+    unsigned short weight;
+    unsigned short value;
+    struct _YJ2_TreeNode *parent;
+    struct _YJ2_TreeNode *left;
+    struct _YJ2_TreeNode *right;
+} YJ2_TreeNode;
 
-// Huffman 樹節點結構
-typedef struct HuffmanNode {
-   unsigned short weight;      // 節點權重
-   unsigned short value;       // 節點值
-   struct HuffmanNode *parent; // 父節點
-   struct HuffmanNode *left;   // 左子節點
-   struct HuffmanNode *right;  // 右子節點
-} HuffmanNode;
+typedef struct _YJ2_Tree
+{
+    YJ2_TreeNode *node;
+    YJ2_TreeNode **list;
+} YJ2_Tree;
 
-// Huffman 樹結構
-typedef struct HuffmanTree {
-   HuffmanNode *root;    // 根節點
-   HuffmanNode **leaves; // 葉節點陣列
-} HuffmanTree;
-
-static unsigned char LOOKUP_TABLE_1[256] = {
+static unsigned char yj2_data1[0x100] = {
     0x3f, 0x0b, 0x17, 0x03, 0x2f, 0x0a, 0x16, 0x00, 0x2e, 0x09, 0x15, 0x02, 0x2d, 0x01, 0x08, 0x00,
     0x3e, 0x07, 0x14, 0x03, 0x2c, 0x06, 0x13, 0x00, 0x2b, 0x05, 0x12, 0x02, 0x2a, 0x01, 0x04, 0x00,
     0x3d, 0x0b, 0x11, 0x03, 0x29, 0x0a, 0x10, 0x00, 0x28, 0x09, 0x0f, 0x02, 0x27, 0x01, 0x08, 0x00,
@@ -67,141 +60,156 @@ static unsigned char LOOKUP_TABLE_1[256] = {
     0x32, 0x07, 0x14, 0x03, 0x20, 0x06, 0x13, 0x00, 0x1f, 0x05, 0x12, 0x02, 0x1e, 0x01, 0x04, 0x00,
     0x31, 0x0b, 0x11, 0x03, 0x1d, 0x0a, 0x10, 0x00, 0x1c, 0x09, 0x0f, 0x02, 0x1b, 0x01, 0x08, 0x00,
     0x30, 0x07, 0x0e, 0x03, 0x1a, 0x06, 0x0d, 0x00, 0x19, 0x05, 0x0c, 0x02, 0x18, 0x01, 0x04, 0x00};
-
-static unsigned char LOOKUP_TABLE_2[16] = {
+static unsigned char yj2_data2[0x10] = {
     0x08, 0x05, 0x06, 0x04, 0x07, 0x05, 0x06, 0x03, 0x07, 0x05, 0x06, 0x04, 0x07, 0x04, 0x05, 0x03};
 
-// 從位元流中讀取單一位元
-static inline int read_bit(const unsigned char *data, unsigned int pos) {
-  return (data[pos >> 3] >> (pos & 7)) & 1;
+static void yj2_adjust_tree(YJ2_Tree tree, unsigned short value)
+{
+    YJ2_TreeNode *node = tree.list[value];
+    YJ2_TreeNode tmp;
+    YJ2_TreeNode *tmp1;
+    YJ2_TreeNode *temp;
+    while (node->value != 0x280)
+    {
+        temp = node + 1;
+        while (node->weight == temp->weight)
+            temp++;
+        temp--;
+        if (temp != node)
+        {
+            tmp1 = node->parent;
+            node->parent = temp->parent;
+            temp->parent = tmp1;
+            if (node->value > 0x140)
+            {
+                node->left->parent = temp;
+                node->right->parent = temp;
+            }
+            else
+                tree.list[node->value] = temp;
+            if (temp->value > 0x140)
+            {
+                temp->left->parent = node;
+                temp->right->parent = node;
+            }
+            else
+                tree.list[temp->value] = node;
+            tmp = *node;
+            *node = *temp;
+            *temp = tmp;
+            node = temp;
+        }
+        node->weight++;
+        node = node->parent;
+    }
+    node->weight++;
 }
 
-// 調整 Huffman 樹
-static void adjust_tree(HuffmanTree *tree, const unsigned short leaf_value) {
-   HuffmanNode *node = tree->leaves[leaf_value];
-   while (node->value != ROOT_NODE_VALUE) {
-      HuffmanNode *next = node + 1;
-      while (next->weight == node->weight && next->value <= ROOT_NODE_VALUE)
-         next++;
-      next--; // 回退到最後一個權重相同的節點
-
-      if (next != node) {
-         // 交換節點
-         HuffmanNode *node_parent = node->parent;
-         node->parent = next->parent;
-         next->parent = node_parent;
-
-         if (node->value > MAX_LEAF_NODES - 1) {
-            node->left->parent = next;
-            node->right->parent = next;
-         } else
-            tree->leaves[node->value] = next;
-
-         if (next->value > MAX_LEAF_NODES - 1) {
-            next->left->parent = node;
-            next->right->parent = node;
-         } else
-            tree->leaves[next->value] = node;
-
-         // 交換指標而非複製結構
-         HuffmanNode temp = *node;
-         *node = *next;
-         *next = temp;
-         node = next;
-      }
-      node->weight++;
-      node = node->parent;
-   }
-   node->weight++;
+static int yj2_build_tree(YJ2_Tree *tree)
+{
+    int i, ptr;
+    YJ2_TreeNode **list = (YJ2_TreeNode **)UTIL_calloc(321, sizeof(YJ2_TreeNode *));
+    YJ2_TreeNode *node = (YJ2_TreeNode *)UTIL_calloc(641, sizeof(YJ2_TreeNode));
+    for (i = 0; i <= 0x140; i++)
+        list[i] = node + i;
+    for (i = 0; i <= 0x280; i++)
+    {
+        node[i].value = i;
+        node[i].weight = 1;
+    }
+    node[0x280].parent = node + 0x280;
+    for (i = 0, ptr = 0x141; ptr <= 0x280; i += 2, ptr++)
+    {
+        node[ptr].left = node + i;
+        node[ptr].right = node + i + 1;
+        node[i].parent = node[i + 1].parent = node + ptr;
+        node[ptr].weight = node[i].weight + node[i + 1].weight;
+    }
+    tree->list = list;
+    tree->node = node;
+    return 1;
 }
 
-// 構建 Huffman 樹
-static void build_tree(HuffmanTree *tree, HuffmanNode *nodes, HuffmanNode **leaves) {
-   tree->root = nodes;
-   tree->leaves = leaves;
-
-   // 初始化葉節點
-   for (int i = 0; i < MAX_LEAF_NODES; i++)
-      leaves[i] = &nodes[i];
-
-   // 初始化所有節點
-   for (int i = 0; i < MAX_TREE_NODES; i++) {
-      nodes[i].value = i;
-      nodes[i].weight = 1;
-      nodes[i].parent = NULL;
-      nodes[i].left = NULL;
-      nodes[i].right = NULL;
-   }
-
-   nodes[ROOT_NODE_VALUE].parent = &nodes[ROOT_NODE_VALUE];
-   for (int i = 0, j = MAX_LEAF_NODES; j < MAX_TREE_NODES; i += 2, j++) {
-      nodes[j].left = &nodes[i];
-      nodes[j].right = &nodes[i + 1];
-      nodes[i].parent = nodes[i + 1].parent = &nodes[j];
-      nodes[j].weight = nodes[i].weight + nodes[i + 1].weight;
-   }
+static int yj2_bt(const unsigned char *data, unsigned int pos)
+{
+    return (data[pos >> 3] & (unsigned char)(1 << (pos & 0x7))) >> (pos & 0x7);
 }
 
-int YJ2_Decompress(const void *source, void *destination, int dest_size) {
-   if (!source || !destination)
-      return -1;
+int YJ2_Decompress(
+    const void *Source,
+    void *Destination,
+    int DestSize)
+{
+    int Length;
+    unsigned int len = 0, ptr = 0;
+    unsigned char *src = (unsigned char *)Source + 4;
+    unsigned char *dest;
+    YJ2_Tree tree;
+    YJ2_TreeNode *node;
 
-   const unsigned char *src = (const unsigned char *)source + 4;
-   unsigned int length = *(const unsigned int *)source;
-   if (length > dest_size)
-      return -1;
+    if (Source == NULL)
+        return -1;
 
-   unsigned char *dest = (unsigned char *)destination;
-   unsigned int bit_pos = 0, bytes_written = 0;
+    if (!yj2_build_tree(&tree))
+        return -1;
 
-   // 初始化樹結構
-   HuffmanNode nodes[MAX_TREE_NODES];
-   HuffmanNode *leaves[MAX_LEAF_NODES];
-   HuffmanTree tree;
-   build_tree(&tree, nodes, leaves);
+    Length = *(unsigned int *)Source;
+    if (Length > DestSize)
+        return -1;
+    dest = (unsigned char *)Destination;
 
-   while (1) {
-      // 遍歷樹直到葉節點
-      HuffmanNode *node = tree.root + ROOT_NODE_VALUE;
-      while (node->value > MAX_LEAF_NODES - 1)
-         node = read_bit(src, bit_pos++) ? node->right : node->left;
+    while (1)
+    {
+        unsigned short val;
+        node = tree.node + 0x280;
+        while (node->value > 0x140)
+        {
+            if (yj2_bt(src, ptr))
+                node = node->right;
+            else
+                node = node->left;
+            ptr++;
+        }
+        val = node->value;
+        if (tree.node[0x280].weight == 0x8000)
+        {
+            int i;
+            for (i = 0; i < 0x141; i++)
+                if (tree.list[i]->weight & 0x1)
+                    yj2_adjust_tree(tree, i);
+            for (i = 0; i <= 0x280; i++)
+                tree.node[i].weight >>= 1;
+        }
+        yj2_adjust_tree(tree, val);
+        if (val > 0xff)
+        {
+            int i;
+            unsigned int temp, tmp, pos;
+            unsigned char *pre;
+            for (i = 0, temp = 0; i < 8; i++, ptr++)
+                temp |= (unsigned int)yj2_bt(src, ptr) << i;
+            tmp = temp & 0xff;
+            for (; i < yj2_data2[tmp & 0xf] + 6; i++, ptr++)
+                temp |= (unsigned int)yj2_bt(src, ptr) << i;
+            temp >>= yj2_data2[tmp & 0xf];
+            pos = (temp & 0x3f) | ((unsigned int)yj2_data1[tmp] << 6);
+            if (pos == 0xfff)
+                break;
+            pre = dest - pos - 1;
+            for (i = 0; i < val - 0xfd; i++)
+                *dest++ = *pre++;
+            len += val - 0xfd;
+        }
+        else
+        {
+            *dest++ = (unsigned char)val;
+            len++;
+        }
+    }
 
-      // 檢查並調整權重
-      if (tree.root[ROOT_NODE_VALUE].weight == MAX_WEIGHT) {
-         for (int i = 0; i < MAX_LEAF_NODES; i++)
-            if (leaves[i]->weight & 1)
-               adjust_tree(&tree, i);
-         for (int i = 0; i < MAX_TREE_NODES; i++)
-            nodes[i].weight >>= 1;
-      }
-
-      unsigned short value = node->value;
-      int copy_len = value - 0xfd;
-      adjust_tree(&tree, value);
-
-      // 處理解壓數據
-      if (value > 0xff) {
-         unsigned int temp = 0;
-         for (int i = 0; i < 8; i++)
-            temp |= read_bit(src, bit_pos++) << i;
-
-         unsigned int lower_bits = temp & 0xff;
-         int extra_bits = LOOKUP_TABLE_2[lower_bits & 0xf];
-         for (int i = 8; i < extra_bits + 6; i++)
-            temp |= read_bit(src, bit_pos++) << i;
-         temp >>= extra_bits;
-
-         unsigned int offset = (temp & 0x3f) | ((unsigned int)LOOKUP_TABLE_1[lower_bits] << 6);
-         if (offset == END_MARKER)
-            break;
-
-         for (int i = 0; i < copy_len; i++)
-           dest[bytes_written + i] = dest[bytes_written + i - offset - 1];
-      } else {
-         copy_len = 1;
-         dest[bytes_written] =(unsigned char)value;
-      }
-      bytes_written += copy_len;
-   }
-   return length;
+    UTIL_free(tree.list);
+    UTIL_free(tree.node);
+    return Length;
 }
+
+int (*Decompress)(const void *, void *, int);

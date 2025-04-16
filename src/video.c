@@ -116,12 +116,12 @@ void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
       return;
 
    if (lpRect != NULL) {
-      DRIVER_FrameShow(gpScreen->pixels, bufPalette, lpRect->x, lpRect->y, lpRect->w, lpRect->h, 0);
+      DRIVER_FrameShow(gpScreen->pixels, lpRect->x, lpRect->y, lpRect->w, lpRect->h, 0);
    } else if (g_wShakeTime != 0) {
       g_wShakeTime--;
-      DRIVER_FrameShow(gpScreen->pixels, bufPalette, 0, (g_wShakeTime & 0x1) * g_wShakeLevel, SCREEN_W, SCREEN_H - g_wShakeLevel, 1);
+      DRIVER_FrameShow(gpScreen->pixels, 0, (g_wShakeTime & 0x1) * g_wShakeLevel, SCREEN_W, SCREEN_H - g_wShakeLevel, 1);
    } else
-      DRIVER_FrameShow(gpScreen->pixels, bufPalette, 0, 0, SCREEN_W, SCREEN_H, 0);
+      DRIVER_FrameShow(gpScreen->pixels, 0, 0, SCREEN_W, SCREEN_H, 0);
 }
 
 void VIDEO_SetPalette(const unsigned char *rgPalette)
@@ -141,6 +141,7 @@ void VIDEO_SetPalette(const unsigned char *rgPalette)
 --*/
 {
    memcpy(bufPalette, rgPalette, 256 * 3);
+   DRIVER_UpdatePalette(bufPalette);
 }
 
 const unsigned char *VIDEO_GetPalette(void)
@@ -210,7 +211,7 @@ void VIDEO_SwitchScreen(unsigned short wSpeed)
       // Draw the backup buffer to the screen
       for (j = rgIndex[i]; j < SCREEN_SIZE; j += 6)
          gpBackup[0]->pixels[j] = gpScreen->pixels[j];
-      DRIVER_FrameShow(gpBackup[0]->pixels, bufPalette, 0, 0, SCREEN_W, SCREEN_H, 0);
+      DRIVER_FrameShow(gpBackup[0]->pixels, 0, 0, SCREEN_W, SCREEN_H, 0);
       UTIL_Delay(wSpeed);
    }
 }
@@ -234,7 +235,6 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
 {
    unsigned short i, j, k;
    const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
-   const int gain = 16;
    unsigned char a, b;
    PAL_Rect ROI;
 
@@ -268,7 +268,7 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
             }
             gpBackup[0]->pixels[k] = (a & 0xF0) | (b & 0x0F);
          }
-         DRIVER_FrameShow(gpBackup[0]->pixels, bufPalette, ROI.x, ROI.y, ROI.w, ROI.h, 1);
+         DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, 1);
       }
    }
 

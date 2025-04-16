@@ -693,10 +693,10 @@ PAL_InterpretInstruction(
       //
       PAL_RemoveEquipmentEffect(wEventObjectID, i);
 
-      if (gpGlobals->g.PlayerRoles.rgwEquipment[i][wEventObjectID] != pScript->rgwOperand[1])
+      if (gpGlobals->g.PlayerRoles->rgwEquipment[i][wEventObjectID] != pScript->rgwOperand[1])
       {
-         w = gpGlobals->g.PlayerRoles.rgwEquipment[i][wEventObjectID];
-         gpGlobals->g.PlayerRoles.rgwEquipment[i][wEventObjectID] = pScript->rgwOperand[1];
+         w = gpGlobals->g.PlayerRoles->rgwEquipment[i][wEventObjectID];
+         gpGlobals->g.PlayerRoles->rgwEquipment[i][wEventObjectID] = pScript->rgwOperand[1];
 
          if (PAL_GetItemIndexToInventory(pScript->rgwOperand[1], &i) && i < MAX_INVENTORY && gpGlobals->rgInventory[i].nAmount == 1 && w != 0 && !PAL_GetItemIndexToInventory(w, &j))
          {
@@ -727,7 +727,7 @@ PAL_InterpretInstruction(
       // Increase/decrease the player's attribute
       //
       {
-         unsigned short *p = (unsigned short *)(&gpGlobals->g.PlayerRoles); // HACKHACK
+         unsigned short *p = (unsigned short *)(&*gpGlobals->g.PlayerRoles); // HACKHACK
 
          if (pScript->rgwOperand[2] == 0)
          {
@@ -747,7 +747,7 @@ PAL_InterpretInstruction(
       // Set player's stat
       //
       {
-         unsigned short *p = (unsigned short *)(&gpGlobals->g.PlayerRoles); // HACKHACK
+         unsigned short *p = (unsigned short *)(&*gpGlobals->g.PlayerRoles); // HACKHACK
 
          if (g_iCurEquipPart != -1)
          {
@@ -906,10 +906,10 @@ PAL_InterpretInstruction(
 
                for (j = 0; j < MAX_PLAYER_EQUIPMENTS; j++)
                {
-                  if (gpGlobals->g.PlayerRoles.rgwEquipment[j][w] == pScript->rgwOperand[0])
+                  if (gpGlobals->g.PlayerRoles->rgwEquipment[j][w] == pScript->rgwOperand[0])
                   {
                      PAL_RemoveEquipmentEffect(w, j);
-                     gpGlobals->g.PlayerRoles.rgwEquipment[j][w] = 0;
+                     gpGlobals->g.PlayerRoles->rgwEquipment[j][w] = 0;
 
                      if (--x == 0)
                      {
@@ -965,10 +965,10 @@ PAL_InterpretInstruction(
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
-            if (gpGlobals->g.PlayerRoles.rgwHP[w] == 0)
+            if (gpGlobals->g.PlayerRoles->rgwHP[w] == 0)
             {
-               gpGlobals->g.PlayerRoles.rgwHP[w] =
-                   gpGlobals->g.PlayerRoles.rgwMaxHP[w] * pScript->rgwOperand[1] / 10;
+               gpGlobals->g.PlayerRoles->rgwHP[w] =
+                   gpGlobals->g.PlayerRoles->rgwMaxHP[w] * pScript->rgwOperand[1] / 10;
 
                PAL_CurePoisonByLevel(w, 3);
                for (x = 0; x < kStatusAll; x++)
@@ -985,10 +985,10 @@ PAL_InterpretInstruction(
          //
          // Apply to one player
          //
-         if (gpGlobals->g.PlayerRoles.rgwHP[wEventObjectID] == 0)
+         if (gpGlobals->g.PlayerRoles->rgwHP[wEventObjectID] == 0)
          {
-            gpGlobals->g.PlayerRoles.rgwHP[wEventObjectID] =
-                gpGlobals->g.PlayerRoles.rgwMaxHP[wEventObjectID] * pScript->rgwOperand[1] / 10;
+            gpGlobals->g.PlayerRoles->rgwHP[wEventObjectID] =
+                gpGlobals->g.PlayerRoles->rgwMaxHP[wEventObjectID] * pScript->rgwOperand[1] / 10;
 
             PAL_CurePoisonByLevel(wEventObjectID, 3);
             for (x = 0; x < kStatusAll; x++)
@@ -1015,23 +1015,23 @@ PAL_InterpretInstruction(
          //
          for (i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
          {
-            w = gpGlobals->g.PlayerRoles.rgwEquipment[i][iPlayerRole];
+            w = gpGlobals->g.PlayerRoles->rgwEquipment[i][iPlayerRole];
             if (w != 0)
             {
                PAL_AddItemToInventory(w, 1);
-               gpGlobals->g.PlayerRoles.rgwEquipment[i][iPlayerRole] = 0;
+               gpGlobals->g.PlayerRoles->rgwEquipment[i][iPlayerRole] = 0;
             }
             PAL_RemoveEquipmentEffect(iPlayerRole, i);
          }
       }
       else
       {
-         w = gpGlobals->g.PlayerRoles.rgwEquipment[pScript->rgwOperand[1] - 1][iPlayerRole];
+         w = gpGlobals->g.PlayerRoles->rgwEquipment[pScript->rgwOperand[1] - 1][iPlayerRole];
          if (w != 0)
          {
             PAL_RemoveEquipmentEffect(iPlayerRole, pScript->rgwOperand[1] - 1);
             PAL_AddItemToInventory(w, 1);
-            gpGlobals->g.PlayerRoles.rgwEquipment[pScript->rgwOperand[1] - 1][iPlayerRole] = 0;
+            gpGlobals->g.PlayerRoles->rgwEquipment[pScript->rgwOperand[1] - 1][iPlayerRole] = 0;
          }
       }
       break;
@@ -1306,7 +1306,7 @@ PAL_InterpretInstruction(
       //
       {
          unsigned short *p = (unsigned short *)&gpGlobals->rgEquipmentEffect[kBodyPartExtra]; // HACKHACK
-         unsigned short *p1 = (unsigned short *)&gpGlobals->g.PlayerRoles;
+         unsigned short *p1 = (unsigned short *)gpGlobals->g.PlayerRoles;
 
          if (pScript->rgwOperand[2] == 0)
          {
@@ -1381,7 +1381,7 @@ PAL_InterpretInstruction(
          if (gpGlobals->g.rgObject[wObject].item.wBitmap != wPrevImageIndex)
          {
             if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
-                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gFiles.fpBALL) > 0)
+                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gFiles[Res_BALL].fp) > 0)
             {
                wPrevImageIndex = gpGlobals->g.rgObject[wObject].item.wBitmap;
             }
@@ -1464,11 +1464,11 @@ PAL_InterpretInstruction(
       w = gpGlobals->rgParty[g_Battle->wMovingPlayerIndex].wPlayerRole;
 
       g_Battle->rgEnemy[wEventObjectID].e.wHealth -= pScript->rgwOperand[0];
-      gpGlobals->g.PlayerRoles.rgwHP[w] += pScript->rgwOperand[0];
+      gpGlobals->g.PlayerRoles->rgwHP[w] += pScript->rgwOperand[0];
 
-      if (gpGlobals->g.PlayerRoles.rgwHP[w] > gpGlobals->g.PlayerRoles.rgwMaxHP[w])
+      if (gpGlobals->g.PlayerRoles->rgwHP[w] > gpGlobals->g.PlayerRoles->rgwMaxHP[w])
       {
-         gpGlobals->g.PlayerRoles.rgwHP[w] = gpGlobals->g.PlayerRoles.rgwMaxHP[w];
+         gpGlobals->g.PlayerRoles->rgwHP[w] = gpGlobals->g.PlayerRoles->rgwMaxHP[w];
       }
       break;
 
@@ -1740,8 +1740,8 @@ PAL_InterpretInstruction(
       i = ((pScript->rgwOperand[1] == 0) ? 8 : pScript->rgwOperand[1]);
       j = gpGlobals->g.rgObject[pScript->rgwOperand[0]].magic.wMagicNumber;
       gpGlobals->g.lprgMagic[j].wBaseDamage =
-          gpGlobals->g.PlayerRoles.rgwMP[wEventObjectID] * i;
-      gpGlobals->g.PlayerRoles.rgwMP[wEventObjectID] = 0;
+          gpGlobals->g.PlayerRoles->rgwMP[wEventObjectID] * i;
+      gpGlobals->g.PlayerRoles->rgwMP[wEventObjectID] = 0;
       break;
 
    case 0x0058:
@@ -1777,7 +1777,7 @@ PAL_InterpretInstruction(
       // Halve the player's HP
       // The wEventObjectID parameter here should indicate the player role
       //
-      gpGlobals->g.PlayerRoles.rgwHP[wEventObjectID] /= 2;
+      gpGlobals->g.PlayerRoles->rgwHP[wEventObjectID] /= 2;
       break;
 
    case 0x005B:
@@ -1832,7 +1832,7 @@ PAL_InterpretInstruction(
       // Kill the player immediately
       // The wEventObjectID parameter here should indicate the player role
       //
-      gpGlobals->g.PlayerRoles.rgwHP[wEventObjectID] = 0;
+      gpGlobals->g.PlayerRoles->rgwHP[wEventObjectID] = 0;
       break;
 
    case 0x0060:
@@ -1884,7 +1884,7 @@ PAL_InterpretInstruction(
       //
       // Set the player's sprite
       //
-      gpGlobals->g.PlayerRoles.rgwSpriteNum[pScript->rgwOperand[0]] = pScript->rgwOperand[1];
+      gpGlobals->g.PlayerRoles->rgwSpriteNum[pScript->rgwOperand[0]] = pScript->rgwOperand[1];
       if (!gpGlobals->fInBattle && pScript->rgwOperand[2])
       {
          PAL_SetLoadFlags(kLoadPlayerSprite);
@@ -1897,7 +1897,7 @@ PAL_InterpretInstruction(
       // Throw weapon to enemy
       //
       w = pScript->rgwOperand[1] * 5;
-      w +=(gpGlobals->g.PlayerRoles.rgwAttackStrength[gpGlobals->rgParty[g_Battle->wMovingPlayerIndex].wPlayerRole] * RandomLong(0, 3));
+      w +=(gpGlobals->g.PlayerRoles->rgwAttackStrength[gpGlobals->rgParty[g_Battle->wMovingPlayerIndex].wPlayerRole] * RandomLong(0, 3));
       PAL_BattleSimulateMagic(wEventObjectID, pScript->rgwOperand[0], w);
       break;
 
@@ -2041,7 +2041,7 @@ PAL_InterpretInstruction(
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          w = gpGlobals->rgParty[i].wPlayerRole;
-         if (gpGlobals->g.PlayerRoles.rgwHP[w] < gpGlobals->g.PlayerRoles.rgwMaxHP[w])
+         if (gpGlobals->g.PlayerRoles->rgwHP[w] < gpGlobals->g.PlayerRoles->rgwMaxHP[w])
          {
             wScriptEntry = pScript->rgwOperand[0] - 1;
             break;
@@ -2106,7 +2106,7 @@ PAL_InterpretInstruction(
       //
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
-         if (gpGlobals->g.PlayerRoles.rgwName[gpGlobals->rgParty[i].wPlayerRole] ==
+         if (gpGlobals->g.PlayerRoles->rgwName[gpGlobals->rgParty[i].wPlayerRole] ==
              pScript->rgwOperand[0])
          {
             wScriptEntry = pScript->rgwOperand[1] - 1;
@@ -2394,7 +2394,7 @@ PAL_InterpretInstruction(
          w = gpGlobals->rgParty[i].wPlayerRole;
          for (x = 0; x < MAX_PLAYER_EQUIPMENTS; x++)
          {
-            if (gpGlobals->g.PlayerRoles.rgwEquipment[x][w] == pScript->rgwOperand[0])
+            if (gpGlobals->g.PlayerRoles->rgwEquipment[x][w] == pScript->rgwOperand[0])
             {
                y = true;
                i = 999;

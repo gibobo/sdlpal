@@ -51,44 +51,17 @@ PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
 --*/
 {
    unsigned char *buf;
-   unsigned int size;
+   int size;
    PALMAP *map;
 
    // Check for invalid map number.
-   if (iMapNum >= PAL_MKFGetChunkCount(fpMapMKF) ||
-       iMapNum >= PAL_MKFGetChunkCount(fpGopMKF) ||
-       iMapNum <= 0) {
+   if (iMapNum <= 0)
      return NULL;
-   }
-
-   // Load the map tile data.
-   size = PAL_MKFGetChunkSize(iMapNum, fpMapMKF);
-
-   // Allocate a temporary buffer for the compressed data.
-   buf = (unsigned char *)UTIL_malloc(size);
 
    // Create the map instance.
    map = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
 
-   // Read the map data.
-   if (PAL_MKFReadChunk(buf, size, iMapNum, fpMapMKF) < 0) {
-      UTIL_free(buf);
-      UTIL_free(map);
-      return NULL;
-   }
-
-   // Decompress the tile data.
-   unsigned int tile_size = PALMAP_Y * PALMAP_X * PALMAP_Z * sizeof(unsigned int);
-   map->Tiles = (unsigned int *)UTIL_malloc(tile_size);
-   if (YJ2_Decompress(buf, map->Tiles, tile_size) < 0) {
-      UTIL_free(buf);
-      UTIL_free(map->Tiles);
-      UTIL_free(map);
-      return NULL;
-   }
-
-   // The compressed data is useless now; delete it.
-   UTIL_free(buf);
+   PAL_MKFDecompressChunk((unsigned char **)&map->Tiles, 0, iMapNum, fpMapMKF);
 
    // Load the tile bitmaps.
    size = PAL_MKFGetChunkSize(iMapNum, fpGopMKF);

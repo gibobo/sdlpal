@@ -812,20 +812,19 @@ int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
 {
    unsigned int uiOffset = 0;
    unsigned int uiNextOffset = 0;
-   unsigned int uiChunkCount = 0;
+   int uiChunkCount = 0;
 
    //
    // Get the total number of chunks.
    //
    uiChunkCount = PAL_MKFGetChunkCount(fp);
-   if (uiChunkNum >= uiChunkCount) {
+   if (uiChunkNum >= uiChunkCount)
       return -1;
-   }
 
    //
    // Get the offset of the specified chunk and the next chunk.
    //
-   UTIL_fseek(fp, 4 * uiChunkNum, SEEK_SET);
+   UTIL_fseek(fp, uiChunkNum * sizeof(unsigned int), SEEK_SET);
    Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
@@ -903,55 +902,29 @@ int PAL_MKFReadChunk(
    return -1;
 }
 
-int PAL_MKFGetDecompressedSize(
+int PAL_MKFReadChunk2(
+    void **lpBuffer,
+    unsigned int uiBufferSize,
     unsigned int uiChunkNum,
     void *fp)
-/*++
-  Purpose:
-
-    Get the decompressed size of a compressed chunk in an MKF archive.
-
-  Parameters:
-
-    [IN]  uiChunkNum - the number of the chunk in the MKF archive.
-
-    [IN]  fp - pointer to the fopen'ed MKF file.
-
-  Return value:
-
-    Integer value which indicates the size of the chunk.
-    -1 if the chunk does not exist.
-
---*/
 {
-   unsigned int buf[2];
-   unsigned int uiOffset;
-   unsigned int uiChunkCount;
 
-   if (fp == NULL) {
-      return -1;
+   int len = PAL_MKFGetChunkSize(uiChunkNum, fp);
+
+   if (len > 0)
+   {
+      unsigned char *buf = *lpBuffer;
+
+      if ((uiBufferSize == 0) || ((*lpBuffer) == NULL))
+      {
+         UTIL_free(*lpBuffer);
+         uiBufferSize = *(unsigned int *)buf;
+         *lpBuffer = UTIL_malloc(uiBufferSize);
+      }
+      PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
    }
 
-   //
-   // Get the total number of chunks.
-   //
-   uiChunkCount = PAL_MKFGetChunkCount(fp);
-   if (uiChunkNum >= uiChunkCount) {
-      return -1;
-   }
-
-   //
-   // Get the offset of the chunk.
-   //
-   UTIL_fseek(fp, 4 * uiChunkNum, SEEK_SET);
-   Check_fread(&uiOffset, 4, 1, fp);
-
-   //
-   // Read the header.
-   //
-   UTIL_fseek(fp, uiOffset, SEEK_SET);
-   Check_fread(buf, sizeof(unsigned int), 1, fp);
-   return (int)buf[0];
+   return len;
 }
 
 int PAL_MKFDecompressChunk(

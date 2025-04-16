@@ -662,7 +662,7 @@ void PAL_UpdatePartyGestures(
       gpGlobals->rgParty[0].x = PAL_X(gpGlobals->partyoffset);
       gpGlobals->rgParty[0].y = PAL_Y(gpGlobals->partyoffset);
 
-      if (gpGlobals->g.PlayerRoles.rgwWalkFrames[gpGlobals->rgParty[0].wPlayerRole] == 4)
+      if (gpGlobals->g.PlayerRoles->rgwWalkFrames[gpGlobals->rgParty[0].wPlayerRole] == 4)
       {
          gpGlobals->rgParty[0].wFrame = gpGlobals->wPartyDirection * 4 + s_iThisStepFrame;
       }
@@ -707,7 +707,7 @@ void PAL_UpdatePartyGestures(
          //
          // Update gesture for this party member
          //
-         if (gpGlobals->g.PlayerRoles.rgwWalkFrames[gpGlobals->rgParty[i].wPlayerRole] == 4)
+         if (gpGlobals->g.PlayerRoles->rgwWalkFrames[gpGlobals->rgParty[i].wPlayerRole] == 4)
          {
             gpGlobals->rgParty[i].wFrame = gpGlobals->rgTrail[2].wDirection * 4 + s_iThisStepFrame;
          }
@@ -735,7 +735,7 @@ void PAL_UpdatePartyGestures(
       //
       // Player is not moved. Use the "standing" gesture instead of "walking" one.
       //
-      i = gpGlobals->g.PlayerRoles.rgwWalkFrames[gpGlobals->rgParty[0].wPlayerRole];
+      i = gpGlobals->g.PlayerRoles->rgwWalkFrames[gpGlobals->rgParty[0].wPlayerRole];
       if (i == 0)
       {
          i = 3;
@@ -744,7 +744,7 @@ void PAL_UpdatePartyGestures(
 
       for (i = 1; i <= (short)gpGlobals->wMaxPartyMemberIndex; i++)
       {
-         int f = gpGlobals->g.PlayerRoles.rgwWalkFrames[gpGlobals->rgParty[i].wPlayerRole];
+         int f = gpGlobals->g.PlayerRoles->rgwWalkFrames[gpGlobals->rgParty[i].wPlayerRole];
          if (f == 0)
          {
             f = 3;

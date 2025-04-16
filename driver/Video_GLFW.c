@@ -8,6 +8,7 @@
 static int window_width = 320;
 static int window_height = 200;
 static unsigned char *framebuffer = NULL;   // RGB888
+static unsigned char *palette = NULL;
 GLFWwindow *window = NULL;
 
 extern void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -18,7 +19,6 @@ unsigned char *DRIVER_FrameBuffer() {
 
 void DRIVER_FrameShow(
     unsigned char *frame,
-    const unsigned char *palette,
     const unsigned short roi_x,
     const unsigned short roi_y,
     const unsigned short roi_w,
@@ -63,6 +63,8 @@ void DRIVER_FrameResize(unsigned int width, unsigned int height) {
     window_height = height;
     VIDEO_GLSL_Initialize(window_width, window_height);
 }
+
+void DRIVER_UpdatePalette(const unsigned char *rgPalette) { palette = rgPalette; }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {

@@ -12,16 +12,15 @@ void DRIVER_Audio_Unlock(void);
 int DRIVER_Init_Video(void);
 void DRIVER_DeInit_Video(void);
 unsigned char *DRIVER_FrameBuffer();
-
 void DRIVER_FrameShow(
     unsigned char *frame,
-    const unsigned char *palette,
     const unsigned short roi_x,
     const unsigned short roi_y,
     const unsigned short roi_w,
     const unsigned short roi_h,
     const unsigned char padding_flag);
 void DRIVER_FrameResize(unsigned int width, unsigned int height);
+void DRIVER_UpdatePalette(const unsigned char *rgPalette);
 
 int DRIVER_Init_Event(void);
 void DRIVER_DeInit_Event(void);

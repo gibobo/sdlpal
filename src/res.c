@@ -249,7 +249,7 @@ void PAL_LoadResources(void)
 
       for (i = 0; i < gpResources->nEventObjectSprites; i++, index++) {
          gpResources->lppEventObjectSprites[i] = NULL;
-         if (PAL_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, gFiles.fpMGO) > 0)
+         if (PAL_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, gFiles[Res_MGO].fp) > 0)
          gpGlobals->g.lprgEventObject[index].nSpriteFramesAuto = PAL_SpriteGetNumFrames(gpResources->lppEventObjectSprites[i]);
          }
 
@@ -269,10 +269,10 @@ void PAL_LoadResources(void)
          assert(wPlayerID < MAX_PLAYER_ROLES);
 
          // Load player sprite
-         wSpriteNum = gpGlobals->g.PlayerRoles.rgwSpriteNum[wPlayerID];
+         wSpriteNum = gpGlobals->g.PlayerRoles->rgwSpriteNum[wPlayerID];
 
          PAL_MKFDecompressChunk(
-            &gpResources->rglpPlayerSprite[i], 0, wSpriteNum, gFiles.fpMGO);
+            &gpResources->rglpPlayerSprite[i], 0, wSpriteNum, gFiles[Res_MGO].fp);
       }
 
       for (i = 1; i <= gpGlobals->nFollower; i++) {
@@ -280,7 +280,7 @@ void PAL_LoadResources(void)
          wSpriteNum = gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].wPlayerRole;
 
          PAL_MKFDecompressChunk(
-            &gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum, gFiles.fpMGO);
+            &gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum, gFiles[Res_MGO].fp);
       }
    }
 

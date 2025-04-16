@@ -204,7 +204,7 @@ PAL_ItemSelectMenuUpdate(
                                  PAL_XY(xBase, yBase - iPictureYOffset));
 
             if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
-                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gFiles.fpBALL) > 0)
+                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gFiles[Res_BALL].fp) > 0)
             {
                PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(xBase + 8, yBase + 7 - iPictureYOffset));
             }
@@ -326,11 +326,11 @@ void PAL_ItemSelectMenuInit(
 
          for (j = 0; j < MAX_PLAYER_EQUIPMENTS; j++)
          {
-            if (gpGlobals->g.rgObject[gpGlobals->g.PlayerRoles.rgwEquipment[j][w]].item.wFlags & kItemFlagUsable)
+            if (gpGlobals->g.rgObject[gpGlobals->g.PlayerRoles->rgwEquipment[j][w]].item.wFlags & kItemFlagUsable)
             {
                if (g_iNumInventory < MAX_INVENTORY)
                {
-                  gpGlobals->rgInventory[g_iNumInventory].wItem = gpGlobals->g.PlayerRoles.rgwEquipment[j][w];
+                  gpGlobals->rgInventory[g_iNumInventory].wItem = gpGlobals->g.PlayerRoles->rgwEquipment[j][w];
                   gpGlobals->rgInventory[g_iNumInventory].nAmount = 0;
                   gpGlobals->rgInventory[g_iNumInventory].nAmountInUse = (unsigned short)-1;
 

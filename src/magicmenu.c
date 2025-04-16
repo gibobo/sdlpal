@@ -256,14 +256,14 @@ void PAL_MagicSelectionMenuInit(
    g_iCurrentItem = 0;
    g_iNumMagic = 0;
 
-   g_wPlayerMP = gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole];
+   g_wPlayerMP = gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole];
 
    //
    // Put all magics of this player to the array
    //
    for (i = 0; i < MAX_PLAYER_MAGICS; i++)
    {
-      w = gpGlobals->g.PlayerRoles.rgwMagic[i][wPlayerRole];
+      w = gpGlobals->g.PlayerRoles->rgwMagic[i][wPlayerRole];
       if (w != 0)
       {
          rgMagicItem[g_iNumMagic].wMagic = w;

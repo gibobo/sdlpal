@@ -45,7 +45,7 @@ static const unsigned char bd_reg_data[] = {
     0x00, 0x01, 0x00, 0x0F, 0x0B, 0x00, 0x07, 0x05, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00};
 
-static void *fp = NULL;
+static void *fpMusMKF = NULL;
 static unsigned char *rix_buf = NULL; /* rix files' f_buffer */
 static int songs = 0;
 static unsigned short f_buffer[25 * 12]; // 9C0h-C18h
@@ -104,23 +104,23 @@ unsigned char CrixPlayer_update() {
 }
 
 void CrixPlayer_deinit(void) {
-   UTIL_fclose(fp);
+   UTIL_fclose(fpMusMKF);
    UTIL_free(rix_buf);
-   fp = NULL;
+   fpMusMKF = NULL;
    rix_buf = NULL;
    subsong_id = -1;
 }
 
 unsigned char CrixPlayer_load(const char *filename) {
-   fp = UTIL_fopen(filename, "rb");
-   UTIL_fseek(fp, 0, SEEK_SET);
-   UTIL_fread(&songs, sizeof(int), 1, fp);
-   UTIL_fseek(fp, songs, SEEK_SET);
+   fpMusMKF = UTIL_fopen(filename, "rb");
+   UTIL_fseek(fpMusMKF, 0, SEEK_SET);
+   UTIL_fread(&songs, sizeof(int), 1, fpMusMKF);
+   UTIL_fseek(fpMusMKF, songs, SEEK_SET);
 
    unsigned short signature;
-   UTIL_fread(&signature, 2, 1, fp);
+   UTIL_fread(&signature, 2, 1, fpMusMKF);
    if (signature != 0x55aa) {
-      UTIL_fclose(fp);
+      UTIL_fclose(fpMusMKF);
       return false;
    }
    songs /= 4;
@@ -160,18 +160,19 @@ void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit) {
    }
 
    if (subsong != subsong_id) {
-      subsong_id = subsong;
       int index[2];
-      UTIL_fseek(fp, subsong * 4, SEEK_SET);
-      UTIL_fread(index, sizeof(int), 2, fp);
+      UTIL_free(rix_buf);
+      rix_buf = NULL;
+      subsong_id = subsong;
+      UTIL_fseek(fpMusMKF, subsong * sizeof(int), SEEK_SET);
+      UTIL_fread(index, sizeof(int), 2, fpMusMKF);
       length = index[1] - index[0];
 
       if (length == 0)
          return;
-      UTIL_fseek(fp, index[0], SEEK_SET);
-      UTIL_free(rix_buf);
       rix_buf = (unsigned char *)UTIL_calloc(length, sizeof(unsigned char));
-      UTIL_fread(rix_buf, length, sizeof(unsigned char), fp);
+      UTIL_fseek(fpMusMKF, index[0], SEEK_SET);
+      UTIL_fread(rix_buf, length, sizeof(unsigned char), fpMusMKF);
    }
 
    if (reinit) {
@@ -189,6 +190,8 @@ void ad_a0b0l_reg_(unsigned short index, unsigned short p2, unsigned short p3) {
 }
 
 void data_initial() {
+   if (rix_buf == NULL)
+      return;
    if (0x0D < length) {
       rhythm = rix_buf[2];
       mus_block = (rix_buf[0x0D] << 8) + rix_buf[0x0C];
@@ -259,7 +262,7 @@ void int_08h_entry() {
 /*--------------------------------------------------------------*/
 unsigned short rix_proc() {
    unsigned char ctrl = 0;
-   if (music_on == 0 || pause_flag == 1)
+   if (music_on == 0 || pause_flag == 1 || rix_buf == NULL)
       return 0;
    band = 0;
    while (I < length && rix_buf[I] != 0x80) {
@@ -297,6 +300,8 @@ unsigned short rix_proc() {
 }
 /*--------------------------------------------------------------*/
 void rix_get_ins() {
+   if (rix_buf == NULL)
+      return;
    if (ins_block + (band_low << 6) + sizeof(insbuf) >= length)
       return;
 

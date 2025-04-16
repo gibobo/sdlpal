@@ -142,7 +142,7 @@ int PAL_InitText(void)
    g_TextLib.bDialogPosition = kDialogUpper;
    g_TextLib.fUserSkip = false;
 
-   PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gFiles.fpDATA);
+   PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gFiles[Res_DATA].fp);
 
    return 0;
 }
@@ -473,7 +473,7 @@ PAL_StartDialogWithOffset(
       if (iNumCharFace > 0)
       {
          // Display the character face at the upper part of the screen
-         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles[Res_RGM].fp) > 0)
          {
             rect.w = PAL_RLEGetWidth((const unsigned char*)buf);
             rect.h = PAL_RLEGetHeight((const unsigned char*)buf);
@@ -495,7 +495,7 @@ PAL_StartDialogWithOffset(
       if (iNumCharFace > 0)
       {
          // Display the character face at the lower part of the screen
-         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles.fpRGM) > 0)
+         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles[Res_RGM].fp) > 0)
          {
             rect.x = 270 - PAL_RLEGetWidth((const unsigned char*)buf) / 2 + xOff;
             rect.y = 144 - PAL_RLEGetHeight((const unsigned char*)buf) / 2 + yOff;
@@ -538,24 +538,20 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
 --*/
 {
-   unsigned char  palette[256 * 3];
-   unsigned char *pCurrentPalette;
-   unsigned char  t[3];
-   int         i;
-   unsigned int    dwBeginningTicks = UTIL_GetTicks();
+   unsigned char new_palette[PALETTE_SIZE];
+   unsigned char *org_palette = NULL;
+   unsigned char t[3];
+   int i;
+   unsigned int dwBeginningTicks = UTIL_GetTicks();
 
-   //
    // get the current palette
-   //
-   pCurrentPalette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
-   memcpy(palette, pCurrentPalette, sizeof(palette));
+   org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
+   memcpy(new_palette, org_palette, PALETTE_SIZE);
 
    if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
       g_TextLib.bDialogPosition != kDialogCenter)
    {
-      //
       // show the icon
-      //
       const unsigned char* p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
       if (p != NULL)
       {
@@ -581,19 +577,19 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
          g_TextLib.bDialogPosition != kDialogCenter)
       {
          // palette shift
-         t[0] = palette[0xF9 * 3 + 0];
-         t[1] = palette[0xF9 * 3 + 1];
-         t[2] = palette[0xF9 * 3 + 2];
+         t[0] = new_palette[0xF9 * 3 + 0];
+         t[1] = new_palette[0xF9 * 3 + 1];
+         t[2] = new_palette[0xF9 * 3 + 2];
          for (i = 0xF9; i < 0xFE; i++) {
-           palette[i * 3 + 0] = palette[i * 3 + 3];
-           palette[i * 3 + 1] = palette[i * 3 + 4];
-           palette[i * 3 + 2] = palette[i * 3 + 5];
+           new_palette[i * 3 + 0] = new_palette[i * 3 + 3];
+           new_palette[i * 3 + 1] = new_palette[i * 3 + 4];
+           new_palette[i * 3 + 2] = new_palette[i * 3 + 5];
          }
-         palette[0xFE * 3 + 0] = t[0];
-         palette[0xFE * 3 + 1] = t[1];
-         palette[0xFE * 3 + 2] = t[2];
+         new_palette[0xFE * 3 + 0] = t[0];
+         new_palette[0xFE * 3 + 1] = t[1];
+         new_palette[0xFE * 3 + 2] = t[2];
 
-         VIDEO_SetPalette(palette);
+         VIDEO_SetPalette(new_palette);
          VIDEO_UpdateScreen(NULL);
       }
 
@@ -611,7 +607,8 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
    if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
       g_TextLib.bDialogPosition != kDialogCenter)
    {
-      PAL_SetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
+      VIDEO_SetPalette(org_palette);
+      VIDEO_UpdateScreen(NULL);
    }
 
    PAL_ClearKeyState();

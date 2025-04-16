@@ -29,7 +29,17 @@
 #include <stdio.h>
 #include <string.h>
 
-FILES gFiles;
+PALFILE gFiles[] = {
+    [Res_FBP] = {"fbp.mkf", NULL},
+    [Res_MGO] = {"mgo.mkf", NULL},
+    [Res_BALL] = {"ball.mkf", NULL},
+    [Res_DATA] = {"data.mkf", NULL},
+    [Res_F] = {"f.mkf", NULL},
+    [Res_FIRE] = {"fire.mkf", NULL},
+    [Res_RGM] = {"rgm.mkf", NULL},
+    [Res_SSS] = {"sss.mkf", NULL},
+};
+
 GLOBALVARS *gpGlobals = NULL;
 
 int PAL_InitGlobals(void)
@@ -49,15 +59,13 @@ int PAL_InitGlobals(void)
 --*/
 {
    // Open files
-   gFiles.fpFBP = UTIL_fopen(RESOURCE_PATH "/fbp.mkf", "rb");
-   gFiles.fpMGO = UTIL_fopen(RESOURCE_PATH "/mgo.mkf", "rb");
-   gFiles.fpBALL = UTIL_fopen(RESOURCE_PATH "/ball.mkf", "rb");
-   gFiles.fpDATA = UTIL_fopen(RESOURCE_PATH "/data.mkf", "rb");
-   gFiles.fpF = UTIL_fopen(RESOURCE_PATH "/f.mkf", "rb");
-   gFiles.fpFIRE = UTIL_fopen(RESOURCE_PATH "/fire.mkf", "rb");
-   gFiles.fpRGM = UTIL_fopen(RESOURCE_PATH "/rgm.mkf", "rb");
-   gFiles.fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
-
+   char filename[256];
+   unsigned char i;
+   for (i = 0; i < Res_ALL; i++)
+   {
+      sprintf(filename, RESOURCE_PATH "/%s", gFiles[i].name);
+      gFiles[i].fp = UTIL_fopen(filename, "rb");
+   }
    return 0;
 }
 
@@ -78,14 +86,12 @@ void PAL_FreeGlobals(void)
 --*/
 {
    // Close all opened files
-   UTIL_fclose(gFiles.fpFBP);
-   UTIL_fclose(gFiles.fpMGO);
-   UTIL_fclose(gFiles.fpBALL);
-   UTIL_fclose(gFiles.fpDATA);
-   UTIL_fclose(gFiles.fpF);
-   UTIL_fclose(gFiles.fpFIRE);
-   UTIL_fclose(gFiles.fpRGM);
-   UTIL_fclose(gFiles.fpSSS);
+   
+   unsigned char i;
+   for (i = 0; i < Res_ALL; i++)
+   {
+      UTIL_fclose(gFiles[i].fp);
+   }
 
    // Free the game data
    if(gpGlobals)
@@ -98,40 +104,12 @@ void PAL_FreeGlobals(void)
       UTIL_free(gpGlobals->g.lprgMagic);
       UTIL_free(gpGlobals->g.lprgBattleField);
       UTIL_free(gpGlobals->g.lprgLevelUpMagic);
+      UTIL_free(gpGlobals->g.PlayerRoles);
       memset(gpGlobals, 0, sizeof(GLOBALVARS));
       UTIL_free(gpGlobals);
    }
 
    gpGlobals = NULL;
-}
-
-static void PAL_ReadGlobalGameData(void)
-/*++
-  Purpose:
-
-    Read global game data from data files.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-  GAMEDATA *p = &gpGlobals->g;
-  PAL_MKFReadChunk(p->lprgScriptEntry,        p->nScriptEntry * sizeof(SCRIPTENTRY), 4, gFiles.fpSSS);
-  PAL_MKFReadChunk(p->lprgStore,              p->nStore * sizeof(STORE), 0, gFiles.fpDATA);
-  PAL_MKFReadChunk(p->lprgEnemy,              p->nEnemy * sizeof(ENEMY), 1, gFiles.fpDATA);
-  PAL_MKFReadChunk(p->lprgEnemyTeam,          p->nEnemyTeam * sizeof(ENEMYTEAM), 2, gFiles.fpDATA);
-  PAL_MKFReadChunk(p->lprgMagic,              p->nMagic * sizeof(MAGIC), 4, gFiles.fpDATA);
-  PAL_MKFReadChunk(p->lprgBattleField,        p->nBattleField * sizeof(BATTLEFIELD), 5, gFiles.fpDATA);
-  PAL_MKFReadChunk(p->lprgLevelUpMagic,       p->nLevelUpMagic * sizeof(LEVELUPMAGIC_ALL), 6, gFiles.fpDATA);
-  PAL_MKFReadChunk(p->rgwBattleEffectIndex,   sizeof(p->rgwBattleEffectIndex), 11, gFiles.fpDATA);
-  PAL_MKFReadChunk(p->EnemyPos,               sizeof(p->EnemyPos), 13, gFiles.fpDATA);
-  PAL_MKFReadChunk(p->rgLevelUpExp,           sizeof(p->rgLevelUpExp), 14, gFiles.fpDATA);
 }
 
 static void PAL_InitGlobalGameData(void)
@@ -150,23 +128,29 @@ static void PAL_InitGlobalGameData(void)
 
 --*/
 {
-#define PAL_DOALLOCATE(fp, num, type, ptr, n)   \
-  if (ptr == NULL) {                            \
-    int len = PAL_MKFGetChunkSize(num, fp);     \
-    ptr = (type *)UTIL_malloc(len);             \
-    n = len / sizeof(type);                     \
-  }
+#define PAL_DOALLOCATE(fp, num, type, ptr, n) \
+   if (ptr == NULL)                           \
+   {                                          \
+      int len = PAL_MKFGetChunkSize(num, fp); \
+      ptr = (type *)UTIL_malloc(len);         \
+      n = len / sizeof(type);                 \
+      PAL_MKFReadChunk(ptr, len, num, fp);    \
+   }
 
-  // If the memory has not been allocated, allocate first.
-  PAL_DOALLOCATE(gFiles.fpSSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
-  PAL_DOALLOCATE(gFiles.fpSSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
-  PAL_DOALLOCATE(gFiles.fpDATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
-  PAL_DOALLOCATE(gFiles.fpDATA, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
-  PAL_DOALLOCATE(gFiles.fpDATA, 2, ENEMYTEAM, gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
-  PAL_DOALLOCATE(gFiles.fpDATA, 4, MAGIC, gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
-  PAL_DOALLOCATE(gFiles.fpDATA, 5, BATTLEFIELD, gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
-  PAL_DOALLOCATE(gFiles.fpDATA, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
-  PAL_ReadGlobalGameData();
+   // If the memory has not been allocated, allocate first.
+   PAL_DOALLOCATE(gFiles[Res_SSS].fp, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
+   PAL_DOALLOCATE(gFiles[Res_SSS].fp, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
+   PAL_DOALLOCATE(gFiles[Res_DATA].fp, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
+   PAL_DOALLOCATE(gFiles[Res_DATA].fp, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
+   PAL_DOALLOCATE(gFiles[Res_DATA].fp, 2, ENEMYTEAM, gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
+   PAL_DOALLOCATE(gFiles[Res_DATA].fp, 4, MAGIC, gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
+   PAL_DOALLOCATE(gFiles[Res_DATA].fp, 5, BATTLEFIELD, gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
+   PAL_DOALLOCATE(gFiles[Res_DATA].fp, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
+   PAL_DOALLOCATE(gFiles[Res_DATA].fp, 3, PLAYERROLES, gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles);
+
+   PAL_MKFReadChunk(gpGlobals->g.rgwBattleEffectIndex, sizeof(gpGlobals->g.rgwBattleEffectIndex), 11, gFiles[Res_DATA].fp);
+   PAL_MKFReadChunk(gpGlobals->g.EnemyPos, sizeof(gpGlobals->g.EnemyPos), 13, gFiles[Res_DATA].fp);
+   PAL_MKFReadChunk(gpGlobals->g.rgLevelUpExp, sizeof(gpGlobals->g.rgLevelUpExp), 14, gFiles[Res_DATA].fp);
 #undef PAL_DOALLOCATE
 }
 
@@ -186,15 +170,12 @@ static void PAL_LoadDefaultGame(void)
 
 --*/
 {
-   GAMEDATA    *p = &gpGlobals->g;
    unsigned int       i;
-
-   unsigned short *pr = (unsigned short *)(&p->PlayerRoles); // HACKHACK
    // Load the default data from the game data files.
-   PAL_MKFReadChunk(p->lprgEventObject, p->nEventObject * sizeof(EVENTOBJECT), 0, gFiles.fpSSS);
-   PAL_MKFReadChunk(p->rgScene, sizeof(p->rgScene), 1, gFiles.fpSSS);
-   PAL_MKFReadChunk(p->rgObject, sizeof(p->rgObject), 2, gFiles.fpSSS);
-   PAL_MKFReadChunk(pr, sizeof(PLAYERROLES), 3, gFiles.fpDATA);
+   PAL_MKFReadChunk(gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject * sizeof(EVENTOBJECT), 0, gFiles[Res_SSS].fp);
+   PAL_MKFReadChunk(gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene), 1, gFiles[Res_SSS].fp);
+   PAL_MKFReadChunk(gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject), 2, gFiles[Res_SSS].fp);
+   PAL_MKFReadChunk(gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles * sizeof(LEVELUPMAGIC_ALL), 3, gFiles[Res_DATA].fp);
 
    // Set some other default data.
    gpGlobals->dwCash = 0;
@@ -217,14 +198,14 @@ static void PAL_LoadDefaultGame(void)
 
    for (i = 0; i < MAX_PLAYER_ROLES; i++)
    {
-      gpGlobals->Exp.rgPrimaryExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
-      gpGlobals->Exp.rgHealthExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
-      gpGlobals->Exp.rgMagicExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
-      gpGlobals->Exp.rgAttackExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
-      gpGlobals->Exp.rgMagicPowerExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
-      gpGlobals->Exp.rgDefenseExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
-      gpGlobals->Exp.rgDexterityExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
-      gpGlobals->Exp.rgFleeExp[i].wLevel = p->PlayerRoles.rgwLevel[i];
+      gpGlobals->Exp.rgPrimaryExp[i].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[i];
+      gpGlobals->Exp.rgHealthExp[i].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[i];
+      gpGlobals->Exp.rgMagicExp[i].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[i];
+      gpGlobals->Exp.rgAttackExp[i].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[i];
+      gpGlobals->Exp.rgMagicPowerExp[i].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[i];
+      gpGlobals->Exp.rgDefenseExp[i].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[i];
+      gpGlobals->Exp.rgDexterityExp[i].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[i];
+      gpGlobals->Exp.rgFleeExp[i].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[i];
    }
 
    gpGlobals->fEnteringScene = true;
@@ -325,7 +306,7 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
    memcpy(gpGlobals->rgParty, s->rgParty, sizeof(PARTY) * MAX_PLAYABLE_PLAYER_ROLES);
    memcpy(gpGlobals->rgTrail, s->rgTrail, sizeof(TRAIL) * MAX_PLAYABLE_PLAYER_ROLES);
    gpGlobals->Exp = s->Exp;
-   gpGlobals->g.PlayerRoles = s->PlayerRoles;
+   *gpGlobals->g.PlayerRoles = s->PlayerRoles;
    memset(gpGlobals->rgPoisonStatus, 0, sizeof(POISONSTATUS) * MAX_POISONS * MAX_PLAYABLE_PLAYER_ROLES);
    memcpy(gpGlobals->rgInventory, s->rgInventory, sizeof(INVENTORY) * MAX_INVENTORY);
    memcpy(gpGlobals->g.rgScene, s->rgScene, sizeof(SCENE) * MAX_SCENES);
@@ -401,7 +382,7 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
    memcpy(s->rgParty, gpGlobals->rgParty, sizeof(gpGlobals->rgParty));
    memcpy(s->rgTrail, gpGlobals->rgTrail, sizeof(gpGlobals->rgTrail));
    s->Exp = gpGlobals->Exp;
-   s->PlayerRoles = gpGlobals->g.PlayerRoles;
+   s->PlayerRoles = *gpGlobals->g.PlayerRoles;
    memcpy(s->rgPoisonStatus, gpGlobals->rgPoisonStatus, sizeof(gpGlobals->rgPoisonStatus));
    memcpy(s->rgInventory, gpGlobals->rgInventory, sizeof(gpGlobals->rgInventory));
    memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
@@ -412,7 +393,7 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
    char *save_path = (char *)UTIL_malloc(256);
    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
    if (fp = UTIL_fopen(save_path, "wb")) {
-      i = PAL_MKFGetChunkSize(0, gFiles.fpSSS);
+      i = PAL_MKFGetChunkSize(0, gFiles[Res_SSS].fp);
       i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
       UTIL_fwrite(s, i, 1, fp);
    }
@@ -582,7 +563,7 @@ PAL_CountItem(
 
         for (j = 0; j < MAX_PLAYER_EQUIPMENTS; j++)
         {
-            if (gpGlobals->g.PlayerRoles.rgwEquipment[j][w] == wObjectID)
+            if (gpGlobals->g.PlayerRoles->rgwEquipment[j][w] == wObjectID)
             {
                 count++;
             }
@@ -854,51 +835,51 @@ PAL_IncreaseHPMP(
 --*/
 {
    int           fSuccess = false;
-   unsigned short           wOrigHP = gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole];
-   unsigned short           wOrigMP = gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole];
+   unsigned short           wOrigHP = gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole];
+   unsigned short           wOrigMP = gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole];
 
    //
    // Only care about alive players
    //
-   if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] > 0)
+   if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] > 0)
    {
       //
       // change HP
       //
-      gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] += sHP;
+      gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] += sHP;
 
-      if ((short)(gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole]) < 0)
+      if ((short)(gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole]) < 0)
       {
-         gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] = 0;
+         gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] = 0;
       }
-      else if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] >
-         gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole])
+      else if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] >
+         gpGlobals->g.PlayerRoles->rgwMaxHP[wPlayerRole])
       {
-         gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] =
-            gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole];
+         gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] =
+            gpGlobals->g.PlayerRoles->rgwMaxHP[wPlayerRole];
       }
 
       //
       // Change MP
       //
-      gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] += sMP;
+      gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole] += sMP;
 
-      if ((short)(gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole]) < 0)
+      if ((short)(gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole]) < 0)
       {
-         gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] = 0;
+         gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole] = 0;
       }
-      else if (gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] >
-         gpGlobals->g.PlayerRoles.rgwMaxMP[wPlayerRole])
+      else if (gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole] >
+         gpGlobals->g.PlayerRoles->rgwMaxMP[wPlayerRole])
       {
-         gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] =
-            gpGlobals->g.PlayerRoles.rgwMaxMP[wPlayerRole];
+         gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole] =
+            gpGlobals->g.PlayerRoles->rgwMaxMP[wPlayerRole];
       }
 
       //
       // Avoid over treatment
       //
-      if (wOrigHP != gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] ||
-          wOrigMP != gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole])
+      if (wOrigHP != gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] ||
+          wOrigMP != gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole])
          fSuccess = true;
    }
 
@@ -933,7 +914,7 @@ PAL_UpdateEquipments(
    {
       for (j = 0; j < MAX_PLAYER_EQUIPMENTS; j++)
       {
-         w = gpGlobals->g.PlayerRoles.rgwEquipment[j][i];
+         w = gpGlobals->g.PlayerRoles->rgwEquipment[j][i];
 
          if (w != 0)
          {
@@ -1330,7 +1311,7 @@ PAL_GetPlayerAttackStrength(
    unsigned short       w;
    int        i;
 
-   w = gpGlobals->g.PlayerRoles.rgwAttackStrength[wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwAttackStrength[wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1362,7 +1343,7 @@ PAL_GetPlayerMagicStrength(
    unsigned short       w;
    int        i;
 
-   w = gpGlobals->g.PlayerRoles.rgwMagicStrength[wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwMagicStrength[wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1394,7 +1375,7 @@ PAL_GetPlayerDefense(
    unsigned short       w;
    int        i;
 
-   w = gpGlobals->g.PlayerRoles.rgwDefense[wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwDefense[wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1426,7 +1407,7 @@ PAL_GetPlayerDexterity(
    unsigned short       w;
    int        i;
 
-   w = gpGlobals->g.PlayerRoles.rgwDexterity[wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwDexterity[wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1458,7 +1439,7 @@ PAL_GetPlayerFleeRate(
    unsigned short       w;
    int        i;
 
-   w = gpGlobals->g.PlayerRoles.rgwFleeRate[wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwFleeRate[wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1490,7 +1471,7 @@ PAL_GetPlayerPoisonResistance(
    unsigned short       w;
    int        i;
 
-   w = gpGlobals->g.PlayerRoles.rgwPoisonResistance[wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwPoisonResistance[wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1531,7 +1512,7 @@ PAL_GetPlayerElementalResistance(
    unsigned short       w;
    int        i;
 
-   w = gpGlobals->g.PlayerRoles.rgwElementalResistance[iAttrib][wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwElementalResistance[iAttrib][wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1568,7 +1549,7 @@ PAL_GetPlayerBattleSprite(
    int       i;
    unsigned short      w;
 
-   w = gpGlobals->g.PlayerRoles.rgwSpriteNumInBattle[wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwSpriteNumInBattle[wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1603,7 +1584,7 @@ PAL_GetPlayerCooperativeMagic(
    int       i;
    unsigned short      w;
 
-   w = gpGlobals->g.PlayerRoles.rgwCooperativeMagic[wPlayerRole];
+   w = gpGlobals->g.PlayerRoles->rgwCooperativeMagic[wPlayerRole];
 
    for (i = 0; i <= MAX_PLAYER_EQUIPMENTS; i++)
    {
@@ -1678,7 +1659,7 @@ PAL_AddMagic(
 
    for (i = 0; i < MAX_PLAYER_MAGICS; i++)
    {
-      if (gpGlobals->g.PlayerRoles.rgwMagic[i][wPlayerRole] == wMagic)
+      if (gpGlobals->g.PlayerRoles->rgwMagic[i][wPlayerRole] == wMagic)
       {
          //
          // already have this magic
@@ -1689,7 +1670,7 @@ PAL_AddMagic(
 
    for (i = 0; i < MAX_PLAYER_MAGICS; i++)
    {
-      if (gpGlobals->g.PlayerRoles.rgwMagic[i][wPlayerRole] == 0)
+      if (gpGlobals->g.PlayerRoles->rgwMagic[i][wPlayerRole] == 0)
       {
          break;
       }
@@ -1703,7 +1684,7 @@ PAL_AddMagic(
       return false;
    }
 
-   gpGlobals->g.PlayerRoles.rgwMagic[i][wPlayerRole] = wMagic;
+   gpGlobals->g.PlayerRoles->rgwMagic[i][wPlayerRole] = wMagic;
    return true;
 }
 
@@ -1733,9 +1714,9 @@ PAL_RemoveMagic(
 
    for (i = 0; i < MAX_PLAYER_MAGICS; i++)
    {
-      if (gpGlobals->g.PlayerRoles.rgwMagic[i][wPlayerRole] == wMagic)
+      if (gpGlobals->g.PlayerRoles->rgwMagic[i][wPlayerRole] == wMagic)
       {
-         gpGlobals->g.PlayerRoles.rgwMagic[i][wPlayerRole] = 0;
+         gpGlobals->g.PlayerRoles->rgwMagic[i][wPlayerRole] = 0;
          break;
       }
    }
@@ -1787,7 +1768,7 @@ PAL_SetPlayerStatus(
       //
       // only allow dead players for "puppet" status
       //
-      if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] == 0)
+      if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] == 0)
       {
          if (gpGlobals->rgPlayerStatus[wPlayerRole][wStatusID] < wNumRound)
          {
@@ -1807,7 +1788,7 @@ PAL_SetPlayerStatus(
       //
       // for "good" statuses, reset the status if the status to be set lasts longer
       //
-      if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] != 0 &&
+      if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] != 0 &&
          gpGlobals->rgPlayerStatus[wPlayerRole][wStatusID] < wNumRound)
       {
          gpGlobals->rgPlayerStatus[wPlayerRole][wStatusID] = wNumRound;
@@ -1916,10 +1897,10 @@ PAL_PlayerLevelUp(
    //
    // Add the level
    //
-   gpGlobals->g.PlayerRoles.rgwLevel[wPlayerRole] += wNumLevel;
-   if (gpGlobals->g.PlayerRoles.rgwLevel[wPlayerRole] > MAX_LEVELS)
+   gpGlobals->g.PlayerRoles->rgwLevel[wPlayerRole] += wNumLevel;
+   if (gpGlobals->g.PlayerRoles->rgwLevel[wPlayerRole] > MAX_LEVELS)
    {
-      gpGlobals->g.PlayerRoles.rgwLevel[wPlayerRole] = MAX_LEVELS;
+      gpGlobals->g.PlayerRoles->rgwLevel[wPlayerRole] = MAX_LEVELS;
    }
 
    for (i = 0; i < wNumLevel; i++)
@@ -1927,28 +1908,28 @@ PAL_PlayerLevelUp(
       //
       // Increase player's stats
       //
-      gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole] += 10 + RandomLong(0, 7);
-      gpGlobals->g.PlayerRoles.rgwMaxMP[wPlayerRole] += 8 + RandomLong(0, 5);
-      gpGlobals->g.PlayerRoles.rgwAttackStrength[wPlayerRole] += 4 + RandomLong(0, 1);
-      gpGlobals->g.PlayerRoles.rgwMagicStrength[wPlayerRole] += 4 + RandomLong(0, 1);
-      gpGlobals->g.PlayerRoles.rgwDefense[wPlayerRole] += 2 + RandomLong(0, 1);
-      gpGlobals->g.PlayerRoles.rgwDexterity[wPlayerRole] += 2 + RandomLong(0, 1);
-      gpGlobals->g.PlayerRoles.rgwFleeRate[wPlayerRole] += 2;
+      gpGlobals->g.PlayerRoles->rgwMaxHP[wPlayerRole] += 10 + RandomLong(0, 7);
+      gpGlobals->g.PlayerRoles->rgwMaxMP[wPlayerRole] += 8 + RandomLong(0, 5);
+      gpGlobals->g.PlayerRoles->rgwAttackStrength[wPlayerRole] += 4 + RandomLong(0, 1);
+      gpGlobals->g.PlayerRoles->rgwMagicStrength[wPlayerRole] += 4 + RandomLong(0, 1);
+      gpGlobals->g.PlayerRoles->rgwDefense[wPlayerRole] += 2 + RandomLong(0, 1);
+      gpGlobals->g.PlayerRoles->rgwDexterity[wPlayerRole] += 2 + RandomLong(0, 1);
+      gpGlobals->g.PlayerRoles->rgwFleeRate[wPlayerRole] += 2;
    }
 
 #define STAT_LIMIT(t) { if ((t) > 999) (t) = 999; }
-   STAT_LIMIT(gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole]);
-   STAT_LIMIT(gpGlobals->g.PlayerRoles.rgwMaxMP[wPlayerRole]);
-   STAT_LIMIT(gpGlobals->g.PlayerRoles.rgwAttackStrength[wPlayerRole]);
-   STAT_LIMIT(gpGlobals->g.PlayerRoles.rgwMagicStrength[wPlayerRole]);
-   STAT_LIMIT(gpGlobals->g.PlayerRoles.rgwDefense[wPlayerRole]);
-   STAT_LIMIT(gpGlobals->g.PlayerRoles.rgwDexterity[wPlayerRole]);
-   STAT_LIMIT(gpGlobals->g.PlayerRoles.rgwFleeRate[wPlayerRole]);
+   STAT_LIMIT(gpGlobals->g.PlayerRoles->rgwMaxHP[wPlayerRole]);
+   STAT_LIMIT(gpGlobals->g.PlayerRoles->rgwMaxMP[wPlayerRole]);
+   STAT_LIMIT(gpGlobals->g.PlayerRoles->rgwAttackStrength[wPlayerRole]);
+   STAT_LIMIT(gpGlobals->g.PlayerRoles->rgwMagicStrength[wPlayerRole]);
+   STAT_LIMIT(gpGlobals->g.PlayerRoles->rgwDefense[wPlayerRole]);
+   STAT_LIMIT(gpGlobals->g.PlayerRoles->rgwDexterity[wPlayerRole]);
+   STAT_LIMIT(gpGlobals->g.PlayerRoles->rgwFleeRate[wPlayerRole]);
 #undef STAT_LIMIT
 
    //
    // Reset experience points to zero
    //
    gpGlobals->Exp.rgPrimaryExp[wPlayerRole].wExp = 0;
-   gpGlobals->Exp.rgPrimaryExp[wPlayerRole].wLevel = gpGlobals->g.PlayerRoles.rgwLevel[wPlayerRole];
+   gpGlobals->Exp.rgPrimaryExp[wPlayerRole].wLevel = gpGlobals->g.PlayerRoles->rgwLevel[wPlayerRole];
 }

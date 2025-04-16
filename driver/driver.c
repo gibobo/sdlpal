@@ -23,7 +23,6 @@ unsigned char *DRIVER_FrameBuffer() { return NULL; }
 
 void DRIVER_FrameShow(
     unsigned char *frame,
-    const unsigned char *palette,
     const unsigned short roi_x,
     const unsigned short roi_y,
     const unsigned short roi_w,
@@ -31,5 +30,7 @@ void DRIVER_FrameShow(
     const unsigned char padding_flag) {}
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height) {}
+
+void DRIVER_UpdatePalette(const unsigned char *rgPalette) {}
 
 int DRIVER_Process_Events(void) { return 0; }

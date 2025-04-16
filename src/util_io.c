@@ -16,12 +16,17 @@ void *UTIL_fopen(const char *_FileName, const char *_Mode) {
 }
 
 void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode) {
+   FILE *fp = NULL;
+
    if (_FileName == NULL || _Mode == NULL)
       TerminateOnError("%s() called with invalid parameters\n", __func__);
    else
-      return fopen(_FileName, _Mode);
-   printf("File %s loaded\n", _FileName);
-   return NULL;
+      fp = fopen(_FileName, _Mode);
+
+   if (fp != NULL)
+      printf("File %s loaded\n", _FileName);
+
+   return fp;
 }
 
 int UTIL_fseek(void *_Stream, long _Offset, int _Origin) {

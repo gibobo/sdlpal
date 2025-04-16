@@ -147,7 +147,7 @@ void PAL_PlayerInfoBox(
       }
    }
 
-   if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] == 0)
+   if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] == 0)
    {
       //
       // Always use the black/white color for dead players
@@ -173,22 +173,22 @@ void PAL_PlayerInfoBox(
    //
    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
                         PAL_XY(PAL_X(pos) + 49, PAL_Y(pos) + 6));
-   PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxHP[wPlayerRole], 4,
+   PAL_DrawNumber(gpGlobals->g.PlayerRoles->rgwMaxHP[wPlayerRole], 4,
                   PAL_XY(PAL_X(pos) + 47, PAL_Y(pos) + 8), kNumColorYellow, kNumAlignRight);
-   PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole], 4,
+   PAL_DrawNumber(gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole], 4,
                   PAL_XY(PAL_X(pos) + 26, PAL_Y(pos) + 5), kNumColorYellow, kNumAlignRight);
 
    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_SLASH), gpScreen,
                         PAL_XY(PAL_X(pos) + 49, PAL_Y(pos) + 22));
-   PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMaxMP[wPlayerRole], 4,
+   PAL_DrawNumber(gpGlobals->g.PlayerRoles->rgwMaxMP[wPlayerRole], 4,
                   PAL_XY(PAL_X(pos) + 47, PAL_Y(pos) + 24), kNumColorCyan, kNumAlignRight);
-   PAL_DrawNumber(gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole], 4,
+   PAL_DrawNumber(gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole], 4,
                   PAL_XY(PAL_X(pos) + 26, PAL_Y(pos) + 21), kNumColorCyan, kNumAlignRight);
 
    //
    // Draw Statuses
    //
-   if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] > 0)
+   if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] > 0)
    {
       for (i = 0; i < kStatusAll; i++)
       {
@@ -633,7 +633,7 @@ PAL_BattleUIPickAutoMagic(
 
    for (i = 0; i < MAX_PLAYER_MAGICS; i++)
    {
-      w = gpGlobals->g.PlayerRoles.rgwMagic[i][wPlayerRole];
+      w = gpGlobals->g.PlayerRoles->rgwMagic[i][wPlayerRole];
       if (w == 0)
       {
          continue;
@@ -645,7 +645,7 @@ PAL_BattleUIPickAutoMagic(
       // skip if the magic is an ultimate move or not enough MP
       //
       if (gpGlobals->g.lprgMagic[wMagicNum].wCostMP == 1 ||
-          gpGlobals->g.lprgMagic[wMagicNum].wCostMP > gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole] ||
+          gpGlobals->g.lprgMagic[wMagicNum].wCostMP > gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole] ||
           (short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) <= 0)
       {
          continue;
@@ -804,7 +804,7 @@ void PAL_BattleUIUpdate(
    {
       wPlayerRole = gpGlobals->rgParty[g_Battle->UI.wCurPlayerIndex].wPlayerRole;
 
-      if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] == 0 &&
+      if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] == 0 &&
           gpGlobals->rgPlayerStatus[wPlayerRole][kStatusPuppet])
       {
          g_Battle->UI.wActionType = kBattleActionAttack;
@@ -825,7 +825,7 @@ void PAL_BattleUIUpdate(
       //
       // Cancel any actions if player is dead or sleeping.
       //
-      if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] == 0 ||
+      if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] == 0 ||
           gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSleep] != 0 ||
           gpGlobals->rgPlayerStatus[wPlayerRole][kStatusParalyzed] != 0)
       {
@@ -1127,7 +1127,7 @@ void PAL_BattleUIUpdate(
                         }
                      }
                   } while (g_Battle->UI.wCurPlayerIndex > 0 &&
-                           (gpGlobals->g.PlayerRoles.rgwHP[gpGlobals->rgParty[g_Battle->UI.wCurPlayerIndex].wPlayerRole] == 0 ||
+                           (gpGlobals->g.PlayerRoles->rgwHP[gpGlobals->rgParty[g_Battle->UI.wCurPlayerIndex].wPlayerRole] == 0 ||
                             gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle->UI.wCurPlayerIndex].wPlayerRole][kStatusConfused] > 0 ||
                             gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle->UI.wCurPlayerIndex].wPlayerRole][kStatusSleep] > 0 ||
                             gpGlobals->rgPlayerStatus[gpGlobals->rgParty[g_Battle->UI.wCurPlayerIndex].wPlayerRole][kStatusParalyzed] > 0));

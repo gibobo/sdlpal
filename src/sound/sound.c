@@ -112,34 +112,39 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
     const unsigned char *lpWaveData = NULL;
     unsigned int len, type;
 
-    if (dwLen < sizeof(RIFFHeader) || lpRiff->signature != RIFF_RIFF || lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8))
+    if (dwLen < sizeof(RIFFHeader) || lpRiff->signature != RIFF_RIFF ||
+        lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8)) {
         return NULL;
+    }
 
     lpChunk = (const RIFFChunkHeader *)(lpRiff + 1);
     dwLen -= sizeof(RIFFHeader);
     while (dwLen >= sizeof(RIFFChunkHeader)) {
-        len = lpChunk->length;
-        type = lpChunk->type;
-        if (dwLen < sizeof(RIFFChunkHeader) + len)
-            return NULL;
-
+      len = lpChunk->length;
+      type = lpChunk->type;
+      if (dwLen >= sizeof(RIFFChunkHeader) + len)
         dwLen -= sizeof(RIFFChunkHeader) + len;
-        switch (type) {
-            case WAVE_fmt:
-                lpFormat = (const WAVEFormatPCM *)(lpChunk + 1);
-                if (len != sizeof(WAVEFormatPCM) || lpFormat->wFormatTag != 0x0001)
-                    return NULL;
-                break;
-            case WAVE_data:
-                lpWaveData = (const unsigned char *)(lpChunk + 1);
-                dwLen = 0;
-                break;
-            }
-        lpChunk = (const RIFFChunkHeader *)((const unsigned char *)(lpChunk + 1) + len);
+      else
+        return NULL;
+
+      switch (type) {
+      case WAVE_fmt:
+        lpFormat = (const WAVEFormatPCM *)(lpChunk + 1);
+        if (len != sizeof(WAVEFormatPCM) || lpFormat->wFormatTag != 0x0001) {
+          return NULL;
+        }
+        break;
+      case WAVE_data:
+        lpWaveData = (const unsigned char *)(lpChunk + 1);
+        dwLen = 0;
+        break;
+      }
+      lpChunk = (const RIFFChunkHeader *)((const unsigned char *)(lpChunk + 1) + len);
     }
 
-    if (lpFormat == NULL || lpWaveData == NULL)
+    if (lpFormat == NULL || lpWaveData == NULL) {
         return NULL;
+    }
 
     lpSpec->channels = lpFormat->nChannels;
     lpSpec->format = (lpFormat->wBitsPerSample == 16);
@@ -182,33 +187,29 @@ static int SOUND_ResampleMix_U8_Mono_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-    int src_samples = lpSpec->size;
-    const unsigned char *src = (const unsigned char *)lpData;
-    short *dst = (short *)lpBuffer;
-    int channel_len = iBufLen;
-    int total_bytes = 0;
-    int j;
-    int to_write;
-    int sample;
+  int src_samples = lpSpec->size;
+  const unsigned char *src = (const unsigned char *)lpData;
+  short *dst = (short *)lpBuffer;
+  int channel_len = iBufLen, total_bytes = 0;
 
-    while (total_bytes < channel_len && src_samples > 0) {
-        to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-            resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
-            sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-        }
+  while (total_bytes < channel_len && src_samples > 0) {
+    int j, to_write = resampler_get_free_count(resampler[0]);
+    if (to_write > src_samples)
+      to_write = src_samples;
+    for (j = 0; j < to_write; j++)
+      resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
+    src_samples -= to_write;
+    while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
+      int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
+      *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      total_bytes += sizeof(short);
+      resampler_remove_sample(resampler[0]);
     }
+  }
 
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+  if (llpData)
+    *llpData = src;
+  return total_bytes;
 }
 
 static int SOUND_ResampleMix_U8_Mono_Stereo(
@@ -243,34 +244,30 @@ static int SOUND_ResampleMix_U8_Mono_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-    int src_samples = lpSpec->size;
-    const unsigned char *src = (const unsigned char *)lpData;
-    short *dst = (short *)lpBuffer;
-    int channel_len = iBufLen >> 1;
-    int total_bytes = 0;
-    int j;
-    int to_write;
-    int sample;
+  int src_samples = lpSpec->size;
+  const unsigned char *src = (const unsigned char *)lpData;
+  short *dst = (short *)lpBuffer;
+  int channel_len = iBufLen >> 1, total_bytes = 0;
 
-    while (total_bytes < channel_len && src_samples > 0) {
-        to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-            resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
-            sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            dst[0] = dst[1] = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            dst += 2;
-            resampler_remove_sample(resampler[0]);
-        }
+  while (total_bytes < channel_len && src_samples > 0) {
+    int j, to_write = resampler_get_free_count(resampler[0]);
+    if (to_write > src_samples)
+      to_write = src_samples;
+    for (j = 0; j < to_write; j++)
+      resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
+    src_samples -= to_write;
+    while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
+      int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
+      dst[0] = dst[1] = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      total_bytes += sizeof(short);
+      dst += 2;
+      resampler_remove_sample(resampler[0]);
     }
+  }
 
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+  if (llpData)
+    *llpData = src;
+  return total_bytes;
 }
 
 static int SOUND_ResampleMix_U8_Stereo_Mono(
@@ -305,36 +302,32 @@ static int SOUND_ResampleMix_U8_Stereo_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-    int src_samples = lpSpec->size >> 1;
-    const unsigned char *src = (const unsigned char *)lpData;
-    short *dst = (short *)lpBuffer;
-    int channel_len = iBufLen;
-    int total_bytes = 0;
-    int j;
-    int to_write;
-    int sample;
+  int src_samples = lpSpec->size >> 1;
+  const unsigned char *src = (const unsigned char *)lpData;
+  short *dst = (short *)lpBuffer;
+  int channel_len = iBufLen, total_bytes = 0;
 
-    while (total_bytes < channel_len && src_samples > 0) {
-        to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++) {
-            resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
-            resampler_write_sample(resampler[1], (*src++ ^ 0x80) << 8);
-        }
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
-            sample = (((resampler_get_sample(resampler[0]) >> 8) + (resampler_get_sample(resampler[1]) >> 8)) >> 1) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-            resampler_remove_sample(resampler[1]);
-        }
+  while (total_bytes < channel_len && src_samples > 0) {
+    int j, to_write = resampler_get_free_count(resampler[0]);
+    if (to_write > src_samples)
+      to_write = src_samples;
+    for (j = 0; j < to_write; j++) {
+      resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
+      resampler_write_sample(resampler[1], (*src++ ^ 0x80) << 8);
     }
+    src_samples -= to_write;
+    while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
+      int sample = (((resampler_get_sample(resampler[0]) >> 8) + (resampler_get_sample(resampler[1]) >> 8)) >> 1) + *dst;
+      *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      total_bytes += sizeof(short);
+      resampler_remove_sample(resampler[0]);
+      resampler_remove_sample(resampler[1]);
+    }
+  }
 
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+  if (llpData)
+    *llpData = src;
+  return total_bytes;
 }
 
 static int SOUND_ResampleMix_U8_Stereo_Stereo(
@@ -369,38 +362,35 @@ static int SOUND_ResampleMix_U8_Stereo_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-    int src_samples = lpSpec->size >> 1;
-    const unsigned char *src = (const unsigned char *)lpData;
-    short *dst = (short *)lpBuffer;
-    int channel_len = iBufLen >> 1;
-    int total_bytes = 0;
-    int j;
-    int to_write;
-    int sample;
+  int src_samples = lpSpec->size >> 1;
+  const unsigned char *src = (const unsigned char *)lpData;
+  short *dst = (short *)lpBuffer;
+  int channel_len = iBufLen >> 1, total_bytes = 0;
 
-    while (total_bytes < channel_len && src_samples > 0) {
-        to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++) {
-            resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
-            resampler_write_sample(resampler[1], (*src++ ^ 0x80) << 8);
-        }
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
-            sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            sample = (resampler_get_sample(resampler[1]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-            resampler_remove_sample(resampler[1]);
-        }
+  while (total_bytes < channel_len && src_samples > 0) {
+    int j, to_write = resampler_get_free_count(resampler[0]);
+    if (to_write > src_samples)
+      to_write = src_samples;
+    for (j = 0; j < to_write; j++) {
+      resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
+      resampler_write_sample(resampler[1], (*src++ ^ 0x80) << 8);
     }
+    src_samples -= to_write;
+    while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
+      int sample;
+      sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
+      *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      sample = (resampler_get_sample(resampler[1]) >> 8) + *dst;
+      *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      total_bytes += sizeof(short);
+      resampler_remove_sample(resampler[0]);
+      resampler_remove_sample(resampler[1]);
+    }
+  }
 
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+  if (llpData)
+    *llpData = src;
+  return total_bytes;
 }
 
 static int SOUND_ResampleMix_S16_Mono_Mono(
@@ -435,33 +425,29 @@ static int SOUND_ResampleMix_S16_Mono_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-    int src_samples = lpSpec->size >> 1;
-    const short *src = (const short *)lpData;
-    short *dst = (short *)lpBuffer;
-    int channel_len = iBufLen;
-    int total_bytes = 0;
-    int j;
-    int to_write;
-    int sample;
+  int src_samples = lpSpec->size >> 1;
+  const short *src = (const short *)lpData;
+  short *dst = (short *)lpBuffer;
+  int channel_len = iBufLen, total_bytes = 0;
 
-    while (total_bytes < channel_len && src_samples > 0) {
-        to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-            resampler_write_sample(resampler[0], *src++);
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
-            sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-        }
+  while (total_bytes < channel_len && src_samples > 0) {
+    int j, to_write = resampler_get_free_count(resampler[0]);
+    if (to_write > src_samples)
+      to_write = src_samples;
+    for (j = 0; j < to_write; j++)
+      resampler_write_sample(resampler[0], *src++);
+    src_samples -= to_write;
+    while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
+      int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
+      *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      total_bytes += sizeof(short);
+      resampler_remove_sample(resampler[0]);
     }
+  }
 
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+  if (llpData)
+    *llpData = src;
+  return total_bytes;
 }
 
 static int SOUND_ResampleMix_S16_Mono_Stereo(
@@ -496,34 +482,30 @@ static int SOUND_ResampleMix_S16_Mono_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-    int src_samples = lpSpec->size >> 1;
-    const short *src = (const short *)lpData;
-    short *dst = (short *)lpBuffer;
-    int channel_len = iBufLen >> 1;
-    int total_bytes = 0;
-    int j;
-    int to_write;
-    int sample;
+  int src_samples = lpSpec->size >> 1;
+  const short *src = (const short *)lpData;
+  short *dst = (short *)lpBuffer;
+  int channel_len = iBufLen >> 1, total_bytes = 0;
 
-    while (total_bytes < channel_len && src_samples > 0) {
-        to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-            resampler_write_sample(resampler[0], *src++);
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
-            sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            dst[0] = dst[1] = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            dst += 2;
-            resampler_remove_sample(resampler[0]);
-        }
+  while (total_bytes < channel_len && src_samples > 0) {
+    int j, to_write = resampler_get_free_count(resampler[0]);
+    if (to_write > src_samples)
+      to_write = src_samples;
+    for (j = 0; j < to_write; j++)
+      resampler_write_sample(resampler[0], *src++);
+    src_samples -= to_write;
+    while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
+      int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
+      dst[0] = dst[1] = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      total_bytes += sizeof(short);
+      dst += 2;
+      resampler_remove_sample(resampler[0]);
     }
+  }
 
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+  if (llpData)
+    *llpData = src;
+  return total_bytes;
 }
 
 static int SOUND_ResampleMix_S16_Stereo_Mono(
@@ -558,36 +540,32 @@ static int SOUND_ResampleMix_S16_Stereo_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-    int src_samples = lpSpec->size >> 2;
-    const short *src = (const short *)lpData;
-    short *dst = (short *)lpBuffer;
-    int channel_len = iBufLen;
-    int total_bytes = 0;
-    int j;
-    int to_write;
-    int sample;
+  int src_samples = lpSpec->size >> 2;
+  const short *src = (const short *)lpData;
+  short *dst = (short *)lpBuffer;
+  int channel_len = iBufLen, total_bytes = 0;
 
-    while (total_bytes < channel_len && src_samples > 0) {
-        to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++) {
-            resampler_write_sample(resampler[0], *src++);
-            resampler_write_sample(resampler[1], *src++);
-        }
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
-            sample = (((resampler_get_sample(resampler[0]) >> 8) + (resampler_get_sample(resampler[1]) >> 8)) >> 1) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-            resampler_remove_sample(resampler[1]);
-        }
+  while (total_bytes < channel_len && src_samples > 0) {
+    int j, to_write = resampler_get_free_count(resampler[0]);
+    if (to_write > src_samples)
+      to_write = src_samples;
+    for (j = 0; j < to_write; j++) {
+      resampler_write_sample(resampler[0], *src++);
+      resampler_write_sample(resampler[1], *src++);
     }
+    src_samples -= to_write;
+    while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
+      int sample = (((resampler_get_sample(resampler[0]) >> 8) + (resampler_get_sample(resampler[1]) >> 8)) >> 1) + *dst;
+      *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      total_bytes += sizeof(short);
+      resampler_remove_sample(resampler[0]);
+      resampler_remove_sample(resampler[1]);
+    }
+  }
 
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+  if (llpData)
+    *llpData = src;
+  return total_bytes;
 }
 
 static int SOUND_ResampleMix_S16_Stereo_Stereo(
@@ -622,38 +600,35 @@ static int SOUND_ResampleMix_S16_Stereo_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-    int src_samples = lpSpec->size >> 2;
-    const short *src = (const short *)lpData;
-    short *dst = (short *)lpBuffer;
-    int channel_len = iBufLen >> 1;
-    int total_bytes = 0;
-    int sample;
-    int to_write;
-    int j;
+  int src_samples = lpSpec->size >> 2;
+  const short *src = (const short *)lpData;
+  short *dst = (short *)lpBuffer;
+  int channel_len = iBufLen >> 1, total_bytes = 0;
 
-    while (total_bytes < channel_len && src_samples > 0) {
-        to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++) {
-            resampler_write_sample(resampler[0], *src++);
-            resampler_write_sample(resampler[1], *src++);
-        }
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
-            sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            sample = (resampler_get_sample(resampler[1]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-            resampler_remove_sample(resampler[1]);
-        }
+  while (total_bytes < channel_len && src_samples > 0) {
+    int j, to_write = resampler_get_free_count(resampler[0]);
+    if (to_write > src_samples)
+      to_write = src_samples;
+    for (j = 0; j < to_write; j++) {
+      resampler_write_sample(resampler[0], *src++);
+      resampler_write_sample(resampler[1], *src++);
     }
+    src_samples -= to_write;
+    while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0) {
+      int sample;
+      sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
+      *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      sample = (resampler_get_sample(resampler[1]) >> 8) + *dst;
+      *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
+      total_bytes += sizeof(short);
+      resampler_remove_sample(resampler[0]);
+      resampler_remove_sample(resampler[1]);
+    }
+  }
 
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+  if (llpData)
+    *llpData = src;
+  return total_bytes;
 }
 
 static int SOUND_Play(
@@ -679,77 +654,79 @@ static int SOUND_Play(
 
 --*/
 {
-    SOUNDPLAYER *player = (SOUNDPLAYER *)object;
-    WAVESPEC wavespec;
-    ResampleMixer mixer;
-    WAVEDATA *cursnd;
-    void *buf;
-    const void *snddata;
-    int len, i;
+  SOUNDPLAYER *player = (SOUNDPLAYER *)object;
+  WAVESPEC wavespec;
+  ResampleMixer mixer;
+  WAVEDATA *cursnd;
+  void *buf;
+  const void *snddata;
+  int len, i;
 
-    // Check for NULL pointer.
-    if (player == NULL)
-        return false;
+  // Check for NULL pointer.
+  if (player == NULL) {
+    return false;
+  }
 
-    if (player->lastSFX == iSoundNum)
-        return false;
+  if (player->lastSFX == iSoundNum)
+    return false;
 
-    player->lastSFX = iSoundNum;
+  player->lastSFX = iSoundNum;
 
-    // Get the length of the sound file.
-    len = PAL_MKFGetChunkSize(iSoundNum, player->mkf);
-    if (len <= 0)
-        return false;
+  // Get the length of the sound file.
+  len = PAL_MKFGetChunkSize(iSoundNum, player->mkf);
+  if (len <= 0) {
+    return false;
+  }
 
-    // Read the sound file from the MKF archive.
-    buf = UTIL_malloc(len);
-    PAL_MKFReadChunk(buf, len, iSoundNum, player->mkf);
+  // Read the sound file from the MKF archive.
+  buf = UTIL_malloc(len);
+  PAL_MKFReadChunk(buf, len, iSoundNum, player->mkf);
 
-    snddata = SOUND_LoadWAVEData(buf, len, &wavespec);
-    if (snddata == NULL) {
-        UTIL_free(buf);
-        return false;
-    }
+  snddata = SOUND_LoadWAVEData(buf, len, &wavespec);
+  if (snddata == NULL) {
+    UTIL_free(buf);
+    return false;
+  }
 
-    if (wavespec.channels == 1 && PAL_AUDIO_CHANNEL_NUM == 1)
-        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Mono : SOUND_ResampleMix_U8_Mono_Mono;
-    else if (wavespec.channels == 1 && PAL_AUDIO_CHANNEL_NUM == 2)
-        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
-    else if (wavespec.channels == 2 && PAL_AUDIO_CHANNEL_NUM == 1)
-        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Mono : SOUND_ResampleMix_U8_Stereo_Mono;
-    else if (wavespec.channels == 2 && PAL_AUDIO_CHANNEL_NUM == 2)
-        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
-    else {
-        UTIL_free(buf);
-        return false;
-    }
+  if (wavespec.channels == 1 && PAL_AUDIO_CHANNEL_NUM == 1)
+    mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Mono : SOUND_ResampleMix_U8_Mono_Mono;
+  else if (wavespec.channels == 1 && PAL_AUDIO_CHANNEL_NUM == 2)
+    mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
+  else if (wavespec.channels == 2 && PAL_AUDIO_CHANNEL_NUM == 1)
+    mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Mono : SOUND_ResampleMix_U8_Stereo_Mono;
+  else if (wavespec.channels == 2 && PAL_AUDIO_CHANNEL_NUM == 2)
+    mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
+  else {
+    UTIL_free(buf);
+    return false;
+  }
 
-    cursnd = &player->soundlist;
-    while (cursnd->next && cursnd->base)
-        cursnd = cursnd->next;
-    if (cursnd->base) {
-        WAVEDATA *obj = (WAVEDATA *)UTIL_malloc(sizeof(WAVEDATA));
-        cursnd->next = obj;
-        cursnd = cursnd->next;
-    }
+  cursnd = &player->soundlist;
+  while (cursnd->next && cursnd->base)
+    cursnd = cursnd->next;
+  if (cursnd->base) {
+    WAVEDATA *obj = (WAVEDATA *)UTIL_malloc(sizeof(WAVEDATA));
+    cursnd->next = obj;
+    cursnd = cursnd->next;
+  }
 
-    for (i = 0; i < wavespec.channels; i++) {
-        if (!cursnd->resampler[i])
-            cursnd->resampler[i] = resampler_create();
-        else
-            resampler_clear(cursnd->resampler[i]);
-        resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % PAL_AUDIO_SAMPLE_RATE) == 0 || (PAL_AUDIO_SAMPLE_RATE % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
-        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)PAL_AUDIO_SAMPLE_RATE);
-    }
+  for (i = 0; i < wavespec.channels; i++) {
+    if (!cursnd->resampler[i])
+      cursnd->resampler[i] = resampler_create();
+    else
+      resampler_clear(cursnd->resampler[i]);
+    resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % PAL_AUDIO_SAMPLE_RATE) == 0 || (PAL_AUDIO_SAMPLE_RATE % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
+    resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)PAL_AUDIO_SAMPLE_RATE);
+  }
 
-    cursnd->base = buf;
-    cursnd->current = snddata;
-    cursnd->end = (const unsigned char *)snddata + wavespec.size;
-    cursnd->spec = wavespec;
-    cursnd->ResampleMix = mixer;
-    player->cursounds++;
+  cursnd->base = buf;
+  cursnd->current = snddata;
+  cursnd->end = (const unsigned char *)snddata + wavespec.size;
+  cursnd->spec = wavespec;
+  cursnd->ResampleMix = mixer;
+  player->cursounds++;
 
-    return true;
+  return true;
 }
 
 void SOUND_Shutdown(void *object)
@@ -768,24 +745,26 @@ void SOUND_Shutdown(void *object)
 
 --*/
 {
-    if (object != NULL) {
-        SOUNDPLAYER *player = (SOUNDPLAYER *)object;
-        WAVEDATA *cursnd = &player->soundlist;
-        do {
+   SOUNDPLAYER *player = (SOUNDPLAYER *)object;
+   if (player) {
+      WAVEDATA *cursnd = &player->soundlist;
+      do {
+         if (cursnd->resampler[0])
             resampler_delete(cursnd->resampler[0]);
+         if (cursnd->resampler[1])
             resampler_delete(cursnd->resampler[1]);
+         if (cursnd->base)
             UTIL_free((void *)cursnd->base);
-        } while ((cursnd = cursnd->next) != NULL);
-        cursnd = player->soundlist.next;
-        while (cursnd) {
-            WAVEDATA *old = cursnd;
-            cursnd = cursnd->next;
-            UTIL_free(old);
-        }
-        UTIL_fclose(player->mkf);
-        UTIL_free(player);
-    }
-    resampler_deinit();
+      } while ((cursnd = cursnd->next) != NULL);
+      cursnd = player->soundlist.next;
+      while (cursnd) {
+         WAVEDATA *old = cursnd;
+         cursnd = cursnd->next;
+         UTIL_free(old);
+      }
+      UTIL_fclose(player->mkf);
+   }
+   resampler_deinit();
 }
 
 static void SOUND_FillBuffer(
@@ -810,24 +789,24 @@ static void SOUND_FillBuffer(
 
 --*/
 {
-    if (object != NULL) {
-        SOUNDPLAYER *player = (SOUNDPLAYER *)object;
-        WAVEDATA *cursnd = &player->soundlist;
-        int sounds = 0;
-        do {
-            if (cursnd->base) {
-                cursnd->ResampleMix(cursnd->resampler, cursnd->current, &cursnd->spec, stream, len, &cursnd->current);
-                cursnd->spec.size = (int)((const unsigned char *)cursnd->end - (const unsigned char *)cursnd->current);
-                if (cursnd->spec.size < cursnd->spec.align) {
-                    UTIL_free((void *)cursnd->base);
-                    cursnd->base = cursnd->current = cursnd->end = NULL;
-                    player->cursounds--;
-                    player->lastSFX = 0;
-                } else
-                    sounds++;
-            }
-        } while ((cursnd = cursnd->next) && sounds < player->cursounds);
-    }
+  SOUNDPLAYER *player = (SOUNDPLAYER *)object;
+  if (player) {
+    WAVEDATA *cursnd = &player->soundlist;
+    int sounds = 0;
+    do {
+      if (cursnd->base) {
+        cursnd->ResampleMix(cursnd->resampler, cursnd->current, &cursnd->spec, stream, len, &cursnd->current);
+        cursnd->spec.size = (int)((const unsigned char *)cursnd->end - (const unsigned char *)cursnd->current);
+        if (cursnd->spec.size < cursnd->spec.align) {
+          UTIL_free((void *)cursnd->base);
+          cursnd->base = cursnd->current = cursnd->end = NULL;
+          player->cursounds--;
+          player->lastSFX = 0;
+        } else
+          sounds++;
+      }
+    } while ((cursnd = cursnd->next) && sounds < player->cursounds);
+  }
 }
 
 AUDIOPLAYER *SOUND_Init(void)
@@ -846,17 +825,17 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
-    void *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
-    // Initialize the resampler module
-    resampler_init();
+   void *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
+   // Initialize the resampler module
+   resampler_init();
 
-    SOUNDPLAYER *player = (SOUNDPLAYER *)UTIL_malloc(sizeof(SOUNDPLAYER));
-    player->Play = SOUND_Play;
-    player->FillBuffer = SOUND_FillBuffer;
-    player->Shutdown = SOUND_Shutdown;
-    player->mkf = mkf;
-    player->soundlist.resampler[0] = resampler_create();
-    player->soundlist.resampler[1] = resampler_create();
-    player->cursounds = 0;
-    return (AUDIOPLAYER *)player;
+   SOUNDPLAYER *player = (SOUNDPLAYER *)UTIL_malloc(sizeof(SOUNDPLAYER));
+   player->Play = SOUND_Play;
+   player->FillBuffer = SOUND_FillBuffer;
+   player->Shutdown = SOUND_Shutdown;
+   player->mkf = mkf;
+   player->soundlist.resampler[0] = resampler_create();
+   player->soundlist.resampler[1] = resampler_create();
+   player->cursounds = 0;
+   return (AUDIOPLAYER *)player;
 }
