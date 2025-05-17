@@ -108,7 +108,7 @@ void CrixPlayer_deinit(void) {
    UTIL_free(rix_buf);
    fpMusMKF = NULL;
    rix_buf = NULL;
-   subsong_id = -1;
+   subsong_id = 0xFFFFFFFF;
 }
 
 unsigned char CrixPlayer_load(const char *filename) {
@@ -124,7 +124,7 @@ unsigned char CrixPlayer_load(const char *filename) {
       return false;
    }
    songs /= 4;
-   subsong_id = -1;
+   subsong_id = 0xFFFFFFFF;
    CrixPlayer_rewind(0, true);
    return true;
 }
@@ -194,8 +194,8 @@ void data_initial() {
       return;
    if (0x0D < length) {
       rhythm = rix_buf[2];
-      mus_block = (rix_buf[0x0D] << 8) + rix_buf[0x0C];
-      ins_block = (rix_buf[0x09] << 8) + rix_buf[0x08];
+      mus_block = ((unsigned short)rix_buf[0x0D] << 8) + rix_buf[0x0C];
+      ins_block = ((unsigned short)rix_buf[0x09] << 8) + rix_buf[0x08];
       I = mus_block + 1;
    } else
       I = mus_block = length; // file too short; will stop playing immediately
@@ -286,7 +286,7 @@ unsigned short rix_proc() {
          rix_C0_pro(ctrl & 0x0F, band_low);
          break;
       default:
-         band = (ctrl << 8) + band_low;
+         band = ((unsigned short)ctrl << 8) + band_low;
          break;
       }
       if (band != 0)
@@ -309,7 +309,7 @@ void rix_get_ins() {
    unsigned char *baddr = (&rix_buf[ins_block]) + (band_low << 6);
 
    for (i = 0; i < 28; i++)
-      insbuf[i] = (baddr[i * 2 + 1] << 8) + baddr[i * 2];
+      insbuf[i] = ((unsigned short)baddr[i * 2 + 1] << 8) + baddr[i * 2];
 }
 /*--------------------------------------------------------------*/
 void rix_90_pro(unsigned short ctrl_l) {
@@ -337,7 +337,8 @@ void rix_A0_pro(unsigned short ctrl_l, unsigned short index) {
 /*--------------------------------------------------------------*/
 void prepare_a0b0(unsigned short index, unsigned short v) /* important !*/
 {
-   short high = 0, low = 0;
+   signed short high = 0;
+   signed short low = 0;
    unsigned int res;
    int res1 = (v - 0x2000) * 0x19;
    if (res1 == (int)0xff)
@@ -345,8 +346,7 @@ void prepare_a0b0(unsigned short index, unsigned short v) /* important !*/
    low = res1 / 0x2000;
    if (low < 0) {
       low = 0x18 - low;
-      high = (signed short)low < 0 ? 0xFFFF : 0;
-      res = high;
+      res = low < 0 ? 0xFFFF : 0;
       res <<= 16;
       res += low;
       low = ((signed short)res) / (signed short)0xFFE7;

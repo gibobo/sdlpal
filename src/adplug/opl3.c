@@ -610,7 +610,7 @@ static void OPL3_PhaseGenerate(opl3_slot *slot)
         switch (slot->slot_num)
         {
         case 13: /* hh */
-            slot->pg_phase_out = rm_xor << 9;
+            slot->pg_phase_out = (unsigned int)rm_xor << 9;
             if (rm_xor ^ (noise & 1))
             {
                 slot->pg_phase_out |= 0xd0;
@@ -621,18 +621,18 @@ static void OPL3_PhaseGenerate(opl3_slot *slot)
             }
             break;
         case 16: /* sd */
-            slot->pg_phase_out = (chip->rm_hh_bit8 << 9)
-                               | ((chip->rm_hh_bit8 ^ (noise & 1)) << 8);
+            slot->pg_phase_out = ((unsigned int)chip->rm_hh_bit8 << 9)
+                               | (((unsigned int)chip->rm_hh_bit8 ^ (noise & 1)) << 8);
             break;
         case 17: /* tc */
-            slot->pg_phase_out = (rm_xor << 9) | 0x80;
+            slot->pg_phase_out = ((unsigned int)rm_xor << 9) | 0x80;
             break;
         default:
             break;
         }
     }
     n_bit = ((noise >> 14) ^ noise) & 0x01;
-    chip->noise = (noise >> 1) | (n_bit << 22);
+    chip->noise = (noise >> 1) | ((unsigned int)n_bit << 22);
 }
 
 /*
@@ -981,10 +981,10 @@ static void OPL3_ChannelWriteC0(opl3_channel *channel, uint8_t data)
     OPL3_ChannelUpdateAlg(channel);
     if (channel->chip->newm)
     {
-        channel->cha = ((data >> 4) & 0x01) ? ~0 : 0;
-        channel->chb = ((data >> 5) & 0x01) ? ~0 : 0;
-        channel->chc = ((data >> 6) & 0x01) ? ~0 : 0;
-        channel->chd = ((data >> 7) & 0x01) ? ~0 : 0;
+        channel->cha = ((data >> 4) & 0x01) ? 0xFFFF : 0;
+        channel->chb = ((data >> 5) & 0x01) ? 0xFFFF : 0;
+        channel->chc = ((data >> 6) & 0x01) ? 0xFFFF : 0;
+        channel->chd = ((data >> 7) & 0x01) ? 0xFFFF : 0;
     }
     else
     {
@@ -1188,7 +1188,7 @@ inline void OPL3_Generate4Ch(opl3_chip *chip, int16_t *buf4)
 
     if ((chip->timer & 0x3f) == 0x3f)
     {
-        chip->tremolopos = (chip->tremolopos + 1) % 210;
+        chip->tremolopos = ((unsigned short)chip->tremolopos + 1) % 210;
     }
     if (chip->tremolopos < 105)
     {
@@ -1196,7 +1196,7 @@ inline void OPL3_Generate4Ch(opl3_chip *chip, int16_t *buf4)
     }
     else
     {
-        chip->tremolo = (210 - chip->tremolopos) >> chip->tremoloshift;
+        chip->tremolo = (unsigned short)(210 - chip->tremolopos) >> chip->tremoloshift;
     }
 
     if ((chip->timer & 0x3ff) == 0x3ff)

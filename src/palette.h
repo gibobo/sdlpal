@@ -29,7 +29,7 @@ void PAL_SetPalette(int iPaletteNum, int fNight);
 
 void PAL_FadeOut(int iDelay);
 
-void PAL_FadeIn(int iPaletteNum, int fNight, int iDelay);
+void PAL_FadeIn(int iPaletteNum, int fNight, unsigned short iDelay);
 
 void PAL_SceneFade(int iPaletteNum, int fNight, int iStep);
 

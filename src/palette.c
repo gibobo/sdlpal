@@ -157,7 +157,7 @@ void PAL_FadeOut(int iDelay)
    VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_FadeIn(int iPaletteNum, int fNight, int iDelay)
+void PAL_FadeIn(int iPaletteNum, int fNight, unsigned short iDelay)
 /*++
   Purpose:
 
@@ -182,6 +182,8 @@ void PAL_FadeIn(int iPaletteNum, int fNight, int iDelay)
    unsigned char *palette;
    unsigned char newpalette[PALETTE_SIZE];
 
+   if(iDelay == 0)
+     iDelay = 1;
    // Get the new palette...
    palette = PAL_GetPalette(iPaletteNum, fNight);
    memset(newpalette, 0, sizeof(newpalette));

@@ -23,10 +23,6 @@
 #include "util.h"
 #include <stdlib.h>
 
-#define PALMAP_Y 128
-#define PALMAP_X 64
-#define PALMAP_Z 2
-
 PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
 /*++
   Purpose:
@@ -50,7 +46,6 @@ PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
 
 --*/
 {
-   unsigned char *buf;
    int size;
    PALMAP *map;
 

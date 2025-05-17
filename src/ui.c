@@ -247,10 +247,6 @@ BOX *PAL_CreateSingleLineBoxWithShadow(
 
 --*/
 {
-   static const int iNumLeftSprite = 44;
-   static const int iNumMidSprite = 45;
-   static const int iNumRightSprite = 46;
-
    const unsigned char *lpBitmapLeft;
    const unsigned char *lpBitmapMid;
    const unsigned char *lpBitmapRight;
@@ -262,9 +258,9 @@ BOX *PAL_CreateSingleLineBoxWithShadow(
    //
    // Get the bitmaps
    //
-   lpBitmapLeft = PAL_SpriteGetFrame(gpSpriteUI, iNumLeftSprite);
-   lpBitmapMid = PAL_SpriteGetFrame(gpSpriteUI, iNumMidSprite);
-   lpBitmapRight = PAL_SpriteGetFrame(gpSpriteUI, iNumRightSprite);
+   lpBitmapLeft = PAL_SpriteGetFrame(gpSpriteUI, 44);
+   lpBitmapMid = PAL_SpriteGetFrame(gpSpriteUI, 45);
+   lpBitmapRight = PAL_SpriteGetFrame(gpSpriteUI, 46);
 
    rect.x = PAL_X(pos);
    rect.y = PAL_Y(pos);

@@ -2000,7 +2000,8 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
 --*/
 {
    unsigned char *lpSpriteEffect = NULL;
-   int l, n, i, j, x, y;
+   unsigned short n;
+   int l, i, j, x, y;
    int iMagicNum;
    int iEffectNum;
    short sLayerOffset;
@@ -2117,7 +2118,8 @@ PAL_BattleShowPlayerOffMagicAnim(
 --*/
 {
    unsigned char *lpSpriteEffect = NULL;
-   int iMagicNum, iEffectNum, n, i, k, l, x, y, wave, blow;
+   unsigned short n;
+   int iMagicNum, iEffectNum, i, k, l, x, y, wave, blow;
    short sLayerOffset;
 
    iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
@@ -2322,7 +2324,8 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
 --*/
 {
    unsigned char *lpSpriteEffect = NULL;
-   int l, n, i, k, x, y, wave, blow;
+   unsigned short n;
+   int l, i, k, x, y, wave, blow;
    int iMagicNum;
    int iEffectNum;
    short sLayerOffset;
@@ -2379,7 +2382,10 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
        }
      } else {
        VIDEO_ShakeScreen(i, 3);
-       *b = PAL_SpriteGetFrame(lpSpriteEffect, (l - gpGlobals->g.lprgMagic[iMagicNum].wShake - 1) % n);
+       if (n == 0)
+         *b = PAL_SpriteGetFrame(lpSpriteEffect, l - gpGlobals->g.lprgMagic[iMagicNum].wShake - 1);
+       else
+         *b = PAL_SpriteGetFrame(lpSpriteEffect, (l - gpGlobals->g.lprgMagic[iMagicNum].wShake - 1) % n);
      }
 
      // Wait for the time of one frame. Accept input here.

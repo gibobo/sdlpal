@@ -33,12 +33,12 @@ static void *fp_font_data = NULL;
 static void *fp_font_size = NULL;
 static unsigned char font_size = 0;
 static unsigned char font_data[32];
-static unsigned short font_wChar = -1;
+static unsigned short font_wChar = 0xFFFF;
 
 void PAL_InitFont(void) {
     fp_font_data = UTIL_fopen(RESOURCE_PATH "/unicode_font.bin", "rb");
     fp_font_size = UTIL_fopen(RESOURCE_PATH "/unicode_font_size.bin", "rb");
-    font_wChar = -1;
+    font_wChar = 0xFFFF;
 }
 
 void PAL_DeInitFont(void) {
@@ -110,9 +110,9 @@ int PAL_CharWidth(unsigned short wChar)
         wChar -= (unicode_upper_base - unicode_lower_top);
     }
 
-    unsigned char font_size;
+    unsigned char size;
     UTIL_fseek(fp_font_size, sizeof(unsigned char) * wChar / 8, SEEK_SET);
-    UTIL_fread(&font_size, sizeof(unsigned char), 1, fp_font_size);
+    UTIL_fread(&size, sizeof(unsigned char), 1, fp_font_size);
 
-    return (font_size & (1 << (wChar % 8))) ? 16 : 8;
+    return (size & (1 << (wChar % 8))) ? 16 : 8;
 }

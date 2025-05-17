@@ -55,6 +55,10 @@
 //  d & 0x2000
 //
 
+#define PALMAP_Y 128
+#define PALMAP_X 64
+#define PALMAP_Z 2
+
 typedef struct tagPALMAP {
    unsigned int *Tiles;
    unsigned char *pTileSprite;

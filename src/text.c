@@ -31,7 +31,6 @@
 #include "ui.h"
 #include "util.h"
 #include "video.h"
-#include <errno.h>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
@@ -101,17 +100,17 @@ int PAL_InitText(void)
       for (i = 0, wpos = 0, data = 0, WordLen_max = 0; i < g_TextLib.nWords; i++) {
         unsigned char data = 0;
         UTIL_fread(&data, sizeof(data), 1, fp);
-        WordLen[i] = data << 24 | wpos;
+        WordLen[i] = (unsigned int)data << 24 | wpos;
         wpos += data;
         if (WordLen_max < data)
           WordLen_max = data;
       }
       UTIL_fclose(fp);
-      WordBuffer = (wchar_t *)UTIL_calloc(BUFFER_WORD_NUM, sizeof(wchar_t *));
+      WordBuffer = (wchar_t **)UTIL_calloc(BUFFER_WORD_NUM, sizeof(wchar_t *));
       for (i = 0; i < BUFFER_WORD_NUM; i++)
          WordBuffer[i] = UTIL_calloc(WordLen_max + 1, sizeof(wchar_t));
       WordBufferIdx = 0;
-      WordIndex = -1;
+      WordIndex = 0xFFFFFFFF;
    }
    // Open the message data files.
    {
@@ -120,14 +119,14 @@ int PAL_InitText(void)
       MsgLen = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs, sizeof(unsigned int));
       for (i = 0, wpos = 0, data = 0, MsgLen_max = 0; i < g_TextLib.nMsgs; i++, data = 0) {
          UTIL_fread(&data, sizeof(data), 1, fp);
-         MsgLen[i] = data << 24 | wpos;
+         MsgLen[i] = (unsigned int)data << 24 | wpos;
          wpos += data;
          if (MsgLen_max < data)
             MsgLen_max = data;
       }
       UTIL_fclose(fp);
       MsgBuffer = UTIL_calloc(MsgLen_max + 1, sizeof(wchar_t));
-      MsgIndex = -1;
+      MsgIndex = 0xFFFFFFFF;
    }
    internal_wbuffer_size = WordLen_max > MsgLen_max ? WordLen_max : MsgLen_max;
    internal_wbuffer = UTIL_calloc(internal_wbuffer_size + 1, sizeof(wchar_t));
@@ -178,8 +177,8 @@ void PAL_FreeText(
    UTIL_fclose(fp_msg);
    
    WordBufferIdx = 0;
-   WordIndex = -1;
-   MsgIndex = -1;
+   WordIndex = 0xFFFFFFFF;
+   MsgIndex = 0xFFFFFFFF;
    WordLen = NULL;
    MsgLen = NULL;
    WordBuffer = NULL;
@@ -512,8 +511,8 @@ PAL_StartDialogWithOffset(
       break;
    }
 
-   g_TextLib.posDialogTitle = PAL_XY( PAL_X(g_TextLib.posDialogTitle) + xOff, PAL_Y(g_TextLib.posDialogTitle) + yOff);
-   g_TextLib.posDialogText = PAL_XY( PAL_X(g_TextLib.posDialogText) + xOff, PAL_Y(g_TextLib.posDialogText) + yOff);
+   g_TextLib.posDialogTitle = PAL_XY_OFFSET(g_TextLib.posDialogTitle, xOff, yOff);
+   g_TextLib.posDialogText = PAL_XY_OFFSET(g_TextLib.posDialogText, xOff, yOff);
 
    g_TextLib.bDialogPosition = bDialogLocation;
    UTIL_free(buf);
@@ -682,13 +681,11 @@ TEXT_DisplayText(
             // Set the font color to Yellow
             //
             if(!isDialog)
-            if (g_TextLib.bCurrentFontColor == FONT_COLOR_YELLOW)
             {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-            }
-            else
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_YELLOW;
+              if (g_TextLib.bCurrentFontColor == FONT_COLOR_YELLOW)
+                 g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+              else
+                 g_TextLib.bCurrentFontColor = FONT_COLOR_YELLOW;
             }
             lpszText++;
             break;
@@ -827,7 +824,6 @@ PAL_ShowDialogText(
       // The text should be shown in a small window at the center of the screen
       //
       {
-         unsigned int      pos;
          BOX       *lpBox;
          int        i;
          int        w = (int)wcslen(lpszText);
@@ -837,19 +833,18 @@ PAL_ShowDialogText(
             len += PAL_CharWidth(lpszText[i]) >> 3;
 
          // Create the window box
-         pos = PAL_XY(PAL_X(g_TextLib.posDialogText) - len * 4, PAL_Y(g_TextLib.posDialogText));
-
-         // Follow behavior of original version
-         lpBox = PAL_CreateSingleLineBoxWithShadow(pos, (len + 1) / 2, false, iDialogShadow);
-
-         rect.x = PAL_X(pos);
-         rect.y = PAL_Y(pos);
+         rect.x = PAL_X(g_TextLib.posDialogText) - len * 4;
+         rect.y = PAL_Y(g_TextLib.posDialogText);
          rect.w = SCREEN_W - rect.x * 2 + 32;
          rect.h = 64;
+
+         // Follow behavior of original version
+         lpBox = PAL_CreateSingleLineBoxWithShadow(PAL_XY(rect.x, rect.y), (len + 1) / 2, false, iDialogShadow);
+
          VIDEO_UpdateScreen(&rect);
 
          // Show the text on the screen
-         TEXT_DisplayText(lpszText, PAL_X(pos) + 8 + ((len & 1) << 2), PAL_Y(pos) + 10, true);
+         TEXT_DisplayText(lpszText, rect.x + 8 + ((len & 1) << 2), rect.y + 10, true);
          VIDEO_UpdateScreen(&rect);
 
          PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
@@ -1037,7 +1032,6 @@ PAL_swprintf(
     // Buffer & length check
     if (buffer == NULL || format == NULL)
     {
-        errno = EINVAL;
         return -1;
     }
 

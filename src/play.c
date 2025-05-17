@@ -230,9 +230,9 @@ PAL_GameUpdate(
                //
                // move here
                //
-               gpGlobals->viewport = PAL_XY(
-                  PAL_X(pos) - PAL_X(gpGlobals->partyoffset),
-                  PAL_Y(pos) - PAL_Y(gpGlobals->partyoffset));
+               gpGlobals->viewport = PAL_XY_OFFSET(pos,
+                                                   -PAL_X(gpGlobals->partyoffset),
+                                                   -PAL_Y(gpGlobals->partyoffset));
 
                break;
             }

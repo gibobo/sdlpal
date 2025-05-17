@@ -195,7 +195,7 @@ void PAL_SplashScreen(void)
    PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, gFiles[Res_MGO].fp);
    PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, gFiles[Res_MGO].fp);
    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
-   iTitleHeight = lpBitmapTitle[2] | (lpBitmapTitle[3] << 8);
+   iTitleHeight = lpBitmapTitle[2] | ((unsigned int)lpBitmapTitle[3] << 8);
    lpBitmapTitle[2] = 0;
    lpBitmapTitle[3] = 0; // HACKHACK
 

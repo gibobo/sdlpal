@@ -88,8 +88,8 @@ int PAL_RLEBlitToSurfaceWithShadow(
    }
 
    // Get the width and height of the bitmap.
-   uiWidth = lpBitmapRLE[0] | (lpBitmapRLE[1] << 8);
-   uiHeight = lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
+   uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
+   uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 
    // Check whether bitmap intersects the surface.
    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
@@ -271,8 +271,8 @@ int PAL_RLEBlitWithColorShift(
    //
    // Get the width and height of the bitmap.
    //
-   uiWidth = lpBitmapRLE[0] | (lpBitmapRLE[1] << 8);
-   uiHeight = lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
+   uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
+   uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 
    //
    // Check whether bitmap intersects the surface.
@@ -465,8 +465,8 @@ int PAL_RLEBlitMonoColor(
    }
 
    // Get the width and height of the bitmap.
-   uiWidth = lpBitmapRLE[0] | (lpBitmapRLE[1] << 8);
-   uiHeight = lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
+   uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
+   uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 
    // Check whether bitmap intersects the surface.
    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
@@ -657,7 +657,7 @@ int PAL_RLEGetWidth(
    }
 
    // Return the width of the bitmap.
-   return lpBitmapRLE[0] | (lpBitmapRLE[1] << 8);
+   return lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
 }
 
 int PAL_RLEGetHeight(
@@ -690,7 +690,7 @@ int PAL_RLEGetHeight(
    }
 
    // Return the height of the bitmap.
-   return lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
+   return lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 }
 
 unsigned short
@@ -716,7 +716,7 @@ PAL_SpriteGetNumFrames(
       return 0;
    }
 
-   return (lpSprite[0] | (lpSprite[1] << 8)) - 1;
+   return (lpSprite[0] | (int)((unsigned int)lpSprite[1] << 8)) - 1;
 }
 
 const unsigned char *
@@ -747,7 +747,7 @@ PAL_SpriteGetFrame(
       return NULL;
    }
 
-   imagecount = (lpSprite[0] | (lpSprite[1] << 8));
+   imagecount = (lpSprite[0] | (int)((unsigned int)lpSprite[1] << 8));
 
    if (iFrameNum < 0 || iFrameNum >= imagecount)
    {
@@ -757,7 +757,7 @@ PAL_SpriteGetFrame(
 
    // Get the offset of the frame
    iFrameNum <<= 1;
-   offset = ((lpSprite[iFrameNum] | (lpSprite[iFrameNum + 1] << 8)) << 1);
+   offset = ((lpSprite[iFrameNum] | (int)((unsigned int)lpSprite[iFrameNum + 1] << 8)) << 1);
    if (offset == 0x18444)
       offset = (unsigned short)offset;
    return &lpSprite[offset];

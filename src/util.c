@@ -21,7 +21,6 @@
 #include "util.h"
 #include "input.h"
 #include "main.h"
-#include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>

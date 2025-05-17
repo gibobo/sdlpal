@@ -361,8 +361,8 @@ static int PAL_LoadGame(int iSaveSlot)
 static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVEDGAME_COMMON *s, unsigned int size)
 {
    s->wSavedTimes = wSavedTimes;
-   s->wViewportX = PAL_X(gpGlobals->viewport);
-   s->wViewportY = PAL_Y(gpGlobals->viewport);
+   s->wViewportX = (unsigned short)PAL_X(gpGlobals->viewport);
+   s->wViewportY = (unsigned short)PAL_Y(gpGlobals->viewport);
    s->nPartyMember = gpGlobals->wMaxPartyMemberIndex;
    s->wNumScene = gpGlobals->wNumScene;
    s->wPaletteOffset = (gpGlobals->fNightPalette ? 0x180 : 0);

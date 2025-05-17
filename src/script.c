@@ -1675,7 +1675,7 @@ PAL_InterpretInstruction(
       //
       VIDEO_UpdateScreen(NULL);
       PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
-                 ((signed short)(pScript->rgwOperand[0]) > 0) ? pScript->rgwOperand[0] : 1);
+                 (pScript->rgwOperand[0]) ? pScript->rgwOperand[0] : 1);
       gpGlobals->fNeedToFadeIn = false;
       break;
 
@@ -1987,10 +1987,7 @@ PAL_InterpretInstruction(
       gpGlobals->rgTrail[0].wDirection = gpGlobals->wPartyDirection;
       gpGlobals->rgTrail[0].x = PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset);
       gpGlobals->rgTrail[0].y = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
-
-      gpGlobals->viewport = PAL_XY(
-          PAL_X(gpGlobals->viewport) + (signed short)(pScript->rgwOperand[0]),
-          PAL_Y(gpGlobals->viewport) + (signed short)(pScript->rgwOperand[1]));
+      gpGlobals->viewport = PAL_XY_OFFSET(gpGlobals->viewport, pScript->rgwOperand[0], pScript->rgwOperand[1]);
 
       gpGlobals->wLayer = pScript->rgwOperand[2] * 8;
 

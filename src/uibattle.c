@@ -682,7 +682,7 @@ void PAL_BattleUIUpdate(
 --*/
 {
    int i, j, x, y;
-   unsigned short wPlayerRole, w;
+   unsigned short wPlayerRole = 0, w;
    static int s_iFrame = 0;
 
    struct
@@ -1497,10 +1497,9 @@ void PAL_BattleUIShowNum(
       if (g_Battle->UI.rgShowNum[i].wNum == 0)
       {
          g_Battle->UI.rgShowNum[i].wNum = wNum;
-         g_Battle->UI.rgShowNum[i].pos = PAL_XY(PAL_X(pos) - 15, PAL_Y(pos));
+         g_Battle->UI.rgShowNum[i].pos = PAL_XY_OFFSET(pos, -15, 0);
          g_Battle->UI.rgShowNum[i].color = color;
          g_Battle->UI.rgShowNum[i].dwTime = UTIL_GetTicks();
-
          break;
       }
    }

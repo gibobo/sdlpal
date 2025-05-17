@@ -177,7 +177,7 @@ PAL_RNGBlitToSurface(
          break;
 
       case 0x04:
-         n = rng[ptr] | (rng[ptr + 1] << 8);
+         n = rng[ptr] | ((unsigned int)rng[ptr + 1] << 8);
          ptr += 2;
          dst += (n + 1) * 2;
          break;
@@ -213,7 +213,7 @@ PAL_RNGBlitToSurface(
          break;
 
       case 0x0c:
-         n = rng[ptr] | (rng[ptr + 1] << 8);
+         n = rng[ptr] | ((unsigned int)rng[ptr + 1] << 8);
          ptr += 2;
          for (i = 0; i <= n; i++)
          {
@@ -245,7 +245,7 @@ PAL_RNGBlitToSurface(
          break;
 
       case 0x12:
-         n = (rng[ptr] | (rng[ptr + 1] << 8)) + 1;
+         n = (rng[ptr] | ((unsigned int)rng[ptr + 1] << 8)) + 1;
          ptr += 2;
          for (i = 0; i < n; i++)
          {
