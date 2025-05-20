@@ -110,7 +110,7 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
     const RIFFChunkHeader *lpChunk = NULL;
     const WAVEFormatPCM *lpFormat = NULL;
     const unsigned char *lpWaveData = NULL;
-    unsigned int len, type;
+    unsigned int len = 0, type;
 
     if (dwLen < sizeof(RIFFHeader) || lpRiff->signature != RIFF_RIFF ||
         lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8)) {

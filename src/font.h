@@ -79,7 +79,7 @@ void PAL_DrawCharOnSurface(
     The width of the character in pixels, 16 for full-width char and 8 for half-width char.
 
 --*/
-int PAL_CharWidth(unsigned short wChar);
+unsigned char PAL_CharWidth(unsigned short wChar);
 
 void PAL_DeInitFont(void);
 

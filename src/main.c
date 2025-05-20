@@ -339,10 +339,7 @@ int main(int argc, char *argv[])
    PAL_SplashScreen();
 
    // Show the opening menu.
-   int iSlot = (unsigned char)PAL_OpeningMenu();
-
-   // Initialize game data and set the flags to load the game resources.
-   PAL_ReloadInNextTick(iSlot);
+   PAL_OpeningMenu();
 
    // Run the main game routine
    while (1)

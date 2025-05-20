@@ -442,7 +442,7 @@ PAL_SaveGame(
    PAL_SaveGame_WIN(iSaveSlot, wSavedTimes);
 }
 
-void PAL_ReloadInNextTick(int iSaveSlot)
+void PAL_ReloadInNextTick(unsigned char iSaveSlot)
 /*++
   Purpose:
 
@@ -460,7 +460,7 @@ void PAL_ReloadInNextTick(int iSaveSlot)
 {
    if (gpGlobals == NULL)
       gpGlobals = (GLOBALVARS *)UTIL_malloc(sizeof(GLOBALVARS));
-   gpGlobals->bCurrentSaveSlot = (unsigned char)iSaveSlot;
+   gpGlobals->bCurrentSaveSlot = iSaveSlot;
    PAL_SetLoadFlags(kLoadGlobalData | kLoadScene | kLoadPlayerSprite);
    gpGlobals->fEnteringScene = true;
    gpGlobals->fNeedToFadeIn = true;

@@ -25,13 +25,13 @@
 extern "C" {
 #endif
 
-int PAL_OpeningMenu(void);
+void PAL_OpeningMenu(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-int
+unsigned short
 PAL_SaveSlotMenu(
    unsigned short        wDefaultSlot
 );

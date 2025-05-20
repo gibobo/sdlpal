@@ -97,7 +97,7 @@ void PAL_DrawCharOnSurface(
     }
 }
 
-int PAL_CharWidth(unsigned short wChar)
+unsigned char PAL_CharWidth(unsigned short wChar)
 {
     if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || wChar >= unicode_upper_top)
     {
@@ -114,5 +114,5 @@ int PAL_CharWidth(unsigned short wChar)
     UTIL_fseek(fp_font_size, sizeof(unsigned char) * wChar / 8, SEEK_SET);
     UTIL_fread(&size, sizeof(unsigned char), 1, fp_font_size);
 
-    return (size & (1 << (wChar % 8))) ? 16 : 8;
+    return (size & (1U << (wChar % 8))) ? 16U : 8U;
 }

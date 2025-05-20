@@ -305,7 +305,7 @@ PAL_BattleUIDrawMiscMenu(
    //
    // Draw the box
    //
-   PAL_CreateBox(PAL_XY(2, 20), 4, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, false);
+   PAL_CreateBox(PAL_XY(2, 20), 4, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, NULL);
 
    //
    // Draw the menu items
@@ -415,7 +415,7 @@ PAL_BattleUIMiscItemSubMenuUpdate(
    // Draw the menu
    //
    PAL_BattleUIDrawMiscMenu(1, true);
-   PAL_CreateBox(PAL_XY(30, 50), 1, PAL_MenuTextMaxWidth(rgMenuItem, 2) - 1, 0, false);
+   PAL_CreateBox(PAL_XY(30, 50), 1, PAL_MenuTextMaxWidth(rgMenuItem, 2) - 1, 0, NULL);
 
    //
    // Draw the menu items

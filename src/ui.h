@@ -154,30 +154,30 @@ int PAL_InitUI(
 void PAL_FreeUI(
     void);
 
-BOX *PAL_CreateBox(
+void PAL_CreateBox(
     unsigned int pos,
     int nRows,
     int nColumns,
     int iStyle,
-    int fSaveScreen);
+    BOX **lpBox);
 
-BOX *PAL_CreateBoxWithShadow(
+void PAL_CreateBoxWithShadow(
     unsigned int pos,
     int nRows,
     int nColumns,
     int iStyle,
-    int fSaveScreen,
+    BOX **lpBox,
     int nShadowOffset);
 
-BOX *PAL_CreateSingleLineBox(
+void PAL_CreateSingleLineBox(
     unsigned int pos,
     int nLen,
-    int fSaveScreen);
+    BOX **lpBox);
 
-BOX *PAL_CreateSingleLineBoxWithShadow(
+void PAL_CreateSingleLineBoxWithShadow(
     unsigned int pos,
     int nLen,
-    int fSaveScreen,
+    BOX **lpBox,
     int nShadowOffset);
 
 void PAL_DeleteBox(
@@ -191,27 +191,31 @@ PAL_ReadMenu(
     unsigned short wDefaultItem,
     unsigned char bLabelColor);
 
-void PAL_DrawNumber(
+void
+PAL_DrawNumber(
     unsigned int iNum,
     unsigned int nLength,
     unsigned int pos,
     NUMCOLOR color,
     NUMALIGN align);
 
-int
+unsigned int
 PAL_TextWidth(
-    const wchar_t *lpszItemText);
+    const wchar_t *itemText);
 
-int PAL_MenuTextMaxWidth(
+unsigned int
+PAL_MenuTextMaxWidth(
     const MENUITEM *rgMenuItem,
-    int nMenuItem);
+    unsigned int nMenuItem);
 
-int PAL_WordMaxWidth(
+unsigned int
+PAL_WordMaxWidth(
     int nFirstWord,
-    int nWordNum);
+    unsigned int nWordNum);
 
-int PAL_WordWidth(
-    int nWordIndex);
+unsigned int
+PAL_WordWidth(
+    unsigned int nWordIndex);
 
 extern unsigned char *gpSpriteUI;
 

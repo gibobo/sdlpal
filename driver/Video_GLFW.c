@@ -8,7 +8,7 @@
 static int window_width = 320;
 static int window_height = 200;
 static unsigned char *framebuffer = NULL;   // RGB888
-static unsigned char *palette = NULL;
+static const unsigned char *palette = NULL;
 GLFWwindow *window = NULL;
 
 extern void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);

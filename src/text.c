@@ -340,7 +340,7 @@ PAL_DrawTextUnescape(
    while (*lpszText)
    {
       // Draw the character
-      int char_width = PAL_CharWidth(*lpszText);
+      unsigned char char_width = PAL_CharWidth(*lpszText);
       if (char_width)
       {
          if (fShadow)
@@ -824,7 +824,6 @@ PAL_ShowDialogText(
       // The text should be shown in a small window at the center of the screen
       //
       {
-         BOX       *lpBox;
          int        i;
          int        w = (int)wcslen(lpszText);
          int        len = 0;
@@ -839,7 +838,7 @@ PAL_ShowDialogText(
          rect.h = 64;
 
          // Follow behavior of original version
-         lpBox = PAL_CreateSingleLineBoxWithShadow(PAL_XY(rect.x, rect.y), (len + 1) / 2, false, iDialogShadow);
+         PAL_CreateSingleLineBoxWithShadow(PAL_XY(rect.x, rect.y), (len + 1) / 2, NULL, iDialogShadow);
 
          VIDEO_UpdateScreen(&rect);
 
@@ -849,8 +848,6 @@ PAL_ShowDialogText(
 
          PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
 
-         // Delete the box
-         PAL_DeleteBox(lpBox);
          VIDEO_UpdateScreen(&rect);
 
          PAL_EndDialog();

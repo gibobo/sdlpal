@@ -133,7 +133,7 @@ static unsigned short GetSavedTimes(int iSaveSlot) {
    return wSavedTimes;
 }
 
-int PAL_OpeningMenu(void)
+void PAL_OpeningMenu(void)
 /*++
   Purpose:
 
@@ -151,7 +151,7 @@ int PAL_OpeningMenu(void)
 {
    unsigned short wItemSelected;
    unsigned short wDefaultItem = 0;
-   int w[2] = {PAL_WordWidth(MAINMENU_LABEL_NEWGAME), PAL_WordWidth(MAINMENU_LABEL_LOADGAME)};
+   unsigned int w[2] = {PAL_WordWidth(MAINMENU_LABEL_NEWGAME), PAL_WordWidth(MAINMENU_LABEL_LOADGAME)};
 
    MENUITEM rgMainMenuItem[2] = {
        // value   label                     enabled   position
@@ -199,10 +199,11 @@ int PAL_OpeningMenu(void)
    AUDIO_PlayMusic(0x00, false, 1);
    PAL_FadeOut(1);
 
-   return (int)wItemSelected;
+   // Initialize game data and set the flags to load the game resources.
+   PAL_ReloadInNextTick(wItemSelected & 0xFF);
 }
 
-int PAL_SaveSlotMenu(
+unsigned short PAL_SaveSlotMenu(
     unsigned short wDefaultSlot)
 /*++
   Purpose:
@@ -219,10 +220,9 @@ int PAL_SaveSlotMenu(
 
 --*/
 {
-   BOX *rgpBox[5];
-   int i;
-   int w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5);
-   int dx = (w > 4) ? (w - 4) * 16 : 0;
+   unsigned int i;
+   unsigned int w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5U);
+   unsigned int dx = (w > 4) ? (w - 4) * 16U : 0U;
    unsigned short wItemSelected;
 
    MENUITEM rgMenuItem[5];
@@ -235,7 +235,7 @@ int PAL_SaveSlotMenu(
    for (i = 0; i < 5; i++)
    {
       // Fix render problem with shadow
-      rgpBox[i] = PAL_CreateSingleLineBox(PAL_XY(195 - dx, 7 + 38 * i), 6 + (w > 4 ? w - 4 : 0), false);
+      PAL_CreateSingleLineBox(PAL_XY(195 - dx, 7 + 38 * i), 6 + (w > 4 ? w - 4 : 0), NULL);
 
       rgMenuItem[i].wValue = i + 1;
       rgMenuItem[i].fEnabled = true;
@@ -259,14 +259,6 @@ int PAL_SaveSlotMenu(
    // Activate the menu
    //
    wItemSelected = PAL_ReadMenu(NULL, rgMenuItem, 5, wDefaultSlot - 1, MENUITEM_COLOR);
-
-   //
-   // Delete the boxes
-   //
-   for (i = 0; i < 5; i++)
-   {
-      PAL_DeleteBox(rgpBox[i]);
-   }
 
    VIDEO_UpdateScreen(&rect);
 
@@ -297,26 +289,33 @@ PAL_SelectionMenu(
 {
    BOX *rgpBox[4];
    MENUITEM rgMenuItem[4];
-   int w[4] = {
+   unsigned char i;
+   unsigned short wReturnValue;
+   unsigned int w[4] = {
        (nWords >= 1 && wItems[0]) ? PAL_WordWidth(wItems[0]) : 1,
        (nWords >= 2 && wItems[1]) ? PAL_WordWidth(wItems[1]) : 1,
        (nWords >= 3 && wItems[2]) ? PAL_WordWidth(wItems[2]) : 1,
        (nWords >= 4 && wItems[3]) ? PAL_WordWidth(wItems[3]) : 1};
-   int dx[4] = {(w[0] - 1) * 16, (w[1] - 1) * 16, (w[2] - 1) * 16, (w[3] - 1) * 16}, i;
-   unsigned int pos[4] = {PAL_XY(145, 110), PAL_XY(220 + dx[0], 110), PAL_XY(145, 160), PAL_XY(220 + dx[2], 160)};
-   unsigned short wReturnValue;
-
+   unsigned int dx[4] = {
+       (w[0] - 1) * 16,
+       (w[1] - 1) * 16,
+       (w[2] - 1) * 16,
+       (w[3] - 1) * 16};
+   unsigned int pos[4] = {
+      PAL_XY(145, 110),
+      PAL_XY(220 + dx[0], 110),
+      PAL_XY(145, 160),
+      PAL_XY(220 + dx[2], 160)
+      };
    const PAL_Rect rect = {130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100};
-
-   for (i = 0; i < nWords; i++)
-      if (nWords > i && !wItems[i])
-         return MENUITEM_VALUE_CANCELLED;
 
    //
    // Create menu items
    //
    for (i = 0; i < nWords; i++)
    {
+      if (!wItems[i])
+         return MENUITEM_VALUE_CANCELLED;
       rgMenuItem[i].fEnabled = true;
       rgMenuItem[i].pos = pos[i];
       rgMenuItem[i].wValue = i;
@@ -331,7 +330,7 @@ PAL_SelectionMenu(
    dx[0] = dx[2] = 0;
    for (i = 0; i < nWords; i++)
    {
-      rgpBox[i] = PAL_CreateSingleLineBox(PAL_XY(130 + 75 * (i % 2) + dx[i], 100 + 50 * (i / 2)), w[i] + 1, true);
+      PAL_CreateSingleLineBox(PAL_XY(130 + 75 * (i % 2) + dx[i], 100 + 50 * (i / 2)), w[i] + 1, &rgpBox[i]);
    }
 
    //
@@ -419,46 +418,6 @@ int PAL_SwitchMenu(
    return (wReturnValue == MENUITEM_VALUE_CANCELLED) ? fEnabled : ((wReturnValue == 0) ? false : true);
 }
 
-BOX *PAL_ShowCash(unsigned int dwCash)
-/*++
-  Purpose:
-
-    Show the cash amount at the top left corner of the screen.
-
-  Parameters:
-
-    [IN]  dwCash - amount of cash.
-
-  Return value:
-
-    pointer to the saved screen part.
-
---*/
-{
-   BOX *lpBox;
-
-   //
-   // Create the box.
-   //
-   lpBox = PAL_CreateSingleLineBox(PAL_XY(0, 0), 5, true);
-   if (lpBox == NULL)
-   {
-      return NULL;
-   }
-
-   //
-   // Draw the text label.
-   //
-   PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(10, 10), 0, false, false, false);
-
-   //
-   // Draw the cash amount.
-   //
-   PAL_DrawNumber(dwCash, 6, PAL_XY(49, 14), kNumColorYellow, kNumAlignRight);
-
-   return lpBox;
-}
-
 static void
 PAL_SystemMenu_OnItemChange(
     unsigned short wCurrentItem)
@@ -498,9 +457,10 @@ PAL_SystemMenu(
 
 --*/
 {
-   BOX *lpMenuBox;
+   BOX *lpMenuBox = NULL;
    unsigned short wReturnValue;
-   int iSlot, i;
+   unsigned short iSlot;
+   int i;
    const PAL_Rect rect = {40, 60, 280, 135};
 
    //
@@ -520,7 +480,7 @@ PAL_SystemMenu(
    //
    // Create the menu box.
    //
-   lpMenuBox = PAL_CreateBox(PAL_XY(40, 60), nSystemMenuItem - 1, PAL_MenuTextMaxWidth(rgSystemMenuItem, nSystemMenuItem) - 1, 0, true);
+   PAL_CreateBox(PAL_XY(40, 60), nSystemMenuItem - 1, PAL_MenuTextMaxWidth(rgSystemMenuItem, nSystemMenuItem) - 1, 0, &lpMenuBox);
 
    //
    // Perform the menu.
@@ -544,7 +504,6 @@ PAL_SystemMenu(
       // Save game
       //
       iSlot = PAL_SaveSlotMenu(gpGlobals->bCurrentSaveSlot);
-
       if (iSlot != MENUITEM_VALUE_CANCELLED)
       {
          unsigned short wSavedTimes = 0;
@@ -571,7 +530,7 @@ PAL_SystemMenu(
       {
          AUDIO_PlayMusic(0x00, false, 1);
          PAL_FadeOut(1);
-         PAL_ReloadInNextTick(iSlot);
+         PAL_ReloadInNextTick(iSlot & 0xFF);
       }
       break;
 
@@ -663,8 +622,7 @@ void PAL_InGameMagicMenu(
    //
    // Draw the box
    //
-   void *tmp = NULL;
-   tmp = PAL_CreateBox(PAL_XY(35, 62), gpGlobals->wMaxPartyMemberIndex, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, false);
+   PAL_CreateBox(PAL_XY(35, 62), gpGlobals->wMaxPartyMemberIndex, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, NULL);
 
    w = PAL_ReadMenu(NULL, rgMenuItem, gpGlobals->wMaxPartyMemberIndex + 1, w, MENUITEM_COLOR);
 
@@ -851,8 +809,7 @@ PAL_InventoryMenu(
            {2, INVMENU_LABEL_USE, true, PAL_XY(43, 73 + 18)},
        };
 
-   void *tmp = NULL;
-   tmp = PAL_CreateBox(PAL_XY(30, 60), 1, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, false);
+   PAL_CreateBox(PAL_XY(30, 60), 1, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem) / sizeof(MENUITEM)) - 1, 0, NULL);
 
    w = PAL_ReadMenu(NULL, rgMenuItem, 2, w - 1, MENUITEM_COLOR);
 
@@ -906,9 +863,10 @@ void PAL_InGameMenu(
 
 --*/
 {
-   BOX *lpCashBox;
-   BOX *lpMenuBox;
+   BOX *lpCashBox = NULL;
+   BOX *lpMenuBox = NULL;
    unsigned short wReturnValue;
+   unsigned char loop_flag = 1;
 
    // Fix render problem with shadow
    VIDEO_BackupScreen(gpScreen);
@@ -916,75 +874,75 @@ void PAL_InGameMenu(
    //
    // Create menu items
    //
-   MENUITEM rgMainMenuItem[4] =
-       {
-           // value  label                      enabled   pos
-           {1, GAMEMENU_LABEL_STATUS, true, PAL_XY(16, 50)},
-           {2, GAMEMENU_LABEL_MAGIC, true, PAL_XY(16, 50 + 18)},
-           {3, GAMEMENU_LABEL_INVENTORY, true, PAL_XY(16, 50 + 36)},
-           {4, GAMEMENU_LABEL_SYSTEM, true, PAL_XY(16, 50 + 54)},
-       };
+   MENUITEM rgMainMenuItem[4] = {
+       // value   label                      enabled  pos
+       {1,        GAMEMENU_LABEL_STATUS,     true,    PAL_XY(16, 50)},
+       {2,        GAMEMENU_LABEL_MAGIC,      true,    PAL_XY(16, 50 + 18)},
+       {3,        GAMEMENU_LABEL_INVENTORY,  true,    PAL_XY(16, 50 + 36)},
+       {4,        GAMEMENU_LABEL_SYSTEM,     true,    PAL_XY(16, 50 + 54)},
+   };
 
    //
-   // Display the cash amount.
+   // Create the box.
    //
-   lpCashBox = PAL_ShowCash(gpGlobals->dwCash);
+   PAL_CreateSingleLineBox(PAL_XY(0, 0), 5, &lpCashBox);
+
+   //
+   // Draw the text label.
+   //
+   PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(10, 10), 0, false, false, false);
+
+   //
+   // Draw the cash amount.
+   //
+   PAL_DrawNumber(gpGlobals->dwCash, 6, PAL_XY(49, 14), kNumColorYellow, kNumAlignRight);
 
    //
    // Create the menu box.
    //
    // Fix render problem with shadow
-   lpMenuBox = PAL_CreateBox(PAL_XY(3, 37), 3, PAL_MenuTextMaxWidth(rgMainMenuItem, 4) - 1, 0, false);
+   PAL_CreateBox(PAL_XY(3, 37), 3, PAL_MenuTextMaxWidth(rgMainMenuItem, 4) - 1, 0, &lpMenuBox);
 
    //
    // Process the menu
    //
-   while (true)
+   while (loop_flag)
    {
       wReturnValue = PAL_ReadMenu(PAL_InGameMenu_OnItemChange, rgMainMenuItem, 4,
                                   gpGlobals->iCurMainMenuItem, MENUITEM_COLOR);
 
-      if (wReturnValue == MENUITEM_VALUE_CANCELLED)
-      {
-         break;
-      }
-
       switch (wReturnValue)
       {
+      case MENUITEM_VALUE_CANCELLED:
+        loop_flag = 0;
+        break;
+
       case 1:
-         //
          // Status
-         //
          PAL_PlayerStatus();
-         goto out;
+         loop_flag = 0;
+         break;
 
       case 2:
-         //
          // Magic
-         //
          PAL_InGameMagicMenu();
-         goto out;
+         loop_flag = 0;
+         break;
 
       case 3:
-         //
          // Inventory
-         //
          PAL_InventoryMenu();
-         goto out;
+         loop_flag = 0;
+         break;
 
       case 4:
-         //
          // System
-         //
          if (PAL_SystemMenu())
-         {
-            goto out;
-         }
+           loop_flag = 0;
          break;
       }
    }
 
-out:
    //
    // Remove the boxes.
    //
@@ -1040,7 +998,7 @@ void PAL_PlayerStatus(
       // Draw the equipments
       for (i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
       {
-         int offset;
+         unsigned int offset;
 
          w = gpGlobals->g.PlayerRoles->rgwEquipment[i][iPlayerRole];
 
@@ -1055,7 +1013,7 @@ void PAL_PlayerStatus(
          }
 
          // Draw the text label
-         offset = PAL_WordWidth(w) * 16;
+         offset = PAL_WordWidth(w) << 4;
          if (PAL_X(RoleEquipNames[i]) + offset > SCREEN_W)
          {
             offset = SCREEN_W - PAL_X(RoleEquipNames[i]) - offset;
@@ -1189,7 +1147,7 @@ PAL_ItemUseMenu(
       //
       // Draw the box
       //
-      PAL_CreateBox(PAL_XY(110, 2), 7, 9, 0, false);
+      PAL_CreateBox(PAL_XY(110, 2), 7, 9, 0, NULL);
 
       //
       // Draw the stats of the selected player
@@ -1367,7 +1325,6 @@ PAL_BuyMenu_OnItemChange(
    const PAL_Rect rect = {20, 8, 300, 175};
    int i, j, n, iPlayerID, x, y;
    unsigned char *bufImage;
-   void *tmp = NULL;
 
    // Prepare item bakcground box pos
    x = 40;
@@ -1426,7 +1383,7 @@ PAL_BuyMenu_OnItemChange(
    //
    // Draw the amount of this item in the inventory
    //
-   tmp = PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, false, (__buymenu_firsttime_render) ? 6 : 0);
+   PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, NULL, (__buymenu_firsttime_render) ? 6 : 0);
    PAL_DrawText(PAL_GetWord(BUYMENU_LABEL_CURRENT), PAL_XY(x + 10, y + 10), 0, false, false, false);
    PAL_DrawNumber(n, 6, PAL_XY(x + 49, y + 15), kNumColorYellow, kNumAlignRight);
 
@@ -1438,7 +1395,7 @@ PAL_BuyMenu_OnItemChange(
    //
    // Draw the cash amount
    //
-   tmp = PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, false, (__buymenu_firsttime_render) ? 6 : 0);
+   PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, NULL, (__buymenu_firsttime_render) ? 6 : 0);
    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(x + 10, y + 10), 0, false, false, false);
    PAL_DrawNumber(gpGlobals->dwCash, 6, PAL_XY(x + 49, y + 15), kNumColorYellow, kNumAlignRight);
 
@@ -1491,8 +1448,7 @@ void PAL_BuyMenu(
    //
    // Draw the box
    //
-   void *tmp = NULL;
-   tmp = PAL_CreateBox(PAL_XY(122, 8), 8, 8, 1, false);
+   PAL_CreateBox(PAL_XY(122, 8), 8, 8, 1, NULL);
 
    //
    // Draw the number of prices
@@ -1561,12 +1517,12 @@ PAL_SellMenu_OnItemChange(
 
 --*/
 {
-   unsigned short x = 100, y = 150;
-   void *tmp = NULL;
+   unsigned short x = 100;
+   unsigned short y = 150;
    //
    // Draw the cash amount
    //
-   tmp = PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, false, 0);
+   PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, NULL, 0);
    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(x + 10, y + 10), 0, false, false, false);
    PAL_DrawNumber(gpGlobals->dwCash, 6, PAL_XY(x + 48, y + 15), kNumColorYellow, kNumAlignRight);
 
@@ -1575,7 +1531,7 @@ PAL_SellMenu_OnItemChange(
    //
    // Draw the price
    //
-   tmp = PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, false, 0);
+   PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, NULL, 0);
 
    if (gpGlobals->g.rgObject[wCurrentItem].item.wFlags & kItemFlagSellable)
    {
@@ -1688,7 +1644,7 @@ void PAL_EquipItemMenu(
       PAL_DrawNumber(PAL_GetPlayerFleeRate(w), 4, EquipStatusValues[4], kNumColorCyan, kNumAlignRight);
 
       // Draw a box for player selection
-      PAL_CreateBox(EquipRoleListBox, gpGlobals->wMaxPartyMemberIndex, PAL_WordMaxWidth(36, 4) - 1, 0, false);
+      PAL_CreateBox(EquipRoleListBox, gpGlobals->wMaxPartyMemberIndex, PAL_WordMaxWidth(36, 4) - 1, 0, NULL);
 
       // Draw the label of players
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)

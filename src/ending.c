@@ -31,11 +31,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-static unsigned short g_wCurEffectSprite = 0;
-
 static void PAL_ShowFBP(
     unsigned short wChunkNum,
-    unsigned short wFade)
+    unsigned short wFade,
+    unsigned short g_wCurEffectSprite)
 /*++
   Purpose:
 
@@ -127,7 +126,7 @@ static void PAL_ShowFBP(
    UTIL_free(bufSprite);
 }
 
-static void PAL_ScrollFBP(unsigned short wChunkNum)
+static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectSprite)
 /*++
   Purpose:
 
@@ -187,19 +186,17 @@ static void PAL_ScrollFBP(unsigned short wChunkNum)
 
       PAL_ApplyWave(gpScreen->pixels);
 
-      if (g_wCurEffectSprite != 0)
-      {
-         int f = UTIL_GetTicks() / 150;
-         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
-                              gpScreen, PAL_XY(0, 0));
+      if (g_wCurEffectSprite) {
+        int f = UTIL_GetTicks() / 150;
+        PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
+                             gpScreen, PAL_XY(0, 0));
       }
 
       VIDEO_UpdateScreen(NULL);
 
-      if (gpGlobals->fNeedToFadeIn)
-      {
-         PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-         gpGlobals->fNeedToFadeIn = false;
+      if (gpGlobals->fNeedToFadeIn) {
+        PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
+        gpGlobals->fNeedToFadeIn = false;
       }
 
       UTIL_Delay(800 / 15);
@@ -322,9 +319,9 @@ void PAL_EndingScreen(void)
    AUDIO_PlayMusic(-1, false, 0);
    AUDIO_PlayMusic(0x19, true, 0);
 
-   PAL_ShowFBP(75, 0);
+   PAL_ShowFBP(75, 0, 0);
    PAL_FadeIn(5, false, 1);
-   PAL_ScrollFBP(74);
+   PAL_ScrollFBP(74, 0);
 
    PAL_FadeOut(1);
 #endif
@@ -354,23 +351,20 @@ void PAL_EndingScreen(void)
    gpGlobals->fNeedToFadeIn = true;
    PAL_RNGPlay(10, 0, -1, 6);
 
-   g_wCurEffectSprite = 0;
-   PAL_ShowFBP(77, 10);
+   PAL_ShowFBP(77, 10, 0);
    VIDEO_BackupScreen(gpScreen);
 
-   g_wCurEffectSprite = 0x27b;
-   PAL_ShowFBP(76, 7);
+   PAL_ShowFBP(76, 7, 0x27b);
 #endif
 #if 1 // GIRL 2
    PAL_SetPalette(5, false);
-   PAL_ShowFBP(73, 7);
-   PAL_ScrollFBP(72);
+   PAL_ShowFBP(73, 7, 0x27b);
+   PAL_ScrollFBP(72, 0x27b);
 
-   PAL_ShowFBP(71, 7);
-   PAL_ShowFBP(68, 7);
+   PAL_ShowFBP(71, 7, 0x27b);
+   PAL_ShowFBP(68, 7, 0x27b);
 
-   g_wCurEffectSprite = 0;
-   PAL_ShowFBP(68, 6);
+   PAL_ShowFBP(68, 6, 0);
 
    PAL_WaitForKey(0);
    AUDIO_PlayMusic(0x00, false, 1);
@@ -379,15 +373,15 @@ void PAL_EndingScreen(void)
 #if 1 // staff list
    AUDIO_PlayMusic(-1, false, 0);
    AUDIO_PlayMusic(9, true, 0);
-   PAL_ScrollFBP(67);
-   PAL_ScrollFBP(66); // GIRL 3
-   PAL_ScrollFBP(65);
-   PAL_ScrollFBP(64); // GIRL 2
-   PAL_ScrollFBP(63);
-   PAL_ScrollFBP(62); // GIRL 1
-   PAL_ScrollFBP(61);
-   PAL_ScrollFBP(60); // BOY
-   PAL_ScrollFBP(59);
+   PAL_ScrollFBP(67, 0);
+   PAL_ScrollFBP(66, 0); // GIRL 3
+   PAL_ScrollFBP(65, 0);
+   PAL_ScrollFBP(64, 0); // GIRL 2
+   PAL_ScrollFBP(63, 0);
+   PAL_ScrollFBP(62, 0); // GIRL 1
+   PAL_ScrollFBP(61, 0);
+   PAL_ScrollFBP(60, 0); // BOY
+   PAL_ScrollFBP(59, 0);
 
    AUDIO_PlayMusic(0x00, false, 6);
    PAL_FadeOut(3); // 淡出

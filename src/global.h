@@ -597,7 +597,7 @@ void PAL_InitGameData(
 extern "C" {
 #endif
 
-void PAL_ReloadInNextTick(int iSaveSlot);
+void PAL_ReloadInNextTick(unsigned char iSaveSlot);
 
 #ifdef __cplusplus
 }

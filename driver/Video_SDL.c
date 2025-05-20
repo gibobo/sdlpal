@@ -8,7 +8,7 @@
 static int window_width = 320;
 static int window_height = 200;
 static unsigned char *framebuffer = NULL;   // RGB888
-static unsigned char *palette = NULL;
+static const unsigned char *palette = NULL;
 static SDL_Window *gpWindow = NULL;
 static SDL_GLContext gpContext = NULL;
 

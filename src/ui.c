@@ -100,22 +100,22 @@ void PAL_FreeUI(
    gpSpriteUI = NULL;
 }
 
-BOX *PAL_CreateBox(
+void PAL_CreateBox(
     unsigned int pos,
     int nRows,
     int nColumns,
     int iStyle,
-    int fSaveScreen)
+    BOX **lpBox)
 {
-   return PAL_CreateBoxWithShadow(pos, nRows, nColumns, iStyle, fSaveScreen, 6);
+   PAL_CreateBoxWithShadow(pos, nRows, nColumns, iStyle, lpBox, 6);
 }
 
-BOX *PAL_CreateBoxWithShadow(
+void PAL_CreateBoxWithShadow(
     unsigned int pos,
     int nRows,
     int nColumns,
     int iStyle,
-    int fSaveScreen,
+    BOX **lpBox,
     int nShadowOffset)
 /*++
   Purpose:
@@ -143,7 +143,6 @@ BOX *PAL_CreateBoxWithShadow(
 {
    int i, j, x, m, n;
    const unsigned char *rglpBorderBitmap[3][3];
-   BOX *lpBox = NULL;
    PAL_Rect rect;
 
    //
@@ -183,8 +182,8 @@ BOX *PAL_CreateBoxWithShadow(
    rect.w += nShadowOffset;
    rect.h += nShadowOffset;
 
-   if (fSaveScreen)
-      lpBox = PAL_CreateBoxInternal(&rect); // Save the used part of the screen
+   if (lpBox)
+      *lpBox = PAL_CreateBoxInternal(&rect); // Save the used part of the screen
 
    //
    // Border takes 2 additional rows and columns...
@@ -210,22 +209,20 @@ BOX *PAL_CreateBoxWithShadow(
 
       rect.y += PAL_RLEGetHeight(rglpBorderBitmap[m][0]);
    }
-
-   return lpBox;
 }
 
-BOX *PAL_CreateSingleLineBox(
+void PAL_CreateSingleLineBox(
     unsigned int pos,
     int nLen,
-    int fSaveScreen)
+    BOX **lpBox)
 {
-   return PAL_CreateSingleLineBoxWithShadow(pos, nLen, fSaveScreen, 6);
+   PAL_CreateSingleLineBoxWithShadow(pos, nLen, lpBox, 6);
 }
 
-BOX *PAL_CreateSingleLineBoxWithShadow(
+void PAL_CreateSingleLineBoxWithShadow(
     unsigned int pos,
     int nLen,
-    int fSaveScreen,
+    BOX **lpBox,
     int nShadowOffset)
 /*++
   Purpose:
@@ -251,7 +248,6 @@ BOX *PAL_CreateSingleLineBoxWithShadow(
    const unsigned char *lpBitmapMid;
    const unsigned char *lpBitmapRight;
    PAL_Rect rect;
-   BOX *lpBox = NULL;
    int i;
    int xSaved;
 
@@ -276,12 +272,12 @@ BOX *PAL_CreateSingleLineBoxWithShadow(
    rect.w += nShadowOffset;
    rect.h += nShadowOffset;
 
-   if (fSaveScreen)
+   if (lpBox)
    {
       //
       // Save the used part of the screen
       //
-      lpBox = PAL_CreateBoxInternal(&rect);
+      *lpBox = PAL_CreateBoxInternal(&rect);
    }
    xSaved = rect.x;
 
@@ -315,8 +311,6 @@ BOX *PAL_CreateSingleLineBoxWithShadow(
    }
 
    PAL_RLEBlitToSurface(lpBitmapRight, gpScreen, PAL_XY(rect.x, rect.y));
-
-   return lpBox;
 }
 
 void PAL_DeleteBox(BOX *lpBox)
@@ -693,6 +687,9 @@ void PAL_DrawNumber(
    }
 }
 
+unsigned int
+PAL_TextWidth(
+    const wchar_t *itemText)
 /*++
    Purpose:
 
@@ -707,23 +704,20 @@ void PAL_DrawNumber(
       text width.
 
 --*/
-int
-PAL_TextWidth(
-    const wchar_t *lpszItemText)
 {
-   int l = (int)wcslen(lpszItemText);
-   int j = 0;
-   int w = 0;
-   for (j = 0; j < l; j++)
-   {
-      w += PAL_CharWidth(lpszItemText[j]);
-   }
+   const unsigned int l = (unsigned int)wcslen(itemText);
+   unsigned int i = 0;
+   unsigned int w = 0;
+
+   for (i = 0; i < l; i++)
+      w += PAL_CharWidth(itemText[i]);
+
    return w;
 }
 
-int PAL_MenuTextMaxWidth(
+unsigned int PAL_MenuTextMaxWidth(
     const MENUITEM *rgMenuItem,
-    int nMenuItem)
+    unsigned int nMenuItem)
 /*++
   Purpose:
 
@@ -740,22 +734,21 @@ int PAL_MenuTextMaxWidth(
 
 --*/
 {
-  int i;
-  int r = 0;
-  int w;
+   unsigned int i = 0;
+   unsigned int r = 0;
+   unsigned int w = 0;
   for (i = 0; i < nMenuItem; i++) {
     const wchar_t *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
-    w = (int)((PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4);
-    if (r < w) {
+      w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4;
+      if (r < w)
       r = w;
     }
-  }
   return r;
 }
 
-int PAL_WordMaxWidth(
+unsigned int PAL_WordMaxWidth(
     int nFirstWord,
-    int nWordNum)
+    unsigned int nWordNum)
 /*++
   Purpose:
 
@@ -772,29 +765,19 @@ int PAL_WordMaxWidth(
 
 --*/
 {
-   int i;
-   int j = 0;
-   int r = 0;
-   for (i = 0; i < nWordNum; i++)
-   {
-      const wchar_t *itemText = PAL_GetWord(nFirstWord + i);
-      int l = (int)wcslen(itemText);
-      int w = 0;
-      for (j = 0; j < l; j++)
-      {
-         w += PAL_CharWidth(itemText[j]);
-      }
-      w = (w + 8) >> 4;
+   unsigned int i = 0;
+   unsigned int w = 0;
+   unsigned int r = 0;
+   for (i = 0; i < nWordNum; i++) {
+      w = PAL_WordWidth(nFirstWord + i);
       if (r < w)
-      {
          r = w;
-      }
    }
    return r;
 }
 
-int PAL_WordWidth(
-    int nWordIndex)
+unsigned int PAL_WordWidth(
+    unsigned int nWordIndex)
 /*++
   Purpose:
 
@@ -811,13 +794,5 @@ int PAL_WordWidth(
 --*/
 {
    const wchar_t *itemText = PAL_GetWord(nWordIndex);
-   unsigned int i = 0;
-   unsigned int w = 8;
-   unsigned int l = (unsigned int)wcslen(itemText);
-
-   for (i = 0; i < l; i++)
-   {
-      w += PAL_CharWidth(itemText[i]);
-   }
-   return (w >> 4);
+   return (8U + PAL_TextWidth(itemText)) >> 4U;
 }

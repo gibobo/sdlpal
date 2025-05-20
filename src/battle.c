@@ -919,7 +919,6 @@ PAL_BattleWon(
    unsigned int dwExp;
    unsigned short w;
    int fLevelUp;
-   void *tmp = NULL;
    PLAYERROLES OrigPlayerRoles;
 
    //
@@ -931,8 +930,8 @@ PAL_BattleWon(
 
    if (g_Battle->iExpGained > 0)
    {
-      int w1 = PAL_WordWidth(BATTLEWIN_GETEXP_LABEL) + 3;
-      int ww1 = (unsigned int)(w1 - 8) << 3;
+      unsigned int w1 = PAL_WordWidth(BATTLEWIN_GETEXP_LABEL) + 3;
+      unsigned int ww1 = (unsigned int)(w1 - 8) << 3;
       //
       // Play the "battle win" music
       //
@@ -941,8 +940,8 @@ PAL_BattleWon(
       //
       // Show the message about the total number of exp. and cash gained
       //
-      tmp = PAL_CreateSingleLineBox(PAL_XY(83 - ww1, 60), w1, false);
-      PAL_CreateSingleLineBox(PAL_XY(65, 105), 10, false);
+      PAL_CreateSingleLineBox(PAL_XY(83 - ww1, 60), w1, NULL);
+      PAL_CreateSingleLineBox(PAL_XY(65, 105), 10, NULL);
 
       PAL_DrawText(PAL_GetWord(BATTLEWIN_GETEXP_LABEL), PAL_XY(95 - ww1, 70), 0, false, false, false);
       PAL_DrawText(PAL_GetWord(BATTLEWIN_BEATENEMY_LABEL), PAL_XY(77, 115), 0, false, false, false);
@@ -970,7 +969,7 @@ PAL_BattleWon(
            {5, gpGlobals->g.PlayerRoles->rgwName[4], true, PAL_XY(0, 0)},
            {6, gpGlobals->g.PlayerRoles->rgwName[5], true, PAL_XY(0, 0)},
        };
-   int maxNameWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem, sizeof(rgFakeMenuItem) / sizeof(MENUITEM));
+   unsigned int maxNameWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem, sizeof(rgFakeMenuItem) / sizeof(MENUITEM));
    const MENUITEM rgFakeMenuItem2[] =
        {
            // value  label                        enabled   pos
@@ -983,7 +982,7 @@ PAL_BattleWon(
            {7, STATUS_LABEL_DEXTERITY, true, PAL_XY(0, 0)},
            {8, STATUS_LABEL_FLEERATE, true, PAL_XY(0, 0)},
        };
-   int maxPropertyWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem2, sizeof(rgFakeMenuItem2) / sizeof(MENUITEM)) - 1;
+   unsigned int maxPropertyWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem2, sizeof(rgFakeMenuItem2) / sizeof(MENUITEM)) - 1;
    int propertyLength = maxPropertyWidth - 1;
    int offsetX = -8 * propertyLength;
    rect1.x += offsetX;
@@ -1031,8 +1030,8 @@ PAL_BattleWon(
          //
          // Player has gained a level. Show the message
          //
-         tmp = PAL_CreateSingleLineBox(PAL_XY(offsetX + 80, 0), propertyLength + 10, false);
-         PAL_CreateBox(PAL_XY(offsetX + 82, 32), 7, propertyLength + 8, 1, false);
+         PAL_CreateSingleLineBox(PAL_XY(offsetX + 80, 0), propertyLength + 10, NULL);
+         PAL_CreateBox(PAL_XY(offsetX + 82, 32), 7, propertyLength + 8, 1, NULL);
 
          wchar_t buffer[32] = L"";
          PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]), PAL_GetWord(STATUS_LABEL_LEVEL), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL));
@@ -1141,7 +1140,7 @@ PAL_BattleWon(
       {                                                                                                                                                                                           \
          wchar_t buffer[32] = L"";                                                                                                                                                        \
          PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]), PAL_GetWord(label), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)); \
-         tmp = PAL_CreateSingleLineBox(PAL_XY(offsetX + 78, 60), maxNameWidth + maxPropertyWidth + PAL_TextWidth(PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)) / 32 + 4, false);                                \
+         PAL_CreateSingleLineBox(PAL_XY(offsetX + 78, 60), maxNameWidth + maxPropertyWidth + PAL_TextWidth(PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)) / 32 + 4, NULL);                                \
          PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, false, false, false);                                                                                                                  \
          PAL_DrawNumber(gpGlobals->g.PlayerRoles->statname[w] - OrigPlayerRoles.statname[w], 5, PAL_XY(183 + (maxNameWidth + maxPropertyWidth - 3) * 8, 74), kNumColorYellow, kNumAlignRight);     \
          VIDEO_UpdateScreen(&rect);                                                                                                                                                               \
@@ -1185,12 +1184,12 @@ PAL_BattleWon(
 
          if (PAL_AddMagic(w, gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic))
          {
-            int ww;
-            int w1 = (ww = PAL_WordWidth(gpGlobals->g.PlayerRoles->rgwName[w])) > 3 ? ww : 3;
-            int w2 = (ww = PAL_WordWidth(BATTLEWIN_ADDMAGIC_LABEL)) > 2 ? ww : 2;
-            int w3 = (ww = PAL_WordWidth(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic)) > 5 ? ww : 5;
+            unsigned int ww;
+            unsigned int w1 = (ww = PAL_WordWidth(gpGlobals->g.PlayerRoles->rgwName[w])) > 3 ? ww : 3;
+            unsigned int w2 = (ww = PAL_WordWidth(BATTLEWIN_ADDMAGIC_LABEL)) > 2 ? ww : 2;
+            unsigned int w3 = (ww = PAL_WordWidth(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic)) > 5 ? ww : 5;
             ww = (unsigned int)(w1 + w2 + w3 - 10) << 3;
-            tmp = PAL_CreateSingleLineBox(PAL_XY(65 - ww, 105), w1 + w2 + w3, false);
+            PAL_CreateSingleLineBox(PAL_XY(65 - ww, 105), w1 + w2 + w3, NULL);
 
             PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]), PAL_XY(75 - ww, 115), 0, false, false, false);
             PAL_DrawText(PAL_GetWord(BATTLEWIN_ADDMAGIC_LABEL), PAL_XY(75 + 16 * w1 - ww, 115), 0, false, false, false);
