@@ -10,7 +10,7 @@ static ma_mutex dmutex;
 #endif
 
 static void audio_callback(ma_device *pDevice, void *stream, const void *pInput, ma_uint32 frameCount) {
-   int len = frameCount * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
+   unsigned int len = frameCount * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
    memset(stream, 0, len);
    AUDIO_FillBuffer(stream, len);
 }

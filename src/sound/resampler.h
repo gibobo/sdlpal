@@ -16,11 +16,11 @@ void resampler_deinit(void);
 void *resampler_create(void);
 void resampler_delete(void *);
 void resampler_set_quality(void *, int quality);
-int resampler_get_free_count(void *);
+unsigned int resampler_get_free_count(void *);
 void resampler_write_sample(void *, short sample);
 void resampler_set_rate(void *, double new_factor);
 void resampler_clear(void *);
-int resampler_get_sample_count(void *);
+unsigned int resampler_get_sample_count(void *);
 int resampler_get_sample(void *);
 void resampler_remove_sample(void *);
 

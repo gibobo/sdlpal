@@ -998,7 +998,7 @@ void PAL_PlayerStatus(
       // Draw the equipments
       for (i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
       {
-         unsigned int offset;
+         int offset;
 
          w = gpGlobals->g.PlayerRoles->rgwEquipment[i][iPlayerRole];
 

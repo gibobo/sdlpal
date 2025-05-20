@@ -69,7 +69,7 @@ const unsigned char *PAL_SpriteGetFrame(
     const unsigned char *lpSprite,
     int iFrameNum);
 
-int PAL_MKFGetChunkCount(void *fp);
+unsigned int PAL_MKFGetChunkCount(void *fp);
 
 int PAL_MKFGetChunkSize(
     unsigned int uiChunkNum,

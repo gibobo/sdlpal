@@ -1451,15 +1451,16 @@ end:
    {
       if (g_Battle->UI.rgShowNum[i].wNum > 0)
       {
-         if ((UTIL_GetTicks() - g_Battle->UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME > 10)
+         unsigned int ticks = (UTIL_GetTicks() - g_Battle->UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME;
+         if (ticks > 10)
          {
             g_Battle->UI.rgShowNum[i].wNum = 0;
          }
          else
          {
             PAL_DrawNumber(g_Battle->UI.rgShowNum[i].wNum, 5,
-                           PAL_XY(PAL_X(g_Battle->UI.rgShowNum[i].pos), PAL_Y(g_Battle->UI.rgShowNum[i].pos) - (UTIL_GetTicks() - g_Battle->UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME),
-                           g_Battle->UI.rgShowNum[i].color, kNumAlignRight);
+                              PAL_XY_OFFSET(g_Battle->UI.rgShowNum[i].pos, 0, -ticks),
+                              g_Battle->UI.rgShowNum[i].color, kNumAlignRight);
          }
       }
    }

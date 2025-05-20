@@ -47,14 +47,14 @@ typedef struct WAVEFormatPCM {
 } WAVEFormatPCM;
 
 typedef struct tagWAVESPEC {
-  int size;
-  int freq;
+  unsigned int size;
+  unsigned int freq;
   unsigned short format;
   unsigned char channels;
   unsigned char align;
 } WAVESPEC;
 
-typedef int (*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, int, const void **);
+typedef int (*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, unsigned int, const void **);
 
 typedef struct tagWAVEDATA {
     struct tagWAVEDATA *next;
@@ -160,7 +160,7 @@ static int SOUND_ResampleMix_U8_Mono_Mono(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    int iBufLen,
+    unsigned int iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -187,13 +187,14 @@ static int SOUND_ResampleMix_U8_Mono_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-  int src_samples = lpSpec->size;
+  unsigned int src_samples = lpSpec->size;
   const unsigned char *src = (const unsigned char *)lpData;
   short *dst = (short *)lpBuffer;
-  int channel_len = iBufLen, total_bytes = 0;
+  unsigned int channel_len = iBufLen;
+  unsigned int total_bytes = 0;
 
   while (total_bytes < channel_len && src_samples > 0) {
-    int j, to_write = resampler_get_free_count(resampler[0]);
+    unsigned int j, to_write = resampler_get_free_count(resampler[0]);
     if (to_write > src_samples)
       to_write = src_samples;
     for (j = 0; j < to_write; j++)
@@ -217,7 +218,7 @@ static int SOUND_ResampleMix_U8_Mono_Stereo(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    int iBufLen,
+    unsigned int iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -244,13 +245,14 @@ static int SOUND_ResampleMix_U8_Mono_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-  int src_samples = lpSpec->size;
+  unsigned int src_samples = lpSpec->size;
   const unsigned char *src = (const unsigned char *)lpData;
   short *dst = (short *)lpBuffer;
-  int channel_len = iBufLen >> 1, total_bytes = 0;
+  unsigned int channel_len = iBufLen >> 1;
+  unsigned int total_bytes = 0;
 
   while (total_bytes < channel_len && src_samples > 0) {
-    int j, to_write = resampler_get_free_count(resampler[0]);
+    unsigned int j, to_write = resampler_get_free_count(resampler[0]);
     if (to_write > src_samples)
       to_write = src_samples;
     for (j = 0; j < to_write; j++)
@@ -275,7 +277,7 @@ static int SOUND_ResampleMix_U8_Stereo_Mono(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    int iBufLen,
+    unsigned int iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -302,13 +304,14 @@ static int SOUND_ResampleMix_U8_Stereo_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-  int src_samples = lpSpec->size >> 1;
+  unsigned int src_samples = lpSpec->size >> 1;
   const unsigned char *src = (const unsigned char *)lpData;
   short *dst = (short *)lpBuffer;
-  int channel_len = iBufLen, total_bytes = 0;
+  unsigned int channel_len = iBufLen;
+  unsigned int total_bytes = 0;
 
   while (total_bytes < channel_len && src_samples > 0) {
-    int j, to_write = resampler_get_free_count(resampler[0]);
+    unsigned int j, to_write = resampler_get_free_count(resampler[0]);
     if (to_write > src_samples)
       to_write = src_samples;
     for (j = 0; j < to_write; j++) {
@@ -335,7 +338,7 @@ static int SOUND_ResampleMix_U8_Stereo_Stereo(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    int iBufLen,
+    unsigned int iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -362,13 +365,14 @@ static int SOUND_ResampleMix_U8_Stereo_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-  int src_samples = lpSpec->size >> 1;
+  unsigned int src_samples = lpSpec->size >> 1;
   const unsigned char *src = (const unsigned char *)lpData;
   short *dst = (short *)lpBuffer;
-  int channel_len = iBufLen >> 1, total_bytes = 0;
+  unsigned int channel_len = iBufLen >> 1;
+  unsigned int total_bytes = 0;
 
   while (total_bytes < channel_len && src_samples > 0) {
-    int j, to_write = resampler_get_free_count(resampler[0]);
+    unsigned int j, to_write = resampler_get_free_count(resampler[0]);
     if (to_write > src_samples)
       to_write = src_samples;
     for (j = 0; j < to_write; j++) {
@@ -398,7 +402,7 @@ static int SOUND_ResampleMix_S16_Mono_Mono(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    int iBufLen,
+    unsigned int iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -425,13 +429,14 @@ static int SOUND_ResampleMix_S16_Mono_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-  int src_samples = lpSpec->size >> 1;
+  unsigned int src_samples = lpSpec->size >> 1;
   const short *src = (const short *)lpData;
   short *dst = (short *)lpBuffer;
-  int channel_len = iBufLen, total_bytes = 0;
+  unsigned int channel_len = iBufLen;
+  unsigned int total_bytes = 0;
 
   while (total_bytes < channel_len && src_samples > 0) {
-    int j, to_write = resampler_get_free_count(resampler[0]);
+    unsigned int j, to_write = resampler_get_free_count(resampler[0]);
     if (to_write > src_samples)
       to_write = src_samples;
     for (j = 0; j < to_write; j++)
@@ -455,7 +460,7 @@ static int SOUND_ResampleMix_S16_Mono_Stereo(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    int iBufLen,
+    unsigned int iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -482,13 +487,14 @@ static int SOUND_ResampleMix_S16_Mono_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-  int src_samples = lpSpec->size >> 1;
+  unsigned int src_samples = lpSpec->size >> 1;
   const short *src = (const short *)lpData;
   short *dst = (short *)lpBuffer;
-  int channel_len = iBufLen >> 1, total_bytes = 0;
+  unsigned int channel_len = iBufLen >> 1;
+  unsigned int total_bytes = 0;
 
   while (total_bytes < channel_len && src_samples > 0) {
-    int j, to_write = resampler_get_free_count(resampler[0]);
+    unsigned int j, to_write = resampler_get_free_count(resampler[0]);
     if (to_write > src_samples)
       to_write = src_samples;
     for (j = 0; j < to_write; j++)
@@ -513,7 +519,7 @@ static int SOUND_ResampleMix_S16_Stereo_Mono(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    int iBufLen,
+    unsigned int iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -540,13 +546,14 @@ static int SOUND_ResampleMix_S16_Stereo_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-  int src_samples = lpSpec->size >> 2;
+  unsigned int src_samples = lpSpec->size >> 2;
   const short *src = (const short *)lpData;
   short *dst = (short *)lpBuffer;
-  int channel_len = iBufLen, total_bytes = 0;
+  unsigned int channel_len = iBufLen;
+  unsigned int total_bytes = 0;
 
   while (total_bytes < channel_len && src_samples > 0) {
-    int j, to_write = resampler_get_free_count(resampler[0]);
+    unsigned int j, to_write = resampler_get_free_count(resampler[0]);
     if (to_write > src_samples)
       to_write = src_samples;
     for (j = 0; j < to_write; j++) {
@@ -573,7 +580,7 @@ static int SOUND_ResampleMix_S16_Stereo_Stereo(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    int iBufLen,
+    unsigned int iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -600,13 +607,14 @@ static int SOUND_ResampleMix_S16_Stereo_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-  int src_samples = lpSpec->size >> 2;
+  unsigned int src_samples = lpSpec->size >> 2;
   const short *src = (const short *)lpData;
   short *dst = (short *)lpBuffer;
-  int channel_len = iBufLen >> 1, total_bytes = 0;
+  unsigned int channel_len = iBufLen >> 1;
+  unsigned int total_bytes = 0;
 
   while (total_bytes < channel_len && src_samples > 0) {
-    int j, to_write = resampler_get_free_count(resampler[0]);
+    unsigned int j, to_write = resampler_get_free_count(resampler[0]);
     if (to_write > src_samples)
       to_write = src_samples;
     for (j = 0; j < to_write; j++) {
@@ -770,7 +778,7 @@ void SOUND_Shutdown(void *object)
 static void SOUND_FillBuffer(
     void *object,
     unsigned char *stream,
-    int len)
+    unsigned int len)
 /*++
   Purpose:
 

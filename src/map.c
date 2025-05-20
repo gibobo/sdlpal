@@ -141,24 +141,24 @@ const unsigned char *PAL_MapGetTileBitmap(
 
 --*/
 {
-  unsigned int d;
+   unsigned int d;
 
-  // Check for invalid parameters.
-  if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL) {
-    return NULL;
-  }
+   // Check for invalid parameters.
+   if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL) {
+      return NULL;
+   }
 
-  // Get the tile data of the specified location.
+   // Get the tile data of the specified location.
    d = lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h];
 
    if (ucLayer == 0) {
-     // Bottom layer
-     return PAL_SpriteGetFrame(lpMap->pTileSprite, (d & 0xFF) | ((d >> 4) & 0x100));
-  } else {
-    // Top layer
-    d >>= 16;
-    return PAL_SpriteGetFrame(lpMap->pTileSprite, ((d & 0xFF) | ((d >> 4) & 0x100)) - 1);
-  }
+      // Bottom layer
+      return PAL_SpriteGetFrame(lpMap->pTileSprite, (int)(d & 0xFF) | ((d >> 4) & 0x100));
+   } else {
+      // Top layer
+      d >>= 16;
+      return PAL_SpriteGetFrame(lpMap->pTileSprite, (int)((d & 0xFF) | ((d >> 4) & 0x100)) - 1);
+   }
 }
 
 int PAL_MapTileIsBlocked(

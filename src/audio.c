@@ -62,7 +62,7 @@ PAL_FORCE_INLINE void AUDIO_MixNative(short *dst, short *src, int samples) {
     }
 }
 
-void AUDIO_FillBuffer(void *stream, int len) {
+void AUDIO_FillBuffer(void *stream, unsigned int len) {
     if(gAudioDevice.fOpened == false)
         return;
 

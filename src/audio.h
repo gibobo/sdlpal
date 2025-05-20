@@ -30,7 +30,7 @@
   int fLoop;                            \
   void (*Shutdown)(void *);             \
   int (*Play)(void *, int, int, float); \
-  void (*FillBuffer)(void *, unsigned char *, int)
+  void (*FillBuffer)(void *, unsigned char *, unsigned int)
 
 typedef struct tagAUDIOPLAYER {
   AUDIOPLAYER_COMMONS;
@@ -40,7 +40,7 @@ int AUDIO_OpenDevice(void);
 
 void AUDIO_CloseDevice(void);
 
-void AUDIO_FillBuffer(void *stream, int len);
+void AUDIO_FillBuffer(void *stream, unsigned int len);
 
 void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime);
 

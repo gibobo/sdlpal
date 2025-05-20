@@ -147,8 +147,8 @@ PAL_PartyWalkTo(
 {
    int xOffset, yOffset, i, dx, dy;
 
-   xOffset = x * 32 + h * 16 - PAL_X(gpGlobals->viewport) - PAL_X(gpGlobals->partyoffset);
-   yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
+   xOffset = x * 32 + h * 16 - (PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset));
+   yOffset = y * 16 + h * 8 - (PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset));
 
    while (xOffset != 0 || yOffset != 0)
    {
@@ -160,8 +160,8 @@ PAL_PartyWalkTo(
          gpGlobals->rgTrail[i + 1] = gpGlobals->rgTrail[i];
       }
       gpGlobals->rgTrail[0].wDirection = gpGlobals->wPartyDirection;
-      gpGlobals->rgTrail[0].x = PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset);
-      gpGlobals->rgTrail[0].y = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
+      gpGlobals->rgTrail[0].x = (unsigned short)(PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset));
+      gpGlobals->rgTrail[0].y = (unsigned short)(PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset));
 
       if (yOffset < 0)
       {
@@ -203,8 +203,8 @@ PAL_PartyWalkTo(
       PAL_MakeScene();
       VIDEO_UpdateScreen(NULL);
 
-      xOffset = x * 32 + h * 16 - PAL_X(gpGlobals->viewport) - PAL_X(gpGlobals->partyoffset);
-      yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
+      xOffset = x * 32 + h * 16 - (PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset));
+      yOffset = y * 16 + h * 8 - (PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset));
    }
 
    PAL_UpdatePartyGestures(false);
@@ -1985,8 +1985,8 @@ PAL_InterpretInstruction(
          gpGlobals->rgTrail[i + 1] = gpGlobals->rgTrail[i];
       }
       gpGlobals->rgTrail[0].wDirection = gpGlobals->wPartyDirection;
-      gpGlobals->rgTrail[0].x = PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset);
-      gpGlobals->rgTrail[0].y = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
+      gpGlobals->rgTrail[0].x = (unsigned short)(PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset));
+      gpGlobals->rgTrail[0].y = (unsigned short)(PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset));
       gpGlobals->viewport = PAL_XY_OFFSET(gpGlobals->viewport, pScript->rgwOperand[0], pScript->rgwOperand[1]);
 
       gpGlobals->wLayer = pScript->rgwOperand[2] * 8;
@@ -2368,8 +2368,8 @@ PAL_InterpretInstruction(
       }
       else
       {
-         pCurrent->x = x;
-         pCurrent->y = y;
+         pCurrent->x = (unsigned short)x;
+         pCurrent->y = (unsigned short)y;
          pCurrent->sState = (signed short)(pScript->rgwOperand[1]);
       }
       break;

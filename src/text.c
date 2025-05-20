@@ -323,9 +323,9 @@ PAL_DrawTextUnescape(
 
 --*/
 {
+   unsigned short fontX = (unsigned short)PAL_X(pos);
+   unsigned short fontY = (unsigned short)PAL_Y(pos);
    PAL_Rect urect;
-   int fontX = PAL_X(pos);
-   int fontY = PAL_Y(pos);
    urect.x = fontX;
    urect.y = fontY;
    urect.h = FONT_HEIGHT;

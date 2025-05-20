@@ -35,8 +35,8 @@ static float *window_lut = NULL;
 
 typedef struct resampler
 {
-    int write_pos, write_filled;
-    int read_pos, read_filled;
+    unsigned int write_pos, write_filled;
+    unsigned int read_pos, read_filled;
     unsigned int phase;
     unsigned int phase_inc;
     unsigned int inv_phase;
@@ -185,8 +185,8 @@ static int resampler_run_cubic_sse(resampler *r, float **out_, float *out_end)
         float *out = *out_;
         float const *in = in_;
         float const *const in_end = in + in_size;
-        int phase = r->phase;
-        int phase_inc = r->phase_inc;
+        unsigned int phase = r->phase;
+        unsigned int phase_inc = r->phase_inc;
 
         do
         {
@@ -237,8 +237,8 @@ static int resampler_run_sinc_sse(resampler *r, float **out_, float *out_end)
         float *out = *out_;
         float const *in = in_;
         float const *const in_end = in + in_size;
-        int phase = r->phase;
-        int phase_inc = r->phase_inc;
+        unsigned int phase = r->phase;
+        unsigned int phase_inc = r->phase_inc;
 
         int step = phase_inc > RESAMPLER_RESOLUTION ? RESAMPLER_RESOLUTION * RESAMPLER_RESOLUTION / phase_inc : RESAMPLER_RESOLUTION;
         int window_step = RESAMPLER_RESOLUTION;
@@ -312,8 +312,8 @@ static int resampler_run_zoh(resampler *r, float **out_, float *out_end)
         float *out = *out_;
         float const *in = in_;
         float const *const in_end = in + in_size;
-        int phase = r->phase;
-        int phase_inc = r->phase_inc;
+        unsigned int phase = r->phase;
+        unsigned int phase_inc = r->phase_inc;
 
         do
         {
@@ -411,8 +411,8 @@ static int resampler_run_linear(resampler *r, float **out_, float *out_end)
         float *out = *out_;
         float const *in = in_;
         float const *const in_end = in + in_size;
-        int phase = r->phase;
-        int phase_inc = r->phase_inc;
+        unsigned int phase = r->phase;
+        unsigned int phase_inc = r->phase_inc;
 
         do
         {
@@ -453,8 +453,8 @@ static int resampler_run_cubic_c(resampler *r, float **out_, float *out_end)
         float *out = *out_;
         float const *in = in_;
         float const *const in_end = in + in_size;
-        int phase = r->phase;
-        int phase_inc = r->phase_inc;
+        unsigned int phase = r->phase;
+        unsigned int phase_inc = r->phase_inc;
 
         do
         {
@@ -500,8 +500,8 @@ static int resampler_run_sinc_c(resampler *r, float **out_, float *out_end)
         float *out = *out_;
         float const *in = in_;
         float const *const in_end = in + in_size;
-        int phase = r->phase;
-        int phase_inc = r->phase_inc;
+        unsigned int phase = r->phase;
+        unsigned int phase_inc = r->phase_inc;
 
         int step = phase_inc > RESAMPLER_RESOLUTION ? RESAMPLER_RESOLUTION * RESAMPLER_RESOLUTION / phase_inc : RESAMPLER_RESOLUTION;
         int window_step = RESAMPLER_RESOLUTION;
@@ -658,13 +658,13 @@ void resampler_set_quality(void *_r, int quality)
     r->quality = (unsigned char)quality;
 }
 
-int resampler_get_free_count(void *_r)
+unsigned int resampler_get_free_count(void *_r)
 {
     resampler *r = (resampler *)_r;
     return resampler_buffer_size - r->write_filled;
 }
 
-static int resampler_min_filled(resampler *r)
+static unsigned int resampler_min_filled(resampler *r)
 {
     switch (r->quality)
     {
@@ -684,7 +684,7 @@ static int resampler_min_filled(resampler *r)
     }
 }
 
-static int resampler_input_delay(resampler *r)
+static unsigned int resampler_input_delay(resampler *r)
 {
     switch (r->quality)
     {
@@ -702,7 +702,7 @@ static int resampler_input_delay(resampler *r)
     }
 }
 
-static int resampler_output_delay(resampler *r)
+static unsigned int resampler_output_delay(resampler *r)
 {
     switch (r->quality)
     {
@@ -768,13 +768,13 @@ void resampler_write_sample(void *_r, short s)
 
 static void resampler_fill(resampler *r)
 {
-    int min_filled = resampler_min_filled(r);
+    unsigned int min_filled = resampler_min_filled(r);
     int quality = r->quality;
     while (r->write_filled > min_filled &&
            r->read_filled < resampler_buffer_size)
     {
-        int write_pos = (r->read_pos + r->read_filled) % resampler_buffer_size;
-        int write_size = resampler_buffer_size - write_pos;
+        unsigned int write_pos = (r->read_pos + r->read_filled) % resampler_buffer_size;
+        unsigned int write_size = resampler_buffer_size - write_pos;
         float *out = r->buffer_out + write_pos;
         if (write_size > (resampler_buffer_size - r->read_filled))
             write_size = resampler_buffer_size - r->read_filled;
@@ -787,7 +787,7 @@ static void resampler_fill(resampler *r)
         case RESAMPLER_QUALITY_BLEP:
         {
             int used;
-            int write_extra = 0;
+            unsigned int write_extra = 0;
             if (write_pos >= r->read_pos)
                 write_extra = r->read_pos;
             if (write_extra > SINC_WIDTH * 2 - 1)
@@ -828,7 +828,7 @@ static void resampler_fill_and_remove_delay(resampler *r)
     }
 }
 
-int resampler_get_sample_count(void *_r)
+unsigned int resampler_get_sample_count(void *_r)
 {
     resampler *r = (resampler *)_r;
     if (r->read_filled < 1 && (r->quality != RESAMPLER_QUALITY_BLEP || r->inv_phase_inc))

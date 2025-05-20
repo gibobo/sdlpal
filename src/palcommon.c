@@ -740,14 +740,14 @@ PAL_SpriteGetFrame(
 
 --*/
 {
-   int imagecount, offset;
+   unsigned int imagecount, offset;
 
    if (lpSprite == NULL)
    {
       return NULL;
    }
 
-   imagecount = (lpSprite[0] | (int)((unsigned int)lpSprite[1] << 8));
+   imagecount = lpSprite[0] | (unsigned int)lpSprite[1] << 8;
 
    if (iFrameNum < 0 || iFrameNum >= imagecount)
    {
@@ -757,13 +757,13 @@ PAL_SpriteGetFrame(
 
    // Get the offset of the frame
    iFrameNum <<= 1;
-   offset = ((lpSprite[iFrameNum] | (int)((unsigned int)lpSprite[iFrameNum + 1] << 8)) << 1);
+   offset = (lpSprite[iFrameNum] | (unsigned int)lpSprite[iFrameNum + 1] << 8) << 1;
    if (offset == 0x18444)
       offset = (unsigned short)offset;
    return &lpSprite[offset];
 }
 
-int PAL_MKFGetChunkCount(void *fp)
+unsigned int PAL_MKFGetChunkCount(void *fp)
 /*++
   Purpose:
 
@@ -779,13 +779,13 @@ int PAL_MKFGetChunkCount(void *fp)
 
 --*/
 {
-   int iNumChunk;
+   unsigned int iNumChunk;
    if (fp == NULL) {
       return 0;
    }
 
    UTIL_fseek(fp, 0, SEEK_SET);
-   if (UTIL_fread(&iNumChunk, sizeof(int), 1, fp) == 1)
+   if (UTIL_fread(&iNumChunk, sizeof(iNumChunk), 1, fp) == 1)
       return (iNumChunk >> 2) - 1;
    else
       return 0;
@@ -812,7 +812,7 @@ int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
 {
    unsigned int uiOffset = 0;
    unsigned int uiNextOffset = 0;
-   int uiChunkCount = 0;
+   unsigned int uiChunkCount = 0;
 
    //
    // Get the total number of chunks.
@@ -876,9 +876,8 @@ int PAL_MKFReadChunk(
    // Get the total number of chunks.
    //
    uiChunkCount = PAL_MKFGetChunkCount(fp);
-   if (uiChunkNum >= uiChunkCount) {
+   if (uiChunkNum >= uiChunkCount)
       return -1;
-   }
 
    // Get the offset of the chunk.
    UTIL_fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
