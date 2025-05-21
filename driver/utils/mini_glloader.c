@@ -56,7 +56,8 @@ PFNGLACTIVETEXTUREPROC glActiveTexture;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 PFNGLGETSTRINGIPROC glGetStringi;
 
-int initGLExtensions(int major) {
+int initGLExtensions(int major)
+{
     glCreateShader = (PFNGLCREATESHADERPROC)SDL_GL_GetProcAddress("glCreateShader");
     glShaderSource = (PFNGLSHADERSOURCEPROC)SDL_GL_GetProcAddress("glShaderSource");
     glCompileShader = (PFNGLCOMPILESHADERPROC)SDL_GL_GetProcAddress("glCompileShader");
@@ -89,13 +90,13 @@ int initGLExtensions(int major) {
     glUniform1f = (PFNGLUNIFORM1FPROC)SDL_GL_GetProcAddress("glUniform1f");
     glActiveTexture = (PFNGLACTIVETEXTUREPROC)SDL_GL_GetProcAddress("glActiveTexture");
     glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)SDL_GL_GetProcAddress("glGetUniformLocation");
-    if( major >= 3 )
-        glGetStringi = (PFNGLGETSTRINGIPROC)SDL_GL_GetProcAddress("glGetStringi") ;
+    if (major >= 3)
+        glGetStringi = (PFNGLGETSTRINGIPROC)SDL_GL_GetProcAddress("glGetStringi");
 
     return glCreateShader && glShaderSource && glCompileShader && glGetShaderiv &&
-    glGetShaderInfoLog && glDeleteShader && glAttachShader && glCreateProgram &&
-    glLinkProgram && glValidateProgram && glGetProgramiv && glGetProgramInfoLog &&
-    glUseProgram && glGenBuffers &&
-    glBindBuffer && glBufferData && glBufferSubData && glGetAttribLocation &&
-    glEnableVertexAttribArray && glDisableVertexAttribArray && glVertexAttribPointer && glUniformMatrix4fv;
+           glGetShaderInfoLog && glDeleteShader && glAttachShader && glCreateProgram &&
+           glLinkProgram && glValidateProgram && glGetProgramiv && glGetProgramInfoLog &&
+           glUseProgram && glGenBuffers &&
+           glBindBuffer && glBufferData && glBufferSubData && glGetAttribLocation &&
+           glEnableVertexAttribArray && glDisableVertexAttribArray && glVertexAttribPointer && glUniformMatrix4fv;
 }

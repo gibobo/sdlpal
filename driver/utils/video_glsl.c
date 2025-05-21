@@ -21,7 +21,6 @@
 //
 
 #include "video_glsl.h"
-#include "driver.h"
 #include "src/video.h"
 #include <assert.h>
 #include <stdio.h>
@@ -51,7 +50,7 @@ char *readShaderFile(const char *filename, GLuint type)
     long filesize = 0;
     char *buf = NULL;
     FILE *fp = NULL;
-    if(fp = fopen(filename, "rb"))
+    if (fp = fopen(filename, "rb"))
     {
         fseek(fp, 0, SEEK_END);
         filesize = ftell(fp);
@@ -64,13 +63,15 @@ char *readShaderFile(const char *filename, GLuint type)
     return buf;
 }
 
-char *skip_version(char *src) {
+char *skip_version(char *src)
+{
     int glslVersion = -1;
     sscanf(src, "#version %d", &glslVersion);
-    if( glslVersion != -1 ){
+    if (glslVersion != -1)
+    {
         char *eol = strstr(src, "\n");
-        for(int i = 0; i < eol-src; i++)
-            src[i]=' ';
+        for (int i = 0; i < eol - src; i++)
+            src[i] = ' ';
     }
     return src;
 }
@@ -145,7 +146,8 @@ GLuint compileProgram(const char *vtx, const char *frag, int is_source)
     return programId;
 }
 
-void VIDEO_GLSL_Initialize(int width, int height) {
+void VIDEO_GLSL_Initialize(int width, int height)
+{
     window_width = width;
     window_height = height;
 
@@ -175,7 +177,8 @@ void VIDEO_GLSL_Initialize(int width, int height) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 }
 
-void VIDEO_GLSL_RenderCopy(const void *data) {
+void VIDEO_GLSL_RenderCopy(const void *data)
+{
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     if (data)

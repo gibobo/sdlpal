@@ -50,12 +50,12 @@ void PAL_DeInitFont(void) {
 
 void PAL_DrawCharOnSurface(
     unsigned short wChar,
-    const unsigned int x,
-    const unsigned int y,
+    const unsigned short x,
+    const unsigned short y,
     const unsigned char bColor)
 {
-    unsigned int i;
-    unsigned int j;
+    unsigned short i;
+    unsigned short j;
 
     // Check for NULL pointer & invalid char code.
     if (gpScreen == NULL)

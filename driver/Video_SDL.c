@@ -1,18 +1,18 @@
-#include "driver.h"
 #include "src/util.h"
 #include "src/video.h"
-#include "video_glsl.h"
+#include "utils/video_glsl.h"
 #include <SDL.h>
 #include <string.h>
 
 static int window_width = 320;
 static int window_height = 200;
-static unsigned char *framebuffer = NULL;   // RGB888
+static unsigned char *framebuffer = NULL; // RGB888
 static const unsigned char *palette = NULL;
 static SDL_Window *gpWindow = NULL;
 static SDL_GLContext gpContext = NULL;
 
-unsigned char *DRIVER_FrameBuffer() {
+unsigned char *DRIVER_FrameBuffer()
+{
     return framebuffer;
 }
 
@@ -22,7 +22,8 @@ void DRIVER_FrameShow(
     const unsigned short roi_y,
     const unsigned short roi_w,
     const unsigned short roi_h,
-    const unsigned char padding_flag) {
+    const unsigned char padding_flag)
+{
 
     unsigned short x, y;
     unsigned short roi_x2 = roi_x + roi_w;
@@ -30,21 +31,28 @@ void DRIVER_FrameShow(
     unsigned char *src = frame;
     unsigned char *dst = DRIVER_FrameBuffer();
 
-    for (y = 0; y < SCREEN_H; y++) {
-        if ((y >= roi_y) && (y < roi_y2)) {
-            for (x = 0; x < SCREEN_W; x++) {
-                if ((x >= roi_x) && (x < roi_x2)) {
+    for (y = 0; y < SCREEN_H; y++)
+    {
+        if ((y >= roi_y) && (y < roi_y2))
+        {
+            for (x = 0; x < SCREEN_W; x++)
+            {
+                if ((x >= roi_x) && (x < roi_x2))
+                {
                     dst[x * 3 + 0] = palette[src[x] * 3 + 0];
                     dst[x * 3 + 1] = palette[src[x] * 3 + 1];
                     dst[x * 3 + 2] = palette[src[x] * 3 + 2];
-                } else if (padding_flag) {
+                }
+                else if (padding_flag)
+                {
                     dst[x * 3 + 0] = 0;
                     dst[x * 3 + 1] = 0;
                     dst[x * 3 + 2] = 0;
                 }
             }
             src += SCREEN_W;
-        } else if (padding_flag)
+        }
+        else if (padding_flag)
             memset(dst, 0, SCREEN_W * 3);
         else
             src += SCREEN_W;
@@ -54,7 +62,8 @@ void DRIVER_FrameShow(
     SDL_GL_SwapWindow(gpWindow);
 }
 
-void DRIVER_FrameResize(unsigned int width, unsigned int height) {
+void DRIVER_FrameResize(unsigned int width, unsigned int height)
+{
     window_width = width;
     window_height = height;
     VIDEO_GLSL_Initialize(window_width, window_height);
@@ -62,7 +71,8 @@ void DRIVER_FrameResize(unsigned int width, unsigned int height) {
 
 void DRIVER_UpdatePalette(const unsigned char *rgPalette) { palette = rgPalette; }
 
-int DRIVER_Init_Video(void) {
+int DRIVER_Init_Video(void)
+{
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -80,7 +90,8 @@ int DRIVER_Init_Video(void) {
 
     //Creates OpenGL context
     gpContext = SDL_GL_CreateContext(gpWindow);
-    if (gpContext == NULL) {
+    if (gpContext == NULL)
+    {
         SDL_DestroyWindow(gpWindow);
         gpWindow = NULL;
         return -1;
@@ -93,7 +104,8 @@ int DRIVER_Init_Video(void) {
     return 0;
 }
 
-void DRIVER_DeInit_Video(void) {
+void DRIVER_DeInit_Video(void)
+{
     VIDEO_GLSL_Destroy();
     UTIL_free(framebuffer);
     if (gpContext)

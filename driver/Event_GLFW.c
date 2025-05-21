@@ -1,4 +1,3 @@
-#include "driver.h"
 #include "src/input.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
@@ -44,76 +43,86 @@ static const int g_KeyMap[][2] = {
     {GLFW_KEY_F, kKeyForce},
     {GLFW_KEY_S, kKeyStatus}};
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-   unsigned char i;
-   for (i = 0; i < rgdwKeyCount; i++)
-   {
-      if (g_KeyMap[i][0] == key)
-      {
-         if (action != GLFW_RELEASE)
-         {
-            PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
-            rgdwKeyLastTime[i] = 0xFF;
-         }
-         else
-         {
-            PAL_KeyUp(g_KeyMap[i][1]);
-            rgdwKeyLastTime[i] = 0;
-         }
-      }
-   }
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    unsigned char i;
+    for (i = 0; i < rgdwKeyCount; i++)
+    {
+        if (g_KeyMap[i][0] == key)
+        {
+            if (action != GLFW_RELEASE)
+            {
+                PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
+                rgdwKeyLastTime[i] = 0xFF;
+            }
+            else
+            {
+                PAL_KeyUp(g_KeyMap[i][1]);
+                rgdwKeyLastTime[i] = 0;
+            }
+        }
+    }
 }
 
 static void joystick_callback(int jid, int event)
 {
-   if (event == GLFW_CONNECTED) {
-      int axisCount, buttonCount, hatCount;
+    if (event == GLFW_CONNECTED)
+    {
+        int axisCount, buttonCount, hatCount;
 
-      glfwGetJoystickAxes(jid, &axisCount);
-      glfwGetJoystickButtons(jid, &buttonCount);
-      glfwGetJoystickHats(jid, &hatCount);
+        glfwGetJoystickAxes(jid, &axisCount);
+        glfwGetJoystickButtons(jid, &buttonCount);
+        glfwGetJoystickHats(jid, &hatCount);
 
-      printf("%08x at %0.3f: Joystick %i (%s) was connected with %i axes, %i buttons, and %i hats\n",
-            counter++, glfwGetTime(),
-            jid,
-            glfwGetJoystickName(jid),
-            axisCount,
-            buttonCount,
-            hatCount);
-
-      if (glfwJoystickIsGamepad(jid)) {
-         printf("  Joystick %i (%s) has a gamepad mapping (%s)\n",
+        printf("%08x at %0.3f: Joystick %i (%s) was connected with %i axes, %i buttons, and %i hats\n",
+               counter++, glfwGetTime(),
                jid,
-               glfwGetJoystickGUID(jid),
-               glfwGetGamepadName(jid));
-      } else {
-         printf("  Joystick %i (%s) has no gamepad mapping\n",
-               jid,
-               glfwGetJoystickGUID(jid));
-      }
-   } else {
-      printf("%08x at %0.3f: Joystick %i was disconnected\n",
-            counter++, glfwGetTime(), jid);
-   }
+               glfwGetJoystickName(jid),
+               axisCount,
+               buttonCount,
+               hatCount);
+
+        if (glfwJoystickIsGamepad(jid))
+        {
+            printf("  Joystick %i (%s) has a gamepad mapping (%s)\n",
+                   jid,
+                   glfwGetJoystickGUID(jid),
+                   glfwGetGamepadName(jid));
+        }
+        else
+        {
+            printf("  Joystick %i (%s) has no gamepad mapping\n",
+                   jid,
+                   glfwGetJoystickGUID(jid));
+        }
+    }
+    else
+    {
+        printf("%08x at %0.3f: Joystick %i was disconnected\n",
+               counter++, glfwGetTime(), jid);
+    }
 }
 
-int DRIVER_Process_Events(void) {
-  int res = 0;
+int DRIVER_Process_Events(void)
+{
+    int res = 0;
     /* Poll for and process events */
-  if (glfwWindowShouldClose(window))
-    res = -1;
-  else
-    glfwPollEvents();
-  return res;
+    if (glfwWindowShouldClose(window))
+        res = -1;
+    else
+        glfwPollEvents();
+    return res;
 }
 
-int DRIVER_Init_Event(void) {
-   glfwSetKeyCallback(window, key_callback);
-   glfwSetJoystickCallback(joystick_callback);
-   rgdwKeyCount = sizeof(g_KeyMap) / sizeof(g_KeyMap[0]);
-   rgdwKeyLastTime = (unsigned char *)calloc(rgdwKeyCount, sizeof(unsigned char));
-   return 0;
+int DRIVER_Init_Event(void)
+{
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetJoystickCallback(joystick_callback);
+    rgdwKeyCount = sizeof(g_KeyMap) / sizeof(g_KeyMap[0]);
+    rgdwKeyLastTime = (unsigned char *)calloc(rgdwKeyCount, sizeof(unsigned char));
+    return 0;
 }
 
-void DRIVER_DeInit_Event(void) {
+void DRIVER_DeInit_Event(void)
+{
 }

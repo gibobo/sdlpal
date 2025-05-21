@@ -43,26 +43,26 @@ include_directories(external)
 include_directories(${DRIVER_DIR})
 
 add_executable(${PROJECT_NAME}_sdl
-    ${DRIVER_DIR}/SDL.c
+    ${DRIVER_DIR}/DrvIf_SDL.c
     ${DRIVER_DIR}/Audio_SDL.c
     ${DRIVER_DIR}/Event_SDL.c
     ${DRIVER_DIR}/Video_SDL.c
-    ${DRIVER_DIR}/mini_glloader.c
-    ${DRIVER_DIR}/video_glsl.c
+    ${DRIVER_DIR}/utils/mini_glloader.c
+    ${DRIVER_DIR}/utils/video_glsl.c
     ${GAME_SOURCES}
 )
 
 add_executable(${PROJECT_NAME}_glfw
-    ${DRIVER_DIR}/GLFW.c
+    ${DRIVER_DIR}/DrvIf_GLFW.c
     ${DRIVER_DIR}/Audio_miniaudio.c
     ${DRIVER_DIR}/Event_GLFW.c
     ${DRIVER_DIR}/Video_GLFW.c
-    ${DRIVER_DIR}/video_glsl.c
+    ${DRIVER_DIR}/utils/video_glsl.c
     ${GAME_SOURCES}
 )
 
 add_executable(${PROJECT_NAME}_dummy
-    ${DRIVER_DIR}/driver.c
+    ${DRIVER_DIR}/DrvIf_Dummy.c
     ${GAME_SOURCES}
 )
 

@@ -1,4 +1,4 @@
-#include "driver.h"
+#include "DrvIf_internal.h"
 #include <GLFW/glfw3.h>
 
 int DRIVER_Init(void)

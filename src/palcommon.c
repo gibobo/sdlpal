@@ -749,14 +749,14 @@ PAL_SpriteGetFrame(
 
    imagecount = lpSprite[0] | (unsigned int)lpSprite[1] << 8;
 
-   if (iFrameNum < 0 || iFrameNum >= imagecount)
+   if (iFrameNum < 0 || (unsigned int)iFrameNum >= imagecount)
    {
       // The frame does not exist
       return NULL;
    }
 
    // Get the offset of the frame
-   iFrameNum <<= 1;
+   iFrameNum = (unsigned int)iFrameNum << 1;
    offset = (lpSprite[iFrameNum] | (unsigned int)lpSprite[iFrameNum + 1] << 8) << 1;
    if (offset == 0x18444)
       offset = (unsigned short)offset;

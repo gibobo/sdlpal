@@ -61,8 +61,8 @@ void PAL_InitFont(void);
 --*/
 void PAL_DrawCharOnSurface(
     unsigned short wChar,
-    const unsigned int x,
-    const unsigned int y,
+    const unsigned short x,
+    const unsigned short y,
     const unsigned char bColor);
 
 /*++
