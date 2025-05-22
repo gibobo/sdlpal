@@ -31,7 +31,7 @@ void DRIVER_FrameShow(
     unsigned short x, y;
     unsigned short roi_x2 = roi_x + roi_w;
     unsigned short roi_y2 = roi_y + roi_h;
-    unsigned char *src = (unsigned char *)frame;
+    unsigned char *src = frame;
     unsigned char *dst = DRIVER_FrameBuffer();
 
     for (y = 0; y < SCREEN_H; y++)

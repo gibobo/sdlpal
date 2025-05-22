@@ -1,3 +1,4 @@
+#include "DrvIf_internal.h"
 #include "src/global.h"
 #include "src/input.h"
 #include "src/util.h"
@@ -135,7 +136,7 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
             if (lpEvent->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             {
                 // resized the window
-                VIDEO_Resize(lpEvent->window.data1, lpEvent->window.data2);
+                DRIVER_FrameResize(lpEvent->window.data1, lpEvent->window.data2);
             }
             break;
 

@@ -1459,7 +1459,7 @@ end:
          else
          {
             PAL_DrawNumber(g_Battle->UI.rgShowNum[i].wNum, 5,
-                              PAL_XY_OFFSET(g_Battle->UI.rgShowNum[i].pos, 0, -ticks),
+                              PAL_XY_OFFSET(g_Battle->UI.rgShowNum[i].pos, 0, -(int)ticks),
                               g_Battle->UI.rgShowNum[i].color, kNumAlignRight);
          }
       }

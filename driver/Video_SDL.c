@@ -58,6 +58,7 @@ void DRIVER_FrameShow(
             src += SCREEN_W;
         dst += SCREEN_W * 3;
     }
+
     VIDEO_GLSL_RenderCopy(framebuffer);
     SDL_GL_SwapWindow(gpWindow);
 }

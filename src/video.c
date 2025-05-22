@@ -334,10 +334,6 @@ void VIDEO_RenderPaused(unsigned char flag) {
    g_bRenderPaused = flag;
 }
 
-void VIDEO_Resize(int w, int h) {
-   DRIVER_FrameResize(w, h);
-}
-
 void VIDEO_CopySurface(
    PAL_Surface *src,
    const PAL_Rect *srcrect,

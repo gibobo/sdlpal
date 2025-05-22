@@ -197,7 +197,7 @@ RIX_FillBuffer(
                 for (unsigned int i = 0; i < l && pRixPlayer->iRemainingFadeSamples > 0; volume += vol_delta)
                 {
                     unsigned int j = 0;
-                    for (j = 0; i < l && j < delta_samples; i++, j++)
+                    for (j = 0; i < l && (int)j < delta_samples; i++, j++)
                     {
                         *ptr++ = *(short *)pRixPlayer->pos * volume / PAL_MIX_MAXVOLUME;
                         pRixPlayer->pos += sizeof(short);

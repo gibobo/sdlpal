@@ -82,8 +82,6 @@ void PAL_FreeSurface(PAL_Surface *surface);
 
 void PAL_CleanScreen(void);
 
-void VIDEO_Resize(int w, int h);
-
 PAL_Surface *VIDEO_GetBackupSurface(unsigned char idx);
 
 #endif

@@ -1,3 +1,4 @@
+#include "DrvIf_internal.h"
 #include "src/input.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
@@ -125,4 +126,6 @@ int DRIVER_Init_Event(void)
 
 void DRIVER_DeInit_Event(void)
 {
+    free(rgdwKeyLastTime);
+    rgdwKeyLastTime = NULL;
 }

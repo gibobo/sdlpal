@@ -3,7 +3,8 @@
 
 int DRIVER_Init_Video(void);
 void DRIVER_DeInit_Video(void);
-unsigned char *DRIVER_FrameBuffer();
+unsigned char *DRIVER_FrameBuffer(void);
+void DRIVER_FrameResize(unsigned int width, unsigned int height);
 
 int DRIVER_Init_Event(void);
 void DRIVER_DeInit_Event(void);

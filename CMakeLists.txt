@@ -61,8 +61,19 @@ add_executable(${PROJECT_NAME}_glfw
     ${GAME_SOURCES}
 )
 
+add_executable(${PROJECT_NAME}_caca
+    ${DRIVER_DIR}/DrvIf.c
+    ${DRIVER_DIR}/Audio_miniaudio.c
+    ${DRIVER_DIR}/Event_CACA.c
+    ${DRIVER_DIR}/Video_CACA.c
+    ${GAME_SOURCES}
+)
+
 add_executable(${PROJECT_NAME}_dummy
-    ${DRIVER_DIR}/DrvIf_Dummy.c
+    ${DRIVER_DIR}/DrvIf.c
+    ${DRIVER_DIR}/Audio_Dummy.c
+    ${DRIVER_DIR}/Event_Dummy.c
+    ${DRIVER_DIR}/Video_Dummy.c
     ${GAME_SOURCES}
 )
 
@@ -77,6 +88,16 @@ target_include_directories(${PROJECT_NAME}_glfw
         ${GLFW_DIR}/deps
 )
 
+target_include_directories(${PROJECT_NAME}_caca
+    PUBLIC
+        external/libcaca/caca
+)
+
+target_link_directories(${PROJECT_NAME}_caca
+    PUBLIC
+        external/libcaca/build/x64/Debug/x64
+)
+
 target_compile_definitions(${PROJECT_NAME}_sdl  PRIVATE _GLLOADER_SDL)
 target_compile_definitions(${PROJECT_NAME}_glfw PRIVATE _GLLOADER_GLFW)
 
@@ -89,6 +110,8 @@ target_link_libraries(${PROJECT_NAME}_glfw
     ${OPENGL_LIBRARY}
     glfw
 )
+
+target_link_libraries(${PROJECT_NAME}_caca libcaca)
 
 if (NOT WIN32)
     target_link_libraries(${PROJECT_NAME}_dummy m)

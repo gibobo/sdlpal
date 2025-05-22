@@ -7,3 +7,6 @@
 [submodule "external/miniaudio"]
 	path = external/miniaudio
 	url = https://github.com/mackron/miniaudio.git
+[submodule "external/libcaca"]
+	path = external/libcaca
+	url = https://github.com/gibobo/libcaca.git
