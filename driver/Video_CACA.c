@@ -50,11 +50,13 @@ void DRIVER_FrameShow(
             src += SCREEN_W;
         dst += SCREEN_W;
     }
-    caca_dither_bitmap(cv, 0, 0,
-                       caca_get_canvas_width(cv),
-                       caca_get_canvas_height(cv),
-                       caca_dither, framebuffer);
-    caca_refresh_display(dp);
+    if (cv && caca_dither)
+        caca_dither_bitmap(cv, 0, 0,
+                           caca_get_canvas_width(cv),
+                           caca_get_canvas_height(cv),
+                           caca_dither, framebuffer);
+    if (dp)
+        caca_refresh_display(dp);
 }
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height)
@@ -75,14 +77,17 @@ void DRIVER_UpdatePalette(const unsigned char *rgPalette)
         b[i] = rgPalette[i * 3 + 2] * 0xfff / 255;
         a[i] = 0;
     }
-    caca_set_dither_palette(caca_dither, r, g, b, a);
+    if(caca_dither)
+        caca_set_dither_palette(caca_dither, r, g, b, a);
 }
 
 int DRIVER_Init_Video(void)
 {
     cv = caca_create_canvas(80, 24);
-    dp = caca_create_display(cv);
-    caca_set_display_title(dp, "PAL_CACA");
+    if (cv)
+        dp = caca_create_display(cv);
+    if (dp)
+        caca_set_display_title(dp, "PAL_CACA");
     caca_dither = caca_create_dither(8, SCREEN_W, SCREEN_H, SCREEN_W, 0, 0, 0, 0);
     // caca_set_dither_algorithm(caca_dither, caca_get_dither_algorithm_list(NULL)[0]);
     framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE);

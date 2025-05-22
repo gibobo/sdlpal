@@ -43,8 +43,10 @@ static const int g_KeyMap[][2] = {
 int DRIVER_Process_Events(void)
 {
     caca_event_t ev;
-    int res = caca_get_event(dp, CACA_EVENT_QUIT | CACA_EVENT_KEY_PRESS | CACA_EVENT_KEY_RELEASE, &ev, 0);
+    int res = 0;
     int event, key, i;
+    if (dp)
+        res = caca_get_event(dp, CACA_EVENT_QUIT | CACA_EVENT_KEY_PRESS | CACA_EVENT_KEY_RELEASE, &ev, 0);
     if (res)
     {
         event = caca_get_event_type(&ev);

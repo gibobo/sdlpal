@@ -35,6 +35,7 @@ set(GLFW_BUILD_DOCS         OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS        OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES     OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/glfw)
+add_subdirectory(external/libcaca)
 
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 add_definitions(-DPAL_HAS_JOYSTICKS)
@@ -93,11 +94,6 @@ target_include_directories(${PROJECT_NAME}_caca
         external/libcaca/caca
 )
 
-target_link_directories(${PROJECT_NAME}_caca
-    PUBLIC
-        external/libcaca/build/x64/Debug/x64
-)
-
 target_compile_definitions(${PROJECT_NAME}_sdl  PRIVATE _GLLOADER_SDL)
 target_compile_definitions(${PROJECT_NAME}_glfw PRIVATE _GLLOADER_GLFW)
 
@@ -111,9 +107,10 @@ target_link_libraries(${PROJECT_NAME}_glfw
     glfw
 )
 
-target_link_libraries(${PROJECT_NAME}_caca libcaca)
-
-if (NOT WIN32)
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME}_caca libcaca)
+else()
+    target_link_libraries(${PROJECT_NAME}_caca libcaca m)
     target_link_libraries(${PROJECT_NAME}_dummy m)
 endif()
 
