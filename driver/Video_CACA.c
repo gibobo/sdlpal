@@ -1,6 +1,6 @@
 #include "caca.h"
-#include "src/util.h"
-#include "src/video.h"
+#include "../src/util.h"
+#include "../src/video.h"
 #include <string.h>
 
 static unsigned char *framebuffer = NULL;

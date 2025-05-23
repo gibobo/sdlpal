@@ -21,7 +21,7 @@
 //
 
 #include "video_glsl.h"
-#include "src/video.h"
+#include "../src/video.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

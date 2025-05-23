@@ -1,5 +1,5 @@
-#include "src/util.h"
-#include "src/video.h"
+#include "../src/util.h"
+#include "../src/video.h"
 // #include "utils/mini_glloader.h"
 #include <GLFW/glfw3.h>
 #include <string.h>

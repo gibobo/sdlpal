@@ -1,6 +1,6 @@
+#include "../src/input.h"
 #include "DrvIf_internal.h"
 #include "caca.h"
-#include "src/input.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,6 +58,11 @@ int DRIVER_Process_Events(void)
             case CACA_EVENT_KEY_PRESS:
             case CACA_EVENT_KEY_RELEASE:
                 key = caca_get_event_key_ch(&ev);
+                if (key == CACA_KEY_CTRL_C)
+                {
+                    res = -1;
+                    break;
+                }
                 for (i = 0; i < rgdwKeyCount; i++)
                 {
                     if (g_KeyMap[i][0] == key)

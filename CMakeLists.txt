@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 3.14)
 project(palgame C CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -43,6 +42,12 @@ add_definitions(-DPAL_HAS_JOYSTICKS)
 include_directories(external)
 include_directories(${DRIVER_DIR})
 
+IF (WIN32)
+    link_libraries(${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+else()
+    link_libraries(${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT} m)
+ENDIF()
+
 add_executable(${PROJECT_NAME}_sdl
     ${DRIVER_DIR}/DrvIf_SDL.c
     ${DRIVER_DIR}/Audio_SDL.c
@@ -64,7 +69,7 @@ add_executable(${PROJECT_NAME}_glfw
 
 add_executable(${PROJECT_NAME}_caca
     ${DRIVER_DIR}/DrvIf.c
-    ${DRIVER_DIR}/Audio_miniaudio.c
+    ${DRIVER_DIR}/Audio_Dummy.c
     ${DRIVER_DIR}/Event_CACA.c
     ${DRIVER_DIR}/Video_CACA.c
     ${GAME_SOURCES}
@@ -91,29 +96,15 @@ target_include_directories(${PROJECT_NAME}_glfw
 
 target_include_directories(${PROJECT_NAME}_caca
     PUBLIC
-        external/libcaca/caca
+        ${CACA_INCLUDE_DIR}
 )
 
 target_compile_definitions(${PROJECT_NAME}_sdl  PRIVATE _GLLOADER_SDL)
 target_compile_definitions(${PROJECT_NAME}_glfw PRIVATE _GLLOADER_GLFW)
 
-target_link_libraries(${PROJECT_NAME}_sdl
-    ${OPENGL_LIBRARY}
-    SDL2::SDL2
-)
-
-target_link_libraries(${PROJECT_NAME}_glfw
-    ${OPENGL_LIBRARY}
-    glfw
-)
-
-if (WIN32)
-    target_link_libraries(${PROJECT_NAME}_caca libcaca)
-else()
-    target_link_libraries(${PROJECT_NAME}_caca libcaca m)
-    target_link_libraries(${PROJECT_NAME}_dummy m)
-endif()
-
+target_link_libraries(${PROJECT_NAME}_sdl   ${OPENGL_LIBRARY}   SDL2::SDL2)
+target_link_libraries(${PROJECT_NAME}_glfw  ${OPENGL_LIBRARY}   glfw)
+target_link_libraries(${PROJECT_NAME}_caca  ${CACA_LIBRARYS})
 
 file(GLOB GAMEDATA
     ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.mkf

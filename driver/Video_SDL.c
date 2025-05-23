@@ -1,5 +1,5 @@
-#include "src/util.h"
-#include "src/video.h"
+#include "../src/util.h"
+#include "../src/video.h"
 #include "utils/video_glsl.h"
 #include <SDL.h>
 #include <string.h>

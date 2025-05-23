@@ -1,5 +1,5 @@
 #include "DrvIf_internal.h"
-#include "src/input.h"
+#include "../src/input.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,32 +75,32 @@ static void joystick_callback(int jid, int event)
         glfwGetJoystickButtons(jid, &buttonCount);
         glfwGetJoystickHats(jid, &hatCount);
 
-        printf("%08x at %0.3f: Joystick %i (%s) was connected with %i axes, %i buttons, and %i hats\n",
-               counter++, glfwGetTime(),
-               jid,
-               glfwGetJoystickName(jid),
-               axisCount,
-               buttonCount,
-               hatCount);
+        fprintf(stdout, "%08x at %0.3f: Joystick %i (%s) was connected with %i axes, %i buttons, and %i hats\n",
+                counter++, glfwGetTime(),
+                jid,
+                glfwGetJoystickName(jid),
+                axisCount,
+                buttonCount,
+                hatCount);
 
         if (glfwJoystickIsGamepad(jid))
         {
-            printf("  Joystick %i (%s) has a gamepad mapping (%s)\n",
-                   jid,
-                   glfwGetJoystickGUID(jid),
-                   glfwGetGamepadName(jid));
+            fprintf(stdout, "  Joystick %i (%s) has a gamepad mapping (%s)\n",
+                    jid,
+                    glfwGetJoystickGUID(jid),
+                    glfwGetGamepadName(jid));
         }
         else
         {
-            printf("  Joystick %i (%s) has no gamepad mapping\n",
-                   jid,
-                   glfwGetJoystickGUID(jid));
+            fprintf(stdout, "  Joystick %i (%s) has no gamepad mapping\n",
+                    jid,
+                    glfwGetJoystickGUID(jid));
         }
     }
     else
     {
-        printf("%08x at %0.3f: Joystick %i was disconnected\n",
-               counter++, glfwGetTime(), jid);
+        fprintf(stdout, "%08x at %0.3f: Joystick %i was disconnected\n",
+                counter++, glfwGetTime(), jid);
     }
 }
 

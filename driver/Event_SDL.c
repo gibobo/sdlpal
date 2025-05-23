@@ -1,8 +1,8 @@
 #include "DrvIf_internal.h"
-#include "src/global.h"
-#include "src/input.h"
-#include "src/util.h"
-#include "src/video.h"
+#include "../src/global.h"
+#include "../src/input.h"
+#include "../src/util.h"
+#include "../src/video.h"
 #include <SDL_events.h>
 #include <stdio.h>
 
