@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Web Game Interface</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            /* 保持比例，填滿可視區域 */
+            aspect-ratio: 320 / 200;
+            image-rendering: pixelated;
+            /* 保持像素化效果 */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const ws = new WebSocket('ws://localhost:8000/ws');
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let sourceNode;
+        let palette = null;
+
+        // 動態調整 Canvas 尺寸以保持比例
+        function resizeCanvas() {
+            const aspectRatio = 320 / 200;
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            if (width / height > aspectRatio) {
+                width = height * aspectRatio;
+            } else {
+                height = width / aspectRatio;
+            }
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+        }
+
+        // 初始調整並監聽視窗大小變化
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        ws.onopen = function () {
+            console.log("WebSocket connected");
+            ws.send("request_palette"); // 請求調色盤
+        };
+
+        ws.onmessage = function (event) {
+            console.log("Received message size:", event.data.size);
+            event.data.arrayBuffer().then(buffer => {
+                const data = new Uint8Array(buffer);
+                console.log("First few bytes:", data.slice(0, 10));
+                if (data[0] === 2) { // 調色盤數據
+                    palette = data.slice(1); // 儲存 256x3 的 RGB 調色盤
+                    console.log("Palette received:", palette.length);
+                } else if (data[0] === 0) { // 影像數據
+                    if (!palette) {
+                        console.warn("No palette, requesting again");
+                        ws.send("request_palette");
+                        return;
+                    }
+                    const width = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
+                    const height = (data[5] << 24) | (data[6] << 16) | (data[7] << 8) | data[8];
+                    canvas.width = width;
+                    canvas.height = height;
+                    const imageData = ctx.createImageData(width, height);
+                    const pixels = imageData.data;
+                    const indices = data.slice(9);
+                    for (let i = 0; i < indices.length; i++) {
+                        const idx = indices[i] * 3;
+                        pixels[i * 4 + 0] = palette[idx + 0]; // R
+                        pixels[i * 4 + 1] = palette[idx + 1]; // G
+                        pixels[i * 4 + 2] = palette[idx + 2]; // B
+                        pixels[i * 4 + 3] = 255; // A
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                } else if (data[0] === 1) { // 聲音數據
+                    audioCtx.decodeAudioData(buffer.slice(1), function (audioBuffer) {
+                        if (sourceNode) sourceNode.stop();
+                        sourceNode = audioCtx.createBufferSource();
+                        sourceNode.buffer = audioBuffer;
+                        sourceNode.connect(audioCtx.destination);
+                        sourceNode.start();
+                    }, function (err) {
+                        console.error("Audio decode error:", err);
+                    });
+                }
+            }).catch(err => {
+                console.error("Error reading arrayBuffer:", err);
+            });
+        };
+
+        document.addEventListener('keydown', function (event) { ws.send('0' + event.key); });
+        document.addEventListener('keypress ', function (event) { ws.send('1' + event.key); });
+        document.addEventListener('keyup', function (event) { ws.send('2' + event.key); });
+    </script>
+</body>
+
+</html>

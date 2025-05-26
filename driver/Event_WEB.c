@@ -110,6 +110,7 @@ void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
         {
             mg_ws_upgrade(nc, hm, NULL);
             ws_conn = nc;
+            DRIVER_UpdatePalette(NULL); // Send palette on connect
         }
     }
     else if (ev == MG_EV_WS_MSG)

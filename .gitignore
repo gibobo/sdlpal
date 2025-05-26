@@ -27,7 +27,6 @@ BundleArtifacts/
 *.o
 *.bc
 *.data
-*.html
 *.mem
 *.js
 *.wasm

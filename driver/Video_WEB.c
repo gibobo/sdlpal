@@ -51,11 +51,12 @@ void DRIVER_FrameShow(
             src += SCREEN_W;
         dst += SCREEN_W;
     }
-    if (ws_conn && send_frame)
+    while (ws_conn == NULL) // Wait for WebSocket connection to be established
     {
-        mg_mgr_poll(&mgr, 1);
-        mg_ws_send(ws_conn, send_frame, 9 + SCREEN_SIZE, WEBSOCKET_OP_BINARY);
+        mg_mgr_poll(&mgr, 1000);
     }
+    mg_ws_send(ws_conn, send_frame, 9 + SCREEN_SIZE, WEBSOCKET_OP_BINARY);
+    mg_mgr_poll(&mgr, 1);
 }
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height)
@@ -65,12 +66,14 @@ void DRIVER_FrameResize(unsigned int width, unsigned int height)
 void DRIVER_UpdatePalette(const unsigned char *rgPalette)
 {
     size_t res;
-    if (ws_conn && send_palette)
-    {
-        mg_mgr_poll(&mgr, 1);
+    if (send_palette == NULL)
+        return;
+
+    if (rgPalette)
         memcpy(send_palette + 1, rgPalette, 256 * 3);
+
+    if (ws_conn)
         res = mg_ws_send(ws_conn, send_palette, 1 + 256 * 3, WEBSOCKET_OP_BINARY);
-    }
 }
 
 int DRIVER_Init_Video(void)
