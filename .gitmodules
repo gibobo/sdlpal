@@ -10,3 +10,6 @@
 [submodule "external/libcaca"]
 	path = external/libcaca
 	url = https://github.com/gibobo/libcaca.git
+[submodule "external/mongoose"]
+	path = external/mongoose
+	url = https://github.com/cesanta/mongoose.git
