@@ -17,6 +17,7 @@ else()
 endif()
 
 set (GLFW_DIR           external/glfw)
+set (WEBSERVER_DIR      external/mongoose)
 set (GAME_DIR           src)
 set (DRIVER_DIR         driver)
 set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource)
@@ -83,6 +84,15 @@ add_executable(${PROJECT_NAME}_dummy
     ${GAME_SOURCES}
 )
 
+add_executable(${PROJECT_NAME}_webserver
+    ${DRIVER_DIR}/DrvIf.c
+    ${DRIVER_DIR}/Audio_WEB.c
+    ${DRIVER_DIR}/Event_WEB.c
+    ${DRIVER_DIR}/Video_WEB.c
+    ${WEBSERVER_DIR}/mongoose.c
+    ${GAME_SOURCES}
+)
+
 target_include_directories(${PROJECT_NAME}_sdl
     PUBLIC
         ${SDL_INCLUDE_DIR}
@@ -99,12 +109,20 @@ target_include_directories(${PROJECT_NAME}_caca
         ${CACA_INCLUDE_DIR}
 )
 
+target_include_directories(${PROJECT_NAME}_webserver
+    PUBLIC
+        ${WEBSERVER_DIR}
+)
+
 target_compile_definitions(${PROJECT_NAME}_sdl  PRIVATE _GLLOADER_SDL)
 target_compile_definitions(${PROJECT_NAME}_glfw PRIVATE _GLLOADER_GLFW)
 
 target_link_libraries(${PROJECT_NAME}_sdl   ${OPENGL_LIBRARY}   SDL2::SDL2)
 target_link_libraries(${PROJECT_NAME}_glfw  ${OPENGL_LIBRARY}   glfw)
 target_link_libraries(${PROJECT_NAME}_caca  ${CACA_LIBRARYS})
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME}_webserver ws2_32)
+endif()
 
 file(GLOB GAMEDATA
     ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.mkf
@@ -114,3 +132,4 @@ file(GLOB CACHEDATA ${CMAKE_SOURCE_DIR}/cache_data/*.bin)
 file(COPY ${GAMEDATA}                       DESTINATION ${RESOURCE_PATH})
 file(COPY ${CACHEDATA}                      DESTINATION ${RESOURCE_PATH})
 file(COPY ${CMAKE_SOURCE_DIR}/shaders/      DESTINATION ${CMAKE_BINARY_DIR}/shaders)
+file(COPY ${CMAKE_SOURCE_DIR}/index.html    DESTINATION ${CMAKE_BINARY_DIR})
