@@ -5,9 +5,9 @@
 #include <math.h>
 
 static unsigned char *send_audio = NULL;
-static unsigned int send_audio_size = 1 + PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
+static unsigned int send_audio_size = 0;
 extern struct mg_connection *ws_conn;
-
+#define PAL_AUDIO_BITS_PER_SAMPLE (PAL_AUDIO_BYTES_PER_SAMPLE << 3) // 8 bits per sample
 void generate_audio(void)
 {
     int16_t *audio_data = (int16_t *)(send_audio + 1);
@@ -48,6 +48,7 @@ void send_audio_config()
 }
 int DRIVER_Init_Audio(void)
 {
+    send_audio_size = 1 + PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
     send_audio = (unsigned char *)UTIL_malloc(send_audio_size);
     send_audio[0] = 1;
     return 0;
@@ -57,6 +58,7 @@ void DRIVER_DeInit_Audio(void)
 {
     UTIL_free(send_audio);
     send_audio = NULL;
+    send_audio_size = 0;
 }
 
 void DRIVER_Audio_Lock(void) {}

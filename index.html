@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Web Game Interface</title>
+    <title>Web PAL</title>
     <style>
         body,
         html {
@@ -34,15 +34,15 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const ws = new WebSocket('ws://localhost:8000/ws');
-        let audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 22050 });
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
         let palette = null;
-        let audioConfig = { sampleRate: 22050, channels: 2, bitsPerSample: 16 };
+        let audioConfig = { sampleRate: 44100, channels: 2, bitsPerSample: 16 };
         const audioQueue = [];
         let currentPlayingSource = null;
         let nextScheduledTime = 0;
         let audioInitialized = false;
-        const BUFFER_AHEAD_TIME = 0.1; // 提前缓冲100ms
-        const MAX_QUEUE_LENGTH = 8; // 增加队列长度以提供更好的缓冲
+        let userInteracted = false;
+        const MAX_QUEUE_LENGTH = 2;
 
         function resizeCanvas() {
             const aspectRatio = 320 / 200;
@@ -96,6 +96,12 @@
                 return;
             }
 
+            // 确保用户已经交互过
+            if (!userInteracted) {
+                console.log("Waiting for user interaction to play audio");
+                return;
+            }
+
             ensureAudioContextRunning();
 
             const { buffer } = audioQueue.shift();
@@ -107,25 +113,23 @@
             const currentTime = audioCtx.currentTime;
             let startTime;
 
-            if (!audioInitialized || nextScheduledTime < currentTime + BUFFER_AHEAD_TIME) {
-                // 第一次播放或者时间已经过去，立即开始
-                startTime = currentTime + BUFFER_AHEAD_TIME;
+            if (!audioInitialized || nextScheduledTime < currentTime) {
+                // 立即播放，最小延迟
+                startTime = currentTime + 0.01; // 10ms最小延迟
                 audioInitialized = true;
             } else {
-                // 连续播放，使用预计算的时间
                 startTime = nextScheduledTime;
             }
 
-            // 更新下次播放时间
             nextScheduledTime = startTime + buffer.duration;
 
-            console.log(`Scheduling buffer at ${startTime.toFixed(3)}s, duration: ${buffer.duration.toFixed(3)}s, queue: ${audioQueue.length}`);
+            // console.log(`Scheduling buffer at ${startTime.toFixed(3)}s, duration: ${buffer.duration.toFixed(3)}s, queue: ${audioQueue.length}`);
 
             source.onended = () => {
                 if (currentPlayingSource === source) {
                     currentPlayingSource = null;
                 }
-                // 继续播放队列中的下一个缓冲区
+                // 立即尝试播放下一个缓冲区
                 if (audioQueue.length > 0) {
                     scheduleNextBuffer();
                 }
@@ -134,29 +138,72 @@
             currentPlayingSource = source;
             source.start(startTime);
 
-            // 如果队列中还有缓冲区，提前调度下一个
+            // 更积极地调度下一个缓冲区
             if (audioQueue.length > 0) {
-                // 在当前缓冲区播放到一半时调度下一个
-                const scheduleNext = Math.max(0, (startTime - currentTime) * 1000 + (buffer.duration * 500));
+                const scheduleDelay = Math.max(10, (startTime - currentTime) * 1000 * 0.8);
                 setTimeout(() => {
                     if (audioQueue.length > 0) {
                         scheduleNextBuffer();
                     }
-                }, scheduleNext);
+                }, scheduleDelay);
             }
         }
 
-        // 用户交互启动音频（解决自动播放限制）
+        // 强制音频初始化和用户交互处理
         function initAudioOnUserInteraction() {
+            if (!userInteracted) {
+                console.log('First user interaction detected');
+                userInteracted = true;
+            }
+
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume().then(() => {
                     console.log('AudioContext resumed by user interaction');
+                    // 尝试播放队列中的音频
+                    if (audioQueue.length > 0 && !currentPlayingSource) {
+                        scheduleNextBuffer();
+                    }
+                }).catch(err => {
+                    console.error('Failed to resume AudioContext:', err);
                 });
             }
         }
 
+        // 添加更多事件监听器确保用户交互被捕获
         document.addEventListener('click', initAudioOnUserInteraction);
         document.addEventListener('keydown', initAudioOnUserInteraction);
+        document.addEventListener('touchstart', initAudioOnUserInteraction);
+        document.addEventListener('mousedown', initAudioOnUserInteraction);
+
+        // 页面加载完成后显示提示
+        window.addEventListener('load', () => {
+            if (audioCtx.state === 'suspended') {
+                console.log('Audio is suspended. Click anywhere or press any key to enable audio.');
+                // 创建一个视觉提示
+                const notice = document.createElement('div');
+                notice.style.cssText = `
+                    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+                    background: rgba(255,255,255,0.9); color: black; padding: 10px 20px;
+                    border-radius: 5px; font-family: Arial; font-size: 14px; z-index: 1000;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                `;
+                notice.textContent = '点击页面或按任意键启用音频 / Click or press any key to enable audio';
+                document.body.appendChild(notice);
+
+                // 用户交互后移除提示
+                const removeNotice = () => {
+                    if (notice.parentNode) {
+                        notice.parentNode.removeChild(notice);
+                    }
+                    document.removeEventListener('click', removeNotice);
+                    document.removeEventListener('keydown', removeNotice);
+                    document.removeEventListener('touchstart', removeNotice);
+                };
+                document.addEventListener('click', removeNotice);
+                document.addEventListener('keydown', removeNotice);
+                document.addEventListener('touchstart', removeNotice);
+            }
+        });
 
         ws.onopen = function () {
             console.log("WebSocket connected");
@@ -248,9 +295,10 @@
                         }
 
                         audioQueue.push({ buffer: audioBuffer });
-                        console.log(`Buffer added, duration: ${audioBuffer.duration.toFixed(3)}s, queue: ${audioQueue.length}`);
+                        // console.log(`Buffer added, duration: ${audioBuffer.duration.toFixed(3)}s, queue: ${audioQueue.length}`);
 
-                        if (!currentPlayingSource) {
+                        // 更积极的播放策略
+                        if (!currentPlayingSource && userInteracted) {
                             scheduleNextBuffer();
                         }
                     } catch (error) {

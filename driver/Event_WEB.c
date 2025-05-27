@@ -55,7 +55,7 @@ void handle_input(const char *data, size_t len)
         Key = kKeyForce, i = 16;
     else if (strstr(keyCode, "s") || strstr(keyCode, "S"))
         Key = kKeyStatus, i = 17;
-    printf("Received key %d: %s\n", keyType - '0', keyCode);
+    // printf("Received key %d: %s\n", keyType - '0', keyCode);
     if (keyType == '0')
     {
         PAL_KeyDown(Key, (rgdwKeyLastTime[i] != 0));
@@ -65,6 +65,7 @@ void handle_input(const char *data, size_t len)
     {
         PAL_KeyUp(Key);
         memset(rgdwKeyLastTime, 0, sizeof(rgdwKeyLastTime));
+        PAL_ClearKeyState();
     }
 }
 
@@ -130,9 +131,12 @@ int DRIVER_Process_Events(void)
     static long last_tick = 0;
     if (UTIL_GetTicks() >= last_tick) // Poll the event manager every 10 milliseconds
     {
-        generate_audio(); // Generate audio data
-        mg_mgr_poll(&mgr, 1);
-        last_tick = UTIL_GetTicks() + 10;
+        generate_audio();     // Generate audio data
+        mg_mgr_poll(&mgr, 0); // Poll the event manager for events
+        long duration_ms = 1000 * PAL_AUDIO_BUFFER_SIZE / PAL_AUDIO_SAMPLE_RATE;
+        last_tick += duration_ms; // Adjust the tick interval based on audio settings
+        if (UTIL_GetTicks() >= last_tick)
+            last_tick = UTIL_GetTicks() + duration_ms; // Ensure we don't miss the next tick
     }
     return 0;
 }

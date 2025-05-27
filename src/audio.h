@@ -21,10 +21,10 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#define PAL_AUDIO_BITS_PER_SAMPLE  (sizeof(short) * 8)
+#define PAL_AUDIO_BYTES_PER_SAMPLE sizeof(short)
 #define PAL_AUDIO_CHANNEL_NUM      (2)
 #define PAL_AUDIO_SAMPLE_RATE      (44100)
-#define PAL_AUDIO_BUFFER_SIZE      (512)
+#define PAL_AUDIO_BUFFER_SIZE      (256 * 3)
 #define PAL_AUDIO_CHUNK_PER_SECOND (70)
 
 #define AUDIOPLAYER_COMMONS               \
