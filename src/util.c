@@ -169,27 +169,23 @@ int gettimeofday(struct timeval *tp, void *tzp)
 }
 #endif
 
-unsigned int UTIL_GetTicks(void)
+long UTIL_GetTicks(void)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
 }
 
-void UTIL_Sleep(unsigned int tm)
-{
-#ifdef _WIN32
-    Sleep(tm);
-#else
-    usleep(tm * 1000);
-#endif
-}
-
 void UTIL_Delay(int ms)
 {
-    unsigned int tm = UTIL_GetTicks() + ms;
+    long tm = UTIL_GetTicks() + ms;
     do
     {
+#ifdef _WIN32
+        Sleep(1);
+#else
+        usleep(1000);
+#endif
         PAL_ProcessEvent();
     } while (tm > UTIL_GetTicks());
 }

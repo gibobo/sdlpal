@@ -102,7 +102,7 @@ static void PAL_ShowFBP(
 
             if (bufSprite)
             {
-               int f = UTIL_GetTicks() / 150;
+               long f = UTIL_GetTicks() / 150;
                PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                                     gpScreen, PAL_XY(0, 0));
             }
@@ -187,7 +187,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
       PAL_ApplyWave(gpScreen->pixels);
 
       if (g_wCurEffectSprite) {
-        int f = UTIL_GetTicks() / 150;
+        long f = UTIL_GetTicks() / 150;
         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                              gpScreen, PAL_XY(0, 0));
       }

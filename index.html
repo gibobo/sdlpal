@@ -31,13 +31,18 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <script>
-        let canvas = document.getElementById('gameCanvas');
-        let ctx = canvas.getContext('2d');
-        let ws = new WebSocket('ws://localhost:8000/ws');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const ws = new WebSocket('ws://localhost:8000/ws');
         let audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 22050 });
-        let sourceNode;
         let palette = null;
         let audioConfig = { sampleRate: 22050, channels: 2, bitsPerSample: 16 };
+        const audioQueue = [];
+        let currentPlayingSource = null;
+        let nextScheduledTime = 0;
+        let audioInitialized = false;
+        const BUFFER_AHEAD_TIME = 0.1; // 提前缓冲100ms
+        const MAX_QUEUE_LENGTH = 8; // 增加队列长度以提供更好的缓冲
 
         function resizeCanvas() {
             const aspectRatio = 320 / 200;
@@ -57,11 +62,101 @@
 
         async function updateAudioContext(sampleRate) {
             if (audioCtx.sampleRate !== sampleRate) {
+                console.log(`Updating AudioContext from ${audioCtx.sampleRate} to ${sampleRate} Hz`);
+
+                // 停止当前播放
+                if (currentPlayingSource) {
+                    currentPlayingSource.stop();
+                    currentPlayingSource = null;
+                }
+
                 await audioCtx.close();
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate });
+
+                // 重置音频状态
+                audioQueue.length = 0;
+                nextScheduledTime = 0;
+                audioInitialized = false;
+
                 console.log(`AudioContext updated to ${sampleRate} Hz`);
             }
         }
+
+        async function ensureAudioContextRunning() {
+            if (audioCtx.state === 'suspended') {
+                console.log("AudioContext suspended, resuming...");
+                await audioCtx.resume();
+                console.log("AudioContext resumed, state:", audioCtx.state);
+            }
+        }
+
+        function scheduleNextBuffer() {
+            if (audioQueue.length === 0) {
+                console.log("No buffers to schedule");
+                return;
+            }
+
+            ensureAudioContextRunning();
+
+            const { buffer } = audioQueue.shift();
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+
+            // 计算播放时间
+            const currentTime = audioCtx.currentTime;
+            let startTime;
+
+            if (!audioInitialized || nextScheduledTime < currentTime + BUFFER_AHEAD_TIME) {
+                // 第一次播放或者时间已经过去，立即开始
+                startTime = currentTime + BUFFER_AHEAD_TIME;
+                audioInitialized = true;
+            } else {
+                // 连续播放，使用预计算的时间
+                startTime = nextScheduledTime;
+            }
+
+            // 更新下次播放时间
+            nextScheduledTime = startTime + buffer.duration;
+
+            console.log(`Scheduling buffer at ${startTime.toFixed(3)}s, duration: ${buffer.duration.toFixed(3)}s, queue: ${audioQueue.length}`);
+
+            source.onended = () => {
+                if (currentPlayingSource === source) {
+                    currentPlayingSource = null;
+                }
+                // 继续播放队列中的下一个缓冲区
+                if (audioQueue.length > 0) {
+                    scheduleNextBuffer();
+                }
+            };
+
+            currentPlayingSource = source;
+            source.start(startTime);
+
+            // 如果队列中还有缓冲区，提前调度下一个
+            if (audioQueue.length > 0) {
+                // 在当前缓冲区播放到一半时调度下一个
+                const scheduleNext = Math.max(0, (startTime - currentTime) * 1000 + (buffer.duration * 500));
+                setTimeout(() => {
+                    if (audioQueue.length > 0) {
+                        scheduleNextBuffer();
+                    }
+                }, scheduleNext);
+            }
+        }
+
+        // 用户交互启动音频（解决自动播放限制）
+        function initAudioOnUserInteraction() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => {
+                    console.log('AudioContext resumed by user interaction');
+                });
+            }
+        }
+
+        document.addEventListener('click', initAudioOnUserInteraction);
+        document.addEventListener('keydown', initAudioOnUserInteraction);
 
         ws.onopen = function () {
             console.log("WebSocket connected");
@@ -69,10 +164,8 @@
         };
 
         ws.onmessage = function (event) {
-            console.log("Received message size:", event.data.size);
             event.data.arrayBuffer().then(buffer => {
                 const data = new Uint8Array(buffer);
-                console.log("First few bytes:", data.slice(0, 10));
                 if (data[0] === 2) { // 調色盤數據
                     palette = data.slice(1);
                 } else if (data[0] === 0) { // 影像數據
@@ -90,44 +183,79 @@
                     const indices = data.slice(9);
                     for (let i = 0; i < indices.length; i++) {
                         const idx = indices[i] * 3;
-                        pixels[i * 4 + 0] = palette[idx + 0]; // R
-                        pixels[i * 4 + 1] = palette[idx + 1]; // G
-                        pixels[i * 4 + 2] = palette[idx + 2]; // B
-                        pixels[i * 4 + 3] = 255; // A
+                        pixels[i * 4 + 0] = palette[idx + 0];
+                        pixels[i * 4 + 1] = palette[idx + 1];
+                        pixels[i * 4 + 2] = palette[idx + 2];
+                        pixels[i * 4 + 3] = 255;
                     }
                     ctx.putImageData(imageData, 0, 0);
                 } else if (data[0] === 3) { // 音頻格式
                     const sampleRate = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
                     const channels = (data[5] << 24) | (data[6] << 16) | (data[7] << 8) | data[8];
                     const bitsPerSample = (data[9] << 24) | (data[10] << 16) | (data[11] << 8) | data[12];
+
+                    const configChanged = (audioConfig.sampleRate !== sampleRate ||
+                        audioConfig.channels !== channels ||
+                        audioConfig.bitsPerSample !== bitsPerSample);
+
                     audioConfig = { sampleRate, channels, bitsPerSample };
-                    console.log(`Received audio config: ${sampleRate} Hz, ${channels} channels, ${bitsPerSample} bits`);
-                    updateAudioContext(sampleRate);
-                } else if (data[0] === 1) { // 聲音數據
-                    const { sampleRate, channels, bitsPerSample } = audioConfig;
-                    const audioBuffer = audioCtx.createBuffer(channels, buffer.byteLength / channels / (bitsPerSample / 8), sampleRate);
-                    if (bitsPerSample === 16) {
-                        const pcmData = new Int16Array(buffer.slice(1));
-                        for (let ch = 0; ch < channels; ch++) {
-                            const channelData = audioBuffer.getChannelData(ch);
-                            for (let i = 0; i < pcmData.length / channels; i++) {
-                                channelData[i] = pcmData[i * channels + ch] / 32768.0;
-                            }
-                        }
-                    } else { // 8 位元
-                        const pcmData = new Uint8Array(buffer.slice(1));
-                        for (let ch = 0; ch < channels; ch++) {
-                            const channelData = audioBuffer.getChannelData(ch);
-                            for (let i = 0; i < pcmData.length / channels; i++) {
-                                channelData[i] = (pcmData[i * channels + ch] - 128) / 128.0;
-                            }
-                        }
+                    console.log(`Audio config: ${sampleRate} Hz, ${channels} channels, ${bitsPerSample} bits`);
+
+                    if (configChanged) {
+                        updateAudioContext(sampleRate);
                     }
-                    if (sourceNode) sourceNode.stop();
-                    sourceNode = audioCtx.createBufferSource();
-                    sourceNode.buffer = audioBuffer;
-                    sourceNode.connect(audioCtx.destination);
-                    sourceNode.start();
+                } else if (data[0] === 1) { // 音频数据
+                    const { sampleRate, channels, bitsPerSample } = audioConfig;
+                    const audioDataSize = buffer.byteLength - 1;
+                    const bytesPerFrame = channels * (bitsPerSample / 8);
+                    const sampleCount = Math.floor(audioDataSize / bytesPerFrame);
+
+                    if (sampleCount <= 0) {
+                        console.warn("Invalid sample count:", sampleCount);
+                        return;
+                    }
+
+                    while (audioQueue.length >= MAX_QUEUE_LENGTH) {
+                        console.warn("Audio queue full, dropping oldest buffer");
+                        audioQueue.shift();
+                    }
+
+                    try {
+                        const audioBuffer = audioCtx.createBuffer(channels, sampleCount, sampleRate);
+
+                        if (bitsPerSample === 16) {
+                            const pcmData = new Int16Array(buffer.slice(1));
+                            const expectedSamples = Math.floor(pcmData.length / channels);
+                            const actualSamples = Math.min(sampleCount, expectedSamples);
+
+                            for (let ch = 0; ch < channels; ch++) {
+                                const channelData = audioBuffer.getChannelData(ch);
+                                for (let i = 0; i < actualSamples; i++) {
+                                    channelData[i] = pcmData[i * channels + ch] / 32768.0;
+                                }
+                            }
+                        } else { // 8 位元
+                            const pcmData = new Uint8Array(buffer.slice(1));
+                            const expectedSamples = Math.floor(pcmData.length / channels);
+                            const actualSamples = Math.min(sampleCount, expectedSamples);
+
+                            for (let ch = 0; ch < channels; ch++) {
+                                const channelData = audioBuffer.getChannelData(ch);
+                                for (let i = 0; i < actualSamples; i++) {
+                                    channelData[i] = (pcmData[i * channels + ch] - 128) / 128.0;
+                                }
+                            }
+                        }
+
+                        audioQueue.push({ buffer: audioBuffer });
+                        console.log(`Buffer added, duration: ${audioBuffer.duration.toFixed(3)}s, queue: ${audioQueue.length}`);
+
+                        if (!currentPlayingSource) {
+                            scheduleNextBuffer();
+                        }
+                    } catch (error) {
+                        console.error("Error creating audio buffer:", error);
+                    }
                 }
             }).catch(err => {
                 console.error("Error reading arrayBuffer:", err);
@@ -135,7 +263,7 @@
         };
 
         document.addEventListener('keydown', function (event) { ws.send('0' + event.key); });
-        document.addEventListener('keypress ', function (event) { ws.send('1' + event.key); });
+        document.addEventListener('keypress', function (event) { ws.send('1' + event.key); });
         document.addEventListener('keyup', function (event) { ws.send('2' + event.key); });
     </script>
 </body>

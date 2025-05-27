@@ -8,7 +8,6 @@ static unsigned char *send_palette = NULL;
 
 extern struct mg_connection *ws_conn;
 extern struct mg_mgr mgr;
-extern void generate_audio(void);
 
 unsigned char *DRIVER_FrameBuffer()
 {
@@ -57,8 +56,7 @@ void DRIVER_FrameShow(
         mg_mgr_poll(&mgr, 1000);
     }
     mg_ws_send(ws_conn, send_frame, 9 + SCREEN_SIZE, WEBSOCKET_OP_BINARY);
-    mg_mgr_poll(&mgr, 1);
-    generate_audio(); // Generate audio after sending frame
+    // mg_mgr_poll(&mgr, 1);
 }
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height)

@@ -35,8 +35,8 @@ static BOX *PAL_CreateBoxInternal(const PAL_Rect *rect)
     BOX *lpBox = (BOX *)UTIL_calloc(1, sizeof(BOX));
     lpBox->pos = PAL_XY(rect->x, rect->y);
     lpBox->lpSavedArea = VIDEO_DuplicateSurface(rect);
-    lpBox->wHeight = (unsigned short)rect->w;
-    lpBox->wWidth = (unsigned short)rect->h;
+    lpBox->wWidth = (unsigned short)rect->w;
+    lpBox->wHeight = (unsigned short)rect->h;
     return lpBox;
 }
 
@@ -429,7 +429,6 @@ PAL_ReadMenu(
 
     while (true)
     {
-        PAL_ClearKeyState();
 
         //
         // Redraw the selected item if needed.
@@ -440,7 +439,8 @@ PAL_ReadMenu(
                          rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
         }
 
-        PAL_ProcessEvent();
+        PAL_ClearKeyState();
+        UTIL_Delay(50);
 
         if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
         {
@@ -585,11 +585,6 @@ PAL_ReadMenu(
                 return rgMenuItem[wCurrentItem].wValue;
             }
         }
-
-        //
-        // Use delay function to avoid high CPU usage.
-        //
-        UTIL_Sleep(50);
     }
 
     return MENUITEM_VALUE_CANCELLED;

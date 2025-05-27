@@ -165,10 +165,13 @@ void PAL_FreeText(
 {
    UTIL_free(WordLen);
    UTIL_free(MsgLen);
-   for (int i = 0; i < BUFFER_WORD_NUM; i++)
+   if (WordBuffer)
    {
-      UTIL_free(WordBuffer[i]);
-      WordBuffer[i] = NULL;
+       for (int i = 0; i < BUFFER_WORD_NUM; i++)
+       {
+           UTIL_free(WordBuffer[i]);
+           WordBuffer[i] = NULL;
+       }
    }
    UTIL_free(WordBuffer);
    UTIL_free(MsgBuffer);

@@ -11,13 +11,11 @@ extern struct mg_connection *ws_conn;
 void generate_audio(void)
 {
     int16_t *audio_data = (int16_t *)(send_audio + 1);
-    size_t samples = PAL_AUDIO_BUFFER_SIZE;
-    unsigned int len = samples * PAL_AUDIO_CHANNEL_NUM * sizeof(int16_t);
-    memset(audio_data, 0, len);
-    AUDIO_FillBuffer(audio_data, len);
+    memset(audio_data, 0, send_audio_size - 1);
+    AUDIO_FillBuffer(audio_data, send_audio_size - 1);
 
     if (ws_conn)
-        mg_ws_send(ws_conn, send_audio, 1 + len, WEBSOCKET_OP_BINARY);
+        mg_ws_send(ws_conn, send_audio, send_audio_size, WEBSOCKET_OP_BINARY);
 }
 
 void send_audio_config()

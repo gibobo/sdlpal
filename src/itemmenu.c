@@ -366,7 +366,7 @@ PAL_ItemSelectMenu(
 {
     int iPrevIndex;
     unsigned short w;
-    unsigned int dwTime;
+    long dwTime;
 
     PAL_ItemSelectMenuInit(wItemFlags);
     iPrevIndex = gpGlobals->iCurInvMenuItem;
@@ -379,7 +379,7 @@ PAL_ItemSelectMenu(
         (*lpfnMenuItemChanged)(gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].wItem);
     }
 
-    dwTime = UTIL_GetTicks();
+    dwTime = UTIL_GetTicks() + 5;
 
     while (true)
     {
@@ -393,16 +393,14 @@ PAL_ItemSelectMenu(
 
         PAL_ClearKeyState();
 
-        PAL_ProcessEvent();
-        while (UTIL_GetTicks() < dwTime)
+        do
         {
-            PAL_ProcessEvent();
+            UTIL_Delay(1);
             if (PAL_GetKeyInput() != kKeyNone)
             {
                 break;
             }
-            UTIL_Sleep(5);
-        }
+        } while (UTIL_GetTicks() < dwTime);
 
         dwTime = UTIL_GetTicks() + FRAME_TIME;
 

@@ -337,7 +337,7 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->FillBuffer = RIX_FillBuffer;
     pRixPlayer->Shutdown = RIX_Shutdown;
     pRixPlayer->Play = RIX_Play;
-    pRixPlayer->buf_max_len = (PAL_AUDIO_SAMPLE_RATE + PAL_AUDIO_CHUNK_PER_SECOND - 1) / PAL_AUDIO_CHUNK_PER_SECOND * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
+    pRixPlayer->buf_max_len = ((PAL_AUDIO_SAMPLE_RATE + PAL_AUDIO_CHUNK_PER_SECOND - 1) / PAL_AUDIO_CHUNK_PER_SECOND) * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
     pRixPlayer->buf = (unsigned char *)UTIL_malloc(pRixPlayer->buf_max_len);
     Copl_init(PAL_AUDIO_SAMPLE_RATE, PAL_AUDIO_CHANNEL_NUM == 2);
 

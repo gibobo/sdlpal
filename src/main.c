@@ -219,7 +219,6 @@ void PAL_SplashScreen(void)
     AUDIO_PlayMusic(0x05, true, 2);
 
     // Clear all of the events and key states
-    PAL_ProcessEvent();
     PAL_ClearKeyState();
 
     srcrect.x = 0;
@@ -286,7 +285,6 @@ void PAL_SplashScreen(void)
         UTIL_Delay(85);
 
         // Check for keypress...
-        PAL_ProcessEvent();
         if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
             break;
     }
@@ -302,7 +300,7 @@ void PAL_SplashScreen(void)
             rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
         VIDEO_SetPalette(rgCurrentPalette);
         VIDEO_UpdateScreen(NULL);
-        UTIL_Sleep(8);
+        UTIL_Delay(8);
         dwTime += 4;
     }
     VIDEO_SetPalette(palette);
@@ -311,7 +309,7 @@ void PAL_SplashScreen(void)
     UTIL_free(cranepos);
     UTIL_free(lpTitleBuf);
     UTIL_free(lpSpriteCrane);
-    UTIL_Sleep(500);
+    UTIL_Delay(500);
 
     AUDIO_PlayMusic(0x00, false, 1);
     PAL_FadeOut(1);

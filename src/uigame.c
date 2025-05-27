@@ -707,7 +707,7 @@ start_magicmenu:
                 while (true)
                 {
                     PAL_ClearKeyState();
-                    PAL_ProcessEvent();
+                    UTIL_Delay(1);
 
                     if (PAL_GetKeyInput() & kKeyMenu)
                     {
@@ -763,8 +763,6 @@ start_magicmenu:
                             break;
                         }
                     }
-
-                    UTIL_Sleep(1);
                 }
             }
         }
@@ -1257,14 +1255,12 @@ PAL_ItemUseMenu(
                     PAL_XY(125, 16 + 20 * sSelectedPlayer), bSelectedColor, false, true, false);
             }
 
-            PAL_ProcessEvent();
+            UTIL_Delay(1);
 
             if (PAL_GetKeyInput() != kKeyNone)
             {
                 break;
             }
-
-            UTIL_Sleep(1);
         }
 
         if (i <= 0)
@@ -1694,7 +1690,7 @@ void PAL_EquipItemMenu(
 
         while (true)
         {
-            PAL_ProcessEvent();
+            UTIL_Delay(1);
 
             // See if we should change the highlight color
             if (UTIL_GetTicks() >= dwColorChangeTime)
@@ -1725,8 +1721,6 @@ void PAL_EquipItemMenu(
             {
                 break;
             }
-
-            UTIL_Sleep(1);
         }
 
         if (wItem == 0)

@@ -1,4 +1,6 @@
+#include "../src/audio.h"
 #include "../src/input.h"
+#include "../src/util.h"
 #include "DrvIf_internal.h"
 #include "mongoose.h"
 #include <stdint.h>
@@ -10,6 +12,7 @@ unsigned char rgdwKeyLastTime[20] = {0};
 
 extern void DRIVER_UpdatePalette(const unsigned char *rgPalette);
 extern void send_audio_config();
+extern void generate_audio(void);
 
 void handle_input(const char *data, size_t len)
 {
@@ -124,6 +127,12 @@ void DRIVER_DeInit_Event(void)
 
 int DRIVER_Process_Events(void)
 {
-    mg_mgr_poll(&mgr, 1);
+    static long last_tick = 0;
+    if (UTIL_GetTicks() >= last_tick) // Poll the event manager every 10 milliseconds
+    {
+        generate_audio(); // Generate audio data
+        mg_mgr_poll(&mgr, 1);
+        last_tick = UTIL_GetTicks() + 10;
+    }
     return 0;
 }

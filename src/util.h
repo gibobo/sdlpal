@@ -61,9 +61,7 @@ void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size);
 void UTIL_free(void *ptr);
 
 // Platform-specific utilities
-unsigned int UTIL_GetTicks(void);
-
-void UTIL_Sleep(unsigned int tm);
+long UTIL_GetTicks(void);
 
 void *UTIL_fopen(const char *_FileName, const char *_Mode);
 
