@@ -22,10 +22,8 @@
             width: 100vw;
             height: 100vh;
             object-fit: contain;
-            /* 保持比例，填滿可視區域 */
             aspect-ratio: 320 / 200;
             image-rendering: pixelated;
-            /* 保持像素化效果 */
         }
     </style>
 </head>
@@ -33,14 +31,14 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const ws = new WebSocket('ws://localhost:8000/ws');
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let canvas = document.getElementById('gameCanvas');
+        let ctx = canvas.getContext('2d');
+        let ws = new WebSocket('ws://localhost:8000/ws');
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 22050 });
         let sourceNode;
         let palette = null;
+        let audioConfig = { sampleRate: 22050, channels: 2, bitsPerSample: 16 };
 
-        // 動態調整 Canvas 尺寸以保持比例
         function resizeCanvas() {
             const aspectRatio = 320 / 200;
             let width = window.innerWidth;
@@ -54,13 +52,20 @@
             canvas.style.height = `${height}px`;
         }
 
-        // 初始調整並監聽視窗大小變化
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
+        async function updateAudioContext(sampleRate) {
+            if (audioCtx.sampleRate !== sampleRate) {
+                await audioCtx.close();
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate });
+                console.log(`AudioContext updated to ${sampleRate} Hz`);
+            }
+        }
+
         ws.onopen = function () {
             console.log("WebSocket connected");
-            ws.send("request_palette"); // 請求調色盤
+            ws.send("request_palette");
         };
 
         ws.onmessage = function (event) {
@@ -69,8 +74,7 @@
                 const data = new Uint8Array(buffer);
                 console.log("First few bytes:", data.slice(0, 10));
                 if (data[0] === 2) { // 調色盤數據
-                    palette = data.slice(1); // 儲存 256x3 的 RGB 調色盤
-                    console.log("Palette received:", palette.length);
+                    palette = data.slice(1);
                 } else if (data[0] === 0) { // 影像數據
                     if (!palette) {
                         console.warn("No palette, requesting again");
@@ -92,16 +96,38 @@
                         pixels[i * 4 + 3] = 255; // A
                     }
                     ctx.putImageData(imageData, 0, 0);
+                } else if (data[0] === 3) { // 音頻格式
+                    const sampleRate = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
+                    const channels = (data[5] << 24) | (data[6] << 16) | (data[7] << 8) | data[8];
+                    const bitsPerSample = (data[9] << 24) | (data[10] << 16) | (data[11] << 8) | data[12];
+                    audioConfig = { sampleRate, channels, bitsPerSample };
+                    console.log(`Received audio config: ${sampleRate} Hz, ${channels} channels, ${bitsPerSample} bits`);
+                    updateAudioContext(sampleRate);
                 } else if (data[0] === 1) { // 聲音數據
-                    audioCtx.decodeAudioData(buffer.slice(1), function (audioBuffer) {
-                        if (sourceNode) sourceNode.stop();
-                        sourceNode = audioCtx.createBufferSource();
-                        sourceNode.buffer = audioBuffer;
-                        sourceNode.connect(audioCtx.destination);
-                        sourceNode.start();
-                    }, function (err) {
-                        console.error("Audio decode error:", err);
-                    });
+                    const { sampleRate, channels, bitsPerSample } = audioConfig;
+                    const audioBuffer = audioCtx.createBuffer(channels, buffer.byteLength / channels / (bitsPerSample / 8), sampleRate);
+                    if (bitsPerSample === 16) {
+                        const pcmData = new Int16Array(buffer.slice(1));
+                        for (let ch = 0; ch < channels; ch++) {
+                            const channelData = audioBuffer.getChannelData(ch);
+                            for (let i = 0; i < pcmData.length / channels; i++) {
+                                channelData[i] = pcmData[i * channels + ch] / 32768.0;
+                            }
+                        }
+                    } else { // 8 位元
+                        const pcmData = new Uint8Array(buffer.slice(1));
+                        for (let ch = 0; ch < channels; ch++) {
+                            const channelData = audioBuffer.getChannelData(ch);
+                            for (let i = 0; i < pcmData.length / channels; i++) {
+                                channelData[i] = (pcmData[i * channels + ch] - 128) / 128.0;
+                            }
+                        }
+                    }
+                    if (sourceNode) sourceNode.stop();
+                    sourceNode = audioCtx.createBufferSource();
+                    sourceNode.buffer = audioBuffer;
+                    sourceNode.connect(audioCtx.destination);
+                    sourceNode.start();
                 }
             }).catch(err => {
                 console.error("Error reading arrayBuffer:", err);

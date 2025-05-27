@@ -7,40 +7,10 @@ struct mg_connection *ws_conn = NULL;
 struct mg_connection *nc = NULL;
 struct mg_mgr mgr;
 unsigned char rgdwKeyLastTime[20] = {0};
-/*
-static const int g_KeyMap[][2] = {
-    {"ArrowUp", kKeyUp},
-    {"8", kKeyUp},
-    {"ArrowDown", kKeyDown},
-    {"2", kKeyDown},
-    {"ArrowLeft", kKeyLeft},
-    {"4", kKeyLeft},
-    {"ArrowRight", kKeyRight},
-    {"6", kKeyRight},
-    {"Escape", kKeyMenu},
-    {"Insert", kKeyMenu},
-    {"Alt", kKeyMenu},
-    {"0", kKeyMenu},
-    {"Enter", kKeySearch},
-    {" ", kKeySearch},
-    {"Control", kKeySearch},
-    {"PageUp", kKeyPgUp},
-    {"9", kKeyPgUp},
-    {"PageDown", kKeyPgDn},
-    {"3", kKeyPgDn},
-    {"Home", kKeyHome},
-    {"7", kKeyHome},
-    {"End", kKeyEnd},
-    {"1", kKeyEnd},
-    {"r", kKeyRepeat},
-    {"a", kKeyAuto},
-    {"d", kKeyDefend},
-    {"e", kKeyUseItem},
-    {"w", kKeyThrowItem},
-    {"q", kKeyFlee},
-    {"f", kKeyForce},
-    {"s", kKeyStatus}};
-    */
+
+extern void DRIVER_UpdatePalette(const unsigned char *rgPalette);
+extern void send_audio_config();
+
 void handle_input(const char *data, size_t len)
 {
     const char keyType = data[0];
@@ -111,6 +81,7 @@ void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
             mg_ws_upgrade(nc, hm, NULL);
             ws_conn = nc;
             DRIVER_UpdatePalette(NULL); // Send palette on connect
+            send_audio_config();        // Send audio config on connect
         }
     }
     else if (ev == MG_EV_WS_MSG)

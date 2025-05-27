@@ -61,31 +61,36 @@ void PAL_Init(void)
 
     // Initialize subsystems.
     e = PAL_InitGlobals();
-    if (e != 0) {
+    if (e != 0)
+    {
         PAL_Shutdown(255);
         TerminateOnError("Could not initialize global data: %d.\n", e);
     }
-  
+
     e = DRIVER_Init();
-    if (e != 0) {
+    if (e != 0)
+    {
         PAL_Shutdown(255);
         TerminateOnError("Could not initialize driver work: %d.\n", e);
     }
 
     e = VIDEO_Startup();
-    if (e != 0) {
+    if (e != 0)
+    {
         PAL_Shutdown(255);
         TerminateOnError("Could not initialize Video: %d.\n", e);
     }
 
     e = PAL_InitUI();
-    if (e != 0) {
+    if (e != 0)
+    {
         PAL_Shutdown(255);
         TerminateOnError("Could not initialize UI subsystem: %d.\n", e);
     }
 
     e = PAL_InitText();
-    if (e != 0) {
+    if (e != 0)
+    {
         PAL_Shutdown(255);
         TerminateOnError("Could not initialize text subsystem: %d.\n", e);
     }
@@ -112,22 +117,22 @@ void PAL_Shutdown(int exit_code)
 
 --*/
 {
-   PAL_FreeResources();
-   PAL_FreeUI();
-   PAL_FreeText();
-   PAL_ShutdownInput();
-   AUDIO_CloseDevice();
-   VIDEO_Shutdown();
-   DRIVER_DeInit();
+    PAL_FreeResources();
+    PAL_FreeUI();
+    PAL_FreeText();
+    PAL_ShutdownInput();
+    AUDIO_CloseDevice();
+    VIDEO_Shutdown();
+    DRIVER_DeInit();
 
-   // global needs be free in last
-   // since subsystems may needs config content during destroy
-   // which also cleared here
-   PAL_DeInitFont();
-   PAL_FreeGlobals();
+    // global needs be free in last
+    // since subsystems may needs config content during destroy
+    // which also cleared here
+    PAL_DeInitFont();
+    PAL_FreeGlobals();
 
-   g_exit_code = exit_code;
-   longjmp(g_exit_jmp_buf, 1);
+    g_exit_code = exit_code;
+    longjmp(g_exit_jmp_buf, 1);
 }
 
 void PAL_TrademarkScreen(void)
@@ -146,10 +151,10 @@ void PAL_TrademarkScreen(void)
 
 --*/
 {
-   PAL_SetPalette(3, false);
-   PAL_RNGPlay(6, 0, -1, 25);
-   UTIL_Delay(1000);
-   PAL_FadeOut(1);
+    PAL_SetPalette(3, false);
+    PAL_RNGPlay(6, 0, -1, 25);
+    UTIL_Delay(1000);
+    PAL_FadeOut(1);
 }
 
 void PAL_SplashScreen(void)
@@ -168,142 +173,148 @@ void PAL_SplashScreen(void)
 
 --*/
 {
-   unsigned char *palette = PAL_GetPalette(1, false);
-   unsigned char rgCurrentPalette[PALETTE_SIZE];
-   PAL_Surface *lpBitmapUp= VIDEO_GetBackupSurface(0);
-   PAL_Surface *lpBitmapDown= VIDEO_GetBackupSurface(1);
-   PAL_Rect srcrect;
-   PAL_Rect dstrect;
-   unsigned char *lpTitleBuf = NULL;
-   unsigned char *lpSpriteCrane = NULL;
-   unsigned char *lpBitmapTitle = NULL;
-   const unsigned char crane_num = 9;
-   int *cranepos = NULL;
-   unsigned int i;
-   unsigned int iImgPos = SCREEN_H;
-   unsigned int iTitleHeight;
-   unsigned int dwTime = 0;
+    unsigned char *palette = PAL_GetPalette(1, false);
+    unsigned char rgCurrentPalette[PALETTE_SIZE];
+    PAL_Surface *lpBitmapUp = VIDEO_GetBackupSurface(0);
+    PAL_Surface *lpBitmapDown = VIDEO_GetBackupSurface(1);
+    PAL_Rect srcrect;
+    PAL_Rect dstrect;
+    unsigned char *lpTitleBuf = NULL;
+    unsigned char *lpSpriteCrane = NULL;
+    unsigned char *lpBitmapTitle = NULL;
+    const unsigned char crane_num = 9;
+    int *cranepos = NULL;
+    unsigned int i;
+    unsigned int iImgPos = SCREEN_H;
+    unsigned int iTitleHeight;
+    unsigned int dwTime = 0;
 
-   if (palette == NULL) {
-      TerminateOnError("ERROR: PAL_SplashScreen(): palette == NULL\n");
-      return;
-   }
+    if (palette == NULL)
+    {
+        TerminateOnError("ERROR: PAL_SplashScreen(): palette == NULL\n");
+        return;
+    }
 
-   // Read the bitmaps
-   PAL_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, gFiles[Res_FBP].fp);
-   PAL_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, gFiles[Res_FBP].fp);
-   PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, gFiles[Res_MGO].fp);
-   PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, gFiles[Res_MGO].fp);
-   lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
-   iTitleHeight = lpBitmapTitle[2] | ((unsigned int)lpBitmapTitle[3] << 8);
-   lpBitmapTitle[2] = 0;
-   lpBitmapTitle[3] = 0; // HACKHACK
+    // Read the bitmaps
+    PAL_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, gFiles[Res_FBP].fp);
+    PAL_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, gFiles[Res_FBP].fp);
+    PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, gFiles[Res_MGO].fp);
+    PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, gFiles[Res_MGO].fp);
+    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
+    iTitleHeight = lpBitmapTitle[2] | ((unsigned int)lpBitmapTitle[3] << 8);
+    lpBitmapTitle[2] = 0;
+    lpBitmapTitle[3] = 0; // HACKHACK
 
-   // Generate the positions of the cranes
-   cranepos = (int *)UTIL_calloc(crane_num * 3, sizeof(int));
-   for (i = 0; i < crane_num; i++) {
-     cranepos[i * 3 + 0] = RandomLong(300, 600);
-     cranepos[i * 3 + 1] = RandomLong(0, 80);
-     cranepos[i * 3 + 2] = RandomLong(0, 8);
-   }
+    // Generate the positions of the cranes
+    cranepos = (int *)UTIL_calloc(crane_num * 3, sizeof(int));
+    for (i = 0; i < crane_num; i++)
+    {
+        cranepos[i * 3 + 0] = RandomLong(300, 600);
+        cranepos[i * 3 + 1] = RandomLong(0, 80);
+        cranepos[i * 3 + 2] = RandomLong(0, 8);
+    }
 
-   // Play the title music
-   AUDIO_PlayMusic(-1, false, 0);
-   AUDIO_PlayMusic(0x05, true, 2);
+    // Play the title music
+    AUDIO_PlayMusic(-1, false, 0);
+    AUDIO_PlayMusic(0x05, true, 2);
 
-   // Clear all of the events and key states
-   PAL_ProcessEvent();
-   PAL_ClearKeyState();
+    // Clear all of the events and key states
+    PAL_ProcessEvent();
+    PAL_ClearKeyState();
 
-   srcrect.x = 0;
-   srcrect.w = SCREEN_W;
-   dstrect.x = 0;
-   dstrect.w = SCREEN_W;
+    srcrect.x = 0;
+    srcrect.w = SCREEN_W;
+    dstrect.x = 0;
+    dstrect.w = SCREEN_W;
 
-   unsigned int Time_LightUP = 15000;
-   while (true)
-   {
-      dwTime++;
-      // Set the palette
-      if (dwTime <= iTitleHeight) {
+    unsigned int Time_LightUP = 15000;
+    while (true)
+    {
+        dwTime++;
+        // Set the palette
+        if (dwTime <= iTitleHeight)
+        {
+            for (i = 0; i < PALETTE_SIZE; i++)
+                rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
+            VIDEO_SetPalette(rgCurrentPalette);
+        }
+
+        // Draw the screen
+        if (iImgPos)
+            iImgPos--;
+
+        // The lower part...
+        srcrect.y = 0;
+        dstrect.y = SCREEN_H - iImgPos;
+        srcrect.h = iImgPos;
+        dstrect.h = srcrect.h;
+        if (srcrect.h && dstrect.h)
+            VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
+        // The upper part...
+        srcrect.y = iImgPos;
+        dstrect.y = 0;
+        srcrect.h = SCREEN_H - iImgPos;
+        dstrect.h = srcrect.h;
+        if (srcrect.h && dstrect.h)
+            VIDEO_CopySurface(lpBitmapUp, &srcrect, gpScreen, &dstrect);
+
+        // Draw the cranes...
+        for (i = 0; i < crane_num; i++)
+        {
+            if (cranepos[i * 3 + 0] > -35)
+            {
+                const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane, cranepos[i * 3 + 2]);
+                PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i * 3 + 0], cranepos[i * 3 + 1]));
+                cranepos[i * 3 + 0]--;
+                cranepos[i * 3 + 1] += (iImgPos & 1) ? 1 : 0;
+                cranepos[i * 3 + 2] += (dwTime & 1);
+                cranepos[i * 3 + 2] %= 8;
+            }
+        }
+
+        // Draw the title...
+        if (dwTime < iTitleHeight)
+        {
+            lpBitmapTitle[2] = (dwTime & 0xFF);
+            lpBitmapTitle[3] = (dwTime >> 8) & 0xFF;
+        }
+
+        PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
+        VIDEO_UpdateScreen(NULL);
+
+        // Delay a while...
+        UTIL_Delay(85);
+
+        // Check for keypress...
+        PAL_ProcessEvent();
+        if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
+            break;
+    }
+    // Quit the splash screen
+    lpBitmapTitle[2] = iTitleHeight & 0xFF;
+    lpBitmapTitle[3] = iTitleHeight >> 8; // HACKHACK
+    PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
+
+    // If the picture has not completed fading in, complete the rest
+    while (dwTime < iTitleHeight)
+    {
         for (i = 0; i < PALETTE_SIZE; i++)
-          rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
+            rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
         VIDEO_SetPalette(rgCurrentPalette);
-      }
+        VIDEO_UpdateScreen(NULL);
+        UTIL_Sleep(8);
+        dwTime += 4;
+    }
+    VIDEO_SetPalette(palette);
+    VIDEO_UpdateScreen(NULL);
 
-      // Draw the screen
-      if (iImgPos)
-         iImgPos--;
+    UTIL_free(cranepos);
+    UTIL_free(lpTitleBuf);
+    UTIL_free(lpSpriteCrane);
+    UTIL_Sleep(500);
 
-      // The lower part...
-      srcrect.y = 0;
-      dstrect.y = SCREEN_H - iImgPos;
-      srcrect.h = iImgPos;
-      dstrect.h = srcrect.h;
-      if (srcrect.h && dstrect.h)
-        VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
-      // The upper part...
-      srcrect.y = iImgPos;
-      dstrect.y = 0;
-      srcrect.h = SCREEN_H - iImgPos;
-      dstrect.h = srcrect.h;
-      if (srcrect.h && dstrect.h)
-        VIDEO_CopySurface(lpBitmapUp, &srcrect, gpScreen, &dstrect);
-
-      // Draw the cranes...
-      for (i = 0; i < crane_num; i++) {
-         if (cranepos[i * 3 + 0] > -35) {
-            const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane, cranepos[i * 3 + 2]);
-            PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i * 3 + 0], cranepos[i * 3 + 1]));
-            cranepos[i * 3 + 0]--;
-            cranepos[i * 3 + 1] += (iImgPos & 1) ? 1 : 0;
-            cranepos[i * 3 + 2] += (dwTime & 1);
-            cranepos[i * 3 + 2] %= 8;
-         }
-      }
-
-      // Draw the title...
-      if (dwTime < iTitleHeight)
-      {
-         lpBitmapTitle[2] = (dwTime & 0xFF);
-         lpBitmapTitle[3] = (dwTime >> 8) & 0xFF;
-      }
-
-      PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
-      VIDEO_UpdateScreen(NULL);
-
-      // Delay a while...
-      UTIL_Delay(85);
-
-      // Check for keypress...
-      PAL_ProcessEvent();
-      if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
-         break;
-   }
-   // Quit the splash screen
-   lpBitmapTitle[2] = iTitleHeight & 0xFF;
-   lpBitmapTitle[3] = iTitleHeight >> 8; // HACKHACK
-   PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
-
-   // If the picture has not completed fading in, complete the rest
-   while (dwTime < iTitleHeight) {
-      for (i = 0; i < PALETTE_SIZE; i++)
-         rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
-      VIDEO_SetPalette(rgCurrentPalette);
-      VIDEO_UpdateScreen(NULL);
-      UTIL_Sleep(8);
-      dwTime += 4;
-   }
-   VIDEO_SetPalette(palette);
-   VIDEO_UpdateScreen(NULL);
-
-   UTIL_free(cranepos);
-   UTIL_free(lpTitleBuf);
-   UTIL_free(lpSpriteCrane);
-   UTIL_Sleep(500);
-
-   AUDIO_PlayMusic(0x00, false, 1);
-   PAL_FadeOut(1);
+    AUDIO_PlayMusic(0x00, false, 1);
+    PAL_FadeOut(1);
 }
 
 int main(int argc, char *argv[])
@@ -324,40 +335,41 @@ int main(int argc, char *argv[])
 
 --*/
 {
-  if (setjmp(g_exit_jmp_buf) != 0) {
-    // A longjmp is made, should exit here
-    return g_exit_code;
-  }
+    if (setjmp(g_exit_jmp_buf) != 0)
+    {
+        // A longjmp is made, should exit here
+        return g_exit_code;
+    }
 
-   // Initialize everything
-   PAL_Init();
+    // Initialize everything
+    PAL_Init();
 
-   // Show the trademark screen and splash screen
-   // PAL_ReloadInNextTick(0);
-   // PAL_EndingScreen();
-   PAL_TrademarkScreen();
-   PAL_SplashScreen();
+    // Show the trademark screen and splash screen
+    // PAL_ReloadInNextTick(0);
+    // PAL_EndingScreen();
+    PAL_TrademarkScreen();
+    PAL_SplashScreen();
 
-   // Show the opening menu.
-   PAL_OpeningMenu();
+    // Show the opening menu.
+    PAL_OpeningMenu();
 
-   // Run the main game routine
-   while (1)
-   {
-      // Load the game resources if needed.
-      PAL_LoadResources();
+    // Run the main game routine
+    while (1)
+    {
+        // Load the game resources if needed.
+        PAL_LoadResources();
 
-      // Clear the input state of previous frame.
-      PAL_ClearKeyState();
+        // Clear the input state of previous frame.
+        PAL_ClearKeyState();
 
-      // Wait for the time of one frame. Accept input here.
-      UTIL_Delay(FRAME_TIME);
+        // Wait for the time of one frame. Accept input here.
+        UTIL_Delay(FRAME_TIME);
 
-      // Run the main frame routine.
-      PAL_StartFrame();
-   }
+        // Run the main frame routine.
+        PAL_StartFrame();
+    }
 
-   // Should not really reach here...
-   assert(false);
-   return 255;
+    // Should not really reach here...
+    assert(false);
+    return 255;
 }

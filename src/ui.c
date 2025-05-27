@@ -30,13 +30,14 @@
 
 unsigned char *gpSpriteUI = NULL;
 
-static BOX *PAL_CreateBoxInternal(const PAL_Rect *rect) {
-   BOX *lpBox = (BOX *)UTIL_calloc(1, sizeof(BOX));
-   lpBox->pos = PAL_XY(rect->x, rect->y);
-   lpBox->lpSavedArea = VIDEO_DuplicateSurface(rect);
-   lpBox->wHeight = (unsigned short)rect->w;
-   lpBox->wWidth = (unsigned short)rect->h;
-   return lpBox;
+static BOX *PAL_CreateBoxInternal(const PAL_Rect *rect)
+{
+    BOX *lpBox = (BOX *)UTIL_calloc(1, sizeof(BOX));
+    lpBox->pos = PAL_XY(rect->x, rect->y);
+    lpBox->lpSavedArea = VIDEO_DuplicateSurface(rect);
+    lpBox->wHeight = (unsigned short)rect->w;
+    lpBox->wWidth = (unsigned short)rect->h;
+    return lpBox;
 }
 
 int PAL_InitUI(
@@ -56,26 +57,26 @@ int PAL_InitUI(
 
 --*/
 {
-   int iSize;
+    int iSize;
 
-   //
-   // Load the UI sprite.
-   //
-   iSize = PAL_MKFGetChunkSize(CHUNKNUM_SPRITEUI, gFiles[Res_DATA].fp);
-   if (iSize < 0)
-   {
-      return -1;
-   }
+    //
+    // Load the UI sprite.
+    //
+    iSize = PAL_MKFGetChunkSize(CHUNKNUM_SPRITEUI, gFiles[Res_DATA].fp);
+    if (iSize < 0)
+    {
+        return -1;
+    }
 
-   gpSpriteUI = (unsigned char *)UTIL_calloc(1, iSize);
-   if (gpSpriteUI == NULL)
-   {
-      return -1;
-   }
+    gpSpriteUI = (unsigned char *)UTIL_calloc(1, iSize);
+    if (gpSpriteUI == NULL)
+    {
+        return -1;
+    }
 
-   PAL_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, gFiles[Res_DATA].fp);
+    PAL_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, gFiles[Res_DATA].fp);
 
-   return 0;
+    return 0;
 }
 
 void PAL_FreeUI(
@@ -96,8 +97,8 @@ void PAL_FreeUI(
 --*/
 {
 
-   UTIL_free(gpSpriteUI);
-   gpSpriteUI = NULL;
+    UTIL_free(gpSpriteUI);
+    gpSpriteUI = NULL;
 }
 
 void PAL_CreateBox(
@@ -107,7 +108,7 @@ void PAL_CreateBox(
     int iStyle,
     BOX **lpBox)
 {
-   PAL_CreateBoxWithShadow(pos, nRows, nColumns, iStyle, lpBox, 6);
+    PAL_CreateBoxWithShadow(pos, nRows, nColumns, iStyle, lpBox, 6);
 }
 
 void PAL_CreateBoxWithShadow(
@@ -141,74 +142,74 @@ void PAL_CreateBoxWithShadow(
 
 --*/
 {
-   int i, j, x, m, n;
-   const unsigned char *rglpBorderBitmap[3][3];
-   PAL_Rect rect;
+    int i, j, x, m, n;
+    const unsigned char *rglpBorderBitmap[3][3];
+    PAL_Rect rect;
 
-   //
-   // Get the bitmaps
-   //
-   for (i = 0; i < 3; i++)
-   {
-      for (j = 0; j < 3; j++)
-      {
-         rglpBorderBitmap[i][j] = PAL_SpriteGetFrame(gpSpriteUI, i * 3 + j + iStyle * 9);
-      }
-   }
+    //
+    // Get the bitmaps
+    //
+    for (i = 0; i < 3; i++)
+    {
+        for (j = 0; j < 3; j++)
+        {
+            rglpBorderBitmap[i][j] = PAL_SpriteGetFrame(gpSpriteUI, i * 3 + j + iStyle * 9);
+        }
+    }
 
-   rect.x = PAL_X(pos);
-   rect.y = PAL_Y(pos);
-   rect.w = 0;
-   rect.h = 0;
+    rect.x = PAL_X(pos);
+    rect.y = PAL_Y(pos);
+    rect.w = 0;
+    rect.h = 0;
 
-   //
-   // Get the total width and total height of the box
-   //
-   for (i = 0; i < 3; i++)
-   {
-      if (i == 1)
-      {
-         rect.w += PAL_RLEGetWidth(rglpBorderBitmap[0][i]) * nColumns;
-         rect.h += PAL_RLEGetHeight(rglpBorderBitmap[i][0]) * nRows;
-      }
-      else
-      {
-         rect.w += PAL_RLEGetWidth(rglpBorderBitmap[0][i]);
-         rect.h += PAL_RLEGetHeight(rglpBorderBitmap[i][0]);
-      }
-   }
+    //
+    // Get the total width and total height of the box
+    //
+    for (i = 0; i < 3; i++)
+    {
+        if (i == 1)
+        {
+            rect.w += PAL_RLEGetWidth(rglpBorderBitmap[0][i]) * nColumns;
+            rect.h += PAL_RLEGetHeight(rglpBorderBitmap[i][0]) * nRows;
+        }
+        else
+        {
+            rect.w += PAL_RLEGetWidth(rglpBorderBitmap[0][i]);
+            rect.h += PAL_RLEGetHeight(rglpBorderBitmap[i][0]);
+        }
+    }
 
-   // Include shadow
-   rect.w += nShadowOffset;
-   rect.h += nShadowOffset;
+    // Include shadow
+    rect.w += nShadowOffset;
+    rect.h += nShadowOffset;
 
-   if (lpBox)
-      *lpBox = PAL_CreateBoxInternal(&rect); // Save the used part of the screen
+    if (lpBox)
+        *lpBox = PAL_CreateBoxInternal(&rect); // Save the used part of the screen
 
-   //
-   // Border takes 2 additional rows and columns...
-   //
-   nRows += 2;
-   nColumns += 2;
+    //
+    // Border takes 2 additional rows and columns...
+    //
+    nRows += 2;
+    nColumns += 2;
 
-   //
-   // Draw the box
-   //
-   for (i = 0; i < nRows; i++)
-   {
-      x = rect.x;
-      m = (i == 0) ? 0 : ((i == nRows - 1) ? 2 : 1);
+    //
+    // Draw the box
+    //
+    for (i = 0; i < nRows; i++)
+    {
+        x = rect.x;
+        m = (i == 0) ? 0 : ((i == nRows - 1) ? 2 : 1);
 
-      for (j = 0; j < nColumns; j++)
-      {
-         n = (j == 0) ? 0 : ((j == nColumns - 1) ? 2 : 1);
-         PAL_RLEBlitToSurfaceWithShadow(rglpBorderBitmap[m][n], gpScreen, PAL_XY(x + nShadowOffset, rect.y + nShadowOffset), true);
-         PAL_RLEBlitToSurface(rglpBorderBitmap[m][n], gpScreen, PAL_XY(x, rect.y));
-         x += PAL_RLEGetWidth(rglpBorderBitmap[m][n]);
-      }
+        for (j = 0; j < nColumns; j++)
+        {
+            n = (j == 0) ? 0 : ((j == nColumns - 1) ? 2 : 1);
+            PAL_RLEBlitToSurfaceWithShadow(rglpBorderBitmap[m][n], gpScreen, PAL_XY(x + nShadowOffset, rect.y + nShadowOffset), true);
+            PAL_RLEBlitToSurface(rglpBorderBitmap[m][n], gpScreen, PAL_XY(x, rect.y));
+            x += PAL_RLEGetWidth(rglpBorderBitmap[m][n]);
+        }
 
-      rect.y += PAL_RLEGetHeight(rglpBorderBitmap[m][0]);
-   }
+        rect.y += PAL_RLEGetHeight(rglpBorderBitmap[m][0]);
+    }
 }
 
 void PAL_CreateSingleLineBox(
@@ -216,7 +217,7 @@ void PAL_CreateSingleLineBox(
     int nLen,
     BOX **lpBox)
 {
-   PAL_CreateSingleLineBoxWithShadow(pos, nLen, lpBox, 6);
+    PAL_CreateSingleLineBoxWithShadow(pos, nLen, lpBox, 6);
 }
 
 void PAL_CreateSingleLineBoxWithShadow(
@@ -244,73 +245,73 @@ void PAL_CreateSingleLineBoxWithShadow(
 
 --*/
 {
-   const unsigned char *lpBitmapLeft;
-   const unsigned char *lpBitmapMid;
-   const unsigned char *lpBitmapRight;
-   PAL_Rect rect;
-   int i;
-   int xSaved;
+    const unsigned char *lpBitmapLeft;
+    const unsigned char *lpBitmapMid;
+    const unsigned char *lpBitmapRight;
+    PAL_Rect rect;
+    int i;
+    int xSaved;
 
-   //
-   // Get the bitmaps
-   //
-   lpBitmapLeft = PAL_SpriteGetFrame(gpSpriteUI, 44);
-   lpBitmapMid = PAL_SpriteGetFrame(gpSpriteUI, 45);
-   lpBitmapRight = PAL_SpriteGetFrame(gpSpriteUI, 46);
+    //
+    // Get the bitmaps
+    //
+    lpBitmapLeft = PAL_SpriteGetFrame(gpSpriteUI, 44);
+    lpBitmapMid = PAL_SpriteGetFrame(gpSpriteUI, 45);
+    lpBitmapRight = PAL_SpriteGetFrame(gpSpriteUI, 46);
 
-   rect.x = PAL_X(pos);
-   rect.y = PAL_Y(pos);
+    rect.x = PAL_X(pos);
+    rect.y = PAL_Y(pos);
 
-   //
-   // Get the total width and total height of the box
-   //
-   rect.w = PAL_RLEGetWidth(lpBitmapLeft) + PAL_RLEGetWidth(lpBitmapRight);
-   rect.w += PAL_RLEGetWidth(lpBitmapMid) * nLen;
-   rect.h = PAL_RLEGetHeight(lpBitmapLeft);
+    //
+    // Get the total width and total height of the box
+    //
+    rect.w = PAL_RLEGetWidth(lpBitmapLeft) + PAL_RLEGetWidth(lpBitmapRight);
+    rect.w += PAL_RLEGetWidth(lpBitmapMid) * nLen;
+    rect.h = PAL_RLEGetHeight(lpBitmapLeft);
 
-   // Include shadow
-   rect.w += nShadowOffset;
-   rect.h += nShadowOffset;
+    // Include shadow
+    rect.w += nShadowOffset;
+    rect.h += nShadowOffset;
 
-   if (lpBox)
-   {
-      //
-      // Save the used part of the screen
-      //
-      *lpBox = PAL_CreateBoxInternal(&rect);
-   }
-   xSaved = rect.x;
+    if (lpBox)
+    {
+        //
+        // Save the used part of the screen
+        //
+        *lpBox = PAL_CreateBoxInternal(&rect);
+    }
+    xSaved = rect.x;
 
-   //
-   // Draw the shadow
-   //
-   PAL_RLEBlitToSurfaceWithShadow(lpBitmapLeft, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
+    //
+    // Draw the shadow
+    //
+    PAL_RLEBlitToSurfaceWithShadow(lpBitmapLeft, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
 
-   rect.x += PAL_RLEGetWidth(lpBitmapLeft);
+    rect.x += PAL_RLEGetWidth(lpBitmapLeft);
 
-   for (i = 0; i < nLen; i++)
-   {
-      PAL_RLEBlitToSurfaceWithShadow(lpBitmapMid, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
-      rect.x += PAL_RLEGetWidth(lpBitmapMid);
-   }
+    for (i = 0; i < nLen; i++)
+    {
+        PAL_RLEBlitToSurfaceWithShadow(lpBitmapMid, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
+        rect.x += PAL_RLEGetWidth(lpBitmapMid);
+    }
 
-   PAL_RLEBlitToSurfaceWithShadow(lpBitmapRight, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
+    PAL_RLEBlitToSurfaceWithShadow(lpBitmapRight, gpScreen, PAL_XY(rect.x + nShadowOffset, rect.y + nShadowOffset), true);
 
-   rect.x = xSaved;
-   //
-   // Draw the box
-   //
-   PAL_RLEBlitToSurface(lpBitmapLeft, gpScreen, pos);
+    rect.x = xSaved;
+    //
+    // Draw the box
+    //
+    PAL_RLEBlitToSurface(lpBitmapLeft, gpScreen, pos);
 
-   rect.x += PAL_RLEGetWidth(lpBitmapLeft);
+    rect.x += PAL_RLEGetWidth(lpBitmapLeft);
 
-   for (i = 0; i < nLen; i++)
-   {
-      PAL_RLEBlitToSurface(lpBitmapMid, gpScreen, PAL_XY(rect.x, rect.y));
-      rect.x += PAL_RLEGetWidth(lpBitmapMid);
-   }
+    for (i = 0; i < nLen; i++)
+    {
+        PAL_RLEBlitToSurface(lpBitmapMid, gpScreen, PAL_XY(rect.x, rect.y));
+        rect.x += PAL_RLEGetWidth(lpBitmapMid);
+    }
 
-   PAL_RLEBlitToSurface(lpBitmapRight, gpScreen, PAL_XY(rect.x, rect.y));
+    PAL_RLEBlitToSurface(lpBitmapRight, gpScreen, PAL_XY(rect.x, rect.y));
 }
 
 void PAL_DeleteBox(BOX *lpBox)
@@ -329,31 +330,31 @@ void PAL_DeleteBox(BOX *lpBox)
 
 --*/
 {
-   PAL_Rect rect;
+    PAL_Rect rect;
 
-   //
-   // Check for NULL pointer.
-   //
-   if (lpBox == NULL)
-   {
-      return;
-   }
+    //
+    // Check for NULL pointer.
+    //
+    if (lpBox == NULL)
+    {
+        return;
+    }
 
-   //
-   // Restore the saved screen part
-   //
-   rect.x = PAL_X(lpBox->pos);
-   rect.y = PAL_Y(lpBox->pos);
-   rect.w = lpBox->wWidth;
-   rect.h = lpBox->wHeight;
+    //
+    // Restore the saved screen part
+    //
+    rect.x = PAL_X(lpBox->pos);
+    rect.y = PAL_Y(lpBox->pos);
+    rect.w = lpBox->wWidth;
+    rect.h = lpBox->wHeight;
 
-   VIDEO_CopySurface(lpBox->lpSavedArea, NULL, gpScreen, &rect);
+    VIDEO_CopySurface(lpBox->lpSavedArea, NULL, gpScreen, &rect);
 
-   //
-   // Free the memory used by the box
-   //
-   PAL_FreeSurface(lpBox->lpSavedArea);
-   UTIL_free(lpBox);
+    //
+    // Free the memory used by the box
+    //
+    PAL_FreeSurface(lpBox->lpSavedArea);
+    UTIL_free(lpBox);
 }
 
 unsigned short
@@ -387,211 +388,211 @@ PAL_ReadMenu(
 
 --*/
 {
-   int i;
-   unsigned short wCurrentItem = (wDefaultItem < nMenuItem) ? wDefaultItem : 0;
+    int i;
+    unsigned short wCurrentItem = (wDefaultItem < nMenuItem) ? wDefaultItem : 0;
 
-   //
-   // Fix issue #166
-   //
-   VIDEO_RenderPaused(true);
-   //
-   // Draw all the menu texts.
-   //
-   for (i = 0; i < nMenuItem; i++)
-   {
-      unsigned char bColor = bLabelColor;
+    //
+    // Fix issue #166
+    //
+    VIDEO_RenderPaused(true);
+    //
+    // Draw all the menu texts.
+    //
+    for (i = 0; i < nMenuItem; i++)
+    {
+        unsigned char bColor = bLabelColor;
 
-      if (!rgMenuItem[i].fEnabled)
-      {
-         if (i == wCurrentItem)
-         {
-            bColor = MENUITEM_COLOR_SELECTED_INACTIVE;
-         }
-         else
-         {
-            bColor = MENUITEM_COLOR_INACTIVE;
-         }
-      }
+        if (!rgMenuItem[i].fEnabled)
+        {
+            if (i == wCurrentItem)
+            {
+                bColor = MENUITEM_COLOR_SELECTED_INACTIVE;
+            }
+            else
+            {
+                bColor = MENUITEM_COLOR_INACTIVE;
+            }
+        }
 
-      PAL_DrawText(PAL_GetWord(rgMenuItem[i].wNumWord), rgMenuItem[i].pos, bColor, true, true, false);
-   }
-   //
-   // Fix issue #166
-   //
-   VIDEO_RenderPaused(false);
-   VIDEO_UpdateScreen(NULL);
+        PAL_DrawText(PAL_GetWord(rgMenuItem[i].wNumWord), rgMenuItem[i].pos, bColor, true, true, false);
+    }
+    //
+    // Fix issue #166
+    //
+    VIDEO_RenderPaused(false);
+    VIDEO_UpdateScreen(NULL);
 
-   if (lpfnMenuItemChanged != NULL)
-   {
-      (*lpfnMenuItemChanged)(rgMenuItem[wDefaultItem].wValue);
-   }
+    if (lpfnMenuItemChanged != NULL)
+    {
+        (*lpfnMenuItemChanged)(rgMenuItem[wDefaultItem].wValue);
+    }
 
-   while (true)
-   {
-      PAL_ClearKeyState();
+    while (true)
+    {
+        PAL_ClearKeyState();
 
-      //
-      // Redraw the selected item if needed.
-      //
-      if (rgMenuItem[wCurrentItem].fEnabled)
-      {
-         PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                      rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
-      }
-
-      PAL_ProcessEvent();
-
-      if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
-      {
-         //
-         // Fix issue #166
-         //
-         VIDEO_RenderPaused(true);
-
-         //
-         // User pressed the down or right arrow key
-         //
-         if (rgMenuItem[wCurrentItem].fEnabled)
-         {
-            //
-            // Dehighlight the unselected item.
-            //
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
-         }
-         else
-         {
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
-         }
-
-         wCurrentItem++;
-
-         if (wCurrentItem >= nMenuItem)
-         {
-            wCurrentItem = 0;
-         }
-
-         //
-         // Highlight the selected item.
-         //
-         if (rgMenuItem[wCurrentItem].fEnabled)
-         {
+        //
+        // Redraw the selected item if needed.
+        //
+        if (rgMenuItem[wCurrentItem].fEnabled)
+        {
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
                          rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
-         }
-         else
-         {
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED_INACTIVE, false, true, false);
-         }
-         //
-         // Fix issue #166
-         //
-         VIDEO_RenderPaused(false);
-         VIDEO_UpdateScreen(NULL);
+        }
 
-         if (lpfnMenuItemChanged != NULL)
-         {
-            (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
-         }
-      }
-      else if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
-      {
-         //
-         // Fix issue #166
-         //
-         VIDEO_RenderPaused(true);
+        PAL_ProcessEvent();
 
-         //
-         // User pressed the up or left arrow key
-         //
-         if (rgMenuItem[wCurrentItem].fEnabled)
-         {
+        if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
+        {
             //
-            // Dehighlight the unselected item.
+            // Fix issue #166
             //
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
-         }
-         else
-         {
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
-         }
+            VIDEO_RenderPaused(true);
 
-         if (wCurrentItem > 0)
-         {
-            wCurrentItem--;
-         }
-         else
-         {
-            wCurrentItem = nMenuItem - 1;
-         }
+            //
+            // User pressed the down or right arrow key
+            //
+            if (rgMenuItem[wCurrentItem].fEnabled)
+            {
+                //
+                // Dehighlight the unselected item.
+                //
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
+            }
+            else
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
+            }
 
-         //
-         // Highlight the selected item.
-         //
-         if (rgMenuItem[wCurrentItem].fEnabled)
-         {
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
-         }
-         else
-         {
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED_INACTIVE, false, true, false);
-         }
-         //
-         // Fix issue #166
-         //
-         VIDEO_RenderPaused(false);
-         VIDEO_UpdateScreen(NULL);
+            wCurrentItem++;
 
-         if (lpfnMenuItemChanged != NULL)
-         {
-            (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
-         }
-      }
-      else if (PAL_GetKeyInput() & kKeyMenu)
-      {
-         //
-         // User cancelled
-         //
-         if (rgMenuItem[wCurrentItem].fEnabled)
-         {
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
-         }
-         else
-         {
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
-         }
+            if (wCurrentItem >= nMenuItem)
+            {
+                wCurrentItem = 0;
+            }
 
-         break;
-      }
-      else if (PAL_GetKeyInput() & kKeySearch)
-      {
-         //
-         // User pressed Enter
-         //
-         if (rgMenuItem[wCurrentItem].fEnabled)
-         {
-            PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
-                         rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_CONFIRMED, false, true, false);
+            //
+            // Highlight the selected item.
+            //
+            if (rgMenuItem[wCurrentItem].fEnabled)
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
+            }
+            else
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED_INACTIVE, false, true, false);
+            }
+            //
+            // Fix issue #166
+            //
+            VIDEO_RenderPaused(false);
+            VIDEO_UpdateScreen(NULL);
 
-            return rgMenuItem[wCurrentItem].wValue;
-         }
-      }
+            if (lpfnMenuItemChanged != NULL)
+            {
+                (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
+            }
+        }
+        else if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
+        {
+            //
+            // Fix issue #166
+            //
+            VIDEO_RenderPaused(true);
 
-      //
-      // Use delay function to avoid high CPU usage.
-      //
-      UTIL_Sleep(50);
-   }
+            //
+            // User pressed the up or left arrow key
+            //
+            if (rgMenuItem[wCurrentItem].fEnabled)
+            {
+                //
+                // Dehighlight the unselected item.
+                //
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
+            }
+            else
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
+            }
 
-   return MENUITEM_VALUE_CANCELLED;
+            if (wCurrentItem > 0)
+            {
+                wCurrentItem--;
+            }
+            else
+            {
+                wCurrentItem = nMenuItem - 1;
+            }
+
+            //
+            // Highlight the selected item.
+            //
+            if (rgMenuItem[wCurrentItem].fEnabled)
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
+            }
+            else
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED_INACTIVE, false, true, false);
+            }
+            //
+            // Fix issue #166
+            //
+            VIDEO_RenderPaused(false);
+            VIDEO_UpdateScreen(NULL);
+
+            if (lpfnMenuItemChanged != NULL)
+            {
+                (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
+            }
+        }
+        else if (PAL_GetKeyInput() & kKeyMenu)
+        {
+            //
+            // User cancelled
+            //
+            if (rgMenuItem[wCurrentItem].fEnabled)
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, bLabelColor, false, true, false);
+            }
+            else
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, false, true, false);
+            }
+
+            break;
+        }
+        else if (PAL_GetKeyInput() & kKeySearch)
+        {
+            //
+            // User pressed Enter
+            //
+            if (rgMenuItem[wCurrentItem].fEnabled)
+            {
+                PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+                             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_CONFIRMED, false, true, false);
+
+                return rgMenuItem[wCurrentItem].wValue;
+            }
+        }
+
+        //
+        // Use delay function to avoid high CPU usage.
+        //
+        UTIL_Sleep(50);
+    }
+
+    return MENUITEM_VALUE_CANCELLED;
 }
 
 void PAL_DrawNumber(
@@ -623,68 +624,68 @@ void PAL_DrawNumber(
 
 --*/
 {
-   unsigned int nActualLength, i;
-   int x, y;
-   const unsigned char *rglpBitmap[10];
+    unsigned int nActualLength, i;
+    int x, y;
+    const unsigned char *rglpBitmap[10];
 
-   //
-   // Get the bitmaps. Blue starts from 29, Cyan from 56, Yellow from 19.
-   //
-   x = (color == kNumColorBlue) ? 29 : ((color == kNumColorCyan) ? 56 : 19);
+    //
+    // Get the bitmaps. Blue starts from 29, Cyan from 56, Yellow from 19.
+    //
+    x = (color == kNumColorBlue) ? 29 : ((color == kNumColorCyan) ? 56 : 19);
 
-   for (i = 0; i < 10; i++)
-   {
-      rglpBitmap[i] = PAL_SpriteGetFrame(gpSpriteUI, (unsigned int)x + i);
-   }
+    for (i = 0; i < 10; i++)
+    {
+        rglpBitmap[i] = PAL_SpriteGetFrame(gpSpriteUI, (unsigned int)x + i);
+    }
 
-   i = iNum;
-   nActualLength = 0;
+    i = iNum;
+    nActualLength = 0;
 
-   //
-   // Calculate the actual length of the number.
-   //
-   while (i > 0)
-   {
-      i /= 10;
-      nActualLength++;
-   }
+    //
+    // Calculate the actual length of the number.
+    //
+    while (i > 0)
+    {
+        i /= 10;
+        nActualLength++;
+    }
 
-   if (nActualLength > nLength)
-   {
-      nActualLength = nLength;
-   }
-   else if (nActualLength == 0)
-   {
-      nActualLength = 1;
-   }
+    if (nActualLength > nLength)
+    {
+        nActualLength = nLength;
+    }
+    else if (nActualLength == 0)
+    {
+        nActualLength = 1;
+    }
 
-   x = PAL_X(pos) - 6;
-   y = PAL_Y(pos);
+    x = PAL_X(pos) - 6;
+    y = PAL_Y(pos);
 
-   switch (align)
-   {
-   case kNumAlignLeft:
-      x += 6 * nActualLength;
-      break;
+    switch (align)
+    {
+        case kNumAlignLeft:
+            x += 6 * nActualLength;
+            break;
 
-   case kNumAlignMid:
-      x += 3 * (nLength + nActualLength);
-      break;
+        case kNumAlignMid:
+            x += 3 * (nLength + nActualLength);
+            break;
 
-   case kNumAlignRight:
-      x += 6 * nLength;
-      break;
-   }
+        case kNumAlignRight:
+            x += 6 * nLength;
+            break;
+    }
 
-   //
-   // Draw the number.
-   //
-   while (nActualLength-- > 0)
-   {
-      PAL_RLEBlitToSurface(rglpBitmap[iNum % 10], gpScreen, PAL_XY(x, y));
-      x -= 6;
-      iNum /= 10;
-   }
+    //
+    // Draw the number.
+    //
+    while (nActualLength-- > 0)
+    {
+        PAL_RLEBlitToSurface(rglpBitmap[iNum % 10], gpScreen, PAL_XY(x, y));
+        x -= 6;
+        iNum /= 10;
+    }
 }
 
 unsigned int
@@ -705,14 +706,14 @@ PAL_TextWidth(
 
 --*/
 {
-   const unsigned int l = (unsigned int)wcslen(itemText);
-   unsigned int i = 0;
-   unsigned int w = 0;
+    const unsigned int l = (unsigned int)wcslen(itemText);
+    unsigned int i = 0;
+    unsigned int w = 0;
 
-   for (i = 0; i < l; i++)
-      w += PAL_CharWidth(itemText[i]);
+    for (i = 0; i < l; i++)
+        w += PAL_CharWidth(itemText[i]);
 
-   return w;
+    return w;
 }
 
 unsigned int PAL_MenuTextMaxWidth(
@@ -734,16 +735,17 @@ unsigned int PAL_MenuTextMaxWidth(
 
 --*/
 {
-   unsigned int i = 0;
-   unsigned int r = 0;
-   unsigned int w = 0;
-  for (i = 0; i < nMenuItem; i++) {
-    const wchar_t *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
-      w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4;
-      if (r < w)
-      r = w;
+    unsigned int i = 0;
+    unsigned int r = 0;
+    unsigned int w = 0;
+    for (i = 0; i < nMenuItem; i++)
+    {
+        const wchar_t *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
+        w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4;
+        if (r < w)
+            r = w;
     }
-  return r;
+    return r;
 }
 
 unsigned int PAL_WordMaxWidth(
@@ -765,15 +767,16 @@ unsigned int PAL_WordMaxWidth(
 
 --*/
 {
-   unsigned int i = 0;
-   unsigned int w = 0;
-   unsigned int r = 0;
-   for (i = 0; i < nWordNum; i++) {
-      w = PAL_WordWidth(nFirstWord + i);
-      if (r < w)
-         r = w;
-   }
-   return r;
+    unsigned int i = 0;
+    unsigned int w = 0;
+    unsigned int r = 0;
+    for (i = 0; i < nWordNum; i++)
+    {
+        w = PAL_WordWidth(nFirstWord + i);
+        if (r < w)
+            r = w;
+    }
+    return r;
 }
 
 unsigned int PAL_WordWidth(
@@ -793,6 +796,6 @@ unsigned int PAL_WordWidth(
 
 --*/
 {
-   const wchar_t *itemText = PAL_GetWord(nWordIndex);
-   return (8U + PAL_TextWidth(itemText)) >> 4U;
+    const wchar_t *itemText = PAL_GetWord(nWordIndex);
+    return (8U + PAL_TextWidth(itemText)) >> 4U;
 }

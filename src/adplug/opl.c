@@ -34,6 +34,42 @@ void update_16s_16m(short *buf, unsigned int samples)
     }
 }
 
+// 16bit, stereo -> 8bit, stereo
+void update_16s_8s(short *buf, int samples)
+{
+    // Resize the internal buffer is necessary before update data into it
+    if (bufsamples < samples)
+    {
+        bufsamples = samples;
+        UTIL_free(buffer);
+        buffer = (short *)UTIL_calloc(samples * 2, sizeof(short));
+    }
+    update_direct(buffer, samples);
+
+    for (int i = 0; i < samples * 2; i++)
+    {
+        ((char *)buf)[i] = (buffer[i] >> 8) ^ 0x80;
+    }
+}
+
+// 16bit, stereo -> 8bit, stereo
+void update_16s_8m(short *buf, int samples)
+{
+    // Resize the internal buffer is necessary before update data into it
+    if (bufsamples < samples)
+    {
+        bufsamples = samples;
+        UTIL_free(buffer);
+        buffer = (short *)UTIL_calloc(samples * 2, sizeof(short));
+    }
+    update_direct(buffer, samples);
+
+    for (unsigned int i = 0, j = 0; i < samples; i++, j += 2)
+    {
+        ((char *)buf)[i] = (((buffer[j] >> 1) + (buffer[j + 1] >> 1)) >> 8) ^ 0x80;
+    }
+}
+
 void Copl_init(unsigned int samplerate, unsigned char stereo)
 {
     rate = samplerate;
