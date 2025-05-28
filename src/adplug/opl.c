@@ -35,7 +35,7 @@ void update_16s_16m(short *buf, unsigned int samples)
 }
 
 // 16bit, stereo -> 8bit, stereo
-void update_16s_8s(short *buf, int samples)
+void update_16s_8s(short *buf, unsigned int samples)
 {
     // Resize the internal buffer is necessary before update data into it
     if (bufsamples < samples)
@@ -46,14 +46,14 @@ void update_16s_8s(short *buf, int samples)
     }
     update_direct(buffer, samples);
 
-    for (int i = 0; i < samples * 2; i++)
+    for (unsigned int i = 0; i < samples * 2; i++)
     {
         ((char *)buf)[i] = (buffer[i] >> 8) ^ 0x80;
     }
 }
 
 // 16bit, stereo -> 8bit, stereo
-void update_16s_8m(short *buf, int samples)
+void update_16s_8m(short *buf, unsigned int samples)
 {
     // Resize the internal buffer is necessary before update data into it
     if (bufsamples < samples)
@@ -96,7 +96,7 @@ void Copl_write(unsigned short reg, unsigned char val)
 };
 
 // Emulation only: fill buffer
-void Copl_update(short *buf, int samples)
+void Copl_update(short *buf, unsigned int samples)
 {
     if (stereo_flag)
         update_direct(buf, samples);

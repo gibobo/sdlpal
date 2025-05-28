@@ -169,7 +169,7 @@ int gettimeofday(struct timeval *tp, void *tzp)
 }
 #endif
 
-long UTIL_GetTicks(void)
+unsigned long UTIL_GetTicks(void)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -178,7 +178,7 @@ long UTIL_GetTicks(void)
 
 void UTIL_Delay(int ms)
 {
-    long tm = UTIL_GetTicks() + ms;
+    unsigned long tm = UTIL_GetTicks() + ms;
     do
     {
 #ifdef _WIN32

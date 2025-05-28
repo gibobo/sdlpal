@@ -364,9 +364,9 @@ PAL_ItemSelectMenu(
 
 --*/
 {
-    int iPrevIndex;
+    unsigned long dwTime;
     unsigned short w;
-    long dwTime;
+    int iPrevIndex;
 
     PAL_ItemSelectMenuInit(wItemFlags);
     iPrevIndex = gpGlobals->iCurInvMenuItem;

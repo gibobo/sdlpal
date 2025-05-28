@@ -360,9 +360,9 @@ PAL_MagicSelectionMenu(
 
 --*/
 {
+    unsigned long dwTime;
     unsigned short w;
     int i;
-    long dwTime;
 
     PAL_MagicSelectionMenuInit(wPlayerRole, fInBattle, wDefaultMagic);
     PAL_ClearKeyState();

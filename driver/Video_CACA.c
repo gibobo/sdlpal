@@ -1,6 +1,6 @@
-#include "caca.h"
 #include "../src/util.h"
 #include "../src/video.h"
+#include "caca.h"
 #include <string.h>
 
 static unsigned char *framebuffer = NULL;
@@ -59,10 +59,6 @@ void DRIVER_FrameShow(
         caca_refresh_display(dp);
 }
 
-void DRIVER_FrameResize(unsigned int width, unsigned int height)
-{
-}
-
 void DRIVER_UpdatePalette(const unsigned char *rgPalette)
 {
     unsigned int r[256] = {0};
@@ -77,7 +73,7 @@ void DRIVER_UpdatePalette(const unsigned char *rgPalette)
         b[i] = rgPalette[i * 3 + 2] * 0xfff / 255;
         a[i] = 0;
     }
-    if(caca_dither)
+    if (caca_dither)
         caca_set_dither_palette(caca_dither, r, g, b, a);
 }
 

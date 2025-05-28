@@ -2,8 +2,6 @@ int DRIVER_Init_Video(void) { return 0; }
 
 void DRIVER_DeInit_Video(void) {}
 
-void DRIVER_FrameResize(unsigned int width, unsigned int height) {}
-
 void DRIVER_UpdatePalette(const unsigned char *rgPalette) {}
 
 void DRIVER_FrameShow(

@@ -1,8 +1,8 @@
-#include "DrvIf_internal.h"
 #include "../src/global.h"
 #include "../src/input.h"
 #include "../src/util.h"
 #include "../src/video.h"
+#include "DrvIf_internal.h"
 #include <SDL_events.h>
 #include <stdio.h>
 
@@ -46,6 +46,7 @@ static SDL_Joystick *g_pJoy = NULL;
 static int joystick_axis_X = 0;
 static int joystick_axis_Y = 0;
 #endif
+extern void DRIVER_FrameResize(unsigned int width, unsigned int height);
 
 static void SDL_UpdateKeyboardState(SDL_Keycode key)
 {

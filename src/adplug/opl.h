@@ -46,6 +46,6 @@ void Copl_init(unsigned int samplerate, unsigned char stereo);
 void Copl_deinit(void);
 void Copl_reset(void);                                  // reinitialize OPL chip(s)
 void Copl_write(unsigned short reg, unsigned char val); // combined register select + data write
-void Copl_update(short *buf, int samples);              // Emulation only: fill buffer
+void Copl_update(short *buf, unsigned int samples);     // Emulation only: fill buffer
 
 #endif

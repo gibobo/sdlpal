@@ -8,64 +8,71 @@
 struct mg_connection *ws_conn = NULL;
 struct mg_connection *nc = NULL;
 struct mg_mgr mgr;
-unsigned char rgdwKeyLastTime[20] = {0};
+static long rgdwKeyLastTime[20] = {0};
 
 extern void DRIVER_UpdatePalette(const unsigned char *rgPalette);
 extern void send_audio_config();
 extern void generate_audio(void);
+extern void clear_audio(void);
+
+unsigned char KeyCompare(const char *Key1, const size_t Key1_len, const char *Key2)
+{
+    return (strlen(Key2) == Key1_len - 1) && (strstr(Key1 + 1, Key2) != NULL);
+}
 
 void handle_input(const char *data, size_t len)
 {
-    const char keyType = data[0];
-    const char *keyCode = (const char *)data + 1;
-    int Key = 0, i = 0;
-    if (strstr(keyCode, "Escape") || strstr(keyCode, "Insert") || strstr(keyCode, "Alt") || strstr(keyCode, "0"))
+    int Key = 0;
+    unsigned char i = 0xff; // Default to invalid key
+    if (KeyCompare(data, len, "Escape") || KeyCompare(data, len, "Insert") || KeyCompare(data, len, "Alt") || KeyCompare(data, len, "0"))
         Key = kKeyMenu, i = 0;
-    else if (strstr(keyCode, "End") || strstr(keyCode, "1"))
-        Key = kKeyEnd, i = 9;
-    else if (strstr(keyCode, "Enter") || strstr(keyCode, " "))
-        Key = kKeySearch, i = 5;
-    else if (strstr(keyCode, "ArrowUp") || strstr(keyCode, "8"))
-        Key = kKeyUp, i = 1;
-    else if (strstr(keyCode, "ArrowDown") || strstr(keyCode, "2"))
+    else if (KeyCompare(data, len, "Enter") || KeyCompare(data, len, " "))
+        Key = kKeySearch, i = 1;
+    else if (KeyCompare(data, len, "ArrowDown") || KeyCompare(data, len, "2"))
         Key = kKeyDown, i = 2;
-    else if (strstr(keyCode, "ArrowLeft") || strstr(keyCode, "4"))
+    else if (KeyCompare(data, len, "ArrowLeft") || KeyCompare(data, len, "4"))
         Key = kKeyLeft, i = 3;
-    else if (strstr(keyCode, "ArrowRight") || strstr(keyCode, "6"))
-        Key = kKeyRight, i = 4;
-    else if (strstr(keyCode, "PageUp") || strstr(keyCode, "9"))
+    else if (KeyCompare(data, len, "ArrowUp") || KeyCompare(data, len, "8"))
+        Key = kKeyUp, i = 4;
+    else if (KeyCompare(data, len, "ArrowRight") || KeyCompare(data, len, "6"))
+        Key = kKeyRight, i = 5;
+    else if (KeyCompare(data, len, "PageUp") || KeyCompare(data, len, "9"))
         Key = kKeyPgUp, i = 6;
-    else if (strstr(keyCode, "PageDown") || strstr(keyCode, "3"))
+    else if (KeyCompare(data, len, "PageDown") || KeyCompare(data, len, "3"))
         Key = kKeyPgDn, i = 7;
-    else if (strstr(keyCode, "Home") || strstr(keyCode, "7"))
-        Key = kKeyHome, i = 8;
-    else if (strstr(keyCode, "r") || strstr(keyCode, "R"))
-        Key = kKeyRepeat, i = 10;
-    else if (strstr(keyCode, "a") || strstr(keyCode, "A"))
-        Key = kKeyAuto, i = 11;
-    else if (strstr(keyCode, "d") || strstr(keyCode, "D"))
-        Key = kKeyDefend, i = 12;
-    else if (strstr(keyCode, "e") || strstr(keyCode, "E"))
-        Key = kKeyUseItem, i = 13;
-    else if (strstr(keyCode, "w") || strstr(keyCode, "W"))
-        Key = kKeyThrowItem, i = 14;
-    else if (strstr(keyCode, "q") || strstr(keyCode, "Q"))
-        Key = kKeyFlee, i = 15;
-    else if (strstr(keyCode, "f") || strstr(keyCode, "F"))
-        Key = kKeyForce, i = 16;
-    else if (strstr(keyCode, "s") || strstr(keyCode, "S"))
-        Key = kKeyStatus, i = 17;
+    else if (KeyCompare(data, len, "r") || KeyCompare(data, len, "R"))
+        Key = kKeyRepeat, i = 8;
+    else if (KeyCompare(data, len, "a") || KeyCompare(data, len, "A"))
+        Key = kKeyAuto, i = 9;
+    else if (KeyCompare(data, len, "d") || KeyCompare(data, len, "D"))
+        Key = kKeyDefend, i = 10;
+    else if (KeyCompare(data, len, "e") || KeyCompare(data, len, "E"))
+        Key = kKeyUseItem, i = 11;
+    else if (KeyCompare(data, len, "w") || KeyCompare(data, len, "W"))
+        Key = kKeyThrowItem, i = 12;
+    else if (KeyCompare(data, len, "q") || KeyCompare(data, len, "Q"))
+        Key = kKeyFlee, i = 13;
+    else if (KeyCompare(data, len, "s") || KeyCompare(data, len, "S"))
+        Key = kKeyStatus, i = 14;
+    else if (KeyCompare(data, len, "f") || KeyCompare(data, len, "F"))
+        Key = kKeyForce, i = 15;
+    else if (KeyCompare(data, len, "Home") || KeyCompare(data, len, "7"))
+        Key = kKeyHome, i = 16;
+    else if (KeyCompare(data, len, "End") || KeyCompare(data, len, "1"))
+        Key = kKeyEnd, i = 17;
     // printf("Received key %d: %s\n", keyType - '0', keyCode);
-    if (keyType == '0')
+    if (i == 0xff)
+        return;
+
+    if (data[0] == '0' || data[0] == '1')
     {
-        PAL_KeyDown(Key, (rgdwKeyLastTime[i] != 0));
-        rgdwKeyLastTime[i] = 0xFF;
+        PAL_KeyDown(1 << i, rgdwKeyLastTime[i]);
+        rgdwKeyLastTime[i] = UTIL_GetTicks();
     }
-    else if (keyType == '2')
+    else if (data[0] == '2')
     {
-        PAL_KeyUp(Key);
-        memset(rgdwKeyLastTime, 0, sizeof(rgdwKeyLastTime));
-        PAL_ClearKeyState();
+        PAL_KeyUp(1 << i);
+        rgdwKeyLastTime[i] = 0;
     }
 }
 
@@ -128,15 +135,18 @@ void DRIVER_DeInit_Event(void)
 
 int DRIVER_Process_Events(void)
 {
-    static long last_tick = 0;
+    static unsigned long last_tick = 0;
+    while (ws_conn == NULL) // Wait for WebSocket connection to be established
+    {
+        clear_audio();
+        mg_mgr_poll(&mgr, 1000);
+    }
+
     if (UTIL_GetTicks() >= last_tick) // Poll the event manager every 10 milliseconds
     {
-        generate_audio();     // Generate audio data
-        mg_mgr_poll(&mgr, 0); // Poll the event manager for events
-        long duration_ms = 1000 * PAL_AUDIO_BUFFER_SIZE / PAL_AUDIO_SAMPLE_RATE;
-        last_tick += duration_ms; // Adjust the tick interval based on audio settings
-        if (UTIL_GetTicks() >= last_tick)
-            last_tick = UTIL_GetTicks() + duration_ms; // Ensure we don't miss the next tick
+        generate_audio();                 // Generate audio data
+        mg_mgr_poll(&mgr, 0);             // Poll the event manager for events
+        last_tick = UTIL_GetTicks() + 10; // Adjust the tick interval based on audio settings
     }
     return 0;
 }

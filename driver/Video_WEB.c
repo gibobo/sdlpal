@@ -51,16 +51,8 @@ void DRIVER_FrameShow(
             src += SCREEN_W;
         dst += SCREEN_W;
     }
-    while (ws_conn == NULL) // Wait for WebSocket connection to be established
-    {
-        mg_mgr_poll(&mgr, 1000);
-    }
-    mg_ws_send(ws_conn, send_frame, 9 + SCREEN_SIZE, WEBSOCKET_OP_BINARY);
-    // mg_mgr_poll(&mgr, 1);
-}
-
-void DRIVER_FrameResize(unsigned int width, unsigned int height)
-{
+    if (ws_conn)
+        mg_ws_send(ws_conn, send_frame, 9 + SCREEN_SIZE, WEBSOCKET_OP_BINARY);
 }
 
 void DRIVER_UpdatePalette(const unsigned char *rgPalette)

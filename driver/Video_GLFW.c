@@ -1,6 +1,6 @@
 #include "../src/util.h"
 #include "../src/video.h"
-// #include "utils/mini_glloader.h"
+#include "utils/video_glsl.h"
 #include <GLFW/glfw3.h>
 #include <string.h>
 
@@ -66,18 +66,13 @@ void DRIVER_FrameShow(
     glfwSwapBuffers(window);
 }
 
-void DRIVER_FrameResize(unsigned int width, unsigned int height)
-{
-    window_width = width;
-    window_height = height;
-    VIDEO_GLSL_Initialize(window_width, window_height);
-}
-
 void DRIVER_UpdatePalette(const unsigned char *rgPalette) { palette = rgPalette; }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    DRIVER_FrameResize(width, height);
+    window_width = width;
+    window_height = height;
+    VIDEO_GLSL_Initialize(window_width, window_height);
 }
 
 int DRIVER_Init_Video(void)

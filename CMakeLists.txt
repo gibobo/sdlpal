@@ -122,14 +122,17 @@ target_link_libraries(${PROJECT_NAME}_glfw  ${OPENGL_LIBRARY}   glfw)
 target_link_libraries(${PROJECT_NAME}_caca  ${CACA_LIBRARYS})
 if(WIN32)
     target_link_libraries(${PROJECT_NAME}_webserver ws2_32)
+    execute_process(COMMAND cmd.exe /c mklink "${CMAKE_BINARY_DIR}/index.html" "${CMAKE_SOURCE_DIR}/index.html")
+else()
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_SOURCE_DIR}/index.html" "${CMAKE_BINARY_DIR}/index.html")
 endif()
 
 file(GLOB GAMEDATA
     ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.mkf
     ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.msg
-    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.dat)
+    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.dat
+    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.rpg)
 file(GLOB CACHEDATA ${CMAKE_SOURCE_DIR}/cache_data/*.bin)
 file(COPY ${GAMEDATA}                       DESTINATION ${RESOURCE_PATH})
 file(COPY ${CACHEDATA}                      DESTINATION ${RESOURCE_PATH})
 file(COPY ${CMAKE_SOURCE_DIR}/shaders/      DESTINATION ${CMAKE_BINARY_DIR}/shaders)
-file(COPY ${CMAKE_SOURCE_DIR}/index.html    DESTINATION ${CMAKE_BINARY_DIR})
