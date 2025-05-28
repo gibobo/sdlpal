@@ -273,8 +273,7 @@ void PAL_MapBlitToSurface(
 
 --*/
 {
-   int sx, sy, dx, dy, xPos, yPos;
-   unsigned char x, y, h;
+   int sx, sy, dx, dy, x, y, h, xPos, yPos;
    const unsigned char *lpBitmap = NULL;
 
    //
