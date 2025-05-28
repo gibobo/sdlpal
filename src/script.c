@@ -2961,6 +2961,10 @@ PAL_RunTriggerScript(
    {
       pEvtObj = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
    }
+   else
+   {
+      pEvtObj = NULL;
+   }
 
    g_fScriptSuccess = true;
 

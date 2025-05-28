@@ -38,7 +38,7 @@
         let currentPlayingSource = null;
         let nextScheduledTime = 0;
         let userInteracted = false;
-        const MAX_QUEUE_LENGTH = 2;
+        const MAX_QUEUE_LENGTH = 1;
 
         function resizeCanvas() {
             const ratio = 320 / 200;
@@ -175,8 +175,8 @@
             }
         };
 
-        ['keydown', 'mousedown', 'touchstart'].forEach(e => addEventListener(e, initAudioOnUserInteraction, { once: true }));
-        ['keydown', 'keypress', 'keyup'].forEach((type, i) => addEventListener(type, e => ws.send(i + e.key)));
+        ['keypress', 'mousedown', 'touchstart'].forEach(e => addEventListener(e, initAudioOnUserInteraction, { once: true }));
+        ['keydown', 'keyup'].forEach((type, i) => addEventListener(type, e => ws.send(i + e.key)));
     </script>
 </body>
 

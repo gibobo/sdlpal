@@ -9,6 +9,7 @@ struct mg_connection *ws_conn = NULL;
 struct mg_connection *nc = NULL;
 struct mg_mgr mgr;
 static long rgdwKeyLastTime[20] = {0};
+static unsigned long least_passed = 0;
 
 extern void DRIVER_UpdatePalette(const unsigned char *rgPalette);
 extern void send_audio_config();
@@ -64,12 +65,13 @@ void handle_input(const char *data, size_t len)
     if (i == 0xff)
         return;
 
-    if (data[0] == '0' || data[0] == '1')
+    if (data[0] == '0')
     {
         PAL_KeyDown(1 << i, rgdwKeyLastTime[i]);
         rgdwKeyLastTime[i] = UTIL_GetTicks();
+        least_passed = rgdwKeyLastTime[i]; // Update least passed time
     }
-    else if (data[0] == '2')
+    else
     {
         PAL_KeyUp(1 << i);
         rgdwKeyLastTime[i] = 0;
@@ -136,17 +138,34 @@ void DRIVER_DeInit_Event(void)
 int DRIVER_Process_Events(void)
 {
     static unsigned long last_tick = 0;
+    unsigned long current_time = UTIL_GetTicks();
     while (ws_conn == NULL) // Wait for WebSocket connection to be established
     {
         clear_audio();
         mg_mgr_poll(&mgr, 1000);
     }
 
-    if (UTIL_GetTicks() >= last_tick) // Poll the event manager every 10 milliseconds
+    if (current_time % 30 == 0) // Poll the event manager every 30 milliseconds
     {
-        generate_audio();                 // Generate audio data
-        mg_mgr_poll(&mgr, 0);             // Poll the event manager for events
-        last_tick = UTIL_GetTicks() + 10; // Adjust the tick interval based on audio settings
+        unsigned long time_diff = current_time - least_passed;
+        // Check if enough time has passed since the last key press
+        if (least_passed > 0 && time_diff > 500)
+        {
+            for (int i = 0; i < sizeof(rgdwKeyLastTime) / sizeof(rgdwKeyLastTime[0]); i++)
+            {
+                if (rgdwKeyLastTime[i])
+                    PAL_KeyUp(1 << i);  // Release the key
+                rgdwKeyLastTime[i] = 0; // Reset the last time
+            }
+            least_passed = 0; // Reset least passed time
+        }
+    }
+
+    if (current_time >= last_tick) // Poll the event manager every 10 milliseconds
+    {
+        generate_audio();              // Generate audio data
+        mg_mgr_poll(&mgr, 0);          // Poll the event manager for events
+        last_tick = current_time + 10; // Adjust the tick interval based on audio settings
     }
     return 0;
 }
