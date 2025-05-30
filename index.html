@@ -32,6 +32,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const ws = new WebSocket('ws://localhost:8000/ws');
+        const keysPressed = new Set();
 
         let audioCtx, palette, audioConfig = { sampleRate: 44100, channels: 2, bitsPerSample: 16 };
         const audioQueue = [];
@@ -176,7 +177,21 @@
         };
 
         ['keypress', 'mousedown', 'touchstart'].forEach(e => addEventListener(e, initAudioOnUserInteraction, { once: true }));
-        ['keydown', 'keyup'].forEach((type, i) => addEventListener(type, e => ws.send(i + e.key)));
+        // Handle key down event
+        document.addEventListener('keydown', function (event) {
+            if (!keysPressed.has(event.key)) {
+                keysPressed.add(event.key);
+                ws.send(`0${event.key}`);
+            }
+        });
+
+        // Handle key up event
+        document.addEventListener('keyup', function (event) {
+            if (keysPressed.has(event.key)) {
+                keysPressed.delete(event.key);
+                ws.send(`1${event.key}`);
+            }
+        });
     </script>
 </body>
 

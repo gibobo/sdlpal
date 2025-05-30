@@ -151,23 +151,6 @@ int DRIVER_Process_Events(void)
         mg_mgr_poll(&mgr, 1000);
     }
 
-    if (current_time >= input_trigger_ticks) // Poll the event manager every 100 milliseconds
-    {
-        unsigned long time_diff = current_time - least_passed;
-        // Check if enough time has passed since the last key press
-        if (least_passed > 0 && time_diff > 500)
-        {
-            for (int i = 0; i < sizeof(rgdwKeyLastTime) / sizeof(rgdwKeyLastTime[0]); i++)
-            {
-                if (rgdwKeyLastTime[i])
-                    PAL_KeyUp(1 << i);  // Release the key
-                rgdwKeyLastTime[i] = 0; // Reset the last time
-            }
-            least_passed = 0; // Reset least passed time
-        }
-        input_trigger_ticks = TRIGGER_TIME(100); // Adjust the tick interval based on input settings
-    }
-
     if (current_time >= video_trigger_ticks) // Poll the event manager every 50 milliseconds
     {
         if (ws_conn != NULL && send_frame != NULL)
