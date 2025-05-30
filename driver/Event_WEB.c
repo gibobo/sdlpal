@@ -1,6 +1,7 @@
 #include "../src/audio.h"
 #include "../src/input.h"
 #include "../src/util.h"
+#include "../src/video.h"
 #include "DrvIf_internal.h"
 #include "mongoose.h"
 #include <stdint.h>
@@ -10,6 +11,7 @@ struct mg_connection *nc = NULL;
 struct mg_mgr mgr;
 static long rgdwKeyLastTime[20] = {0};
 static unsigned long least_passed = 0;
+extern unsigned char *send_frame;
 
 extern void DRIVER_UpdatePalette(const unsigned char *rgPalette);
 extern void send_audio_config();
@@ -137,15 +139,19 @@ void DRIVER_DeInit_Event(void)
 
 int DRIVER_Process_Events(void)
 {
-    static unsigned long last_tick = 0;
+    static unsigned long video_trigger_ticks = 0;
+    static unsigned long audio_trigger_ticks = 0;
+    static unsigned long input_trigger_ticks = 0;
     unsigned long current_time = UTIL_GetTicks();
+#define TRIGGER_TIME(tm) (tm * ((current_time / tm) + 1U)) // Helper macro to adjust trigger time
+
     while (ws_conn == NULL) // Wait for WebSocket connection to be established
     {
         clear_audio();
         mg_mgr_poll(&mgr, 1000);
     }
 
-    if (current_time % 30 == 0) // Poll the event manager every 30 milliseconds
+    if (current_time >= input_trigger_ticks) // Poll the event manager every 100 milliseconds
     {
         unsigned long time_diff = current_time - least_passed;
         // Check if enough time has passed since the last key press
@@ -159,13 +165,24 @@ int DRIVER_Process_Events(void)
             }
             least_passed = 0; // Reset least passed time
         }
+        input_trigger_ticks = TRIGGER_TIME(100); // Adjust the tick interval based on input settings
     }
 
-    if (current_time >= last_tick) // Poll the event manager every 10 milliseconds
+    if (current_time >= video_trigger_ticks) // Poll the event manager every 50 milliseconds
     {
-        generate_audio();              // Generate audio data
-        mg_mgr_poll(&mgr, 0);          // Poll the event manager for events
-        last_tick = current_time + 10; // Adjust the tick interval based on audio settings
+        if (ws_conn != NULL && send_frame != NULL)
+        {
+            mg_ws_send(ws_conn, send_frame, 9 + SCREEN_SIZE, WEBSOCKET_OP_BINARY); // Send the video frame over WebSocket
+            mg_mgr_poll(&mgr, 0);                                                  // Poll the event manager for events
+        }
+        video_trigger_ticks = TRIGGER_TIME(50); // Adjust the tick interval based on video settings
     }
+    if (current_time >= audio_trigger_ticks) // Poll the event manager every 10 milliseconds
+    {
+        generate_audio();                       // Generate audio data
+        mg_mgr_poll(&mgr, 0);                   // Poll the event manager for events
+        input_trigger_ticks = TRIGGER_TIME(10); // Adjust the tick interval based on audio settings
+    }
+#undef TRIGGER_TIME
     return 0;
 }

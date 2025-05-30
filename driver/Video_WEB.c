@@ -3,7 +3,7 @@
 #include "mongoose.h"
 #include <string.h>
 
-static unsigned char *send_frame = NULL;
+unsigned char *send_frame = NULL;
 static unsigned char *send_palette = NULL;
 
 extern struct mg_connection *ws_conn;
@@ -51,8 +51,6 @@ void DRIVER_FrameShow(
             src += SCREEN_W;
         dst += SCREEN_W;
     }
-    if (ws_conn)
-        mg_ws_send(ws_conn, send_frame, 9 + SCREEN_SIZE, WEBSOCKET_OP_BINARY);
 }
 
 void DRIVER_UpdatePalette(const unsigned char *rgPalette)
