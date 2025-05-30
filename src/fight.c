@@ -1054,7 +1054,7 @@ PAL_BattleStartFrame(
                //
                // Skip other players if someone selected coopmagic
                //
-               i = min(gpGlobals->wMaxPartyMemberIndex + 1, MAX_PLAYERS_IN_PARTY - 1);
+               i = gpGlobals->wMaxPartyMemberIndex + 1;
                break;
             }
          }

@@ -2063,7 +2063,7 @@ PAL_InterpretInstruction(
                 if (pScript->rgwOperand[i] != 0)
                 {
                     gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex].wPlayerRole = pScript->rgwOperand[i] - 1;
-                    gpGlobals->wMaxPartyMemberIndex = min(gpGlobals->wMaxPartyMemberIndex + 1, MAX_PLAYERS_IN_PARTY - 1);
+                    gpGlobals->wMaxPartyMemberIndex++;
                 }
             }
 

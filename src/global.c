@@ -287,7 +287,7 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
 
    // Get common data from the saved game struct.
    gpGlobals->viewport = PAL_XY(s->wViewportX, s->wViewportY);
-   gpGlobals->wMaxPartyMemberIndex = min(max(s->nPartyMember, 0), MAX_PLAYERS_IN_PARTY - 1);
+   gpGlobals->wMaxPartyMemberIndex = s->nPartyMember;
    gpGlobals->wNumScene = s->wNumScene;
    gpGlobals->fNightPalette = (s->wPaletteOffset != 0);
    gpGlobals->wPartyDirection = s->wPartyDirection;
