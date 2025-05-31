@@ -21,80 +21,52 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-int
-PAL_BattleSelectAutoTargetFrom(
-   int
-);
+int PAL_BattleSelectAutoTargetFrom(
+    int);
 
-int
-PAL_IsPlayerDying(
-   unsigned short
-);
+int PAL_IsPlayerDying(
+    unsigned short);
 
-int
-PAL_IsPlayerHealthy(
-   unsigned short     wPlayerRole
-);
+int PAL_IsPlayerHealthy(
+    unsigned short wPlayerRole);
 
-int
-PAL_BattleSelectAutoTarget(
-   void
-);
+int PAL_BattleSelectAutoTarget(
+    void);
 
-void
-PAL_BattleUpdateFighters(
-   void
-);
+void PAL_BattleUpdateFighters(
+    void);
 
-void
-PAL_BattlePlayerCheckReady(
-   void
-);
+void PAL_BattlePlayerCheckReady(
+    void);
 
-void
-PAL_BattleStartFrame(
-   void
-);
+void PAL_BattleStartFrame(
+    void);
 
-void
-PAL_BattleCommitAction(
-   int         fRepeat
-);
+void PAL_BattleCommitAction(
+    int fRepeat);
 
-void
-PAL_BattlePlayerPerformAction(
-   unsigned short         wPlayerIndex
-);
+void PAL_BattlePlayerPerformAction(
+    unsigned short wPlayerIndex);
 
-void
-PAL_BattleEnemyPerformAction(
-   unsigned short         wEnemyIndex
-);
+void PAL_BattleEnemyPerformAction(
+    unsigned short wEnemyIndex);
 
-void
-PAL_BattleShowPlayerPreMagicAnim(
-   unsigned short         wPlayerIndex,
-   int         fSummon
-);
+void PAL_BattleShowPlayerPreMagicAnim(
+    unsigned short wPlayerIndex,
+    int fSummon);
 
-void
-PAL_BattleDelay(
-   unsigned short       wDuration,
-   unsigned short       wObjectID,
-   int       fUpdateGesture
-);
+void PAL_BattleDelay(
+    unsigned short wDuration,
+    unsigned short wObjectID,
+    int fUpdateGesture);
 
-void
-PAL_BattleStealFromEnemy(
-   unsigned short           wTarget,
-   unsigned short           wStealRate
-);
+void PAL_BattleStealFromEnemy(
+    unsigned short wTarget,
+    unsigned short wStealRate);
 
-void
-PAL_BattleSimulateMagic(
-   short      sTarget,
-   unsigned short       wMagicObjectID,
-   unsigned short       wBaseDamage
-);
+void PAL_BattleSimulateMagic(
+    short sTarget,
+    unsigned short wMagicObjectID,
+    unsigned short wBaseDamage);
 
 #endif

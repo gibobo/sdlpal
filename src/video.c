@@ -260,7 +260,7 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
             if (g_wShakeTime != 0)
             {
                 ROI.y = (g_wShakeTime & 1) ? g_wShakeLevel : 0;
-                ROI.h -= g_wShakeLevel;
+                ROI.h = SCREEN_H - g_wShakeLevel;
                 g_wShakeTime--;
             }
 

@@ -1731,19 +1731,17 @@ void PAL_EquipItemMenu(
 
         if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
         {
-            iCurrentPlayer--;
-            if (iCurrentPlayer < 0)
-            {
+            if (iCurrentPlayer == 0)
                 iCurrentPlayer = gpGlobals->wMaxPartyMemberIndex;
-            }
+            else
+                iCurrentPlayer--;
         }
         else if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
         {
-            iCurrentPlayer++;
-            if (iCurrentPlayer > gpGlobals->wMaxPartyMemberIndex)
-            {
+            if (iCurrentPlayer == gpGlobals->wMaxPartyMemberIndex)
                 iCurrentPlayer = 0;
-            }
+            else
+                iCurrentPlayer++;
         }
         else if (PAL_GetKeyInput() & kKeyMenu)
         {

@@ -25,14 +25,15 @@
 #include "uibattle.h"
 #include "video.h"
 
-#define BATTLE_FRAME_TIME (1000 / 25) // 25 FPS
+#define BATTLE_FRAME_TIME            (1000 / 25) // 25 FPS
 #define MAX_BATTLE_MAGICSPRITE_ITEMS 3
-#define MAX_BATTLESPRITESEQ_ITEMS (MAX_ENEMIES_IN_TEAM + MAX_PLAYABLE_PLAYER_ROLES + MAX_BATTLE_MAGICSPRITE_ITEMS)
-#define MAX_BATTLE_ACTIONS 256
-#define MAX_KILLED_ENEMIES 256
-#define MAX_ACTIONQUEUE_ITEMS (MAX_PLAYERS_IN_PARTY + MAX_ENEMIES_IN_TEAM * 2)
+#define MAX_BATTLESPRITESEQ_ITEMS    (MAX_ENEMIES_IN_TEAM + MAX_PLAYABLE_PLAYER_ROLES + MAX_BATTLE_MAGICSPRITE_ITEMS)
+#define MAX_BATTLE_ACTIONS           256
+#define MAX_KILLED_ENEMIES           256
+#define MAX_ACTIONQUEUE_ITEMS        (MAX_PLAYERS_IN_PARTY + MAX_ENEMIES_IN_TEAM * 2)
 
-typedef enum tagBATTLERESULT {
+typedef enum tagBATTLERESULT
+{
     kBattleResultWon = 3,          // player won the battle
     kBattleResultLost = 1,         // player lost the battle
     kBattleResultFleed = 0xFFFF,   // player fleed from the battle
@@ -42,13 +43,15 @@ typedef enum tagBATTLERESULT {
     kBattleResultPause = 1002,     // battle pause
 } BATTLERESULT;
 
-typedef enum tagFIGHTERSTATE {
+typedef enum tagFIGHTERSTATE
+{
     kFighterWait, // waiting time
     kFighterCom,  // accepting command
     kFighterAct,  // doing the actual move
 } FIGHTERSTATE;
 
-typedef enum tagBATTLEACTIONTYPE {
+typedef enum tagBATTLEACTIONTYPE
+{
     kBattleActionPass,       // do nothing
     kBattleActionDefend,     // defend
     kBattleActionAttack,     // physical attack
@@ -60,14 +63,16 @@ typedef enum tagBATTLEACTIONTYPE {
     kBattleActionAttackMate, // attack teammate (confused only)
 } BATTLEACTIONTYPE;
 
-typedef struct tagBATTLEACTION {
+typedef struct tagBATTLEACTION
+{
     BATTLEACTIONTYPE ActionType;
     unsigned short wActionID; // item/magic to use
     short sTarget;            // -1 for everyone
     float flRemainingTime;    // remaining waiting time before the action start
 } BATTLEACTION;
 
-typedef struct tagBATTLEENEMY {
+typedef struct tagBATTLEENEMY
+{
     unsigned short wObjectID;             // Object ID of this enemy
     ENEMY e;                              // detailed data of this enemy
     unsigned short rgwStatus[kStatusAll]; // status effects
@@ -89,7 +94,8 @@ typedef struct tagBATTLEENEMY {
 } BATTLEENEMY;
 
 // We only put some data used in battle here; other data can be accessed in the global data.
-typedef struct tagBATTLEPLAYER {
+typedef struct tagBATTLEPLAYER
+{
     int iColorShift;
     float flTimeMeter; // time-charging meter (0 = empty, 100 = full).
     float flTimeSpeedModifier;
@@ -107,14 +113,16 @@ typedef struct tagBATTLEPLAYER {
     unsigned short wPrevMP;       // MP value prior to action
 } BATTLEPLAYER;
 
-typedef enum tagBATTLESPRITETYPE {
+typedef enum tagBATTLESPRITETYPE
+{
     kBattleSpriteTypeNone,
     kBattleSpriteTypeEnemy,
     kBattleSpriteTypePlayer,
     kBattleSpriteTypeMagic,
 } BATTLESPRITETYPE;
 
-typedef struct tagBATTLESPRITESEQ {
+typedef struct tagBATTLESPRITESEQ
+{
     unsigned short wType;
     unsigned short wObjectIndex;
     unsigned int pos;
@@ -122,24 +130,28 @@ typedef struct tagBATTLESPRITESEQ {
     int fHaveColorShift;
 } BATTLESPRITESEQ;
 
-typedef struct tagSUMMON {
+typedef struct tagSUMMON
+{
     unsigned char *lpSprite;
     unsigned short wCurrentFrame;
 } SUMMON;
 
-typedef enum tabBATTLEPHASE {
+typedef enum tabBATTLEPHASE
+{
     kBattlePhaseSelectAction,
     kBattlePhasePerformAction
 } BATTLEPHASE;
 
-typedef struct tagACTIONQUEUE {
+typedef struct tagACTIONQUEUE
+{
     int fIsEnemy;
     unsigned short wDexterity;
     unsigned short wIndex;
     int fIsSecond;
 } ACTIONQUEUE;
 
-typedef struct tagBATTLE {
+typedef struct tagBATTLE
+{
     BATTLEPLAYER rgPlayer[MAX_PLAYERS_IN_PARTY];
     BATTLEENEMY rgEnemy[MAX_ENEMIES_IN_TEAM];
 
