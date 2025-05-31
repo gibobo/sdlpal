@@ -59,7 +59,7 @@ PAL_MagicSelectionMenuUpdate(
 
 --*/
 {
-    int i, j, k, line, item_delta;
+    int i, j, k, line, item_delta = 0;
     unsigned char bColor;
     unsigned short wScript;
     const int iItemsPerLine = 32 / 10;
@@ -72,49 +72,32 @@ PAL_MagicSelectionMenuUpdate(
     //
     // Check for inputs
     //
-    if (PAL_GetKeyInput() & kKeyUp)
-    {
-        item_delta = -iItemsPerLine;
-    }
-    else if (PAL_GetKeyInput() & kKeyDown)
-    {
-        item_delta = iItemsPerLine;
-    }
-    else if (PAL_GetKeyInput() & kKeyLeft)
-    {
-        item_delta = -1;
-    }
-    else if (PAL_GetKeyInput() & kKeyRight)
-    {
-        item_delta = 1;
-    }
-    else if (PAL_GetKeyInput() & kKeyPgUp)
-    {
-        item_delta = -(iItemsPerLine * iLinesPerPage);
-    }
-    else if (PAL_GetKeyInput() & kKeyPgDn)
-    {
-        item_delta = iItemsPerLine * iLinesPerPage;
-    }
-    else if (PAL_GetKeyInput() & kKeyHome)
-    {
-        item_delta = -g_iCurrentItem;
-    }
-    else if (PAL_GetKeyInput() & kKeyEnd)
-    {
-        item_delta = g_iNumMagic - g_iCurrentItem - 1;
-    }
-    else if (PAL_GetKeyInput() & kKeyMenu)
-    {
+    if (PAL_GetKeyInput() & kKeyMenu)
         return 0;
-    }
-    else
-    {
-        item_delta = 0;
-    }
+    else if (PAL_GetKeyInput() & kKeyUp)
+        item_delta = -iItemsPerLine;
+    else if (PAL_GetKeyInput() & kKeyDown)
+        item_delta = iItemsPerLine;
+    else if (PAL_GetKeyInput() & kKeyLeft)
+        item_delta = -1;
+    else if (PAL_GetKeyInput() & kKeyRight)
+        item_delta = 1;
+    else if (PAL_GetKeyInput() & kKeyPgUp)
+        item_delta = -(iItemsPerLine * iLinesPerPage);
+    else if (PAL_GetKeyInput() & kKeyPgDn)
+        item_delta = iItemsPerLine * iLinesPerPage;
+    else if (PAL_GetKeyInput() & kKeyHome)
+        item_delta = -g_iCurrentItem;
+    else if (PAL_GetKeyInput() & kKeyEnd)
+        item_delta = g_iNumMagic - g_iCurrentItem - 1;
 
     // Make sure the current menu item index is in bound
-    g_iCurrentItem = min(max(g_iCurrentItem + item_delta, 0), g_iNumMagic - 1);
+    if (g_iCurrentItem + item_delta < 0)
+        g_iCurrentItem = g_iNumMagic - 1;
+    else if (g_iCurrentItem + item_delta >= g_iNumMagic)
+        g_iCurrentItem = 0;
+    else
+        g_iCurrentItem = g_iCurrentItem + item_delta;
 
     //
     // Create the box.

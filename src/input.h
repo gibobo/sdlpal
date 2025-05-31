@@ -73,7 +73,7 @@ void PAL_SetDirInput(const PALDIRECTION dir);
 
 PALDIRECTION PAL_GetDirInput(void);
 
-void PAL_KeyDown(PALKEY key, int fRepeat);
+void PAL_KeyDown(PALKEY key);
 
 void PAL_KeyUp(PALKEY key);
 

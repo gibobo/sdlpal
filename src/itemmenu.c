@@ -53,7 +53,7 @@ PAL_ItemSelectMenuUpdate(
 
 --*/
 {
-    int i, j, k, line, item_delta;
+    int i, j, k, line, item_delta = 0;
     unsigned short wObject, wScript;
     unsigned char bColor;
     static unsigned char bufImage[2048];
@@ -70,51 +70,32 @@ PAL_ItemSelectMenuUpdate(
     //
     // Process input
     //
-    if (PAL_GetKeyInput() & kKeyUp)
-    {
-        item_delta = -iItemsPerLine;
-    }
-    else if (PAL_GetKeyInput() & kKeyDown)
-    {
-        item_delta = iItemsPerLine;
-    }
-    else if (PAL_GetKeyInput() & kKeyLeft)
-    {
-        item_delta = -1;
-    }
-    else if (PAL_GetKeyInput() & kKeyRight)
-    {
-        item_delta = 1;
-    }
-    else if (PAL_GetKeyInput() & kKeyPgUp)
-    {
-        item_delta = -(iItemsPerLine * iLinesPerPage);
-    }
-    else if (PAL_GetKeyInput() & kKeyPgDn)
-    {
-        item_delta = iItemsPerLine * iLinesPerPage;
-    }
-    else if (PAL_GetKeyInput() & kKeyHome)
-    {
-        item_delta = -gpGlobals->iCurInvMenuItem;
-    }
-    else if (PAL_GetKeyInput() & kKeyEnd)
-    {
-        item_delta = g_iNumInventory - gpGlobals->iCurInvMenuItem - 1;
-    }
-    else if (PAL_GetKeyInput() & kKeyMenu)
-    {
+    if (PAL_GetKeyInput() & kKeyMenu)
         return 0;
-    }
-    else
-    {
-        item_delta = 0;
-    }
+    else if (PAL_GetKeyInput() & kKeyUp)
+        item_delta = -iItemsPerLine;
+    else if (PAL_GetKeyInput() & kKeyDown)
+        item_delta = iItemsPerLine;
+    else if (PAL_GetKeyInput() & kKeyLeft)
+        item_delta = -1;
+    else if (PAL_GetKeyInput() & kKeyRight)
+        item_delta = 1;
+    else if (PAL_GetKeyInput() & kKeyPgUp)
+        item_delta = -(iItemsPerLine * iLinesPerPage);
+    else if (PAL_GetKeyInput() & kKeyPgDn)
+        item_delta = iItemsPerLine * iLinesPerPage;
+    else if (PAL_GetKeyInput() & kKeyHome)
+        item_delta = -gpGlobals->iCurInvMenuItem;
+    else if (PAL_GetKeyInput() & kKeyEnd)
+        item_delta = g_iNumInventory - gpGlobals->iCurInvMenuItem - 1;
 
-    //
     // Make sure the current menu item index is in bound
-    //
-    gpGlobals->iCurInvMenuItem = min(max(gpGlobals->iCurInvMenuItem + item_delta, 0), g_iNumInventory - 1);
+    if (gpGlobals->iCurInvMenuItem + item_delta < 0)
+        gpGlobals->iCurInvMenuItem = g_iNumInventory - 1;
+    else if (gpGlobals->iCurInvMenuItem + item_delta >= g_iNumInventory)
+        gpGlobals->iCurInvMenuItem = 0;
+    else
+        gpGlobals->iCurInvMenuItem += item_delta;
 
     //
     // Redraw the box

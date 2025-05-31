@@ -9,8 +9,6 @@
 struct mg_connection *ws_conn = NULL;
 struct mg_connection *nc = NULL;
 struct mg_mgr mgr;
-static long rgdwKeyLastTime[20] = {0};
-static unsigned long least_passed = 0;
 extern unsigned char *send_frame;
 
 extern void DRIVER_UpdatePalette(const unsigned char *rgPalette);
@@ -68,16 +66,9 @@ void handle_input(const char *data, size_t len)
         return;
 
     if (data[0] == '0')
-    {
-        PAL_KeyDown(1 << i, rgdwKeyLastTime[i]);
-        rgdwKeyLastTime[i] = UTIL_GetTicks();
-        least_passed = rgdwKeyLastTime[i]; // Update least passed time
-    }
+        PAL_KeyDown(1 << i);
     else
-    {
         PAL_KeyUp(1 << i);
-        rgdwKeyLastTime[i] = 0;
-    }
 }
 
 void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
@@ -128,7 +119,6 @@ int DRIVER_Init_Event(void)
         return -1;
     }
     fprintf(stdout, "Starting web server on port 8000\n");
-    memset(rgdwKeyLastTime, 0, sizeof(rgdwKeyLastTime));
     return 0;
 }
 

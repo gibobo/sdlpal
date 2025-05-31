@@ -6,8 +6,6 @@
 #include <string.h>
 
 extern caca_display_t *dp;
-static unsigned char *rgdwKeyLastTime = NULL;
-static unsigned char rgdwKeyCount = 0;
 static unsigned int counter = 0; // Event index
 static const int g_KeyMap[][2] = {
     {CACA_KEY_UP, kKeyUp},
@@ -63,20 +61,14 @@ int DRIVER_Process_Events(void)
                     res = -1;
                     break;
                 }
-                for (i = 0; i < rgdwKeyCount; i++)
+                for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++)
                 {
                     if (g_KeyMap[i][0] == key)
                     {
                         if (event == CACA_EVENT_KEY_PRESS)
-                        {
-                            PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
-                            rgdwKeyLastTime[i] = 0xFF;
-                        }
+                            PAL_KeyDown(g_KeyMap[i][1]);
                         else
-                        {
                             PAL_KeyUp(g_KeyMap[i][1]);
-                            rgdwKeyLastTime[i] = 0;
-                        }
                         break;
                     }
                 }
@@ -91,13 +83,9 @@ int DRIVER_Process_Events(void)
 
 int DRIVER_Init_Event(void)
 {
-    rgdwKeyCount = sizeof(g_KeyMap) / sizeof(g_KeyMap[0]);
-    rgdwKeyLastTime = (unsigned char *)calloc(rgdwKeyCount, sizeof(unsigned char));
     return 0;
 }
 
 void DRIVER_DeInit_Event(void)
 {
-    free(rgdwKeyLastTime);
-    rgdwKeyLastTime = NULL;
 }

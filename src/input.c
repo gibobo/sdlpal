@@ -38,20 +38,20 @@ static int PAL_GetCurrDirection(void)
 
 --*/
 {
-   PALDIRECTION i;
-   PALDIRECTION iCurrDir = kDirSouth;
+    PALDIRECTION i;
+    PALDIRECTION iCurrDir = kDirSouth;
 
-   for (i = kDirSouth; i != kDirUnknown; i++)
-      if (g_InputState.dwKeyOrder[iCurrDir] < g_InputState.dwKeyOrder[i])
-         iCurrDir = i;
+    for (i = kDirSouth; i != kDirUnknown; i++)
+        if (g_InputState.dwKeyOrder[iCurrDir] < g_InputState.dwKeyOrder[i])
+            iCurrDir = i;
 
-   if (g_InputState.dwKeyOrder[iCurrDir] == 0)
-      iCurrDir = kDirUnknown;
+    if (g_InputState.dwKeyOrder[iCurrDir] == 0)
+        iCurrDir = kDirUnknown;
 
-   return iCurrDir;
+    return iCurrDir;
 }
 
-void PAL_KeyDown(PALKEY key, int fRepeat)
+void PAL_KeyDown(PALKEY key)
 /*++
   Purpose:
     Called when user pressed a key.
@@ -64,27 +64,25 @@ void PAL_KeyDown(PALKEY key, int fRepeat)
 
 --*/
 {
-   PALDIRECTION iCurrDir = kDirUnknown;
+    PALDIRECTION iCurrDir = kDirUnknown;
+    if (key & kKeyDown)
+        iCurrDir = kDirSouth;
+    else if (key & kKeyLeft)
+        iCurrDir = kDirWest;
+    else if (key & kKeyUp)
+        iCurrDir = kDirNorth;
+    else if (key & kKeyRight)
+        iCurrDir = kDirEast;
+    g_InputState.dwKeyPress |= key;
 
-   if (!fRepeat) {
-      if (key & kKeyDown) {
-         iCurrDir = kDirSouth;
-      } else if (key & kKeyLeft) {
-         iCurrDir = kDirWest;
-      } else if (key & kKeyUp) {
-         iCurrDir = kDirNorth;
-      } else if (key & kKeyRight) {
-         iCurrDir = kDirEast;
-      }
-
-      if (iCurrDir != kDirUnknown) {
-         g_InputState.dwKeyMaxCount++;
-         g_InputState.dwKeyOrder[iCurrDir] = g_InputState.dwKeyMaxCount;
-         g_InputState.dir = PAL_GetCurrDirection();
-      }
-   }
-
-   g_InputState.dwKeyPress |= key;
+    if (iCurrDir != kDirUnknown)
+    {
+        if (g_InputState.dwKeyOrder[iCurrDir] == 0 || g_InputState.dwKeyOrder[iCurrDir] != g_InputState.dwKeyMaxCount)
+        {
+            g_InputState.dwKeyOrder[iCurrDir] = ++g_InputState.dwKeyMaxCount;
+            g_InputState.dir = PAL_GetCurrDirection();
+        }
+    }
 }
 
 void PAL_KeyUp(PALKEY key)
@@ -100,24 +98,23 @@ void PAL_KeyUp(PALKEY key)
 
 --*/
 {
-   int iCurrDir = kDirUnknown;
+    int iCurrDir = kDirUnknown;
+    if (key & kKeyDown)
+        iCurrDir = kDirSouth;
+    else if (key & kKeyLeft)
+        iCurrDir = kDirWest;
+    else if (key & kKeyUp)
+        iCurrDir = kDirNorth;
+    else if (key & kKeyRight)
+        iCurrDir = kDirEast;
 
-   if (key & kKeyDown) {
-      iCurrDir = kDirSouth;
-   } else if (key & kKeyLeft) {
-      iCurrDir = kDirWest;
-   } else if (key & kKeyUp) {
-      iCurrDir = kDirNorth;
-   } else if (key & kKeyRight) {
-      iCurrDir = kDirEast;
-   }
-
-   if (iCurrDir != kDirUnknown) {
-      g_InputState.dwKeyOrder[iCurrDir] = 0;
-      iCurrDir = PAL_GetCurrDirection();
-      g_InputState.dwKeyMaxCount = (iCurrDir == kDirUnknown) ? 0 : g_InputState.dwKeyOrder[iCurrDir];
-      g_InputState.dir = iCurrDir;
-   }
+    if (iCurrDir != kDirUnknown)
+    {
+        g_InputState.dwKeyOrder[iCurrDir] = 0;
+        iCurrDir = PAL_GetCurrDirection();
+        g_InputState.dwKeyMaxCount = (iCurrDir == kDirUnknown) ? 0 : g_InputState.dwKeyOrder[iCurrDir];
+        g_InputState.dir = iCurrDir;
+    }
 }
 
 void PAL_ClearKeyState(void)
@@ -133,7 +130,7 @@ void PAL_ClearKeyState(void)
 
 --*/
 {
-   g_InputState.dwKeyPress = kKeyNone;
+    g_InputState.dwKeyPress = kKeyNone;
 }
 
 void PAL_InitInput(void)
@@ -149,8 +146,8 @@ void PAL_InitInput(void)
 
 --*/
 {
-   memset((void *)&g_InputState, 0, sizeof(g_InputState));
-   g_InputState.dir = kDirUnknown;
+    memset((void *)&g_InputState, 0, sizeof(g_InputState));
+    g_InputState.dir = kDirUnknown;
 }
 
 void PAL_ShutdownInput(void)
@@ -181,22 +178,26 @@ void PAL_ProcessEvent(void)
 
 --*/
 {
-  if (DRIVER_Process_Events() == -1)
-    PAL_Shutdown(0);
+    if (DRIVER_Process_Events() == -1)
+        PAL_Shutdown(0);
 }
 
-void PAL_SetKeyInput(const PALKEY key) {
-  g_InputState.dwKeyPress = key;
+void PAL_SetKeyInput(const PALKEY key)
+{
+    g_InputState.dwKeyPress = key;
 }
 
-PALKEY PAL_GetKeyInput(void) {
-  return g_InputState.dwKeyPress;
+PALKEY PAL_GetKeyInput(void)
+{
+    return g_InputState.dwKeyPress;
 }
 
-void PAL_SetDirInput(const PALDIRECTION dir) {
-  g_InputState.dir = dir;
+void PAL_SetDirInput(const PALDIRECTION dir)
+{
+    g_InputState.dir = dir;
 }
 
-PALDIRECTION PAL_GetDirInput(void) {
-  return g_InputState.dir;
+PALDIRECTION PAL_GetDirInput(void)
+{
+    return g_InputState.dir;
 }

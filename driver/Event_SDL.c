@@ -50,10 +50,9 @@ extern void DRIVER_FrameResize(unsigned int width, unsigned int height);
 
 static void SDL_UpdateKeyboardState(SDL_Keycode key)
 {
-    static unsigned int rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
+    static unsigned char rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
     const unsigned char *keyState = (const unsigned char *)SDL_GetKeyboardState(NULL);
-    int i;
-    unsigned int dwCurrentTime = UTIL_GetTicks();
+    unsigned char i;
 
     for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++)
     {
@@ -62,15 +61,15 @@ static void SDL_UpdateKeyboardState(SDL_Keycode key)
 
         if (keyPress == SDL_PRESSED)
         {
-            if (dwCurrentTime > rgdwKeyLastTime[i])
+            if (rgdwKeyLastTime[i] == 0)
             {
-                PAL_KeyDown(g_KeyMap[i][1], (rgdwKeyLastTime[i] != 0));
-                rgdwKeyLastTime[i] = 0xFFFFFFFF;
+                PAL_KeyDown(g_KeyMap[i][1]);
+                rgdwKeyLastTime[i] = 0xFF;
             }
         }
         else
         {
-            if (rgdwKeyLastTime[i] > 0)
+            if (rgdwKeyLastTime[i])
                 PAL_KeyUp(g_KeyMap[i][1]);
             rgdwKeyLastTime[i] = 0;
         }
