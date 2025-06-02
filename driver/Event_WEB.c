@@ -9,66 +9,77 @@
 struct mg_connection *ws_conn = NULL;
 struct mg_connection *nc = NULL;
 struct mg_mgr mgr;
-extern unsigned char *send_frame;
 
 extern void DRIVER_UpdatePalette(const unsigned char *rgPalette);
+extern void send_video_frame(void);
 extern void send_audio_config();
-extern void generate_audio(void);
-extern void clear_audio(void);
-
-unsigned char KeyCompare(const char *Key1, const size_t Key1_len, const char *Key2)
+extern void send_audio_data(void);
+typedef struct
 {
-    return (strlen(Key2) == Key1_len - 1) && (strstr(Key1 + 1, Key2) != NULL);
+    const char *name;
+    PALKEY keycode;
+} KeyMapEntry;
+
+static const KeyMapEntry key_map[] = {
+    {"Escape", kKeyMenu},
+    {"Insert", kKeyMenu},
+    {"Alt", kKeyMenu},
+    {"0", kKeyMenu},
+    {"Enter", kKeySearch},
+    {" ", kKeySearch},
+    {"ArrowDown", kKeyDown},
+    {"2", kKeyDown},
+    {"ArrowLeft", kKeyLeft},
+    {"4", kKeyLeft},
+    {"ArrowUp", kKeyUp},
+    {"8", kKeyUp},
+    {"ArrowRight", kKeyRight},
+    {"6", kKeyRight},
+    {"PageUp", kKeyPgUp},
+    {"9", kKeyPgUp},
+    {"PageDown", kKeyPgDn},
+    {"3", kKeyPgDn},
+    {"r", kKeyRepeat},
+    {"R", kKeyRepeat},
+    {"a", kKeyAuto},
+    {"A", kKeyAuto},
+    {"d", kKeyDefend},
+    {"D", kKeyDefend},
+    {"e", kKeyUseItem},
+    {"E", kKeyUseItem},
+    {"w", kKeyThrowItem},
+    {"W", kKeyThrowItem},
+    {"q", kKeyFlee},
+    {"Q", kKeyFlee},
+    {"s", kKeyStatus},
+    {"S", kKeyStatus},
+    {"f", kKeyForce},
+    {"F", kKeyForce},
+    {"Home", kKeyHome},
+    {"7", kKeyHome},
+    {"End", kKeyEnd},
+    {"1", kKeyEnd},
+};
+
+static int match_key(const char *data, size_t len, const char *key)
+{
+    size_t key_len = strlen(key);
+    return (len == key_len + 1) && (strncmp(data + 1, key, key_len) == 0);
 }
 
 void handle_input(const char *data, size_t len)
 {
-    int Key = 0;
-    unsigned char i = 0xff; // Default to invalid key
-    if (KeyCompare(data, len, "Escape") || KeyCompare(data, len, "Insert") || KeyCompare(data, len, "Alt") || KeyCompare(data, len, "0"))
-        Key = kKeyMenu, i = 0;
-    else if (KeyCompare(data, len, "Enter") || KeyCompare(data, len, " "))
-        Key = kKeySearch, i = 1;
-    else if (KeyCompare(data, len, "ArrowDown") || KeyCompare(data, len, "2"))
-        Key = kKeyDown, i = 2;
-    else if (KeyCompare(data, len, "ArrowLeft") || KeyCompare(data, len, "4"))
-        Key = kKeyLeft, i = 3;
-    else if (KeyCompare(data, len, "ArrowUp") || KeyCompare(data, len, "8"))
-        Key = kKeyUp, i = 4;
-    else if (KeyCompare(data, len, "ArrowRight") || KeyCompare(data, len, "6"))
-        Key = kKeyRight, i = 5;
-    else if (KeyCompare(data, len, "PageUp") || KeyCompare(data, len, "9"))
-        Key = kKeyPgUp, i = 6;
-    else if (KeyCompare(data, len, "PageDown") || KeyCompare(data, len, "3"))
-        Key = kKeyPgDn, i = 7;
-    else if (KeyCompare(data, len, "r") || KeyCompare(data, len, "R"))
-        Key = kKeyRepeat, i = 8;
-    else if (KeyCompare(data, len, "a") || KeyCompare(data, len, "A"))
-        Key = kKeyAuto, i = 9;
-    else if (KeyCompare(data, len, "d") || KeyCompare(data, len, "D"))
-        Key = kKeyDefend, i = 10;
-    else if (KeyCompare(data, len, "e") || KeyCompare(data, len, "E"))
-        Key = kKeyUseItem, i = 11;
-    else if (KeyCompare(data, len, "w") || KeyCompare(data, len, "W"))
-        Key = kKeyThrowItem, i = 12;
-    else if (KeyCompare(data, len, "q") || KeyCompare(data, len, "Q"))
-        Key = kKeyFlee, i = 13;
-    else if (KeyCompare(data, len, "s") || KeyCompare(data, len, "S"))
-        Key = kKeyStatus, i = 14;
-    else if (KeyCompare(data, len, "f") || KeyCompare(data, len, "F"))
-        Key = kKeyForce, i = 15;
-    else if (KeyCompare(data, len, "Home") || KeyCompare(data, len, "7"))
-        Key = kKeyHome, i = 16;
-    else if (KeyCompare(data, len, "End") || KeyCompare(data, len, "1"))
-        Key = kKeyEnd, i = 17;
-    // printf("Received key %d: %s\n", keyType - '0', keyCode);
-    if (i == 0xff)
-        return;
-
-    if (data[0] == '0')
-        PAL_KeyDown(1 << i);
-    else
-        PAL_KeyUp(1 << i);
+    for (size_t i = 0; i < sizeof(key_map) / sizeof(key_map[0]); ++i)
+    {
+        if (match_key(data, len, key_map[i].name))
+        {
+            if (data[0] == '0')
+                PAL_KeyDown(key_map[i].keycode);
+            else
+                PAL_KeyUp(key_map[i].keycode);
+            return;
+        }
+    }
 }
 
 void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
@@ -129,32 +140,27 @@ void DRIVER_DeInit_Event(void)
 
 int DRIVER_Process_Events(void)
 {
-    static unsigned long video_trigger_ticks = 0;
-    static unsigned long audio_trigger_ticks = 0;
-    static unsigned long input_trigger_ticks = 0;
-    unsigned long current_time = UTIL_GetTicks();
-#define TRIGGER_TIME(tm) (tm * ((current_time / tm) + 1U)) // Helper macro to adjust trigger time
+    static unsigned long video_trigger_ticks = 0, audio_trigger_ticks = 0;
+    unsigned long current_time;
 
     while (ws_conn == NULL) // Wait for WebSocket connection to be established
     {
-        clear_audio();
         mg_mgr_poll(&mgr, 1000);
     }
 
-    if (current_time >= video_trigger_ticks) // Poll the event manager every 50 milliseconds
+    current_time = UTIL_GetTicks();
+#define TRIGGER_TIME(tm) (tm * ((current_time / tm) + 1U)) // Helper macro to adjust trigger time
+    if (current_time >= video_trigger_ticks)               // Poll the event manager every 50 milliseconds
     {
-        if (ws_conn != NULL && send_frame != NULL)
-        {
-            mg_ws_send(ws_conn, send_frame, 9 + SCREEN_SIZE, WEBSOCKET_OP_BINARY); // Send the video frame over WebSocket
-            mg_mgr_poll(&mgr, 0);                                                  // Poll the event manager for events
-        }
+        send_video_frame();                     // Generate and send video frame
+        mg_mgr_poll(&mgr, 0);                   // Poll the event manager for events
         video_trigger_ticks = TRIGGER_TIME(50); // Adjust the tick interval based on video settings
     }
     if (current_time >= audio_trigger_ticks) // Poll the event manager every 10 milliseconds
     {
-        generate_audio();                       // Generate audio data
+        send_audio_data();                      // Send audio data if available
         mg_mgr_poll(&mgr, 0);                   // Poll the event manager for events
-        input_trigger_ticks = TRIGGER_TIME(10); // Adjust the tick interval based on audio settings
+        audio_trigger_ticks = TRIGGER_TIME(10); // Adjust the tick interval based on audio settings
     }
 #undef TRIGGER_TIME
     return 0;

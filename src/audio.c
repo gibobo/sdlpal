@@ -37,7 +37,8 @@
 #endif
 #define PAL_MAX_VOLUME 100
 
-typedef struct tagAUDIODEVICE {
+typedef struct tagAUDIODEVICE
+{
     AUDIOPLAYER *pMusPlayer;
     AUDIOPLAYER *pSoundPlayer;
     void *pSoundBuffer; /* The output buffer for sound */
@@ -49,8 +50,10 @@ typedef struct tagAUDIODEVICE {
 
 static AUDIODEVICE gAudioDevice;
 
-PAL_FORCE_INLINE void AUDIO_MixNative(short *dst, short *src, int samples) {
-    while (samples > 0) {
+PAL_FORCE_INLINE void AUDIO_MixNative(short *dst, short *src, unsigned int samples)
+{
+    while (samples--)
+    {
         int val = *src++ + *dst;
         if (val > SHRT_MAX)
             *dst++ = SHRT_MAX;
@@ -58,26 +61,28 @@ PAL_FORCE_INLINE void AUDIO_MixNative(short *dst, short *src, int samples) {
             *dst++ = SHRT_MIN;
         else
             *dst++ = (short)val;
-        samples--;
     }
 }
 
-void AUDIO_FillBuffer(void *stream, unsigned int len) {
-    if(gAudioDevice.fOpened == false)
+void AUDIO_FillBuffer(void *stream, unsigned int len)
+{
+    if (gAudioDevice.fOpened == false)
         return;
 
     // Play music
-    if (gAudioDevice.fMusicEnabled && gAudioDevice.pMusPlayer) {
+    if (gAudioDevice.fMusicEnabled && gAudioDevice.pMusPlayer)
+    {
         gAudioDevice.pMusPlayer->FillBuffer(gAudioDevice.pMusPlayer, stream, len);
     }
 
     // Play sound
-    if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer && gAudioDevice.pSoundBuffer) {
+    if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer && gAudioDevice.pSoundBuffer)
+    {
         memset(gAudioDevice.pSoundBuffer, 0, len);
         gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, len);
 
         // Mix sound & music
-        AUDIO_MixNative((short *)stream, (short *)gAudioDevice.pSoundBuffer, len >> 1);
+        AUDIO_MixNative(stream, gAudioDevice.pSoundBuffer, len >> 1);
     }
 }
 
@@ -97,12 +102,10 @@ int AUDIO_OpenDevice(void)
 
 --*/
 {
-    if (gAudioDevice.fOpened) {
-        return -1;  // Already opened
-    }
+    if (gAudioDevice.fOpened == true)
+        return -1; // Already opened
 
     memset(&gAudioDevice, 0, sizeof(AUDIODEVICE));
-    gAudioDevice.fOpened = false;
 #if 1
     // Initialize the music subsystem.
     gAudioDevice.pMusPlayer = RIX_Init();
@@ -134,22 +137,19 @@ void AUDIO_CloseDevice(void)
 
 --*/
 {
-    if (gAudioDevice.pSoundPlayer != NULL) {
+    if (gAudioDevice.fOpened == false)
+        return;
+
+    if (gAudioDevice.pSoundPlayer != NULL)
         gAudioDevice.pSoundPlayer->Shutdown(gAudioDevice.pSoundPlayer);
-        gAudioDevice.pSoundPlayer = NULL;
-    }
 
-    if (gAudioDevice.pMusPlayer) {
+    if (gAudioDevice.pMusPlayer)
         gAudioDevice.pMusPlayer->Shutdown(gAudioDevice.pMusPlayer);
-        gAudioDevice.pMusPlayer = NULL;
-    }
 
-    if (gAudioDevice.pSoundBuffer != NULL) {
+    if (gAudioDevice.pSoundBuffer != NULL)
         UTIL_free(gAudioDevice.pSoundBuffer);
-        gAudioDevice.pSoundBuffer = NULL;
-    }
 
-    gAudioDevice.fOpened = false;
+    memset(&gAudioDevice, 0, sizeof(AUDIODEVICE));
 }
 
 void AUDIO_PlaySound(int iSoundNum)
@@ -172,31 +172,38 @@ void AUDIO_PlaySound(int iSoundNum)
     // load the entire sound file at once, which may cause about 0.5s or longer
     // latency for large sound files. To prevent this latency affects audio playing,
     // the mutex lock is obtained inside the SOUND_Play function rather than here.
-    if (gAudioDevice.pSoundPlayer) {
+    if (gAudioDevice.pSoundPlayer)
+    {
         gAudioDevice.pSoundPlayer->Play(gAudioDevice.pSoundPlayer, abs(iSoundNum), false, 0.0f);
     }
 }
 
-void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime) {
-    if (gAudioDevice.pMusPlayer) {
+void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime)
+{
+    if (gAudioDevice.pMusPlayer)
+    {
         DRIVER_Audio_Lock();
         gAudioDevice.pMusPlayer->Play(gAudioDevice.pMusPlayer, iNumRIX, fLoop, flFadeTime);
         DRIVER_Audio_Unlock();
     }
 }
 
-void AUDIO_EnableMusic(int fEnable) {
-  gAudioDevice.fMusicEnabled = fEnable;
+void AUDIO_EnableMusic(int fEnable)
+{
+    gAudioDevice.fMusicEnabled = fEnable;
 }
 
-int AUDIO_MusicEnabled(void) {
+int AUDIO_MusicEnabled(void)
+{
     return gAudioDevice.fMusicEnabled;
 }
 
-void AUDIO_EnableSound(int fEnable) {
+void AUDIO_EnableSound(int fEnable)
+{
     gAudioDevice.fSoundEnabled = fEnable;
 }
 
-int AUDIO_SoundEnabled(void) {
+int AUDIO_SoundEnabled(void)
+{
     return gAudioDevice.fSoundEnabled;
 }

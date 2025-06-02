@@ -5,23 +5,23 @@
     <meta charset="UTF-8">
     <title>PAL</title>
     <style>
-        body,
-        html {
+        html,
+        body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
             width: 100vw;
             height: 100vh;
             background: #000;
             display: flex;
             justify-content: center;
-            align-items: center
+            align-items: center;
+            overflow: hidden;
         }
 
         canvas {
-            object-fit: contain;
             aspect-ratio: 320/200;
-            image-rendering: pixelated
+            image-rendering: pixelated;
+            object-fit: contain;
         }
     </style>
 </head>
@@ -36,10 +36,7 @@
 
         let audioCtx, palette, audioConfig = { sampleRate: 44100, channels: 2, bitsPerSample: 16 };
         const audioQueue = [];
-        let currentPlayingSource = null;
-        let nextScheduledTime = 0;
-        let userInteracted = false;
-        const MAX_QUEUE_LENGTH = 1;
+        let currentPlayingSource = null, nextScheduledTime = 0;
 
         function resizeCanvas() {
             const ratio = 320 / 200;
@@ -48,107 +45,89 @@
             else h = w / ratio;
             canvas.style.width = w + 'px';
             canvas.style.height = h + 'px';
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(h * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // 重設變形
+            ctx.imageSmoothingEnabled = true;   // 關閉平滑，保留像素風格
         }
-
         resizeCanvas();
         addEventListener('resize', resizeCanvas);
 
         function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (AudioContext || webkitAudioContext)({ sampleRate: audioConfig.sampleRate });
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
-
-        function initAudioOnUserInteraction() {
-            if (!userInteracted) {
-                userInteracted = true;
-                initAudio();
-                scheduleNextBuffer();
-            }
+            if (!audioCtx) audioCtx = new (AudioContext || webkitAudioContext)({ sampleRate: audioConfig.sampleRate });
+            if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
         function scheduleNextBuffer() {
-            if (!audioQueue.length || !userInteracted || !audioCtx) return;
-
+            if (!audioQueue.length || !audioCtx) return;
             const { buffer } = audioQueue.shift();
             const source = audioCtx.createBufferSource();
             source.buffer = buffer;
             source.connect(audioCtx.destination);
-
-            const currentTime = audioCtx.currentTime;
-            const startTime = Math.max(currentTime + 0.01, nextScheduledTime);
+            const startTime = Math.max(audioCtx.currentTime + 0.01, nextScheduledTime);
             nextScheduledTime = startTime + buffer.duration;
-
             source.onended = () => {
                 if (currentPlayingSource === source) currentPlayingSource = null;
                 scheduleNextBuffer();
             };
-
             currentPlayingSource = source;
             source.start(startTime);
-
-            if (audioQueue.length > 0) {
-                const scheduleDelay = Math.max(10, (startTime - currentTime) * 1000 * 0.8);
-                setTimeout(() => {
-                    if (audioQueue.length > 0) {
-                        scheduleNextBuffer();
-                    }
-                }, scheduleDelay);
-            }
+            if (audioQueue.length) setTimeout(scheduleNextBuffer, 10);
         }
 
-        ws.onopen = () => ws.send("request_palette");
+        window.addEventListener('DOMContentLoaded', initAudio);
 
-        ws.onmessage = async function (event) {
+        ws.onmessage = async event => {
             const data = new Uint8Array(await event.data.arrayBuffer());
-
-            if (data[0] === 2) { // 調色盤數據
+            if (data[0] === 2) {
                 palette = data.slice(1);
-            } else if (data[0] === 0 && palette) { // 影像數據
-                canvas.width = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
-                canvas.height = (data[5] << 24) | (data[6] << 16) | (data[7] << 8) | data[8];
-                const imageData = ctx.createImageData(canvas.width, canvas.height);
-                const pixels = imageData.data;
-                const indices = data.slice(9);
+            } else if (data[0] === 0 && palette) {
+                const gameWidth = (data[1] << 8) | data[2];
+                const gameHeight = (data[3] << 8) | data[4];
+                const imageData = ctx.createImageData(gameWidth, gameHeight);
+                const pixels = imageData.data, indices = data.slice(5);
                 for (let i = 0; i < indices.length; i++) {
-                    const idx = indices[i] * 3;
-                    const pixelIdx = i * 4;
-                    pixels[pixelIdx] = palette[idx];
-                    pixels[pixelIdx + 1] = palette[idx + 1];
-                    pixels[pixelIdx + 2] = palette[idx + 2];
-                    pixels[pixelIdx + 3] = 255;
+                    const idx = indices[i] * 3, p = i * 4;
+                    pixels[p] = palette[idx];
+                    pixels[p + 1] = palette[idx + 1];
+                    pixels[p + 2] = palette[idx + 2];
+                    pixels[p + 3] = 255;
                 }
-                ctx.putImageData(imageData, 0, 0);
-            } else if (data[0] === 3) { // 音頻格式
-                const newConfig = {
-                    sampleRate: (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4],
-                    channels: (data[5] << 24) | (data[6] << 16) | (data[7] << 8) | data[8],
-                    bitsPerSample: (data[9] << 24) | (data[10] << 16) | (data[11] << 8) | data[12]
-                };
+                const dpr = window.devicePixelRatio || 1;
+                const offscreen = document.createElement('canvas');
+                offscreen.width = gameWidth;
+                offscreen.height = gameHeight;
+                offscreen.getContext('2d').putImageData(imageData, 0, 0);
 
-                if (newConfig !== audioConfig) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const scale = Math.min(canvas.width / gameWidth, canvas.height / gameHeight);
+                const dx = (canvas.width - gameWidth * scale) / 2;
+                const dy = (canvas.height - gameHeight * scale) / 2;
+                ctx.setTransform(scale, 0, 0, scale, dx, dy);
+                ctx.drawImage(offscreen, 0, 0);
+            } else if (data[0] === 3) {
+                const newConfig = {
+                    sampleRate: (data[1] << 8) | data[2],
+                    channels: data[3],
+                    bitsPerSample: data[4]
+                };
+                if (JSON.stringify(newConfig) !== JSON.stringify(audioConfig)) {
                     if (audioCtx) await audioCtx.close();
                     audioConfig = newConfig;
                     audioQueue.length = 0;
                     nextScheduledTime = 0;
-                    if (userInteracted) initAudio();
+                    initAudio();
                 }
-            } else if (data[0] === 1) { // 音頻數據
-                if (audioQueue.length > MAX_QUEUE_LENGTH) audioQueue.shift();
-
+            } else if (data[0] === 1) {
+                if (audioQueue.length > 1) audioQueue.shift();
                 const { sampleRate, channels, bitsPerSample } = audioConfig;
-                const audioDataSize = data.length - 1;
                 const bytesPerFrame = channels * (bitsPerSample / 8);
-                const sampleCount = Math.floor(audioDataSize / bytesPerFrame);
-
+                const sampleCount = Math.floor((data.length - 1) / bytesPerFrame);
                 if (sampleCount > 0) {
                     try {
                         if (!audioCtx) initAudio();
                         const audioBuffer = audioCtx.createBuffer(channels, sampleCount, sampleRate);
-
                         if (bitsPerSample === 16) {
                             const pcmData = new Int16Array(data.buffer.slice(1));
                             for (let ch = 0; ch < channels; ch++) {
@@ -166,31 +145,22 @@
                                 }
                             }
                         }
-
                         audioQueue.push({ buffer: audioBuffer });
-                        if (!currentPlayingSource && userInteracted) scheduleNextBuffer();
-                    } catch (e) {
-                        console.error("Audio buffer error:", e);
-                    }
+                        if (!currentPlayingSource) scheduleNextBuffer();
+                    } catch (e) { }
                 }
             }
         };
 
-        ['keypress', 'mousedown', 'touchstart'].forEach(e => addEventListener(e, initAudioOnUserInteraction, { once: true }));
-        // Handle key down event
-        document.addEventListener('keydown', function (event) {
-            if (!keysPressed.has(event.key)) {
-                keysPressed.add(event.key);
-                ws.send(`0${event.key}`);
-            }
+        document.addEventListener('keydown', e => {
+            if (keysPressed.has(e.key)) return;
+            keysPressed.add(e.key);
+            ws.send(`0${e.key}`);
         });
-
-        // Handle key up event
-        document.addEventListener('keyup', function (event) {
-            if (keysPressed.has(event.key)) {
-                keysPressed.delete(event.key);
-                ws.send(`1${event.key}`);
-            }
+        document.addEventListener('keyup', e => {
+            if (!keysPressed.has(e.key)) return;
+            keysPressed.delete(e.key);
+            ws.send(`1${e.key}`);
         });
     </script>
 </body>

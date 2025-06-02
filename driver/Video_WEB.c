@@ -11,7 +11,7 @@ extern struct mg_mgr mgr;
 
 unsigned char *DRIVER_FrameBuffer()
 {
-    return send_frame + 9;
+    return send_frame + 5;
 }
 
 void DRIVER_FrameShow(
@@ -66,18 +66,26 @@ void DRIVER_UpdatePalette(const unsigned char *rgPalette)
         res = mg_ws_send(ws_conn, send_palette, 1 + 256 * 3, WEBSOCKET_OP_BINARY);
 }
 
+void send_video_frame(void)
+{
+    if (ws_conn == NULL || send_frame == NULL)
+        return;
+
+    if (mg_ws_send(ws_conn, send_frame, 5 + SCREEN_SIZE, WEBSOCKET_OP_BINARY) == -1)
+    {
+        fprintf(stderr, "Failed to send video frame\n");
+        return;
+    }
+}
+
 int DRIVER_Init_Video(void)
 {
-    send_frame = (unsigned char *)UTIL_malloc(9 + SCREEN_SIZE);
+    send_frame = (unsigned char *)UTIL_malloc(5 + SCREEN_SIZE);
     send_frame[0] = 0;
-    send_frame[1] = (SCREEN_W >> 24) & 0xFF;
-    send_frame[2] = (SCREEN_W >> 16) & 0xFF;
-    send_frame[3] = (SCREEN_W >> 8) & 0xFF;
-    send_frame[4] = SCREEN_W & 0xFF;
-    send_frame[5] = (SCREEN_H >> 24) & 0xFF;
-    send_frame[6] = (SCREEN_H >> 16) & 0xFF;
-    send_frame[7] = (SCREEN_H >> 8) & 0xFF;
-    send_frame[8] = SCREEN_H & 0xFF;
+    send_frame[1] = (SCREEN_W >> 8) & 0xFF;
+    send_frame[2] = SCREEN_W & 0xFF;
+    send_frame[3] = (SCREEN_H >> 8) & 0xFF;
+    send_frame[4] = SCREEN_H & 0xFF;
 
     send_palette = (unsigned char *)UTIL_malloc(1 + 256 * 3);
     send_palette[0] = 2;
