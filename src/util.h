@@ -25,6 +25,10 @@
 #define RESOURCE_PATH "."
 #endif
 
+#ifndef CACHES_PATH
+#define CACHES_PATH "."
+#endif
+
 #ifndef SEEK_SET
 #define SEEK_SET 0
 #endif

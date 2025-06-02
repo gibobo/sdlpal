@@ -1,54 +1,72 @@
-cmake_minimum_required (VERSION 3.14)
+cmake_minimum_required(VERSION 3.14)
+
+# Project definition
 project(palgame C CXX)
 
+# Global properties
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-find_package(Threads REQUIRED)
-find_package(OpenGL REQUIRED)
-
+# Output directories
 if(UNIX)
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY             ${CMAKE_BINARY_DIR})
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 else()
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
-    add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG       ${CMAKE_BINARY_DIR})
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE     ${CMAKE_BINARY_DIR})
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${CMAKE_BINARY_DIR})
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
 endif()
 
-set (GLFW_DIR           external/glfw)
-set (WEBSERVER_DIR      external/mongoose)
-set (GAME_DIR           src)
-set (DRIVER_DIR         driver)
-set (RESOURCE_PATH      ${CMAKE_BINARY_DIR}/resource)
+# External and source directories
+set(GLFW_DIR        external/glfw)
+set(WEBSERVER_DIR   external/mongoose)
+set(GAME_DIR        src)
+set(DRIVER_DIR      driver)
+set(RESOURCE_PATH   ${CMAKE_BINARY_DIR}/resource)
+set(CACHES_PATH     ${CMAKE_BINARY_DIR}/caches)
 
+# Source files
 file(GLOB GAME_SOURCES
     ${GAME_DIR}/*.c
     ${GAME_DIR}/adplug/*.c
-    ${GAME_DIR}/sound/*.c)
+    ${GAME_DIR}/sound/*.c
+)
 
-set(SDL_SHARED              OFF CACHE BOOL "Build a shared version of the library" FORCE)
-set(SDL_TEST                OFF CACHE BOOL "Build the SDL2_test library" FORCE)
-set(SDL2_DISABLE_SDL2MAIN   ON  CACHE BOOL "Disable building/installation of SDL2main" FORCE)
+# Dependencies
+find_package(Threads REQUIRED)
+find_package(OpenGL REQUIRED)
+
+# SDL2 configuration
+set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
+set(SDL_TEST OFF CACHE BOOL "Build the SDL2_test library" FORCE)
+set(SDL2_DISABLE_SDL2MAIN ON CACHE BOOL "Disable building/installation of SDL2main" FORCE)
 add_subdirectory(external/SDL)
-set(GLFW_BUILD_DOCS         OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS        OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES     OFF CACHE BOOL "" FORCE)
+
+# GLFW configuration
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/glfw)
+
+# libcaca
 add_subdirectory(external/libcaca)
 
+# Definitions
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
+add_definitions(-DCACHES_PATH="${CACHES_PATH}")
 add_definitions(-DPAL_HAS_JOYSTICKS)
+# Include directories
+include_directories(
+    external
+    ${DRIVER_DIR}
+)
 
-include_directories(external)
-include_directories(${DRIVER_DIR})
-
-IF (WIN32)
+# Link libraries
+if(WIN32)
     link_libraries(${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 else()
     link_libraries(${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT} m)
-ENDIF()
+endif()
 
+# Executable targets
 add_executable(${PROJECT_NAME}_sdl
     ${DRIVER_DIR}/DrvIf_SDL.c
     ${DRIVER_DIR}/Audio_SDL.c
@@ -93,51 +111,40 @@ add_executable(${PROJECT_NAME}_webserver
     ${GAME_SOURCES}
 )
 
-target_include_directories(${PROJECT_NAME}_sdl
-    PUBLIC
-        ${SDL_INCLUDE_DIR}
-)
+# Target include directories
+target_include_directories(${PROJECT_NAME}_sdl PUBLIC ${SDL_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME}_glfw PUBLIC ${GLFW_DIR} ${GLFW_DIR}/deps)
+target_include_directories(${PROJECT_NAME}_caca PUBLIC ${CACA_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME}_webserver PUBLIC ${WEBSERVER_DIR})
 
-target_include_directories(${PROJECT_NAME}_glfw
-    PUBLIC
-        ${GLFW_DIR}
-        ${GLFW_DIR}/deps
-)
-
-target_include_directories(${PROJECT_NAME}_caca
-    PUBLIC
-        ${CACA_INCLUDE_DIR}
-)
-
-target_include_directories(${PROJECT_NAME}_webserver
-    PUBLIC
-        ${WEBSERVER_DIR}
-)
-
-target_compile_definitions(${PROJECT_NAME}_sdl  PRIVATE _GLLOADER_SDL)
+# Target compile definitions
+target_compile_definitions(${PROJECT_NAME}_sdl PRIVATE _GLLOADER_SDL)
 target_compile_definitions(${PROJECT_NAME}_glfw PRIVATE _GLLOADER_GLFW)
 
-target_link_libraries(${PROJECT_NAME}_sdl   ${OPENGL_LIBRARY}   SDL2::SDL2)
-target_link_libraries(${PROJECT_NAME}_glfw  ${OPENGL_LIBRARY}   glfw)
+# Target link libraries
+target_link_libraries(${PROJECT_NAME}_sdl   ${OPENGL_LIBRARY} SDL2::SDL2)
+target_link_libraries(${PROJECT_NAME}_glfw  ${OPENGL_LIBRARY} glfw)
 target_link_libraries(${PROJECT_NAME}_caca  ${CACA_LIBRARYS})
 if(WIN32)
     target_link_libraries(${PROJECT_NAME}_webserver ws2_32)
 endif()
 
-file(GLOB GAMEDATA
-    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.mkf
-    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.msg
-    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.dat
-    ${CMAKE_SOURCE_DIR}/Pal98rqptw/*.rpg)
-file(GLOB CACHEDATA ${CMAKE_SOURCE_DIR}/cache_data/*.bin)
-file(COPY ${GAMEDATA}                       DESTINATION ${RESOURCE_PATH})
-file(COPY ${CACHEDATA}                      DESTINATION ${RESOURCE_PATH})
-file(COPY ${CMAKE_SOURCE_DIR}/shaders/      DESTINATION ${CMAKE_BINARY_DIR}/shaders)
-
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/index.html")
-    if(WIN32)
-        execute_process(COMMAND cmd.exe /c mklink "${CMAKE_BINARY_DIR}\\index.html" "${CMAKE_SOURCE_DIR}\\index.html")
-    else()
-        execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_SOURCE_DIR}/index.html" "${CMAKE_BINARY_DIR}/index.html")
-    endif()
+# Symlink creation
+if(WIN32)
+    set(MKLINK_SCRIPT "${CMAKE_BINARY_DIR}/create_symlinks.bat")
+    file(WRITE "${MKLINK_SCRIPT}" 
+        "mklink \"${CMAKE_BINARY_DIR}/index.html\" \"${CMAKE_SOURCE_DIR}/index.html\"\n"
+        "mklink /D \"${RESOURCE_PATH}\" \"${CMAKE_SOURCE_DIR}/Pal98rqptw\"\n"
+        "mklink /D \"${CACHES_PATH}\" \"${CMAKE_SOURCE_DIR}/cache_data\"\n"
+        "mklink /D \"${CMAKE_BINARY_DIR}/shaders\" \"${CMAKE_SOURCE_DIR}/shaders\"\n"
+    )
+    execute_process(
+        COMMAND powershell -Command "Start-Process cmd -ArgumentList '/c \"${MKLINK_SCRIPT}\"' -Verb runAs"
+        RESULT_VARIABLE elevate_result
+    )
+else()
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_SOURCE_DIR}/index.html" "${CMAKE_BINARY_DIR}/index.html")
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_SOURCE_DIR}/shaders"    "${CMAKE_BINARY_DIR}/shaders")
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_SOURCE_DIR}/Pal98rqptw" "${RESOURCE_PATH}")
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_SOURCE_DIR}/cache_data" "${CACHES_PATH}")
 endif()

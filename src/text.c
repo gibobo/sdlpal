@@ -36,18 +36,18 @@
 #include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wctype.h>
-#include <stdio.h>
 
-#define FONT_COLOR_DEFAULT 0x4F
-#define FONT_COLOR_YELLOW 0x2D
-#define FONT_COLOR_RED 0x1A
-#define FONT_COLOR_CYAN 0x8D
+#define FONT_COLOR_DEFAULT  0x4F
+#define FONT_COLOR_YELLOW   0x2D
+#define FONT_COLOR_RED      0x1A
+#define FONT_COLOR_CYAN     0x8D
 #define FONT_COLOR_CYAN_ALT 0x8C
-#define FONT_COLOR_RED_ALT 0x17
-#define BUFFER_WORD_NUM (3)
+#define FONT_COLOR_RED_ALT  0x17
+#define BUFFER_WORD_NUM     (3)
 
 unsigned char g_fUpdatedInBattle = false;
 static void *fp_word = NULL;
@@ -82,68 +82,70 @@ int PAL_InitText(void)
 
 --*/
 {
-   void *fp;
-   unsigned int wpos, i;
-   char path[128];
-   unsigned char data;
+    void *fp;
+    unsigned int wpos, i;
+    char path[128];
+    unsigned char data;
 
-   sprintf(path, "%s/word_%db.bin", RESOURCE_PATH, (int)sizeof(wchar_t));
-   fp_word = UTIL_fopen(path, "rb");
-   sprintf(path, "%s/msg_%db.bin", RESOURCE_PATH, (int)sizeof(wchar_t));
-   fp_msg = UTIL_fopen(path, "rb");
+    sprintf(path, "%s/word_%db.bin", CACHES_PATH, (int)sizeof(wchar_t));
+    fp_word = UTIL_fopen(path, "rb");
+    sprintf(path, "%s/msg_%db.bin", CACHES_PATH, (int)sizeof(wchar_t));
+    fp_msg = UTIL_fopen(path, "rb");
 
-   // Open the word data files.
-   {
-      fp = UTIL_fopen(RESOURCE_PATH "/word_len.bin", "rb");
-      g_TextLib.nWords = flength(fp);
-      WordLen = (unsigned int *)UTIL_calloc(g_TextLib.nWords, sizeof(unsigned int));
-      for (i = 0, wpos = 0, data = 0, WordLen_max = 0; i < g_TextLib.nWords; i++) {
-        unsigned char data = 0;
-        UTIL_fread(&data, sizeof(data), 1, fp);
-        WordLen[i] = (unsigned int)data << 24 | wpos;
-        wpos += data;
-        if (WordLen_max < data)
-          WordLen_max = data;
-      }
-      UTIL_fclose(fp);
-      WordBuffer = (wchar_t **)UTIL_calloc(BUFFER_WORD_NUM, sizeof(wchar_t *));
-      for (i = 0; i < BUFFER_WORD_NUM; i++)
-         WordBuffer[i] = UTIL_calloc(WordLen_max + 1, sizeof(wchar_t));
-      WordBufferIdx = 0;
-      WordIndex = 0xFFFFFFFF;
-   }
-   // Open the message data files.
-   {
-      fp = UTIL_fopen(RESOURCE_PATH "/msg_len.bin", "rb");
-      g_TextLib.nMsgs = flength(fp);
-      MsgLen = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs, sizeof(unsigned int));
-      for (i = 0, wpos = 0, data = 0, MsgLen_max = 0; i < g_TextLib.nMsgs; i++, data = 0) {
-         UTIL_fread(&data, sizeof(data), 1, fp);
-         MsgLen[i] = (unsigned int)data << 24 | wpos;
-         wpos += data;
-         if (MsgLen_max < data)
-            MsgLen_max = data;
-      }
-      UTIL_fclose(fp);
-      MsgBuffer = UTIL_calloc(MsgLen_max + 1, sizeof(wchar_t));
-      MsgIndex = 0xFFFFFFFF;
-   }
-   internal_wbuffer_size = WordLen_max > MsgLen_max ? WordLen_max : MsgLen_max;
-   internal_wbuffer = UTIL_calloc(internal_wbuffer_size + 1, sizeof(wchar_t));
+    // Open the word data files.
+    {
+        fp = UTIL_fopen(CACHES_PATH "/word_len.bin", "rb");
+        g_TextLib.nWords = flength(fp);
+        WordLen = (unsigned int *)UTIL_calloc(g_TextLib.nWords, sizeof(unsigned int));
+        for (i = 0, wpos = 0, data = 0, WordLen_max = 0; i < g_TextLib.nWords; i++)
+        {
+            unsigned char data = 0;
+            UTIL_fread(&data, sizeof(data), 1, fp);
+            WordLen[i] = (unsigned int)data << 24 | wpos;
+            wpos += data;
+            if (WordLen_max < data)
+                WordLen_max = data;
+        }
+        UTIL_fclose(fp);
+        WordBuffer = (wchar_t **)UTIL_calloc(BUFFER_WORD_NUM, sizeof(wchar_t *));
+        for (i = 0; i < BUFFER_WORD_NUM; i++)
+            WordBuffer[i] = UTIL_calloc(WordLen_max + 1, sizeof(wchar_t));
+        WordBufferIdx = 0;
+        WordIndex = 0xFFFFFFFF;
+    }
+    // Open the message data files.
+    {
+        fp = UTIL_fopen(CACHES_PATH "/msg_len.bin", "rb");
+        g_TextLib.nMsgs = flength(fp);
+        MsgLen = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs, sizeof(unsigned int));
+        for (i = 0, wpos = 0, data = 0, MsgLen_max = 0; i < g_TextLib.nMsgs; i++, data = 0)
+        {
+            UTIL_fread(&data, sizeof(data), 1, fp);
+            MsgLen[i] = (unsigned int)data << 24 | wpos;
+            wpos += data;
+            if (MsgLen_max < data)
+                MsgLen_max = data;
+        }
+        UTIL_fclose(fp);
+        MsgBuffer = UTIL_calloc(MsgLen_max + 1, sizeof(wchar_t));
+        MsgIndex = 0xFFFFFFFF;
+    }
+    internal_wbuffer_size = WordLen_max > MsgLen_max ? WordLen_max : MsgLen_max;
+    internal_wbuffer = UTIL_calloc(internal_wbuffer_size + 1, sizeof(wchar_t));
 
-   g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-   g_TextLib.bIcon = 0;
-   g_TextLib.posIcon = 0;
-   g_TextLib.nCurrentDialogLine = 0;
-   g_TextLib.iDelayTime = 3;
-   g_TextLib.posDialogTitle = PAL_XY(12, 8);
-   g_TextLib.posDialogText = PAL_XY(44, 26);
-   g_TextLib.bDialogPosition = kDialogUpper;
-   g_TextLib.fUserSkip = false;
+    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+    g_TextLib.bIcon = 0;
+    g_TextLib.posIcon = 0;
+    g_TextLib.nCurrentDialogLine = 0;
+    g_TextLib.iDelayTime = 3;
+    g_TextLib.posDialogTitle = PAL_XY(12, 8);
+    g_TextLib.posDialogText = PAL_XY(44, 26);
+    g_TextLib.bDialogPosition = kDialogUpper;
+    g_TextLib.fUserSkip = false;
 
-   PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gFiles[Res_DATA].fp);
+    PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gFiles[Res_DATA].fp);
 
-   return 0;
+    return 0;
 }
 
 void PAL_FreeText(
@@ -163,32 +165,32 @@ void PAL_FreeText(
 
 --*/
 {
-   UTIL_free(WordLen);
-   UTIL_free(MsgLen);
-   if (WordBuffer)
-   {
-       for (int i = 0; i < BUFFER_WORD_NUM; i++)
-       {
-           UTIL_free(WordBuffer[i]);
-           WordBuffer[i] = NULL;
-       }
-   }
-   UTIL_free(WordBuffer);
-   UTIL_free(MsgBuffer);
-   UTIL_free(internal_wbuffer);
-   UTIL_fclose(fp_word);
-   UTIL_fclose(fp_msg);
-   
-   WordBufferIdx = 0;
-   WordIndex = 0xFFFFFFFF;
-   MsgIndex = 0xFFFFFFFF;
-   WordLen = NULL;
-   MsgLen = NULL;
-   WordBuffer = NULL;
-   MsgBuffer = NULL;
-   internal_wbuffer = NULL;
-   fp_word = NULL;
-   fp_msg = NULL;
+    UTIL_free(WordLen);
+    UTIL_free(MsgLen);
+    if (WordBuffer)
+    {
+        for (int i = 0; i < BUFFER_WORD_NUM; i++)
+        {
+            UTIL_free(WordBuffer[i]);
+            WordBuffer[i] = NULL;
+        }
+    }
+    UTIL_free(WordBuffer);
+    UTIL_free(MsgBuffer);
+    UTIL_free(internal_wbuffer);
+    UTIL_fclose(fp_word);
+    UTIL_fclose(fp_msg);
+
+    WordBufferIdx = 0;
+    WordIndex = 0xFFFFFFFF;
+    MsgIndex = 0xFFFFFFFF;
+    WordLen = NULL;
+    MsgLen = NULL;
+    WordBuffer = NULL;
+    MsgBuffer = NULL;
+    internal_wbuffer = NULL;
+    fp_word = NULL;
+    fp_msg = NULL;
 }
 
 const wchar_t *PAL_GetWord(unsigned int iNumWord)
@@ -207,14 +209,15 @@ const wchar_t *PAL_GetWord(unsigned int iNumWord)
 
 --*/
 {
-   if (WordIndex != iNumWord) {
-      WordIndex = iNumWord;
-      UTIL_fseek(fp_word, sizeof(wchar_t) * (WordLen[WordIndex] & 0x00FFFFFF), SEEK_SET);
-      WordBufferIdx = (WordBufferIdx + 1) % BUFFER_WORD_NUM;
-      UTIL_fread(WordBuffer[WordBufferIdx], sizeof(wchar_t), WordLen[WordIndex] >> 24, fp_word);
-      WordBuffer[WordBufferIdx][WordLen[WordIndex] >> 24] = 0;
-   }
-   return (iNumWord >= g_TextLib.nWords || !WordBuffer[WordBufferIdx]) ? L"" : WordBuffer[WordBufferIdx];
+    if (WordIndex != iNumWord)
+    {
+        WordIndex = iNumWord;
+        UTIL_fseek(fp_word, sizeof(wchar_t) * (WordLen[WordIndex] & 0x00FFFFFF), SEEK_SET);
+        WordBufferIdx = (WordBufferIdx + 1) % BUFFER_WORD_NUM;
+        UTIL_fread(WordBuffer[WordBufferIdx], sizeof(wchar_t), WordLen[WordIndex] >> 24, fp_word);
+        WordBuffer[WordBufferIdx][WordLen[WordIndex] >> 24] = 0;
+    }
+    return (iNumWord >= g_TextLib.nWords || !WordBuffer[WordBufferIdx]) ? L"" : WordBuffer[WordBufferIdx];
 }
 
 const wchar_t *PAL_GetMsg(unsigned int iNumMsg)
@@ -233,72 +236,69 @@ const wchar_t *PAL_GetMsg(unsigned int iNumMsg)
 
 --*/
 {
-   if (MsgIndex != iNumMsg) {
-      MsgIndex = iNumMsg;
-      UTIL_fseek(fp_msg, sizeof(wchar_t) * (MsgLen[MsgIndex] & 0x00FFFFFF), SEEK_SET);
-      // memset(MsgBuffer, 0, MsgLen_max * sizeof(wchar_t));
-      UTIL_fread(MsgBuffer, sizeof(wchar_t), MsgLen[MsgIndex] >> 24, fp_msg);
-      MsgBuffer[MsgLen[MsgIndex] >> 24] = 0;
-   }
-   return (iNumMsg >= g_TextLib.nMsgs || !MsgBuffer) ? L"" : MsgBuffer;
+    if (MsgIndex != iNumMsg)
+    {
+        MsgIndex = iNumMsg;
+        UTIL_fseek(fp_msg, sizeof(wchar_t) * (MsgLen[MsgIndex] & 0x00FFFFFF), SEEK_SET);
+        // memset(MsgBuffer, 0, MsgLen_max * sizeof(wchar_t));
+        UTIL_fread(MsgBuffer, sizeof(wchar_t), MsgLen[MsgIndex] >> 24, fp_msg);
+        MsgBuffer[MsgLen[MsgIndex] >> 24] = 0;
+    }
+    return (iNumMsg >= g_TextLib.nMsgs || !MsgBuffer) ? L"" : MsgBuffer;
 }
 
 wchar_t *PAL_UnescapeText(const wchar_t *lpszText)
 {
-   wchar_t *buf = internal_wbuffer;
+    wchar_t *buf = internal_wbuffer;
 
-   if(wcsstr(lpszText, L"\\") == NULL)
-      return (wchar_t*)lpszText;
+    if (wcsstr(lpszText, L"\\") == NULL)
+        return (wchar_t *)lpszText;
 
-   memset(internal_wbuffer, 0, sizeof(wchar_t) * internal_wbuffer_size);
+    memset(internal_wbuffer, 0, sizeof(wchar_t) * internal_wbuffer_size);
 
-   while (*lpszText != L'\0')
-   {
-      switch (*lpszText)
-      {
-         case '-':
-         case '\'':
-         case '@':
-         case '\"':
-         case '$':
-         case '~':
-         case ')':
-         case '(':
-            lpszText++;
-            break;
-         case '\\':
-            lpszText++;
-         default:
-            wcsncpy(buf++, lpszText++, 1);
-            break;
-      }
-   }
-   return internal_wbuffer;
+    while (*lpszText != L'\0')
+    {
+        switch (*lpszText)
+        {
+            case '-':
+            case '\'':
+            case '@':
+            case '\"':
+            case '$':
+            case '~':
+            case ')':
+            case '(':
+                lpszText++;
+                break;
+            case '\\':
+                lpszText++;
+            default:
+                wcsncpy(buf++, lpszText++, 1);
+                break;
+        }
+    }
+    return internal_wbuffer;
 }
 
-void
-PAL_DrawText(
-   const wchar_t *lpszText,
-   unsigned int      pos,
-   unsigned char       bColor,
-   int       fShadow,
-   int       fUpdate,
-   int       fUse8x8Font
-)
+void PAL_DrawText(
+    const wchar_t *lpszText,
+    unsigned int pos,
+    unsigned char bColor,
+    int fShadow,
+    int fUpdate,
+    int fUse8x8Font)
 {
     PAL_DrawTextUnescape(lpszText, pos, bColor, fShadow, fUpdate, fUse8x8Font, true);
 }
 
-void
-PAL_DrawTextUnescape(
-   const wchar_t*    lpszText,
-   unsigned int      pos,
-   unsigned char       bColor,
-   int       fShadow,
-   int       fUpdate,
-   int       fUse8x8Font,
-   int       fUnescape
-)
+void PAL_DrawTextUnescape(
+    const wchar_t *lpszText,
+    unsigned int pos,
+    unsigned char bColor,
+    int fShadow,
+    int fUpdate,
+    int fUse8x8Font,
+    int fUnescape)
 /*++
   Purpose:
 
@@ -326,62 +326,61 @@ PAL_DrawTextUnescape(
 
 --*/
 {
-   unsigned short fontX = (unsigned short)PAL_X(pos);
-   unsigned short fontY = (unsigned short)PAL_Y(pos);
-   PAL_Rect urect;
-   urect.x = fontX;
-   urect.y = fontY;
-   urect.h = FONT_HEIGHT;
-   urect.w = 0;
+    unsigned short fontX = (unsigned short)PAL_X(pos);
+    unsigned short fontY = (unsigned short)PAL_Y(pos);
+    PAL_Rect urect;
+    urect.x = fontX;
+    urect.y = fontY;
+    urect.h = FONT_HEIGHT;
+    urect.w = 0;
 
-   // Handle text overflow
-   if (fontX >= SCREEN_W) return;
+    // Handle text overflow
+    if (fontX >= SCREEN_W)
+        return;
 
-   if(fUnescape)
-      lpszText = PAL_UnescapeText(lpszText);
+    if (fUnescape)
+        lpszText = PAL_UnescapeText(lpszText);
 
-   while (*lpszText)
-   {
-      // Draw the character
-      unsigned char char_width = PAL_CharWidth(*lpszText);
-      if (char_width)
-      {
-         if (fShadow)
-         {
-            // Note: In the original PAL DOS version,
-            // the text has triple shadows, while Win95 only has one layer.
-            // It is suspected that there is a bug in the original Win95 version,
-            // so sdlpal chose to use triple shadows for both.
-            PAL_DrawCharOnSurface(*lpszText, fontX + 1, fontY + 0, 0);
-            PAL_DrawCharOnSurface(*lpszText, fontX + 0, fontY + 1, 0);
-            PAL_DrawCharOnSurface(*lpszText, fontX + 1, fontY + 1, 0);
-         }
-         PAL_DrawCharOnSurface(*lpszText++, fontX, fontY, bColor);
-         fontX += char_width;
-         urect.w += char_width;
-      }
-   }
+    while (*lpszText)
+    {
+        // Draw the character
+        unsigned char char_width = PAL_CharWidth(*lpszText);
+        if (char_width)
+        {
+            if (fShadow)
+            {
+                // Note: In the original PAL DOS version,
+                // the text has triple shadows, while Win95 only has one layer.
+                // It is suspected that there is a bug in the original Win95 version,
+                // so sdlpal chose to use triple shadows for both.
+                PAL_DrawCharOnSurface(*lpszText, fontX + 1, fontY + 0, 0);
+                PAL_DrawCharOnSurface(*lpszText, fontX + 0, fontY + 1, 0);
+                PAL_DrawCharOnSurface(*lpszText, fontX + 1, fontY + 1, 0);
+            }
+            PAL_DrawCharOnSurface(*lpszText++, fontX, fontY, bColor);
+            fontX += char_width;
+            urect.w += char_width;
+        }
+    }
 
-   // Update the screen area
-   if (fUpdate && urect.w > 0)
-   {
-      if (fShadow)
-      {
-         urect.w++;
-         urect.h++;
-      }
-      urect.x = max(urect.x - 10, 0);
-      urect.y = max(urect.y - 10, 0);
-      urect.w = min(SCREEN_W - urect.x, urect.w + 20);
-      urect.h = min(SCREEN_H - urect.y, urect.h + 20);
-      VIDEO_UpdateScreen(&urect);
-   }
+    // Update the screen area
+    if (fUpdate && urect.w > 0)
+    {
+        if (fShadow)
+        {
+            urect.w++;
+            urect.h++;
+        }
+        urect.x = max(urect.x - 10, 0);
+        urect.y = max(urect.y - 10, 0);
+        urect.w = min(SCREEN_W - urect.x, urect.w + 20);
+        urect.h = min(SCREEN_H - urect.y, urect.h + 20);
+        VIDEO_UpdateScreen(&urect);
+    }
 }
 
-void
-PAL_DialogSetDelayTime(
-   int          iDelayTime
-)
+void PAL_DialogSetDelayTime(
+    int iDelayTime)
 /*++
   Purpose:
 
@@ -397,29 +396,25 @@ PAL_DialogSetDelayTime(
 
 --*/
 {
-   g_TextLib.iDelayTime = iDelayTime;
+    g_TextLib.iDelayTime = iDelayTime;
 }
 
-void
-PAL_StartDialog(
-   unsigned char         bDialogLocation,
-   unsigned char         bFontColor,
-   int          iNumCharFace,
-   int         fPlayingRNG
-)
+void PAL_StartDialog(
+    unsigned char bDialogLocation,
+    unsigned char bFontColor,
+    int iNumCharFace,
+    int fPlayingRNG)
 {
-   PAL_StartDialogWithOffset(bDialogLocation, bFontColor, iNumCharFace, fPlayingRNG, 0, 0);
+    PAL_StartDialogWithOffset(bDialogLocation, bFontColor, iNumCharFace, fPlayingRNG, 0, 0);
 }
 
-void
-PAL_StartDialogWithOffset(
-   unsigned char         bDialogLocation,
-   unsigned char         bFontColor,
-   int          iNumCharFace,
-   int         fPlayingRNG,
-   int          xOff,
-   int          yOff
-)
+void PAL_StartDialogWithOffset(
+    unsigned char bDialogLocation,
+    unsigned char bFontColor,
+    int iNumCharFace,
+    int fPlayingRNG,
+    int xOff,
+    int yOff)
 /*++
   Purpose:
 
@@ -441,90 +436,90 @@ PAL_StartDialogWithOffset(
 
 --*/
 {
-   unsigned char *buf = NULL;
-   const unsigned int buf_sz = 8192;   // SCREEN_SIZE
-   PAL_Rect rect;
+    unsigned char *buf = NULL;
+    const unsigned int buf_sz = 8192; // SCREEN_SIZE
+    PAL_Rect rect;
 
-   buf = (unsigned char *)UTIL_malloc(buf_sz);
-   if (gpGlobals->fInBattle && !g_fUpdatedInBattle) {
-      // Update the screen in battle, or the graphics may seem messed up
-      VIDEO_UpdateScreen(NULL);
-      g_fUpdatedInBattle = true;
-   }
+    buf = (unsigned char *)UTIL_malloc(buf_sz);
+    if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
+    {
+        // Update the screen in battle, or the graphics may seem messed up
+        VIDEO_UpdateScreen(NULL);
+        g_fUpdatedInBattle = true;
+    }
 
-   g_TextLib.bIcon = 0;
-   g_TextLib.posIcon = 0;
-   g_TextLib.nCurrentDialogLine = 0;
-   g_TextLib.posDialogTitle = PAL_XY(12, 8);
-   g_TextLib.fUserSkip = false;
+    g_TextLib.bIcon = 0;
+    g_TextLib.posIcon = 0;
+    g_TextLib.nCurrentDialogLine = 0;
+    g_TextLib.posDialogTitle = PAL_XY(12, 8);
+    g_TextLib.fUserSkip = false;
 
-   if (bFontColor != 0)
-   {
-      g_TextLib.bCurrentFontColor = bFontColor;
-   }
+    if (bFontColor != 0)
+    {
+        g_TextLib.bCurrentFontColor = bFontColor;
+    }
 
-   if (fPlayingRNG && iNumCharFace)
-   {
-      VIDEO_BackupScreen(gpScreen);
-      g_TextLib.fPlayingRNG = true;
-   }
+    if (fPlayingRNG && iNumCharFace)
+    {
+        VIDEO_BackupScreen(gpScreen);
+        g_TextLib.fPlayingRNG = true;
+    }
 
-   switch (bDialogLocation)
-   {
-   case kDialogUpper:
-      if (iNumCharFace > 0)
-      {
-         // Display the character face at the upper part of the screen
-         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles[Res_RGM].fp) > 0)
-         {
-            rect.w = PAL_RLEGetWidth((const unsigned char*)buf);
-            rect.h = PAL_RLEGetHeight((const unsigned char*)buf);
-            rect.x = max(48 - rect.w / 2 + xOff, 0);
-            rect.y = max(55 - rect.h / 2 + yOff, 0);
-            PAL_RLEBlitToSurface((const unsigned char*)buf, gpScreen, PAL_XY(rect.x, rect.y));
-            VIDEO_UpdateScreen(&rect);
-         }
-      }
-      g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 80 : 12, 8);
-      g_TextLib.posDialogText = PAL_XY(iNumCharFace > 0 ? 96 : 44, 26);
-      break;
+    switch (bDialogLocation)
+    {
+        case kDialogUpper:
+            if (iNumCharFace > 0)
+            {
+                // Display the character face at the upper part of the screen
+                if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles[Res_RGM].fp) > 0)
+                {
+                    rect.w = PAL_RLEGetWidth((const unsigned char *)buf);
+                    rect.h = PAL_RLEGetHeight((const unsigned char *)buf);
+                    rect.x = max(48 - rect.w / 2 + xOff, 0);
+                    rect.y = max(55 - rect.h / 2 + yOff, 0);
+                    PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
+                    VIDEO_UpdateScreen(&rect);
+                }
+            }
+            g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 80 : 12, 8);
+            g_TextLib.posDialogText = PAL_XY(iNumCharFace > 0 ? 96 : 44, 26);
+            break;
 
-   case kDialogCenter:
-      g_TextLib.posDialogText = PAL_XY(80, 40);
-      break;
+        case kDialogCenter:
+            g_TextLib.posDialogText = PAL_XY(80, 40);
+            break;
 
-   case kDialogLower:
-      if (iNumCharFace > 0)
-      {
-         // Display the character face at the lower part of the screen
-         if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles[Res_RGM].fp) > 0)
-         {
-            rect.x = 270 - PAL_RLEGetWidth((const unsigned char*)buf) / 2 + xOff;
-            rect.y = 144 - PAL_RLEGetHeight((const unsigned char*)buf) / 2 + yOff;
-            PAL_RLEBlitToSurface((const unsigned char*)buf, gpScreen, PAL_XY(rect.x, rect.y));
-            VIDEO_UpdateScreen(NULL);
-         }
-      }
-      g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 4 : 12, 108);
-      g_TextLib.posDialogText = PAL_XY(iNumCharFace > 0 ? 20 : 44, 126);
-      break;
+        case kDialogLower:
+            if (iNumCharFace > 0)
+            {
+                // Display the character face at the lower part of the screen
+                if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles[Res_RGM].fp) > 0)
+                {
+                    rect.x = 270 - PAL_RLEGetWidth((const unsigned char *)buf) / 2 + xOff;
+                    rect.y = 144 - PAL_RLEGetHeight((const unsigned char *)buf) / 2 + yOff;
+                    PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
+                    VIDEO_UpdateScreen(NULL);
+                }
+            }
+            g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 4 : 12, 108);
+            g_TextLib.posDialogText = PAL_XY(iNumCharFace > 0 ? 20 : 44, 126);
+            break;
 
-   case kDialogCenterWindow:
-      g_TextLib.posDialogText = PAL_XY(160, 40);
-      break;
-   }
+        case kDialogCenterWindow:
+            g_TextLib.posDialogText = PAL_XY(160, 40);
+            break;
+    }
 
-   g_TextLib.posDialogTitle = PAL_XY_OFFSET(g_TextLib.posDialogTitle, xOff, yOff);
-   g_TextLib.posDialogText = PAL_XY_OFFSET(g_TextLib.posDialogText, xOff, yOff);
+    g_TextLib.posDialogTitle = PAL_XY_OFFSET(g_TextLib.posDialogTitle, xOff, yOff);
+    g_TextLib.posDialogText = PAL_XY_OFFSET(g_TextLib.posDialogText, xOff, yOff);
 
-   g_TextLib.bDialogPosition = bDialogLocation;
-   UTIL_free(buf);
+    g_TextLib.bDialogPosition = bDialogLocation;
+    UTIL_free(buf);
 }
 
 static void
 PAL_DialogWaitForKeyWithMaximumSeconds(
-   float fMaxSeconds
-)
+    float fMaxSeconds)
 /*++
   Purpose:
 
@@ -540,243 +535,244 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
 --*/
 {
-   unsigned char new_palette[PALETTE_SIZE];
-   unsigned char *org_palette = NULL;
-   unsigned char t[3];
-   int i;
-   unsigned int dwBeginningTicks = UTIL_GetTicks();
+    unsigned char new_palette[PALETTE_SIZE];
+    unsigned char *org_palette = NULL;
+    unsigned char t[3];
+    int i;
+    unsigned int dwBeginningTicks = UTIL_GetTicks();
 
-   // get the current palette
-   org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
-   memcpy(new_palette, org_palette, PALETTE_SIZE);
+    // get the current palette
+    org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
+    memcpy(new_palette, org_palette, PALETTE_SIZE);
 
-   if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
-      g_TextLib.bDialogPosition != kDialogCenter)
-   {
-      // show the icon
-      const unsigned char* p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
-      if (p != NULL)
-      {
-         PAL_Rect rect;
+    if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
+        g_TextLib.bDialogPosition != kDialogCenter)
+    {
+        // show the icon
+        const unsigned char *p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
+        if (p != NULL)
+        {
+            PAL_Rect rect;
 
-         rect.x = PAL_X(g_TextLib.posIcon);
-         rect.y = PAL_Y(g_TextLib.posIcon);
-         rect.w = 16;
-         rect.h = 16;
+            rect.x = PAL_X(g_TextLib.posIcon);
+            rect.y = PAL_Y(g_TextLib.posIcon);
+            rect.w = 16;
+            rect.h = 16;
 
-         PAL_RLEBlitToSurface(p, gpScreen, g_TextLib.posIcon);
-         VIDEO_UpdateScreen(&rect);
-      }
-   }
+            PAL_RLEBlitToSurface(p, gpScreen, g_TextLib.posIcon);
+            VIDEO_UpdateScreen(&rect);
+        }
+    }
 
-   PAL_ClearKeyState();
+    PAL_ClearKeyState();
 
-   while (true)
-   {
-      UTIL_Delay(100);
+    while (true)
+    {
+        UTIL_Delay(100);
 
-      if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
-         g_TextLib.bDialogPosition != kDialogCenter)
-      {
-         // palette shift
-         t[0] = new_palette[0xF9 * 3 + 0];
-         t[1] = new_palette[0xF9 * 3 + 1];
-         t[2] = new_palette[0xF9 * 3 + 2];
-         for (i = 0xF9; i < 0xFE; i++) {
-           new_palette[i * 3 + 0] = new_palette[i * 3 + 3];
-           new_palette[i * 3 + 1] = new_palette[i * 3 + 4];
-           new_palette[i * 3 + 2] = new_palette[i * 3 + 5];
-         }
-         new_palette[0xFE * 3 + 0] = t[0];
-         new_palette[0xFE * 3 + 1] = t[1];
-         new_palette[0xFE * 3 + 2] = t[2];
+        if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
+            g_TextLib.bDialogPosition != kDialogCenter)
+        {
+            // palette shift
+            t[0] = new_palette[0xF9 * 3 + 0];
+            t[1] = new_palette[0xF9 * 3 + 1];
+            t[2] = new_palette[0xF9 * 3 + 2];
+            for (i = 0xF9; i < 0xFE; i++)
+            {
+                new_palette[i * 3 + 0] = new_palette[i * 3 + 3];
+                new_palette[i * 3 + 1] = new_palette[i * 3 + 4];
+                new_palette[i * 3 + 2] = new_palette[i * 3 + 5];
+            }
+            new_palette[0xFE * 3 + 0] = t[0];
+            new_palette[0xFE * 3 + 1] = t[1];
+            new_palette[0xFE * 3 + 2] = t[2];
 
-         VIDEO_SetPalette(new_palette);
-         VIDEO_UpdateScreen(NULL);
-      }
+            VIDEO_SetPalette(new_palette);
+            VIDEO_UpdateScreen(NULL);
+        }
 
-      if (fabs(fMaxSeconds) > FLT_EPSILON && UTIL_GetTicks() - dwBeginningTicks > 1000 * fMaxSeconds)
-      {
-         break;
-      }
+        if (fabs(fMaxSeconds) > FLT_EPSILON && UTIL_GetTicks() - dwBeginningTicks > 1000 * fMaxSeconds)
+        {
+            break;
+        }
 
-      if (PAL_GetKeyInput() != kKeyNone)
-      {
-         break;
-      }
-   }
+        if (PAL_GetKeyInput() != kKeyNone)
+        {
+            break;
+        }
+    }
 
-   if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
-      g_TextLib.bDialogPosition != kDialogCenter)
-   {
-      VIDEO_SetPalette(org_palette);
-      VIDEO_UpdateScreen(NULL);
-   }
+    if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
+        g_TextLib.bDialogPosition != kDialogCenter)
+    {
+        VIDEO_SetPalette(org_palette);
+        VIDEO_UpdateScreen(NULL);
+    }
 
-   PAL_ClearKeyState();
+    PAL_ClearKeyState();
 
-   g_TextLib.fUserSkip = false;
+    g_TextLib.fUserSkip = false;
 }
 
-int
-TEXT_DisplayText(
-   const wchar_t *lpszText,
-   int            x,
-   int            y,
-   int           isDialog
-)
-{
-   //
-   // normal texts
-   //
-   wchar_t text[2];
-   unsigned char color;
-   unsigned char isNumber=0;
-
-   while (lpszText != NULL && *lpszText != '\0')
-   {
-      switch (*lpszText)
-      {
-         case '-':
-            //
-            // Set the font color to Cyan
-            //
-            if (g_TextLib.bCurrentFontColor == FONT_COLOR_CYAN)
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-            }
-            else
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_CYAN;
-            }
-            lpszText++;
-            break;
-         case '\'':
-            //
-            // Set the font color to Red
-            //
-            if (g_TextLib.bCurrentFontColor == FONT_COLOR_RED)
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-            }
-            else
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_RED;
-            }
-            lpszText++;
-            break;
-         case '@':
-            //
-            // Set the font color to Red
-            //
-            if (g_TextLib.bCurrentFontColor == FONT_COLOR_RED_ALT)
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-            }
-            else
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_RED_ALT;
-            }
-            lpszText++;
-            break;
-         case '\"':
-            //
-            // Set the font color to Yellow
-            //
-            if(!isDialog)
-            {
-              if (g_TextLib.bCurrentFontColor == FONT_COLOR_YELLOW)
-                 g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-              else
-                 g_TextLib.bCurrentFontColor = FONT_COLOR_YELLOW;
-            }
-            lpszText++;
-            break;
-
-         case '$':
-            //
-            // Set the delay time of text-displaying
-            //
-            g_TextLib.iDelayTime = wcstol(lpszText + 1, NULL, 10) * 10 / 7;
-            lpszText += 3;
-            break;
-
-         case '~':
-            //
-            // Delay for a period and quit
-            //
-            if (g_TextLib.fUserSkip)
-            {
-               VIDEO_UpdateScreen(NULL);
-            }
-            if( !isDialog )
-               UTIL_Delay(wcstol(lpszText + 1, NULL, 10) * 80 / 7);
-            g_TextLib.nCurrentDialogLine = -1;
-            g_TextLib.fUserSkip = false;
-            return x; // don't go further
-
-         case ')':
-            //
-            // Set the waiting icon
-            //
-            g_TextLib.bIcon = 1;
-            lpszText++;
-            break;
-
-         case '(':
-            //
-            // Set the waiting icon
-            //
-            g_TextLib.bIcon = 2;
-            lpszText++;
-            break;
-
-         case '\\':
-            lpszText++;
-
-         default:
-            text[0] = *lpszText++;
-            text[1] = 0;
-
-            color = g_TextLib.bCurrentFontColor;
-            if(isDialog) {
-               if(g_TextLib.bCurrentFontColor == FONT_COLOR_DEFAULT)
-                  color = 0;
-               if( text[0]>= '0' && text[0] <= '9' ) {
-                  isNumber = 1;
-               }else{
-                  isNumber = 0;
-               }
-            }
-
-            // Update the screen on each draw operation is time-consuming, so disable it if user want to skip
-            if( isNumber )
-               PAL_DrawNumber(text[0]-'0', 1, PAL_XY(x, y+4), kNumColorYellow, kNumAlignLeft);
-            else
-               PAL_DrawTextUnescape(text, PAL_XY(x, y), color, !isDialog, !isDialog && !g_TextLib.fUserSkip, false, false);
-            x += PAL_CharWidth(text[0]);
-
-            if (!isDialog && !g_TextLib.fUserSkip)
-            {
-               PAL_ClearKeyState();
-               UTIL_Delay(g_TextLib.iDelayTime * 8);
-
-               if (PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
-               {
-                  // User pressed a key to skip the dialog
-                  g_TextLib.fUserSkip = true;
-               }
-            }
-      }
-   }
-   return x;
-}
-
-void
-PAL_ShowDialogText(
+int TEXT_DisplayText(
     const wchar_t *lpszText,
-    int iDialogShadow
-)
+    int x,
+    int y,
+    int isDialog)
+{
+    //
+    // normal texts
+    //
+    wchar_t text[2];
+    unsigned char color;
+    unsigned char isNumber = 0;
+
+    while (lpszText != NULL && *lpszText != '\0')
+    {
+        switch (*lpszText)
+        {
+            case '-':
+                //
+                // Set the font color to Cyan
+                //
+                if (g_TextLib.bCurrentFontColor == FONT_COLOR_CYAN)
+                {
+                    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+                }
+                else
+                {
+                    g_TextLib.bCurrentFontColor = FONT_COLOR_CYAN;
+                }
+                lpszText++;
+                break;
+            case '\'':
+                //
+                // Set the font color to Red
+                //
+                if (g_TextLib.bCurrentFontColor == FONT_COLOR_RED)
+                {
+                    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+                }
+                else
+                {
+                    g_TextLib.bCurrentFontColor = FONT_COLOR_RED;
+                }
+                lpszText++;
+                break;
+            case '@':
+                //
+                // Set the font color to Red
+                //
+                if (g_TextLib.bCurrentFontColor == FONT_COLOR_RED_ALT)
+                {
+                    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+                }
+                else
+                {
+                    g_TextLib.bCurrentFontColor = FONT_COLOR_RED_ALT;
+                }
+                lpszText++;
+                break;
+            case '\"':
+                //
+                // Set the font color to Yellow
+                //
+                if (!isDialog)
+                {
+                    if (g_TextLib.bCurrentFontColor == FONT_COLOR_YELLOW)
+                        g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+                    else
+                        g_TextLib.bCurrentFontColor = FONT_COLOR_YELLOW;
+                }
+                lpszText++;
+                break;
+
+            case '$':
+                //
+                // Set the delay time of text-displaying
+                //
+                g_TextLib.iDelayTime = wcstol(lpszText + 1, NULL, 10) * 10 / 7;
+                lpszText += 3;
+                break;
+
+            case '~':
+                //
+                // Delay for a period and quit
+                //
+                if (g_TextLib.fUserSkip)
+                {
+                    VIDEO_UpdateScreen(NULL);
+                }
+                if (!isDialog)
+                    UTIL_Delay(wcstol(lpszText + 1, NULL, 10) * 80 / 7);
+                g_TextLib.nCurrentDialogLine = -1;
+                g_TextLib.fUserSkip = false;
+                return x; // don't go further
+
+            case ')':
+                //
+                // Set the waiting icon
+                //
+                g_TextLib.bIcon = 1;
+                lpszText++;
+                break;
+
+            case '(':
+                //
+                // Set the waiting icon
+                //
+                g_TextLib.bIcon = 2;
+                lpszText++;
+                break;
+
+            case '\\':
+                lpszText++;
+
+            default:
+                text[0] = *lpszText++;
+                text[1] = 0;
+
+                color = g_TextLib.bCurrentFontColor;
+                if (isDialog)
+                {
+                    if (g_TextLib.bCurrentFontColor == FONT_COLOR_DEFAULT)
+                        color = 0;
+                    if (text[0] >= '0' && text[0] <= '9')
+                    {
+                        isNumber = 1;
+                    }
+                    else
+                    {
+                        isNumber = 0;
+                    }
+                }
+
+                // Update the screen on each draw operation is time-consuming, so disable it if user want to skip
+                if (isNumber)
+                    PAL_DrawNumber(text[0] - '0', 1, PAL_XY(x, y + 4), kNumColorYellow, kNumAlignLeft);
+                else
+                    PAL_DrawTextUnescape(text, PAL_XY(x, y), color, !isDialog, !isDialog && !g_TextLib.fUserSkip, false, false);
+                x += PAL_CharWidth(text[0]);
+
+                if (!isDialog && !g_TextLib.fUserSkip)
+                {
+                    PAL_ClearKeyState();
+                    UTIL_Delay(g_TextLib.iDelayTime * 8);
+
+                    if (PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
+                    {
+                        // User pressed a key to skip the dialog
+                        g_TextLib.fUserSkip = true;
+                    }
+                }
+        }
+    }
+    return x;
+}
+
+void PAL_ShowDialogText(
+    const wchar_t *lpszText,
+    int iDialogShadow)
 /*++
   Purpose:
 
@@ -792,113 +788,110 @@ PAL_ShowDialogText(
 
 --*/
 {
-   PAL_Rect        rect;
-   int             x, y;
+    PAL_Rect rect;
+    int x, y;
 
-   PAL_ClearKeyState();
-   g_TextLib.bIcon = 0;
+    PAL_ClearKeyState();
+    g_TextLib.bIcon = 0;
 
-   if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
-   {
-      //
-      // Update the screen in battle, or the graphics may seem messed up
-      //
-      VIDEO_UpdateScreen(NULL);
-      g_fUpdatedInBattle = true;
-   }
+    if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
+    {
+        //
+        // Update the screen in battle, or the graphics may seem messed up
+        //
+        VIDEO_UpdateScreen(NULL);
+        g_fUpdatedInBattle = true;
+    }
 
-   if (g_TextLib.nCurrentDialogLine > 3)
-   {
-      //
-      // The rest dialogs should be shown in the next page.
-      //
-      PAL_DialogWaitForKeyWithMaximumSeconds(0);
-      g_TextLib.nCurrentDialogLine = 0;
-      VIDEO_RestoreScreen(gpScreen);
-      VIDEO_UpdateScreen(NULL);
-   }
+    if (g_TextLib.nCurrentDialogLine > 3)
+    {
+        //
+        // The rest dialogs should be shown in the next page.
+        //
+        PAL_DialogWaitForKeyWithMaximumSeconds(0);
+        g_TextLib.nCurrentDialogLine = 0;
+        VIDEO_RestoreScreen(gpScreen);
+        VIDEO_UpdateScreen(NULL);
+    }
 
-   x = PAL_X(g_TextLib.posDialogText);
-   y = PAL_Y(g_TextLib.posDialogText) + g_TextLib.nCurrentDialogLine * 18;
+    x = PAL_X(g_TextLib.posDialogText);
+    y = PAL_Y(g_TextLib.posDialogText) + g_TextLib.nCurrentDialogLine * 18;
 
-   if (g_TextLib.bDialogPosition == kDialogCenterWindow)
-   {
-      //
-      // The text should be shown in a small window at the center of the screen
-      //
-      {
-         int        i;
-         int        w = (int)wcslen(lpszText);
-         int        len = 0;
+    if (g_TextLib.bDialogPosition == kDialogCenterWindow)
+    {
+        //
+        // The text should be shown in a small window at the center of the screen
+        //
+        {
+            int i;
+            int w = (int)wcslen(lpszText);
+            int len = 0;
 
-         for (i = 0; i < w; i++)
-            len += PAL_CharWidth(lpszText[i]) >> 3;
+            for (i = 0; i < w; i++)
+                len += PAL_CharWidth(lpszText[i]) >> 3;
 
-         // Create the window box
-         rect.x = PAL_X(g_TextLib.posDialogText) - len * 4;
-         rect.y = PAL_Y(g_TextLib.posDialogText);
-         rect.w = SCREEN_W - rect.x * 2 + 32;
-         rect.h = 64;
+            // Create the window box
+            rect.x = PAL_X(g_TextLib.posDialogText) - len * 4;
+            rect.y = PAL_Y(g_TextLib.posDialogText);
+            rect.w = SCREEN_W - rect.x * 2 + 32;
+            rect.h = 64;
 
-         // Follow behavior of original version
-         PAL_CreateSingleLineBoxWithShadow(PAL_XY(rect.x, rect.y), (len + 1) / 2, NULL, iDialogShadow);
+            // Follow behavior of original version
+            PAL_CreateSingleLineBoxWithShadow(PAL_XY(rect.x, rect.y), (len + 1) / 2, NULL, iDialogShadow);
 
-         VIDEO_UpdateScreen(&rect);
+            VIDEO_UpdateScreen(&rect);
 
-         // Show the text on the screen
-         TEXT_DisplayText(lpszText, rect.x + 8 + ((len & 1) << 2), rect.y + 10, true);
-         VIDEO_UpdateScreen(&rect);
+            // Show the text on the screen
+            TEXT_DisplayText(lpszText, rect.x + 8 + ((len & 1) << 2), rect.y + 10, true);
+            VIDEO_UpdateScreen(&rect);
 
-         PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
+            PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
 
-         VIDEO_UpdateScreen(&rect);
+            VIDEO_UpdateScreen(&rect);
 
-         PAL_EndDialog();
-      }
-   }
-   else
-   {
-      int len = (int)wcslen(lpszText);
-      if (g_TextLib.nCurrentDialogLine == 0 &&
-          g_TextLib.bDialogPosition != kDialogCenter &&
-          (lpszText[len - 1] == 0xff1a ||
-           lpszText[len - 1] == 0x2236 || // Special case for Pal WIN95 Simplified Chinese version
-           lpszText[len - 1] == ':')
-         )
-      {
-         //
-         // name of character
-         //
-         PAL_DrawText(lpszText, g_TextLib.posDialogTitle, FONT_COLOR_CYAN_ALT, true, true, false);
-      }
-      else
-      {
-         if (!g_TextLib.fPlayingRNG && g_TextLib.nCurrentDialogLine == 0)
-         {
+            PAL_EndDialog();
+        }
+    }
+    else
+    {
+        int len = (int)wcslen(lpszText);
+        if (g_TextLib.nCurrentDialogLine == 0 &&
+            g_TextLib.bDialogPosition != kDialogCenter &&
+            (lpszText[len - 1] == 0xff1a ||
+             lpszText[len - 1] == 0x2236 || // Special case for Pal WIN95 Simplified Chinese version
+             lpszText[len - 1] == ':'))
+        {
             //
-            // Save the screen before we show the first line of dialog
+            // name of character
             //
-            VIDEO_BackupScreen(gpScreen);
-         }
+            PAL_DrawText(lpszText, g_TextLib.posDialogTitle, FONT_COLOR_CYAN_ALT, true, true, false);
+        }
+        else
+        {
+            if (!g_TextLib.fPlayingRNG && g_TextLib.nCurrentDialogLine == 0)
+            {
+                //
+                // Save the screen before we show the first line of dialog
+                //
+                VIDEO_BackupScreen(gpScreen);
+            }
 
-         x = TEXT_DisplayText(lpszText, x, y, false);
+            x = TEXT_DisplayText(lpszText, x, y, false);
 
-         // and update the full screen at once after all texts are drawn
-         if (g_TextLib.fUserSkip)
-         {
-             VIDEO_UpdateScreen(NULL);
-         }
+            // and update the full screen at once after all texts are drawn
+            if (g_TextLib.fUserSkip)
+            {
+                VIDEO_UpdateScreen(NULL);
+            }
 
-         g_TextLib.posIcon = PAL_XY(x, y);
-         g_TextLib.nCurrentDialogLine++;
-      }
-   }
+            g_TextLib.posIcon = PAL_XY(x, y);
+            g_TextLib.nCurrentDialogLine++;
+        }
+    }
 }
 
-void
-PAL_ClearDialog(
-   char       fWaitForKey
-)
+void PAL_ClearDialog(
+    char fWaitForKey)
 /*++
   Purpose:
 
@@ -914,26 +907,24 @@ PAL_ClearDialog(
 
 --*/
 {
-   if (g_TextLib.nCurrentDialogLine > 0 && fWaitForKey)
-   {
-      PAL_DialogWaitForKeyWithMaximumSeconds(0);
-   }
+    if (g_TextLib.nCurrentDialogLine > 0 && fWaitForKey)
+    {
+        PAL_DialogWaitForKeyWithMaximumSeconds(0);
+    }
 
-   g_TextLib.nCurrentDialogLine = 0;
+    g_TextLib.nCurrentDialogLine = 0;
 
-   if (g_TextLib.bDialogPosition == kDialogCenter)
-   {
-      g_TextLib.posDialogTitle = PAL_XY(12, 8);
-      g_TextLib.posDialogText = PAL_XY(44, 26);
-      g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-      g_TextLib.bDialogPosition = kDialogUpper;
-   }
+    if (g_TextLib.bDialogPosition == kDialogCenter)
+    {
+        g_TextLib.posDialogTitle = PAL_XY(12, 8);
+        g_TextLib.posDialogText = PAL_XY(44, 26);
+        g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+        g_TextLib.bDialogPosition = kDialogUpper;
+    }
 }
 
-void
-PAL_EndDialog(
-   void
-)
+void PAL_EndDialog(
+    void)
 /*++
   Purpose:
 
@@ -949,24 +940,22 @@ PAL_EndDialog(
 
 --*/
 {
-   PAL_ClearDialog(true);
+    PAL_ClearDialog(true);
 
-   //
-   // Set some default parameters, as there are some parts of script
-   // which doesn't have a "start dialog" instruction before showing the dialog.
-   //
-   g_TextLib.posDialogTitle = PAL_XY(12, 8);
-   g_TextLib.posDialogText = PAL_XY(44, 26);
-   g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-   g_TextLib.bDialogPosition = kDialogUpper;
-   g_TextLib.fUserSkip = false;
-   g_TextLib.fPlayingRNG = false;
+    //
+    // Set some default parameters, as there are some parts of script
+    // which doesn't have a "start dialog" instruction before showing the dialog.
+    //
+    g_TextLib.posDialogTitle = PAL_XY(12, 8);
+    g_TextLib.posDialogText = PAL_XY(44, 26);
+    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+    g_TextLib.bDialogPosition = kDialogUpper;
+    g_TextLib.fUserSkip = false;
+    g_TextLib.fPlayingRNG = false;
 }
 
-int
-PAL_DialogIsPlayingRNG(
-   void
-)
+int PAL_DialogIsPlayingRNG(
+    void)
 /*++
   Purpose:
 
@@ -982,16 +971,14 @@ PAL_DialogIsPlayingRNG(
 
 --*/
 {
-   return g_TextLib.fPlayingRNG;
+    return g_TextLib.fPlayingRNG;
 }
 
-int
-PAL_swprintf(
-    wchar_t* buffer,
+int PAL_swprintf(
+    wchar_t *buffer,
     int count,
     const wchar_t *format,
-    ...
-)
+    ...)
 /*++
   Purpose:
 
@@ -1019,11 +1006,11 @@ PAL_swprintf(
 --*/
 {
     va_list ap;
-    const wchar_t * const format_end = format + wcslen(format);
-    const wchar_t * const buffer_end = buffer + count - 1;
-    wchar_t chr_buf[2] = { 0, 0 };
-    const wchar_t* fmt_start = NULL;
-    wchar_t* cur_fmt = NULL;
+    const wchar_t *const format_end = format + wcslen(format);
+    const wchar_t *const buffer_end = buffer + count - 1;
+    wchar_t chr_buf[2] = {0, 0};
+    const wchar_t *fmt_start = NULL;
+    wchar_t *cur_fmt = NULL;
     int fmt_len = 0;
     int state, precision = 0, width = 0;
     int left_aligned = 0, wide = 0, narrow = 0;
@@ -1040,229 +1027,243 @@ PAL_swprintf(
 
     va_start(ap, format);
 
-    count = 0; state = 0;
+    count = 0;
+    state = 0;
     while (buffer < buffer_end && format < format_end)
     {
         switch (state)
         {
-        case 0: // Outside format spec
-            if (*format != L'%')
-            {
-                *buffer++ = *format++;
-                count++;
-            }
-            else
-            {
-                fmt_start = format++;
-                left_aligned = wide = narrow = 0;
-                precision_var = width_var = 0;
-                precision_defined = 0;
-                state = 1;
-            }
-            continue;
-        case 1: // [flags]
-            switch (*format)
-            {
-            case L'-':
-                left_aligned = 1;
-            case L'+':
-            case L' ':
-            case L'#':
-            case L'0':
-                format++;
-                continue;
-            default:
-                state = 2;
-                width = width_var = 0;
-            }
-        case 2: // [width]
-            switch (*format)
-            {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                if (width >= 0)
-                    width = width * 10 + (*format - L'0');
-                format++;
-                continue;
-            case '*':
-                if (width == 0)
-                    width_var = 1;
-                format++;
-                continue;
-            case '.':
-                format++;
-                precision = precision_var = 0;
-                precision_defined = 1;
-                state = 3;
-                continue;
-            default:
-                state = 4;
-                continue;
-            }
-        case 3: // [.precision]
-            switch (*format)
-            {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                if (precision >= 0)
-                    precision = precision * 10 + (*format - L'0');
-                format++;
-                continue;
-            case '*':
-                if (precision == 0)
-                    precision_var = 1;
-                format++;
-                continue;
-            default:
-                state = 4;
-            }
-        case 4: // [{h | l | ll}]
-            switch (*format)
-            {
-            case 'l': if (narrow == 0) wide++; format++; continue;
-            case 'h': if (wide == 0) narrow++; format++; continue;
-            default: state = 5;
-            }
-        case 5: // type
-            if (*format == 'c' || *format == 's')
-            {
-                // We handle char & str specially
-                wchar_t* buf;
-                int len;
-                int i;
-
-                // Check width
-                if (width_var)
+            case 0: // Outside format spec
+                if (*format != L'%')
                 {
-                    width = va_arg(ap, int);
-                    left_aligned = (width < 0);
-                    width = left_aligned ? -width : width;
-                }
-                // Although precision has no meaning to '%c' output, however
-                // the argument still needs to be read if '.*' is provided
-                if (precision_var)
-                    precision = va_arg(ap, int);
-                else if (!precision_defined)
-                    precision = INT_MAX;
-
-                if (*format == 's')
-                {
-                    buf = va_arg(ap, wchar_t*);
-                    len = (int)wcslen(buf);
+                    *buffer++ = *format++;
+                    count++;
                 }
                 else
                 {
-                    // For ANSI character, put it into the internal buffer
-                    if (wide)
-                        chr_buf[0] = va_arg(ap, wchar_t);
-                    else
-                        chr_buf[0] = va_arg(ap, int);
-                    buf = chr_buf;
-                    len = 1;
+                    fmt_start = format++;
+                    left_aligned = wide = narrow = 0;
+                    precision_var = width_var = 0;
+                    precision_defined = 0;
+                    state = 1;
                 }
-
-                // Limit output length no longer then precision
-                if (precision > len)
-                    precision = len;
-
-                // Left-side padding
-                for (i = 0; !left_aligned && i < width - precision && buffer < buffer_end; i++)
-                {
-                    *buffer++ = L' ';
-                    count++;
-                }
-
-                // Do not overflow the output buffer
-                if (buffer + precision > buffer_end)
-                    precision = (int)(buffer_end - buffer);
-
-                // Convert or copy string (char) into output buffer
-                wcsncpy(buffer, buf, precision);
-                buffer += precision;
-                count += precision;
-
-                // Right-side padding
-                for (i = 0; left_aligned && i < width - precision && buffer < buffer_end; i++)
-                {
-                    *buffer++ = L' ';
-                    count++;
-                }
-            }
-            else
-            {
-                // For other types, pass them directly into vswprintf
-                int cur_cnt = 0;
-                va_list apd;
-
-                // We copy this argument's format string into internal buffer
-                if (fmt_len < (int)(format - fmt_start + 1)) {
-                    UTIL_free(cur_fmt);
-                    fmt_len = (int)(format - fmt_start) + 2;
-                    cur_fmt = (wchar_t *)UTIL_calloc(fmt_len, sizeof(wchar_t));
-                }
-                wcsncpy(cur_fmt, fmt_start, fmt_len);
-                cur_fmt[fmt_len] = L'\0';
-                // And pass it into vswprintf to get the output
-                va_copy(apd, ap);
-                cur_cnt = vswprintf(buffer, buffer_end - buffer, cur_fmt, apd);
-                va_end(apd);
-                buffer += cur_cnt; count += cur_cnt;
-
-                // Then we need to move the argument pointer into next one
-                // Check if width/precision should be read from arguments
-                if (width_var) va_arg(ap, int);
-                if (precision_var) va_arg(ap, int);
-
-                // Move pointer to pass the actual value argument
+                continue;
+            case 1: // [flags]
                 switch (*format)
                 {
-                case 'd':
-                case 'i':
-                case 'o':
-                case 'u':
-                case 'x':
-                case 'X':
-                    if (wide == 1)
-                        va_arg(ap, long);
-                    else if (wide >= 2)
-                        va_arg(ap, long long);
-                    else
-                        va_arg(ap, int);
-                    break;
-                case 'e':
-                case 'E':
-                case 'f':
-                case 'g':
-                case 'G':
-                case 'a':
-                case 'A':
-                    va_arg(ap, double);
-                    break;
-                case 'p':
-                case 'n':
-                    va_arg(ap, void*);
-                    break;
+                    case L'-':
+                        left_aligned = 1;
+                    case L'+':
+                    case L' ':
+                    case L'#':
+                    case L'0':
+                        format++;
+                        continue;
+                    default:
+                        state = 2;
+                        width = width_var = 0;
                 }
-            }
-            state = 0;
-            format++;
-            break;
+            case 2: // [width]
+                switch (*format)
+                {
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        if (width >= 0)
+                            width = width * 10 + (*format - L'0');
+                        format++;
+                        continue;
+                    case '*':
+                        if (width == 0)
+                            width_var = 1;
+                        format++;
+                        continue;
+                    case '.':
+                        format++;
+                        precision = precision_var = 0;
+                        precision_defined = 1;
+                        state = 3;
+                        continue;
+                    default:
+                        state = 4;
+                        continue;
+                }
+            case 3: // [.precision]
+                switch (*format)
+                {
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        if (precision >= 0)
+                            precision = precision * 10 + (*format - L'0');
+                        format++;
+                        continue;
+                    case '*':
+                        if (precision == 0)
+                            precision_var = 1;
+                        format++;
+                        continue;
+                    default:
+                        state = 4;
+                }
+            case 4: // [{h | l | ll}]
+                switch (*format)
+                {
+                    case 'l':
+                        if (narrow == 0)
+                            wide++;
+                        format++;
+                        continue;
+                    case 'h':
+                        if (wide == 0)
+                            narrow++;
+                        format++;
+                        continue;
+                    default:
+                        state = 5;
+                }
+            case 5: // type
+                if (*format == 'c' || *format == 's')
+                {
+                    // We handle char & str specially
+                    wchar_t *buf;
+                    int len;
+                    int i;
+
+                    // Check width
+                    if (width_var)
+                    {
+                        width = va_arg(ap, int);
+                        left_aligned = (width < 0);
+                        width = left_aligned ? -width : width;
+                    }
+                    // Although precision has no meaning to '%c' output, however
+                    // the argument still needs to be read if '.*' is provided
+                    if (precision_var)
+                        precision = va_arg(ap, int);
+                    else if (!precision_defined)
+                        precision = INT_MAX;
+
+                    if (*format == 's')
+                    {
+                        buf = va_arg(ap, wchar_t *);
+                        len = (int)wcslen(buf);
+                    }
+                    else
+                    {
+                        // For ANSI character, put it into the internal buffer
+                        if (wide)
+                            chr_buf[0] = va_arg(ap, wchar_t);
+                        else
+                            chr_buf[0] = va_arg(ap, int);
+                        buf = chr_buf;
+                        len = 1;
+                    }
+
+                    // Limit output length no longer then precision
+                    if (precision > len)
+                        precision = len;
+
+                    // Left-side padding
+                    for (i = 0; !left_aligned && i < width - precision && buffer < buffer_end; i++)
+                    {
+                        *buffer++ = L' ';
+                        count++;
+                    }
+
+                    // Do not overflow the output buffer
+                    if (buffer + precision > buffer_end)
+                        precision = (int)(buffer_end - buffer);
+
+                    // Convert or copy string (char) into output buffer
+                    wcsncpy(buffer, buf, precision);
+                    buffer += precision;
+                    count += precision;
+
+                    // Right-side padding
+                    for (i = 0; left_aligned && i < width - precision && buffer < buffer_end; i++)
+                    {
+                        *buffer++ = L' ';
+                        count++;
+                    }
+                }
+                else
+                {
+                    // For other types, pass them directly into vswprintf
+                    int cur_cnt = 0;
+                    va_list apd;
+
+                    // We copy this argument's format string into internal buffer
+                    if (fmt_len < (int)(format - fmt_start + 1))
+                    {
+                        UTIL_free(cur_fmt);
+                        fmt_len = (int)(format - fmt_start) + 2;
+                        cur_fmt = (wchar_t *)UTIL_calloc(fmt_len, sizeof(wchar_t));
+                    }
+                    wcsncpy(cur_fmt, fmt_start, fmt_len);
+                    cur_fmt[fmt_len] = L'\0';
+                    // And pass it into vswprintf to get the output
+                    va_copy(apd, ap);
+                    cur_cnt = vswprintf(buffer, buffer_end - buffer, cur_fmt, apd);
+                    va_end(apd);
+                    buffer += cur_cnt;
+                    count += cur_cnt;
+
+                    // Then we need to move the argument pointer into next one
+                    // Check if width/precision should be read from arguments
+                    if (width_var)
+                        va_arg(ap, int);
+                    if (precision_var)
+                        va_arg(ap, int);
+
+                    // Move pointer to pass the actual value argument
+                    switch (*format)
+                    {
+                        case 'd':
+                        case 'i':
+                        case 'o':
+                        case 'u':
+                        case 'x':
+                        case 'X':
+                            if (wide == 1)
+                                va_arg(ap, long);
+                            else if (wide >= 2)
+                                va_arg(ap, long long);
+                            else
+                                va_arg(ap, int);
+                            break;
+                        case 'e':
+                        case 'E':
+                        case 'f':
+                        case 'g':
+                        case 'G':
+                        case 'a':
+                        case 'A':
+                            va_arg(ap, double);
+                            break;
+                        case 'p':
+                        case 'n':
+                            va_arg(ap, void *);
+                            break;
+                    }
+                }
+                state = 0;
+                format++;
+                break;
         }
     }
 

@@ -24,10 +24,10 @@
 #include "video.h"
 #include <stdlib.h>
 
-#define ReLU(A)  ((A) > 0 ? (A) : 0)
-#define unicode_lower_top	0xD800
-#define unicode_upper_base  0xF900
-#define unicode_upper_top	0xFFFE
+#define ReLU(A)            ((A) > 0 ? (A) : 0)
+#define unicode_lower_top  0xD800
+#define unicode_upper_base 0xF900
+#define unicode_upper_top  0xFFFE
 
 static void *fp_font_data = NULL;
 static void *fp_font_size = NULL;
@@ -35,13 +35,15 @@ static unsigned char font_size = 0;
 static unsigned char font_data[32];
 static unsigned short font_wChar = 0xFFFF;
 
-void PAL_InitFont(void) {
-    fp_font_data = UTIL_fopen(RESOURCE_PATH "/unicode_font.bin", "rb");
-    fp_font_size = UTIL_fopen(RESOURCE_PATH "/unicode_font_size.bin", "rb");
+void PAL_InitFont(void)
+{
+    fp_font_data = UTIL_fopen(CACHES_PATH "/unicode_font.bin", "rb");
+    fp_font_size = UTIL_fopen(CACHES_PATH "/unicode_font_size.bin", "rb");
     font_wChar = 0xFFFF;
 }
 
-void PAL_DeInitFont(void) {
+void PAL_DeInitFont(void)
+{
     UTIL_fclose(fp_font_data);
     UTIL_fclose(fp_font_size);
     fp_font_data = NULL;
@@ -77,7 +79,8 @@ void PAL_DrawCharOnSurface(
     unsigned char *dst = gpScreen->pixels + gpScreen->w * ReLU(y) + x;
     unsigned char *top = gpScreen->pixels + gpScreen->w * gpScreen->h;
 
-    if (font_wChar != wChar) {
+    if (font_wChar != wChar)
+    {
         font_wChar = wChar;
         UTIL_fseek(fp_font_size, sizeof(unsigned char) * wChar / 8, SEEK_SET);
         UTIL_fread(&font_size, sizeof(unsigned char), 1, fp_font_size);
@@ -88,12 +91,15 @@ void PAL_DrawCharOnSurface(
         font_size = (font_size & (1 << (wChar % 8))) ? 32 : 16;
     }
 
-    for (i = 0; i < font_size && dst < top; i += (font_size >> 4), dst += gpScreen->w) {
-      for (j = 0; (j < (font_size >> 1)) && ((x + j) < gpScreen->w); j++) {
-        if (font_data[i + ((font_size == 32 && j >= 8) ? 1 : 0)] & (1 << (j % 8))) {
-          dst[j] = bColor;
+    for (i = 0; i < font_size && dst < top; i += (font_size >> 4), dst += gpScreen->w)
+    {
+        for (j = 0; (j < (font_size >> 1)) && ((x + j) < gpScreen->w); j++)
+        {
+            if (font_data[i + ((font_size == 32 && j >= 8) ? 1 : 0)] & (1 << (j % 8)))
+            {
+                dst[j] = bColor;
+            }
         }
-      }
     }
 }
 
