@@ -21,12 +21,12 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
+#define PAL_AUDIO_CHUNK_PER_SECOND (70U)
 #define PAL_AUDIO_BIT_DEPTH        (16U)
 #define PAL_AUDIO_BYTES_PER_SAMPLE (PAL_AUDIO_BIT_DEPTH >> 3)
 #define PAL_AUDIO_CHANNEL_NUM      (2U)
 #define PAL_AUDIO_SAMPLE_RATE      (44100U)
-#define PAL_AUDIO_BUFFER_SIZE      (256 * 3)
-#define PAL_AUDIO_CHUNK_PER_SECOND (70U)
+#define PAL_AUDIO_BUFFER_SIZE      (1U + ((PAL_AUDIO_SAMPLE_RATE / PAL_AUDIO_CHUNK_PER_SECOND) / 128U)) * 128U
 
 #define AUDIOPLAYER_COMMONS               \
     int iMusic;                           \
