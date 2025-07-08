@@ -328,7 +328,7 @@ void PAL_PaletteFade(int iPaletteNum, int fNight, int fUpdateScene)
     unsigned char tmp_palette[PALETTE_SIZE];
 
     memcpy(org_palette, gPalette, PALETTE_SIZE);
-    memset(tmp_palette, 0, PALETTE_SIZE);
+    memset(tmp_palette, 0xff, PALETTE_SIZE);
     new_palette = PAL_GetPalette(iPaletteNum, fNight);
 
     // Start fading...

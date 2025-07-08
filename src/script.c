@@ -901,8 +901,16 @@ PAL_InterpretInstruction(
             }
             if (x <= PAL_CountItem(pScript->rgwOperand[0]) || pScript->rgwOperand[2] == 0)
             {
-                if (!PAL_AddItemToInventory(pScript->rgwOperand[0], -x))
+                y = PAL_AddItemToInventory(pScript->rgwOperand[0], -x);
+                if (y <= 0)
                 {
+                    //
+                    // Check if it's a partial removal and set the remaining amount
+                    //
+                    if (y < 0)
+                    {
+                        x = -y;
+                    }
                     //
                     // Try removing equipped item
                     //
@@ -2393,7 +2401,7 @@ PAL_InterpretInstruction(
             //
             // Jump if the specified item is not equipped
             //
-            y = false;
+            y = 0;
             for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
             {
                 w = gpGlobals->rgParty[i].wPlayerRole;
@@ -2401,13 +2409,11 @@ PAL_InterpretInstruction(
                 {
                     if (gpGlobals->g.PlayerRoles->rgwEquipment[x][w] == pScript->rgwOperand[0])
                     {
-                        y = true;
-                        i = 999;
-                        break;
+                        y++;
                     }
                 }
             }
-            if (!y)
+            if (y < pScript->rgwOperand[1])
             {
                 wScriptEntry = pScript->rgwOperand[2] - 1;
             }
