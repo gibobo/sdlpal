@@ -31,12 +31,26 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket(
+            (location.protocol === 'https:' ? 'wss://' : 'ws://') +
+            location.hostname +
+            (location.port ? ':' + location.port : '') +
+            '/ws'
+        );
         const keysPressed = new Set();
 
         let audioCtx, palette, audioConfig = { sampleRate: 44100, channels: 2, bitsPerSample: 16 };
         const audioQueue = [];
         let currentPlayingSource = null, nextScheduledTime = 0;
+
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (AudioContext || webkitAudioContext)({ sampleRate: audioConfig.sampleRate });
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
 
         function resizeCanvas() {
             const ratio = 320 / 200;
@@ -75,8 +89,6 @@
             source.start(startTime);
             if (audioQueue.length) setTimeout(scheduleNextBuffer, 10);
         }
-
-        window.addEventListener('DOMContentLoaded', initAudio);
 
         ws.onmessage = async event => {
             const data = new Uint8Array(await event.data.arrayBuffer());
@@ -126,7 +138,6 @@
                 const sampleCount = Math.floor((data.length - 1) / bytesPerFrame);
                 if (sampleCount > 0) {
                     try {
-                        if (!audioCtx) initAudio();
                         const audioBuffer = audioCtx.createBuffer(channels, sampleCount, sampleRate);
                         if (bitsPerSample === 16) {
                             const pcmData = new Int16Array(data.buffer.slice(1));
@@ -162,6 +173,9 @@
             keysPressed.delete(e.key);
             ws.send(`1${e.key}`);
         });
+        document.addEventListener('keydown', ensureAudioContext);
+        document.addEventListener('mousedown', ensureAudioContext);
+        document.addEventListener('touchstart', ensureAudioContext);
     </script>
 </body>
 

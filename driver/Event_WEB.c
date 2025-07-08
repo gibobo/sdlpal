@@ -123,7 +123,7 @@ int DRIVER_Init_Event(void)
 {
     mg_log_set(MG_LL_ERROR);
     mg_mgr_init(&mgr);
-    nc = mg_http_listen(&mgr, "http://localhost:8000", ev_handler, NULL);
+    nc = mg_http_listen(&mgr, "http://0.0.0.0:8000", ev_handler, NULL);
     if (nc == NULL)
     {
         fprintf(stderr, "Failed to start server\n");
