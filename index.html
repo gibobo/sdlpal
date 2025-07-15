@@ -33,6 +33,11 @@
             height: 120px;
             touch-action: none;
             z-index: 20;
+            user-select: none;
+            /* 防止選取 */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
         }
 
         #joystick-base {
@@ -41,6 +46,11 @@
             height: 100%;
             background: rgba(100, 100, 100, 0.2);
             border-radius: 50%;
+            user-select: none;
+            /* 防止選取 */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
         }
 
         #joystick-knob {
@@ -53,6 +63,11 @@
             border-radius: 50%;
             pointer-events: none;
             transition: left 0.05s, top 0.05s;
+            user-select: none;
+            /* 防止選取 */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
         }
     </style>
 </head>
@@ -217,90 +232,132 @@
         const baseRect = joystickArea.getBoundingClientRect();
         const center = { x: baseRect.width / 2, y: baseRect.height / 2 };
         let activeDir = null;
+        const JOYSTICK_THRESHOLD = 20; // 統一門檻值
+        const KNOB_RADIUS = 20; // knob 半徑
 
         function getDirection(dx, dy) {
-          const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-          if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return null;
-          if (angle >= -45 && angle < 45) return 'ArrowRight';
-          if (angle >= 45 && angle < 135) return 'ArrowDown';
-          if (angle >= -135 && angle < -45) return 'ArrowUp';
-          return 'ArrowLeft';
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            if (Math.abs(dx) < JOYSTICK_THRESHOLD && Math.abs(dy) < JOYSTICK_THRESHOLD) return null;
+            if (angle >= -45 && angle < 45) return 'ArrowRight';
+            if (angle >= 45 && angle < 135) return 'ArrowDown';
+            if (angle >= -135 && angle < -45) return 'ArrowUp';
+            return 'ArrowLeft';
         }
 
         function sendDirection(dir) {
-          ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].forEach(k => {
-            if (k === dir && activeDir !== dir) ws.send(`0${k}`);
-            else if (k !== dir && activeDir === k) ws.send(`1${k}`);
-          });
-          activeDir = dir;
+            ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].forEach(k => {
+                if (k === dir && activeDir !== dir) ws.send(`0${k}`);
+                else if (k !== dir && activeDir === k) ws.send(`1${k}`);
+            });
+            activeDir = dir;
         }
 
         let mouseActive = false;
+        let joystickTouchActive = false;
+        let touchStartPos = null; // 新增：記錄 touchstart 位置
 
         joystickArea.addEventListener('touchstart', e => {
-          const touch = e.touches[0];
-          const rect = joystickArea.getBoundingClientRect();
-          const x = touch.clientX - rect.left;
-          const y = touch.clientY - rect.top;
-          const dx = x - center.x;
-          const dy = y - center.y;
-          knob.style.left = (center.x + dx/2 - 20) + 'px';
-          knob.style.top = (center.y + dy/2 - 20) + 'px';
-          sendDirection(getDirection(dx, dy));
+            joystickTouchActive = true;
+            const touch = e.touches[0];
+            const rect = joystickArea.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            touchStartPos = { x, y }; // 新增：記錄起始位置
+            const dx = x - center.x;
+            const dy = y - center.y;
+            knob.style.left = (center.x + dx / 2 - KNOB_RADIUS) + 'px';
+            knob.style.top = (center.y + dy / 2 - KNOB_RADIUS) + 'px';
+            sendDirection(getDirection(dx, dy));
+            e.stopPropagation();
         });
         joystickArea.addEventListener('touchmove', e => {
-          const touch = e.touches[0];
-          const rect = joystickArea.getBoundingClientRect();
-          const x = touch.clientX - rect.left;
-          const y = touch.clientY - rect.top;
-          const dx = x - center.x;
-          const dy = y - center.y;
-          knob.style.left = (center.x + dx/2 - 20) + 'px';
-          knob.style.top = (center.y + dy/2 - 20) + 'px';
-          sendDirection(getDirection(dx, dy));
+            const touch = e.touches[0];
+            const rect = joystickArea.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            const dx = x - center.x;
+            const dy = y - center.y;
+            knob.style.left = (center.x + dx / 2 - KNOB_RADIUS) + 'px';
+            knob.style.top = (center.y + dy / 2 - KNOB_RADIUS) + 'px';
+            sendDirection(getDirection(dx, dy));
+            e.stopPropagation();
         });
         joystickArea.addEventListener('touchend', e => {
-          knob.style.left = (center.x - 20) + 'px';
-          knob.style.top = (center.y - 20) + 'px';
-          sendDirection(null);
+            const touch = e.changedTouches[0];
+            const rect = joystickArea.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            const dx = x - center.x;
+            const dy = y - center.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // 判斷是否為點擊或拖曳
+            const touchMoved = Math.abs(dx) > JOYSTICK_THRESHOLD || Math.abs(dy) > JOYSTICK_THRESHOLD;
+
+            // 修正：用 touchStartPos 判斷是否為點擊中心
+            if (!touchMoved && touchStartPos) {
+                const startDx = touchStartPos.x - center.x;
+                const startDy = touchStartPos.y - center.y;
+                const startDist = Math.sqrt(startDx * startDx + startDy * startDy);
+                if (startDist < JOYSTICK_THRESHOLD) {
+                    ws.send('0Escape');
+                    setTimeout(() => ws.send('1Escape'), 80);
+                }
+            }
+            knob.style.left = (center.x - KNOB_RADIUS) + 'px';
+            knob.style.top = (center.y - KNOB_RADIUS) + 'px';
+            sendDirection(null);
+            joystickTouchActive = false;
+            touchStartPos = null; // 重設
+            e.stopPropagation();
         });
         joystickArea.addEventListener('mousedown', e => {
-          mouseActive = true;
-          handleJoystickMouse(e);
+            mouseActive = true;
+            handleJoystickMouse(e);
         });
         window.addEventListener('mousemove', e => {
-          if (!mouseActive) return;
-          handleJoystickMouse(e);
+            if (!mouseActive) return;
+            handleJoystickMouse(e);
         });
         window.addEventListener('mouseup', e => {
-          if (!mouseActive) return;
-          mouseActive = false;
-          knob.style.left = (center.x - 20) + 'px';
-          knob.style.top = (center.y - 20) + 'px';
-          sendDirection(null);
+            if (!mouseActive) return;
+            mouseActive = false;
+            knob.style.left = (center.x - KNOB_RADIUS) + 'px';
+            knob.style.top = (center.y - KNOB_RADIUS) + 'px';
+            sendDirection(null);
         });
 
         function handleJoystickMouse(e) {
-          // 以搖桿區域中心為基準計算滑鼠座標
-          const rect = joystickArea.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const dx = x - center.x;
-          const dy = y - center.y;
-          // knob 位置可限制最大半徑，或允許超出
-          const maxDist = center.x;
-          let dist = Math.sqrt(dx*dx + dy*dy);
-          let ratio = dist > maxDist ? maxDist / dist : 1;
-          knob.style.left = (center.x + dx * ratio - 20) + 'px';
-          knob.style.top = (center.y + dy * ratio - 20) + 'px';
-          sendDirection(getDirection(dx, dy));
+            // 以搖桿區域中心為基準計算滑鼠座標
+            const rect = joystickArea.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const dx = x - center.x;
+            const dy = y - center.y;
+            // knob 位置可限制最大半徑，或允許超出
+            const maxDist = center.x;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            let ratio = dist > maxDist ? maxDist / dist : 1;
+            knob.style.left = (center.x + dx * ratio - KNOB_RADIUS) + 'px';
+            knob.style.top = (center.y + dy * ratio - KNOB_RADIUS) + 'px';
+            sendDirection(getDirection(dx, dy));
         }
 
         // 處理畫面左右半邊的點擊/觸控作為確定與取消
+        let lastTouchTime = 0;
+        const TOUCH_DEBOUNCE_MS = 200;
         function handleConfirmCancel(e, isDown) {
             let x;
             if (e.touches && e.touches.length > 0) {
+                // debounce: 避免連點
+                const now = Date.now();
+                if (now - lastTouchTime < TOUCH_DEBOUNCE_MS) {
+                    e.preventDefault && e.preventDefault();
+                    return;
+                }
+                lastTouchTime = now;
                 x = e.touches[0].clientX;
+                e.preventDefault && e.preventDefault();
             } else {
                 x = e.clientX;
             }
@@ -312,19 +369,17 @@
         }
 
         // 滑鼠事件
-        canvas.addEventListener('mousedown', e => {
-            handleConfirmCancel(e, true);
-        });
-        canvas.addEventListener('mouseup', e => {
-            handleConfirmCancel(e, false);
-        });
+        canvas.addEventListener('mousedown', e => { handleConfirmCancel(e, true); });
+        canvas.addEventListener('mouseup', e => { handleConfirmCancel(e, false); });
 
         // 觸控事件
-        canvas.addEventListener('touchstart', e => {
-            handleConfirmCancel(e, true);
-        });
-        canvas.addEventListener('touchend', e => {
-            handleConfirmCancel(e, false);
+        canvas.addEventListener('touchstart', e => { if (joystickTouchActive) return; handleConfirmCancel(e, true); });
+        canvas.addEventListener('touchend', e => { if (joystickTouchActive) return; handleConfirmCancel(e, false); });
+
+        // 阻止搖桿區域被選取（防止拖曳選取）
+        ['joystick-area', 'joystick-base', 'joystick-knob'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.addEventListener('selectstart', e => e.preventDefault()); }
         });
     </script>
 </body>
