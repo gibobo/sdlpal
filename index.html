@@ -23,11 +23,46 @@
             image-rendering: pixelated;
             object-fit: contain;
         }
+
+        /* 搖桿樣式 */
+        #joystick-area {
+            position: absolute;
+            left: 2vw;
+            bottom: 8vh;
+            width: 120px;
+            height: 120px;
+            touch-action: none;
+            z-index: 20;
+        }
+
+        #joystick-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(100, 100, 100, 0.2);
+            border-radius: 50%;
+        }
+
+        #joystick-knob {
+            position: absolute;
+            left: 40px;
+            top: 40px;
+            width: 40px;
+            height: 40px;
+            background: rgba(200, 200, 200, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+            transition: left 0.05s, top 0.05s;
+        }
     </style>
 </head>
 
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div id="joystick-area">
+        <div id="joystick-base"></div>
+        <div id="joystick-knob"></div>
+    </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -176,6 +211,121 @@
         document.addEventListener('keydown', ensureAudioContext);
         document.addEventListener('mousedown', ensureAudioContext);
         document.addEventListener('touchstart', ensureAudioContext);
+
+        const joystickArea = document.getElementById('joystick-area');
+        const knob = document.getElementById('joystick-knob');
+        const baseRect = joystickArea.getBoundingClientRect();
+        const center = { x: baseRect.width / 2, y: baseRect.height / 2 };
+        let activeDir = null;
+
+        function getDirection(dx, dy) {
+          const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+          if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return null;
+          if (angle >= -45 && angle < 45) return 'ArrowRight';
+          if (angle >= 45 && angle < 135) return 'ArrowDown';
+          if (angle >= -135 && angle < -45) return 'ArrowUp';
+          return 'ArrowLeft';
+        }
+
+        function sendDirection(dir) {
+          ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].forEach(k => {
+            if (k === dir && activeDir !== dir) ws.send(`0${k}`);
+            else if (k !== dir && activeDir === k) ws.send(`1${k}`);
+          });
+          activeDir = dir;
+        }
+
+        let mouseActive = false;
+
+        joystickArea.addEventListener('touchstart', e => {
+          const touch = e.touches[0];
+          const rect = joystickArea.getBoundingClientRect();
+          const x = touch.clientX - rect.left;
+          const y = touch.clientY - rect.top;
+          const dx = x - center.x;
+          const dy = y - center.y;
+          knob.style.left = (center.x + dx/2 - 20) + 'px';
+          knob.style.top = (center.y + dy/2 - 20) + 'px';
+          sendDirection(getDirection(dx, dy));
+        });
+        joystickArea.addEventListener('touchmove', e => {
+          const touch = e.touches[0];
+          const rect = joystickArea.getBoundingClientRect();
+          const x = touch.clientX - rect.left;
+          const y = touch.clientY - rect.top;
+          const dx = x - center.x;
+          const dy = y - center.y;
+          knob.style.left = (center.x + dx/2 - 20) + 'px';
+          knob.style.top = (center.y + dy/2 - 20) + 'px';
+          sendDirection(getDirection(dx, dy));
+        });
+        joystickArea.addEventListener('touchend', e => {
+          knob.style.left = (center.x - 20) + 'px';
+          knob.style.top = (center.y - 20) + 'px';
+          sendDirection(null);
+        });
+        joystickArea.addEventListener('mousedown', e => {
+          mouseActive = true;
+          handleJoystickMouse(e);
+        });
+        window.addEventListener('mousemove', e => {
+          if (!mouseActive) return;
+          handleJoystickMouse(e);
+        });
+        window.addEventListener('mouseup', e => {
+          if (!mouseActive) return;
+          mouseActive = false;
+          knob.style.left = (center.x - 20) + 'px';
+          knob.style.top = (center.y - 20) + 'px';
+          sendDirection(null);
+        });
+
+        function handleJoystickMouse(e) {
+          // 以搖桿區域中心為基準計算滑鼠座標
+          const rect = joystickArea.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const dx = x - center.x;
+          const dy = y - center.y;
+          // knob 位置可限制最大半徑，或允許超出
+          const maxDist = center.x;
+          let dist = Math.sqrt(dx*dx + dy*dy);
+          let ratio = dist > maxDist ? maxDist / dist : 1;
+          knob.style.left = (center.x + dx * ratio - 20) + 'px';
+          knob.style.top = (center.y + dy * ratio - 20) + 'px';
+          sendDirection(getDirection(dx, dy));
+        }
+
+        // 處理畫面左右半邊的點擊/觸控作為確定與取消
+        function handleConfirmCancel(e, isDown) {
+            let x;
+            if (e.touches && e.touches.length > 0) {
+                x = e.touches[0].clientX;
+            } else {
+                x = e.clientX;
+            }
+            const rect = canvas.getBoundingClientRect();
+            const relX = x - rect.left;
+            const isRight = relX > rect.width / 2;
+            const key = isRight ? 'Enter' : 'Escape';
+            ws.send((isDown ? '0' : '1') + key);
+        }
+
+        // 滑鼠事件
+        canvas.addEventListener('mousedown', e => {
+            handleConfirmCancel(e, true);
+        });
+        canvas.addEventListener('mouseup', e => {
+            handleConfirmCancel(e, false);
+        });
+
+        // 觸控事件
+        canvas.addEventListener('touchstart', e => {
+            handleConfirmCancel(e, true);
+        });
+        canvas.addEventListener('touchend', e => {
+            handleConfirmCancel(e, false);
+        });
     </script>
 </body>
 
