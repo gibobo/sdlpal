@@ -346,7 +346,9 @@
         // 處理畫面左右半邊的點擊/觸控作為確定與取消
         let lastTouchTime = 0;
         const TOUCH_DEBOUNCE_MS = 200;
+        // 只在 touchend 時觸發 Enter（右半邊）與 Escape（joystick中心）
         function handleConfirmCancel(e, isDown) {
+            if (isDown) return; // 只處理放開（touchend/mouseup）
             let x;
             if (e.touches && e.touches.length > 0) {
                 // debounce: 避免連點
@@ -356,7 +358,7 @@
                     return;
                 }
                 lastTouchTime = now;
-                x = e.touches[0].clientX;
+                x = e.changedTouches ? e.changedTouches[0].clientX : e.touches[0].clientX;
                 e.preventDefault && e.preventDefault();
             } else {
                 x = e.clientX;
@@ -364,16 +366,20 @@
             const rect = canvas.getBoundingClientRect();
             const relX = x - rect.left;
             const isRight = relX > rect.width / 2;
-            const key = isRight ? 'Enter' : 'Escape';
-            ws.send((isDown ? '0' : '1') + key);
+            if (isRight) {
+                const key = 'Enter';
+                ws.send('0' + key);
+                setTimeout(() => ws.send('1' + key), 80);
+            }
+            // 左半邊不再傳送 Escape
         }
 
         // 滑鼠事件
-        canvas.addEventListener('mousedown', e => { handleConfirmCancel(e, true); });
+        canvas.addEventListener('mousedown', e => { /* 不處理 */ });
         canvas.addEventListener('mouseup', e => { handleConfirmCancel(e, false); });
 
         // 觸控事件
-        canvas.addEventListener('touchstart', e => { if (joystickTouchActive) return; handleConfirmCancel(e, true); });
+        canvas.addEventListener('touchstart', e => { /* 不處理 */ });
         canvas.addEventListener('touchend', e => { if (joystickTouchActive) return; handleConfirmCancel(e, false); });
 
         // 阻止搖桿區域被選取（防止拖曳選取）
