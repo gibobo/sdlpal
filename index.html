@@ -270,18 +270,22 @@
         }
 
         joystickArea.addEventListener('touchstart', e => {
+            if (mouseActive) return;
             joystickTouchActive = true;
             const touch = e.touches[0];
             const x = touch.clientX - baseRect.left;
             const y = touch.clientY - baseRect.top;
             touchStartPos = { x, y };
+            ws.send(`==> Touch Start`);
             sendDirection(getDirection(x, y));
             e.stopPropagation();
         });
         joystickArea.addEventListener('touchmove', e => {
+            touchStartPos = null; // 重設(拖曳非點擊)
             const touch = e.touches[0];
             const x = touch.clientX - baseRect.left;
             const y = touch.clientY - baseRect.top;
+            ws.send(`==> Touch Move`);
             sendDirection(getDirection(x, y));
             e.stopPropagation();
         });
@@ -297,16 +301,20 @@
                 ws.send('0Escape');
                 setTimeout(() => ws.send('1Escape'), 80);
             }
+            ws.send(`==> Touch End`);
             sendDirection(null);
             joystickTouchActive = false;
+            mouseActive = false;
             touchStartPos = null;
             e.stopPropagation();
         });
         joystickArea.addEventListener('mousedown', e => {
+            if (joystickTouchActive) return;
             mouseActive = true;
             const x = e.clientX - baseRect.left;
             const y = e.clientY - baseRect.top;
             touchStartPos = { x, y };
+            ws.send(`==> Mouse Start`);
             sendDirection(getDirection(x, y));
         });
         window.addEventListener('mousemove', e => {
@@ -314,6 +322,7 @@
             touchStartPos = null; // 重設(拖曳非點擊)
             const x = e.clientX - baseRect.left;
             const y = e.clientY - baseRect.top;
+            ws.send(`==> Mouse Move`);
             sendDirection(getDirection(x, y));
         });
         window.addEventListener('mouseup', e => {
@@ -328,7 +337,9 @@
                 ws.send('0Escape');
                 setTimeout(() => ws.send('1Escape'), 80);
             }
+            ws.send(`==> Mouse End`);
             sendDirection(null);
+            joystickTouchActive = false;
             mouseActive = false;
             touchStartPos = null;
         });
@@ -337,51 +348,30 @@
         let lastTouchTime = 0;
         const touch_debounce_ms = 200;
         // 只在 touchend 時觸發 Enter（右半邊）與 Escape（joystick中心）
-        function handleConfirmCancel(e, isDown) {
-            if (isDown) return; // 只處理放開（touchend/mouseup）
-            let x;
+        function handleConfirmCancel(e) {
+            let x, y;
             if (e.touches && e.touches.length > 0) {
-                // debounce: 避免連點
-                const now = Date.now();
-                if (now - lastTouchTime < touch_debounce_ms) {
-                    e.preventDefault && e.preventDefault();
-                    return;
-                }
-                lastTouchTime = now;
                 x = e.changedTouches ? e.changedTouches[0].clientX : e.touches[0].clientX;
-                e.preventDefault && e.preventDefault();
-            } else {
-                x = e.clientX;
+                y = e.changedTouches ? e.changedTouches[0].clientY : e.touches[0].clientY;
             }
+            else {
+                x = e.clientX;
+                y = e.clientY;
+            }
+
             const rect = canvas.getBoundingClientRect();
             const relX = x - rect.left;
             const isRight = relX > rect.width / 2;
             if (isRight) {
+                ws.send(`==> Handle Confirm Cancel`);
                 const key = 'Enter';
                 ws.send('0' + key);
                 setTimeout(() => ws.send('1' + key), 80);
             }
         }
 
-        // 滑鼠事件
-        canvas.addEventListener('mousedown', e => { /* 不處理 */ });
-        canvas.addEventListener('mouseup', e => {
-            handleConfirmCancel(e, false);
-        });
-
-        // 觸控事件
-        canvas.addEventListener('touchstart', e => { /* 不處理 */ });
-        canvas.addEventListener('touchend', e => {
-            if (joystickTouchActive)
-                return;
-            handleConfirmCancel(e, false);
-        });
-
-        // 阻止搖桿區域被選取（防止拖曳選取）
-        ['joystick-area', 'joystick-base', 'joystick-knob'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.addEventListener('selectstart', e => e.preventDefault()); }
-        });
+        canvas.addEventListener('mouseup', e => { handleConfirmCancel(e); });
+        canvas.addEventListener('touchend', e => { handleConfirmCancel(e); });
     </script>
 </body>
 
