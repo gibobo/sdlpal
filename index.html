@@ -4,18 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <title>PAL</title>
+    <!-- 禁止縮放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <style>
         html,
         body {
             margin: 0;
             padding: 0;
             width: 100vw;
-            height: 100vh;
+            /* height: 100vh; 移除這行，避免 iOS Safari 裁切 */
             background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            touch-action: none;
+            /* 新增：防止縮放/滑動 */
         }
 
         canvas {
@@ -90,6 +94,7 @@
             let w = innerWidth, h = innerHeight;
             if (w / h > ratio) w = h * ratio;
             else h = w / ratio;
+            document.body.style.height = h + 'px'; // 新增: 動態設定 body 高度
             canvas.style.width = w + 'px';
             canvas.style.height = h + 'px';
             const dpr = window.devicePixelRatio || 1;
@@ -313,7 +318,7 @@
             const x = touch.clientX;
             const y = touch.clientY;
             touchStartPos = null; // 重設(拖曳非點擊)
-            ws.send(`==> Touch Move`);
+            // ws.send(`==> Touch Move`);
             sendDirection(getDirection(x, y));
             e.stopPropagation();
         });
@@ -358,6 +363,11 @@
             resetKnobPosition();
         });
         resetKnobPosition();
+
+        // 防止 iOS Safari 雙指縮放
+        window.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
     </script>
 </body>
 
