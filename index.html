@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <title>PAL</title>
     <!-- 禁止縮放 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <style>
         html,
         body {
@@ -225,6 +226,7 @@
         let mouseActive = false;
         let touchActive = false;
         let touchStartPos = null;
+        let joystickTouchId = null; // 追蹤搖桿手指 id
 
         function getJoystickCenter() {
             const x = window.innerWidth * 0.10 + JOYSTICK_RADIUS;
@@ -261,15 +263,14 @@
         }
 
         function sendDirection(dir) {
-            if (dir === null) {
-                resetKnobPosition();
-                if (activeDir !== null) ws.send(`1${activeDir}`);
-            }
-            else {
-                ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].forEach(k => {
-                    if (k === dir && activeDir !== dir) ws.send(`0${k}`);
-                    else if (k !== dir && activeDir === k) ws.send(`1${k}`);
-                });
+            if (activeDir !== dir) {
+                if (activeDir !== null)
+                    ws.send(`1${activeDir}`); // 先鬆開前一個方向
+
+                if (dir === null)
+                    resetKnobPosition();    // 重設搖桿位置
+                else
+                    ws.send(`0${dir}`); // 再按下新方向
             }
             activeDir = dir;
         }
@@ -301,32 +302,54 @@
         }
 
         window.addEventListener('touchstart', e => {
-            const touch = e.touches[0];
-            const x = touch.clientX;
-            const y = touch.clientY;
-            touchActive = true;
-            ws.send(`==> Touch Start`);
-            if (Math.abs(x - JoystickCenter.x) < JOYSTICK_RADIUS &&
-                Math.abs(y - JoystickCenter.y) < JOYSTICK_RADIUS) {
-                touchStartPos = { x, y };
-                sendDirection(getDirection(x, y));
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
+                const x = touch.clientX;
+                const y = touch.clientY;
+                ws.send(`==> Touch Start ${touch.identifier}`);
+                if (joystickTouchId === null &&
+                    Math.abs(x - JoystickCenter.x) < JOYSTICK_RADIUS &&
+                    Math.abs(y - JoystickCenter.y) < JOYSTICK_RADIUS) {
+                    joystickTouchId = touch.identifier;
+                    touchStartPos = { x, y };
+                    sendDirection(getDirection(x, y));
+                }
             }
+            touchActive = true;
             e.stopPropagation();
         });
         window.addEventListener('touchmove', e => {
-            const touch = e.touches[0];
-            const x = touch.clientX;
-            const y = touch.clientY;
-            touchStartPos = null; // 重設(拖曳非點擊)
-            // ws.send(`==> Touch Move`);
-            sendDirection(getDirection(x, y));
+            if (joystickTouchId !== null) {
+                // 找到搖桿手指
+                for (let i = 0; i < e.touches.length; i++) {
+                    const touch = e.touches[i];
+                    if (touch.identifier === joystickTouchId) {
+                        const x = touch.clientX;
+                        const y = touch.clientY;
+                        touchStartPos = null;
+                        sendDirection(getDirection(x, y));
+                        break;
+                    }
+                }
+            }
             e.stopPropagation();
         });
         window.addEventListener('touchend', e => {
-            ws.send(`==> Touch End`);
-            sendDirection(null);
+            // 檢查搖桿手指是否離開
+            let joystickStillActive = false;
+            for (let i = 0; i < e.touches.length; i++) {
+                if (e.touches[i].identifier === joystickTouchId) {
+                    joystickStillActive = true;
+                    break;
+                }
+            }
+            if (!joystickStillActive && joystickTouchId !== null) {
+                ws.send(`==> Touch End`);
+                sendDirection(null);
+                joystickTouchId = null;
+                touchStartPos = null;
+            }
             handleConfirmCancel(e);
-            touchStartPos = null;
             setTimeout(() => { touchActive = false; }, 500);
             e.stopPropagation();
         });
@@ -365,7 +388,7 @@
         resetKnobPosition();
 
         // 防止 iOS Safari 雙指縮放
-        window.addEventListener('gesturestart', function(e) {
+        window.addEventListener('gesturestart', function (e) {
             e.preventDefault();
         });
     </script>
