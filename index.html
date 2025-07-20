@@ -27,6 +27,10 @@
             aspect-ratio: 320/200;
             image-rendering: pixelated;
             object-fit: contain;
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
         }
 
         /* 保留 knob 樣式 */
@@ -40,7 +44,6 @@
             pointer-events: none;
             transition: left 0.05s, top 0.05s;
             user-select: none;
-            /* 防止選取 */
             -webkit-user-select: none;
             -ms-user-select: none;
             -moz-user-select: none;
@@ -57,6 +60,10 @@
             background: rgba(100, 100, 100, 0.18);
             border-radius: 50%;
             pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
             z-index: 20;
         }
     </style>
@@ -92,10 +99,14 @@
 
         function resizeCanvas() {
             const ratio = 320 / 200;
-            let w = innerWidth, h = innerHeight;
-            if (w / h > ratio) w = h * ratio;
-            else h = w / ratio;
-            document.body.style.height = h + 'px'; // 新增: 動態設定 body 高度
+            let w = window.innerWidth;
+            let h = window.innerHeight;
+            // 以高度為主，寬度不能超過比例
+            if (w / h > ratio) {
+                w = h * ratio;
+            } else {
+                h = w / ratio;
+            }
             canvas.style.width = w + 'px';
             canvas.style.height = h + 'px';
             const dpr = window.devicePixelRatio || 1;
@@ -275,29 +286,21 @@
             activeDir = dir;
         }
 
-        function handleConfirmCancel(e) {
-            let x, y;
-            if (e.touches && e.touches.length > 0) {
-                x = e.changedTouches ? e.changedTouches[0].clientX : e.touches[0].clientX;
-                y = e.changedTouches ? e.changedTouches[0].clientY : e.touches[0].clientY;
-            }
-            else {
-                x = e.clientX;
-                y = e.clientY;
-            }
+        function sendCommand(cmd) {
+            ws.send(`0${cmd}`);
+            ws.send(`1${cmd}`);
+        }
 
-            if (touchStartPos) {
-                ws.send(`==> Handle Confirm Cancel`);
-                ws.send('0Escape');
-                ws.send('1Escape');
-                return;
-            }
+        function handleConfirmCancel() {
+            ws.send(`==> Handle Confirm Cancel`);
             const canvasRect = canvas.getBoundingClientRect();
             const isRight = x > (canvasRect.left + canvasRect.width / 2);
-            if (isRight && !mouseActive) {
-                ws.send(`==> Handle Confirm Cancel`);
-                ws.send('0Enter');
-                ws.send('1Enter');
+            if (touchStartPos) {
+                sendCommand('Escape');
+                touchStartPos = null;
+            }
+            else if (isRight) {
+                sendCommand('Enter');
             }
         }
 
@@ -306,13 +309,15 @@
                 const touch = e.touches[i];
                 const x = touch.clientX;
                 const y = touch.clientY;
-                ws.send(`==> Touch Start ${touch.identifier}`);
                 if (joystickTouchId === null &&
                     Math.abs(x - JoystickCenter.x) < JOYSTICK_RADIUS &&
                     Math.abs(y - JoystickCenter.y) < JOYSTICK_RADIUS) {
                     joystickTouchId = touch.identifier;
                     touchStartPos = { x, y };
                     sendDirection(getDirection(x, y));
+                    ws.send(`==> Touch Start (joystick)  ${touch.identifier}`);
+                } else {
+                    ws.send(`==> Touch Start (command)  ${touch.identifier}`);
                 }
             }
             touchActive = true;
@@ -335,22 +340,21 @@
             e.stopPropagation();
         });
         window.addEventListener('touchend', e => {
-            // 檢查搖桿手指是否離開
-            let joystickStillActive = false;
-            for (let i = 0; i < e.touches.length; i++) {
-                if (e.touches[i].identifier === joystickTouchId) {
-                    joystickStillActive = true;
-                    break;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                if (t.identifier === joystickTouchId) { // 如果是搖桿手指
+                    ws.send(`==> Touch End (joystick) ${t.identifier}`);
+                    if (touchStartPos)
+                        sendCommand('Escape');
+                    else
+                        sendDirection(null);
+                    joystickTouchId = null; // 重設搖桿手指 ID
+                    touchStartPos = null; // 重設觸控起始位置
+                } else { // 如果是其他手指
+                    ws.send(`==> Touch End (command) ${t.identifier}`);
+                    sendCommand('Enter');
                 }
             }
-            if (!joystickStillActive && joystickTouchId !== null) {
-                ws.send(`==> Touch End`);
-                sendDirection(null);
-                joystickTouchId = null;
-                touchStartPos = null;
-            }
-            handleConfirmCancel(e);
-            setTimeout(() => { touchActive = false; }, 500);
             e.stopPropagation();
         });
         window.addEventListener('mousedown', e => {
@@ -366,31 +370,33 @@
             }
         });
         window.addEventListener('mousemove', e => {
-            if (touchActive || !mouseActive) return;
+            if (touchActive) return;
             const x = e.clientX;
             const y = e.clientY;
             touchStartPos = null; // 重設(拖曳非點擊)
-            // ws.send(`==> Mouse Move`);
+            ws.send(`==> Mouse Move`);
             sendDirection(getDirection(x, y));
         });
         window.addEventListener('mouseup', e => {
             if (touchActive) return;
             ws.send(`==> Mouse End`);
             sendDirection(null);
-            handleConfirmCancel(e);
+            handleConfirmCancel();
             mouseActive = false;
             touchStartPos = null;
         });
 
-        window.addEventListener('resize', () => {
-            resetKnobPosition();
+        // 防止 iOS Safari 雙指縮放
+        window.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+        window.addEventListener('resize', () => { resetKnobPosition(); });
+        // 新增：監聽設備旋轉
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                resizeCanvas();
+                resetKnobPosition();
+            }, 300); // 延遲執行，確保螢幕尺寸已更新
         });
         resetKnobPosition();
-
-        // 防止 iOS Safari 雙指縮放
-        window.addEventListener('gesturestart', function (e) {
-            e.preventDefault();
-        });
     </script>
 </body>
 
