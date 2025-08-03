@@ -238,6 +238,11 @@
         let touchActive = false;
         let touchStartPos = null;
         let joystickTouchId = null; // 追蹤搖桿手指 id
+        let dragStartPos = null; // 拖曳起始位置
+        let lastDragDirection = null; // 上次拖曳方向
+        let dragMoveCount = 0; // 拖曳移動計數器
+        let lastWheelTime = 0; // 上次滾輪事件時間
+        const WHEEL_THROTTLE_DELAY = 150; // 滾輪防抖延遲（毫秒）
 
         function getJoystickCenter() {
             const x = window.innerWidth * 0.10 + JOYSTICK_RADIUS;
@@ -291,7 +296,45 @@
             ws.send(`1${cmd}`);
         }
 
-        function handleConfirmCancel() {
+        // 獲取遊戲畫面中心點
+        function getGameCenter() {
+            const canvasRect = canvas.getBoundingClientRect();
+            return {
+                x: canvasRect.left + canvasRect.width / 2,
+                y: canvasRect.top + canvasRect.height / 2
+            };
+        }
+
+        // 基於遊戲畫面中心的方向判斷函數
+        function getDirectionFromCenter(currentX, currentY) {
+            const center = getGameCenter();
+            const dx = currentX - center.x;
+            const dy = currentY - center.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // 距離太小，不判斷方向（死區）
+            if (distance < 30) return null;
+            
+            // 計算角度
+            let angle = Math.atan2(dy, dx);
+            let direction = null;
+            
+            if (angle >= -Math.PI / 4 && angle < Math.PI / 4) direction = 'ArrowRight';
+            else if (angle >= Math.PI / 4 && angle < 3 * Math.PI / 4) direction = 'ArrowDown';
+            else if (angle >= -3 * Math.PI / 4 && angle < -Math.PI / 4) direction = 'ArrowUp';
+            else direction = 'ArrowLeft';
+            
+            return direction;
+        }
+
+        // 重設拖曳狀態
+        function resetDragState() {
+            dragStartPos = null;
+            lastDragDirection = null;
+            dragMoveCount = 0;
+        }
+
+        function handleConfirmCancel(x, y) {
             ws.send(`==> Handle Confirm Cancel`);
             const canvasRect = canvas.getBoundingClientRect();
             const isRight = x > (canvasRect.left + canvasRect.width / 2);
@@ -359,35 +402,231 @@
         });
         window.addEventListener('mousedown', e => {
             if (touchActive) return;
+            
+            // 阻止事件冒泡和預設行為，防止附加元件干擾
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
             const x = e.clientX;
             const y = e.clientY;
             ws.send(`==> Mouse Start`);
-            if (Math.abs(x - JoystickCenter.x) < JOYSTICK_RADIUS &&
-                Math.abs(y - JoystickCenter.y) < JOYSTICK_RADIUS) {
+            
+            if (e.button === 0) { // 左鍵
                 mouseActive = true;
                 touchStartPos = { x, y };
-                sendDirection(getDirection(x, y));
+                
+                if (Math.abs(x - JoystickCenter.x) < JOYSTICK_RADIUS &&
+                    Math.abs(y - JoystickCenter.y) < JOYSTICK_RADIUS) {
+                    // 在搖桿區域內 - 立即使用搖桿模式
+                    sendDirection(getDirection(x, y));
+                    resetDragState(); // 重設拖曳狀態
+                } else {
+                    // 在搖桿區域外 - 先不發送任何命令，等待 mousemove 或 mouseup
+                    ws.send(`==> Mouse: Outside joystick area, waiting for move/up`);
+                }
+            } else if (e.button === 1) { // 中鍵（滾輪按鈕）
+                if (Math.abs(x - JoystickCenter.x) >= JOYSTICK_RADIUS ||
+                    Math.abs(y - JoystickCenter.y) >= JOYSTICK_RADIUS) {
+                    // 在搖桿區域外 - 根據中心位置發送方向命令
+                    const direction = getDirectionFromCenter(x, y);
+                    if (direction) {
+                        ws.send(`==> Mouse: Middle click outside joystick area at (${x}, ${y}) -> ${direction}`);
+                        sendDirection(direction); // 使用 sendDirection 而不是 sendCommand
+                        mouseActive = true; // 標記滑鼠為活動狀態以維持方向控制
+                        touchStartPos = { x, y }; // 設置起始位置
+                    } else {
+                        ws.send(`==> Mouse: Middle click outside joystick area at (${x}, ${y}) -> too close to center, no direction`);
+                    }
+                } else {
+                    // 在搖桿區域內 - 發送 Escape
+                    ws.send(`==> Mouse: Middle click in joystick area -> Escape`);
+                    sendCommand('Escape');
+                }
+            } else if (e.button === 2) { // 右鍵
+                // 右鍵立即發送 Escape
+                ws.send(`==> Mouse: Right click -> Escape`);
+                sendCommand('Escape');
             }
         });
         window.addEventListener('mousemove', e => {
-            if (touchActive) return;
+            if (touchActive || !mouseActive) return; // 只在滑鼠按下時才處理
+            
+            // 阻止事件冒泡和預設行為
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
             const x = e.clientX;
             const y = e.clientY;
-            touchStartPos = null; // 重設(拖曳非點擊)
-            ws.send(`==> Mouse Move`);
-            sendDirection(getDirection(x, y));
+            
+            if (Math.abs(x - JoystickCenter.x) < JOYSTICK_RADIUS &&
+                Math.abs(y - JoystickCenter.y) < JOYSTICK_RADIUS) {
+                // 在搖桿區域內，使用搖桿邏輯
+                ws.send(`==> Mouse Move (joystick)`);
+                touchStartPos = null; // 清除點擊狀態，表示進入拖曳模式
+                sendDirection(getDirection(x, y));
+            } else {
+                // 在搖桿區域外，檢查是否有移動（拖曳）
+                if (touchStartPos) {
+                    const dx = x - touchStartPos.x;
+                    const dy = y - touchStartPos.y;
+                    const moveDistance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // 如果移動距離超過閾值，進入方向控制模式
+                    if (moveDistance > 10) {
+                        ws.send(`==> Mouse Move: Started dragging outside joystick (distance: ${moveDistance})`);
+                        touchStartPos = null; // 清除點擊狀態，表示進入拖曳模式
+                        
+                        // 使用遊戲畫面中心為基準的方向判斷
+                        const direction = getDirectionFromCenter(x, y);
+                        if (direction) {
+                            sendDirection(direction);
+                        }
+                    }
+                } else {
+                    // 已經在拖曳模式中，繼續發送方向命令
+                    ws.send(`==> Mouse Move: Continue dragging outside joystick`);
+                    const direction = getDirectionFromCenter(x, y);
+                    if (direction) {
+                        sendDirection(direction);
+                    }
+                }
+            }
         });
         window.addEventListener('mouseup', e => {
             if (touchActive) return;
-            ws.send(`==> Mouse End`);
-            sendDirection(null);
-            handleConfirmCancel();
+            
+            // 阻止事件冒泡和預設行為
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const x = e.clientX;
+            const y = e.clientY;
+            ws.send(`==> Mouse End (button: ${e.button})`);
+            
+            if (mouseActive) {
+                if (e.button === 1) {
+                    // 中鍵釋放 - 只需停止方向輸入
+                    ws.send(`==> Mouse: Middle button release -> stop direction`);
+                    sendDirection(null);
+                } else if (e.button === 0) {
+                    // 左鍵釋放
+                    if (touchStartPos) {
+                        // 如果還有 touchStartPos，表示是短按點擊（沒有拖曳）
+                        if (Math.abs(x - JoystickCenter.x) < JOYSTICK_RADIUS &&
+                            Math.abs(y - JoystickCenter.y) < JOYSTICK_RADIUS) {
+                            // 在搖桿區域內點擊 - 發送 Escape
+                            ws.send(`==> Mouse: Short click in joystick area -> Escape`);
+                            sendCommand('Escape');
+                        } else {
+                            // 在搖桿區域外點擊 - 發送 Enter
+                            ws.send(`==> Mouse: Short click outside joystick area -> Enter`);
+                            sendCommand('Enter');
+                        }
+                    } else {
+                        // touchStartPos 已被清除，表示是拖曳操作，只停止方向輸入
+                        ws.send(`==> Mouse: End of drag operation`);
+                    }
+                    
+                    // 停止方向輸入
+                    sendDirection(null);
+                } else if (e.button === 2) {
+                    // 右鍵釋放 - 右鍵在 mousedown 時已經發送了 Escape，這裡不需要額外處理
+                    ws.send(`==> Mouse: Right button release`);
+                }
+            }
+            
             mouseActive = false;
             touchStartPos = null;
         });
 
         // 防止 iOS Safari 雙指縮放
         window.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+        
+        // 強化禁用右鍵選單和防止附加元件干擾
+        window.addEventListener('contextmenu', function (e) { 
+            e.preventDefault(); 
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }, { capture: true });
+        
+        // 禁用拖放功能，防止某些附加元件誤觸發
+        window.addEventListener('dragstart', function (e) { 
+            e.preventDefault(); 
+            e.stopPropagation();
+            return false;
+        }, { capture: true });
+        
+        window.addEventListener('drop', function (e) { 
+            e.preventDefault(); 
+            e.stopPropagation();
+            return false;
+        }, { capture: true });
+        
+        window.addEventListener('dragover', function (e) { 
+            e.preventDefault(); 
+            e.stopPropagation();
+            return false;
+        }, { capture: true });
+        
+        // 防止選取文字（某些附加元件可能會在選取時觸發）
+        window.addEventListener('selectstart', function (e) { 
+            e.preventDefault(); 
+            return false;
+        }, { capture: true });
+        
+        // 滑鼠滾輪事件處理
+        window.addEventListener('wheel', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // 防抖機制 - 限制滾輪事件觸發頻率
+            const currentTime = Date.now();
+            if (currentTime - lastWheelTime < WHEEL_THROTTLE_DELAY) {
+                ws.send(`==> Wheel: Throttled (${currentTime - lastWheelTime}ms since last)`);
+                return false;
+            }
+            lastWheelTime = currentTime;
+            
+            const deltaY = e.deltaY;
+            const deltaX = e.deltaX;
+            let command = null;
+            
+            // 檢查是否主要是水平滾動
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // 水平滾動（左右撥動）
+                if (deltaX < 0) {
+                    // 向左撥動 - 發送 ArrowLeft
+                    command = 'ArrowLeft';
+                    ws.send(`==> Wheel: Left Scroll (${deltaX}, mode: ${e.deltaMode}) -> ArrowLeft`);
+                } else if (deltaX > 0) {
+                    // 向右撥動 - 發送 ArrowRight
+                    command = 'ArrowRight';
+                    ws.send(`==> Wheel: Right Scroll (${deltaX}, mode: ${e.deltaMode}) -> ArrowRight`);
+                }
+            } else {
+                // 垂直滾動（上下滾動）
+                if (deltaY < 0) {
+                    // 向上滾動 - 發送 ArrowUp
+                    command = 'ArrowUp';
+                    ws.send(`==> Wheel: Up Scroll (${deltaY}, mode: ${e.deltaMode}) -> ArrowUp`);
+                } else if (deltaY > 0) {
+                    // 向下滾動 - 發送 ArrowDown
+                    command = 'ArrowDown';
+                    ws.send(`==> Wheel: Down Scroll (${deltaY}, mode: ${e.deltaMode}) -> ArrowDown`);
+                }
+            }
+            
+            if (command) {
+                sendCommand(command);
+            }
+            
+            return false;
+        }, { passive: false, capture: true });
         window.addEventListener('resize', () => { resetKnobPosition(); });
         // 新增：監聽設備旋轉
         window.addEventListener('orientationchange', () => {
