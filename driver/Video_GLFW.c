@@ -62,8 +62,15 @@ void DRIVER_FrameShow(
         dst += SCREEN_W * 3;
     }
 
-    VIDEO_GLSL_RenderCopy(framebuffer);
-    glfwSwapBuffers(window);
+    // Try to use OpenGL rendering if available, otherwise use software fallback
+    GLint current_context = 0;
+    if (glfwGetCurrentContext() != NULL) {
+        VIDEO_GLSL_RenderCopy(framebuffer);
+        glfwSwapBuffers(window);
+    } else {
+        // Software fallback - just poll events to keep window responsive
+        glfwPollEvents();
+    }
 }
 
 void DRIVER_UpdatePalette(const unsigned char *rgPalette) { palette = rgPalette; }
@@ -72,25 +79,36 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     window_width = width;
     window_height = height;
-    VIDEO_GLSL_Initialize(window_width, window_height);
+    // Only initialize OpenGL if we have a valid context
+    if (glfwGetCurrentContext() != NULL) {
+        VIDEO_GLSL_Initialize(window_width, window_height);
+    }
 }
 
 int DRIVER_Init_Video(void)
 {
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
-    /* Create a windowed mode window and its OpenGL context */
+    // Try software rendering first to avoid OpenGL ES issues on NVIDIA Tegra
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    
+    /* Create a windowed mode window without OpenGL context */
     window = glfwCreateWindow(window_width, window_height, "GLFWPAL", NULL, NULL);
-    if (window == NULL)
-        return -1;
-
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
+    if (window == NULL) {
+        // Fallback to OpenGL if no API doesn't work
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+        window = glfwCreateWindow(window_width, window_height, "GLFWPAL", NULL, NULL);
+        if (window == NULL)
+            return -1;
+        
+        /* Make the window's context current */
+        glfwMakeContextCurrent(window);
+        VIDEO_GLSL_Initialize(window_width, window_height);
+    }
+    
     glfwGetWindowSize(window, &window_width, &window_height);
     framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
-    VIDEO_GLSL_Initialize(window_width, window_height);
     glfwSwapInterval(1);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     return 0;
@@ -98,7 +116,10 @@ int DRIVER_Init_Video(void)
 
 void DRIVER_DeInit_Video(void)
 {
-    VIDEO_GLSL_Destroy();
+    // Only destroy OpenGL resources if we have a valid context
+    if (glfwGetCurrentContext() != NULL) {
+        VIDEO_GLSL_Destroy();
+    }
     UTIL_free(framebuffer);
     glfwTerminate();
     window = NULL;

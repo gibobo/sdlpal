@@ -78,11 +78,15 @@ void AUDIO_FillBuffer(void *stream, unsigned int len)
     // Play sound
     if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer && gAudioDevice.pSoundBuffer)
     {
-        memset(gAudioDevice.pSoundBuffer, 0, len);
-        gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, len);
+        // Prevent buffer overflow by limiting the size to the allocated buffer size
+        int buffer_size = PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
+        int safe_len = (len > buffer_size) ? buffer_size : len;
+        
+        memset(gAudioDevice.pSoundBuffer, 0, safe_len);
+        gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, safe_len);
 
         // Mix sound & music
-        AUDIO_MixNative(stream, gAudioDevice.pSoundBuffer, len >> 1);
+        AUDIO_MixNative(stream, gAudioDevice.pSoundBuffer, safe_len >> 1);
     }
 }
 

@@ -1,6 +1,5 @@
 #include "../src/util.h"
 #include "../src/video.h"
-#include "utils/video_glsl.h"
 #include <SDL.h>
 #include <string.h>
 
@@ -9,7 +8,8 @@ static int window_height = 200;
 static unsigned char *framebuffer = NULL; // RGB888
 static const unsigned char *palette = NULL;
 static SDL_Window *gpWindow = NULL;
-static SDL_GLContext gpContext = NULL;
+static SDL_Renderer *gpRenderer = NULL;
+static SDL_Texture *gpTexture = NULL;
 
 unsigned char *DRIVER_FrameBuffer()
 {
@@ -24,6 +24,7 @@ void DRIVER_FrameShow(
     const unsigned short roi_h,
     const unsigned char padding_flag)
 {
+    if (!gpRenderer || !gpTexture) return;
 
     unsigned short x, y;
     unsigned short roi_x2 = roi_x + roi_w;
@@ -59,62 +60,83 @@ void DRIVER_FrameShow(
         dst += SCREEN_W * 3;
     }
 
-    VIDEO_GLSL_RenderCopy(framebuffer);
-    SDL_GL_SwapWindow(gpWindow);
+    // Update texture with framebuffer data
+    SDL_UpdateTexture(gpTexture, NULL, framebuffer, SCREEN_W * 3);
+    
+    // Clear and render
+    SDL_SetRenderDrawColor(gpRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(gpRenderer);
+    SDL_RenderCopy(gpRenderer, gpTexture, NULL, NULL);
+    SDL_RenderPresent(gpRenderer);
 }
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height)
 {
     window_width = width;
     window_height = height;
-    VIDEO_GLSL_Initialize(window_width, window_height);
+    // Renderer automatically handles scaling
 }
 
-void DRIVER_UpdatePalette(const unsigned char *rgPalette) { palette = rgPalette; }
+void DRIVER_UpdatePalette(const unsigned char *rgPalette) 
+{ 
+    palette = rgPalette; 
+}
 
 int DRIVER_Init_Video(void)
 {
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-
-    // Before we can render anything, we need a window and a renderer.
+    // Always use software rendering to avoid driver issues
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+    
+    // Create window
     gpWindow = SDL_CreateWindow(
         "SDLPAL",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         window_width, window_height,
-        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    
     if (gpWindow == NULL)
         return -1;
 
-    //Creates OpenGL context
-    gpContext = SDL_GL_CreateContext(gpWindow);
-    if (gpContext == NULL)
+    // Create renderer
+    gpRenderer = SDL_CreateRenderer(gpWindow, -1, SDL_RENDERER_SOFTWARE);
+    if (gpRenderer == NULL)
     {
         SDL_DestroyWindow(gpWindow);
         gpWindow = NULL;
         return -1;
     }
-    SDL_GL_MakeCurrent(gpWindow, gpContext);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
+
+    // Create texture for framebuffer
+    gpTexture = SDL_CreateTexture(gpRenderer, 
+        SDL_PIXELFORMAT_RGB24, 
+        SDL_TEXTUREACCESS_STREAMING,
+        SCREEN_W, SCREEN_H);
+    
+    if (gpTexture == NULL)
+    {
+        SDL_DestroyRenderer(gpRenderer);
+        SDL_DestroyWindow(gpWindow);
+        gpRenderer = NULL;
+        gpWindow = NULL;
+        return -1;
+    }
 
     framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
-    VIDEO_GLSL_Initialize(window_width, window_height);
     return 0;
 }
 
 void DRIVER_DeInit_Video(void)
 {
-    VIDEO_GLSL_Destroy();
     UTIL_free(framebuffer);
-    if (gpContext)
-        SDL_GL_DeleteContext(gpContext);
+    if (gpTexture)
+        SDL_DestroyTexture(gpTexture);
+    if (gpRenderer)
+        SDL_DestroyRenderer(gpRenderer);
     if (gpWindow)
         SDL_DestroyWindow(gpWindow);
-
-    gpContext = NULL;
+    
+    gpTexture = NULL;
+    gpRenderer = NULL;
     gpWindow = NULL;
-    framebuffer = NULL;
 }
