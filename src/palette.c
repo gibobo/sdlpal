@@ -190,11 +190,11 @@ void PAL_FadeIn(int iPaletteNum, int fNight, unsigned short iDelay)
     memset(newpalette, 0, sizeof(newpalette));
 
     // Start fading in...
-    time = UTIL_GetTicks() + iDelay * 10 * 60;
+    time = (unsigned int)UTIL_GetTicks() + iDelay * 10 * 60;
     while (true)
     {
         // Set the current palette...
-        j = (int)(time - UTIL_GetTicks()) / iDelay / 10;
+        j = (int)(time - (unsigned int)UTIL_GetTicks()) / iDelay / 10;
         if (j < 0)
         {
             break;

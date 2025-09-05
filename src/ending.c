@@ -102,7 +102,7 @@ static void PAL_ShowFBP(
 
             if (bufSprite)
             {
-               long f = UTIL_GetTicks() / 150;
+               long f = (unsigned int)UTIL_GetTicks() / 150U;
                PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                                     gpScreen, PAL_XY(0, 0));
             }
@@ -187,7 +187,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
       PAL_ApplyWave(gpScreen->pixels);
 
       if (g_wCurEffectSprite) {
-        long f = UTIL_GetTicks() / 150;
+        unsigned int f = (unsigned int)UTIL_GetTicks() / 150U;
         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                              gpScreen, PAL_XY(0, 0));
       }
@@ -270,7 +270,7 @@ static void PAL_EndingAnimation(void)
     if (yPosGirl < 80)
       yPosGirl = 80;
 
-    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (UTIL_GetTicks() / 50) % 4),
+    PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (UTIL_GetTicks() / 50U) % 4U),
                          gpScreen, PAL_XY(220, yPosGirl));
 
     // Update the screen

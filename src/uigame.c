@@ -1245,7 +1245,7 @@ PAL_ItemUseMenu(
                     bSelectedColor++;
                 }
 
-                dwColorChangeTime = UTIL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
+                dwColorChangeTime = (unsigned int)UTIL_GetTicks() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
                 //
                 // Redraw the selected item.
@@ -1605,7 +1605,7 @@ void PAL_EquipItemMenu(
     gpGlobals->wLastUnequippedItem = wItem;
 
     bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
-    dwColorChangeTime = UTIL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
+    dwColorChangeTime = (unsigned int)UTIL_GetTicks() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
     while (true)
     {
@@ -1705,7 +1705,7 @@ void PAL_EquipItemMenu(
                     bSelectedColor++;
                 }
 
-                dwColorChangeTime = UTIL_GetTicks() + (600 / MENUITEM_COLOR_SELECTED_TOTALNUM);
+                dwColorChangeTime = (unsigned int)UTIL_GetTicks() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
                 // Redraw the selected item if needed.
                 w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;

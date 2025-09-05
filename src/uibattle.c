@@ -483,7 +483,7 @@ void PAL_BattleUIShowText(
    else
    {
       wcscpy(g_Battle->UI.szMsg, lpszText);
-      g_Battle->UI.dwMsgShowTime = UTIL_GetTicks() + wDuration;
+      g_Battle->UI.dwMsgShowTime = (unsigned int)UTIL_GetTicks() + wDuration;
    }
 }
 
@@ -1451,7 +1451,7 @@ end:
    {
       if (g_Battle->UI.rgShowNum[i].wNum > 0)
       {
-         unsigned int ticks = (UTIL_GetTicks() - g_Battle->UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME;
+         unsigned int ticks = ((unsigned int)UTIL_GetTicks() - g_Battle->UI.rgShowNum[i].dwTime) / BATTLE_FRAME_TIME;
          if (ticks > 10)
          {
             g_Battle->UI.rgShowNum[i].wNum = 0;
@@ -1500,7 +1500,7 @@ void PAL_BattleUIShowNum(
          g_Battle->UI.rgShowNum[i].wNum = wNum;
          g_Battle->UI.rgShowNum[i].pos = PAL_XY_OFFSET(pos, -15, 0);
          g_Battle->UI.rgShowNum[i].color = color;
-         g_Battle->UI.rgShowNum[i].dwTime = UTIL_GetTicks();
+         g_Battle->UI.rgShowNum[i].dwTime = (unsigned int)UTIL_GetTicks();
          break;
       }
    }

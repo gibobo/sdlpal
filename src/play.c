@@ -583,7 +583,7 @@ PAL_WaitForKeyInternal(
 
 --*/
 {
-   unsigned int     dwTimeOut = UTIL_GetTicks() + wTimeOut;
+   unsigned int dwTimeOut = (unsigned int)UTIL_GetTicks() + wTimeOut;
 
    PAL_ClearKeyState();
 
@@ -591,8 +591,7 @@ PAL_WaitForKeyInternal(
    {
       UTIL_Delay(5);
 
-      if (PAL_GetKeyInput() && fAllowAnyKey
-         || PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
+      if (PAL_GetKeyInput() && fAllowAnyKey || PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
       {
          break;
       }

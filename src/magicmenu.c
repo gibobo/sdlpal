@@ -343,14 +343,14 @@ PAL_MagicSelectionMenu(
 
 --*/
 {
-    unsigned long dwTime;
+    unsigned int dwTime;
     unsigned short w;
     int i;
 
     PAL_MagicSelectionMenuInit(wPlayerRole, fInBattle, wDefaultMagic);
     PAL_ClearKeyState();
 
-    dwTime = UTIL_GetTicks() + 5;
+    dwTime = (unsigned int)UTIL_GetTicks() + 5U;
 
     while (true)
     {
@@ -382,7 +382,7 @@ PAL_MagicSelectionMenu(
                 break;
         } while (UTIL_GetTicks() < dwTime);
 
-        dwTime = UTIL_GetTicks() + FRAME_TIME;
+        dwTime = (unsigned int)UTIL_GetTicks() + FRAME_TIME;
     }
 
     return 0; // should not really reach here

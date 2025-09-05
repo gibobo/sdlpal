@@ -539,7 +539,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
     unsigned char *org_palette = NULL;
     unsigned char t[3];
     int i;
-    unsigned int dwBeginningTicks = UTIL_GetTicks();
+    unsigned int dwBeginningTicks = (unsigned int)UTIL_GetTicks();
 
     // get the current palette
     org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
@@ -591,7 +591,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
             VIDEO_UpdateScreen(NULL);
         }
 
-        if (fabs(fMaxSeconds) > FLT_EPSILON && UTIL_GetTicks() - dwBeginningTicks > 1000 * fMaxSeconds)
+        if ((fabs(fMaxSeconds) > FLT_EPSILON) && ((unsigned int)UTIL_GetTicks() > dwBeginningTicks + (1000U * fMaxSeconds)))
         {
             break;
         }
