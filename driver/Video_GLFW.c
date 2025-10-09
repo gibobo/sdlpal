@@ -94,26 +94,29 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 int DRIVER_Init_Video(void)
 {
-    // Try software rendering first to avoid OpenGL ES issues on NVIDIA Tegra
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    // Verify GLFW is initialized
+    if (!glfwGetVersionString())
+    {
+        return -1;
+    }
 
-    /* Create a windowed mode window without OpenGL context */
+    // Try OpenGL ES first for better compatibility
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+
+    /* Create a windowed mode window with OpenGL context */
     window = glfwCreateWindow(window_width, window_height, "GLFWPAL", NULL, NULL);
+
     if (window == NULL)
     {
-        // Fallback to OpenGL if no API doesn't work
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
-        window = glfwCreateWindow(window_width, window_height, "GLFWPAL", NULL, NULL);
-        if (window == NULL)
-            return -1;
-
-        /* Make the window's context current */
-        glfwMakeContextCurrent(window);
-        VIDEO_GLSL_Initialize(window_width, window_height);
+        return -1;
     }
+
+    /* Make the window's context current */
+    glfwMakeContextCurrent(window);
+    VIDEO_GLSL_Initialize(window_width, window_height);
 
     glfwGetWindowSize(window, &window_width, &window_height);
     framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
