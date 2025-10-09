@@ -10,7 +10,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 else()
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${CMAKE_BINARY_DIR})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
 endif()
@@ -38,6 +37,15 @@ find_package(OpenGL REQUIRED)
 set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
 set(SDL_TEST OFF CACHE BOOL "Build the SDL2_test library" FORCE)
 set(SDL2_DISABLE_SDL2MAIN ON CACHE BOOL "Disable building/installation of SDL2main" FORCE)
+
+# Save current flags and disable warnings for external libraries
+set(SAVED_C_FLAGS "${CMAKE_C_FLAGS}")
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")  # Suppress all warnings for external code
+elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")  # Suppress all warnings for external code
+endif()
+
 add_subdirectory(external/SDL)
 
 # GLFW configuration
@@ -48,6 +56,71 @@ add_subdirectory(external/glfw)
 
 # libcaca
 add_subdirectory(external/libcaca)
+
+# Restore original flags for our project code
+set(CMAKE_C_FLAGS "${SAVED_C_FLAGS}")
+
+# Compiler warning flags function
+function(set_project_warnings target_name)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        set(PROJECT_WARNING_FLAGS
+            -Wall                    # Enable most warnings
+            -Wextra                  # Enable extra warnings
+            -Wconversion             # Warn about type conversions that may lose data
+            -Wsign-conversion        # Warn about signed/unsigned conversions
+            -Wcast-align             # Warn about pointer casts that increase alignment
+            -Wformat=2               # Warn about format string issues
+            -Wformat-security        # Warn about security issues in format strings
+            -Wdouble-promotion       # Warn about float to double promotions
+            -Wundef                  # Warn about undefined macros
+            -Wstrict-prototypes      # Warn about function declarations without prototypes (C only)
+            -Wmissing-prototypes     # Warn about missing function prototypes (C only)
+            -Wold-style-definition   # Warn about old-style function definitions (C only)
+        )
+        
+        # Add warning flags that are available in newer versions
+        include(CheckCCompilerFlag)
+        
+        # Check for unsigned conversion warning (GCC 7.0+)
+        check_c_compiler_flag(-Wunsigned-conversion HAS_UNSIGNED_CONVERSION_WARNING)
+        if(HAS_UNSIGNED_CONVERSION_WARNING)
+            list(APPEND PROJECT_WARNING_FLAGS -Wunsigned-conversion)
+        endif()
+        
+        check_c_compiler_flag(-Wlogical-op HAS_LOGICAL_OP_WARNING)
+        if(HAS_LOGICAL_OP_WARNING)
+            list(APPEND PROJECT_WARNING_FLAGS -Wlogical-op)
+        endif()
+        
+        check_c_compiler_flag(-Wduplicated-cond HAS_DUPLICATED_COND_WARNING)
+        if(HAS_DUPLICATED_COND_WARNING)
+            list(APPEND PROJECT_WARNING_FLAGS -Wduplicated-cond)
+        endif()
+        
+        check_c_compiler_flag(-Wduplicated-branches HAS_DUPLICATED_BRANCHES_WARNING)
+        if(HAS_DUPLICATED_BRANCHES_WARNING)
+            list(APPEND PROJECT_WARNING_FLAGS -Wduplicated-branches)
+        endif()
+        
+        # Apply warning flags to specific target
+        target_compile_options(${target_name} PRIVATE ${PROJECT_WARNING_FLAGS})
+        
+    elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+        # MSVC warning flags
+        target_compile_options(${target_name} PRIVATE
+            /W4          # Enable level 4 warnings
+            /we4013      # Treat undefined function as error
+            /we4024      # Different types for formal and actual parameter
+            /we4047      # Different levels of indirection
+            /we4133      # Incompatible types
+        )
+        target_compile_definitions(${target_name} PRIVATE
+            _CRT_SECURE_NO_WARNINGS
+            _CRT_NONSTDC_NO_DEPRECATE
+            _SCL_SECURE_NO_WARNINGS
+        )
+    endif()
+endfunction()
 
 # Definitions
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
@@ -128,6 +201,13 @@ target_link_libraries(${PROJECT_NAME}_caca  ${CACA_LIBRARYS})
 if(WIN32)
     target_link_libraries(${PROJECT_NAME}_webserver ws2_32)
 endif()
+
+# Apply project-specific warning flags to all our executables
+set_project_warnings(${PROJECT_NAME}_sdl)
+set_project_warnings(${PROJECT_NAME}_glfw)
+set_project_warnings(${PROJECT_NAME}_caca)
+set_project_warnings(${PROJECT_NAME}_dummy)
+set_project_warnings(${PROJECT_NAME}_webserver)
 
 # Symlink creation
 if(WIN32)

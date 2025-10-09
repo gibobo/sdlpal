@@ -1,5 +1,7 @@
+#include "../src/driver.h"
 #include "../src/util.h"
 #include "../src/video.h"
+#include "DrvIf_internal.h"
 #include "caca.h"
 #include <string.h>
 
@@ -8,7 +10,7 @@ static caca_canvas_t *cv = NULL;
 caca_display_t *dp = NULL;
 static caca_dither_t *caca_dither = NULL;
 
-unsigned char *DRIVER_FrameBuffer()
+unsigned char *DRIVER_FrameBuffer(void)
 {
     return framebuffer;
 }
@@ -68,9 +70,9 @@ void DRIVER_UpdatePalette(const unsigned char *rgPalette)
     unsigned int i;
     for (i = 0; i < 256; i++)
     {
-        r[i] = rgPalette[i * 3 + 0] * 0xfff / 255;
-        g[i] = rgPalette[i * 3 + 1] * 0xfff / 255;
-        b[i] = rgPalette[i * 3 + 2] * 0xfff / 255;
+        r[i] = (unsigned int)(rgPalette[i * 3 + 0]) * 0xfff / 255;
+        g[i] = (unsigned int)(rgPalette[i * 3 + 1]) * 0xfff / 255;
+        b[i] = (unsigned int)(rgPalette[i * 3 + 2]) * 0xfff / 255;
         a[i] = 0;
     }
     if (caca_dither)

@@ -21,6 +21,7 @@
 //
 
 #include "video_glsl.h"
+#include "../src/driver.h"
 #include "../src/video.h"
 #include <assert.h>
 #include <stdio.h>
@@ -45,18 +46,24 @@ static int window_height = 0;
 static const float p_vex[] = {-1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0};
 static const float p_tex[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
-char *readShaderFile(const char *filename, GLuint type)
+// Function prototype
+char *readShaderFile(const char *filename);
+char *skip_version(char *src);
+GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_source);
+GLuint compileProgram(const char *vtx, const char *frag, int is_source);
+
+char *readShaderFile(const char *filename)
 {
     long filesize = 0;
     char *buf = NULL;
     FILE *fp = NULL;
-    if (fp = fopen(filename, "rb"))
+    if ((fp = fopen(filename, "rb")))
     {
         fseek(fp, 0, SEEK_END);
         filesize = ftell(fp);
-        buf = (char *)malloc(filesize + 1);
+        buf = (char *)malloc((size_t)filesize + 1);
         fseek(fp, 0, SEEK_SET);
-        fread(buf, filesize, 1, fp);
+        fread(buf, (size_t)filesize, 1, fp);
         fclose(fp);
         buf[filesize] = '\0';
     }
@@ -80,13 +87,12 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
 {
 #define SHADER_TYPE(shaderType) (shaderType == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT")
     char *pShaderBuffer;
-    char *source = (is_source) ? (char *)sourceOrFilename : readShaderFile(sourceOrFilename, shaderType);
-    int lines = -1;
+    char *source = (is_source) ? (char *)sourceOrFilename : readShaderFile(sourceOrFilename);
     unsigned int sourceLen = (unsigned int)strlen(source) * 2U;
     pShaderBuffer = (char *)malloc(sourceLen);
     memset(pShaderBuffer, 0, sourceLen);
 
-    sprintf(pShaderBuffer, "%s#define %s\r\n%s\r\n", pShaderBuffer, SHADER_TYPE(shaderType), is_source ? source : skip_version(source));
+    snprintf(pShaderBuffer, sourceLen, "#define %s\r\n%s\r\n", SHADER_TYPE(shaderType), is_source ? source : skip_version(source));
     if (!is_source)
         free((void *)source);
 
@@ -106,7 +112,7 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
         glGetShaderiv(result, GL_INFO_LOG_LENGTH, &logLength);
         if (logLength > 0)
         {
-            GLchar *log = (GLchar *)malloc(logLength);
+            GLchar *log = (GLchar *)malloc((size_t)logLength);
             glGetShaderInfoLog(result, logLength, &logLength, log);
             free(log);
         }
@@ -164,14 +170,14 @@ void VIDEO_GLSL_Initialize(int width, int height)
     free(pszShader);
 
     position = glGetAttribLocation(gProgramId, "VertexCoord");
-    glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, p_vex);
+    glVertexAttribPointer((GLuint)position, 3, GL_FLOAT, GL_FALSE, 0, p_vex);
 
     texcoord = glGetAttribLocation(gProgramId, "TexCoord");
-    glVertexAttribPointer(texcoord, 2, GL_FLOAT, GL_FALSE, 0, p_tex);
+    glVertexAttribPointer((GLuint)texcoord, 2, GL_FLOAT, GL_FALSE, 0, p_tex);
 
     glActiveTexture(GL_TEXTURE0);
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glGenTextures(1, (GLuint *)&texture);
+    glBindTexture(GL_TEXTURE_2D, (GLuint)texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -183,29 +189,29 @@ void VIDEO_GLSL_RenderCopy(const void *data)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     if (data)
     {
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, (GLuint)texture);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCREEN_W, SCREEN_H, GL_RGB, GL_UNSIGNED_BYTE, data);
     }
 
     glUseProgram(gProgramId);
 
-    glEnableVertexAttribArray(texcoord);
-    glEnableVertexAttribArray(position);
+    glEnableVertexAttribArray((GLuint)texcoord);
+    glEnableVertexAttribArray((GLuint)position);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    glDisableVertexAttribArray(position);
-    glDisableVertexAttribArray(texcoord);
+    glDisableVertexAttribArray((GLuint)position);
+    glDisableVertexAttribArray((GLuint)texcoord);
     glUseProgram(0);
 }
 
-void VIDEO_GLSL_Destroy()
+void VIDEO_GLSL_Destroy(void)
 {
     if (gProgramId != 0)
         glDeleteProgram(gProgramId);
 
     if (texture != -1)
-        glDeleteTextures(1, &texture);
+        glDeleteTextures(1, (GLuint *)&texture);
 
     window_width = 0;
     window_height = 0;

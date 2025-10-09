@@ -1,4 +1,5 @@
 #include "../src/audio.h"
+#include "../src/driver.h"
 #include "../src/input.h"
 #include "../src/util.h"
 #include "../src/video.h"
@@ -10,10 +11,13 @@ struct mg_connection *ws_conn = NULL;
 struct mg_connection *nc = NULL;
 struct mg_mgr mgr;
 
-extern void DRIVER_UpdatePalette(const unsigned char *rgPalette);
 extern void send_video_frame(void);
-extern void send_audio_config();
+extern void send_audio_config(void);
 extern void send_audio_data(void);
+
+void handle_input(const char *data, size_t len);
+void ev_handler(struct mg_connection *nc, int ev, void *ev_data);
+
 typedef struct
 {
     const char *name;
@@ -158,14 +162,14 @@ int DRIVER_Process_Events(void)
 #define TRIGGER_TIME(tm) (tm * ((current_time / tm) + 1U)) // Helper macro to adjust trigger time
     if (current_time >= video_trigger_ticks)               // Poll the event manager every 50 milliseconds
     {
-        send_video_frame();                     // Generate and send video frame
-        mg_mgr_poll(&mgr, 0);                   // Poll the event manager for events
+        send_video_frame();                      // Generate and send video frame
+        mg_mgr_poll(&mgr, 0);                    // Poll the event manager for events
         video_trigger_ticks = TRIGGER_TIME(50U); // Adjust the tick interval based on video settings
     }
     if (current_time >= audio_trigger_ticks) // Poll the event manager every 10 milliseconds
     {
-        send_audio_data();                      // Send audio data if available
-        mg_mgr_poll(&mgr, 0);                   // Poll the event manager for events
+        send_audio_data();                       // Send audio data if available
+        mg_mgr_poll(&mgr, 0);                    // Poll the event manager for events
         audio_trigger_ticks = TRIGGER_TIME(10U); // Adjust the tick interval based on audio settings
     }
 #undef TRIGGER_TIME

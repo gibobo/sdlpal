@@ -1,3 +1,4 @@
+#include "../src/driver.h"
 #include "../src/input.h"
 #include "DrvIf_internal.h"
 #include <GLFW/glfw3.h>
@@ -42,8 +43,14 @@ static const int g_KeyMap[][2] = {
     {GLFW_KEY_F, kKeyForce},
     {GLFW_KEY_S, kKeyStatus}};
 
+// Function prototypes
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+    (void)window;
+    (void)scancode;
+    (void)mods;
     unsigned char i;
     for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++)
     {

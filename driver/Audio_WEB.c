@@ -1,6 +1,8 @@
 ﻿#include "../src/audio.h"
+#include "../src/driver.h"
 #include "../src/global.h"
 #include "../src/util.h"
+#include "DrvIf_internal.h"
 #include "mongoose.h"
 #include <math.h>
 
@@ -11,6 +13,10 @@ static unsigned int audio_start_tick = 0;
 static const double duration_ms = 1000.0 * (double)PAL_AUDIO_BUFFER_SIZE / (double)PAL_AUDIO_SAMPLE_RATE;
 extern struct mg_connection *ws_conn;
 
+/* Function prototypes */
+void send_audio_data(void);
+void send_audio_config(void);
+
 void send_audio_data(void)
 {
     int16_t *audio_data = (int16_t *)(send_audio + 1);
@@ -20,7 +26,7 @@ void send_audio_data(void)
         return;
 
     AUDIO_FillBuffer(audio_data, send_audio_size - 1);
-    if (ws_conn == NULL || mg_ws_send(ws_conn, send_audio, send_audio_size, WEBSOCKET_OP_BINARY) == -1)
+    if (ws_conn == NULL || (size_t)mg_ws_send(ws_conn, send_audio, send_audio_size, WEBSOCKET_OP_BINARY) == (size_t)-1)
     {
         fprintf(stderr, "Failed to send audio data\n");
         duration_sum = 0.0;
@@ -34,7 +40,7 @@ void send_audio_data(void)
     }
 }
 
-void send_audio_config()
+void send_audio_config(void)
 {
     uint8_t send_config[] = {
         3,                                   // Type 3: audio format
@@ -44,7 +50,7 @@ void send_audio_config()
         PAL_AUDIO_BIT_DEPTH,                 // Bit depth (1 byte)
     };
 
-    if (ws_conn == NULL || mg_ws_send(ws_conn, send_config, sizeof(send_config), WEBSOCKET_OP_BINARY) == -1)
+    if (ws_conn == NULL || (size_t)mg_ws_send(ws_conn, send_config, sizeof(send_config), WEBSOCKET_OP_BINARY) == (size_t)-1)
     {
         fprintf(stderr, "Failed to send audio config\n");
     }

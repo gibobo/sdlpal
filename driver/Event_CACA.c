@@ -1,3 +1,4 @@
+#include "../src/driver.h"
 #include "../src/input.h"
 #include "DrvIf_internal.h"
 #include "caca.h"
@@ -6,7 +7,6 @@
 #include <string.h>
 
 extern caca_display_t *dp;
-static unsigned int counter = 0; // Event index
 static const int g_KeyMap[][2] = {
     {CACA_KEY_UP, kKeyUp},
     {'8', kKeyUp},
@@ -61,7 +61,7 @@ int DRIVER_Process_Events(void)
                     res = -1;
                     break;
                 }
-                for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++)
+                for (i = 0; i < (int)(sizeof(g_KeyMap) / sizeof(g_KeyMap[0])); i++)
                 {
                     if (g_KeyMap[i][0] == key)
                     {
@@ -81,11 +81,6 @@ int DRIVER_Process_Events(void)
     return res;
 }
 
-int DRIVER_Init_Event(void)
-{
-    return 0;
-}
+int DRIVER_Init_Event(void) { return 0; }
 
-void DRIVER_DeInit_Event(void)
-{
-}
+void DRIVER_DeInit_Event(void) {}

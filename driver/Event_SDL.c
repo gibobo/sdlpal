@@ -1,3 +1,4 @@
+#include "../src/driver.h"
 #include "../src/global.h"
 #include "../src/input.h"
 #include "../src/util.h"
@@ -50,6 +51,7 @@ extern void DRIVER_FrameResize(unsigned int width, unsigned int height);
 
 static void SDL_UpdateKeyboardState(SDL_Keycode key)
 {
+    (void)key;
     static unsigned char rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
     const unsigned char *keyState = (const unsigned char *)SDL_GetKeyboardState(NULL);
     unsigned char i;
@@ -136,7 +138,7 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
             if (lpEvent->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             {
                 // resized the window
-                DRIVER_FrameResize(lpEvent->window.data1, lpEvent->window.data2);
+                DRIVER_FrameResize((unsigned int)lpEvent->window.data1, (unsigned int)lpEvent->window.data2);
             }
             break;
 
@@ -156,6 +158,7 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
                 // Pressed Alt+F4 (Exit program)...
                 return -1;
             }
+            break;
         case SDL_KEYUP:
             SDL_UpdateKeyboardState(lpEvent->key.keysym.sym);
             break;

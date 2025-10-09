@@ -1,5 +1,7 @@
 #include "../src/audio.h"
+#include "../src/driver.h"
 #include "../src/global.h"
+#include "DrvIf_internal.h"
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio/miniaudio.h"
 #include <string.h>
@@ -11,6 +13,8 @@ static ma_mutex dmutex;
 
 static void audio_callback(ma_device *pDevice, void *stream, const void *pInput, ma_uint32 frameCount)
 {
+    (void)pDevice;
+    (void)pInput;
     unsigned int len = frameCount * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
     memset(stream, 0, len);
     AUDIO_FillBuffer(stream, len);

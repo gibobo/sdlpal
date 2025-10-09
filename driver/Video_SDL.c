@@ -1,5 +1,7 @@
+#include "../src/driver.h"
 #include "../src/util.h"
 #include "../src/video.h"
+#include "DrvIf_internal.h"
 #include <SDL.h>
 #include <string.h>
 
@@ -11,7 +13,10 @@ static SDL_Window *gpWindow = NULL;
 static SDL_Renderer *gpRenderer = NULL;
 static SDL_Texture *gpTexture = NULL;
 
-unsigned char *DRIVER_FrameBuffer()
+// Function prototypes
+void DRIVER_FrameResize(unsigned int width, unsigned int height);
+
+unsigned char *DRIVER_FrameBuffer(void)
 {
     return framebuffer;
 }
@@ -24,7 +29,8 @@ void DRIVER_FrameShow(
     const unsigned short roi_h,
     const unsigned char padding_flag)
 {
-    if (!gpRenderer || !gpTexture) return;
+    if (!gpRenderer || !gpTexture)
+        return;
 
     unsigned short x, y;
     unsigned short roi_x2 = roi_x + roi_w;
@@ -62,7 +68,7 @@ void DRIVER_FrameShow(
 
     // Update texture with framebuffer data
     SDL_UpdateTexture(gpTexture, NULL, framebuffer, SCREEN_W * 3);
-    
+
     // Clear and render
     SDL_SetRenderDrawColor(gpRenderer, 0, 0, 0, 255);
     SDL_RenderClear(gpRenderer);
@@ -72,21 +78,21 @@ void DRIVER_FrameShow(
 
 void DRIVER_FrameResize(unsigned int width, unsigned int height)
 {
-    window_width = width;
-    window_height = height;
+    window_width = (int)width;
+    window_height = (int)height;
     // Renderer automatically handles scaling
 }
 
-void DRIVER_UpdatePalette(const unsigned char *rgPalette) 
-{ 
-    palette = rgPalette; 
+void DRIVER_UpdatePalette(const unsigned char *rgPalette)
+{
+    palette = rgPalette;
 }
 
 int DRIVER_Init_Video(void)
 {
     // Always use software rendering to avoid driver issues
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-    
+
     // Create window
     gpWindow = SDL_CreateWindow(
         "SDLPAL",
@@ -94,7 +100,7 @@ int DRIVER_Init_Video(void)
         SDL_WINDOWPOS_UNDEFINED,
         window_width, window_height,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    
+
     if (gpWindow == NULL)
         return -1;
 
@@ -108,11 +114,11 @@ int DRIVER_Init_Video(void)
     }
 
     // Create texture for framebuffer
-    gpTexture = SDL_CreateTexture(gpRenderer, 
-        SDL_PIXELFORMAT_RGB24, 
-        SDL_TEXTUREACCESS_STREAMING,
-        SCREEN_W, SCREEN_H);
-    
+    gpTexture = SDL_CreateTexture(gpRenderer,
+                                  SDL_PIXELFORMAT_RGB24,
+                                  SDL_TEXTUREACCESS_STREAMING,
+                                  SCREEN_W, SCREEN_H);
+
     if (gpTexture == NULL)
     {
         SDL_DestroyRenderer(gpRenderer);
@@ -135,7 +141,7 @@ void DRIVER_DeInit_Video(void)
         SDL_DestroyRenderer(gpRenderer);
     if (gpWindow)
         SDL_DestroyWindow(gpWindow);
-    
+
     gpTexture = NULL;
     gpRenderer = NULL;
     gpWindow = NULL;

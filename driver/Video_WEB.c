@@ -1,15 +1,19 @@
+#include "../src/driver.h"
 #include "../src/util.h"
 #include "../src/video.h"
+#include "DrvIf_internal.h"
 #include "mongoose.h"
 #include <string.h>
 
 unsigned char *send_frame = NULL;
 static unsigned char *send_palette = NULL;
-
 extern struct mg_connection *ws_conn;
 extern struct mg_mgr mgr;
 
-unsigned char *DRIVER_FrameBuffer()
+// Function prototypes
+void send_video_frame(void);
+
+unsigned char *DRIVER_FrameBuffer(void)
 {
     return send_frame + 5;
 }
@@ -55,7 +59,6 @@ void DRIVER_FrameShow(
 
 void DRIVER_UpdatePalette(const unsigned char *rgPalette)
 {
-    size_t res;
     if (send_palette == NULL)
         return;
 
@@ -63,7 +66,7 @@ void DRIVER_UpdatePalette(const unsigned char *rgPalette)
         memcpy(send_palette + 1, rgPalette, 256 * 3);
 
     if (ws_conn)
-        res = mg_ws_send(ws_conn, send_palette, 1 + 256 * 3, WEBSOCKET_OP_BINARY);
+        mg_ws_send(ws_conn, send_palette, 1 + 256 * 3, WEBSOCKET_OP_BINARY);
 }
 
 void send_video_frame(void)
@@ -71,7 +74,7 @@ void send_video_frame(void)
     if (ws_conn == NULL || send_frame == NULL)
         return;
 
-    if (mg_ws_send(ws_conn, send_frame, 5 + SCREEN_SIZE, WEBSOCKET_OP_BINARY) == -1)
+    if ((int)mg_ws_send(ws_conn, send_frame, 5 + SCREEN_SIZE, WEBSOCKET_OP_BINARY) == -1)
     {
         fprintf(stderr, "Failed to send video frame\n");
         return;

@@ -1,5 +1,7 @@
+#include "../src/driver.h"
 #include "../src/util.h"
 #include "../src/video.h"
+#include "DrvIf_internal.h"
 #include "utils/video_glsl.h"
 #include <GLFW/glfw3.h>
 #include <string.h>
@@ -11,8 +13,9 @@ static const unsigned char *palette = NULL;
 GLFWwindow *window = NULL;
 
 extern void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
-unsigned char *DRIVER_FrameBuffer()
+unsigned char *DRIVER_FrameBuffer(void)
 {
     return framebuffer;
 }
@@ -63,11 +66,13 @@ void DRIVER_FrameShow(
     }
 
     // Try to use OpenGL rendering if available, otherwise use software fallback
-    GLint current_context = 0;
-    if (glfwGetCurrentContext() != NULL) {
+    if (glfwGetCurrentContext() != NULL)
+    {
         VIDEO_GLSL_RenderCopy(framebuffer);
         glfwSwapBuffers(window);
-    } else {
+    }
+    else
+    {
         // Software fallback - just poll events to keep window responsive
         glfwPollEvents();
     }
@@ -77,10 +82,12 @@ void DRIVER_UpdatePalette(const unsigned char *rgPalette) { palette = rgPalette;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
+    (void)window;
     window_width = width;
     window_height = height;
     // Only initialize OpenGL if we have a valid context
-    if (glfwGetCurrentContext() != NULL) {
+    if (glfwGetCurrentContext() != NULL)
+    {
         VIDEO_GLSL_Initialize(window_width, window_height);
     }
 }
@@ -89,10 +96,11 @@ int DRIVER_Init_Video(void)
 {
     // Try software rendering first to avoid OpenGL ES issues on NVIDIA Tegra
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    
+
     /* Create a windowed mode window without OpenGL context */
     window = glfwCreateWindow(window_width, window_height, "GLFWPAL", NULL, NULL);
-    if (window == NULL) {
+    if (window == NULL)
+    {
         // Fallback to OpenGL if no API doesn't work
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -101,12 +109,12 @@ int DRIVER_Init_Video(void)
         window = glfwCreateWindow(window_width, window_height, "GLFWPAL", NULL, NULL);
         if (window == NULL)
             return -1;
-        
+
         /* Make the window's context current */
         glfwMakeContextCurrent(window);
         VIDEO_GLSL_Initialize(window_width, window_height);
     }
-    
+
     glfwGetWindowSize(window, &window_width, &window_height);
     framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
     glfwSwapInterval(1);
@@ -117,7 +125,8 @@ int DRIVER_Init_Video(void)
 void DRIVER_DeInit_Video(void)
 {
     // Only destroy OpenGL resources if we have a valid context
-    if (glfwGetCurrentContext() != NULL) {
+    if (glfwGetCurrentContext() != NULL)
+    {
         VIDEO_GLSL_Destroy();
     }
     UTIL_free(framebuffer);
