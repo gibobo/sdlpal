@@ -48,8 +48,8 @@
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-// status of characters
-typedef enum tagPALRES
+// Resource identifiers
+typedef enum
 {
     Res_ABC = 0,    // enemy sprites in battle
     Res_FBP,        // battlefield background images
@@ -116,7 +116,7 @@ void *UTIL_Open(const PALRES res, const char *_Mode);
 
 void *UTIL_Open_without_checking(const PALRES res, const char *_Mode);
 
-void UTIL_Close(const PALRES res);
+unsigned char UTIL_Close(const PALRES res);
 
 #ifdef __cplusplus
 extern "C" {

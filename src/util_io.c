@@ -127,7 +127,7 @@ void *UTIL_Open(const PALRES res, const char *_Mode)
     return gFiles[res].fp;
 }
 
-void UTIL_Close(const PALRES res)
+unsigned char UTIL_Close(const PALRES res)
 {
     if (gFiles[res].created)
         gFiles[res].created--;
@@ -137,6 +137,7 @@ void UTIL_Close(const PALRES res)
         UTIL_fclose(gFiles[res].fp);
         gFiles[res].fp = NULL;
     }
+    return gFiles[res].created;
 }
 
 long flength(void *fp)

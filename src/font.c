@@ -39,15 +39,14 @@ void PAL_InitFont(void)
 {
     fp_font_data = UTIL_Open(Cache_Font, "rb");
     fp_font_size = UTIL_Open(Cache_FontSize, "rb");
-    font_wChar = 0xFFFF;
 }
 
 void PAL_DeInitFont(void)
 {
-    UTIL_Close(Cache_Font);
-    UTIL_Close(Cache_FontSize);
-    fp_font_data = NULL;
-    fp_font_size = NULL;
+    if (UTIL_Close(Cache_Font) == 0)
+        fp_font_data = NULL;
+    if (UTIL_Close(Cache_FontSize) == 0)
+        fp_font_size = NULL;
 }
 
 void PAL_DrawCharOnSurface(
@@ -56,28 +55,21 @@ void PAL_DrawCharOnSurface(
     const unsigned short y,
     const unsigned char bColor)
 {
-    unsigned short i;
-    unsigned short j;
-
-    // Check for NULL pointer & invalid char code.
+    // Check for NULL screen surface.
     if (gpScreen == NULL)
         return;
 
-    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) ||
-        (wChar >= unicode_upper_top))
-    {
+    // Check for NULL pointer & invalid char code.
+    if ((fp_font_data == NULL) || (fp_font_size == NULL))
         return;
-    }
+
+    // Check for invalid char code.
+    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || (wChar >= unicode_upper_top))
+        return;
 
     // Locate for this character in the font lib.
     if (wChar >= unicode_upper_base)
-    {
         wChar -= (unicode_upper_base - unicode_lower_top);
-    }
-
-    // Draw the character to the surface.
-    unsigned char *dst = gpScreen->pixels + gpScreen->w * ReLU(y) + x;
-    unsigned char *top = gpScreen->pixels + gpScreen->w * gpScreen->h;
 
     if (font_wChar != wChar)
     {
@@ -88,9 +80,14 @@ void PAL_DrawCharOnSurface(
         UTIL_fseek(fp_font_data, sizeof(unsigned char) * wChar * 32, SEEK_SET);
         UTIL_fread(font_data, sizeof(unsigned char), 32, fp_font_data);
 
-        font_size = (font_size & (1 << (wChar % 8))) ? 32 : 16;
+        font_size = (font_size & (1U << (wChar % 8))) ? 32U : 16U;
     }
 
+    unsigned short i;
+    unsigned short j;
+    // Draw the character to the surface.
+    unsigned char *dst = gpScreen->pixels + gpScreen->w * ReLU(y) + x;
+    unsigned char *top = gpScreen->pixels + gpScreen->w * gpScreen->h;
     for (i = 0; i < font_size && dst < top; i += (font_size >> 4), dst += gpScreen->w)
     {
         for (j = 0; (j < (font_size >> 1)) && ((x + j) < gpScreen->w); j++)
@@ -105,20 +102,19 @@ void PAL_DrawCharOnSurface(
 
 unsigned char PAL_CharWidth(unsigned short wChar)
 {
-    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || wChar >= unicode_upper_top)
-    {
+    if (fp_font_size == NULL)
         return 0;
-    }
+
+    // Check for invalid char code.
+    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || (wChar >= unicode_upper_top))
+        return 0;
 
     // Locate for this character in the font lib.
     if (wChar >= unicode_upper_base)
-    {
         wChar -= (unicode_upper_base - unicode_lower_top);
-    }
 
     unsigned char size;
     UTIL_fseek(fp_font_size, sizeof(unsigned char) * wChar / 8, SEEK_SET);
     UTIL_fread(&size, sizeof(unsigned char), 1, fp_font_size);
-
     return (size & (1U << (wChar % 8))) ? 16U : 8U;
 }

@@ -965,7 +965,7 @@ void PAL_BattleStartFrame(
     }
     else
     {
-        int fEnded = true;
+        unsigned char fEnded = true;
 
         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
         {

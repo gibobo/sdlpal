@@ -26,6 +26,7 @@
 #include "battle.h"
 #include "ending.h"
 #include "fight.h"
+#include "font.h"
 #include "global.h"
 #include "input.h"
 #include "main.h"
@@ -1076,7 +1077,9 @@ PAL_InterpretInstruction(
             //
             PAL_MakeScene();
             VIDEO_UpdateScreen(NULL);
+            PAL_InitFont();
             PAL_BuyMenu(pScript->rgwOperand[0]);
+            PAL_DeInitFont();
             break;
 
         case 0x0027:
@@ -1085,7 +1088,9 @@ PAL_InterpretInstruction(
             //
             PAL_MakeScene();
             VIDEO_UpdateScreen(NULL);
+            PAL_InitFont();
             PAL_SellMenu();
+            PAL_DeInitFont();
             break;
 
         case 0x0028:
@@ -2952,18 +2957,14 @@ PAL_RunTriggerScript(
 
 --*/
 {
+    extern unsigned char g_fUpdatedInBattle; // HACKHACK
     static unsigned short wLastEventObject = 0;
 
-    unsigned short wNextScriptEntry;
-    int fEnded;
     SCRIPTENTRY *pScript;
     EVENTOBJECT *pEvtObj = NULL;
     int i;
-
-    extern unsigned char g_fUpdatedInBattle; // HACKHACK
-
-    wNextScriptEntry = wScriptEntry;
-    fEnded = false;
+    unsigned short wNextScriptEntry = wScriptEntry;
+    unsigned char fEnded = false;
     g_fUpdatedInBattle = false;
 
     if (wEventObjectID == 0xFFFF)
@@ -3101,7 +3102,9 @@ PAL_RunTriggerScript(
                 //
                 // Start battle
                 //
+                PAL_InitFont();
                 i = PAL_StartBattle(pScript->rgwOperand[0], !pScript->rgwOperand[2]);
+                PAL_DeInitFont();
 
                 if (i == kBattleResultLost && pScript->rgwOperand[1] != 0)
                 {
@@ -3151,7 +3154,7 @@ PAL_RunTriggerScript(
                 // Goto the specified address if player selected no
                 //
                 PAL_ClearDialog(false);
-
+                PAL_InitFont();
                 if (!PAL_ConfirmMenu())
                 {
                     wScriptEntry = pScript->rgwOperand[0];
@@ -3160,6 +3163,7 @@ PAL_RunTriggerScript(
                 {
                     wScriptEntry++;
                 }
+                PAL_DeInitFont();
                 break;
 
             case 0x003B:
@@ -3215,7 +3219,9 @@ PAL_RunTriggerScript(
                 //
                 // Print dialog text
                 //
+                PAL_InitFont();
                 PAL_ShowDialogText(PAL_GetMsg(pScript->rgwOperand[0]), 0);
+                PAL_DeInitFont();
                 wScriptEntry++;
                 break;
 

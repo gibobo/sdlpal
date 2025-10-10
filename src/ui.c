@@ -729,7 +729,7 @@ unsigned int PAL_MenuTextMaxWidth(
     for (i = 0; i < nMenuItem; i++)
     {
         const wchar_t *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
-        w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8) >> 4;
+        w = (PAL_TextWidth(PAL_UnescapeText(itemText)) + 8U) >> 4U;
         if (r < w)
             r = w;
     }
@@ -785,5 +785,5 @@ unsigned int PAL_WordWidth(
 --*/
 {
     const wchar_t *itemText = PAL_GetWord(nWordIndex);
-    return (8U + PAL_TextWidth(itemText)) >> 4U;
+    return (PAL_TextWidth(itemText) + 8U) >> 4U;
 }
