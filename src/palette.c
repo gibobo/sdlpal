@@ -52,14 +52,13 @@ unsigned char *PAL_GetPalette(int iPaletteNum, int fNight)
     unsigned char buf[PALETTE_SIZE * 2];
     unsigned char *ptr = buf;
     int i;
-    void *fp = NULL;
     memset(gPalette, 0, sizeof(gPalette));
     memset(buf, 0, sizeof(buf));
 
     // Read the palette data from the pat.mkf file
-    fp = UTIL_fopen(RESOURCE_PATH "/pat.mkf", "rb");
-    i = PAL_MKFReadChunk(buf, sizeof(buf), iPaletteNum, fp);
-    UTIL_fclose(fp);
+    void *fpPAT = UTIL_Open(Res_PAT, "rb");
+    i = PAL_MKFReadChunk(buf, sizeof(buf), iPaletteNum, fpPAT);
+    UTIL_Close(Res_PAT);
 
     if (i < 0)
         return NULL; // Read failed

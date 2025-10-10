@@ -819,18 +819,17 @@ void PAL_LoadBattleSprites(
 --*/
 {
     int i, x, y, s;
-    void *fp = NULL;
+    void *fpABC = UTIL_Open(Res_ABC, "rb");
+    void *fpF = UTIL_Open(Res_F, "rb");
 
     PAL_FreeBattleSprites();
-
-    fp = UTIL_fopen(RESOURCE_PATH "/abc.mkf", "rb");
 
     // Load battle sprites for players
     for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
     {
         s = PAL_GetPlayerBattleSprite(gpGlobals->rgParty[i].wPlayerRole);
 
-        if (PAL_MKFDecompressChunk(&g_Battle->rgPlayer[i].lpSprite, 0, s, gFiles[Res_F].fp) <= 0)
+        if (PAL_MKFDecompressChunk(&g_Battle->rgPlayer[i].lpSprite, 0, s, fpF) <= 0)
             continue;
 
         //
@@ -849,7 +848,7 @@ void PAL_LoadBattleSprites(
         if (g_Battle->rgEnemy[i].wObjectID == 0)
             continue;
 
-        if (PAL_MKFDecompressChunk(&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, fp) <= 0)
+        if (PAL_MKFDecompressChunk(&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, fpABC) <= 0)
             continue;
 
         //
@@ -864,7 +863,8 @@ void PAL_LoadBattleSprites(
         g_Battle->rgEnemy[i].pos = PAL_XY(x, y);
     }
 
-    UTIL_fclose(fp);
+    UTIL_Close(Res_ABC);
+    UTIL_Close(Res_F);
 }
 
 static void
@@ -889,10 +889,9 @@ PAL_LoadBattleBackground(
     g_Battle->lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
 
     // Load the picture
-    PAL_MKFDecompressChunk(&g_Battle->lpBackground->pixels,
-                           SCREEN_SIZE,
-                           gpGlobals->wNumBattleField,
-                           gFiles[Res_FBP].fp);
+    void *fpFBP = UTIL_Open(Res_FBP, "rb");
+    PAL_MKFDecompressChunk(&g_Battle->lpBackground->pixels, SCREEN_SIZE, gpGlobals->wNumBattleField, fpFBP);
+    UTIL_Close(Res_FBP);
 }
 
 static void
@@ -1516,10 +1515,11 @@ PAL_StartBattle(
     //
     // Load the battle effect sprite.
     //
-    i = PAL_MKFGetChunkSize(10, gFiles[Res_DATA].fp);
+    void *fpDATA = UTIL_Open(Res_DATA, "rb");
+    i = PAL_MKFGetChunkSize(10, fpDATA);
     g_Battle->lpEffectSprite = UTIL_malloc(i);
-
-    PAL_MKFReadChunk(g_Battle->lpEffectSprite, i, 10, gFiles[Res_DATA].fp);
+    PAL_MKFReadChunk(g_Battle->lpEffectSprite, i, 10, fpDATA);
+    UTIL_Close(Res_DATA);
 
     g_Battle->Phase = kBattlePhaseSelectAction;
     g_Battle->fRepeat = false;

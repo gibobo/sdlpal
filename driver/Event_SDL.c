@@ -158,6 +158,7 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
                 // Pressed Alt+F4 (Exit program)...
                 return -1;
             }
+            SDL_UpdateKeyboardState(lpEvent->key.keysym.sym);
             break;
         case SDL_KEYUP:
             SDL_UpdateKeyboardState(lpEvent->key.keysym.sym);

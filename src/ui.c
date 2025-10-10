@@ -57,26 +57,19 @@ int PAL_InitUI(
 
 --*/
 {
-    int iSize;
-
     //
     // Load the UI sprite.
     //
-    iSize = PAL_MKFGetChunkSize(CHUNKNUM_SPRITEUI, gFiles[Res_DATA].fp);
-    if (iSize < 0)
+    void *fpDATA = UTIL_Open(Res_DATA, "rb");
+    int iSize = PAL_MKFGetChunkSize(CHUNKNUM_SPRITEUI, fpDATA);
+    if (iSize > 0)
     {
-        return -1;
+        gpSpriteUI = (unsigned char *)UTIL_calloc(1, iSize);
+        if (gpSpriteUI != NULL)
+            PAL_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, fpDATA);
     }
-
-    gpSpriteUI = (unsigned char *)UTIL_calloc(1, iSize);
-    if (gpSpriteUI == NULL)
-    {
-        return -1;
-    }
-
-    PAL_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, gFiles[Res_DATA].fp);
-
-    return 0;
+    UTIL_Close(Res_DATA);
+    return (gpSpriteUI != NULL) ? 0 : -1;
 }
 
 void PAL_FreeUI(

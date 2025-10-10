@@ -65,7 +65,7 @@ typedef struct tagPALMAP {
    int iMapNum;
 } PALMAP;
 
-PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF);
+PALMAP *PAL_LoadMap(int iMapNum);
 
 void PAL_FreeMap(PALMAP *lpMap);
 

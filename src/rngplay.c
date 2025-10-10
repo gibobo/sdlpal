@@ -288,7 +288,7 @@ PAL_RNGPlay(
 
 --*/
 {
-   void *fp = NULL;
+   void *fpRNG = UTIL_Open(Res_RNG, "rb");
    unsigned char *rng = NULL;
    unsigned char *buf = NULL;
    int rng_size = 0;
@@ -298,11 +298,9 @@ PAL_RNGPlay(
    // Avoid losing the last frame
    if (iEndFrame > 0) iEndFrame++;
 
-   fp = UTIL_fopen(RESOURCE_PATH "/rng.mkf", "rb");
-
-   for (; fp && iStartFrame != iEndFrame; iStartFrame++) {
+   for (; fpRNG && iStartFrame != iEndFrame; iStartFrame++) {
       // Read, decompress and render the frame
-      buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fp);
+      buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fpRNG);
       if (buf_size < 0)
          break; // Failed to get the frame, don't go further
 
@@ -328,7 +326,7 @@ PAL_RNGPlay(
       UTIL_Delay(iDelay);
    }
 
-   UTIL_fclose(fp);
+   UTIL_Close(Res_RNG);
    UTIL_free(rng);
    UTIL_free(buf);
 }

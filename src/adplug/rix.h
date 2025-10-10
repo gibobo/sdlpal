@@ -24,8 +24,8 @@
 #define _RIX_H_
 
 void CrixPlayer_deinit(void);
-unsigned char CrixPlayer_load(const char *filename);
-unsigned char CrixPlayer_update();
+unsigned char CrixPlayer_load(void);
+unsigned char CrixPlayer_update(void);
 void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit); /* For seamless continuous */
 
 #endif

@@ -779,16 +779,16 @@ unsigned int PAL_MKFGetChunkCount(void *fp)
 
 --*/
 {
-   unsigned int iNumChunk;
-   if (fp == NULL) {
-      return 0;
-   }
-
-   UTIL_fseek(fp, 0, SEEK_SET);
-   if (UTIL_fread(&iNumChunk, sizeof(iNumChunk), 1, fp) == 1)
-      return (iNumChunk >> 2) - 1;
-   else
-      return 0;
+    unsigned int iNumChunk = 0;
+    unsigned int read_len = 0;
+    if (fp)
+    {
+        UTIL_fseek(fp, 0, SEEK_SET);
+        read_len = UTIL_fread(&iNumChunk, sizeof(iNumChunk), 1, fp);
+        if (read_len == 1)
+            return (iNumChunk >> 2) - 1;
+    }
+    return 0;
 }
 
 int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
@@ -899,31 +899,6 @@ int PAL_MKFReadChunk(
    }
 
    return -1;
-}
-
-int PAL_MKFReadChunk2(
-    void **lpBuffer,
-    unsigned int uiBufferSize,
-    unsigned int uiChunkNum,
-    void *fp)
-{
-
-   int len = PAL_MKFGetChunkSize(uiChunkNum, fp);
-
-   if (len > 0)
-   {
-      unsigned char *buf = *lpBuffer;
-
-      if ((uiBufferSize == 0) || ((*lpBuffer) == NULL))
-      {
-         UTIL_free(*lpBuffer);
-         uiBufferSize = *(unsigned int *)buf;
-         *lpBuffer = UTIL_malloc(uiBufferSize);
-      }
-      PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
-   }
-
-   return len;
 }
 
 int PAL_MKFDecompressChunk(

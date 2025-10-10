@@ -120,18 +120,14 @@ static const unsigned int MagicDescMsgPos = PAL_XY(102, 0);
 
 static unsigned short GetSavedTimes(int iSaveSlot)
 {
-    char *save_path = NULL;
-    void *fp = NULL;
     unsigned short wSavedTimes = 0;
-    save_path = (char *)UTIL_malloc(256);
-    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
-    if (fp = UTIL_fopen_without_checking(save_path, "rb"))
+    void *fpSAVE = UTIL_Open_without_checking(Save_1 + iSaveSlot - 1, "rb");
+    if (fpSAVE)
     {
-        if (UTIL_fread(&wSavedTimes, sizeof(unsigned short), 1, fp) != 1)
+        if (UTIL_fread(&wSavedTimes, sizeof(unsigned short), 1, fpSAVE) != 1)
             wSavedTimes = 0;
-        UTIL_fclose(fp);
+        UTIL_Close(Save_1 + iSaveSlot - 1);
     }
-    UTIL_free(save_path);
     return wSavedTimes;
 }
 
@@ -165,7 +161,9 @@ void PAL_OpeningMenu(void)
 
     // Draw the background
     // Read the picture from fbp.mkf.
-    PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, 2, gFiles[Res_FBP].fp);
+    void *fpFBP = UTIL_Open(Res_FBP, "rb");
+    PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, 2, fpFBP);
+    UTIL_Close(Res_FBP);
 
     // ...and blit it to the screen buffer.
     VIDEO_UpdateScreen(NULL);
@@ -986,13 +984,17 @@ void PAL_PlayerStatus(
         iPlayerRole = gpGlobals->rgParty[iCurrent].wPlayerRole;
 
         // Draw the background image
-        PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, gFiles[Res_FBP].fp);
+        void *fpFBP = UTIL_Open(Res_FBP, "rb");
+        PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, fpFBP);
+        UTIL_Close(Res_FBP);
 
         // Draw the image of player role
-        if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles->rgwAvatar[iPlayerRole], gFiles[Res_RGM].fp) > 0)
+        void *fpRGM = UTIL_Open(Res_RGM, "rb");
+        if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles->rgwAvatar[iPlayerRole], fpRGM) > 0)
         {
             PAL_RLEBlitToSurface(bufImage, gpScreen, RoleImage);
         }
+        UTIL_Close(Res_RGM);
 
         // Draw the equipments
         for (i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
@@ -1007,10 +1009,12 @@ void PAL_PlayerStatus(
             }
 
             // Draw the image
-            if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[w].item.wBitmap, gFiles[Res_BALL].fp) > 0)
+            void *fpBALL = UTIL_Open(Res_BALL, "rb");
+            if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[w].item.wBitmap, fpBALL) > 0)
             {
                 PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY_OFFSET(RoleEquipImageBoxes[i], 1, 1));
             }
+            UTIL_Close(Res_BALL);
 
             // Draw the text label
             offset = PAL_WordWidth(w) << 4;
@@ -1205,11 +1209,12 @@ PAL_ItemUseMenu(
             //
             // Draw the picture of the item
             //
-            if (PAL_MKFReadChunk(bufImage, bufImageSize,
-                                 gpGlobals->g.rgObject[wItemToUse].item.wBitmap, gFiles[Res_BALL].fp) > 0)
+            void *fpBALL = UTIL_Open(Res_BALL, "rb");
+            if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wItemToUse].item.wBitmap, fpBALL) > 0)
             {
                 PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(127, 88));
             }
+            UTIL_Close(Res_BALL);
 
             //
             // Draw the amount and label of the item
@@ -1341,11 +1346,12 @@ PAL_BuyMenu_OnItemChange(
     y = 15;
 
     bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
-    if (PAL_MKFReadChunk(bufImage, bufImageSize,
-                         gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, gFiles[Res_BALL].fp) > 0)
+    void *fpBALL = UTIL_Open(Res_BALL, "rb");
+    if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, fpBALL) > 0)
     {
         PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(x, y));
     }
+    UTIL_Close(Res_BALL);
     UTIL_free(bufImage);
 
     // See how many of this item we have in the inventory
@@ -1612,15 +1618,17 @@ void PAL_EquipItemMenu(
         wItem = gpGlobals->wLastUnequippedItem;
 
         // Draw the background
-        PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM,
-                               gFiles[Res_FBP].fp);
+        void *fpFBP = UTIL_Open(Res_FBP, "rb");
+        PAL_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM, fpFBP);
+        UTIL_Close(Res_FBP);
 
         // Draw the item picture
-        if (PAL_MKFReadChunk(bufImage, bufImageSize,
-                             gpGlobals->g.rgObject[wItem].item.wBitmap, gFiles[Res_BALL].fp) > 0)
+        void *fpBALL = UTIL_Open(Res_BALL, "rb");
+        if (PAL_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wItem].item.wBitmap, fpBALL) > 0)
         {
             PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY_OFFSET(EquipImageBox, 8, 8));
         }
+        UTIL_Close(Res_BALL);
 
         // Draw the current equipment of the selected player
         w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;

@@ -65,7 +65,6 @@ PAL_ItemSelectMenuUpdate(
     const int iPageLineOffset = (iLinesPerPage + 1) / 2;
     const int iPictureYOffset = 0;
     unsigned int cursorPos = PAL_XY(15 + iCursorXOffset, 22);
-    ;
 
     //
     // Process input
@@ -184,11 +183,12 @@ PAL_ItemSelectMenuUpdate(
                 PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
                                      PAL_XY(xBase, yBase - iPictureYOffset));
 
-                if (PAL_MKFReadChunk(bufImage, sizeof(bufImage),
-                                     gpGlobals->g.rgObject[wObject].item.wBitmap, gFiles[Res_BALL].fp) > 0)
+                void *fpBALL = UTIL_Open(Res_BALL, "rb");
+                if (PAL_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, fpBALL) > 0)
                 {
                     PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(xBase + 8, yBase + 7 - iPictureYOffset));
                 }
+                UTIL_Close(Res_BALL);
             }
 
             //

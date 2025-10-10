@@ -82,31 +82,40 @@ int PAL_InitText(void)
 
 --*/
 {
-    void *fp;
     unsigned int wpos, i;
-    char path[128];
     unsigned char data;
+    unsigned char wchar_size = sizeof(wchar_t);
 
-    sprintf(path, "%s/word_%db.bin", CACHES_PATH, (int)sizeof(wchar_t));
-    fp_word = UTIL_fopen(path, "rb");
-    sprintf(path, "%s/msg_%db.bin", CACHES_PATH, (int)sizeof(wchar_t));
-    fp_msg = UTIL_fopen(path, "rb");
+    if (wchar_size == 2)
+    {
+        fp_word = UTIL_Open(Cache_Word_2B, "rb");
+        fp_msg = UTIL_Open(Cache_Msg_2B, "rb");
+    }
+    else if (wchar_size == 4)
+    {
+        fp_word = UTIL_Open(Cache_Word_4B, "rb");
+        fp_msg = UTIL_Open(Cache_Msg_4B, "rb");
+    }
+    else
+    {
+        TerminateOnError("Unsupported wchar_t size: %d\n", wchar_size);
+    }
 
     // Open the word data files.
     {
-        fp = UTIL_fopen(CACHES_PATH "/word_len.bin", "rb");
-        g_TextLib.nWords = flength(fp);
+        void *fpWLEN = UTIL_Open(Cache_WordLen, "rb");
+        g_TextLib.nWords = flength(fpWLEN);
         WordLen = (unsigned int *)UTIL_calloc(g_TextLib.nWords, sizeof(unsigned int));
         for (i = 0, wpos = 0, data = 0, WordLen_max = 0; i < g_TextLib.nWords; i++)
         {
             unsigned char data = 0;
-            UTIL_fread(&data, sizeof(data), 1, fp);
+            UTIL_fread(&data, sizeof(data), 1, fpWLEN);
             WordLen[i] = (unsigned int)data << 24 | wpos;
             wpos += data;
             if (WordLen_max < data)
                 WordLen_max = data;
         }
-        UTIL_fclose(fp);
+        UTIL_Close(Cache_WordLen);
         WordBuffer = (wchar_t **)UTIL_calloc(BUFFER_WORD_NUM, sizeof(wchar_t *));
         for (i = 0; i < BUFFER_WORD_NUM; i++)
             WordBuffer[i] = UTIL_calloc(WordLen_max + 1, sizeof(wchar_t));
@@ -115,18 +124,18 @@ int PAL_InitText(void)
     }
     // Open the message data files.
     {
-        fp = UTIL_fopen(CACHES_PATH "/msg_len.bin", "rb");
-        g_TextLib.nMsgs = flength(fp);
+        void *fpMLEN = UTIL_Open(Cache_MsgLen, "rb");
+        g_TextLib.nMsgs = flength(fpMLEN);
         MsgLen = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs, sizeof(unsigned int));
         for (i = 0, wpos = 0, data = 0, MsgLen_max = 0; i < g_TextLib.nMsgs; i++, data = 0)
         {
-            UTIL_fread(&data, sizeof(data), 1, fp);
+            UTIL_fread(&data, sizeof(data), 1, fpMLEN);
             MsgLen[i] = (unsigned int)data << 24 | wpos;
             wpos += data;
             if (MsgLen_max < data)
                 MsgLen_max = data;
         }
-        UTIL_fclose(fp);
+        UTIL_Close(Cache_MsgLen);
         MsgBuffer = UTIL_calloc(MsgLen_max + 1, sizeof(wchar_t));
         MsgIndex = 0xFFFFFFFF;
     }
@@ -142,8 +151,9 @@ int PAL_InitText(void)
     g_TextLib.posDialogText = PAL_XY(44, 26);
     g_TextLib.bDialogPosition = kDialogUpper;
     g_TextLib.fUserSkip = false;
-
-    PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, gFiles[Res_DATA].fp);
+    void *fpDATA = UTIL_Open(Res_DATA, "rb");
+    PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, fpDATA);
+    UTIL_Close(Res_DATA);
 
     return 0;
 }
@@ -178,8 +188,18 @@ void PAL_FreeText(
     UTIL_free(WordBuffer);
     UTIL_free(MsgBuffer);
     UTIL_free(internal_wbuffer);
-    UTIL_fclose(fp_word);
-    UTIL_fclose(fp_msg);
+
+    unsigned char wchar_size = sizeof(wchar_t);
+    if (wchar_size == 2)
+    {
+        UTIL_Close(Cache_Word_2B);
+        UTIL_Close(Cache_Msg_2B);
+    }
+    else if (wchar_size == 4)
+    {
+        UTIL_Close(Cache_Word_4B);
+        UTIL_Close(Cache_Msg_4B);
+    }
 
     WordBufferIdx = 0;
     WordIndex = 0xFFFFFFFF;
@@ -471,7 +491,8 @@ void PAL_StartDialogWithOffset(
             if (iNumCharFace > 0)
             {
                 // Display the character face at the upper part of the screen
-                if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles[Res_RGM].fp) > 0)
+                void *fpRGM = UTIL_Open(Res_RGM, "rb");
+                if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, fpRGM) > 0)
                 {
                     rect.w = PAL_RLEGetWidth((const unsigned char *)buf);
                     rect.h = PAL_RLEGetHeight((const unsigned char *)buf);
@@ -480,6 +501,7 @@ void PAL_StartDialogWithOffset(
                     PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
                     VIDEO_UpdateScreen(&rect);
                 }
+                UTIL_Close(Res_RGM);
             }
             g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 80 : 12, 8);
             g_TextLib.posDialogText = PAL_XY(iNumCharFace > 0 ? 96 : 44, 26);
@@ -493,13 +515,15 @@ void PAL_StartDialogWithOffset(
             if (iNumCharFace > 0)
             {
                 // Display the character face at the lower part of the screen
-                if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, gFiles[Res_RGM].fp) > 0)
+                void *fpRGM = UTIL_Open(Res_RGM, "rb");
+                if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, fpRGM) > 0)
                 {
                     rect.x = 270 - PAL_RLEGetWidth((const unsigned char *)buf) / 2 + xOff;
                     rect.y = 144 - PAL_RLEGetHeight((const unsigned char *)buf) / 2 + yOff;
                     PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
                     VIDEO_UpdateScreen(NULL);
                 }
+                UTIL_Close(Res_RGM);
             }
             g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 4 : 12, 108);
             g_TextLib.posDialogText = PAL_XY(iNumCharFace > 0 ? 20 : 44, 126);

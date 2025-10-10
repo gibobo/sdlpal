@@ -37,15 +37,15 @@ static unsigned short font_wChar = 0xFFFF;
 
 void PAL_InitFont(void)
 {
-    fp_font_data = UTIL_fopen(CACHES_PATH "/unicode_font.bin", "rb");
-    fp_font_size = UTIL_fopen(CACHES_PATH "/unicode_font_size.bin", "rb");
+    fp_font_data = UTIL_Open(Cache_Font, "rb");
+    fp_font_size = UTIL_Open(Cache_FontSize, "rb");
     font_wChar = 0xFFFF;
 }
 
 void PAL_DeInitFont(void)
 {
-    UTIL_fclose(fp_font_data);
-    UTIL_fclose(fp_font_size);
+    UTIL_Close(Cache_Font);
+    UTIL_Close(Cache_FontSize);
     fp_font_data = NULL;
     fp_font_size = NULL;
 }

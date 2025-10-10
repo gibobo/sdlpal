@@ -23,7 +23,7 @@
 #include "util.h"
 #include <stdlib.h>
 
-PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
+PALMAP *PAL_LoadMap(int iMapNum)
 /*++
   Purpose:
 
@@ -46,38 +46,41 @@ PALMAP *PAL_LoadMap(int iMapNum, void *fpMapMKF, void *fpGopMKF)
 
 --*/
 {
-   int size;
-   PALMAP *map;
+    // Check for invalid map number.
+    if (iMapNum <= 0)
+        return NULL;
 
-   // Check for invalid map number.
-   if (iMapNum <= 0)
-     return NULL;
+    // Create the map instance.
+    PALMAP *map = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
+    map->iMapNum = iMapNum;
 
-   // Create the map instance.
-   map = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
+    void *fpMAP = UTIL_Open(Res_MAP, "rb");
+    PAL_MKFDecompressChunk((unsigned char **)&map->Tiles, 0, iMapNum, fpMAP);
+    UTIL_Close(Res_MAP);
 
-   PAL_MKFDecompressChunk((unsigned char **)&map->Tiles, 0, iMapNum, fpMapMKF);
+    // Load the tile bitmaps.
+    void *fpGOP = UTIL_Open(Res_GOP, "rb");
+    int size = PAL_MKFGetChunkSize(iMapNum, fpGOP);
+    if (size <= 0)
+    {
+        UTIL_Close(Res_GOP);
+        UTIL_free(map->Tiles);
+        UTIL_free(map);
+        return NULL;
+    }
 
-   // Load the tile bitmaps.
-   size = PAL_MKFGetChunkSize(iMapNum, fpGopMKF);
-   if (size <= 0) {
-      UTIL_free(map->Tiles);
-      UTIL_free(map);
-      return NULL;
-   }
+    map->pTileSprite = (unsigned char *)UTIL_malloc(size);
+    int res = PAL_MKFReadChunk(map->pTileSprite, size, iMapNum, fpGOP);
+    UTIL_Close(Res_GOP);
+    if (res < 0)
+    {
+        UTIL_free(map->pTileSprite);
+        UTIL_free(map->Tiles);
+        UTIL_free(map);
+        return NULL;
+    }
 
-   map->pTileSprite = (unsigned char *)UTIL_malloc(size);
-   if (PAL_MKFReadChunk(map->pTileSprite, size, iMapNum, fpGopMKF) < 0) {
-      UTIL_free(map->pTileSprite);
-      UTIL_free(map->Tiles);
-      UTIL_free(map);
-      return NULL;
-   }
-
-   // Done.
-   map->iMapNum = iMapNum;
-
-   return map;
+    return map;
 }
 
 void PAL_FreeMap(PALMAP *lpMap)
@@ -96,19 +99,19 @@ void PAL_FreeMap(PALMAP *lpMap)
 
 --*/
 {
-   // Check for NULL pointer.
-   if (lpMap == NULL)
-   {
-      return;
-   }
+    // Check for NULL pointer.
+    if (lpMap == NULL)
+    {
+        return;
+    }
 
-   // Free the tile bitmaps.
-   UTIL_free(lpMap->pTileSprite);
-   
-   // Free the tiles.
-   UTIL_free(lpMap->Tiles);
-   // Delete the instance.
-   UTIL_free(lpMap);
+    // Free the tile bitmaps.
+    UTIL_free(lpMap->pTileSprite);
+
+    // Free the tiles.
+    UTIL_free(lpMap->Tiles);
+    // Delete the instance.
+    UTIL_free(lpMap);
 }
 
 const unsigned char *PAL_MapGetTileBitmap(
@@ -141,24 +144,28 @@ const unsigned char *PAL_MapGetTileBitmap(
 
 --*/
 {
-   unsigned int d;
+    unsigned int d;
 
-   // Check for invalid parameters.
-   if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL) {
-      return NULL;
-   }
+    // Check for invalid parameters.
+    if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL)
+    {
+        return NULL;
+    }
 
-   // Get the tile data of the specified location.
-   d = lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h];
+    // Get the tile data of the specified location.
+    d = lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h];
 
-   if (ucLayer == 0) {
-      // Bottom layer
-      return PAL_SpriteGetFrame(lpMap->pTileSprite, (int)(d & 0xFF) | ((d >> 4) & 0x100));
-   } else {
-      // Top layer
-      d >>= 16;
-      return PAL_SpriteGetFrame(lpMap->pTileSprite, (int)((d & 0xFF) | ((d >> 4) & 0x100)) - 1);
-   }
+    if (ucLayer == 0)
+    {
+        // Bottom layer
+        return PAL_SpriteGetFrame(lpMap->pTileSprite, (int)(d & 0xFF) | ((d >> 4) & 0x100));
+    }
+    else
+    {
+        // Top layer
+        d >>= 16;
+        return PAL_SpriteGetFrame(lpMap->pTileSprite, (int)((d & 0xFF) | ((d >> 4) & 0x100)) - 1);
+    }
 }
 
 int PAL_MapTileIsBlocked(
@@ -188,13 +195,13 @@ int PAL_MapTileIsBlocked(
 
 --*/
 {
-   // Check for invalid parameters.
-   if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL)
-   {
-      return 1;
-   }
+    // Check for invalid parameters.
+    if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL)
+    {
+        return 1;
+    }
 
-   return (lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h] & 0x2000) >> 13;
+    return (lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h] & 0x2000) >> 13;
 }
 
 unsigned char
@@ -229,25 +236,25 @@ PAL_MapGetTileHeight(
 
 --*/
 {
-   unsigned int d;
+    unsigned int d;
 
-   //
-   // Check for invalid parameters.
-   //
-   if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL)
-   {
-      return 0;
-   }
+    //
+    // Check for invalid parameters.
+    //
+    if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL)
+    {
+        return 0;
+    }
 
-   d = lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h];
+    d = lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h];
 
-   if (ucLayer)
-   {
-      d >>= 16;
-   }
+    if (ucLayer)
+    {
+        d >>= 16;
+    }
 
-   d >>= 8;
-   return (unsigned char)(d & 0xf);
+    d >>= 8;
+    return (unsigned char)(d & 0xf);
 }
 
 void PAL_MapBlitToSurface(
@@ -273,39 +280,39 @@ void PAL_MapBlitToSurface(
 
 --*/
 {
-   int sx, sy, dx, dy, x, y, h, xPos, yPos;
-   const unsigned char *lpBitmap = NULL;
+    int sx, sy, dx, dy, x, y, h, xPos, yPos;
+    const unsigned char *lpBitmap = NULL;
 
-   //
-   // Convert the coordinate
-   //
-   sy = lpSrcRect->y / 16 - 1;
-   dy = (lpSrcRect->y + lpSrcRect->h) / 16 + 2;
-   sx = lpSrcRect->x / 32 - 1;
-   dx = (lpSrcRect->x + lpSrcRect->w) / 32 + 2;
+    //
+    // Convert the coordinate
+    //
+    sy = lpSrcRect->y / 16 - 1;
+    dy = (lpSrcRect->y + lpSrcRect->h) / 16 + 2;
+    sx = lpSrcRect->x / 32 - 1;
+    dx = (lpSrcRect->x + lpSrcRect->w) / 32 + 2;
 
-   //
-   // Do the drawing.
-   //
-   yPos = sy * 16 - 8 - lpSrcRect->y;
-   for (y = sy; y < dy; y++)
-   {
-      for (h = 0; h < 2; h++, yPos += 8)
-      {
-         xPos = sx * 32 + h * 16 - 16 - lpSrcRect->x;
-         for (x = sx; x < dx; x++, xPos += 32)
-         {
-            lpBitmap = PAL_MapGetTileBitmap(x, y, h, ucLayer, lpMap);
-            if (lpBitmap == NULL)
+    //
+    // Do the drawing.
+    //
+    yPos = sy * 16 - 8 - lpSrcRect->y;
+    for (y = sy; y < dy; y++)
+    {
+        for (h = 0; h < 2; h++, yPos += 8)
+        {
+            xPos = sx * 32 + h * 16 - 16 - lpSrcRect->x;
+            for (x = sx; x < dx; x++, xPos += 32)
             {
-               if (ucLayer)
-               {
-                  continue;
-               }
-               lpBitmap = PAL_MapGetTileBitmap(0, 0, 0, ucLayer, lpMap);
+                lpBitmap = PAL_MapGetTileBitmap(x, y, h, ucLayer, lpMap);
+                if (lpBitmap == NULL)
+                {
+                    if (ucLayer)
+                    {
+                        continue;
+                    }
+                    lpBitmap = PAL_MapGetTileBitmap(0, 0, 0, ucLayer, lpMap);
+                }
+                PAL_RLEBlitToSurfaceWithShadow(lpBitmap, gpScreen, PAL_XY(xPos, yPos), 0);
             }
-            PAL_RLEBlitToSurfaceWithShadow(lpBitmap, gpScreen, PAL_XY(xPos, yPos), 0);
-         }
-      }
-   }
+        }
+    }
 }
