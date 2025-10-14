@@ -43,7 +43,7 @@ typedef struct tagRIXPLAYER
     unsigned int buf_max_len;
     unsigned char *pos;
     int iNextMusic; // the next music number to switch to
-    unsigned int dwStartFadeTime;
+    unsigned long dwStartFadeTime;
     int iTotalFadeOutSamples;
     int iTotalFadeInSamples;
     int iRemainingFadeSamples;
@@ -105,9 +105,10 @@ RIX_FillBuffer(
             case FADE_OUT:
                 if (pRixPlayer->iTotalFadeOutSamples == pRixPlayer->iRemainingFadeSamples && pRixPlayer->iTotalFadeOutSamples > 0)
                 {
-                    unsigned int now = (unsigned int)UTIL_GetTicks();
-                    int passed_samples = (now > pRixPlayer->dwStartFadeTime) ? (int)((now - pRixPlayer->dwStartFadeTime) * PAL_AUDIO_SAMPLE_RATE / 1000) : 0;
-                    pRixPlayer->iRemainingFadeSamples -= passed_samples;
+                    if (UTIL_GetMicroseconds() > pRixPlayer->dwStartFadeTime)
+                    {
+                        pRixPlayer->iRemainingFadeSamples -= ((UTIL_GetMicroseconds() - pRixPlayer->dwStartFadeTime) * PAL_AUDIO_SAMPLE_RATE / 1000U);
+                    }
                 }
                 if (pRixPlayer->iMusic == -1 || pRixPlayer->iRemainingFadeSamples <= 0)
                 {
@@ -122,7 +123,7 @@ RIX_FillBuffer(
                         if (pRixPlayer->iMusic > 0)
                             pRixPlayer->dwStartFadeTime += pRixPlayer->iTotalFadeOutSamples * 1000 / PAL_AUDIO_SAMPLE_RATE;
                         else
-                            pRixPlayer->dwStartFadeTime = UTIL_GetTicks();
+                            pRixPlayer->dwStartFadeTime = UTIL_GetMicroseconds();
                         pRixPlayer->iTotalFadeOutSamples = 0;
                         pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeInSamples;
                         CrixPlayer_rewind(pRixPlayer->iMusic, true);
@@ -292,13 +293,10 @@ RIX_Play(
 
     if (pRixPlayer->FadeType != FADE_OUT)
     {
+        pRixPlayer->dwStartFadeTime = UTIL_GetMicroseconds();
         if (pRixPlayer->FadeType == FADE_IN && pRixPlayer->iTotalFadeInSamples > 0 && pRixPlayer->iRemainingFadeSamples > 0)
         {
-            pRixPlayer->dwStartFadeTime = (unsigned int)UTIL_GetTicks() - (int)((float)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples * flFadeTime * (1000 / 2));
-        }
-        else
-        {
-            pRixPlayer->dwStartFadeTime = (unsigned int)UTIL_GetTicks();
+            pRixPlayer->dwStartFadeTime -= ((float)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples * flFadeTime * (1000U / 2U));
         }
         pRixPlayer->iTotalFadeOutSamples = (int)round(flFadeTime / 2.0f * PAL_AUDIO_SAMPLE_RATE) * PAL_AUDIO_CHANNEL_NUM;
         pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeOutSamples;

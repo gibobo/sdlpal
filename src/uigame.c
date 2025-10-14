@@ -1130,16 +1130,13 @@ PAL_ItemUseMenu(
 
 --*/
 {
-    unsigned char bColor, bSelectedColor;
-    unsigned char *bufImage;
-    unsigned int dwColorChangeTime;
+    unsigned char bColor;
+    unsigned char bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
+    unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
+    unsigned long dwColorChangeTime = 0;
     static unsigned short sSelectedPlayer = 0;
     PAL_Rect rect = {110, 2, 200, 180};
     int i;
-
-    bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
-    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
-    dwColorChangeTime = 0;
 
     while (true)
     {
@@ -1238,7 +1235,7 @@ PAL_ItemUseMenu(
             //
             // See if we should change the highlight color
             //
-            if (UTIL_GetTicks() >= dwColorChangeTime)
+            if (UTIL_GetMicroseconds() >= dwColorChangeTime)
             {
                 if ((unsigned short)bSelectedColor + 1 >=
                     (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
@@ -1250,7 +1247,7 @@ PAL_ItemUseMenu(
                     bSelectedColor++;
                 }
 
-                dwColorChangeTime = (unsigned int)UTIL_GetTicks() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
+                dwColorChangeTime = UTIL_GetMicroseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
                 //
                 // Redraw the selected item.
@@ -1599,19 +1596,14 @@ void PAL_EquipItemMenu(
 
 --*/
 {
-    unsigned char *bufImage;
     unsigned short w;
     unsigned short iCurrentPlayer = 0;
     int i;
     unsigned char bColor;
-    unsigned char bSelectedColor;
-    unsigned int dwColorChangeTime;
-
-    bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
+    unsigned char bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
+    unsigned long dwColorChangeTime = UTIL_GetMicroseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
+    unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
     gpGlobals->wLastUnequippedItem = wItem;
-
-    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
-    dwColorChangeTime = (unsigned int)UTIL_GetTicks() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
     while (true)
     {
@@ -1701,7 +1693,7 @@ void PAL_EquipItemMenu(
             UTIL_Delay(1);
 
             // See if we should change the highlight color
-            if (UTIL_GetTicks() >= dwColorChangeTime)
+            if (UTIL_GetMicroseconds() >= dwColorChangeTime)
             {
                 if ((unsigned short)bSelectedColor + 1 >=
                     (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
@@ -1713,7 +1705,7 @@ void PAL_EquipItemMenu(
                     bSelectedColor++;
                 }
 
-                dwColorChangeTime = (unsigned int)UTIL_GetTicks() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
+                dwColorChangeTime = UTIL_GetMicroseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
                 // Redraw the selected item if needed.
                 w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;

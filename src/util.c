@@ -25,8 +25,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <windows.h>
+#elif defined(ARDUINO_ARCH_ESP32)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #else
 #include <sys/time.h>
 #include <unistd.h>
@@ -169,17 +172,31 @@ int gettimeofday(struct timeval *tp, void *tzp)
 }
 #endif
 
-unsigned long UTIL_GetTicks(void)
+unsigned long UTIL_GetMicroseconds(void)
 {
+#ifdef ARDUINO_ARCH_ESP32
+    return xTaskGetTickCount() * portTICK_PERIOD_MS;
+#else
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
+#endif
 }
 
 void UTIL_Delay(int ms)
 {
-    unsigned long tm = UTIL_GetTicks() + ms;
-    do
+    if (ms <= 0)
+        return;
+#ifdef ARDUINO_ARCH_ESP32
+    TickType_t tm = xTaskGetTickCount() + pdMS_TO_TICKS(ms);
+    while (xTaskGetTickCount() < tm)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1));
+        PAL_ProcessEvent();
+    }
+#else
+    unsigned long tm = UTIL_GetMicroseconds() + ms;
+    while (UTIL_GetMicroseconds() < tm)
     {
 #ifdef _WIN32
         Sleep(1);
@@ -187,5 +204,6 @@ void UTIL_Delay(int ms)
         usleep(1000);
 #endif
         PAL_ProcessEvent();
-    } while (tm > UTIL_GetTicks());
+    }
+#endif
 }

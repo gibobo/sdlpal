@@ -28,6 +28,7 @@
 #include "uibattle.h"
 #include "util.h"
 #include "video.h"
+#include <assert.h>
 #include <stdbool.h>
 
 static struct MAGICITEM
@@ -343,47 +344,38 @@ PAL_MagicSelectionMenu(
 
 --*/
 {
-    unsigned int dwTime;
-    unsigned short w;
-    int i;
+    int i, j;
+    unsigned short w = 0xFFFF;
+    unsigned long dwTime = 0;
 
     PAL_MagicSelectionMenuInit(wPlayerRole, fInBattle, wDefaultMagic);
-    PAL_ClearKeyState();
-
-    dwTime = (unsigned int)UTIL_GetTicks() + 5U;
 
     while (true)
     {
-        PAL_MakeScene();
-
-        w = 45;
-
-        for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
+        PAL_ClearKeyState();
+        while (UTIL_GetMicroseconds() < dwTime)
         {
-            PAL_PlayerInfoBox(PAL_XY(w, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-                              TIMEMETER_COLOR_DEFAULT, false);
-            w += 78;
+            UTIL_Delay(1);
+            if (PAL_GetKeyInput() != kKeyNone)
+                break;
+        }
+        dwTime = UTIL_GetMicroseconds() + FRAME_TIME;
+
+        PAL_MakeScene();
+        for (i = 0, j = 45; i <= gpGlobals->wMaxPartyMemberIndex; i++, j += 78)
+        {
+            PAL_PlayerInfoBox(PAL_XY(j, 165), gpGlobals->rgParty[i].wPlayerRole, 100, TIMEMETER_COLOR_DEFAULT, false);
         }
 
         w = PAL_MagicSelectionMenuUpdate();
         VIDEO_UpdateScreen(NULL);
 
-        PAL_ClearKeyState();
-
         if (w != 0xFFFF)
         {
             return w;
         }
-
-        do
-        {
-            UTIL_Delay(1);
-            if (PAL_GetKeyInput() != kKeyNone)
-                break;
-        } while (UTIL_GetTicks() < dwTime);
-
-        dwTime = (unsigned int)UTIL_GetTicks() + FRAME_TIME;
     }
 
+    assert(false);
     return 0; // should not really reach here
 }

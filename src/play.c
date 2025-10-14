@@ -586,11 +586,11 @@ PAL_WaitForKeyInternal(
 
 --*/
 {
-   unsigned int dwTimeOut = (unsigned int)UTIL_GetTicks() + wTimeOut;
+   unsigned long dwTimeOut = UTIL_GetMicroseconds() + wTimeOut;
 
    PAL_ClearKeyState();
 
-   while (wTimeOut == 0 || (UTIL_GetTicks() < dwTimeOut))
+   while (wTimeOut == 0 || (UTIL_GetMicroseconds() < dwTimeOut))
    {
       UTIL_Delay(5);
 

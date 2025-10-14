@@ -149,16 +149,16 @@ void DRIVER_DeInit_Event(void)
 
 int DRIVER_Process_Events(void)
 {
-    static unsigned int video_trigger_ticks = 0;
-    static unsigned int audio_trigger_ticks = 0;
-    unsigned int current_time;
+    static unsigned long video_trigger_ticks = 0;
+    static unsigned long audio_trigger_ticks = 0;
+    unsigned long current_time;
 
     while (ws_conn == NULL) // Wait for WebSocket connection to be established
     {
         mg_mgr_poll(&mgr, 1000);
     }
 
-    current_time = (unsigned int)UTIL_GetTicks();
+    current_time = UTIL_GetMicroseconds();
 #define TRIGGER_TIME(tm) (tm * ((current_time / tm) + 1U)) // Helper macro to adjust trigger time
     if (current_time >= video_trigger_ticks)               // Poll the event manager every 50 milliseconds
     {

@@ -61,8 +61,8 @@ static wchar_t **WordBuffer = NULL;
 static unsigned char WordBufferIdx = 0;
 static wchar_t *MsgBuffer = NULL;
 static wchar_t *internal_wbuffer = NULL;
-static unsigned int WordIndex = -1;
-static unsigned int MsgIndex = -1;
+static unsigned int WordIndex = 0xFFFFFFFF;
+static unsigned int MsgIndex = 0xFFFFFFFF;
 TEXTLIB g_TextLib;
 
 int PAL_InitText(void)
@@ -553,7 +553,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
     unsigned char *org_palette = NULL;
     unsigned char t[3];
     int i;
-    unsigned int dwBeginningTicks = (unsigned int)UTIL_GetTicks();
+    unsigned long dwTime = UTIL_GetMicroseconds() + (unsigned long)(1000U * fMaxSeconds);
 
     // get the current palette
     org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
@@ -582,7 +582,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
     while (true)
     {
-        UTIL_Delay(100);
+        UTIL_Delay(FRAME_TIME);
 
         if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
             g_TextLib.bDialogPosition != kDialogCenter)
@@ -605,7 +605,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
             VIDEO_UpdateScreen(NULL);
         }
 
-        if ((fabs(fMaxSeconds) > FLT_EPSILON) && ((unsigned int)UTIL_GetTicks() > dwBeginningTicks + (1000U * fMaxSeconds)))
+        if ((fMaxSeconds != 0.0f) && (UTIL_GetMicroseconds() > dwTime))
         {
             break;
         }
@@ -822,7 +822,7 @@ void PAL_ShowDialogText(
         //
         // The rest dialogs should be shown in the next page.
         //
-        PAL_DialogWaitForKeyWithMaximumSeconds(0);
+        PAL_DialogWaitForKeyWithMaximumSeconds(0.0f);
         g_TextLib.nCurrentDialogLine = 0;
         VIDEO_RestoreScreen(gpScreen);
         VIDEO_UpdateScreen(NULL);
@@ -923,7 +923,7 @@ void PAL_ClearDialog(
 {
     if (g_TextLib.nCurrentDialogLine > 0 && fWaitForKey)
     {
-        PAL_DialogWaitForKeyWithMaximumSeconds(0);
+        PAL_DialogWaitForKeyWithMaximumSeconds(0.0f);
     }
 
     g_TextLib.nCurrentDialogLine = 0;

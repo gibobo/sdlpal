@@ -9,7 +9,7 @@
 static unsigned char *send_audio = NULL;
 static unsigned int send_audio_size = 0;
 static double duration_sum = 0.0;
-static unsigned int audio_start_tick = 0;
+static unsigned long audio_start_tick = 0;
 static const double duration_ms = 1000.0 * (double)PAL_AUDIO_BUFFER_SIZE / (double)PAL_AUDIO_SAMPLE_RATE;
 extern struct mg_connection *ws_conn;
 
@@ -22,7 +22,7 @@ void send_audio_data(void)
     int16_t *audio_data = (int16_t *)(send_audio + 1);
     memset(audio_data, 0, send_audio_size - 1);
 
-    if ((unsigned int)UTIL_GetTicks() + duration_ms < audio_start_tick + duration_sum)
+    if (UTIL_GetMicroseconds() + duration_ms < audio_start_tick + duration_sum)
         return;
 
     AUDIO_FillBuffer(audio_data, send_audio_size - 1);
@@ -30,13 +30,13 @@ void send_audio_data(void)
     {
         fprintf(stderr, "Failed to send audio data\n");
         duration_sum = 0.0;
-        audio_start_tick = 0;
+        audio_start_tick = 0U;
     }
     else
     {
         duration_sum += duration_ms;
-        if (audio_start_tick == 0)
-            audio_start_tick = (unsigned int)UTIL_GetTicks();
+        if (audio_start_tick == 0U)
+            audio_start_tick = UTIL_GetMicroseconds();
     }
 }
 

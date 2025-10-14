@@ -83,7 +83,7 @@ typedef struct tagSHOWNUM
 {
    unsigned short wNum;
    unsigned int pos;
-   unsigned int dwTime;
+   unsigned long dwTime;
    NUMCOLOR color;
 } SHOWNUM;
 
@@ -94,7 +94,7 @@ typedef struct tagBATTLEUI
 
    wchar_t szMsg[32];               // message to be shown on the screen
    wchar_t szNextMsg[32];           // next message to be shown on the screen
-   unsigned int dwMsgShowTime;      // the end time of showing the message
+   unsigned long dwMsgShowTime;      // the end time of showing the message
    unsigned short wNextMsgDuration; // duration of the next message
 
    unsigned short wCurPlayerIndex; // index of the current player

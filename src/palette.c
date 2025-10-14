@@ -121,7 +121,7 @@ void PAL_FadeOut(int iDelay)
 --*/
 {
     unsigned int i, j;
-    long time, now;
+    unsigned long time, now;
     unsigned char org_palette[PALETTE_SIZE];
     unsigned char new_palette[PALETTE_SIZE];
 
@@ -132,15 +132,8 @@ void PAL_FadeOut(int iDelay)
     //
     // Start fading out...
     //
-    now = UTIL_GetTicks();
-    time = now + iDelay * 10 * 60;
-    while (time > now)
+    for (j = 60; j > 0; j -= (iDelay > 10 ? iDelay / 10 : 1))
     {
-        //
-        // Set the current palette...
-        //
-        j = (time - now) / (iDelay * 10);
-
         for (i = 0; i < PALETTE_SIZE; i++)
         {
             new_palette[i] = (org_palette[i] * j) >> 6;
@@ -148,8 +141,7 @@ void PAL_FadeOut(int iDelay)
 
         VIDEO_SetPalette(new_palette);
         VIDEO_UpdateScreen(NULL);
-        UTIL_Delay(10);
-        now = UTIL_GetTicks();
+        UTIL_Delay(iDelay * 10);
     }
 
     memset(new_palette, 0, sizeof(new_palette));
@@ -177,39 +169,21 @@ void PAL_FadeIn(int iPaletteNum, int fNight, unsigned short iDelay)
 
 --*/
 {
-    int i, j;
-    unsigned int time;
-    unsigned char *palette;
-    unsigned char newpalette[PALETTE_SIZE];
-
-    if (iDelay == 0)
-        iDelay = 1;
-    // Get the new palette...
-    palette = PAL_GetPalette(iPaletteNum, fNight);
-    memset(newpalette, 0, sizeof(newpalette));
+    unsigned short i, j;
+    unsigned char *palette = PAL_GetPalette(iPaletteNum, fNight);
+    unsigned char newpalette[PALETTE_SIZE] = {0};
 
     // Start fading in...
-    time = (unsigned int)UTIL_GetTicks() + iDelay * 10 * 60;
-    while (true)
+    for (j = 0; j < 60U; j += (iDelay > 10U ? iDelay / 10U : 1U))
     {
-        // Set the current palette...
-        j = (int)(time - (unsigned int)UTIL_GetTicks()) / iDelay / 10;
-        if (j < 0)
-        {
-            break;
-        }
-
-        j = 60 - j;
-
         for (i = 0; i < PALETTE_SIZE; i++)
         {
-            newpalette[i] = (palette[i] * j) >> 6;
+            newpalette[i] = (unsigned char)(((unsigned short)palette[i] * j) >> 6U);
         }
 
         VIDEO_SetPalette(newpalette);
         VIDEO_UpdateScreen(NULL);
-
-        UTIL_Delay(10);
+        UTIL_Delay(iDelay * 10U);
     }
 
     VIDEO_SetPalette(palette);
@@ -238,7 +212,8 @@ void PAL_SceneFade(int iPaletteNum, int fNight, int iStep)
 {
     unsigned char *palette;
     unsigned char newpalette[PALETTE_SIZE];
-    int i, j;
+    int i;
+    unsigned int j;
 
     palette = PAL_GetPalette(iPaletteNum, fNight);
     memset(newpalette, 0, sizeof(newpalette));
@@ -269,12 +244,12 @@ void PAL_SceneFade(int iPaletteNum, int fNight, int iStep)
             // Calculate the current palette...
             for (j = 0; j < PALETTE_SIZE; j++)
             {
-                newpalette[j] = (palette[j] * i) >> 6;
+                newpalette[j] = (unsigned char)(((unsigned int)palette[j] * (unsigned int)i) >> 6U);
             }
             VIDEO_SetPalette(newpalette);
             VIDEO_UpdateScreen(NULL);
 
-            UTIL_Delay(100);
+            UTIL_Delay(FRAME_TIME);
         }
     }
     else
@@ -291,12 +266,12 @@ void PAL_SceneFade(int iPaletteNum, int fNight, int iStep)
             // Calculate the current palette...
             for (j = 0; j < PALETTE_SIZE; j++)
             {
-                newpalette[j] = (palette[j] * i) >> 6;
+                newpalette[j] = (unsigned char)(((unsigned int)palette[j] * (unsigned int)i) >> 6U);
             }
             VIDEO_SetPalette(newpalette);
             VIDEO_UpdateScreen(NULL);
 
-            UTIL_Delay(100);
+            UTIL_Delay(FRAME_TIME);
         }
     }
 }

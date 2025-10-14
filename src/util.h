@@ -39,7 +39,7 @@
 #define SEEK_END 2
 #endif
 
-#define FRAME_TIME (1000 / 10) // 10 FPS
+#define FRAME_TIME (100U) // 10 FPS
 
 #ifndef max
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -98,7 +98,7 @@ void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size);
 void UTIL_free(void *ptr);
 
 // Platform-specific utilities
-unsigned long UTIL_GetTicks(void);
+unsigned long UTIL_GetMicroseconds(void);
 
 void *UTIL_fopen(const char *_FileName, const char *_Mode);
 

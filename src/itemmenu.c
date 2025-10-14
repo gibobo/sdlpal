@@ -345,13 +345,11 @@ PAL_ItemSelectMenu(
 
 --*/
 {
-    unsigned int dwTime;
-    unsigned short w;
-    int iPrevIndex;
+    unsigned short w = 0xFFFF;
+    unsigned long dwTime = 0;
+    int iPrevIndex = gpGlobals->iCurInvMenuItem;
 
     PAL_ItemSelectMenuInit(wItemFlags);
-    iPrevIndex = gpGlobals->iCurInvMenuItem;
-
     PAL_ClearKeyState();
 
     if (lpfnMenuItemChanged != NULL)
@@ -360,35 +358,21 @@ PAL_ItemSelectMenu(
         (*lpfnMenuItemChanged)(gpGlobals->rgInventory[gpGlobals->iCurInvMenuItem].wItem);
     }
 
-    dwTime = (unsigned int)UTIL_GetTicks() + 5U;
-
     while (true)
     {
-        if (lpfnMenuItemChanged == NULL)
-        {
-            PAL_MakeScene();
-        }
-
-        w = PAL_ItemSelectMenuUpdate();
-        VIDEO_UpdateScreen(NULL);
-
         PAL_ClearKeyState();
-
-        do
+        while (UTIL_GetMicroseconds() < dwTime)
         {
             UTIL_Delay(1);
             if (PAL_GetKeyInput() != kKeyNone)
             {
                 break;
             }
-        } while ((unsigned int)UTIL_GetTicks() < dwTime);
-
-        dwTime = (unsigned int)UTIL_GetTicks() + FRAME_TIME;
-
-        if (w != 0xFFFF)
+        }
+        dwTime = UTIL_GetMicroseconds() + FRAME_TIME;
+        if (lpfnMenuItemChanged == NULL)
         {
-            g_fNoDesc = false;
-            return w;
+            PAL_MakeScene();
         }
 
         if (iPrevIndex != gpGlobals->iCurInvMenuItem)
@@ -402,6 +386,15 @@ PAL_ItemSelectMenu(
             }
 
             iPrevIndex = gpGlobals->iCurInvMenuItem;
+        }
+
+        w = PAL_ItemSelectMenuUpdate();
+        VIDEO_UpdateScreen(NULL);
+
+        if (w != 0xFFFF)
+        {
+            g_fNoDesc = false;
+            return w;
         }
     }
 
