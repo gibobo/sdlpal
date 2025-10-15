@@ -24,9 +24,16 @@
 #define PAL_AUDIO_CHUNK_PER_SECOND (70U)
 #define PAL_AUDIO_BIT_DEPTH        (16U)
 #define PAL_AUDIO_BYTES_PER_SAMPLE (PAL_AUDIO_BIT_DEPTH >> 3)
+
+#ifdef ARDUINO_ARCH_ESP32
+#define PAL_AUDIO_CHANNEL_NUM      (1U)
+#define PAL_AUDIO_SAMPLE_RATE      (22050)
+#define PAL_AUDIO_BUFFER_SIZE      (1U + ((PAL_AUDIO_SAMPLE_RATE / PAL_AUDIO_CHUNK_PER_SECOND) / 128U)) * 128U
+#else
 #define PAL_AUDIO_CHANNEL_NUM      (2U)
 #define PAL_AUDIO_SAMPLE_RATE      (44100U)
 #define PAL_AUDIO_BUFFER_SIZE      (1U + ((PAL_AUDIO_SAMPLE_RATE / PAL_AUDIO_CHUNK_PER_SECOND) / 256U)) * 256U
+#endif
 
 #define AUDIOPLAYER_COMMONS               \
     int iMusic;                           \

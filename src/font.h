@@ -23,6 +23,10 @@
 
 #define FONT_HEIGHT (16)
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 /*++
   Purpose:
 
@@ -38,6 +42,21 @@
 
 --*/
 void PAL_InitFont(void);
+
+/*++
+  Purpose:
+
+    Deinitialize the font subsystem.
+
+  Parameters:
+
+    None.
+
+  Return value:
+
+    None.
+--*/
+void PAL_DeInitFont(void);
 
 /*++
   Purpose:
@@ -81,6 +100,8 @@ void PAL_DrawCharOnSurface(
 --*/
 unsigned char PAL_CharWidth(unsigned short wChar);
 
-void PAL_DeInitFont(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif
