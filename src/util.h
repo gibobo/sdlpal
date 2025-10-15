@@ -21,12 +21,17 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#ifdef ARDUINO_ARCH_ESP32
+#define RESOURCE_PATH "/sdcard"
+#define CACHES_PATH   "/sdcard"
+#else
 #ifndef RESOURCE_PATH
 #define RESOURCE_PATH "."
 #endif
 
 #ifndef CACHES_PATH
 #define CACHES_PATH "."
+#endif
 #endif
 
 #ifndef SEEK_SET
@@ -123,6 +128,8 @@ extern "C" {
 #endif
 
 void UTIL_Delay(int ms);
+
+unsigned int UTIL_WaitKeys(unsigned int ms, unsigned int wait_keys);
 
 #ifdef __cplusplus
 }

@@ -188,15 +188,15 @@ void UTIL_Delay(int ms)
     if (ms <= 0)
         return;
 #ifdef ARDUINO_ARCH_ESP32
-    TickType_t tm = xTaskGetTickCount() + pdMS_TO_TICKS(ms);
-    while (xTaskGetTickCount() < tm)
+    TickType_t end_time = xTaskGetTickCount() + pdMS_TO_TICKS(ms);
+    while (xTaskGetTickCount() < end_time)
     {
         vTaskDelay(pdMS_TO_TICKS(1));
         PAL_ProcessEvent();
     }
 #else
-    unsigned long tm = UTIL_GetMicroseconds() + ms;
-    while (UTIL_GetMicroseconds() < tm)
+    unsigned long end_time = UTIL_GetMicroseconds() + ms;
+    while (UTIL_GetMicroseconds() < end_time)
     {
 #ifdef _WIN32
         Sleep(1);
@@ -206,4 +206,47 @@ void UTIL_Delay(int ms)
         PAL_ProcessEvent();
     }
 #endif
+}
+
+unsigned int UTIL_WaitKeys(unsigned int ms, unsigned int wait_keys)
+{
+    // If no specific keys are specified, wait for any key.
+    if (wait_keys == 0)
+        wait_keys = 0xFFFFFFFF;
+
+    // Clear previous key states
+    PAL_ClearKeyState();
+
+#ifdef ARDUINO_ARCH_ESP32
+    TickType_t end_time = xTaskGetTickCount() + pdMS_TO_TICKS(ms);
+    while (ms == 0 || xTaskGetTickCount() < end_time)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1));
+        PAL_ProcessEvent();
+
+        PALKEY pressed_key = PAL_GetKeyInput();
+        if (pressed_key & wait_keys)
+        {
+            return pressed_key & wait_keys;
+        }
+    }
+#else
+    unsigned long end_time = UTIL_GetMicroseconds() + ms;
+    while (ms == 0 || UTIL_GetMicroseconds() < end_time)
+    {
+#ifdef _WIN32
+        Sleep(1);
+#else
+        usleep(1000);
+#endif
+        PAL_ProcessEvent();
+        PALKEY pressed_key = PAL_GetKeyInput();
+        if (pressed_key & wait_keys)
+        {
+            return pressed_key & wait_keys;
+        }
+    }
+#endif
+
+    return kKeyNone; // Timeout occurred
 }

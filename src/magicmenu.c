@@ -346,21 +346,12 @@ PAL_MagicSelectionMenu(
 {
     int i, j;
     unsigned short w = 0xFFFF;
-    unsigned long dwTime = 0;
 
     PAL_MagicSelectionMenuInit(wPlayerRole, fInBattle, wDefaultMagic);
+    PAL_ClearKeyState();
 
     while (true)
     {
-        PAL_ClearKeyState();
-        while (UTIL_GetMicroseconds() < dwTime)
-        {
-            UTIL_Delay(1);
-            if (PAL_GetKeyInput() != kKeyNone)
-                break;
-        }
-        dwTime = UTIL_GetMicroseconds() + FRAME_TIME;
-
         PAL_MakeScene();
         for (i = 0, j = 45; i <= gpGlobals->wMaxPartyMemberIndex; i++, j += 78)
         {
@@ -374,6 +365,7 @@ PAL_MagicSelectionMenu(
         {
             return w;
         }
+        UTIL_WaitKeys(FRAME_TIME, 0);
     }
 
     assert(false);

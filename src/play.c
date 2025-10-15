@@ -510,7 +510,7 @@ PAL_StartFrame(
     None.
 
 --*/
-{
+{  
    // Run the game logic of one frame
    PAL_GameUpdate(true);
    if (gpGlobals->fEnteringScene)
@@ -562,85 +562,4 @@ PAL_StartFrame(
       // Quit Game
       PAL_QuitGame();
    }
-}
-
-static inline void
-PAL_WaitForKeyInternal(
-   unsigned short      wTimeOut,
-   int      fAllowAnyKey
-)
-/*++
-  Purpose:
-
-    Wait for any key.
-
-  Parameters:
-
-    [IN]  wTimeOut - the maximum time of the waiting. 0 = wait forever.
-
-    [IN]  fAllowAnyKey - Whether any key are allowed. If no, only KeySearch and KeyMenu allowed.
-
-  Return value:
-
-    None.
-
---*/
-{
-   unsigned long dwTimeOut = UTIL_GetMicroseconds() + wTimeOut;
-
-   PAL_ClearKeyState();
-
-   while (wTimeOut == 0 || (UTIL_GetMicroseconds() < dwTimeOut))
-   {
-      UTIL_Delay(5);
-
-      if (PAL_GetKeyInput() && fAllowAnyKey || PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
-      {
-         break;
-      }
-   }
-}
-
-void
-PAL_WaitForKey(
-   unsigned short      wTimeOut
-)
-/*++
-  Purpose:
-
-    Wait for KeySearch and KeyMenu.
-
-  Parameters:
-
-    [IN]  wTimeOut - the maximum time of the waiting. 0 = wait forever.
-
-  Return value:
-
-    None.
-
---*/
-{
-   PAL_WaitForKeyInternal(wTimeOut, false);
-}
-
-void
-PAL_WaitForAnyKey(
-   unsigned short      wTimeOut
-)
-/*++
-  Purpose:
-
-    Wait for any key.
-
-  Parameters:
-
-    [IN]  wTimeOut - the maximum time of the waiting. 0 = wait forever.
-
-  Return value:
-
-    None.
-
---*/
-{
-   PAL_WaitForKeyInternal(wTimeOut, true);
 }

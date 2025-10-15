@@ -951,7 +951,7 @@ PAL_BattleWon(
         PAL_DrawNumber(g_Battle->iCashGained, 5, PAL_XY(162, 119), kNumColorYellow, kNumAlignMid);
 
         VIDEO_UpdateScreen(&rect);
-        PAL_WaitForAnyKey(g_Battle->fIsBoss ? 5500 : 3000);
+        UTIL_WaitKeys(g_Battle->fIsBoss ? 5500 : 3000, 0);
     }
 
     //
@@ -1090,7 +1090,7 @@ PAL_BattleWon(
             // Update the screen and wait for key
             //
             VIDEO_UpdateScreen(&rect1);
-            PAL_WaitForAnyKey(3000);
+            UTIL_WaitKeys(3000, 0);
 
             OrigPlayerRoles = *gpGlobals->g.PlayerRoles;
         }
@@ -1144,7 +1144,7 @@ PAL_BattleWon(
             PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, false, false, false);                                                                                                               \
             PAL_DrawNumber(gpGlobals->g.PlayerRoles->statname[w] - OrigPlayerRoles.statname[w], 5, PAL_XY(183 + (maxNameWidth + maxPropertyWidth - 3) * 8, 74), kNumColorYellow, kNumAlignRight); \
             VIDEO_UpdateScreen(&rect);                                                                                                                                                            \
-            PAL_WaitForAnyKey(3000);                                                                                                                                                              \
+            UTIL_WaitKeys(3000, 0);                                                                                                                                                              \
         }                                                                                                                                                                                         \
     }
 
@@ -1196,7 +1196,7 @@ PAL_BattleWon(
                 PAL_DrawText(PAL_GetWord(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic), PAL_XY(75 + 16 * (w1 + w2) - ww, 115), 0x1B, false, false, false);
 
                 VIDEO_UpdateScreen(&rect);
-                PAL_WaitForAnyKey(3000);
+                UTIL_WaitKeys(3000, 0);
             }
 
             j++;

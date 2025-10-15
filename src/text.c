@@ -578,12 +578,8 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
         }
     }
 
-    PAL_ClearKeyState();
-
     while (true)
     {
-        UTIL_Delay(FRAME_TIME);
-
         if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
             g_TextLib.bDialogPosition != kDialogCenter)
         {
@@ -610,7 +606,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
             break;
         }
 
-        if (PAL_GetKeyInput() != kKeyNone)
+        if (UTIL_WaitKeys(FRAME_TIME, 0) != kKeyNone)
         {
             break;
         }
@@ -770,10 +766,7 @@ int TEXT_DisplayText(
 
                 if (!isDialog && !g_TextLib.fUserSkip)
                 {
-                    PAL_ClearKeyState();
-                    UTIL_Delay(g_TextLib.iDelayTime * 8);
-
-                    if (PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
+                    if (UTIL_WaitKeys(g_TextLib.iDelayTime * 8, kKeySearch | kKeyMenu))
                     {
                         // User pressed a key to skip the dialog
                         g_TextLib.fUserSkip = true;

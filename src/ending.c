@@ -337,7 +337,7 @@ void PAL_EndingScreen(void)
     PAL_ShowFBP(71, 7, 0x27b);
     PAL_ShowFBP(68, 7, 0x27b);
     PAL_ShowFBP(68, 6, 0x000);
-    PAL_WaitForKey(0);
+    UTIL_WaitKeys(0, 0);
     AUDIO_PlayMusic(0x00, false, 1);
     UTIL_Delay(500);
 #endif

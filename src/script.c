@@ -1662,7 +1662,7 @@ PAL_InterpretInstruction(
             //
             // wait for any key
             //
-            PAL_WaitForKey(0);
+            UTIL_WaitKeys(0, 0);
             break;
 
         case 0x004E:

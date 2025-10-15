@@ -432,10 +432,9 @@ PAL_ReadMenu(
                          rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, false, true, false);
         }
 
-        PAL_ClearKeyState();
-        UTIL_Delay(50);
+        PALKEY keys = UTIL_WaitKeys(50, kKeyMenu | kKeySearch | kKeyLeft | kKeyRight | kKeyUp | kKeyDown);
 
-        if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
+        if (keys & (kKeyDown | kKeyRight))
         {
             //
             // Fix issue #166
@@ -490,7 +489,7 @@ PAL_ReadMenu(
                 (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
             }
         }
-        else if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
+        else if (keys & (kKeyUp | kKeyLeft))
         {
             //
             // Fix issue #166
@@ -547,7 +546,7 @@ PAL_ReadMenu(
                 (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
             }
         }
-        else if (PAL_GetKeyInput() & kKeyMenu)
+        else if (keys & kKeyMenu)
         {
             //
             // User cancelled
@@ -565,7 +564,7 @@ PAL_ReadMenu(
 
             break;
         }
-        else if (PAL_GetKeyInput() & kKeySearch)
+        else if (keys & kKeySearch)
         {
             //
             // User pressed Enter

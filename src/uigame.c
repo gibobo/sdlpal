@@ -704,8 +704,7 @@ start_magicmenu:
 
                 while (true)
                 {
-                    PAL_ClearKeyState();
-                    UTIL_Delay(1);
+                    UTIL_WaitKeys(1, kKeyMenu | kKeySearch | kKeyLeft | kKeyRight | kKeyUp | kKeyDown);
 
                     if (PAL_GetKeyInput() & kKeyMenu)
                     {
@@ -1084,24 +1083,21 @@ void PAL_PlayerStatus(
         // Update the screen
         VIDEO_UpdateScreen(NULL);
 
-        // Wait for input
-        PAL_ClearKeyState();
-
         while (true)
         {
-            UTIL_Delay(1);
+            PALKEY keys = UTIL_WaitKeys(1, kKeyMenu | kKeySearch | kKeyLeft | kKeyRight | kKeyUp | kKeyDown);
 
-            if (PAL_GetKeyInput() & kKeyMenu)
+            if (keys & kKeyMenu)
             {
                 iCurrent = -1;
                 break;
             }
-            else if (PAL_GetKeyInput() & (kKeyLeft | kKeyUp))
+            else if (keys & (kKeyLeft | kKeyUp))
             {
                 iCurrent--;
                 break;
             }
-            else if (PAL_GetKeyInput() & (kKeyRight | kKeyDown | kKeySearch))
+            else if (keys & (kKeyRight | kKeyDown | kKeySearch))
             {
                 iCurrent++;
                 break;
@@ -1225,11 +1221,6 @@ PAL_ItemUseMenu(
         //
         VIDEO_UpdateScreen(&rect);
 
-        //
-        // Wait for key
-        //
-        PAL_ClearKeyState();
-
         while (true)
         {
             //
@@ -1257,9 +1248,8 @@ PAL_ItemUseMenu(
                     PAL_XY(125, 16 + 20 * sSelectedPlayer), bSelectedColor, false, true, false);
             }
 
-            UTIL_Delay(1);
-
-            if (PAL_GetKeyInput() != kKeyNone)
+            // Wait for any key
+            if (UTIL_WaitKeys(1, 0) != kKeyNone)
             {
                 break;
             }
@@ -1690,8 +1680,6 @@ void PAL_EquipItemMenu(
 
         while (true)
         {
-            UTIL_Delay(1);
-
             // See if we should change the highlight color
             if (UTIL_GetMicroseconds() >= dwColorChangeTime)
             {
@@ -1717,7 +1705,7 @@ void PAL_EquipItemMenu(
                 }
             }
 
-            if (PAL_GetKeyInput() != kKeyNone)
+            if (UTIL_WaitKeys(1, 0) != kKeyNone)
             {
                 break;
             }

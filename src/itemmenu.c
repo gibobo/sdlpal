@@ -346,7 +346,6 @@ PAL_ItemSelectMenu(
 --*/
 {
     unsigned short w = 0xFFFF;
-    unsigned long dwTime = 0;
     int iPrevIndex = gpGlobals->iCurInvMenuItem;
 
     PAL_ItemSelectMenuInit(wItemFlags);
@@ -360,16 +359,6 @@ PAL_ItemSelectMenu(
 
     while (true)
     {
-        PAL_ClearKeyState();
-        while (UTIL_GetMicroseconds() < dwTime)
-        {
-            UTIL_Delay(1);
-            if (PAL_GetKeyInput() != kKeyNone)
-            {
-                break;
-            }
-        }
-        dwTime = UTIL_GetMicroseconds() + FRAME_TIME;
         if (lpfnMenuItemChanged == NULL)
         {
             PAL_MakeScene();
@@ -396,6 +385,7 @@ PAL_ItemSelectMenu(
             g_fNoDesc = false;
             return w;
         }
+        UTIL_WaitKeys(FRAME_TIME, 0);
     }
 
     assert(false);

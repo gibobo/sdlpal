@@ -223,7 +223,6 @@ void PAL_SplashScreen(void)
     dstrect.x = 0;
     dstrect.w = SCREEN_W;
 
-    unsigned int Time_LightUP = 15000;
     while (true)
     {
         dwTime++;
@@ -278,11 +277,8 @@ void PAL_SplashScreen(void)
         PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
         VIDEO_UpdateScreen(NULL);
 
-        // Delay a while...
-        UTIL_Delay(85);
-
         // Check for keypress...
-        if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
+        if (UTIL_WaitKeys(85, kKeyMenu | kKeySearch))
             break;
     }
     // Quit the splash screen
