@@ -52,17 +52,19 @@
 unsigned char g_fUpdatedInBattle = false;
 static PALRES Cache_Word;
 static PALRES Cache_Msg;
+
+static wchar_t *WordData = NULL;
 static unsigned int *WordLen = NULL;
-static unsigned int *MsgLen = NULL;
 static unsigned int WordLen_max = 0;
-static unsigned int MsgLen_max = 0;
-static unsigned int internal_wbuffer_size = 0;
 static wchar_t **WordBuffer = NULL;
-static unsigned char WordBufferIdx = 0;
-static wchar_t *MsgBuffer = NULL;
+
+static wchar_t *MsgData = NULL;
+static unsigned int *MsgLen = NULL;
+static unsigned int MsgLen_max = 0;
+
 static wchar_t *internal_wbuffer = NULL;
-static unsigned int WordIndex = 0xFFFFFFFF;
-static unsigned int MsgIndex = 0xFFFFFFFF;
+static unsigned int internal_wbuffer_size = 0;
+
 TEXTLIB g_TextLib;
 
 int PAL_InitText(void)
@@ -115,11 +117,13 @@ int PAL_InitText(void)
                 WordLen_max = data;
         }
         UTIL_Close(Cache_WordLen);
-        WordBuffer = (wchar_t **)UTIL_calloc(BUFFER_WORD_NUM, sizeof(wchar_t *));
-        for (i = 0; i < BUFFER_WORD_NUM; i++)
-            WordBuffer[i] = UTIL_calloc(WordLen_max + 1, sizeof(wchar_t));
-        WordBufferIdx = 0;
-        WordIndex = 0xFFFFFFFF;
+    }
+    {
+        void *fpWORD = UTIL_Open(Cache_Word, "rb");
+        unsigned int word_buffer_size = UTIL_flength(fpWORD) / sizeof(wchar_t);
+        WordData = (wchar_t *)UTIL_calloc(word_buffer_size, sizeof(wchar_t));
+        UTIL_fread(WordData, sizeof(wchar_t), word_buffer_size, fpWORD);
+        UTIL_Close(Cache_Word);
     }
     // Open the message data files.
     {
@@ -135,10 +139,15 @@ int PAL_InitText(void)
                 MsgLen_max = data;
         }
         UTIL_Close(Cache_MsgLen);
-        MsgBuffer = UTIL_calloc(MsgLen_max + 1, sizeof(wchar_t));
-        MsgIndex = 0xFFFFFFFF;
     }
-    internal_wbuffer_size = WordLen_max > MsgLen_max ? WordLen_max : MsgLen_max;
+    {
+        void *fpMSG = UTIL_Open(Cache_Msg, "rb");
+        unsigned int msg_buffer_size = UTIL_flength(fpMSG) / sizeof(wchar_t);
+        MsgData = (wchar_t *)UTIL_calloc(msg_buffer_size, sizeof(wchar_t));
+        UTIL_fread(MsgData, sizeof(wchar_t), msg_buffer_size, fpMSG);
+        UTIL_Close(Cache_Msg);
+    }
+    internal_wbuffer_size = max(WordLen_max, MsgLen_max);
     internal_wbuffer = UTIL_calloc(internal_wbuffer_size + 1, sizeof(wchar_t));
 
     g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
@@ -174,27 +183,16 @@ void PAL_FreeText(
 
 --*/
 {
+    UTIL_free(WordData);
     UTIL_free(WordLen);
+    UTIL_free(MsgData);
     UTIL_free(MsgLen);
-    if (WordBuffer)
-    {
-        for (int i = 0; i < BUFFER_WORD_NUM; i++)
-        {
-            UTIL_free(WordBuffer[i]);
-            WordBuffer[i] = NULL;
-        }
-    }
-    UTIL_free(WordBuffer);
-    UTIL_free(MsgBuffer);
     UTIL_free(internal_wbuffer);
 
-    WordBufferIdx = 0;
-    WordIndex = 0xFFFFFFFF;
-    MsgIndex = 0xFFFFFFFF;
+    WordData = NULL;
     WordLen = NULL;
+    MsgData = NULL;
     MsgLen = NULL;
-    WordBuffer = NULL;
-    MsgBuffer = NULL;
     internal_wbuffer = NULL;
 }
 
@@ -214,17 +212,8 @@ const wchar_t *PAL_GetWord(unsigned int iNumWord)
 
 --*/
 {
-    if (WordIndex != iNumWord)
-    {
-        WordIndex = iNumWord;
-        void *fpWORD = UTIL_Open(Cache_Word, "rb");
-        UTIL_fseek(fpWORD, sizeof(wchar_t) * (WordLen[WordIndex] & 0x00FFFFFF), SEEK_SET);
-        WordBufferIdx = (WordBufferIdx + 1) % BUFFER_WORD_NUM;
-        UTIL_fread(WordBuffer[WordBufferIdx], sizeof(wchar_t), WordLen[WordIndex] >> 24, fpWORD);
-        WordBuffer[WordBufferIdx][WordLen[WordIndex] >> 24] = 0;
-        UTIL_Close(Cache_Word);
-    }
-    return (iNumWord >= g_TextLib.nWords || !WordBuffer[WordBufferIdx]) ? L"" : WordBuffer[WordBufferIdx];
+    unsigned int WordBufferStart = WordLen[iNumWord] & 0x00FFFFFF;
+    return (iNumWord >= g_TextLib.nWords || WordData[WordBufferStart] == 0) ? L"" : &WordData[WordBufferStart];
 }
 
 const wchar_t *PAL_GetMsg(unsigned int iNumMsg)
@@ -243,16 +232,8 @@ const wchar_t *PAL_GetMsg(unsigned int iNumMsg)
 
 --*/
 {
-    if (MsgIndex != iNumMsg)
-    {
-        MsgIndex = iNumMsg;
-        void *fpMSG = UTIL_Open(Cache_Msg, "rb");
-        UTIL_fseek(fpMSG, sizeof(wchar_t) * (MsgLen[MsgIndex] & 0x00FFFFFF), SEEK_SET);
-        UTIL_fread(MsgBuffer, sizeof(wchar_t), MsgLen[MsgIndex] >> 24, fpMSG);
-        MsgBuffer[MsgLen[MsgIndex] >> 24] = 0;
-        UTIL_Close(Cache_Msg);
-    }
-    return (iNumMsg >= g_TextLib.nMsgs || !MsgBuffer) ? L"" : MsgBuffer;
+    unsigned int MsgBufferStart = MsgLen[iNumMsg] & 0x00FFFFFF;
+    return (iNumMsg >= g_TextLib.nMsgs || MsgData[MsgBufferStart] == 0) ? L"" : &MsgData[MsgBufferStart];
 }
 
 wchar_t *PAL_UnescapeText(const wchar_t *lpszText)
