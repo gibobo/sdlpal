@@ -172,7 +172,7 @@ int gettimeofday(struct timeval *tp, void *tzp)
 }
 #endif
 
-unsigned long UTIL_GetMicroseconds(void)
+unsigned long UTIL_GetMilliseconds(void)
 {
 #ifdef ARDUINO_ARCH_ESP32
     return xTaskGetTickCount() * portTICK_PERIOD_MS;
@@ -183,29 +183,30 @@ unsigned long UTIL_GetMicroseconds(void)
 #endif
 }
 
-void UTIL_Delay(int ms)
+void UTIL_Sleep(unsigned int ms)
 {
-    if (ms <= 0)
-        return;
-#ifdef ARDUINO_ARCH_ESP32
-    TickType_t end_time = xTaskGetTickCount() + pdMS_TO_TICKS(ms);
-    while (xTaskGetTickCount() < end_time)
+#if defined(ARDUINO_ARCH_ESP32)
+    vTaskDelay(pdMS_TO_TICKS(ms));
+#elif defined(_WIN32)
+    Sleep(ms);
+#else
+    usleep(ms * 1000);
+#endif
+}
+
+unsigned int UTIL_Delay(unsigned int ms)
+{
+    // Clear previous key states
+    PAL_ClearKeyState();
+
+    unsigned long end_time = UTIL_GetMilliseconds() + ms;
+    while (UTIL_GetMilliseconds() < end_time)
     {
-        vTaskDelay(pdMS_TO_TICKS(1));
+        UTIL_Sleep(1);
         PAL_ProcessEvent();
     }
-#else
-    unsigned long end_time = UTIL_GetMicroseconds() + ms;
-    while (UTIL_GetMicroseconds() < end_time)
-    {
-#ifdef _WIN32
-        Sleep(1);
-#else
-        usleep(1000);
-#endif
-        PAL_ProcessEvent();
-    }
-#endif
+
+    return PAL_GetKeyInput();
 }
 
 unsigned int UTIL_WaitKeys(unsigned int ms, unsigned int wait_keys)
@@ -217,36 +218,14 @@ unsigned int UTIL_WaitKeys(unsigned int ms, unsigned int wait_keys)
     // Clear previous key states
     PAL_ClearKeyState();
 
-#ifdef ARDUINO_ARCH_ESP32
-    TickType_t end_time = xTaskGetTickCount() + pdMS_TO_TICKS(ms);
-    while (ms == 0 || xTaskGetTickCount() < end_time)
+    PALKEY pressed_key = kKeyNone;
+    unsigned long end_time = UTIL_GetMilliseconds() + ms;
+    while ((ms == 0 || UTIL_GetMilliseconds() < end_time) && (pressed_key == kKeyNone))
     {
-        vTaskDelay(pdMS_TO_TICKS(1));
+        UTIL_Sleep(1);
         PAL_ProcessEvent();
-
-        PALKEY pressed_key = PAL_GetKeyInput();
-        if (pressed_key & wait_keys)
-        {
-            return pressed_key & wait_keys;
-        }
+        pressed_key |= (PAL_GetKeyInput() & wait_keys);
     }
-#else
-    unsigned long end_time = UTIL_GetMicroseconds() + ms;
-    while (ms == 0 || UTIL_GetMicroseconds() < end_time)
-    {
-#ifdef _WIN32
-        Sleep(1);
-#else
-        usleep(1000);
-#endif
-        PAL_ProcessEvent();
-        PALKEY pressed_key = PAL_GetKeyInput();
-        if (pressed_key & wait_keys)
-        {
-            return pressed_key & wait_keys;
-        }
-    }
-#endif
 
-    return kKeyNone; // Timeout occurred
+    return pressed_key;
 }

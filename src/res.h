@@ -23,9 +23,10 @@
 
 enum tagLOADRESFLAG
 {
-   kLoadGlobalData     = (1 << 0),    // load global data
-   kLoadScene          = (1 << 1),    // load a scene
-   kLoadPlayerSprite   = (1 << 2),    // load player sprites
+    kLoadNone = 0,                // no need to load anything
+    kLoadGlobalData = (1 << 0),   // load global data
+    kLoadScene = (1 << 1),        // load a scene
+    kLoadPlayerSprite = (1 << 2), // load player sprites
 };
 
 void PAL_InitResources(void);

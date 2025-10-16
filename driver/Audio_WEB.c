@@ -22,7 +22,7 @@ void send_audio_data(void)
     int16_t *audio_data = (int16_t *)(send_audio + 1);
     memset(audio_data, 0, send_audio_size - 1);
 
-    if (UTIL_GetMicroseconds() + duration_ms < audio_start_tick + duration_sum)
+    if (UTIL_GetMilliseconds() + duration_ms < audio_start_tick + duration_sum)
         return;
 
     AUDIO_FillBuffer(audio_data, send_audio_size - 1);
@@ -36,7 +36,7 @@ void send_audio_data(void)
     {
         duration_sum += duration_ms;
         if (audio_start_tick == 0U)
-            audio_start_tick = UTIL_GetMicroseconds();
+            audio_start_tick = UTIL_GetMilliseconds();
     }
 }
 

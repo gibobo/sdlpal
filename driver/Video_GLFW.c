@@ -15,11 +15,6 @@ GLFWwindow *window = NULL;
 extern void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
-unsigned char *DRIVER_FrameBuffer(void)
-{
-    return framebuffer;
-}
-
 void DRIVER_FrameShow(
     unsigned char *frame,
     const unsigned short roi_x,
@@ -28,14 +23,14 @@ void DRIVER_FrameShow(
     const unsigned short roi_h,
     const unsigned char padding_flag)
 {
-    if (window == NULL)
+    if (window == NULL || framebuffer == NULL || palette == NULL)
         return;
 
     unsigned short x, y;
     unsigned short roi_x2 = roi_x + roi_w;
     unsigned short roi_y2 = roi_y + roi_h;
     unsigned char *src = frame;
-    unsigned char *dst = DRIVER_FrameBuffer();
+    unsigned char *dst = framebuffer;
 
     for (y = 0; y < SCREEN_H; y++)
     {

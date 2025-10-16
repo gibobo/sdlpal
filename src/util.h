@@ -84,9 +84,10 @@ typedef enum
     Cache_MsgLen,   // message length cache
     Cache_Font,     // font cache
     Cache_FontSize, // font size cache
+    Res_Count       // total number of resources
 } PALRES;
 
-long flength(void *fp);
+long UTIL_flength(void *fp);
 
 int RandomLong(int from, int to);
 
@@ -103,7 +104,7 @@ void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size);
 void UTIL_free(void *ptr);
 
 // Platform-specific utilities
-unsigned long UTIL_GetMicroseconds(void);
+unsigned long UTIL_GetMilliseconds(void);
 
 void *UTIL_fopen(const char *_FileName, const char *_Mode);
 
@@ -127,7 +128,9 @@ unsigned char UTIL_Close(const PALRES res);
 extern "C" {
 #endif
 
-void UTIL_Delay(int ms);
+void UTIL_Sleep(unsigned int ms);
+
+unsigned int UTIL_Delay(unsigned int ms);
 
 unsigned int UTIL_WaitKeys(unsigned int ms, unsigned int wait_keys);
 

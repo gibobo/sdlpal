@@ -10,11 +10,6 @@ static caca_canvas_t *cv = NULL;
 caca_display_t *dp = NULL;
 static caca_dither_t *caca_dither = NULL;
 
-unsigned char *DRIVER_FrameBuffer(void)
-{
-    return framebuffer;
-}
-
 void DRIVER_FrameShow(
     unsigned char *frame,
     const unsigned short roi_x,
@@ -23,11 +18,14 @@ void DRIVER_FrameShow(
     const unsigned short roi_h,
     const unsigned char padding_flag)
 {
+    if (framebuffer == NULL)
+        return;
+
     unsigned short x, y;
     unsigned short roi_x2 = roi_x + roi_w;
     unsigned short roi_y2 = roi_y + roi_h;
     unsigned char *src = frame;
-    unsigned char *dst = DRIVER_FrameBuffer();
+    unsigned char *dst = framebuffer;
 
     for (y = 0; y < SCREEN_H; y++)
     {
@@ -53,10 +51,11 @@ void DRIVER_FrameShow(
         dst += SCREEN_W;
     }
     if (cv && caca_dither)
-        caca_dither_bitmap(cv, 0, 0,
-                           caca_get_canvas_width(cv),
-                           caca_get_canvas_height(cv),
-                           caca_dither, framebuffer);
+        caca_dither_bitmap(
+            cv, 0, 0,
+            caca_get_canvas_width(cv),
+            caca_get_canvas_height(cv),
+            caca_dither, framebuffer);
     if (dp)
         caca_refresh_display(dp);
 }

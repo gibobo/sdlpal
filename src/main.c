@@ -75,6 +75,9 @@ void PAL_Init(void)
         TerminateOnError("Could not initialize Video: %d.\n", e);
     }
 
+    if (gpGlobals == NULL)
+        gpGlobals = (GLOBALVARS *)UTIL_malloc(sizeof(GLOBALVARS));
+
     e = PAL_InitUI();
     if (e != 0)
     {
@@ -336,7 +339,6 @@ int main(int argc, char *argv[])
     PAL_Init();
 
     // Show the trademark screen and splash screen
-    // PAL_ReloadInNextTick(0);
     // PAL_EndingScreen();
     PAL_TrademarkScreen();
     PAL_SplashScreen();
@@ -349,9 +351,6 @@ int main(int argc, char *argv[])
     // Run the main game routine
     while (1)
     {
-        // Load the game resources if needed.
-        PAL_LoadResources();
-
         // Clear the input state of previous frame.
         PAL_ClearKeyState();
 

@@ -1,41 +1,38 @@
 #include "util.h"
 #include <stdio.h>
 
-struct
-{
-    char *name;
-    void *fp;
-    unsigned char created;
-} gFiles[] = {
-    [Res_ABC] = {RESOURCE_PATH "/abc.mkf", NULL, 0},
-    [Res_FBP] = {RESOURCE_PATH "/fbp.mkf", NULL, 0},
-    [Res_MGO] = {RESOURCE_PATH "/mgo.mkf", NULL, 0},
-    [Res_BALL] = {RESOURCE_PATH "/ball.mkf", NULL, 0},
-    [Res_DATA] = {RESOURCE_PATH "/data.mkf", NULL, 0},
-    [Res_F] = {RESOURCE_PATH "/f.mkf", NULL, 0},
-    [Res_FIRE] = {RESOURCE_PATH "/fire.mkf", NULL, 0},
-    [Res_RGM] = {RESOURCE_PATH "/rgm.mkf", NULL, 0},
-    [Res_SSS] = {RESOURCE_PATH "/sss.mkf", NULL, 0},
-    [Res_SOUNDS] = {RESOURCE_PATH "/sounds.mkf", NULL, 0},
-    [Res_PAT] = {RESOURCE_PATH "/pat.mkf", NULL, 0},
-    [Res_MAP] = {RESOURCE_PATH "/map.mkf", NULL, 0},
-    [Res_GOP] = {RESOURCE_PATH "/gop.mkf", NULL, 0},
-    [Res_MUS] = {RESOURCE_PATH "/mus.mkf", NULL, 0},
-    [Res_RNG] = {RESOURCE_PATH "/rng.mkf", NULL, 0},
-    [Save_1] = {RESOURCE_PATH "/1.rpg", NULL, 0},
-    [Save_2] = {RESOURCE_PATH "/2.rpg", NULL, 0},
-    [Save_3] = {RESOURCE_PATH "/3.rpg", NULL, 0},
-    [Save_4] = {RESOURCE_PATH "/4.rpg", NULL, 0},
-    [Save_5] = {RESOURCE_PATH "/5.rpg", NULL, 0},
-    [Cache_Word_2B] = {CACHES_PATH "/word_2b.bin", NULL, 0},
-    [Cache_Word_4B] = {CACHES_PATH "/word_4b.bin", NULL, 0},
-    [Cache_WordLen] = {CACHES_PATH "/word_len.bin", NULL, 0},
-    [Cache_Msg_2B] = {CACHES_PATH "/msg_2b.bin", NULL, 0},
-    [Cache_Msg_4B] = {CACHES_PATH "/msg_4b.bin", NULL, 0},
-    [Cache_MsgLen] = {CACHES_PATH "/msg_len.bin", NULL, 0},
-    [Cache_Font] = {CACHES_PATH "/unicode_font.bin", NULL, 0},
-    [Cache_FontSize] = {CACHES_PATH "/unicode_font_size.bin", NULL, 0},
+static char *gFiles_name[Res_Count] = {
+    [Res_ABC] = RESOURCE_PATH "/abc.mkf",
+    [Res_FBP] = RESOURCE_PATH "/fbp.mkf",
+    [Res_MGO] = RESOURCE_PATH "/mgo.mkf",
+    [Res_BALL] = RESOURCE_PATH "/ball.mkf",
+    [Res_DATA] = RESOURCE_PATH "/data.mkf",
+    [Res_F] = RESOURCE_PATH "/f.mkf",
+    [Res_FIRE] = RESOURCE_PATH "/fire.mkf",
+    [Res_RGM] = RESOURCE_PATH "/rgm.mkf",
+    [Res_SSS] = RESOURCE_PATH "/sss.mkf",
+    [Res_SOUNDS] = RESOURCE_PATH "/sounds.mkf",
+    [Res_PAT] = RESOURCE_PATH "/pat.mkf",
+    [Res_MAP] = RESOURCE_PATH "/map.mkf",
+    [Res_GOP] = RESOURCE_PATH "/gop.mkf",
+    [Res_MUS] = RESOURCE_PATH "/mus.mkf",
+    [Res_RNG] = RESOURCE_PATH "/rng.mkf",
+    [Save_1] = RESOURCE_PATH "/1.rpg",
+    [Save_2] = RESOURCE_PATH "/2.rpg",
+    [Save_3] = RESOURCE_PATH "/3.rpg",
+    [Save_4] = RESOURCE_PATH "/4.rpg",
+    [Save_5] = RESOURCE_PATH "/5.rpg",
+    [Cache_Word_2B] = CACHES_PATH "/word_2b.bin",
+    [Cache_Word_4B] = CACHES_PATH "/word_4b.bin",
+    [Cache_WordLen] = CACHES_PATH "/word_len.bin",
+    [Cache_Msg_2B] = CACHES_PATH "/msg_2b.bin",
+    [Cache_Msg_4B] = CACHES_PATH "/msg_4b.bin",
+    [Cache_MsgLen] = CACHES_PATH "/msg_len.bin",
+    [Cache_Font] = CACHES_PATH "/unicode_font.bin",
+    [Cache_FontSize] = CACHES_PATH "/unicode_font_size.bin",
 };
+static unsigned char gFiles_created[Res_Count] = {0};
+static FILE *gFiles_fp[Res_Count] = {NULL};
 
 void *UTIL_fopen(const char *_FileName, const char *_Mode)
 {
@@ -105,52 +102,52 @@ void UTIL_fclose(void *fp)
 
 void *UTIL_Open_without_checking(const PALRES res, const char *_Mode)
 {
-    if (gFiles[res].name == NULL || _Mode == NULL)
+    if (gFiles_name[res] == NULL || _Mode == NULL)
         TerminateOnError("%s() called with invalid parameters\n", __func__);
-    else if (gFiles[res].fp == NULL)
-        gFiles[res].fp = fopen(gFiles[res].name, _Mode);
+    else if (gFiles_fp[res] == NULL)
+        gFiles_fp[res] = fopen(gFiles_name[res], _Mode);
 
-    if (gFiles[res].fp != NULL)
+    if (gFiles_fp[res] != NULL)
     {
-        gFiles[res].created++;
-        // fprintf(stdout, "File %s loaded\n", gFiles[res].name);
+        gFiles_created[res]++;
+        // fprintf(stdout, "File %s loaded\n", gFiles_name[res]);
     }
 
-    return gFiles[res].fp;
+    return gFiles_fp[res];
 }
 
 void *UTIL_Open(const PALRES res, const char *_Mode)
 {
-    if(UTIL_Open_without_checking(res, _Mode) == NULL)
-        TerminateOnError("%s() open %s failed\n", __func__, gFiles[res].name);
+    if (UTIL_Open_without_checking(res, _Mode) == NULL)
+        TerminateOnError("%s() open %s failed\n", __func__, gFiles_name[res]);
 
-    return gFiles[res].fp;
+    return gFiles_fp[res];
 }
 
 unsigned char UTIL_Close(const PALRES res)
 {
-    if (gFiles[res].created)
-        gFiles[res].created--;
+    if (gFiles_created[res])
+        gFiles_created[res]--;
 
-    if ((gFiles[res].created == 0) && (gFiles[res].fp != NULL))
+    if ((gFiles_created[res] == 0) && (gFiles_fp[res] != NULL))
     {
-        UTIL_fclose(gFiles[res].fp);
-        gFiles[res].fp = NULL;
+        UTIL_fclose(gFiles_fp[res]);
+        gFiles_fp[res] = NULL;
     }
-    return gFiles[res].created;
+    return gFiles_created[res];
 }
 
-long flength(void *fp)
+long UTIL_flength(void *fp)
 {
     long old_pos = ftell((FILE *)fp);
 
     if (old_pos == -1)
         return -1;
 
-    if (UTIL_fseek(fp, 0, SEEK_END) == -1)
+    if (UTIL_fseek((FILE *)fp, 0, SEEK_END) == -1)
         return -1;
 
     long length = ftell((FILE *)fp);
-    UTIL_fseek(fp, old_pos, SEEK_SET);
+    UTIL_fseek((FILE *)fp, old_pos, SEEK_SET);
     return length;
 }

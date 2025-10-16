@@ -1226,7 +1226,7 @@ PAL_ItemUseMenu(
             //
             // See if we should change the highlight color
             //
-            if (UTIL_GetMicroseconds() >= dwColorChangeTime)
+            if (UTIL_GetMilliseconds() >= dwColorChangeTime)
             {
                 if ((unsigned short)bSelectedColor + 1 >=
                     (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
@@ -1238,7 +1238,7 @@ PAL_ItemUseMenu(
                     bSelectedColor++;
                 }
 
-                dwColorChangeTime = UTIL_GetMicroseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
+                dwColorChangeTime = UTIL_GetMilliseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
                 //
                 // Redraw the selected item.
@@ -1591,7 +1591,7 @@ void PAL_EquipItemMenu(
     int i;
     unsigned char bColor;
     unsigned char bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
-    unsigned long dwColorChangeTime = UTIL_GetMicroseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
+    unsigned long dwColorChangeTime = UTIL_GetMilliseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
     unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
     gpGlobals->wLastUnequippedItem = wItem;
 
@@ -1681,7 +1681,7 @@ void PAL_EquipItemMenu(
         while (true)
         {
             // See if we should change the highlight color
-            if (UTIL_GetMicroseconds() >= dwColorChangeTime)
+            if (UTIL_GetMilliseconds() >= dwColorChangeTime)
             {
                 if ((unsigned short)bSelectedColor + 1 >=
                     (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
@@ -1693,7 +1693,7 @@ void PAL_EquipItemMenu(
                     bSelectedColor++;
                 }
 
-                dwColorChangeTime = UTIL_GetMicroseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
+                dwColorChangeTime = UTIL_GetMilliseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
 
                 // Redraw the selected item if needed.
                 w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;

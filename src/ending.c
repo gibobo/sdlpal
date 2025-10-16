@@ -97,7 +97,7 @@ static void PAL_ShowFBP(
 
             if (bufSprite)
             {
-                unsigned long f = UTIL_GetMicroseconds() / 150U;
+                unsigned long f = UTIL_GetMilliseconds() / 150U;
                 PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                                      gpScreen, PAL_XY(0, 0));
             }
@@ -170,7 +170,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
 
         if (bufSprite)
         {
-            unsigned long f = UTIL_GetMicroseconds() / 150U;
+            unsigned long f = UTIL_GetMilliseconds() / 150U;
             PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                                  gpScreen, PAL_XY(0, 0));
         }
@@ -245,7 +245,7 @@ static void PAL_EndingAnimation(void)
         // Draw animated girl
         if (i & 1 && yPosGirl > 80)
             yPosGirl--;
-        PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (UTIL_GetMicroseconds() / 50U) % 4U),
+        PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (UTIL_GetMilliseconds() / 50U) % 4U),
                              gpScreen, PAL_XY(220, yPosGirl));
 
         VIDEO_UpdateScreen(NULL);
@@ -356,6 +356,6 @@ void PAL_EndingScreen(void)
     PAL_ScrollFBP(59, 0);
 
     AUDIO_PlayMusic(0x00, false, 6);
-    PAL_FadeOut(3); // 淡出
+    PAL_FadeOut(3); // FadeOut
 #endif
 }

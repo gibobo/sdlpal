@@ -213,7 +213,7 @@ PAL_MagicSelectionMenuUpdate(
 
 void PAL_MagicSelectionMenuInit(
     unsigned short wPlayerRole,
-    int fInBattle,
+    unsigned char fInBattle,
     unsigned short wDefaultMagic)
 /*++
   Purpose:
@@ -323,7 +323,7 @@ void PAL_MagicSelectionMenuInit(
 unsigned short
 PAL_MagicSelectionMenu(
     unsigned short wPlayerRole,
-    int fInBattle,
+    unsigned char fInBattle,
     unsigned short wDefaultMagic)
 /*++
   Purpose:

@@ -31,7 +31,9 @@
 #include "video.h"
 #include <stdlib.h>
 
-#define Check_fread(buf, elem, num, fp) if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) return -1
+#define Check_fread(buf, elem, num, fp)                 \
+    if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
+    return -1
 
 static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned int uiFrameNum, void *fpRngMKF)
 /*++
@@ -65,7 +67,8 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
     unsigned int uiChunkCount = 0;
     int iChunkLen = 0;
 
-    if (fpRngMKF == NULL || lpBuffer == NULL ) {
+    if (fpRngMKF == NULL || lpBuffer == NULL)
+    {
         return -1;
     }
 
@@ -74,7 +77,8 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
 
     // Get the total number of chunks.
     uiChunkCount = PAL_MKFGetChunkCount(fpRngMKF);
-    if (uiRngNum >= uiChunkCount) {
+    if (uiRngNum >= uiChunkCount)
+    {
         return -1;
     }
 
@@ -85,16 +89,20 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
 
     // Get the length of the chunk.
     iChunkLen = uiNextOffset - uiOffset;
-    if (iChunkLen != 0) {
+    if (iChunkLen != 0)
+    {
         UTIL_fseek(fpRngMKF, uiOffset, SEEK_SET);
-    } else {
+    }
+    else
+    {
         return -1;
     }
 
     // Get the number of sub chunks.
     Check_fread(&uiChunkCount, sizeof(unsigned int), 1, fpRngMKF);
     uiChunkCount = (uiChunkCount >> 2) - 1;
-    if (uiFrameNum >= uiChunkCount) {
+    if (uiFrameNum >= uiChunkCount)
+    {
         return -1;
     }
 
@@ -106,7 +114,8 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
     // Get the length of the sub chunk.
     iChunkLen = uiNextOffset - uiSubOffset;
 
-    if (iChunkLen != 0) {
+    if (iChunkLen != 0)
+    {
         *lpBuffer = (unsigned char *)UTIL_malloc(iChunkLen);
         UTIL_fseek(fpRngMKF, uiOffset + uiSubOffset, SEEK_SET);
         return (int)UTIL_fread(*lpBuffer, 1, iChunkLen, fpRngMKF);
@@ -143,130 +152,128 @@ PAL_RNGBlitToSurface(
 
 --*/
 {
-   int ptr = 0;
-   unsigned int i, n, data;
-   unsigned char *dst = NULL;
+    int ptr = 0;
+    unsigned int i, n, data;
+    unsigned char *dst = NULL;
 
-   // Check for invalid parameters.
-   if (lpDstSurface == NULL || length < 0)
-   {
-      return -1;
-   }
-   dst = lpDstSurface->pixels;
+    // Check for invalid parameters.
+    if (lpDstSurface == NULL || length < 0)
+    {
+        return -1;
+    }
+    dst = lpDstSurface->pixels;
 
-   // Draw the frame to the surface.
-   while (ptr < length)
-   {
-      data = rng[ptr++];
-      n = 0;
-      switch (data)
-      {
-      case 0x00:
-      case 0x13:
-         // End
-         ptr = length;
-         break;
+    // Draw the frame to the surface.
+    while (ptr < length)
+    {
+        data = rng[ptr++];
+        n = 0;
+        switch (data)
+        {
+            case 0x00:
+            case 0x13:
+                // End
+                ptr = length;
+                break;
 
-      case 0x02:
-         dst += 2;
-         break;
+            case 0x02:
+                dst += 2;
+                break;
 
-      case 0x03:
-         n = rng[ptr++];
-         dst += (n + 1) * 2;
-         break;
+            case 0x03:
+                n = rng[ptr++];
+                dst += (n + 1) * 2;
+                break;
 
-      case 0x04:
-         n = rng[ptr] | ((unsigned int)rng[ptr + 1] << 8);
-         ptr += 2;
-         dst += (n + 1) * 2;
-         break;
+            case 0x04:
+                n = rng[ptr] | ((unsigned int)rng[ptr + 1] << 8);
+                ptr += 2;
+                dst += (n + 1) * 2;
+                break;
 
-      case 0x0a:
-         *dst++ = rng[ptr++];
-         *dst++ = rng[ptr++];
+            case 0x0a:
+                *dst++ = rng[ptr++];
+                *dst++ = rng[ptr++];
 
-      case 0x09:
-         *dst++ = rng[ptr++];
-         *dst++ = rng[ptr++];
+            case 0x09:
+                *dst++ = rng[ptr++];
+                *dst++ = rng[ptr++];
 
-      case 0x08:
-         *dst++ = rng[ptr++];
-         *dst++ = rng[ptr++];
+            case 0x08:
+                *dst++ = rng[ptr++];
+                *dst++ = rng[ptr++];
 
-      case 0x07:
-         *dst++ = rng[ptr++];
-         *dst++ = rng[ptr++];
+            case 0x07:
+                *dst++ = rng[ptr++];
+                *dst++ = rng[ptr++];
 
-      case 0x06:
-         *dst++ = rng[ptr++];
-         *dst++ = rng[ptr++];
-         break;
+            case 0x06:
+                *dst++ = rng[ptr++];
+                *dst++ = rng[ptr++];
+                break;
 
-      case 0x0b:
-         n = rng[ptr++];
-         for (i = 0; i <= n; i++)
-         {
-            *dst++ = rng[ptr++];
-            *dst++ = rng[ptr++];
-         }
-         break;
+            case 0x0b:
+                n = rng[ptr++];
+                for (i = 0; i <= n; i++)
+                {
+                    *dst++ = rng[ptr++];
+                    *dst++ = rng[ptr++];
+                }
+                break;
 
-      case 0x0c:
-         n = rng[ptr] | ((unsigned int)rng[ptr + 1] << 8);
-         ptr += 2;
-         for (i = 0; i <= n; i++)
-         {
-            *dst++ = rng[ptr++];
-            *dst++ = rng[ptr++];
-         }
-         break;
+            case 0x0c:
+                n = rng[ptr] | ((unsigned int)rng[ptr + 1] << 8);
+                ptr += 2;
+                for (i = 0; i <= n; i++)
+                {
+                    *dst++ = rng[ptr++];
+                    *dst++ = rng[ptr++];
+                }
+                break;
 
-      case 0x0d:
-      case 0x0e:
-      case 0x0f:
-      case 0x10:
-         for (i = 0; i < data - 11; i++)
-         {
-            *dst++ = rng[ptr];
-            *dst++ = rng[ptr + 1];
-         }
-         ptr += 2;
-         break;
+            case 0x0d:
+            case 0x0e:
+            case 0x0f:
+            case 0x10:
+                for (i = 0; i < data - 11; i++)
+                {
+                    *dst++ = rng[ptr];
+                    *dst++ = rng[ptr + 1];
+                }
+                ptr += 2;
+                break;
 
-      case 0x11:
-         n = rng[ptr++];
-         for (i = 0; i <= n; i++)
-         {
-            *dst++ = rng[ptr];
-            *dst++ = rng[ptr + 1];
-         }
-         ptr += 2;
-         break;
+            case 0x11:
+                n = rng[ptr++];
+                for (i = 0; i <= n; i++)
+                {
+                    *dst++ = rng[ptr];
+                    *dst++ = rng[ptr + 1];
+                }
+                ptr += 2;
+                break;
 
-      case 0x12:
-         n = (rng[ptr] | ((unsigned int)rng[ptr + 1] << 8)) + 1;
-         ptr += 2;
-         for (i = 0; i < n; i++)
-         {
-            *dst++ = rng[ptr];
-            *dst++ = rng[ptr + 1];
-         }
-         ptr += 2;
-         break;
-      }
-   }
+            case 0x12:
+                n = (rng[ptr] | ((unsigned int)rng[ptr + 1] << 8)) + 1;
+                ptr += 2;
+                for (i = 0; i < n; i++)
+                {
+                    *dst++ = rng[ptr];
+                    *dst++ = rng[ptr + 1];
+                }
+                ptr += 2;
+                break;
+        }
+    }
 
-   return 0;
+    return 0;
 }
 
-void
-PAL_RNGPlay(
-   int           iNumRNG,
-   int           iStartFrame,
-   int           iEndFrame,
-   int           iSpeed
-)
+void PAL_RNGPlay(
+    int iNumRNG,
+    int iStartFrame,
+    int iEndFrame,
+    int iSpeed)
 /*++
   Purpose:
 
@@ -288,45 +295,47 @@ PAL_RNGPlay(
 
 --*/
 {
-   void *fpRNG = UTIL_Open(Res_RNG, "rb");
-   unsigned char *rng = NULL;
-   unsigned char *buf = NULL;
-   int rng_size = 0;
-   int buf_size = 0;
-   unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
+    void *fpRNG = UTIL_Open(Res_RNG, "rb");
+    unsigned char *rng = NULL;
+    unsigned char *buf = NULL;
+    int rng_size = 0;
+    int buf_size = 0;
+    unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
 
-   // Avoid losing the last frame
-   if (iEndFrame > 0) iEndFrame++;
+    // Avoid losing the last frame
+    if (iEndFrame > 0)
+        iEndFrame++;
 
-   for (; fpRNG && iStartFrame != iEndFrame; iStartFrame++) {
-      // Read, decompress and render the frame
-      buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fpRNG);
-      if (buf_size < 0)
-         break; // Failed to get the frame, don't go further
+    for (; fpRNG && iStartFrame != iEndFrame; iStartFrame++)
+    {
+        // Read, decompress and render the frame
+        buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fpRNG);
+        if (buf_size < 0)
+            break; // Failed to get the frame, don't go further
 
-      UTIL_free(rng);
-      rng_size = *(unsigned int *)buf;
-      rng = (unsigned char *)UTIL_malloc(rng_size);
-      if (PAL_RNGBlitToSurface(rng, YJ2_Decompress(buf, rng, rng_size), gpScreen) < 0)
-         break; // Failed to get the frame, don't go further
+        UTIL_free(rng);
+        rng_size = *(unsigned int *)buf;
+        rng = (unsigned char *)UTIL_malloc(rng_size);
+        if (PAL_RNGBlitToSurface(rng, YJ2_Decompress(buf, rng, rng_size), gpScreen) < 0)
+            break; // Failed to get the frame, don't go further
 
-      // Update the screen
-      VIDEO_UpdateScreen(NULL);
+        // Update the screen
+        VIDEO_UpdateScreen(NULL);
 
-      // Fade in the screen if needed
+        // Fade in the screen if needed
 
-      if (gpGlobals)
-      {
-         if (gpGlobals->fNeedToFadeIn)
-            PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
-         gpGlobals->fNeedToFadeIn = 0;
-      }
+        if (gpGlobals)
+        {
+            if (gpGlobals->fNeedToFadeIn)
+                PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
+            gpGlobals->fNeedToFadeIn = 0;
+        }
 
-      // Delay for a while
-      UTIL_Delay(iDelay);
-   }
+        // Delay for a while
+        UTIL_Delay(iDelay);
+    }
 
-   UTIL_Close(Res_RNG);
-   UTIL_free(rng);
-   UTIL_free(buf);
+    UTIL_Close(Res_RNG);
+    UTIL_free(rng);
+    UTIL_free(buf);
 }

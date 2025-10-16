@@ -306,8 +306,8 @@ PAL_Surface *VIDEO_CreateCompatibleSizedSurface(const PAL_Rect *pSize)
     // Create the surface
     PAL_Surface *dest = NULL;
     dest = (PAL_Surface *)UTIL_malloc(sizeof(PAL_Surface));
-    dest->w = pSize ? max(pSize->w, 0) : SCREEN_W;
-    dest->h = pSize ? max(pSize->h, 0) : SCREEN_H;
+    dest->w = pSize ? max((unsigned short)pSize->w, 0) : SCREEN_W;
+    dest->h = pSize ? max((unsigned short)pSize->h, 0) : SCREEN_H;
     if (dest->w && dest->h)
         dest->pixels = (unsigned char *)UTIL_calloc(dest->w * dest->h, sizeof(unsigned char));
     else

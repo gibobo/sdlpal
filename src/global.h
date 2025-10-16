@@ -520,10 +520,10 @@ typedef struct tagGLOBALVARS
     int iCurInvMenuItem;                // current inventory menu item number
     int iCurPlayingRNG;                 // current playing RNG animation
     unsigned char bCurrentSaveSlot;     // current save slot (1-5)
-    int fEnteringScene;                 // TRUE if entering a new scene
-    int fNeedToFadeIn;                  // TRUE if need to fade in when drawing scene
-    int fInBattle;                      // TRUE if in battle
-    int fAutoBattle;                    // TRUE if auto-battle
+    unsigned char fEnteringScene;       // TRUE if entering a new scene
+    unsigned char fNeedToFadeIn;        // TRUE if need to fade in when drawing scene
+    unsigned char fInBattle;            // TRUE if in battle
+    unsigned char fAutoBattle;          // TRUE if auto-battle
     unsigned short wLastUnequippedItem; // last unequipped item
 
     PLAYERROLES rgEquipmentEffect[MAX_PLAYER_EQUIPMENTS + 1];    // equipment effects
@@ -573,7 +573,7 @@ void PAL_InitGameData(
 extern "C" {
 #endif
 
-void PAL_ReloadInNextTick(unsigned char iSaveSlot);
+    void PAL_ReloadInNextTick(unsigned char iSaveSlot);
 
 #ifdef __cplusplus
 }

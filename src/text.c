@@ -104,11 +104,10 @@ int PAL_InitText(void)
     // Open the word data files.
     {
         void *fpWLEN = UTIL_Open(Cache_WordLen, "rb");
-        g_TextLib.nWords = flength(fpWLEN);
+        g_TextLib.nWords = UTIL_flength(fpWLEN);
         WordLen = (unsigned int *)UTIL_calloc(g_TextLib.nWords, sizeof(unsigned int));
         for (i = 0, wpos = 0, data = 0, WordLen_max = 0; i < g_TextLib.nWords; i++)
         {
-            unsigned char data = 0;
             UTIL_fread(&data, sizeof(data), 1, fpWLEN);
             WordLen[i] = (unsigned int)data << 24 | wpos;
             wpos += data;
@@ -125,7 +124,7 @@ int PAL_InitText(void)
     // Open the message data files.
     {
         void *fpMLEN = UTIL_Open(Cache_MsgLen, "rb");
-        g_TextLib.nMsgs = flength(fpMLEN);
+        g_TextLib.nMsgs = UTIL_flength(fpMLEN);
         MsgLen = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs, sizeof(unsigned int));
         for (i = 0, wpos = 0, data = 0, MsgLen_max = 0; i < g_TextLib.nMsgs; i++, data = 0)
         {
@@ -249,7 +248,6 @@ const wchar_t *PAL_GetMsg(unsigned int iNumMsg)
         MsgIndex = iNumMsg;
         void *fpMSG = UTIL_Open(Cache_Msg, "rb");
         UTIL_fseek(fpMSG, sizeof(wchar_t) * (MsgLen[MsgIndex] & 0x00FFFFFF), SEEK_SET);
-        // memset(MsgBuffer, 0, MsgLen_max * sizeof(wchar_t));
         UTIL_fread(MsgBuffer, sizeof(wchar_t), MsgLen[MsgIndex] >> 24, fpMSG);
         MsgBuffer[MsgLen[MsgIndex] >> 24] = 0;
         UTIL_Close(Cache_Msg);
@@ -553,7 +551,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
     unsigned char *org_palette = NULL;
     unsigned char t[3];
     int i;
-    unsigned long dwTime = UTIL_GetMicroseconds() + (unsigned long)(1000U * fMaxSeconds);
+    unsigned long dwTime = UTIL_GetMilliseconds() + (unsigned long)(1000U * fMaxSeconds);
 
     // get the current palette
     org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
@@ -578,7 +576,8 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
         }
     }
 
-    while (true)
+    while ((fMaxSeconds == 0.0f || UTIL_GetMilliseconds() <= dwTime) &&
+           (UTIL_WaitKeys(FRAME_TIME, 0) == kKeyNone))
     {
         if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
             g_TextLib.bDialogPosition != kDialogCenter)
@@ -599,16 +598,6 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
             VIDEO_SetPalette(new_palette);
             VIDEO_UpdateScreen(NULL);
-        }
-
-        if ((fMaxSeconds != 0.0f) && (UTIL_GetMicroseconds() > dwTime))
-        {
-            break;
-        }
-
-        if (UTIL_WaitKeys(FRAME_TIME, 0) != kKeyNone)
-        {
-            break;
         }
     }
 
@@ -1174,9 +1163,9 @@ int PAL_swprintf(
                     {
                         // For ANSI character, put it into the internal buffer
                         if (wide)
-                            chr_buf[0] = va_arg(ap, wchar_t);
+                            chr_buf[0] = (wchar_t)va_arg(ap, wchar_t);
                         else
-                            chr_buf[0] = va_arg(ap, int);
+                            chr_buf[0] = (wchar_t)va_arg(ap, int);
                         buf = chr_buf;
                         len = 1;
                     }
@@ -1277,12 +1266,12 @@ int PAL_swprintf(
     // If the format string is malformed, try to copy it into the dest buffer
     if (state && buffer < buffer_end)
     {
-        int fmt_len = (int)(format - fmt_start);
+        int fmt_len2 = (int)(format - fmt_start);
         int buf_len = (int)(buffer_end - buffer);
-        if (fmt_len <= buf_len)
+        if (fmt_len2 <= buf_len)
         {
-            wcsncpy(buffer, fmt_start, buf_len);
-            buffer += fmt_len;
+            wcsncpy(buffer, fmt_start, fmt_len2);
+            buffer += fmt_len2;
         }
         else
         {

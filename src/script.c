@@ -1787,9 +1787,10 @@ PAL_InterpretInstruction(
                 // Set data to load the scene in the next frame
                 //
                 gpGlobals->wNumScene = pScript->rgwOperand[0];
-                PAL_SetLoadFlags(kLoadScene);
                 gpGlobals->fEnteringScene = true;
                 gpGlobals->wLayer = 0;
+                PAL_SetLoadFlags(kLoadScene);
+                PAL_LoadResources();
             }
             break;
 

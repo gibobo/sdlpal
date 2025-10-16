@@ -105,9 +105,9 @@ RIX_FillBuffer(
             case FADE_OUT:
                 if (pRixPlayer->iTotalFadeOutSamples == pRixPlayer->iRemainingFadeSamples && pRixPlayer->iTotalFadeOutSamples > 0)
                 {
-                    if (UTIL_GetMicroseconds() > pRixPlayer->dwStartFadeTime)
+                    if (UTIL_GetMilliseconds() > pRixPlayer->dwStartFadeTime)
                     {
-                        pRixPlayer->iRemainingFadeSamples -= ((UTIL_GetMicroseconds() - pRixPlayer->dwStartFadeTime) * PAL_AUDIO_SAMPLE_RATE / 1000U);
+                        pRixPlayer->iRemainingFadeSamples -= ((UTIL_GetMilliseconds() - pRixPlayer->dwStartFadeTime) * PAL_AUDIO_SAMPLE_RATE / 1000U);
                     }
                 }
                 if (pRixPlayer->iMusic == -1 || pRixPlayer->iRemainingFadeSamples <= 0)
@@ -123,7 +123,7 @@ RIX_FillBuffer(
                         if (pRixPlayer->iMusic > 0)
                             pRixPlayer->dwStartFadeTime += pRixPlayer->iTotalFadeOutSamples * 1000 / PAL_AUDIO_SAMPLE_RATE;
                         else
-                            pRixPlayer->dwStartFadeTime = UTIL_GetMicroseconds();
+                            pRixPlayer->dwStartFadeTime = UTIL_GetMilliseconds();
                         pRixPlayer->iTotalFadeOutSamples = 0;
                         pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeInSamples;
                         CrixPlayer_rewind(pRixPlayer->iMusic, true);
@@ -293,7 +293,7 @@ RIX_Play(
 
     if (pRixPlayer->FadeType != FADE_OUT)
     {
-        pRixPlayer->dwStartFadeTime = UTIL_GetMicroseconds();
+        pRixPlayer->dwStartFadeTime = UTIL_GetMilliseconds();
         if (pRixPlayer->FadeType == FADE_IN && pRixPlayer->iTotalFadeInSamples > 0 && pRixPlayer->iRemainingFadeSamples > 0)
         {
             pRixPlayer->dwStartFadeTime -= ((float)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples * flFadeTime * (1000U / 2U));

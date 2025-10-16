@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 struct mg_connection *ws_conn = NULL;
-struct mg_connection *nc = NULL;
+struct mg_connection *listener_conn = NULL;
 struct mg_mgr mgr;
 
 extern void send_video_frame(void);
@@ -132,8 +132,8 @@ int DRIVER_Init_Event(void)
 {
     mg_log_set(MG_LL_ERROR);
     mg_mgr_init(&mgr);
-    nc = mg_http_listen(&mgr, "http://0.0.0.0:8000", ev_handler, NULL);
-    if (nc == NULL)
+    listener_conn = mg_http_listen(&mgr, "http://0.0.0.0:8000", ev_handler, NULL);
+    if (listener_conn == NULL)
     {
         fprintf(stderr, "Failed to start server\n");
         return -1;
@@ -158,7 +158,7 @@ int DRIVER_Process_Events(void)
         mg_mgr_poll(&mgr, 1000);
     }
 
-    current_time = UTIL_GetMicroseconds();
+    current_time = UTIL_GetMilliseconds();
 #define TRIGGER_TIME(tm) (tm * ((current_time / tm) + 1U)) // Helper macro to adjust trigger time
     if (current_time >= video_trigger_ticks)               // Poll the event manager every 50 milliseconds
     {

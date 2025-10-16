@@ -419,13 +419,12 @@ void PAL_ReloadInNextTick(unsigned char iSaveSlot)
 
 --*/
 {
-    if (gpGlobals == NULL)
-        gpGlobals = (GLOBALVARS *)UTIL_malloc(sizeof(GLOBALVARS));
     gpGlobals->bCurrentSaveSlot = iSaveSlot;
-    PAL_SetLoadFlags(kLoadGlobalData | kLoadScene | kLoadPlayerSprite);
     gpGlobals->fEnteringScene = true;
     gpGlobals->fNeedToFadeIn = true;
     gpGlobals->dwFrameNum = 0;
+    PAL_SetLoadFlags(kLoadGlobalData | kLoadScene | kLoadPlayerSprite);
+    PAL_LoadResources();
 }
 
 void PAL_InitGameData(
@@ -894,7 +893,7 @@ void PAL_RemoveEquipmentEffect(
 --*/
 {
     unsigned short *p;
-    int i, j;
+    unsigned short i, j;
 
     p = (unsigned short *)&gpGlobals->rgEquipmentEffect[wEquipPart]; // HACKHACK
 
@@ -918,7 +917,7 @@ void PAL_RemoveEquipmentEffect(
         //
         // Remove all poisons leveled 99
         //
-        for (i = 0; i <= (short)gpGlobals->wMaxPartyMemberIndex; i++)
+        for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
         {
             if (gpGlobals->rgParty[i].wPlayerRole == wPlayerRole)
             {
@@ -927,7 +926,7 @@ void PAL_RemoveEquipmentEffect(
             }
         }
 
-        if (i <= (short)gpGlobals->wMaxPartyMemberIndex)
+        if (i <= gpGlobals->wMaxPartyMemberIndex)
         {
             j = 0;
 

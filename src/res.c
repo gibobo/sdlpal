@@ -175,12 +175,10 @@ void PAL_SetLoadFlags(
 
 --*/
 {
-    if (gpResources == NULL)
+    if (gpResources)
     {
-        return;
+        gpResources->bLoadFlags |= bFlags;
     }
-
-    gpResources->bLoadFlags |= bFlags;
 }
 
 void PAL_LoadResources(void)
@@ -202,7 +200,7 @@ void PAL_LoadResources(void)
     int i, index;
     unsigned short wPlayerID, wSpriteNum;
 
-    if (gpResources == NULL || gpResources->bLoadFlags == 0)
+    if (gpResources == NULL || gpResources->bLoadFlags == kLoadNone)
     {
         return;
     }
@@ -215,10 +213,8 @@ void PAL_LoadResources(void)
     }
 
     // Load scene
-    void *fpMGO = UTIL_Open(Res_MGO, "rb");
     if (gpResources->bLoadFlags & kLoadScene)
     {
-
         if (gpGlobals->fEnteringScene)
         {
             gpGlobals->wScreenWave = 0;
@@ -251,13 +247,14 @@ void PAL_LoadResources(void)
             gpResources->lppEventObjectSprites = (unsigned char **)UTIL_calloc(gpResources->nEventObjectSprites, sizeof(unsigned char *));
         }
 
+        void *fpMGO = UTIL_Open(Res_MGO, "rb");
         for (i = 0; i < gpResources->nEventObjectSprites; i++, index++)
         {
             gpResources->lppEventObjectSprites[i] = NULL;
             if (PAL_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, fpMGO) > 0)
                 gpGlobals->g.lprgEventObject[index].nSpriteFramesAuto = PAL_SpriteGetNumFrames(gpResources->lppEventObjectSprites[i]);
         }
-
+        UTIL_Close(Res_MGO);
         gpGlobals->partyoffset = PAL_XY(160, 112);
     }
 
@@ -267,6 +264,7 @@ void PAL_LoadResources(void)
         // Free previous loaded player sprites
         PAL_FreePlayerSprites();
 
+        void *fpMGO = UTIL_Open(Res_MGO, "rb");
         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
         {
             wPlayerID = gpGlobals->rgParty[i].wPlayerRole;
@@ -287,11 +285,11 @@ void PAL_LoadResources(void)
             PAL_MKFDecompressChunk(
                 &gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum, fpMGO);
         }
+        UTIL_Close(Res_MGO);
     }
 
     // Clear all of the load flags
-    UTIL_Close(Res_MGO);
-    gpResources->bLoadFlags = 0;
+    gpResources->bLoadFlags = kLoadNone;
 }
 
 void *PAL_GetCurrentMap(void)

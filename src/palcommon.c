@@ -24,16 +24,16 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define Check_fread(buf, elem, num, fp)             \
-   if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
-   return -1
+#define Check_fread(buf, elem, num, fp)                 \
+    if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
+    return -1
 
 int PAL_RLEBlitToSurface(
     const unsigned char *lpBitmapRLE,
     PAL_Surface *lpDstSurface,
     unsigned int pos)
 {
-   return PAL_RLEBlitToSurfaceWithShadow(lpBitmapRLE, lpDstSurface, pos, false);
+    return PAL_RLEBlitToSurfaceWithShadow(lpBitmapRLE, lpDstSurface, pos, false);
 }
 
 int PAL_RLEBlitToSurfaceWithShadow(
@@ -63,154 +63,154 @@ int PAL_RLEBlitToSurfaceWithShadow(
 
 --*/
 {
-   int i, j, k, sx;
-   int x, y;
-   int uiLen = 0;
-   int uiWidth = 0;
-   int uiHeight = 0;
-   int uiSrcX = 0;
-   unsigned char T;
-   int dx = PAL_X(pos);
-   int dy = PAL_Y(pos);
-   unsigned char *p;
+    int i, j, k, sx;
+    int x, y;
+    int uiLen = 0;
+    int uiWidth = 0;
+    int uiHeight = 0;
+    int uiSrcX = 0;
+    unsigned char T;
+    int dx = PAL_X(pos);
+    int dy = PAL_Y(pos);
+    unsigned char *p;
 
-   // Check for NULL pointer.
-   if (lpBitmapRLE == NULL || lpDstSurface == NULL)
-   {
-      return -1;
-   }
+    // Check for NULL pointer.
+    if (lpBitmapRLE == NULL || lpDstSurface == NULL)
+    {
+        return -1;
+    }
 
-   // Skip the 0x00000002 in the file header.
-   if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
-   {
-      lpBitmapRLE += 4;
-   }
+    // Skip the 0x00000002 in the file header.
+    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
+        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+    {
+        lpBitmapRLE += 4;
+    }
 
-   // Get the width and height of the bitmap.
-   uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
-   uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
+    // Get the width and height of the bitmap.
+    uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
+    uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 
-   // Check whether bitmap intersects the surface.
-   if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
-       uiHeight + dy <= 0 || dy >= lpDstSurface->h)
-   {
-      return 0;
-   }
+    // Check whether bitmap intersects the surface.
+    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
+        uiHeight + dy <= 0 || dy >= lpDstSurface->h)
+    {
+        return 0;
+    }
 
-   // Calculate the total length of the bitmap.
-   // The bitmap is 8-bpp, each pixel will use 1 byte.
-   uiLen = uiWidth * uiHeight;
+    // Calculate the total length of the bitmap.
+    // The bitmap is 8-bpp, each pixel will use 1 byte.
+    uiLen = uiWidth * uiHeight;
 
-   // Start decoding and blitting the bitmap.
-   lpBitmapRLE += 4;
-   for (i = 0; i < uiLen;)
-   {
-      T = *lpBitmapRLE++;
-      if ((T & 0x80) && T <= 0x80 + uiWidth)
-      {
-         i += T - 0x80;
-         uiSrcX += T - 0x80;
-         if (uiSrcX >= uiWidth)
-         {
-            uiSrcX -= uiWidth;
-            dy++;
-         }
-      }
-      else
-      {
-         // Prepare coordinates.
-         j = 0;
-         sx = uiSrcX;
-         x = dx + uiSrcX;
-         y = dy;
+    // Start decoding and blitting the bitmap.
+    lpBitmapRLE += 4;
+    for (i = 0; i < uiLen;)
+    {
+        T = *lpBitmapRLE++;
+        if ((T & 0x80) && T <= 0x80 + uiWidth)
+        {
+            i += T - 0x80;
+            uiSrcX += T - 0x80;
+            if (uiSrcX >= uiWidth)
+            {
+                uiSrcX -= uiWidth;
+                dy++;
+            }
+        }
+        else
+        {
+            // Prepare coordinates.
+            j = 0;
+            sx = uiSrcX;
+            x = dx + uiSrcX;
+            y = dy;
 
-         // Skip the points which are out of the surface.
-         if (y < 0)
-         {
-            j += -y * uiWidth;
-            y = 0;
-         }
-         else if (y >= lpDstSurface->h)
-         {
-            return 0;   // No more pixels needed, break out
-         }
-
-         while (j < T)
-         {
             // Skip the points which are out of the surface.
-            if (x < 0)
+            if (y < 0)
             {
-               j += -x;
-               if (j >= T)
-                  break;
-               sx += -x;
-               x = 0;
+                j += -y * uiWidth;
+                y = 0;
             }
-            else if (x >= lpDstSurface->w)
+            else if (y >= lpDstSurface->h)
             {
-               j += uiWidth - sx;
-               x -= sx;
-               sx = 0;
-               y++;
-               if (y >= lpDstSurface->h)
-               {
-                  return 0;   // No more pixels needed, break out
-               }
-               continue;
+                return 0; // No more pixels needed, break out
             }
 
-            // Put the pixels in row onto the surface
-            k = T - j;
-            if (lpDstSurface->w - x < k)
-               k = lpDstSurface->w - x;
-            if (uiWidth - sx < k)
-               k = uiWidth - sx;
-            sx += k;
-            p = lpDstSurface->pixels + y * lpDstSurface->w;
-            if (bShadow)
+            while (j < T)
             {
-               j += k;
-               for (; k != 0; k--)
-               {
-                  p[x] = (p[x] & 0xF0) | ((p[x] & 0x0F) >> 1);
-                  x++;
-               }
-            }
-            else
-            {
-               for (; k != 0; k--)
-               {
-                  p[x] = lpBitmapRLE[j];
-                  j++;
-                  x++;
-               }
-            }
+                // Skip the points which are out of the surface.
+                if (x < 0)
+                {
+                    j += -x;
+                    if (j >= T)
+                        break;
+                    sx += -x;
+                    x = 0;
+                }
+                else if (x >= lpDstSurface->w)
+                {
+                    j += uiWidth - sx;
+                    x -= sx;
+                    sx = 0;
+                    y++;
+                    if (y >= lpDstSurface->h)
+                    {
+                        return 0; // No more pixels needed, break out
+                    }
+                    continue;
+                }
 
-            if (sx >= uiWidth)
-            {
-               sx -= uiWidth;
-               x -= uiWidth;
-               y++;
-               if (y >= lpDstSurface->h)
-               {
-                  return 0;   // No more pixels needed, break out
-               }
-            }
-         }
-         lpBitmapRLE += T;
-         i += T;
-         uiSrcX += T;
-         while (uiSrcX >= uiWidth)
-         {
-            uiSrcX -= uiWidth;
-            dy++;
-         }
-      }
-   }
+                // Put the pixels in row onto the surface
+                k = T - j;
+                if (lpDstSurface->w - x < k)
+                    k = lpDstSurface->w - x;
+                if (uiWidth - sx < k)
+                    k = uiWidth - sx;
+                sx += k;
+                p = lpDstSurface->pixels + y * lpDstSurface->w;
+                if (bShadow)
+                {
+                    j += k;
+                    for (; k != 0; k--)
+                    {
+                        p[x] = (p[x] & 0xF0) | ((p[x] & 0x0F) >> 1);
+                        x++;
+                    }
+                }
+                else
+                {
+                    for (; k != 0; k--)
+                    {
+                        p[x] = lpBitmapRLE[j];
+                        j++;
+                        x++;
+                    }
+                }
 
-   // Success
-   return 0;
+                if (sx >= uiWidth)
+                {
+                    sx -= uiWidth;
+                    x -= uiWidth;
+                    y++;
+                    if (y >= lpDstSurface->h)
+                    {
+                        return 0; // No more pixels needed, break out
+                    }
+                }
+            }
+            lpBitmapRLE += T;
+            i += T;
+            uiSrcX += T;
+            while (uiSrcX >= uiWidth)
+            {
+                uiSrcX -= uiWidth;
+                dy++;
+            }
+        }
+    }
+
+    // Success
+    return 0;
 }
 
 int PAL_RLEBlitWithColorShift(
@@ -240,174 +240,174 @@ int PAL_RLEBlitWithColorShift(
 
 --*/
 {
-   int i, j, k, sx;
-   int x, y;
-   int uiLen = 0;
-   int uiWidth = 0;
-   int uiHeight = 0;
-   int uiSrcX = 0;
-   unsigned char T, b;
-   int dx = PAL_X(pos);
-   int dy = PAL_Y(pos);
-   unsigned char *p;
+    int i, j, k, sx;
+    int x, y;
+    int uiLen = 0;
+    int uiWidth = 0;
+    int uiHeight = 0;
+    int uiSrcX = 0;
+    unsigned char T, b;
+    int dx = PAL_X(pos);
+    int dy = PAL_Y(pos);
+    unsigned char *p;
 
-   //
-   // Check for NULL pointer.
-   //
-   if (lpBitmapRLE == NULL || lpDstSurface == NULL)
-   {
-      return -1;
-   }
+    //
+    // Check for NULL pointer.
+    //
+    if (lpBitmapRLE == NULL || lpDstSurface == NULL)
+    {
+        return -1;
+    }
 
-   //
-   // Skip the 0x00000002 in the file header.
-   //
-   if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
-   {
-      lpBitmapRLE += 4;
-   }
+    //
+    // Skip the 0x00000002 in the file header.
+    //
+    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
+        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+    {
+        lpBitmapRLE += 4;
+    }
 
-   //
-   // Get the width and height of the bitmap.
-   //
-   uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
-   uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
+    //
+    // Get the width and height of the bitmap.
+    //
+    uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
+    uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 
-   //
-   // Check whether bitmap intersects the surface.
-   //
-   if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
-       uiHeight + dy <= 0 || dy >= lpDstSurface->h)
-   {
-      return 0;
-   }
+    //
+    // Check whether bitmap intersects the surface.
+    //
+    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
+        uiHeight + dy <= 0 || dy >= lpDstSurface->h)
+    {
+        return 0;
+    }
 
-   //
-   // Calculate the total length of the bitmap.
-   // The bitmap is 8-bpp, each pixel will use 1 byte.
-   //
-   uiLen = uiWidth * uiHeight;
+    //
+    // Calculate the total length of the bitmap.
+    // The bitmap is 8-bpp, each pixel will use 1 byte.
+    //
+    uiLen = uiWidth * uiHeight;
 
-   //
-   // Start decoding and blitting the bitmap.
-   //
-   lpBitmapRLE += 4;
-   for (i = 0; i < uiLen;)
-   {
-      T = *lpBitmapRLE++;
-      if ((T & 0x80) && T <= 0x80 + uiWidth)
-      {
-         i += T - 0x80;
-         uiSrcX += T - 0x80;
-         if (uiSrcX >= uiWidth)
-         {
-            uiSrcX -= uiWidth;
-            dy++;
-         }
-      }
-      else
-      {
-         //
-         // Prepare coordinates.
-         //
-         j = 0;
-         sx = uiSrcX;
-         x = dx + uiSrcX;
-         y = dy;
+    //
+    // Start decoding and blitting the bitmap.
+    //
+    lpBitmapRLE += 4;
+    for (i = 0; i < uiLen;)
+    {
+        T = *lpBitmapRLE++;
+        if ((T & 0x80) && T <= 0x80 + uiWidth)
+        {
+            i += T - 0x80;
+            uiSrcX += T - 0x80;
+            if (uiSrcX >= uiWidth)
+            {
+                uiSrcX -= uiWidth;
+                dy++;
+            }
+        }
+        else
+        {
+            //
+            // Prepare coordinates.
+            //
+            j = 0;
+            sx = uiSrcX;
+            x = dx + uiSrcX;
+            y = dy;
 
-         //
-         // Skip the points which are out of the surface.
-         //
-         if (y < 0)
-         {
-            j += -y * uiWidth;
-            y = 0;
-         }
-         else if (y >= lpDstSurface->h)
-         {
-            return 0; // No more pixels needed, break out
-         }
-
-         while (j < T)
-         {
             //
             // Skip the points which are out of the surface.
             //
-            if (x < 0)
+            if (y < 0)
             {
-               j += -x;
-               if (j >= T)
-                  break;
-               sx += -x;
-               x = 0;
+                j += -y * uiWidth;
+                y = 0;
             }
-            else if (x >= lpDstSurface->w)
+            else if (y >= lpDstSurface->h)
             {
-               j += uiWidth - sx;
-               x -= sx;
-               sx = 0;
-               y++;
-               if (y >= lpDstSurface->h)
-               {
-                  return 0; // No more pixels needed, break out
-               }
-               continue;
+                return 0; // No more pixels needed, break out
             }
 
-            // Put the pixels in row onto the surface
-            k = T - j;
-            if (lpDstSurface->w - x < k)
-               k = lpDstSurface->w - x;
-            if (uiWidth - sx < k)
-               k = uiWidth - sx;
-            sx += k;
-            p = lpDstSurface->pixels + y * lpDstSurface->w;
-            for (; k != 0; k--)
+            while (j < T)
             {
-               b = (lpBitmapRLE[j] & 0x0F);
-               if ((int)b + iColorShift > 0x0F)
-               {
-                  b = 0x0F;
-               }
-               else if ((int)b + iColorShift < 0)
-               {
-                  b = 0;
-               }
-               else
-               {
-                  b += iColorShift;
-               }
+                //
+                // Skip the points which are out of the surface.
+                //
+                if (x < 0)
+                {
+                    j += -x;
+                    if (j >= T)
+                        break;
+                    sx += -x;
+                    x = 0;
+                }
+                else if (x >= lpDstSurface->w)
+                {
+                    j += uiWidth - sx;
+                    x -= sx;
+                    sx = 0;
+                    y++;
+                    if (y >= lpDstSurface->h)
+                    {
+                        return 0; // No more pixels needed, break out
+                    }
+                    continue;
+                }
 
-               p[x] = (b | (lpBitmapRLE[j] & 0xF0));
-               j++;
-               x++;
+                // Put the pixels in row onto the surface
+                k = T - j;
+                if (lpDstSurface->w - x < k)
+                    k = lpDstSurface->w - x;
+                if (uiWidth - sx < k)
+                    k = uiWidth - sx;
+                sx += k;
+                p = lpDstSurface->pixels + y * lpDstSurface->w;
+                for (; k != 0; k--)
+                {
+                    b = (lpBitmapRLE[j] & 0x0F);
+                    if ((int)b + iColorShift > 0x0F)
+                    {
+                        b = 0x0F;
+                    }
+                    else if ((int)b + iColorShift < 0)
+                    {
+                        b = 0;
+                    }
+                    else
+                    {
+                        b += iColorShift;
+                    }
+
+                    p[x] = (b | (lpBitmapRLE[j] & 0xF0));
+                    j++;
+                    x++;
+                }
+
+                if (sx >= uiWidth)
+                {
+                    sx -= uiWidth;
+                    x -= uiWidth;
+                    y++;
+                    if (y >= lpDstSurface->h)
+                    {
+                        return 0; // No more pixels needed, break out
+                    }
+                }
             }
-
-            if (sx >= uiWidth)
+            lpBitmapRLE += T;
+            i += T;
+            uiSrcX += T;
+            while (uiSrcX >= uiWidth)
             {
-               sx -= uiWidth;
-               x -= uiWidth;
-               y++;
-               if (y >= lpDstSurface->h)
-               {
-                  return 0; // No more pixels needed, break out
-               }
+                uiSrcX -= uiWidth;
+                dy++;
             }
-         }
-         lpBitmapRLE += T;
-         i += T;
-         uiSrcX += T;
-         while (uiSrcX >= uiWidth)
-         {
-            uiSrcX -= uiWidth;
-            dy++;
-         }
-      }
-   }
+        }
+    }
 
-   // Success
-   return 0;
+    // Success
+    return 0;
 }
 
 int PAL_RLEBlitMonoColor(
@@ -440,159 +440,159 @@ int PAL_RLEBlitMonoColor(
 
 --*/
 {
-   int i, j, k, sx;
-   int x, y;
-   int uiLen = 0;
-   int uiWidth = 0;
-   int uiHeight = 0;
-   int uiSrcX = 0;
-   unsigned char T, b;
-   int dx = PAL_X(pos);
-   int dy = PAL_Y(pos);
-   unsigned char *p;
+    int i, j, k, sx;
+    int x, y;
+    int uiLen = 0;
+    int uiWidth = 0;
+    int uiHeight = 0;
+    int uiSrcX = 0;
+    unsigned char T, b;
+    int dx = PAL_X(pos);
+    int dy = PAL_Y(pos);
+    unsigned char *p;
 
-   // Check for NULL pointer.
-   if (lpBitmapRLE == NULL || lpDstSurface == NULL)
-   {
-      return -1;
-   }
+    // Check for NULL pointer.
+    if (lpBitmapRLE == NULL || lpDstSurface == NULL)
+    {
+        return -1;
+    }
 
-   // Skip the 0x00000002 in the file header.
-   if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
-   {
-      lpBitmapRLE += 4;
-   }
+    // Skip the 0x00000002 in the file header.
+    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
+        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+    {
+        lpBitmapRLE += 4;
+    }
 
-   // Get the width and height of the bitmap.
-   uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
-   uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
+    // Get the width and height of the bitmap.
+    uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
+    uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 
-   // Check whether bitmap intersects the surface.
-   if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
-       uiHeight + dy <= 0 || dy >= lpDstSurface->h)
-   {
-      return 0;
-   }
+    // Check whether bitmap intersects the surface.
+    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
+        uiHeight + dy <= 0 || dy >= lpDstSurface->h)
+    {
+        return 0;
+    }
 
-   // Calculate the total length of the bitmap.
-   // The bitmap is 8-bpp, each pixel will use 1 byte.
-   uiLen = uiWidth * uiHeight;
+    // Calculate the total length of the bitmap.
+    // The bitmap is 8-bpp, each pixel will use 1 byte.
+    uiLen = uiWidth * uiHeight;
 
-   // Start decoding and blitting the bitmap.
-   lpBitmapRLE += 4;
-   bColor &= 0xF0;
-   for (i = 0; i < uiLen;)
-   {
-      T = *lpBitmapRLE++;
-      if ((T & 0x80) && T <= 0x80 + uiWidth)
-      {
-         i += T - 0x80;
-         uiSrcX += T - 0x80;
-         if (uiSrcX >= uiWidth)
-         {
-            uiSrcX -= uiWidth;
-            dy++;
-         }
-      }
-      else
-      {
-         // Prepare coordinates.
-         j = 0;
-         sx = uiSrcX;
-         x = dx + uiSrcX;
-         y = dy;
+    // Start decoding and blitting the bitmap.
+    lpBitmapRLE += 4;
+    bColor &= 0xF0;
+    for (i = 0; i < uiLen;)
+    {
+        T = *lpBitmapRLE++;
+        if ((T & 0x80) && T <= 0x80 + uiWidth)
+        {
+            i += T - 0x80;
+            uiSrcX += T - 0x80;
+            if (uiSrcX >= uiWidth)
+            {
+                uiSrcX -= uiWidth;
+                dy++;
+            }
+        }
+        else
+        {
+            // Prepare coordinates.
+            j = 0;
+            sx = uiSrcX;
+            x = dx + uiSrcX;
+            y = dy;
 
-         // Skip the points which are out of the surface.
-         if (y < 0)
-         {
-            j += -y * uiWidth;
-            y = 0;
-         }
-         else if (y >= lpDstSurface->h)
-         {
-            return 0;   // No more pixels needed, break out
-         }
-
-         while (j < T)
-         {
             // Skip the points which are out of the surface.
-            if (x < 0)
+            if (y < 0)
             {
-               j += -x;
-               if (j >= T)
-                  break;
-               sx += -x;
-               x = 0;
+                j += -y * uiWidth;
+                y = 0;
             }
-            else if (x >= lpDstSurface->w)
+            else if (y >= lpDstSurface->h)
             {
-               j += uiWidth - sx;
-               x -= sx;
-               sx = 0;
-               y++;
-               if (y >= lpDstSurface->h)
-               {
-                  return 0;   // No more pixels needed, break out
-               }
-               continue;
+                return 0; // No more pixels needed, break out
             }
 
-            //
-            // Put the pixels in row onto the surface
-            //
-            k = T - j;
-            if (lpDstSurface->w - x < k)
-               k = lpDstSurface->w - x;
-            if (uiWidth - sx < k)
-               k = uiWidth - sx;
-            sx += k;
-            p = lpDstSurface->pixels + y * lpDstSurface->w;
-            for (; k != 0; k--)
+            while (j < T)
             {
-               b = lpBitmapRLE[j] & 0x0F;
-               if ((int)b + iColorShift > 0x0F)
-               {
-                  b = 0x0F;
-               }
-               else if ((int)b + iColorShift < 0)
-               {
-                  b = 0;
-               }
-               else
-               {
-                  b += iColorShift;
-               }
+                // Skip the points which are out of the surface.
+                if (x < 0)
+                {
+                    j += -x;
+                    if (j >= T)
+                        break;
+                    sx += -x;
+                    x = 0;
+                }
+                else if (x >= lpDstSurface->w)
+                {
+                    j += uiWidth - sx;
+                    x -= sx;
+                    sx = 0;
+                    y++;
+                    if (y >= lpDstSurface->h)
+                    {
+                        return 0; // No more pixels needed, break out
+                    }
+                    continue;
+                }
 
-               p[x] = (b | bColor);
-               j++;
-               x++;
+                //
+                // Put the pixels in row onto the surface
+                //
+                k = T - j;
+                if (lpDstSurface->w - x < k)
+                    k = lpDstSurface->w - x;
+                if (uiWidth - sx < k)
+                    k = uiWidth - sx;
+                sx += k;
+                p = lpDstSurface->pixels + y * lpDstSurface->w;
+                for (; k != 0; k--)
+                {
+                    b = lpBitmapRLE[j] & 0x0F;
+                    if ((int)b + iColorShift > 0x0F)
+                    {
+                        b = 0x0F;
+                    }
+                    else if ((int)b + iColorShift < 0)
+                    {
+                        b = 0;
+                    }
+                    else
+                    {
+                        b += iColorShift;
+                    }
+
+                    p[x] = (b | bColor);
+                    j++;
+                    x++;
+                }
+
+                if (sx >= uiWidth)
+                {
+                    sx -= uiWidth;
+                    x -= uiWidth;
+                    y++;
+                    if (y >= lpDstSurface->h)
+                    {
+                        return 0; // No more pixels needed, break out
+                    }
+                }
             }
-
-            if (sx >= uiWidth)
+            lpBitmapRLE += T;
+            i += T;
+            uiSrcX += T;
+            while (uiSrcX >= uiWidth)
             {
-               sx -= uiWidth;
-               x -= uiWidth;
-               y++;
-               if (y >= lpDstSurface->h)
-               {
-                  return 0;   // No more pixels needed, break out
-               }
+                uiSrcX -= uiWidth;
+                dy++;
             }
-         }
-         lpBitmapRLE += T;
-         i += T;
-         uiSrcX += T;
-         while (uiSrcX >= uiWidth)
-         {
-            uiSrcX -= uiWidth;
-            dy++;
-         }
-      }
-   }
+        }
+    }
 
-   // Success
-   return 0;
+    // Success
+    return 0;
 }
 
 int PAL_FBPBlitToSurface(
@@ -616,15 +616,15 @@ int PAL_FBPBlitToSurface(
 
 --*/
 {
-   if (lpBitmapFBP == NULL || lpDstSurface == NULL ||
-       lpDstSurface->w != SCREEN_W || lpDstSurface->h != SCREEN_H)
-   {
-      return -1;
-   }
+    if (lpBitmapFBP == NULL || lpDstSurface == NULL ||
+        lpDstSurface->w != SCREEN_W || lpDstSurface->h != SCREEN_H)
+    {
+        return -1;
+    }
 
-   // simply copy everything to the surface
-   memcpy(lpDstSurface->pixels, lpBitmapFBP, lpDstSurface->w * lpDstSurface->h);
-   return 0;
+    // simply copy everything to the surface
+    memcpy(lpDstSurface->pixels, lpBitmapFBP, lpDstSurface->w * lpDstSurface->h);
+    return 0;
 }
 
 int PAL_RLEGetWidth(
@@ -644,20 +644,20 @@ int PAL_RLEGetWidth(
 
 --*/
 {
-   if (lpBitmapRLE == NULL)
-   {
-      return 0;
-   }
+    if (lpBitmapRLE == NULL)
+    {
+        return 0;
+    }
 
-   // Skip the 0x00000002 in the file header.
-   if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
-   {
-      lpBitmapRLE += 4;
-   }
+    // Skip the 0x00000002 in the file header.
+    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
+        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+    {
+        lpBitmapRLE += 4;
+    }
 
-   // Return the width of the bitmap.
-   return lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
+    // Return the width of the bitmap.
+    return lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
 }
 
 int PAL_RLEGetHeight(
@@ -677,20 +677,20 @@ int PAL_RLEGetHeight(
 
 --*/
 {
-   if (lpBitmapRLE == NULL)
-   {
-      return 0;
-   }
+    if (lpBitmapRLE == NULL)
+    {
+        return 0;
+    }
 
-   // Skip the 0x00000002 in the file header.
-   if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
-       lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
-   {
-      lpBitmapRLE += 4;
-   }
+    // Skip the 0x00000002 in the file header.
+    if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
+        lpBitmapRLE[2] == 0x00 && lpBitmapRLE[3] == 0x00)
+    {
+        lpBitmapRLE += 4;
+    }
 
-   // Return the height of the bitmap.
-   return lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
+    // Return the height of the bitmap.
+    return lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 }
 
 unsigned short
@@ -711,12 +711,12 @@ PAL_SpriteGetNumFrames(
 
 --*/
 {
-   if (lpSprite == NULL)
-   {
-      return 0;
-   }
+    if (lpSprite == NULL)
+    {
+        return 0;
+    }
 
-   return (lpSprite[0] | (int)((unsigned int)lpSprite[1] << 8)) - 1;
+    return (lpSprite[0] | (int)((unsigned int)lpSprite[1] << 8)) - 1;
 }
 
 const unsigned char *
@@ -740,27 +740,27 @@ PAL_SpriteGetFrame(
 
 --*/
 {
-   unsigned int imagecount, offset;
+    unsigned int imagecount, offset;
 
-   if (lpSprite == NULL)
-   {
-      return NULL;
-   }
+    if (lpSprite == NULL)
+    {
+        return NULL;
+    }
 
-   imagecount = lpSprite[0] | (unsigned int)lpSprite[1] << 8;
+    imagecount = lpSprite[0] | (unsigned int)lpSprite[1] << 8;
 
-   if (iFrameNum < 0 || (unsigned int)iFrameNum >= imagecount)
-   {
-      // The frame does not exist
-      return NULL;
-   }
+    if (iFrameNum < 0 || (unsigned int)iFrameNum >= imagecount)
+    {
+        // The frame does not exist
+        return NULL;
+    }
 
-   // Get the offset of the frame
-   iFrameNum = (unsigned int)iFrameNum << 1;
-   offset = (lpSprite[iFrameNum] | (unsigned int)lpSprite[iFrameNum + 1] << 8) << 1;
-   if (offset == 0x18444)
-      offset = (unsigned short)offset;
-   return &lpSprite[offset];
+    // Get the offset of the frame
+    iFrameNum = (unsigned int)iFrameNum << 1;
+    offset = (lpSprite[iFrameNum] | (unsigned int)lpSprite[iFrameNum + 1] << 8) << 1;
+    if (offset == 0x18444)
+        offset = (unsigned short)offset;
+    return &lpSprite[offset];
 }
 
 unsigned int PAL_MKFGetChunkCount(void *fp)
@@ -810,28 +810,28 @@ int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
 
 --*/
 {
-   unsigned int uiOffset = 0;
-   unsigned int uiNextOffset = 0;
-   unsigned int uiChunkCount = 0;
+    unsigned int uiOffset = 0;
+    unsigned int uiNextOffset = 0;
+    unsigned int uiChunkCount = 0;
 
-   //
-   // Get the total number of chunks.
-   //
-   uiChunkCount = PAL_MKFGetChunkCount(fp);
-   if (uiChunkNum >= uiChunkCount)
-      return -1;
+    //
+    // Get the total number of chunks.
+    //
+    uiChunkCount = PAL_MKFGetChunkCount(fp);
+    if (uiChunkNum >= uiChunkCount)
+        return -1;
 
-   //
-   // Get the offset of the specified chunk and the next chunk.
-   //
-   UTIL_fseek(fp, uiChunkNum * sizeof(unsigned int), SEEK_SET);
-   Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
-   Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
+    //
+    // Get the offset of the specified chunk and the next chunk.
+    //
+    UTIL_fseek(fp, uiChunkNum * sizeof(unsigned int), SEEK_SET);
+    Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
+    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
-   //
-   // Return the length of the chunk.
-   //
-   return uiNextOffset - uiOffset;
+    //
+    // Return the length of the chunk.
+    //
+    return uiNextOffset - uiOffset;
 }
 
 //TO DO
@@ -863,42 +863,45 @@ int PAL_MKFReadChunk(
 
 --*/
 {
-   unsigned int uiOffset = 0;
-   unsigned int uiNextOffset = 0;
-   unsigned int uiChunkCount;
-   unsigned int uiChunkLen;
+    unsigned int uiOffset = 0;
+    unsigned int uiNextOffset = 0;
+    unsigned int uiChunkCount;
+    unsigned int uiChunkLen;
 
-   if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0) {
-      return -1;
-   }
+    if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0)
+    {
+        return -1;
+    }
 
-   //
-   // Get the total number of chunks.
-   //
-   uiChunkCount = PAL_MKFGetChunkCount(fp);
-   if (uiChunkNum >= uiChunkCount)
-      return -1;
+    //
+    // Get the total number of chunks.
+    //
+    uiChunkCount = PAL_MKFGetChunkCount(fp);
+    if (uiChunkNum >= uiChunkCount)
+        return -1;
 
-   // Get the offset of the chunk.
-   UTIL_fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
-   Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
-   Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
+    // Get the offset of the chunk.
+    UTIL_fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
+    Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
+    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
-   //
-   // Get the length of the chunk.
-   //
-   uiChunkLen = uiNextOffset - uiOffset;
+    //
+    // Get the length of the chunk.
+    //
+    uiChunkLen = uiNextOffset - uiOffset;
 
-   if (uiChunkLen > uiBufferSize) {
-      return -2;
-   }
+    if (uiChunkLen > uiBufferSize)
+    {
+        return -2;
+    }
 
-   if (uiChunkLen != 0) {
-      UTIL_fseek(fp, uiOffset, SEEK_SET);
-      return (int)UTIL_fread(lpBuffer, 1, uiChunkLen, fp);
-   }
+    if (uiChunkLen != 0)
+    {
+        UTIL_fseek(fp, uiOffset, SEEK_SET);
+        return (int)UTIL_fread(lpBuffer, 1, uiChunkLen, fp);
+    }
 
-   return -1;
+    return -1;
 }
 
 int PAL_MKFDecompressChunk(
@@ -929,22 +932,24 @@ int PAL_MKFDecompressChunk(
 
 --*/
 {
-   int len = PAL_MKFGetChunkSize(uiChunkNum, fp);
+    int len = PAL_MKFGetChunkSize(uiChunkNum, fp);
 
-   if (len > 0) {
-      unsigned char *buf = (unsigned char *)UTIL_malloc(len);
+    if (len > 0)
+    {
+        unsigned char *buf = (unsigned char *)UTIL_malloc(len);
 
-      PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
+        PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
 
-      if ((uiBufferSize == 0) || ((*lpBuffer) == NULL)) {
-         UTIL_free(*lpBuffer);
-         uiBufferSize = *(unsigned int *)buf;
-         *lpBuffer = UTIL_malloc(uiBufferSize);
-      }
+        if (uiBufferSize == 0 || *lpBuffer == NULL)
+        {
+            UTIL_free(*lpBuffer);
+            uiBufferSize = *(unsigned int *)buf;
+            *lpBuffer = UTIL_malloc(uiBufferSize);
+        }
 
-      len = YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
-      UTIL_free(buf);
-   }
+        len = YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
+        UTIL_free(buf);
+    }
 
-   return len;
+    return len;
 }
