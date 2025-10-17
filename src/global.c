@@ -29,7 +29,44 @@
 #include <stdio.h>
 #include <string.h>
 
+PALRESFILE gFiles[] = {
+    [Pal_Res_FBP] = {RESOURCE_PATH "fbp.mkf", NULL},
+    [Pal_Res_MGO] = {RESOURCE_PATH "mgo.mkf", NULL},
+    [Pal_Res_BALL] = {RESOURCE_PATH "ball.mkf", NULL},
+    [Pal_Res_DATA] = {RESOURCE_PATH "data.mkf", NULL},
+    [Pal_Res_F] = {RESOURCE_PATH "f.mkf", NULL},
+    [Pal_Res_FIRE] = {RESOURCE_PATH "fire.mkf", NULL},
+    [Pal_Res_RGM] = {RESOURCE_PATH "rgm.mkf", NULL},
+};
+
 GLOBALVARS *gpGlobals = NULL;
+
+int PAL_InitGlobals(void)
+/*++
+  Purpose:
+
+    Initialize global data.
+
+  Parameters:
+
+    None.
+
+  Return value:
+
+    0 = success, -1 = error.
+
+--*/
+{
+    // Open files
+    gFiles[Pal_Res_FBP].fp = UTIL_fopen(gFiles[Pal_Res_FBP].name, "rb");
+    gFiles[Pal_Res_MGO].fp = UTIL_fopen(gFiles[Pal_Res_MGO].name, "rb");
+    gFiles[Pal_Res_BALL].fp = UTIL_fopen(gFiles[Pal_Res_BALL].name, "rb");
+    gFiles[Pal_Res_DATA].fp = UTIL_fopen(gFiles[Pal_Res_DATA].name, "rb");
+    gFiles[Pal_Res_F].fp = UTIL_fopen(gFiles[Pal_Res_F].name, "rb");
+    gFiles[Pal_Res_FIRE].fp = UTIL_fopen(gFiles[Pal_Res_FIRE].name, "rb");
+    gFiles[Pal_Res_RGM].fp = UTIL_fopen(gFiles[Pal_Res_RGM].name, "rb");
+    return 0;
+}
 
 void PAL_FreeGlobals(void)
 /*++
@@ -47,6 +84,13 @@ void PAL_FreeGlobals(void)
 
 --*/
 {
+    UTIL_fclose(gFiles[Pal_Res_FBP].fp);
+    UTIL_fclose(gFiles[Pal_Res_MGO].fp);
+    UTIL_fclose(gFiles[Pal_Res_BALL].fp);
+    UTIL_fclose(gFiles[Pal_Res_DATA].fp);
+    UTIL_fclose(gFiles[Pal_Res_F].fp);
+    UTIL_fclose(gFiles[Pal_Res_FIRE].fp);
+    UTIL_fclose(gFiles[Pal_Res_RGM].fp);
     // Free the game data
     if (gpGlobals)
     {
@@ -92,10 +136,10 @@ static void PAL_InitGlobalGameData(void)
     }
 
     // If the memory has not been allocated, allocate first.
-    void *fpSSS = UTIL_Open(Res_SSS, "rb");
+    void *fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
     PAL_DOALLOCATE(fpSSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
     PAL_DOALLOCATE(fpSSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
-    UTIL_Close(Res_SSS);
+    UTIL_fclose(fpSSS);
     void *fpDATA = UTIL_Open(Res_DATA, "rb");
     PAL_DOALLOCATE(fpDATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
     PAL_DOALLOCATE(fpDATA, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
@@ -129,11 +173,11 @@ static void PAL_LoadDefaultGame(void)
 {
     unsigned int i;
     // Load the default data from the game data files.
-    void *fpSSS = UTIL_Open(Res_SSS, "rb");
+    void *fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
     PAL_MKFReadChunk(gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject * sizeof(EVENTOBJECT), 0, fpSSS);
     PAL_MKFReadChunk(gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene), 1, fpSSS);
     PAL_MKFReadChunk(gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject), 2, fpSSS);
-    UTIL_free(fpSSS);
+    UTIL_fclose(fpSSS);
     void *fpDATA = UTIL_Open(Res_DATA, "rb");
     PAL_MKFReadChunk(gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles * sizeof(LEVELUPMAGIC_ALL), 3, fpDATA);
     UTIL_Close(Res_DATA);
@@ -236,12 +280,14 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
 {
     unsigned int n = 0;
     // Try to open the specified file
-    void *fpSAVE = UTIL_Open_without_checking(Save_1 + iSaveSlot - 1, "rb");
+    char save_path[256] = {0};
+    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
+    void *fpSAVE = UTIL_fopen_without_checking(save_path, "rb");
     if (fpSAVE)
     {
         // Read all data from the file and close.
         n = UTIL_fread(s, 1, size, fpSAVE);
-        UTIL_Close(Save_1 + iSaveSlot - 1);
+        UTIL_fclose(fpSAVE);
     }
 
     if (n < size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS)
@@ -329,7 +375,7 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
     s->wViewportY = (unsigned short)PAL_Y(gpGlobals->viewport);
     s->nPartyMember = gpGlobals->wMaxPartyMemberIndex;
     s->wNumScene = gpGlobals->wNumScene;
-    s->wPaletteOffset = (gpGlobals->fNightPalette ? 0x180 : 0);
+    s->wPaletteOffset = (gpGlobals->fNightPalette ? (256 * 3) / 2 : 0);
     s->wPartyDirection = gpGlobals->wPartyDirection;
     s->wNumMusic = gpGlobals->wNumMusic;
     s->wNumBattleMusic = gpGlobals->wNumBattleMusic;
@@ -352,16 +398,18 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
     memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
 
     // Try writing to file
-    void *fpSAVE = UTIL_Open(Save_1 + iSaveSlot - 1, "wb");
+    char save_path[256] = {0};
+    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
+    void *fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
+    void *fpSAVE = UTIL_fopen(save_path, "wb");
     if (fpSAVE)
     {
-        void *fpSSS = UTIL_Open(Res_SSS, "rb");
         unsigned int i = PAL_MKFGetChunkSize(0, fpSSS);
         i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
         UTIL_fwrite(s, i, 1, fpSAVE);
-        UTIL_Close(Res_SSS);
-        UTIL_Close(Save_1 + iSaveSlot - 1);
+        UTIL_fclose(fpSAVE);
     }
+    UTIL_fclose(fpSSS);
 }
 
 static void

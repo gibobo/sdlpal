@@ -82,7 +82,8 @@ void PAL_DrawCharOnSurface(
     unsigned short wChar,
     const unsigned short x,
     const unsigned short y,
-    const unsigned char bColor);
+    const unsigned char bColor,
+    const unsigned char fShadow);
 
 /*++
   Purpose:

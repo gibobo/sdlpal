@@ -23,17 +23,17 @@
 
 #define PALETTE_SIZE (256 * 3)
 
-unsigned char *PAL_GetPalette(int iPaletteNum, int fNight);
+unsigned char *PAL_GetPalette(int iPaletteNum, unsigned char fNight);
 
-void PAL_SetPalette(int iPaletteNum, int fNight);
+void PAL_SetPalette(int iPaletteNum, unsigned char fNight);
 
 void PAL_FadeOut(int iDelay);
 
-void PAL_FadeIn(int iPaletteNum, int fNight, unsigned short iDelay);
+void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay);
 
-void PAL_SceneFade(int iPaletteNum, int fNight, int iStep);
+void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep);
 
-void PAL_PaletteFade(int iPaletteNum, int fNight, int fUpdateScene);
+void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene);
 
 void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom);
 

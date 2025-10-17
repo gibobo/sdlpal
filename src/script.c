@@ -1077,9 +1077,7 @@ PAL_InterpretInstruction(
             //
             PAL_MakeScene();
             VIDEO_UpdateScreen(NULL);
-            PAL_InitFont();
             PAL_BuyMenu(pScript->rgwOperand[0]);
-            PAL_DeInitFont();
             break;
 
         case 0x0027:
@@ -1088,9 +1086,7 @@ PAL_InterpretInstruction(
             //
             PAL_MakeScene();
             VIDEO_UpdateScreen(NULL);
-            PAL_InitFont();
             PAL_SellMenu();
-            PAL_DeInitFont();
             break;
 
         case 0x0028:
@@ -3103,9 +3099,7 @@ PAL_RunTriggerScript(
                 //
                 // Start battle
                 //
-                PAL_InitFont();
                 i = PAL_StartBattle(pScript->rgwOperand[0], !pScript->rgwOperand[2]);
-                PAL_DeInitFont();
 
                 if (i == kBattleResultLost && pScript->rgwOperand[1] != 0)
                 {
@@ -3155,7 +3149,6 @@ PAL_RunTriggerScript(
                 // Goto the specified address if player selected no
                 //
                 PAL_ClearDialog(false);
-                PAL_InitFont();
                 if (!PAL_ConfirmMenu())
                 {
                     wScriptEntry = pScript->rgwOperand[0];
@@ -3164,7 +3157,6 @@ PAL_RunTriggerScript(
                 {
                     wScriptEntry++;
                 }
-                PAL_DeInitFont();
                 break;
 
             case 0x003B:
@@ -3220,9 +3212,7 @@ PAL_RunTriggerScript(
                 //
                 // Print dialog text
                 //
-                PAL_InitFont();
                 PAL_ShowDialogText(PAL_GetMsg(pScript->rgwOperand[0]), 0);
-                PAL_DeInitFont();
                 wScriptEntry++;
                 break;
 

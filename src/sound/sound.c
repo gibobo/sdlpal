@@ -74,6 +74,7 @@ typedef struct tagWAVEDATA
 typedef struct tagSOUNDPLAYER
 {
     AUDIOPLAYER_COMMONS;
+    void *mkf; /* File pointer to the MKF file */
     WAVEDATA soundlist;
     int cursounds;
     int lastSFX;
@@ -81,7 +82,7 @@ typedef struct tagSOUNDPLAYER
 
 typedef struct tagVOCHEADER
 {
-    char signature[0x14];       /* "Creative Voice File\x1A" */
+    char signature[0x14];       /* "Creative Voice File" */
     unsigned short data_offset; /* little endian */
     unsigned short version;
     unsigned short version_checksum;
@@ -713,18 +714,15 @@ static int SOUND_Play(
     player->lastSFX = iSoundNum;
 
     // Get the length of the sound file.
-    void *fpSOUNDS = UTIL_Open(Res_SOUNDS, "rb");
-    len = PAL_MKFGetChunkSize(iSoundNum, fpSOUNDS);
+    len = PAL_MKFGetChunkSize(iSoundNum, player->mkf);
     if (len <= 0)
     {
-        UTIL_Close(Res_SOUNDS);
         return false;
     }
 
     // Read the sound file from the MKF archive.
     buf = UTIL_malloc(len);
-    PAL_MKFReadChunk(buf, len, iSoundNum, fpSOUNDS);
-    UTIL_Close(Res_SOUNDS);
+    PAL_MKFReadChunk(buf, len, iSoundNum, player->mkf);
 
     snddata = SOUND_LoadWAVEData(buf, len, &wavespec);
     if (snddata == NULL)
@@ -813,6 +811,7 @@ void SOUND_Shutdown(void *object)
             cursnd = cursnd->next;
             UTIL_free(old);
         }
+        UTIL_fclose(player->mkf);
     }
     resampler_deinit();
 }
@@ -880,6 +879,7 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
+    void *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
     // Initialize the resampler module
     resampler_init();
 
@@ -887,6 +887,7 @@ AUDIOPLAYER *SOUND_Init(void)
     player->Play = SOUND_Play;
     player->FillBuffer = SOUND_FillBuffer;
     player->Shutdown = SOUND_Shutdown;
+    player->mkf = mkf;
     player->soundlist.resampler[0] = resampler_create();
     player->soundlist.resampler[1] = resampler_create();
     player->cursounds = 0;

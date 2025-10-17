@@ -64,26 +64,12 @@ typedef enum
     Res_F,          // player sprites during battle
     Res_FIRE,       // fire effect sprites
     Res_RGM,        // character face bitmaps
-    Res_SSS,        // script data
     Res_SOUNDS,     // sound data
     Res_PAT,        // palette data
     Res_MAP,        // map data
     Res_GOP,        // map objects
     Res_MUS,        // music data
     Res_RNG,        // RNG animation data
-    Save_1,         // save slot 1
-    Save_2,         // save slot 2
-    Save_3,         // save slot 3
-    Save_4,         // save slot 4
-    Save_5,         // save slot 5
-    Cache_Word_2B,  // word cache 2 Bytes
-    Cache_Word_4B,  // word cache 4 Bytes
-    Cache_WordLen,  // word length cache
-    Cache_Msg_2B,   // message cache 2 Bytes
-    Cache_Msg_4B,   // message cache 4 Bytes
-    Cache_MsgLen,   // message length cache
-    Cache_Font,     // font cache
-    Cache_FontSize, // font size cache
     Res_Count       // total number of resources
 } PALRES;
 

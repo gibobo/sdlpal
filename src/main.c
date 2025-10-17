@@ -92,6 +92,7 @@ void PAL_Init(void)
         TerminateOnError("Could not initialize text subsystem: %d.\n", e);
     }
 
+    PAL_InitFont();
     PAL_InitInput();
     PAL_InitResources();
     AUDIO_OpenDevice();
@@ -124,6 +125,7 @@ void PAL_Shutdown(int exit_code)
     // global needs be free in last
     // since subsystems may needs config content during destroy
     // which also cleared here
+    PAL_DeInitFont();
     PAL_FreeGlobals();
 
     g_exit_code = exit_code;
@@ -344,9 +346,7 @@ int main(int argc, char *argv[])
     PAL_SplashScreen();
 
     // Show the opening menu.
-    PAL_InitFont();
     PAL_OpeningMenu();
-    PAL_DeInitFont();
 
     // Run the main game routine
     while (1)

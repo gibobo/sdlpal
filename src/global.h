@@ -469,6 +469,25 @@ typedef struct tagGAMEDATA
     unsigned short rgwBattleEffectIndex[10 * 2];
 } GAMEDATA;
 
+// status of characters
+typedef enum tagPALRES
+{
+   Pal_Res_FBP = 0, // battlefield background images
+   Pal_Res_MGO,     // sprites in scenes
+   Pal_Res_BALL,    // item bitmaps
+   Pal_Res_DATA,    // misc data
+   Pal_Res_F,       // player sprites during battle
+   Pal_Res_FIRE,    // fire effect sprites
+   Pal_Res_RGM,     // character face bitmaps
+   Pal_Res_ALL
+}PALRESLIST;
+
+typedef struct tagPALFILE
+{
+   char *name;
+   void *fp;
+}PALRESFILE;
+
 // player party
 typedef struct tagPARTY
 {
@@ -538,7 +557,7 @@ typedef struct tagGLOBALVARS
     unsigned short wPartyDirection;           // direction of the party
     unsigned short wNumScene;                 // current scene number
     unsigned short wNumPalette;               // current palette number
-    int fNightPalette;                        // TRUE if use the darker night palette
+    unsigned char fNightPalette;              // TRUE if use the darker night palette
     unsigned short wNumMusic;                 // current music number
     unsigned short wNumBattleMusic;           // current music number in battle
     unsigned short wNumBattleField;           // current battle field number
@@ -558,6 +577,10 @@ typedef struct tagGLOBALVARS
 } GLOBALVARS;
 
 extern GLOBALVARS *gpGlobals;
+extern PALRESFILE gFiles[];
+
+int PAL_InitGlobals(
+    void);
 
 void PAL_FreeGlobals(
     void);

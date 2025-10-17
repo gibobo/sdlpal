@@ -516,9 +516,7 @@ void PAL_StartFrame(
     if (PAL_GetKeyInput() & kKeyMenu)
     {
         // Show the in-game menu
-        PAL_InitFont();
         PAL_InGameMenu();
-        PAL_DeInitFont();
     }
     else if (PAL_GetKeyInput() & kKeyUseItem)
     {

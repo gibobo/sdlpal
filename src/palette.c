@@ -31,7 +31,7 @@
 
 static unsigned char gPalette[PALETTE_SIZE];
 
-unsigned char *PAL_GetPalette(int iPaletteNum, int fNight)
+unsigned char *PAL_GetPalette(int iPaletteNum, unsigned char fNight)
 /*++
   Purpose:
 
@@ -49,23 +49,26 @@ unsigned char *PAL_GetPalette(int iPaletteNum, int fNight)
 
 --*/
 {
-    unsigned char buf[PALETTE_SIZE * 2];
-    unsigned char *ptr = buf;
-    int i;
-    memset(gPalette, 0, sizeof(gPalette));
-    memset(buf, 0, sizeof(buf));
+    static int iPaletteNum_cached = 0xFFFF;
+    static unsigned char fNight_cached = 0xFF;
+    if (iPaletteNum == iPaletteNum_cached && fNight == fNight_cached)
+        return gPalette;
 
+    iPaletteNum_cached = iPaletteNum;
+    fNight_cached = fNight;
+
+    unsigned char buf[PALETTE_SIZE * 2];
     // Read the palette data from the pat.mkf file
     void *fpPAT = UTIL_Open(Res_PAT, "rb");
-    i = PAL_MKFReadChunk(buf, sizeof(buf), iPaletteNum, fpPAT);
+    int i = PAL_MKFReadChunk(buf, PALETTE_SIZE * 2, iPaletteNum, fpPAT);
     UTIL_Close(Res_PAT);
 
     if (i < 0)
         return NULL; // Read failed
     else if (i <= PALETTE_SIZE)
-        fNight = false; // There is no night colors in the palette
+        fNight = 0; // There is no night colors in the palette
 
-    ptr = buf + PALETTE_SIZE * ((fNight) ? 1 : 0);
+    unsigned char *ptr = buf + PALETTE_SIZE * ((fNight) ? 1 : 0);
 
     for (i = 0; i < PALETTE_SIZE; i++)
         gPalette[i] = ptr[i] << 2;
@@ -73,7 +76,7 @@ unsigned char *PAL_GetPalette(int iPaletteNum, int fNight)
     return gPalette;
 }
 
-void PAL_SetPalette(int iPaletteNum, int fNight)
+void PAL_SetPalette(int iPaletteNum, unsigned char fNight)
 /*++
   Purpose:
 
@@ -149,7 +152,7 @@ void PAL_FadeOut(int iDelay)
     VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_FadeIn(int iPaletteNum, int fNight, unsigned short iDelay)
+void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay)
 /*++
   Purpose:
 
@@ -190,7 +193,7 @@ void PAL_FadeIn(int iPaletteNum, int fNight, unsigned short iDelay)
     VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_SceneFade(int iPaletteNum, int fNight, int iStep)
+void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
 /*++
   Purpose:
 
@@ -276,7 +279,7 @@ void PAL_SceneFade(int iPaletteNum, int fNight, int iStep)
     }
 }
 
-void PAL_PaletteFade(int iPaletteNum, int fNight, int fUpdateScene)
+void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene)
 /*++
   Purpose:
 

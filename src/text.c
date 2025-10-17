@@ -50,9 +50,6 @@
 #define BUFFER_WORD_NUM     (3)
 
 unsigned char g_fUpdatedInBattle = false;
-static PALRES Cache_Word;
-static PALRES Cache_Msg;
-
 static wchar_t *WordData = NULL;
 static unsigned int *WordLen = NULL;
 static unsigned int WordLen_max = 0;
@@ -84,28 +81,14 @@ int PAL_InitText(void)
 
 --*/
 {
-    unsigned int wpos, i;
+    unsigned int wpos;
+    unsigned int i;
     unsigned char data;
-    unsigned char wchar_size = sizeof(wchar_t);
-
-    if (wchar_size == 2)
-    {
-        Cache_Word = Cache_Word_2B;
-        Cache_Msg = Cache_Msg_2B;
-    }
-    else if (wchar_size == 4)
-    {
-        Cache_Word = Cache_Word_4B;
-        Cache_Msg = Cache_Msg_4B;
-    }
-    else
-    {
-        TerminateOnError("Unsupported wchar_t size: %d\n", wchar_size);
-    }
+    char path[128];
 
     // Open the word data files.
     {
-        void *fpWLEN = UTIL_Open(Cache_WordLen, "rb");
+        void *fpWLEN = UTIL_fopen(CACHES_PATH "/word_len.bin", "rb");
         g_TextLib.nWords = UTIL_flength(fpWLEN);
         WordLen = (unsigned int *)UTIL_calloc(g_TextLib.nWords, sizeof(unsigned int));
         for (i = 0, wpos = 0, data = 0, WordLen_max = 0; i < g_TextLib.nWords; i++)
@@ -116,18 +99,19 @@ int PAL_InitText(void)
             if (WordLen_max < data)
                 WordLen_max = data;
         }
-        UTIL_Close(Cache_WordLen);
+        UTIL_fclose(fpWLEN);
     }
     {
-        void *fpWORD = UTIL_Open(Cache_Word, "rb");
+        sprintf(path, "%s/word_%db.bin", CACHES_PATH, sizeof(wchar_t));
+        void *fpWORD = UTIL_fopen(path, "rb");
         unsigned int word_buffer_size = UTIL_flength(fpWORD) / sizeof(wchar_t);
         WordData = (wchar_t *)UTIL_calloc(word_buffer_size, sizeof(wchar_t));
         UTIL_fread(WordData, sizeof(wchar_t), word_buffer_size, fpWORD);
-        UTIL_Close(Cache_Word);
+        UTIL_fclose(fpWORD);
     }
     // Open the message data files.
     {
-        void *fpMLEN = UTIL_Open(Cache_MsgLen, "rb");
+        void *fpMLEN = UTIL_fopen(CACHES_PATH "/msg_len.bin", "rb");
         g_TextLib.nMsgs = UTIL_flength(fpMLEN);
         MsgLen = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs, sizeof(unsigned int));
         for (i = 0, wpos = 0, data = 0, MsgLen_max = 0; i < g_TextLib.nMsgs; i++, data = 0)
@@ -138,14 +122,15 @@ int PAL_InitText(void)
             if (MsgLen_max < data)
                 MsgLen_max = data;
         }
-        UTIL_Close(Cache_MsgLen);
+        UTIL_fclose(fpMLEN);
     }
     {
-        void *fpMSG = UTIL_Open(Cache_Msg, "rb");
+        sprintf(path, "%s/msg_%db.bin", CACHES_PATH, sizeof(wchar_t));
+        void *fpMSG = UTIL_fopen(path, "rb");
         unsigned int msg_buffer_size = UTIL_flength(fpMSG) / sizeof(wchar_t);
         MsgData = (wchar_t *)UTIL_calloc(msg_buffer_size, sizeof(wchar_t));
         UTIL_fread(MsgData, sizeof(wchar_t), msg_buffer_size, fpMSG);
-        UTIL_Close(Cache_Msg);
+        UTIL_fclose(fpMSG);
     }
     internal_wbuffer_size = max(WordLen_max, MsgLen_max);
     internal_wbuffer = UTIL_calloc(internal_wbuffer_size + 1, sizeof(wchar_t));
@@ -336,17 +321,7 @@ void PAL_DrawTextUnescape(
         unsigned char char_width = PAL_CharWidth(*lpszText);
         if (char_width)
         {
-            if (fShadow)
-            {
-                // Note: In the original PAL DOS version,
-                // the text has triple shadows, while Win95 only has one layer.
-                // It is suspected that there is a bug in the original Win95 version,
-                // so sdlpal chose to use triple shadows for both.
-                PAL_DrawCharOnSurface(*lpszText, fontX + 1, fontY + 0, 0);
-                PAL_DrawCharOnSurface(*lpszText, fontX + 0, fontY + 1, 0);
-                PAL_DrawCharOnSurface(*lpszText, fontX + 1, fontY + 1, 0);
-            }
-            PAL_DrawCharOnSurface(*lpszText++, fontX, fontY, bColor);
+            PAL_DrawCharOnSurface(*lpszText++, fontX, fontY, bColor, fShadow);
             fontX += char_width;
             urect.w += char_width;
         }
