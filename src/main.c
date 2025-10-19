@@ -65,14 +65,14 @@ void PAL_Init(void)
     if (e != 0)
     {
         PAL_Shutdown(255);
-        TerminateOnError("Could not initialize driver work: %d.\n", e);
+        TerminateOnError("%s() failed: driver initialization error (code: %d)\n", __func__, e);
     }
 
     e = VIDEO_Startup();
     if (e != 0)
     {
         PAL_Shutdown(255);
-        TerminateOnError("Could not initialize Video: %d.\n", e);
+        TerminateOnError("%s() failed: video subsystem initialization error (code: %d)\n", __func__, e);
     }
 
     if (gpGlobals == NULL)
@@ -82,14 +82,14 @@ void PAL_Init(void)
     if (e != 0)
     {
         PAL_Shutdown(255);
-        TerminateOnError("Could not initialize UI subsystem: %d.\n", e);
+        TerminateOnError("%s() failed: UI subsystem initialization error (code: %d)\n", __func__, e);
     }
 
     e = PAL_InitText();
     if (e != 0)
     {
         PAL_Shutdown(255);
-        TerminateOnError("Could not initialize text subsystem: %d.\n", e);
+        TerminateOnError("%s() failed: text subsystem initialization error (code: %d)\n", __func__, e);
     }
 
     PAL_InitFont();
@@ -188,7 +188,7 @@ void PAL_SplashScreen(void)
 
     if (palette == NULL)
     {
-        TerminateOnError("ERROR: PAL_SplashScreen(): palette == NULL\n");
+        TerminateOnError("%s() failed: palette data is NULL (unable to load palette)\n", __func__);
         return;
     }
 

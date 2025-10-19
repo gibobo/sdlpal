@@ -243,7 +243,7 @@ void PAL_InitFont(void)
     if (font_size_bitmap == NULL)
     {
         void *fp_font_size = UTIL_fopen(CACHES_PATH "/unicode_font_size.bin", "rb");
-        unsigned int bitmap_size = UTIL_flength(fp_font_size);
+        unsigned int bitmap_size = UTIL_FileLength(fp_font_size);
         font_size_bitmap = (unsigned char *)UTIL_calloc(bitmap_size, sizeof(unsigned char));
         UTIL_fread(font_size_bitmap, sizeof(unsigned char), bitmap_size, fp_font_size);
         UTIL_fclose(fp_font_size);

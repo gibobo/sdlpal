@@ -232,9 +232,8 @@ void PAL_LoadResources(void)
         if (gpResources->lpMap == NULL)
         {
             UTIL_Close(Res_MGO);
-
-            TerminateOnError("PAL_LoadResources(): Fail to load map #%d (scene #%d) !",
-                             gpGlobals->g.rgScene[i].wMapNum, gpGlobals->wNumScene);
+            TerminateOnError("%s() failed: cannot load map data (map #%d for scene #%d - file not found or corrupted)\n",
+                             __func__, gpGlobals->g.rgScene[i].wMapNum, gpGlobals->wNumScene);
         }
 
         // Load sprites

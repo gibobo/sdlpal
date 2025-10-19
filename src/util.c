@@ -137,9 +137,9 @@ float RandomFloat(float from, float to)
 void TerminateOnError(
     const char *fmt,
     ...)
-// This function terminates the game because of an error and
-// prints the message string pointed to by fmt both in the
-// console and in a messagebox.
+// This function is called when a fatal error or abnormal condition is detected.
+// It formats and prints the error message to stderr, then immediately
+// terminates the application with an error exit code.
 {
     va_list argptr;
     char string[256];

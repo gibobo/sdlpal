@@ -20,27 +20,12 @@ static char *gFiles_name[Res_Count] = {
 static unsigned char gFiles_created[Res_Count] = {0};
 static FILE *gFiles_fp[Res_Count] = {NULL};
 
-void *UTIL_fopen(const char *_FileName, const char *_Mode)
-{
-    FILE *fp = NULL;
-
-    if (_FileName == NULL || _Mode == NULL)
-        TerminateOnError("%s() called with invalid parameters\n", __func__);
-    else
-        fp = fopen(_FileName, _Mode);
-
-    if (fp == NULL)
-        TerminateOnError("%s() open %s returns a null pointer\n", __func__, _FileName);
-    fprintf(stdout, "File %s loaded\n", _FileName);
-    return fp;
-}
-
 void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode)
 {
     FILE *fp = NULL;
 
     if (_FileName == NULL || _Mode == NULL)
-        TerminateOnError("%s() called with invalid parameters\n", __func__);
+        TerminateOnError("%s() failed: invalid arguments (filename or mode is NULL)\n", __func__);
     else
         fp = fopen(_FileName, _Mode);
 
@@ -50,10 +35,19 @@ void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode)
     return fp;
 }
 
+void *UTIL_fopen(const char *_FileName, const char *_Mode)
+{
+    FILE *fp = UTIL_fopen_without_checking(_FileName, _Mode);
+    if (fp == NULL)
+        TerminateOnError("%s() failed: cannot open file '%s' (file not found or permission denied)\n", __func__, _FileName);
+
+    return fp;
+}
+
 int UTIL_fseek(void *_Stream, long _Offset, int _Origin)
 {
     if (_Stream == NULL)
-        TerminateOnError("%s() called with invalid parameters\n", __func__);
+        TerminateOnError("%s() failed: invalid argument (stream is NULL)\n", __func__);
     else
         return fseek((FILE *)_Stream, _Offset, _Origin);
 
@@ -63,7 +57,7 @@ int UTIL_fseek(void *_Stream, long _Offset, int _Origin)
 unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream)
 {
     if (_Buffer == NULL || _Stream == NULL)
-        TerminateOnError("%s() called with invalid parameters\n", __func__);
+        TerminateOnError("%s() failed: invalid arguments (buffer or stream is NULL)\n", __func__);
     else
         return (unsigned int)fread(_Buffer, _ElementSize, _ElementCount, (FILE *)_Stream);
 
@@ -73,7 +67,7 @@ unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _
 unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream)
 {
     if (_Buffer == NULL || _Stream == NULL)
-        TerminateOnError("%s() called with invalid parameters\n", __func__);
+        TerminateOnError("%s() failed: invalid arguments (buffer or stream is NULL)\n", __func__);
     else
         return (unsigned int)fwrite(_Buffer, _ElementSize, _ElementCount, (FILE *)_Stream);
 
@@ -89,7 +83,7 @@ void UTIL_fclose(void *fp)
 void *UTIL_Open_without_checking(const PALRES res, const char *_Mode)
 {
     if (gFiles_name[res] == NULL || _Mode == NULL)
-        TerminateOnError("%s() called with invalid parameters\n", __func__);
+        TerminateOnError("%s() failed: invalid arguments (resource name or mode is NULL)\n", __func__);
     else if (gFiles_fp[res] == NULL)
         gFiles_fp[res] = fopen(gFiles_name[res], _Mode);
 
@@ -104,10 +98,12 @@ void *UTIL_Open_without_checking(const PALRES res, const char *_Mode)
 
 void *UTIL_Open(const PALRES res, const char *_Mode)
 {
-    if (UTIL_Open_without_checking(res, _Mode) == NULL)
-        TerminateOnError("%s() open %s failed\n", __func__, gFiles_name[res]);
+    FILE *fp = UTIL_Open_without_checking(res, _Mode);
 
-    return gFiles_fp[res];
+    if (fp == NULL)
+        TerminateOnError("%s() failed: cannot open resource file '%s' (file not found or access denied)\n", __func__, gFiles_name[res]);
+
+    return fp;
 }
 
 unsigned char UTIL_Close(const PALRES res)
@@ -123,17 +119,25 @@ unsigned char UTIL_Close(const PALRES res)
     return gFiles_created[res];
 }
 
-long UTIL_flength(void *fp)
+long UTIL_FileLength(void *fp)
 {
+    if (fp == NULL)
+        TerminateOnError("%s() failed: invalid argument (file pointer is NULL)\n", __func__);
+
     long old_pos = ftell((FILE *)fp);
 
     if (old_pos == -1)
-        return -1;
+        TerminateOnError("%s() failed: ftell() error - cannot get current file position\n", __func__);
 
     if (UTIL_fseek((FILE *)fp, 0, SEEK_END) == -1)
-        return -1;
+        TerminateOnError("%s() failed: fseek() error - cannot seek to end of file\n", __func__);
 
-    long length = ftell((FILE *)fp);
-    UTIL_fseek((FILE *)fp, old_pos, SEEK_SET);
+    long length = ftell((FILE *)fp); // Get the file length
+    if (length == -1)
+        TerminateOnError("%s() failed: ftell() error - cannot get file length\n", __func__);
+
+    if (UTIL_fseek((FILE *)fp, old_pos, SEEK_SET) == -1)
+        TerminateOnError("%s() failed: fseek() error - cannot restore file position\n", __func__);
+
     return length;
 }

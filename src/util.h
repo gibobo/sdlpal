@@ -73,7 +73,7 @@ typedef enum
     Res_Count       // total number of resources
 } PALRES;
 
-long UTIL_flength(void *fp);
+long UTIL_FileLength(void *fp);
 
 int RandomLong(int from, int to);
 

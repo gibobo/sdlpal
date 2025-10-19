@@ -1,4 +1,5 @@
 #include "util.h"
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,7 @@ void *UTIL_malloc(unsigned int buffer_size)
 
     // first off, check if buffer size is valid
     if (buffer_size == 0)
-        TerminateOnError("%s() called with invalid buffer size: %d\n", __func__, buffer_size);
+        TerminateOnError("%s() failed: invalid buffer size (cannot allocate 0 bytes)\n", __func__);
 
 #ifdef ARDUINO_ARCH_ESP32
     buffer = heap_caps_malloc(buffer_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
@@ -28,7 +29,7 @@ void *UTIL_malloc(unsigned int buffer_size)
 
     // last check, check if malloc call succeeded
     if (buffer == NULL)
-        TerminateOnError("%s() failure for %d bytes (out of memory?)\n", __func__, buffer_size);
+        TerminateOnError("%s() failed: memory allocation failed for %u bytes (insufficient memory)\n", __func__, buffer_size);
 
     memset(buffer, 0, buffer_size);
 
@@ -42,7 +43,11 @@ void *UTIL_calloc(unsigned int n, unsigned int size)
 
     // first off, check if buffer size is valid
     if (n == 0 || size == 0)
-        TerminateOnError("%s() called with invalid parameters\n", __func__);
+        TerminateOnError("%s() failed: invalid parameters (n=%u, size=%u - cannot allocate zero elements or zero-sized elements)\n", __func__, n, size);
+
+    // Check for potential overflow
+    if (n > UINT_MAX / size)
+        TerminateOnError("%s() failed: arithmetic overflow detected (n=%u, size=%u - total size exceeds maximum value)\n", __func__, n, size);
 
 #ifdef ARDUINO_ARCH_ESP32
     buffer = heap_caps_calloc(n, size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
@@ -56,7 +61,7 @@ void *UTIL_calloc(unsigned int n, unsigned int size)
 
     // last check, check if calloc call succeeded
     if (buffer == NULL)
-        TerminateOnError("%s() failure for %d bytes (out of memory?)\n", __func__, size * n);
+        TerminateOnError("%s() failed: memory allocation failed for %u bytes (insufficient memory)\n", __func__, size * n);
 
     memset(buffer, 0, size * n);
 
@@ -70,7 +75,7 @@ void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size)
 
     // first off, check if buffer size is valid
     if (n == 0 || size == 0)
-        TerminateOnError("%s() called with invalid parameters\n", __func__);
+        TerminateOnError("%s() failed: invalid parameters (n=%u, size=%u - cannot reallocate to zero size)\n", __func__, n, size);
 
 #ifdef ARDUINO_ARCH_ESP32
     buffer = heap_caps_realloc(ptr, n * size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
@@ -83,7 +88,7 @@ void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size)
 
     // last check, check if realloc call succeeded
     if (buffer == NULL)
-        TerminateOnError("%s() failure for %d bytes (out of memory?)\n", __func__, size * n);
+        TerminateOnError("%s() failed: memory reallocation failed for %u bytes (insufficient memory)\n", __func__, size * n);
 
     return buffer; // nothing went wrong, so return buffer pointer
 }
