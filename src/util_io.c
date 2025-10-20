@@ -1,22 +1,24 @@
 #include "util.h"
 #include <stdio.h>
 
-static char *gFiles_name[Res_Count] = {
+char *gFiles_name[Res_Count] = {
     [Res_ABC] = RESOURCE_PATH "/abc.mkf",
-    [Res_FBP] = RESOURCE_PATH "/fbp.mkf",
-    [Res_MGO] = RESOURCE_PATH "/mgo.mkf",
     [Res_BALL] = RESOURCE_PATH "/ball.mkf",
     [Res_DATA] = RESOURCE_PATH "/data.mkf",
     [Res_F] = RESOURCE_PATH "/f.mkf",
+    [Res_FBP] = RESOURCE_PATH "/fbp.mkf",
     [Res_FIRE] = RESOURCE_PATH "/fire.mkf",
-    [Res_RGM] = RESOURCE_PATH "/rgm.mkf",
-    [Res_SOUNDS] = RESOURCE_PATH "/sounds.mkf",
-    [Res_PAT] = RESOURCE_PATH "/pat.mkf",
-    [Res_MAP] = RESOURCE_PATH "/map.mkf",
     [Res_GOP] = RESOURCE_PATH "/gop.mkf",
+    [Res_MAP] = RESOURCE_PATH "/map.mkf",
+    [Res_MGO] = RESOURCE_PATH "/mgo.mkf",
     [Res_MUS] = RESOURCE_PATH "/mus.mkf",
+    [Res_PAT] = RESOURCE_PATH "/pat.mkf",
+    [Res_RGM] = RESOURCE_PATH "/rgm.mkf",
     [Res_RNG] = RESOURCE_PATH "/rng.mkf",
+    [Res_SOUNDS] = RESOURCE_PATH "/sounds.mkf",
+    [Res_SSS] = RESOURCE_PATH "/sss.mkf",
 };
+
 static unsigned char gFiles_created[Res_Count] = {0};
 static FILE *gFiles_fp[Res_Count] = {NULL};
 

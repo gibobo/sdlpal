@@ -35,6 +35,7 @@
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
+#include "resource.h"
 #include <assert.h>
 #include <setjmp.h>
 #include <stdbool.h>
@@ -336,7 +337,7 @@ int main(int argc, char *argv[])
         // A longjmp is made, should exit here
         return g_exit_code;
     }
-
+    // PAL_ResourcesCreate();
     // Initialize everything
     PAL_Init();
 

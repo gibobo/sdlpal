@@ -35,7 +35,7 @@
     if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
     return -1
 
-static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned int uiFrameNum, void *fpRngMKF)
+int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned int uiFrameNum, void *fpRngMKF)
 /*++
   Purpose:
 
@@ -79,7 +79,7 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
     uiChunkCount = PAL_MKFGetChunkCount(fpRngMKF);
     if (uiRngNum >= uiChunkCount)
     {
-        return -1;
+        return -2;
     }
 
     // Get the offset of the chunk.
@@ -95,7 +95,7 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
     }
     else
     {
-        return -1;
+        return -3;
     }
 
     // Get the number of sub chunks.
@@ -103,7 +103,7 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
     uiChunkCount = (uiChunkCount >> 2) - 1;
     if (uiFrameNum >= uiChunkCount)
     {
-        return -1;
+        return -4;
     }
 
     // Get the offset of the sub chunk.
@@ -121,7 +121,7 @@ static int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, uns
         return (int)UTIL_fread(*lpBuffer, 1, iChunkLen, fpRngMKF);
     }
 
-    return -1;
+    return 0;
 }
 
 static int
@@ -298,7 +298,7 @@ void PAL_RNGPlay(
     void *fpRNG = UTIL_Open(Res_RNG, "rb");
     unsigned char *rng = NULL;
     unsigned char *buf = NULL;
-    int rng_size = 0;
+    unsigned int rng_size = 0;
     int buf_size = 0;
     unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
 
@@ -310,13 +310,14 @@ void PAL_RNGPlay(
     {
         // Read, decompress and render the frame
         buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fpRNG);
-        if (buf_size < 0)
+        if (buf_size <= 0)
             break; // Failed to get the frame, don't go further
 
         UTIL_free(rng);
         rng_size = *(unsigned int *)buf;
         rng = (unsigned char *)UTIL_malloc(rng_size);
-        if (PAL_RNGBlitToSurface(rng, YJ2_Decompress(buf, rng, rng_size), gpScreen) < 0)
+        int RNGBlit_len = YJ2_Decompress(buf, rng, rng_size);
+        if (PAL_RNGBlitToSurface(rng, RNGBlit_len, gpScreen) < 0)
             break; // Failed to get the frame, don't go further
 
         // Update the screen

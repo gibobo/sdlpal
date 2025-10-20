@@ -56,21 +56,22 @@
 // Resource identifiers
 typedef enum
 {
-    Res_ABC = 0,    // enemy sprites in battle
-    Res_FBP,        // battlefield background images
-    Res_MGO,        // sprites in scenes
-    Res_BALL,       // item bitmaps
-    Res_DATA,       // misc data
-    Res_F,          // player sprites during battle
-    Res_FIRE,       // fire effect sprites
-    Res_RGM,        // character face bitmaps
-    Res_SOUNDS,     // sound data
-    Res_PAT,        // palette data
-    Res_MAP,        // map data
-    Res_GOP,        // map objects
-    Res_MUS,        // music data
-    Res_RNG,        // RNG animation data
-    Res_Count       // total number of resources
+    Res_ABC = 0, // enemy sprites in battle
+    Res_BALL,    // item bitmaps
+    Res_DATA,    // misc data
+    Res_F,       // player sprites during battle
+    Res_FBP,     // battlefield background images
+    Res_FIRE,    // fire effect sprites
+    Res_GOP,     // map objects
+    Res_MAP,     // map data
+    Res_MGO,     // sprites in scenes
+    Res_MUS,     // music data
+    Res_PAT,     // palette data
+    Res_RGM,     // character face bitmaps
+    Res_RNG,     // RNG animation data
+    Res_SOUNDS,  // sound data,
+    Res_SSS,     // special scene sprites
+    Res_Count    // total number of resources
 } PALRES;
 
 long UTIL_FileLength(void *fp);

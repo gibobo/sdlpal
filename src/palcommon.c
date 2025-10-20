@@ -869,9 +869,7 @@ int PAL_MKFReadChunk(
     unsigned int uiChunkLen;
 
     if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0)
-    {
         return -1;
-    }
 
     //
     // Get the total number of chunks.
@@ -885,23 +883,17 @@ int PAL_MKFReadChunk(
     Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
     Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
-    //
+    if (uiOffset > uiNextOffset)
+        return -2;
+
     // Get the length of the chunk.
-    //
     uiChunkLen = uiNextOffset - uiOffset;
 
     if (uiChunkLen > uiBufferSize)
-    {
-        return -2;
-    }
+        return -3;
 
-    if (uiChunkLen != 0)
-    {
-        UTIL_fseek(fp, uiOffset, SEEK_SET);
-        return (int)UTIL_fread(lpBuffer, 1, uiChunkLen, fp);
-    }
-
-    return -1;
+    UTIL_fseek(fp, uiOffset, SEEK_SET);
+    return (int)UTIL_fread(lpBuffer, 1, uiChunkLen, fp);
 }
 
 int PAL_MKFDecompressChunk(

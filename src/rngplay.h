@@ -21,12 +21,16 @@
 #ifndef RNGPLAY_H
 #define RNGPLAY_H
 
-void
-PAL_RNGPlay(
-   int           iNumRNG,
-   int           iStartFrame,
-   int           iNumFrames,
-   int           iSpeed
-);
+int PAL_RNGReadFrame(
+    unsigned char **lpBuffer,
+    unsigned int uiRngNum,
+    unsigned int uiFrameNum,
+    void *fpRngMKF);
+
+void PAL_RNGPlay(
+    int iNumRNG,
+    int iStartFrame,
+    int iNumFrames,
+    int iSpeed);
 
 #endif
