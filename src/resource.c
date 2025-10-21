@@ -7,6 +7,19 @@
 
 extern char *gFiles_name[Res_Count];
 
+typedef struct
+{
+    unsigned int offset;
+    unsigned int length;
+} pal_file_info_t;
+
+typedef struct
+{
+    unsigned int res_count;
+    unsigned int *chunk_count;
+    pal_file_info_t **file_info;
+} resource_export_import_t;
+
 static void Set_FrameNum(FILE *fpInfo, unsigned int index, unsigned int frame_num)
 {
     long new_pos = ftell(fpInfo);
@@ -165,28 +178,50 @@ void PAL_ResourcesExport(void)
     sprintf(filename_info, "%s/pal.dat", CACHES_PATH);
     FILE *fpRes_out = UTIL_fopen(filename_res, "wb");
     FILE *fpInfo_out = UTIL_fopen(filename_info, "w");
+    unsigned int res_offset = 0;
     for (int res = 0; res < Res_Count; res++)
     {
         sprintf(filename_res, "%s/res_%d.bin", CACHES_PATH, (unsigned int)res);
         sprintf(filename_info, "%s/res_%d.dat", CACHES_PATH, (unsigned int)res);
-        FILE *fpRes = UTIL_fopen(filename_res, "rb");
-        FILE *fpInfo = UTIL_fopen(filename_info, "rb");
-        // unsigned int res_len = UTIL_FileLength(fpRes);
-        // fwrite(&res_len, sizeof(unsigned int), 1, fpInfo_out);
-        // unsigned char *buffer = (unsigned char *)UTIL_malloc(res_len);
-        // UTIL_fread(buffer, sizeof(char), res_len, fpRes);
-        // fwrite(buffer, sizeof(char), res_len, fpRes_out);
-        // UTIL_free(buffer);
 
-        // unsigned int info_len = UTIL_FileLength(fpInfo);
-        // fwrite(&info_len, sizeof(unsigned int), 1, fpInfo_out);
-        // buffer = (unsigned char *)UTIL_malloc(info_len);
-        // UTIL_fread(buffer, sizeof(char), info_len, fpInfo);
-        // fwrite(buffer, sizeof(char), info_len, fpInfo_out);
-        // UTIL_free(buffer);
+        FILE *fpRes = UTIL_fopen(filename_res, "rb");
+        unsigned int res_len = UTIL_FileLength(fpRes);
+        unsigned char *buffer_u8 = (unsigned char *)UTIL_malloc(res_len);
+        UTIL_fread(buffer_u8, sizeof(char), res_len, fpRes);
+        UTIL_fclose(fpRes);
+        fwrite(buffer_u8, sizeof(char), res_len, fpRes_out);
+        UTIL_free(buffer_u8);
+
+        FILE *fpInfo = UTIL_fopen(filename_info, "rb");
+        unsigned int info_len = UTIL_FileLength(fpInfo);
+        unsigned int *buffer_u32 = (unsigned int *)UTIL_malloc(info_len);
+        UTIL_fread(buffer_u32, sizeof(char), info_len, fpInfo);
+        UTIL_fclose(fpInfo);
+
+        resource_export_import_t res_info;
+        res_info.res_count = buffer_u32[0];
+        res_info.chunk_count = (unsigned int *)UTIL_calloc(res_info.res_count, sizeof(unsigned int));
+        res_info.file_info = (pal_file_info_t **)UTIL_calloc(res_info.res_count, sizeof(pal_file_info_t *));
+        for (unsigned int i = 0; i < res_info.res_count; i++)
+        {
+            res_info.chunk_count[i] = buffer_u32[1 + i];
+            res_info.file_info[i] = (pal_file_info_t *)UTIL_calloc(res_info.chunk_count[i], sizeof(pal_file_info_t));
+            pal_file_info_t *chunk_info = res_info.file_info[i];
+            pal_file_info_t *chunk_info_orig = (pal_file_info_t *)(buffer_u32 + (1 + res_info.res_count) + i * 2);
+
+            for (unsigned int j = 0; j < res_info.chunk_count[i]; j++)
+            {
+                chunk_info[j].offset = chunk_info_orig[j].offset + res_offset;
+                chunk_info[j].length = chunk_info_orig[j].length;
+            }
+        }
+
+        fwrite(buffer_u32, sizeof(char), info_len, fpInfo_out);
+        UTIL_free(buffer_u32);
 
         UTIL_fclose(fpRes);
         UTIL_fclose(fpInfo);
+        res_offset += res_len;
     }
     UTIL_fclose(fpRes_out);
     UTIL_fclose(fpInfo_out);

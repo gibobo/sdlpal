@@ -293,3 +293,5 @@ vc17/
 build/
 out/
 src_backup/
+cache_data/res_*.bin
+cache_data/res_*.dat
