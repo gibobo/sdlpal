@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void PAL_ResourcesCreate(void);
+void PAL_ResourcesExport(void);
+void PAL_ResourcesImport(void);
 
 #endif // RESOURCE_H

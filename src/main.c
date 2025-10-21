@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
         // A longjmp is made, should exit here
         return g_exit_code;
     }
-    // PAL_ResourcesCreate();
+    PAL_ResourcesExport();
     // Initialize everything
     PAL_Init();
 
