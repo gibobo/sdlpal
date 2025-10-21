@@ -277,13 +277,11 @@ void PAL_DrawCharOnSurface(
     const unsigned char bColor,
     const unsigned char fShadow)
 {
-    // Check for NULL screen surface.
-    if (gpScreen == NULL)
+    // Ensure font system is initialized
+    if ((gpScreen == NULL) || (fp_font_data == NULL) || (font_size_bitmap == NULL))
+    {
         return;
-
-    // Check for NULL pointer & invalid char code.
-    if ((fp_font_data == NULL) || (font_size_bitmap == NULL))
-        return;
+    }
 
     // Check for invalid char code.
     if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || (wChar >= unicode_upper_top))
@@ -300,10 +298,6 @@ void PAL_DrawCharOnSurface(
     // Get optimized font data with caching
     unsigned char font_size;
     unsigned char *char_font_data = PAL_GetFontData(wChar, &font_size);
-    if (char_font_data == NULL)
-    {
-        return; // Failed to load font data
-    }
 
     // Prepare for drawing on the screen surface
     unsigned char *dst = gpScreen->pixels + gpScreen->w * ReLU(y) + x;
@@ -317,22 +311,27 @@ void PAL_DrawCharOnSurface(
 
     for (unsigned short i = 0; i < font_height && dst < top; i += row_increment, dst += gpScreen->w)
     {
+        unsigned char *shadow_row = dst + gpScreen->w;
         for (unsigned short j = 0; j < font_width && (x + j) < gpScreen->w; j++)
         {
             unsigned char byte_offset = (is_large_font && j >= BITS_PER_BYTE) ? 1 : 0;
-            if (char_font_data[i + byte_offset] & (1 << (j & 7)))
+            unsigned char bit_mask = 1 << (j & 7);
+            if (char_font_data[i + byte_offset] & bit_mask)
             {
                 dst[j] = bColor;
-                // Draw shadow with bounds checking
+                // Draw shadow with optimized bounds checking
                 if (fShadow)
                 {
-                    if (j < gpScreen->w && x + j < gpScreen->w)
-                        dst[j] = 0;
-                    if (dst + gpScreen->w < top)
+                    unsigned char can_draw_right = (x + j + 1 < gpScreen->w);
+                    unsigned char can_draw_bottom = (shadow_row + j < top);
+
+                    if (can_draw_right)
+                        dst[j + 1] = 0;
+                    if (can_draw_bottom)
                     {
-                        dst[j + gpScreen->w] = 0;
-                        if (j + 1 < gpScreen->w && x + j + 1 < gpScreen->w)
-                            dst[j + gpScreen->w + 1] = 0;
+                        shadow_row[j] = 0;
+                        if (can_draw_right)
+                            shadow_row[j + 1] = 0;
                     }
                 }
             }
