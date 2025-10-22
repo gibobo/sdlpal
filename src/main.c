@@ -29,13 +29,13 @@
 #include "palette.h"
 #include "play.h"
 #include "res.h"
+#include "resource.h"
 #include "rngplay.h"
 #include "text.h"
 #include "ui.h"
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
-#include "resource.h"
 #include <assert.h>
 #include <setjmp.h>
 #include <stdbool.h>
@@ -60,6 +60,14 @@ void PAL_Init(void)
 --*/
 {
     int e;
+
+    // PAL_ConsolidateExtractedResources();
+    e = PAL_LoadConsolidatedResources();
+    if (e != 0)
+    {
+        PAL_Shutdown(255);
+        TerminateOnError("%s() failed: load consolidated resources error (code: %d)\n", __func__, e);
+    }
 
     // Initialize subsystems.
     e = DRIVER_Init();
@@ -128,6 +136,7 @@ void PAL_Shutdown(int exit_code)
     // which also cleared here
     PAL_DeInitFont();
     PAL_FreeGlobals();
+    PAL_FreeResourceIndex();
 
     g_exit_code = exit_code;
     longjmp(g_exit_jmp_buf, 1);
@@ -337,7 +346,6 @@ int main(int argc, char *argv[])
         // A longjmp is made, should exit here
         return g_exit_code;
     }
-    PAL_ResourcesExport();
     // Initialize everything
     PAL_Init();
 
