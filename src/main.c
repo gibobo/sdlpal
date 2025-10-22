@@ -68,6 +68,8 @@ void PAL_Init(void)
         PAL_Shutdown(255);
         TerminateOnError("%s() failed: load consolidated resources error (code: %d)\n", __func__, e);
     }
+    else
+        printf("Consolidated resources loaded successfully.\n");
 
     // Initialize subsystems.
     e = DRIVER_Init();
@@ -76,6 +78,8 @@ void PAL_Init(void)
         PAL_Shutdown(255);
         TerminateOnError("%s() failed: driver initialization error (code: %d)\n", __func__, e);
     }
+    else
+        printf("Driver initialized successfully.\n");
 
     e = PAL_InitGlobals();
     if (e != 0)
@@ -83,6 +87,8 @@ void PAL_Init(void)
         PAL_Shutdown(255);
         TerminateOnError("%s() failed: global data initialization error (code: %d)\n", __func__, e);
     }
+    else
+        printf("Global data initialized successfully.\n");
 
     e = PAL_InitUI();
     if (e != 0)
@@ -90,6 +96,8 @@ void PAL_Init(void)
         PAL_Shutdown(255);
         TerminateOnError("%s() failed: UI subsystem initialization error (code: %d)\n", __func__, e);
     }
+    else
+        printf("UI subsystem initialized successfully.\n");
 
     e = PAL_InitText();
     if (e != 0)
@@ -97,12 +105,16 @@ void PAL_Init(void)
         PAL_Shutdown(255);
         TerminateOnError("%s() failed: text subsystem initialization error (code: %d)\n", __func__, e);
     }
+    else
+        printf("Text subsystem initialized successfully.\n");
 
     e = PAL_InitFont();
     if (e != 0)
     {
         TerminateOnError("%s() failed: font subsystem initialization error (code: %d)\n", __func__, e);
     }
+    else
+        printf("Font subsystem initialized successfully.\n");
 
     e = PAL_InitResources();
     if (e != 0)
@@ -110,6 +122,8 @@ void PAL_Init(void)
         PAL_Shutdown(255);
         TerminateOnError("%s() failed: resource manager initialization error (code: %d)\n", __func__, e);
     }
+    else
+        printf("Resource manager initialized successfully.\n");
 
     e = VIDEO_Startup();
     if (e != 0)
@@ -117,6 +131,8 @@ void PAL_Init(void)
         PAL_Shutdown(255);
         TerminateOnError("%s() failed: video subsystem initialization error (code: %d)\n", __func__, e);
     }
+    else
+        printf("Video subsystem initialized successfully.\n");
 
     e = AUDIO_Startup();
     if (e != 0)
@@ -125,8 +141,11 @@ void PAL_Init(void)
         printf("Warning: %s() failed: audio subsystem initialization error (code: %d)\n", __func__, e);
         printf("Game will continue without audio.\n");
     }
+    else
+        printf("Audio subsystem initialized successfully.\n");
 
     PAL_InitInput();
+    printf("Input subsystem initialized successfully.\n");
 }
 
 void PAL_Shutdown(int exit_code)
