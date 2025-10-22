@@ -22,6 +22,7 @@
 
 #include "rix.h"
 #include "../util.h"
+#include "../resource.h"
 #include "opl.h"
 #include <stdbool.h>
 #include <stdio.h>
@@ -46,7 +47,6 @@ static const unsigned char bd_reg_data[] = {
     0x00, 0x00, 0x00};
 
 static unsigned char *rix_buf = NULL; /* rix files' f_buffer */
-static int songs = 0;
 static unsigned short f_buffer[25 * 12]; // 9C0h-C18h
 static unsigned short a0b0_data2[11];
 static unsigned char a0b0_data3[18];
@@ -112,19 +112,6 @@ void CrixPlayer_deinit(void)
 
 unsigned char CrixPlayer_load(void)
 {
-    unsigned short signature = 0;
-    void *fpMUS = UTIL_Open(Res_MUS, "rb");
-    UTIL_fseek(fpMUS, 0, SEEK_SET);
-    UTIL_fread(&songs, sizeof(int), 1, fpMUS);
-    UTIL_fseek(fpMUS, songs, SEEK_SET);
-    UTIL_fread(&signature, 2, 1, fpMUS);
-    UTIL_Close(Res_MUS);
-
-    if (signature != 0x55AA)
-    {
-        return false;
-    }
-    songs /= 4;
     subsong_id = 0xFFFFFFFF;
     CrixPlayer_rewind(0, true);
     return true;
@@ -164,22 +151,10 @@ void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit)
 
     if (subsong != subsong_id)
     {
-        int index[2];
         UTIL_free(rix_buf);
         rix_buf = NULL;
         subsong_id = subsong;
-        void *fpMUS = UTIL_Open(Res_MUS, "rb");
-        UTIL_fseek(fpMUS, subsong * sizeof(int), SEEK_SET);
-        UTIL_fread(index, sizeof(int), 2, fpMUS);
-        length = index[1] - index[0];
-
-        if (length > 0)
-        {
-            rix_buf = (unsigned char *)UTIL_calloc(length, sizeof(unsigned char));
-            UTIL_fseek(fpMUS, index[0], SEEK_SET);
-            UTIL_fread(rix_buf, length, sizeof(unsigned char), fpMUS);
-        }
-        UTIL_Close(Res_MUS);
+        length = RES_MKFDecompressChunk(&rix_buf, 0, subsong_id, Res_MUS);
     }
 
     if (reinit)

@@ -34,6 +34,7 @@
 #include "palette.h"
 #include "play.h"
 #include "res.h"
+#include "resource.h"
 #include "rngplay.h"
 #include "scene.h"
 #include "text.h"
@@ -1395,8 +1396,7 @@ PAL_InterpretInstruction(
                 static unsigned char bufImage[2048];
                 if (gpGlobals->g.rgObject[wObject].item.wBitmap != wPrevImageIndex)
                 {
-                    void *fpBALL = UTIL_Open(Res_BALL, "rb");
-                    if (PAL_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, fpBALL) > 0)
+                    if (RES_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, Res_BALL) > 0)
                     {
                         wPrevImageIndex = gpGlobals->g.rgObject[wObject].item.wBitmap;
                     }
@@ -1404,7 +1404,6 @@ PAL_InterpretInstruction(
                     {
                         wPrevImageIndex = 0xFFFF;
                     }
-                    UTIL_Close(Res_BALL);
                 }
                 if (wPrevImageIndex != 0xFFFF)
                 {

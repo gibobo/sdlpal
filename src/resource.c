@@ -5,22 +5,43 @@
 #include <stdio.h>
 #include <string.h>
 
-extern char *gFiles_name[Res_Count];
+static const char *g_ResourceFilePaths[Res_Count] = {
+    [Res_ABC] = RESOURCE_PATH "/abc.mkf",
+    [Res_BALL] = RESOURCE_PATH "/ball.mkf",
+    [Res_DATA] = RESOURCE_PATH "/data.mkf",
+    [Res_F] = RESOURCE_PATH "/f.mkf",
+    [Res_FBP] = RESOURCE_PATH "/fbp.mkf",
+    [Res_FIRE] = RESOURCE_PATH "/fire.mkf",
+    [Res_GOP] = RESOURCE_PATH "/gop.mkf",
+    [Res_MAP] = RESOURCE_PATH "/map.mkf",
+    [Res_MGO] = RESOURCE_PATH "/mgo.mkf",
+    [Res_MUS] = RESOURCE_PATH "/mus.mkf",
+    [Res_PAT] = RESOURCE_PATH "/pat.mkf",
+    [Res_RGM] = RESOURCE_PATH "/rgm.mkf",
+    [Res_RNG] = RESOURCE_PATH "/rng.mkf",
+    [Res_SOUNDS] = RESOURCE_PATH "/sounds.mkf",
+    [Res_SSS] = RESOURCE_PATH "/sss.mkf",
+};
 
 typedef struct
 {
-    unsigned int offset;
-    unsigned int length;
-} pal_file_info_t;
+    unsigned int data_offset;
+    unsigned int data_length;
+} ResourceFileInfo;
 
 typedef struct
 {
     unsigned int chunk_count;
     unsigned int *frame_count;
-    pal_file_info_t **file_info;
-} resource_export_import_t;
+    ResourceFileInfo **resource_file_info;
+} ResourceIndex;
 
-resource_export_import_t gResource_Export_Import[Res_Count];
+static void *g_ConsolidatedResourceFile = NULL;
+
+/* Initialize the global resource export/import array to ensure a single
+   defined object with zero-initialized contents to avoid multiple-definition
+   or uninitialized-data issues across builds. */
+static ResourceIndex g_CachedResourceIndex[Res_Count] = {0};
 
 static void PAL_ExtractAndDecompressMKFChunks(PALRES res)
 {
@@ -28,7 +49,7 @@ static void PAL_ExtractAndDecompressMKFChunks(PALRES res)
     char filename_info[256] = {0};
     sprintf(filename_res, "%s/res_%d.bin", CACHES_PATH, (unsigned int)res);
     sprintf(filename_info, "%s/res_%d.dat", CACHES_PATH, (unsigned int)res);
-    FILE *fp = UTIL_fopen(gFiles_name[res], "rb");
+    FILE *fp = UTIL_fopen(g_ResourceFilePaths[res], "rb");
     FILE *fpRes = UTIL_fopen(filename_res, "wb");
     FILE *fpInfo = UTIL_fopen(filename_info, "wb");
     unsigned int index = 0;
@@ -65,7 +86,7 @@ static void PAL_ExtractRawMKFChunks(PALRES res)
     char filename_info[256] = {0};
     sprintf(filename_res, "%s/res_%d.bin", CACHES_PATH, (unsigned int)res);
     sprintf(filename_info, "%s/res_%d.dat", CACHES_PATH, (unsigned int)res);
-    FILE *fp = UTIL_fopen(gFiles_name[res], "rb");
+    FILE *fp = UTIL_fopen(g_ResourceFilePaths[res], "rb");
     FILE *fpRes = UTIL_fopen(filename_res, "wb");
     FILE *fpInfo = UTIL_fopen(filename_info, "wb");
     unsigned int index = 0;
@@ -101,7 +122,7 @@ static void PAL_ExtractRNGAnimationFrames(PALRES res)
     char filename_info[256] = {0};
     sprintf(filename_res, "%s/res_%d.bin", CACHES_PATH, (unsigned int)res);
     sprintf(filename_info, "%s/res_%d.dat", CACHES_PATH, (unsigned int)res);
-    FILE *fp = UTIL_fopen(gFiles_name[res], "rb");
+    FILE *fp = UTIL_fopen(g_ResourceFilePaths[res], "rb");
     FILE *fpRes = UTIL_fopen(filename_res, "wb");
     FILE *fpInfo = UTIL_fopen(filename_info, "wb");
     unsigned int index = 0;
@@ -227,129 +248,214 @@ void PAL_ConsolidateExtractedResources(void)
 
 int PAL_LoadConsolidatedResources(void)
 {
-    // FILE *fpRes = UTIL_fopen(CACHES_PATH "/pal.bin", "rb");
+    g_ConsolidatedResourceFile = UTIL_fopen(CACHES_PATH "/pal.bin", "rb");
     FILE *fpInfo = UTIL_fopen(CACHES_PATH "/pal.dat", "rb");
     if (!fpInfo)
     {
-        return -1; // 無法打開資源文件
+        return -1; // Failed to open resource file
     }
     unsigned int offset_info = 0;
     unsigned int info_len = UTIL_FileLength(fpInfo);
     if (info_len == 0)
     {
         UTIL_fclose(fpInfo);
-        return -2; // 資源文件為空
+        return -2; // Resource file is empty
     }
-    
+
     unsigned int *buffer_u32 = (unsigned int *)UTIL_malloc(info_len);
     if (!buffer_u32)
     {
         UTIL_fclose(fpInfo);
-        return -3; // 內存分配失敗
+        return -3; // Memory allocation failed
     }
-    
+
     size_t read_size = UTIL_fread(buffer_u32, sizeof(char), info_len, fpInfo);
     UTIL_fclose(fpInfo);
-    
+
     if (read_size != info_len)
     {
         UTIL_free(buffer_u32);
-        return -4; // 讀取文件失敗
+        return -4; // Failed to read file
     }
 
-    // 使用緩衝區數據而不是重新打開文件
+    // Use buffer data instead of reopening file
     unsigned int buffer_offset = 0;
-    
-    // 檢查是否有足夠的數據用於偏移表
+
+    // Check if there's enough data for offset table
     if (info_len < Res_Count * sizeof(unsigned int))
     {
         UTIL_free(buffer_u32);
-        return -5; // 文件格式錯誤：偏移表不完整
+        return -5; // File format error: incomplete offset table
     }
 
     for (PALRES res = 0; res < Res_Count; res++)
     {
-        // 從緩衝區讀取偏移信息
+        // Read offset information from buffer
         offset_info = buffer_u32[res];
-        
-        // 檢查偏移是否有效
+
+        // Check if offset is valid
         if (offset_info >= info_len / sizeof(unsigned int))
         {
             UTIL_free(buffer_u32);
-            return -6; // 文件格式錯誤：無效偏移
+            return -6; // File format error: invalid offset
         }
 
-        // 讀取chunk數量
+        // Read chunk count
         unsigned int uiChunkCount = buffer_u32[offset_info];
         buffer_offset = offset_info + 1;
-        
-        // 檢查是否有足夠的數據
+
+        // Check if there's enough data
         if (buffer_offset >= info_len / sizeof(unsigned int))
         {
             UTIL_free(buffer_u32);
-            return -7; // 文件格式錯誤：數據不足
+            return -7; // File format error: insufficient data
         }
 
-        gResource_Export_Import[res].chunk_count = uiChunkCount;
-        gResource_Export_Import[res].frame_count = (unsigned int *)UTIL_malloc(sizeof(unsigned int) * uiChunkCount);
-        gResource_Export_Import[res].file_info = (pal_file_info_t **)UTIL_malloc(sizeof(pal_file_info_t *) * uiChunkCount);
-        
-        if (!gResource_Export_Import[res].frame_count || !gResource_Export_Import[res].file_info)
+        g_CachedResourceIndex[res].chunk_count = uiChunkCount;
+        g_CachedResourceIndex[res].frame_count = (unsigned int *)UTIL_malloc(sizeof(unsigned int) * uiChunkCount);
+        g_CachedResourceIndex[res].resource_file_info = (ResourceFileInfo **)UTIL_malloc(sizeof(ResourceFileInfo *) * uiChunkCount);
+
+        if (!g_CachedResourceIndex[res].frame_count || !g_CachedResourceIndex[res].resource_file_info)
         {
             UTIL_free(buffer_u32);
-            return -8; // 內存分配失敗
+            return -8; // Memory allocation failed
         }
 
         for (unsigned int i = 0; i < uiChunkCount; i++)
         {
-            // 檢查緩衝區邊界
+            // Check buffer bounds
             if (buffer_offset >= info_len / sizeof(unsigned int))
             {
                 UTIL_free(buffer_u32);
-                return -9; // 文件格式錯誤：數據越界
+                return -9; // File format error: data out of bounds
             }
-            
-            // 讀取幀數量
+
+            // Read frame count
             unsigned int frame_num = buffer_u32[buffer_offset++];
-            gResource_Export_Import[res].frame_count[i] = frame_num;
-            gResource_Export_Import[res].file_info[i] = (pal_file_info_t *)UTIL_malloc(sizeof(pal_file_info_t) * frame_num);
-            
-            if (!gResource_Export_Import[res].file_info[i])
+            g_CachedResourceIndex[res].frame_count[i] = frame_num;
+            g_CachedResourceIndex[res].resource_file_info[i] = (ResourceFileInfo *)UTIL_malloc(sizeof(ResourceFileInfo) * frame_num);
+
+            if (!g_CachedResourceIndex[res].resource_file_info[i])
             {
                 UTIL_free(buffer_u32);
-                return -10; // 內存分配失敗
+                return -10; // Memory allocation failed
             }
-            
+
             for (unsigned int j = 0; j < frame_num; j++)
             {
-                // 檢查是否有足夠的數據讀取offset和length
+                // Check if there's enough data to read offset and length
                 if (buffer_offset + 1 >= info_len / sizeof(unsigned int))
                 {
                     UTIL_free(buffer_u32);
-                    return -11; // 文件格式錯誤：幀數據不完整
+                    return -11; // File format error: incomplete frame data
                 }
-                
+
                 unsigned int data_offset = buffer_u32[buffer_offset++];
                 unsigned int data_length = buffer_u32[buffer_offset++];
-                gResource_Export_Import[res].file_info[i][j].offset = data_offset;
-                gResource_Export_Import[res].file_info[i][j].length = data_length;
+                g_CachedResourceIndex[res].resource_file_info[i][j].data_offset = data_offset;
+                g_CachedResourceIndex[res].resource_file_info[i][j].data_length = data_length;
             }
         }
     }
 
     UTIL_free(buffer_u32);
-    return 0; // 成功
+    return 0; // Success
 }
 
 void PAL_FreeResourceIndex(void)
 {
+    UTIL_fclose(g_ConsolidatedResourceFile);
+    g_ConsolidatedResourceFile = NULL;
     for (PALRES res = 0; res < Res_Count; res++)
     {
-        for (unsigned int i = 0; i < gResource_Export_Import[res].chunk_count; i++)
+        for (unsigned int i = 0; i < g_CachedResourceIndex[res].chunk_count; i++)
         {
-            UTIL_free(gResource_Export_Import[res].file_info[i]);
+            UTIL_free(g_CachedResourceIndex[res].resource_file_info[i]);
         }
-        UTIL_free(gResource_Export_Import[res].file_info);
-        UTIL_free(gResource_Export_Import[res].frame_count);
+        UTIL_free(g_CachedResourceIndex[res].resource_file_info);
+        UTIL_free(g_CachedResourceIndex[res].frame_count);
+        g_CachedResourceIndex[res].chunk_count = 0;
+        g_CachedResourceIndex[res].frame_count = NULL;
+        g_CachedResourceIndex[res].resource_file_info = NULL;
     }
+}
+
+int RES_MKFGetChunkSize(
+    unsigned int chunk_index,
+    unsigned char resource_id)
+{
+    if (chunk_index >= g_CachedResourceIndex[resource_id].chunk_count)
+        return 0;
+
+    return g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
+}
+
+int RES_ReadAnimationFrame(
+    unsigned char **frame_buffer,
+    unsigned int animation_index,
+    unsigned int frame_index,
+    unsigned char resource_id)
+{
+    if (animation_index >= g_CachedResourceIndex[resource_id].chunk_count)
+        return -1;
+    if (frame_index >= g_CachedResourceIndex[resource_id].frame_count[animation_index])
+        return -2;
+
+    unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_length;
+    if (data_length > 0)
+    {
+        UTIL_free(*frame_buffer);
+        *frame_buffer = UTIL_malloc(data_length);
+        UTIL_fseek(g_ConsolidatedResourceFile, g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_offset, SEEK_SET);
+        UTIL_fread(*frame_buffer, 1, data_length, g_ConsolidatedResourceFile);
+    }
+    else
+    {
+        UTIL_free(*frame_buffer);
+        *frame_buffer = NULL;
+    }
+
+    return data_length;
+}
+
+int RES_MKFDecompressChunk(
+    unsigned char **chunk_buffer,
+    unsigned int buffer_size,
+    unsigned int chunk_index,
+    unsigned char resource_id)
+{
+
+    unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
+
+    if (data_length > 0)
+    {
+        if (buffer_size == 0 || *chunk_buffer == NULL)
+        {
+            UTIL_free(*chunk_buffer);
+            buffer_size = data_length;
+            *chunk_buffer = UTIL_malloc(buffer_size);
+        }
+        UTIL_fseek(g_ConsolidatedResourceFile, g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset, SEEK_SET);
+        UTIL_fread(*chunk_buffer, 1, buffer_size, g_ConsolidatedResourceFile);
+    }
+
+    return data_length;
+}
+
+int RES_MKFReadChunk(
+    void *output_buffer,
+    unsigned int buffer_size,
+    unsigned int chunk_index,
+    unsigned char resource_id)
+{
+    if (output_buffer == NULL || buffer_size == 0)
+        return -1;
+
+    unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
+
+    if (data_length > buffer_size)
+        return -2;
+
+    UTIL_fseek(g_ConsolidatedResourceFile, g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset, SEEK_SET);
+    return UTIL_fread(output_buffer, 1, data_length, g_ConsolidatedResourceFile);
 }

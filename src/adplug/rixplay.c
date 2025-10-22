@@ -340,12 +340,7 @@ AUDIOPLAYER *RIX_Init(void)
     Copl_init(PAL_AUDIO_SAMPLE_RATE, PAL_AUDIO_CHANNEL_NUM == 2);
 
     // Load the MKF file.
-    if (!CrixPlayer_load())
-    {
-        UTIL_free(pRixPlayer);
-        pRixPlayer = NULL;
-        return NULL;
-    }
+    CrixPlayer_load();
 
     // Success.
     pRixPlayer->FadeType = FADE_NONE;

@@ -24,6 +24,7 @@
 #include "global.h"
 #include "input.h"
 #include "palcommon.h"
+#include "resource.h"
 #include "script.h"
 #include "text.h"
 #include "util.h"
@@ -1977,9 +1978,7 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-    void *fpFIRE = UTIL_Open(Res_FIRE, "rb");
-    n = PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, fpFIRE);
-    UTIL_Close(Res_FIRE);
+    n = RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE);
     if (n <= 0)
         return;
 
@@ -2112,9 +2111,7 @@ PAL_BattleShowPlayerOffMagicAnim(
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-    void *fpFIRE = UTIL_Open(Res_FIRE, "rb");
-    n = PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, fpFIRE);
-    UTIL_Close(Res_FIRE);
+    n = RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE);
     if (n <= 0)
         return;
 
@@ -2324,9 +2321,7 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-    void *fpFIRE = UTIL_Open(Res_FIRE, "rb");
-    n = PAL_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, fpFIRE);
-    UTIL_Close(Res_FIRE);
+    n = RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE);
     if (n <= 0)
         return;
 
@@ -2561,9 +2556,7 @@ static void PAL_BattleShowPlayerSummonMagicAnim(unsigned short wPlayerIndex, uns
     VIDEO_BackupScreen(g_Battle->lpSceneBuf);
 
     // Load the sprite of the summoned god
-    fpF = UTIL_Open(Res_F, "rb");
-    PAL_MKFDecompressChunk(&g_Battle->lpSummonSprite, 0, gpGlobals->g.lprgMagic[wMagicNum].rgSpecific.wSummonEffect + 10, fpF);
-    UTIL_Close(Res_F);
+    RES_MKFDecompressChunk(&g_Battle->lpSummonSprite, 0, gpGlobals->g.lprgMagic[wMagicNum].rgSpecific.wSummonEffect + 10, Res_F);
 
     g_Battle->iSummonFrame = 0;
     g_Battle->posSummon = PAL_XY(240 + (short)(gpGlobals->g.lprgMagic[wMagicNum].wXOffset),

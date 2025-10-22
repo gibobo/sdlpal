@@ -53,27 +53,6 @@
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-// Resource identifiers
-typedef enum
-{
-    Res_ABC = 0, // enemy sprites in battle
-    Res_BALL,    // item bitmaps
-    Res_DATA,    // misc data
-    Res_F,       // player sprites during battle
-    Res_FBP,     // battlefield background images
-    Res_FIRE,    // fire effect sprites
-    Res_GOP,     // map objects
-    Res_MAP,     // map data
-    Res_MGO,     // sprites in scenes
-    Res_MUS,     // music data
-    Res_PAT,     // palette data
-    Res_RGM,     // character face bitmaps
-    Res_RNG,     // RNG animation data
-    Res_SOUNDS,  // sound data,
-    Res_SSS,     // special scene sprites
-    Res_Count    // total number of resources
-} PALRES;
-
 long UTIL_FileLength(void *fp);
 
 int RandomLong(int from, int to);
@@ -104,12 +83,6 @@ unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _
 unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream);
 
 void UTIL_fclose(void *fp);
-
-void *UTIL_Open(const PALRES res, const char *_Mode);
-
-void *UTIL_Open_without_checking(const PALRES res, const char *_Mode);
-
-unsigned char UTIL_Close(const PALRES res);
 
 #ifdef __cplusplus
 extern "C" {

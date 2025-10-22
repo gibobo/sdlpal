@@ -22,6 +22,7 @@
 #include "driver.h"
 #include "palcommon.h"
 #include "res.h"
+#include "resource.h"
 #include "script.h"
 #include "util.h"
 #include <assert.h>
@@ -126,32 +127,25 @@ static void PAL_InitGlobalGameData(void)
 
 --*/
 {
-#define PAL_DOALLOCATE(fp, num, type, ptr, n)   \
-    if (ptr == NULL)                            \
-    {                                           \
-        int len = PAL_MKFGetChunkSize(num, fp); \
-        ptr = (type *)UTIL_malloc(len);         \
-        n = len / sizeof(type);                 \
-        PAL_MKFReadChunk(ptr, len, num, fp);    \
+#define PAL_DOALLOCATE(fp, num, type, ptr, n)                        \
+    if (ptr == NULL)                                                 \
+    {                                                                \
+        n = RES_MKFDecompressChunk((unsigned char **)&ptr, 0, num, fp) / sizeof(type); \
     }
 
     // If the memory has not been allocated, allocate first.
-    void *fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
-    PAL_DOALLOCATE(fpSSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
-    PAL_DOALLOCATE(fpSSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
-    UTIL_fclose(fpSSS);
-    void *fpDATA = UTIL_Open(Res_DATA, "rb");
-    PAL_DOALLOCATE(fpDATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
-    PAL_DOALLOCATE(fpDATA, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
-    PAL_DOALLOCATE(fpDATA, 2, ENEMYTEAM, gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
-    PAL_DOALLOCATE(fpDATA, 4, MAGIC, gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
-    PAL_DOALLOCATE(fpDATA, 5, BATTLEFIELD, gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
-    PAL_DOALLOCATE(fpDATA, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
-    PAL_DOALLOCATE(fpDATA, 3, PLAYERROLES, gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles);
-    PAL_MKFReadChunk(gpGlobals->g.rgwBattleEffectIndex, sizeof(gpGlobals->g.rgwBattleEffectIndex), 11, fpDATA);
-    PAL_MKFReadChunk(gpGlobals->g.EnemyPos, sizeof(gpGlobals->g.EnemyPos), 13, fpDATA);
-    PAL_MKFReadChunk(gpGlobals->g.rgLevelUpExp, sizeof(gpGlobals->g.rgLevelUpExp), 14, fpDATA);
-    UTIL_Close(Res_DATA);
+    PAL_DOALLOCATE(Res_SSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
+    PAL_DOALLOCATE(Res_SSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
+    PAL_DOALLOCATE(Res_DATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
+    PAL_DOALLOCATE(Res_DATA, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
+    PAL_DOALLOCATE(Res_DATA, 2, ENEMYTEAM, gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
+    PAL_DOALLOCATE(Res_DATA, 4, MAGIC, gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
+    PAL_DOALLOCATE(Res_DATA, 5, BATTLEFIELD, gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
+    PAL_DOALLOCATE(Res_DATA, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
+    PAL_DOALLOCATE(Res_DATA, 3, PLAYERROLES, gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles);
+    RES_MKFReadChunk(gpGlobals->g.rgwBattleEffectIndex, sizeof(gpGlobals->g.rgwBattleEffectIndex), 11, Res_DATA);
+    RES_MKFReadChunk(gpGlobals->g.EnemyPos, sizeof(gpGlobals->g.EnemyPos), 13, Res_DATA);
+    RES_MKFReadChunk(gpGlobals->g.rgLevelUpExp, sizeof(gpGlobals->g.rgLevelUpExp), 14, Res_DATA);
 #undef PAL_DOALLOCATE
 }
 
@@ -173,14 +167,10 @@ static void PAL_LoadDefaultGame(void)
 {
     unsigned int i;
     // Load the default data from the game data files.
-    void *fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
-    PAL_MKFReadChunk(gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject * sizeof(EVENTOBJECT), 0, fpSSS);
-    PAL_MKFReadChunk(gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene), 1, fpSSS);
-    PAL_MKFReadChunk(gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject), 2, fpSSS);
-    UTIL_fclose(fpSSS);
-    void *fpDATA = UTIL_Open(Res_DATA, "rb");
-    PAL_MKFReadChunk(gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles * sizeof(LEVELUPMAGIC_ALL), 3, fpDATA);
-    UTIL_Close(Res_DATA);
+    RES_MKFReadChunk(gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject * sizeof(EVENTOBJECT), 0, Res_SSS);
+    RES_MKFReadChunk(gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene), 1, Res_SSS);
+    RES_MKFReadChunk(gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject), 2, Res_SSS);
+    RES_MKFReadChunk(gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles * sizeof(LEVELUPMAGIC_ALL), 3, Res_DATA);
 
     // Set some other default data.
     gpGlobals->dwCash = 0;
@@ -400,16 +390,14 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
     // Try writing to file
     char save_path[256] = {0};
     sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
-    void *fpSSS = UTIL_fopen(RESOURCE_PATH "/sss.mkf", "rb");
     void *fpSAVE = UTIL_fopen(save_path, "wb");
     if (fpSAVE)
     {
-        unsigned int i = PAL_MKFGetChunkSize(0, fpSSS);
+        unsigned int i = RES_MKFGetChunkSize(0, Res_SSS);
         i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
         UTIL_fwrite(s, i, 1, fpSAVE);
         UTIL_fclose(fpSAVE);
     }
-    UTIL_fclose(fpSSS);
 }
 
 static void

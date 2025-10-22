@@ -24,6 +24,7 @@
 #include "input.h"
 #include "palcommon.h"
 #include "play.h"
+#include "resource.h"
 #include "scene.h"
 #include "util.h"
 #include <stdbool.h>
@@ -59,9 +60,7 @@ unsigned char *PAL_GetPalette(int iPaletteNum, unsigned char fNight)
 
     unsigned char buf[PALETTE_SIZE * 2];
     // Read the palette data from the pat.mkf file
-    void *fpPAT = UTIL_Open(Res_PAT, "rb");
-    int i = PAL_MKFReadChunk(buf, PALETTE_SIZE * 2, iPaletteNum, fpPAT);
-    UTIL_Close(Res_PAT);
+    int i = RES_MKFReadChunk(buf, PALETTE_SIZE * 2, iPaletteNum, Res_PAT);
 
     if (i < 0)
         return NULL; // Read failed

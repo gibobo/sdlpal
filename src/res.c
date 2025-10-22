@@ -24,6 +24,7 @@
 #include "global.h"
 #include "map.h"
 #include "palcommon.h"
+#include "resource.h"
 #include "util.h"
 #include <assert.h>
 #include <stddef.h>
@@ -231,7 +232,6 @@ void PAL_LoadResources(void)
 
         if (gpResources->lpMap == NULL)
         {
-            UTIL_Close(Res_MGO);
             TerminateOnError("%s() failed: cannot load map data (map #%d for scene #%d - file not found or corrupted)\n",
                              __func__, gpGlobals->g.rgScene[i].wMapNum, gpGlobals->wNumScene);
         }
@@ -246,14 +246,12 @@ void PAL_LoadResources(void)
             gpResources->lppEventObjectSprites = (unsigned char **)UTIL_calloc(gpResources->nEventObjectSprites, sizeof(unsigned char *));
         }
 
-        void *fpMGO = UTIL_Open(Res_MGO, "rb");
         for (i = 0; i < gpResources->nEventObjectSprites; i++, index++)
         {
             gpResources->lppEventObjectSprites[i] = NULL;
-            if (PAL_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, fpMGO) > 0)
+            if (RES_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, Res_MGO) > 0)
                 gpGlobals->g.lprgEventObject[index].nSpriteFramesAuto = PAL_SpriteGetNumFrames(gpResources->lppEventObjectSprites[i]);
         }
-        UTIL_Close(Res_MGO);
         gpGlobals->partyoffset = PAL_XY(160, 112);
     }
 
@@ -263,7 +261,6 @@ void PAL_LoadResources(void)
         // Free previous loaded player sprites
         PAL_FreePlayerSprites();
 
-        void *fpMGO = UTIL_Open(Res_MGO, "rb");
         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
         {
             wPlayerID = gpGlobals->rgParty[i].wPlayerRole;
@@ -272,8 +269,8 @@ void PAL_LoadResources(void)
             // Load player sprite
             wSpriteNum = gpGlobals->g.PlayerRoles->rgwSpriteNum[wPlayerID];
 
-            PAL_MKFDecompressChunk(
-                &gpResources->rglpPlayerSprite[i], 0, wSpriteNum, fpMGO);
+            RES_MKFDecompressChunk(
+                &gpResources->rglpPlayerSprite[i], 0, wSpriteNum, Res_MGO);
         }
 
         for (i = 1; i <= gpGlobals->nFollower; i++)
@@ -281,10 +278,9 @@ void PAL_LoadResources(void)
             // Load the follower sprite
             wSpriteNum = gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].wPlayerRole;
 
-            PAL_MKFDecompressChunk(
-                &gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum, fpMGO);
+            RES_MKFDecompressChunk(
+                &gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum, Res_MGO);
         }
-        UTIL_Close(Res_MGO);
     }
 
     // Clear all of the load flags

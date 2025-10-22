@@ -27,6 +27,7 @@
 #include "input.h"
 #include "palcommon.h"
 #include "palette.h"
+#include "resource.h"
 #include "util.h"
 #include "video.h"
 #include <stdlib.h>
@@ -295,28 +296,19 @@ void PAL_RNGPlay(
 
 --*/
 {
-    void *fpRNG = UTIL_Open(Res_RNG, "rb");
     unsigned char *rng = NULL;
-    unsigned char *buf = NULL;
     unsigned int rng_size = 0;
-    int buf_size = 0;
     unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
 
     // Avoid losing the last frame
     if (iEndFrame > 0)
         iEndFrame++;
 
-    for (; fpRNG && iStartFrame != iEndFrame; iStartFrame++)
+    for (; iStartFrame != iEndFrame; iStartFrame++)
     {
-        // Read, decompress and render the frame
-        buf_size = PAL_RNGReadFrame(&buf, iNumRNG, iStartFrame, fpRNG);
-        if (buf_size <= 0)
+        int RNGBlit_len = RES_ReadAnimationFrame(&rng, iNumRNG, iStartFrame, Res_RNG);
+        if (RNGBlit_len <= 0)
             break; // Failed to get the frame, don't go further
-
-        UTIL_free(rng);
-        rng_size = *(unsigned int *)buf;
-        rng = (unsigned char *)UTIL_malloc(rng_size);
-        int RNGBlit_len = YJ2_Decompress(buf, rng, rng_size);
         if (PAL_RNGBlitToSurface(rng, RNGBlit_len, gpScreen) < 0)
             break; // Failed to get the frame, don't go further
 
@@ -335,8 +327,5 @@ void PAL_RNGPlay(
         // Delay for a while
         UTIL_Delay(iDelay);
     }
-
-    UTIL_Close(Res_RNG);
     UTIL_free(rng);
-    UTIL_free(buf);
 }

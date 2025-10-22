@@ -23,6 +23,7 @@
 #include "global.h"
 #include "input.h"
 #include "palcommon.h"
+#include "resource.h"
 #include "text.h"
 #include "util.h"
 #include "video.h"
@@ -60,15 +61,7 @@ int PAL_InitUI(
     //
     // Load the UI sprite.
     //
-    void *fpDATA = UTIL_Open(Res_DATA, "rb");
-    int iSize = PAL_MKFGetChunkSize(CHUNKNUM_SPRITEUI, fpDATA);
-    if (iSize > 0)
-    {
-        gpSpriteUI = (unsigned char *)UTIL_calloc(1, iSize);
-        if (gpSpriteUI != NULL)
-            PAL_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, fpDATA);
-    }
-    UTIL_Close(Res_DATA);
+    RES_MKFDecompressChunk(&gpSpriteUI, 0, CHUNKNUM_SPRITEUI, Res_DATA);
     return (gpSpriteUI != NULL) ? 0 : -1;
 }
 

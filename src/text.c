@@ -28,6 +28,7 @@
 #include "input.h"
 #include "palcommon.h"
 #include "palette.h"
+#include "resource.h"
 #include "ui.h"
 #include "util.h"
 #include "video.h"
@@ -144,9 +145,7 @@ int PAL_InitText(void)
     g_TextLib.posDialogText = PAL_XY(44, 26);
     g_TextLib.bDialogPosition = kDialogUpper;
     g_TextLib.fUserSkip = false;
-    void *fpDATA = UTIL_Open(Res_DATA, "rb");
-    PAL_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, fpDATA);
-    UTIL_Close(Res_DATA);
+    RES_MKFReadChunk(g_TextLib.bufDialogIcons, sizeof(g_TextLib.bufDialogIcons), 12, Res_DATA);
 
     return 0;
 }
@@ -435,8 +434,7 @@ void PAL_StartDialogWithOffset(
             if (iNumCharFace > 0)
             {
                 // Display the character face at the upper part of the screen
-                void *fpRGM = UTIL_Open(Res_RGM, "rb");
-                if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, fpRGM) > 0)
+                if (RES_MKFReadChunk(buf, buf_sz, iNumCharFace, Res_RGM) > 0)
                 {
                     rect.w = PAL_RLEGetWidth((const unsigned char *)buf);
                     rect.h = PAL_RLEGetHeight((const unsigned char *)buf);
@@ -445,7 +443,6 @@ void PAL_StartDialogWithOffset(
                     PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
                     VIDEO_UpdateScreen(&rect);
                 }
-                UTIL_Close(Res_RGM);
             }
             g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 80 : 12, 8);
             g_TextLib.posDialogText = PAL_XY(iNumCharFace > 0 ? 96 : 44, 26);
@@ -459,15 +456,13 @@ void PAL_StartDialogWithOffset(
             if (iNumCharFace > 0)
             {
                 // Display the character face at the lower part of the screen
-                void *fpRGM = UTIL_Open(Res_RGM, "rb");
-                if (PAL_MKFReadChunk(buf, buf_sz, iNumCharFace, fpRGM) > 0)
+                if (RES_MKFReadChunk(buf, buf_sz, iNumCharFace, Res_RGM) > 0)
                 {
                     rect.x = 270 - PAL_RLEGetWidth((const unsigned char *)buf) / 2 + xOff;
                     rect.y = 144 - PAL_RLEGetHeight((const unsigned char *)buf) / 2 + yOff;
                     PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
                     VIDEO_UpdateScreen(NULL);
                 }
-                UTIL_Close(Res_RGM);
             }
             g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 4 : 12, 108);
             g_TextLib.posDialogText = PAL_XY(iNumCharFace > 0 ? 20 : 44, 126);

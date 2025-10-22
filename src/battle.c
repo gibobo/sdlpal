@@ -27,6 +27,7 @@
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
+#include "resource.h"
 #include "scene.h"
 #include "script.h"
 #include "text.h"
@@ -819,9 +820,6 @@ void PAL_LoadBattleSprites(
 --*/
 {
     int i, x, y, s;
-    void *fpABC = UTIL_Open(Res_ABC, "rb");
-    void *fpF = UTIL_Open(Res_F, "rb");
-
     PAL_FreeBattleSprites();
 
     // Load battle sprites for players
@@ -829,7 +827,7 @@ void PAL_LoadBattleSprites(
     {
         s = PAL_GetPlayerBattleSprite(gpGlobals->rgParty[i].wPlayerRole);
 
-        if (PAL_MKFDecompressChunk(&g_Battle->rgPlayer[i].lpSprite, 0, s, fpF) <= 0)
+        if (RES_MKFDecompressChunk(&g_Battle->rgPlayer[i].lpSprite, 0, s, Res_F) <= 0)
             continue;
 
         //
@@ -848,7 +846,7 @@ void PAL_LoadBattleSprites(
         if (g_Battle->rgEnemy[i].wObjectID == 0)
             continue;
 
-        if (PAL_MKFDecompressChunk(&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, fpABC) <= 0)
+        if (RES_MKFDecompressChunk(&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, Res_ABC) <= 0)
             continue;
 
         //
@@ -862,9 +860,6 @@ void PAL_LoadBattleSprites(
         g_Battle->rgEnemy[i].posOriginal = PAL_XY(x, y);
         g_Battle->rgEnemy[i].pos = PAL_XY(x, y);
     }
-
-    UTIL_Close(Res_ABC);
-    UTIL_Close(Res_F);
 }
 
 static void
@@ -889,9 +884,7 @@ PAL_LoadBattleBackground(
     g_Battle->lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
 
     // Load the picture
-    void *fpFBP = UTIL_Open(Res_FBP, "rb");
-    PAL_MKFDecompressChunk(&g_Battle->lpBackground->pixels, SCREEN_SIZE, gpGlobals->wNumBattleField, fpFBP);
-    UTIL_Close(Res_FBP);
+    RES_MKFDecompressChunk(&g_Battle->lpBackground->pixels, SCREEN_SIZE, gpGlobals->wNumBattleField, Res_FBP);
 }
 
 static void
@@ -1144,7 +1137,7 @@ PAL_BattleWon(
             PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, false, false, false);                                                                                                               \
             PAL_DrawNumber(gpGlobals->g.PlayerRoles->statname[w] - OrigPlayerRoles.statname[w], 5, PAL_XY(183 + (maxNameWidth + maxPropertyWidth - 3) * 8, 74), kNumColorYellow, kNumAlignRight); \
             VIDEO_UpdateScreen(&rect);                                                                                                                                                            \
-            UTIL_WaitKeys(3000, 0);                                                                                                                                                              \
+            UTIL_WaitKeys(3000, 0);                                                                                                                                                               \
         }                                                                                                                                                                                         \
     }
 
@@ -1515,11 +1508,7 @@ PAL_StartBattle(
     //
     // Load the battle effect sprite.
     //
-    void *fpDATA = UTIL_Open(Res_DATA, "rb");
-    i = PAL_MKFGetChunkSize(10, fpDATA);
-    g_Battle->lpEffectSprite = UTIL_malloc(i);
-    PAL_MKFReadChunk(g_Battle->lpEffectSprite, i, 10, fpDATA);
-    UTIL_Close(Res_DATA);
+    RES_MKFDecompressChunk(&g_Battle->lpEffectSprite, 0, 10, Res_DATA);
 
     g_Battle->Phase = kBattlePhaseSelectAction;
     g_Battle->fRepeat = false;

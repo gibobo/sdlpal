@@ -1,27 +1,6 @@
 #include "util.h"
 #include <stdio.h>
 
-char *gFiles_name[Res_Count] = {
-    [Res_ABC] = RESOURCE_PATH "/abc.mkf",
-    [Res_BALL] = RESOURCE_PATH "/ball.mkf",
-    [Res_DATA] = RESOURCE_PATH "/data.mkf",
-    [Res_F] = RESOURCE_PATH "/f.mkf",
-    [Res_FBP] = RESOURCE_PATH "/fbp.mkf",
-    [Res_FIRE] = RESOURCE_PATH "/fire.mkf",
-    [Res_GOP] = RESOURCE_PATH "/gop.mkf",
-    [Res_MAP] = RESOURCE_PATH "/map.mkf",
-    [Res_MGO] = RESOURCE_PATH "/mgo.mkf",
-    [Res_MUS] = RESOURCE_PATH "/mus.mkf",
-    [Res_PAT] = RESOURCE_PATH "/pat.mkf",
-    [Res_RGM] = RESOURCE_PATH "/rgm.mkf",
-    [Res_RNG] = RESOURCE_PATH "/rng.mkf",
-    [Res_SOUNDS] = RESOURCE_PATH "/sounds.mkf",
-    [Res_SSS] = RESOURCE_PATH "/sss.mkf",
-};
-
-static unsigned char gFiles_created[Res_Count] = {0};
-static FILE *gFiles_fp[Res_Count] = {NULL};
-
 void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode)
 {
     FILE *fp = NULL;
@@ -80,45 +59,6 @@ void UTIL_fclose(void *fp)
 {
     if (fp != NULL)
         fclose((FILE *)fp);
-}
-
-void *UTIL_Open_without_checking(const PALRES res, const char *_Mode)
-{
-    if (gFiles_name[res] == NULL || _Mode == NULL)
-        TerminateOnError("%s() failed: invalid arguments (resource name or mode is NULL)\n", __func__);
-    else if (gFiles_fp[res] == NULL)
-        gFiles_fp[res] = fopen(gFiles_name[res], _Mode);
-
-    if (gFiles_fp[res] != NULL)
-    {
-        gFiles_created[res]++;
-        // fprintf(stdout, "File %s loaded\n", gFiles_name[res]);
-    }
-
-    return gFiles_fp[res];
-}
-
-void *UTIL_Open(const PALRES res, const char *_Mode)
-{
-    FILE *fp = UTIL_Open_without_checking(res, _Mode);
-
-    if (fp == NULL)
-        TerminateOnError("%s() failed: cannot open resource file '%s' (file not found or access denied)\n", __func__, gFiles_name[res]);
-
-    return fp;
-}
-
-unsigned char UTIL_Close(const PALRES res)
-{
-    if (gFiles_created[res])
-        gFiles_created[res]--;
-
-    if ((gFiles_created[res] == 0) && (gFiles_fp[res] != NULL))
-    {
-        UTIL_fclose(gFiles_fp[res]);
-        gFiles_fp[res] = NULL;
-    }
-    return gFiles_created[res];
 }
 
 long UTIL_FileLength(void *fp)

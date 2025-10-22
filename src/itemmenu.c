@@ -22,6 +22,7 @@
 #include "global.h"
 #include "input.h"
 #include "palcommon.h"
+#include "resource.h"
 #include "scene.h"
 #include "script.h"
 #include "text.h"
@@ -183,12 +184,10 @@ PAL_ItemSelectMenuUpdate(
                 PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
                                      PAL_XY(xBase, yBase - iPictureYOffset));
 
-                void *fpBALL = UTIL_Open(Res_BALL, "rb");
-                if (PAL_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, fpBALL) > 0)
+                if (RES_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, Res_BALL) > 0)
                 {
                     PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(xBase + 8, yBase + 7 - iPictureYOffset));
                 }
-                UTIL_Close(Res_BALL);
             }
 
             //

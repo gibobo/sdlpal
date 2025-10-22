@@ -21,6 +21,7 @@
 #include "../audio.h"
 #include "../global.h"
 #include "../palcommon.h"
+#include "../resource.h"
 #include "../util.h"
 #include "resampler.h"
 #include <stdbool.h>
@@ -74,7 +75,6 @@ typedef struct tagWAVEDATA
 typedef struct tagSOUNDPLAYER
 {
     AUDIOPLAYER_COMMONS;
-    void *mkf; /* File pointer to the MKF file */
     WAVEDATA soundlist;
     int cursounds;
     int lastSFX;
@@ -698,7 +698,7 @@ static int SOUND_Play(
     WAVESPEC wavespec;
     ResampleMixer mixer;
     WAVEDATA *cursnd;
-    void *buf;
+    unsigned char *buf = NULL;
     const void *snddata;
     int len, i;
 
@@ -713,16 +713,11 @@ static int SOUND_Play(
 
     player->lastSFX = iSoundNum;
 
-    // Get the length of the sound file.
-    len = PAL_MKFGetChunkSize(iSoundNum, player->mkf);
+    len = RES_MKFDecompressChunk(&buf, 0, iSoundNum, Res_SOUNDS);
     if (len <= 0)
     {
         return false;
     }
-
-    // Read the sound file from the MKF archive.
-    buf = UTIL_malloc(len);
-    PAL_MKFReadChunk(buf, len, iSoundNum, player->mkf);
 
     snddata = SOUND_LoadWAVEData(buf, len, &wavespec);
     if (snddata == NULL)
@@ -811,7 +806,6 @@ void SOUND_Shutdown(void *object)
             cursnd = cursnd->next;
             UTIL_free(old);
         }
-        UTIL_fclose(player->mkf);
     }
     resampler_deinit();
 }
@@ -879,7 +873,6 @@ AUDIOPLAYER *SOUND_Init(void)
 
 --*/
 {
-    void *mkf = UTIL_fopen(RESOURCE_PATH "/sounds.mkf", "rb");
     // Initialize the resampler module
     resampler_init();
 
@@ -887,7 +880,6 @@ AUDIOPLAYER *SOUND_Init(void)
     player->Play = SOUND_Play;
     player->FillBuffer = SOUND_FillBuffer;
     player->Shutdown = SOUND_Shutdown;
-    player->mkf = mkf;
     player->soundlist.resampler[0] = resampler_create();
     player->soundlist.resampler[1] = resampler_create();
     player->cursounds = 0;

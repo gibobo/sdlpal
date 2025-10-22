@@ -24,6 +24,7 @@
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
+#include "resource.h"
 #include "rngplay.h"
 #include "scene.h"
 #include "util.h"
@@ -59,15 +60,11 @@ static void PAL_ShowFBP(
     unsigned int k;
     PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
 
-    void *fpFBP = UTIL_Open(Res_FBP, "rb");
-    PAL_MKFDecompressChunk(&buf, 0, wChunkNum, fpFBP);
-    UTIL_Close(Res_FBP);
+    RES_MKFDecompressChunk(&buf, 0, wChunkNum, Res_FBP);
 
     if (g_wCurEffectSprite)
     {
-        void *fpMGO = UTIL_Open(Res_MGO, "rb");
-        PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, fpMGO);
-        UTIL_Close(Res_MGO);
+        RES_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, Res_MGO);
     }
 
     if (wFade > 0)
@@ -141,15 +138,11 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
     PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
     PAL_Surface *p = VIDEO_GetBackupSurface(1);
 
-    void *fpFBP = UTIL_Open(Res_FBP, "rb");
-    PAL_MKFDecompressChunk(&p->pixels, SCREEN_SIZE, wChunkNum, fpFBP);
-    UTIL_Close(Res_FBP);
+    RES_MKFDecompressChunk(&p->pixels, SCREEN_SIZE, wChunkNum, Res_FBP);
 
     if (g_wCurEffectSprite)
     {
-        void *fpMGO = UTIL_Open(Res_MGO, "rb");
-        PAL_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, fpMGO);
-        UTIL_Close(Res_MGO);
+        RES_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, Res_MGO);
     }
 
     VIDEO_BackupScreen(gpScreen);
@@ -214,15 +207,10 @@ static void PAL_EndingAnimation(void)
     int yPosGirl = 180;
 
     // Load resources
-    void *fpFBP = UTIL_Open(Res_FBP, "rb");
-    PAL_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, fpFBP);
-    PAL_MKFDecompressChunk(&pLower->pixels, SCREEN_SIZE, 70, fpFBP);
-    UTIL_Close(Res_FBP);
-
-    void *fpMGO = UTIL_Open(Res_MGO, "rb");
-    PAL_MKFDecompressChunk(&bufBeast, 0, 571, fpMGO);
-    PAL_MKFDecompressChunk(&bufGirl, 0, 572, fpMGO);
-    UTIL_Close(Res_MGO);
+    RES_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, Res_FBP);
+    RES_MKFDecompressChunk(&pLower->pixels, SCREEN_SIZE, 70, Res_FBP);
+    RES_MKFDecompressChunk(&bufBeast, 0, 571, Res_MGO);
+    RES_MKFDecompressChunk(&bufGirl, 0, 572, Res_MGO);
 
     gpGlobals->wScreenWave = 2;
 

@@ -20,6 +20,7 @@
 
 #include "map.h"
 #include "palcommon.h"
+#include "resource.h"
 #include "util.h"
 #include <stdlib.h>
 
@@ -54,31 +55,10 @@ PALMAP *PAL_LoadMap(int iMapNum)
     PALMAP *map = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
     map->iMapNum = iMapNum;
 
-    void *fpMAP = UTIL_Open(Res_MAP, "rb");
-    PAL_MKFDecompressChunk((unsigned char **)&map->Tiles, 0, iMapNum, fpMAP);
-    UTIL_Close(Res_MAP);
+    RES_MKFDecompressChunk((unsigned char **)&map->Tiles, 0, iMapNum, Res_MAP);
 
     // Load the tile bitmaps.
-    void *fpGOP = UTIL_Open(Res_GOP, "rb");
-    int size = PAL_MKFGetChunkSize(iMapNum, fpGOP);
-    if (size <= 0)
-    {
-        UTIL_Close(Res_GOP);
-        UTIL_free(map->Tiles);
-        UTIL_free(map);
-        return NULL;
-    }
-
-    map->pTileSprite = (unsigned char *)UTIL_malloc(size);
-    int res = PAL_MKFReadChunk(map->pTileSprite, size, iMapNum, fpGOP);
-    UTIL_Close(Res_GOP);
-    if (res < 0)
-    {
-        UTIL_free(map->pTileSprite);
-        UTIL_free(map->Tiles);
-        UTIL_free(map);
-        return NULL;
-    }
+    RES_MKFDecompressChunk(&map->pTileSprite, 0, iMapNum, Res_GOP);
 
     return map;
 }

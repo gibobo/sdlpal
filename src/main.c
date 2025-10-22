@@ -203,14 +203,10 @@ void PAL_SplashScreen(void)
     }
 
     // Read the bitmaps
-    void *fpFBP = UTIL_Open(Res_FBP, "rb");
-    PAL_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, fpFBP);
-    PAL_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, fpFBP);
-    UTIL_Close(Res_FBP);
-    void *fpMGO = UTIL_Open(Res_MGO, "rb");
-    PAL_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, fpMGO);
-    PAL_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, fpMGO);
-    UTIL_Close(Res_MGO);
+    RES_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, Res_FBP);
+    RES_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, Res_FBP);
+    RES_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, Res_MGO);
+    RES_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, Res_MGO);
 
     lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
     iTitleHeight = lpBitmapTitle[2] | ((unsigned int)lpBitmapTitle[3] << 8);
