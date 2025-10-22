@@ -219,8 +219,15 @@ static unsigned char *PAL_GetFontData(unsigned short wChar, unsigned char *out_f
 /*
  * Initialize the font system by loading font data and size bitmap.
  * This function must be called before any font rendering operations.
+ * 
+ * Returns:
+ *   0 - Success
+ *  -1 - Failed to open font data file
+ *  -2 - Failed to open font size file
+ *  -3 - Failed to allocate memory for font size bitmap
+ *  -4 - Failed to read font size bitmap
  */
-void PAL_InitFont(void)
+int PAL_InitFont(void)
 {
     font_wChar = 0xFFFF; // Reset cached character
 
@@ -237,17 +244,55 @@ void PAL_InitFont(void)
 
     // Open font data file containing actual bitmap data
     fp_font_data = UTIL_fopen(CACHES_PATH "/unicode_font.bin", "rb");
+    if (fp_font_data == NULL)
+    {
+        return -1; // Failed to open font data file
+    }
 
     // Load font size bitmap if not already loaded
     // This bitmap determines whether each character uses 16x16 or 32x32 font
     if (font_size_bitmap == NULL)
     {
         void *fp_font_size = UTIL_fopen(CACHES_PATH "/unicode_font_size.bin", "rb");
+        if (fp_font_size == NULL)
+        {
+            UTIL_fclose(fp_font_data);
+            fp_font_data = NULL;
+            return -2; // Failed to open font size file
+        }
+
         unsigned int bitmap_size = UTIL_FileLength(fp_font_size);
+        if (bitmap_size == 0)
+        {
+            UTIL_fclose(fp_font_size);
+            UTIL_fclose(fp_font_data);
+            fp_font_data = NULL;
+            return -2; // Invalid font size file
+        }
+
         font_size_bitmap = (unsigned char *)UTIL_calloc(bitmap_size, sizeof(unsigned char));
-        UTIL_fread(font_size_bitmap, sizeof(unsigned char), bitmap_size, fp_font_size);
+        if (font_size_bitmap == NULL)
+        {
+            UTIL_fclose(fp_font_size);
+            UTIL_fclose(fp_font_data);
+            fp_font_data = NULL;
+            return -3; // Failed to allocate memory for font size bitmap
+        }
+
+        size_t read_size = UTIL_fread(font_size_bitmap, sizeof(unsigned char), bitmap_size, fp_font_size);
         UTIL_fclose(fp_font_size);
+
+        if (read_size != bitmap_size)
+        {
+            UTIL_free(font_size_bitmap);
+            font_size_bitmap = NULL;
+            UTIL_fclose(fp_font_data);
+            fp_font_data = NULL;
+            return -4; // Failed to read font size bitmap
+        }
     }
+
+    return 0; // Success
 }
 
 void PAL_DeInitFont(void)

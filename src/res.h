@@ -29,7 +29,7 @@ enum tagLOADRESFLAG
     kLoadPlayerSprite = (1 << 2), // load player sprites
 };
 
-void PAL_InitResources(void);
+int PAL_InitResources(void);
 
 void PAL_FreeResources(void);
 

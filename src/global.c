@@ -30,16 +30,6 @@
 #include <stdio.h>
 #include <string.h>
 
-PALRESFILE gFiles[] = {
-    [Pal_Res_FBP] = {RESOURCE_PATH "fbp.mkf", NULL},
-    [Pal_Res_MGO] = {RESOURCE_PATH "mgo.mkf", NULL},
-    [Pal_Res_BALL] = {RESOURCE_PATH "ball.mkf", NULL},
-    [Pal_Res_DATA] = {RESOURCE_PATH "data.mkf", NULL},
-    [Pal_Res_F] = {RESOURCE_PATH "f.mkf", NULL},
-    [Pal_Res_FIRE] = {RESOURCE_PATH "fire.mkf", NULL},
-    [Pal_Res_RGM] = {RESOURCE_PATH "rgm.mkf", NULL},
-};
-
 GLOBALVARS *gpGlobals = NULL;
 
 int PAL_InitGlobals(void)
@@ -58,14 +48,12 @@ int PAL_InitGlobals(void)
 
 --*/
 {
-    // Open files
-    gFiles[Pal_Res_FBP].fp = UTIL_fopen(gFiles[Pal_Res_FBP].name, "rb");
-    gFiles[Pal_Res_MGO].fp = UTIL_fopen(gFiles[Pal_Res_MGO].name, "rb");
-    gFiles[Pal_Res_BALL].fp = UTIL_fopen(gFiles[Pal_Res_BALL].name, "rb");
-    gFiles[Pal_Res_DATA].fp = UTIL_fopen(gFiles[Pal_Res_DATA].name, "rb");
-    gFiles[Pal_Res_F].fp = UTIL_fopen(gFiles[Pal_Res_F].name, "rb");
-    gFiles[Pal_Res_FIRE].fp = UTIL_fopen(gFiles[Pal_Res_FIRE].name, "rb");
-    gFiles[Pal_Res_RGM].fp = UTIL_fopen(gFiles[Pal_Res_RGM].name, "rb");
+    UTIL_free(gpGlobals);
+    gpGlobals = (GLOBALVARS *)UTIL_malloc(sizeof(GLOBALVARS));
+    if (gpGlobals == NULL)
+    {
+        return -1;
+    }
     return 0;
 }
 
@@ -85,13 +73,6 @@ void PAL_FreeGlobals(void)
 
 --*/
 {
-    UTIL_fclose(gFiles[Pal_Res_FBP].fp);
-    UTIL_fclose(gFiles[Pal_Res_MGO].fp);
-    UTIL_fclose(gFiles[Pal_Res_BALL].fp);
-    UTIL_fclose(gFiles[Pal_Res_DATA].fp);
-    UTIL_fclose(gFiles[Pal_Res_F].fp);
-    UTIL_fclose(gFiles[Pal_Res_FIRE].fp);
-    UTIL_fclose(gFiles[Pal_Res_RGM].fp);
     // Free the game data
     if (gpGlobals)
     {
@@ -130,7 +111,7 @@ static void PAL_InitGlobalGameData(void)
 #define PAL_DOALLOCATE(fp, num, type, ptr, n)                        \
     if (ptr == NULL)                                                 \
     {                                                                \
-        n = RES_MKFDecompressChunk((unsigned char **)&ptr, 0, num, fp) / sizeof(type); \
+        n = RES_MKFDecompressChunk(&ptr, 0, num, fp) / sizeof(type); \
     }
 
     // If the memory has not been allocated, allocate first.

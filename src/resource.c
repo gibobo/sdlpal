@@ -391,7 +391,7 @@ int RES_MKFGetChunkSize(
 }
 
 int RES_ReadAnimationFrame(
-    unsigned char **frame_buffer,
+    void **frame_buffer,
     unsigned int animation_index,
     unsigned int frame_index,
     unsigned char resource_id)
@@ -419,12 +419,11 @@ int RES_ReadAnimationFrame(
 }
 
 int RES_MKFDecompressChunk(
-    unsigned char **chunk_buffer,
+    void **chunk_buffer,
     unsigned int buffer_size,
     unsigned int chunk_index,
     unsigned char resource_id)
 {
-
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
 
     if (data_length > 0)

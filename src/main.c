@@ -77,15 +77,12 @@ void PAL_Init(void)
         TerminateOnError("%s() failed: driver initialization error (code: %d)\n", __func__, e);
     }
 
-    e = VIDEO_Startup();
+    e = PAL_InitGlobals();
     if (e != 0)
     {
         PAL_Shutdown(255);
-        TerminateOnError("%s() failed: video subsystem initialization error (code: %d)\n", __func__, e);
+        TerminateOnError("%s() failed: global data initialization error (code: %d)\n", __func__, e);
     }
-
-    if (gpGlobals == NULL)
-        gpGlobals = (GLOBALVARS *)UTIL_malloc(sizeof(GLOBALVARS));
 
     e = PAL_InitUI();
     if (e != 0)
@@ -101,10 +98,35 @@ void PAL_Init(void)
         TerminateOnError("%s() failed: text subsystem initialization error (code: %d)\n", __func__, e);
     }
 
-    PAL_InitFont();
+    e = PAL_InitFont();
+    if (e != 0)
+    {
+        TerminateOnError("%s() failed: font subsystem initialization error (code: %d)\n", __func__, e);
+    }
+
+    e = PAL_InitResources();
+    if (e != 0)
+    {
+        PAL_Shutdown(255);
+        TerminateOnError("%s() failed: resource manager initialization error (code: %d)\n", __func__, e);
+    }
+
+    e = VIDEO_Startup();
+    if (e != 0)
+    {
+        PAL_Shutdown(255);
+        TerminateOnError("%s() failed: video subsystem initialization error (code: %d)\n", __func__, e);
+    }
+
+    e = AUDIO_Startup();
+    if (e != 0)
+    {
+        // Audio initialization failure is not fatal - game can run without sound
+        printf("Warning: %s() failed: audio subsystem initialization error (code: %d)\n", __func__, e);
+        printf("Game will continue without audio.\n");
+    }
+
     PAL_InitInput();
-    PAL_InitResources();
-    AUDIO_OpenDevice();
 }
 
 void PAL_Shutdown(int exit_code)

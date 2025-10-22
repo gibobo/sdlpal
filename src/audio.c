@@ -90,7 +90,7 @@ void AUDIO_FillBuffer(void *stream, unsigned int len)
     }
 }
 
-int AUDIO_OpenDevice(void)
+int AUDIO_Startup(void)
 /*++
   Purpose:
 
@@ -102,7 +102,8 @@ int AUDIO_OpenDevice(void)
 
   Return value:
 
-    0 if succeed, others if failed.
+    0 - Success
+   -1 - Already opened
 
 --*/
 {
@@ -110,19 +111,45 @@ int AUDIO_OpenDevice(void)
         return -1; // Already opened
 
     memset(&gAudioDevice, 0, sizeof(AUDIODEVICE));
-#if 1
+
     // Initialize the music subsystem.
     gAudioDevice.pMusPlayer = RIX_Init();
-    gAudioDevice.fMusicEnabled = (gAudioDevice.pMusPlayer) ? true : false;
+    if (gAudioDevice.pMusPlayer == NULL)
+    {
+        // Music initialization failed, but continue with sound only
+        gAudioDevice.fMusicEnabled = false;
+    }
+    else
+    {
+        gAudioDevice.fMusicEnabled = true;
+    }
 
     // Initialize the sound subsystem.
     gAudioDevice.pSoundPlayer = SOUND_Init();
-    gAudioDevice.pSoundBuffer = (gAudioDevice.pSoundPlayer) ? UTIL_calloc(PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM, sizeof(short)) : NULL;
-    gAudioDevice.fSoundEnabled = (gAudioDevice.pSoundBuffer) ? true : false;
-#endif
-    gAudioDevice.fOpened = true;
+    if (gAudioDevice.pSoundPlayer == NULL)
+    {
+        // Sound initialization failed
+        gAudioDevice.fSoundEnabled = false;
+    }
+    else
+    {
+        // Allocate sound buffer
+        gAudioDevice.pSoundBuffer = UTIL_calloc(PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM, sizeof(short));
+        if (gAudioDevice.pSoundBuffer == NULL)
+        {
+            // Sound buffer allocation failed
+            gAudioDevice.pSoundPlayer->Shutdown(gAudioDevice.pSoundPlayer);
+            gAudioDevice.pSoundPlayer = NULL;
+            gAudioDevice.fSoundEnabled = false;
+        }
+        else
+        {
+            gAudioDevice.fSoundEnabled = true;
+        }
+    }
 
-    return 0;
+    gAudioDevice.fOpened = true;
+    return 0; // Success (at least one audio subsystem is working)
 }
 
 void AUDIO_CloseDevice(void)

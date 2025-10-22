@@ -23,7 +23,7 @@
 #include "main.h"
 #include <string.h>
 
-volatile PALINPUTSTATE g_InputState;
+volatile PALINPUTSTATE g_InputState = {0};
 
 static int PAL_GetCurrDirection(void)
 /*++

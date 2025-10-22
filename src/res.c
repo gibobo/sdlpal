@@ -101,7 +101,7 @@ PAL_FreePlayerSprites(
     }
 }
 
-void PAL_InitResources(void)
+int PAL_InitResources(void)
 /*++
   Purpose:
 
@@ -113,11 +113,18 @@ void PAL_InitResources(void)
 
   Return value:
 
-    None.
+    0 - Success
+   -1 - Memory allocation failed
 
 --*/
 {
     gpResources = (RESOURCES *)UTIL_calloc(1, sizeof(RESOURCES));
+    if (gpResources == NULL)
+    {
+        return -1; // Memory allocation failed
+    }
+    
+    return 0; // Success
 }
 
 void PAL_FreeResources(

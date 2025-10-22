@@ -25,26 +25,35 @@ typedef enum
     Res_Count    // total number of resources
 } PALRES;
 
+// Consolidate extracted resource files into a single resource file.
 void PAL_ConsolidateExtractedResources(void);
+
+// Load the consolidated resource file and build the resource index.
 int PAL_LoadConsolidatedResources(void);
+
+// Free the loaded resource index and close the resource file.
 void PAL_FreeResourceIndex(void);
 
-int RES_ReadAnimationFrame(
-    unsigned char **frame_buffer,
-    unsigned int animation_index,
-    unsigned int frame_index,
-    unsigned char resource_id);
-
+// Resource access functions
 int RES_MKFGetChunkSize(
     unsigned int chunk_index,
     unsigned char resource_id);
 
+// Reads an animation frame into a buffer
+int RES_ReadAnimationFrame(
+    void **frame_buffer,
+    unsigned int animation_index,
+    unsigned int frame_index,
+    unsigned char resource_id);
+
+// Decompresses a chunk from the resource file into a buffer
 int RES_MKFDecompressChunk(
-    unsigned char **chunk_buffer,
+    void **chunk_buffer,
     unsigned int buffer_size,
     unsigned int chunk_index,
     unsigned char resource_id);
 
+// Reads a raw chunk from the resource file into a provided buffer.
 int RES_MKFReadChunk(
     void *output_buffer,
     unsigned int buffer_size,

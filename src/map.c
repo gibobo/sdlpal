@@ -55,7 +55,7 @@ PALMAP *PAL_LoadMap(int iMapNum)
     PALMAP *map = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
     map->iMapNum = iMapNum;
 
-    RES_MKFDecompressChunk((unsigned char **)&map->Tiles, 0, iMapNum, Res_MAP);
+    RES_MKFDecompressChunk(&map->Tiles, 0, iMapNum, Res_MAP);
 
     // Load the tile bitmaps.
     RES_MKFDecompressChunk(&map->pTileSprite, 0, iMapNum, Res_GOP);

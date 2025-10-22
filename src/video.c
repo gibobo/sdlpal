@@ -53,17 +53,24 @@ int VIDEO_Startup(void)
 {
     // Create palette object
     bufPalette = (unsigned char *)UTIL_malloc(256 * 3);
+    if (bufPalette == NULL)
+    {
+        return -1; // Memory allocation failed
+    }
 
     // Create the screen buffer and the backup screen buffer.
     gpScreen = VIDEO_CreateCompatibleSizedSurface(NULL);
+    if (gpScreen == NULL)
+    {
+        return -2; // Fail to create screen buffer
+    }
+
+    // Create backup buffers
     gpBackup[0] = VIDEO_CreateCompatibleSizedSurface(NULL);
     gpBackup[1] = VIDEO_CreateCompatibleSizedSurface(NULL);
-
-    // Failed?
-    if (gpScreen == NULL || gpBackup[0] == NULL || gpBackup[1] == NULL || bufPalette == NULL)
+    if (gpBackup[0] == NULL || gpBackup[1] == NULL)
     {
-        VIDEO_Shutdown();
-        return -2;
+        return -3; // Fail to create backup buffers
     }
 
     return 0;

@@ -47,7 +47,7 @@ typedef struct tagAUDIOPLAYER
     AUDIOPLAYER_COMMONS;
 } AUDIOPLAYER;
 
-int AUDIO_OpenDevice(void);
+int AUDIO_Startup(void);
 
 void AUDIO_CloseDevice(void);
 

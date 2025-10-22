@@ -469,25 +469,6 @@ typedef struct tagGAMEDATA
     unsigned short rgwBattleEffectIndex[10 * 2];
 } GAMEDATA;
 
-// status of characters
-typedef enum tagPALRES
-{
-   Pal_Res_FBP = 0, // battlefield background images
-   Pal_Res_MGO,     // sprites in scenes
-   Pal_Res_BALL,    // item bitmaps
-   Pal_Res_DATA,    // misc data
-   Pal_Res_F,       // player sprites during battle
-   Pal_Res_FIRE,    // fire effect sprites
-   Pal_Res_RGM,     // character face bitmaps
-   Pal_Res_ALL
-}PALRESLIST;
-
-typedef struct tagPALFILE
-{
-   char *name;
-   void *fp;
-}PALRESFILE;
-
 // player party
 typedef struct tagPARTY
 {
@@ -577,7 +558,6 @@ typedef struct tagGLOBALVARS
 } GLOBALVARS;
 
 extern GLOBALVARS *gpGlobals;
-extern PALRESFILE gFiles[];
 
 int PAL_InitGlobals(
     void);
