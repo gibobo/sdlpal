@@ -397,12 +397,6 @@ int main(int argc, char *argv[])
     // Run the main game routine
     while (1)
     {
-        // Clear the input state of previous frame.
-        PAL_ClearKeyState();
-
-        // Wait for the time of one frame. Accept input here.
-        UTIL_Delay(FRAME_TIME);
-
         // Run the main frame routine.
         PAL_StartFrame();
     }

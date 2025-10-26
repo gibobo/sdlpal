@@ -187,7 +187,7 @@ void PAL_OpeningMenu(void)
             VIDEO_BackupScreen(gpScreen);
             wItemSelected = PAL_SaveSlotMenu(1);
             VIDEO_RestoreScreen(gpScreen);
-            VIDEO_UpdateScreen(NULL);
+            // VIDEO_UpdateScreen(NULL);
             if (wItemSelected != MENUITEM_VALUE_CANCELLED)
             {
                 break;
@@ -261,7 +261,7 @@ unsigned short PAL_SaveSlotMenu(
     //
     wItemSelected = PAL_ReadMenu(NULL, rgMenuItem, 5, wDefaultSlot - 1, MENUITEM_COLOR);
 
-    VIDEO_UpdateScreen(&rect);
+    // VIDEO_UpdateScreen(&rect);
 
     return wItemSelected;
 }
@@ -346,7 +346,7 @@ PAL_SelectionMenu(
         PAL_DeleteBox(rgpBox[i]);
     }
 
-    VIDEO_UpdateScreen(&rect);
+    // VIDEO_UpdateScreen(&rect);
 
     return wReturnValue;
 }
@@ -595,8 +595,7 @@ void PAL_InGameMagicMenu(
 
     for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
     {
-        PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-                          TIMEMETER_COLOR_DEFAULT, true);
+        PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole);
         y += 78;
     }
 
@@ -683,8 +682,7 @@ start_magicmenu:
 
                 for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
                 {
-                    PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-                                      TIMEMETER_COLOR_DEFAULT, true);
+                    PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole);
                     y += 78;
                 }
 
@@ -705,7 +703,7 @@ start_magicmenu:
 
                 while (true)
                 {
-                    UTIL_WaitKeys(1, kKeyMenu | kKeySearch | kKeyLeft | kKeyRight | kKeyUp | kKeyDown);
+                    UTIL_WaitKeys(FRAME_TIME, kKeyMenu | kKeySearch | kKeyLeft | kKeyRight | kKeyUp | kKeyDown);
 
                     if (PAL_GetKeyInput() & kKeyMenu)
                     {
@@ -772,8 +770,7 @@ start_magicmenu:
 
         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
         {
-            PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole, 100,
-                              TIMEMETER_COLOR_DEFAULT, true);
+            PAL_PlayerInfoBox(PAL_XY(y, 165), gpGlobals->rgParty[i].wPlayerRole);
             y += 78;
         }
     }
@@ -887,7 +884,7 @@ void PAL_InGameMenu(
     //
     // Draw the text label.
     //
-    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(10, 10), 0, false, false, false);
+    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(10, 10), 0, false, false);
 
     //
     // Draw the cash amount.
@@ -987,7 +984,7 @@ void PAL_PlayerStatus(
         RES_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, Res_FBP);
 
         // Draw the image of player role
-        if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles->rgwAvatar[iPlayerRole], Res_RGM) > 0)
+        if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles->rgwAvatar[iPlayerRole], Res_RGM))
         {
             PAL_RLEBlitToSurface(bufImage, gpScreen, RoleImage);
         }
@@ -1005,7 +1002,7 @@ void PAL_PlayerStatus(
             }
 
             // Draw the image
-            if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[w].item.wBitmap, Res_BALL) > 0)
+            if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[w].item.wBitmap, Res_BALL))
             {
                 PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY_OFFSET(RoleEquipImageBoxes[i], 1, 1));
             }
@@ -1020,21 +1017,21 @@ void PAL_PlayerStatus(
             {
                 offset = 0;
             }
-            PAL_DrawText(PAL_GetWord(w), PAL_XY_OFFSET(RoleEquipNames[i], offset, 0), STATUS_COLOR_EQUIPMENT, true, false, false);
+            PAL_DrawText(PAL_GetWord(w), PAL_XY_OFFSET(RoleEquipNames[i], offset, 0), STATUS_COLOR_EQUIPMENT, true, false);
         }
 
         // Draw the text labels
         for (i = 0; i < sizeof(labels0) / sizeof(int); i++)
         {
-            PAL_DrawText(PAL_GetWord(labels0[i]), RoleLabels[i], MENUITEM_COLOR, true, false, false);
+            PAL_DrawText(PAL_GetWord(labels0[i]), RoleLabels[i], MENUITEM_COLOR, true, false);
         }
         for (i = 0; i < sizeof(labels) / sizeof(int); i++)
         {
-            PAL_DrawText(PAL_GetWord(labels[i]), RoleStatusLabels[i], MENUITEM_COLOR, true, false, false);
+            PAL_DrawText(PAL_GetWord(labels[i]), RoleStatusLabels[i], MENUITEM_COLOR, true, false);
         }
 
         PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[iPlayerRole]),
-                     RoleName, MENUITEM_COLOR_CONFIRMED, true, false, false);
+                     RoleName, MENUITEM_COLOR_CONFIRMED, true, false);
 
         // Draw the stats
         if (RoleExpSlash != 0)
@@ -1071,7 +1068,7 @@ void PAL_PlayerStatus(
 
             if (w != 0 && gpGlobals->g.rgObject[w].poison.wPoisonLevel <= 3)
             {
-                PAL_DrawText(PAL_GetWord(w), RolePoisonNames[j++], (unsigned char)(gpGlobals->g.rgObject[w].poison.wColor + 10), true, false, false);
+                PAL_DrawText(PAL_GetWord(w), RolePoisonNames[j++], (unsigned char)(gpGlobals->g.rgObject[w].poison.wColor + 10), true, false);
             }
         }
 
@@ -1122,9 +1119,7 @@ PAL_ItemUseMenu(
 --*/
 {
     unsigned char bColor;
-    unsigned char bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
     unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
-    unsigned long dwColorChangeTime = 0;
     static unsigned short sSelectedPlayer = 0;
     PAL_Rect rect = {110, 2, 200, 180};
     int i;
@@ -1144,14 +1139,14 @@ PAL_ItemUseMenu(
         //
         // Draw the stats of the selected player
         //
-        PAL_DrawText(PAL_GetWord(STATUS_LABEL_LEVEL), PAL_XY(200, 16), ITEMUSEMENU_COLOR_STATLABEL, true, false, false);
-        PAL_DrawText(PAL_GetWord(STATUS_LABEL_HP), PAL_XY(200, 34), ITEMUSEMENU_COLOR_STATLABEL, true, false, false);
-        PAL_DrawText(PAL_GetWord(STATUS_LABEL_MP), PAL_XY(200, 52), ITEMUSEMENU_COLOR_STATLABEL, true, false, false);
-        PAL_DrawText(PAL_GetWord(STATUS_LABEL_ATTACKPOWER), PAL_XY(200, 70), ITEMUSEMENU_COLOR_STATLABEL, true, false, false);
-        PAL_DrawText(PAL_GetWord(STATUS_LABEL_MAGICPOWER), PAL_XY(200, 88), ITEMUSEMENU_COLOR_STATLABEL, true, false, false);
-        PAL_DrawText(PAL_GetWord(STATUS_LABEL_RESISTANCE), PAL_XY(200, 106), ITEMUSEMENU_COLOR_STATLABEL, true, false, false);
-        PAL_DrawText(PAL_GetWord(STATUS_LABEL_DEXTERITY), PAL_XY(200, 124), ITEMUSEMENU_COLOR_STATLABEL, true, false, false);
-        PAL_DrawText(PAL_GetWord(STATUS_LABEL_FLEERATE), PAL_XY(200, 142), ITEMUSEMENU_COLOR_STATLABEL, true, false, false);
+        PAL_DrawText(PAL_GetWord(STATUS_LABEL_LEVEL), PAL_XY(200, 16), ITEMUSEMENU_COLOR_STATLABEL, true, false);
+        PAL_DrawText(PAL_GetWord(STATUS_LABEL_HP), PAL_XY(200, 34), ITEMUSEMENU_COLOR_STATLABEL, true, false);
+        PAL_DrawText(PAL_GetWord(STATUS_LABEL_MP), PAL_XY(200, 52), ITEMUSEMENU_COLOR_STATLABEL, true, false);
+        PAL_DrawText(PAL_GetWord(STATUS_LABEL_ATTACKPOWER), PAL_XY(200, 70), ITEMUSEMENU_COLOR_STATLABEL, true, false);
+        PAL_DrawText(PAL_GetWord(STATUS_LABEL_MAGICPOWER), PAL_XY(200, 88), ITEMUSEMENU_COLOR_STATLABEL, true, false);
+        PAL_DrawText(PAL_GetWord(STATUS_LABEL_RESISTANCE), PAL_XY(200, 106), ITEMUSEMENU_COLOR_STATLABEL, true, false);
+        PAL_DrawText(PAL_GetWord(STATUS_LABEL_DEXTERITY), PAL_XY(200, 124), ITEMUSEMENU_COLOR_STATLABEL, true, false);
+        PAL_DrawText(PAL_GetWord(STATUS_LABEL_FLEERATE), PAL_XY(200, 142), ITEMUSEMENU_COLOR_STATLABEL, true, false);
 
         i = gpGlobals->rgParty[sSelectedPlayer].wPlayerRole;
 
@@ -1178,14 +1173,14 @@ PAL_ItemUseMenu(
         {
             if (i == sSelectedPlayer)
             {
-                bColor = bSelectedColor;
+                bColor = MENUITEM_COLOR_SELECTED_FIRST;
             }
             else
             {
                 bColor = MENUITEM_COLOR;
             }
 
-            PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[gpGlobals->rgParty[i].wPlayerRole]), PAL_XY(125, 16 + 20 * i), bColor, true, false, false);
+            PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[gpGlobals->rgParty[i].wPlayerRole]), PAL_XY(125, 16 + 20 * i), bColor, true, false);
         }
 
         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen, PAL_XY(120, 80));
@@ -1197,7 +1192,7 @@ PAL_ItemUseMenu(
             //
             // Draw the picture of the item
             //
-            if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wItemToUse].item.wBitmap, Res_BALL) > 0)
+            if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wItemToUse].item.wBitmap, Res_BALL))
             {
                 PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(127, 88));
             }
@@ -1205,44 +1200,27 @@ PAL_ItemUseMenu(
             //
             // Draw the amount and label of the item
             //
-            PAL_DrawText(PAL_GetWord(wItemToUse), PAL_XY(116, 143), STATUS_COLOR_EQUIPMENT, true, false, false);
+            PAL_DrawText(PAL_GetWord(wItemToUse), PAL_XY(116, 143), STATUS_COLOR_EQUIPMENT, true, false);
             PAL_DrawNumber(i, 2, PAL_XY(170, 133), kNumColorCyan, kNumAlignRight);
         }
 
         //
         // Update the screen area
         //
-        VIDEO_UpdateScreen(&rect);
+        // VIDEO_UpdateScreen(&rect);
 
         while (true)
         {
             //
-            // See if we should change the highlight color
+            // Redraw the selected item.
             //
-            if (UTIL_GetMilliseconds() >= dwColorChangeTime)
-            {
-                if ((unsigned short)bSelectedColor + 1 >=
-                    (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
-                {
-                    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
-                }
-                else
-                {
-                    bSelectedColor++;
-                }
-
-                dwColorChangeTime = UTIL_GetMilliseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
-
-                //
-                // Redraw the selected item.
-                //
-                PAL_DrawText(
-                    PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[gpGlobals->rgParty[sSelectedPlayer].wPlayerRole]),
-                    PAL_XY(125, 16 + 20 * sSelectedPlayer), bSelectedColor, false, true, false);
-            }
-
+            PAL_DrawText(
+                PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[gpGlobals->rgParty[sSelectedPlayer].wPlayerRole]),
+                PAL_XY(125, 16 + 20 * sSelectedPlayer), MENUITEM_COLOR_SELECTED, false, true);
+            // Update the screen
+            VIDEO_UpdateScreen(NULL);
             // Wait for any key
-            if (UTIL_WaitKeys(1, 0) != kKeyNone)
+            if (UTIL_WaitKeys(FRAME_TIME, 0) != kKeyNone)
             {
                 break;
             }
@@ -1326,7 +1304,7 @@ PAL_BuyMenu_OnItemChange(
     y = 15;
 
     bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
-    if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, Res_BALL) > 0)
+    if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, Res_BALL))
     {
         PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(x, y));
     }
@@ -1366,7 +1344,7 @@ PAL_BuyMenu_OnItemChange(
     // Draw the amount of this item in the inventory
     //
     PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, NULL, (__buymenu_firsttime_render) ? 6 : 0);
-    PAL_DrawText(PAL_GetWord(BUYMENU_LABEL_CURRENT), PAL_XY(x + 10, y + 10), 0, false, false, false);
+    PAL_DrawText(PAL_GetWord(BUYMENU_LABEL_CURRENT), PAL_XY(x + 10, y + 10), 0, false, false);
     PAL_DrawNumber(n, 6, PAL_XY(x + 49, y + 15), kNumColorYellow, kNumAlignRight);
 
     //
@@ -1378,10 +1356,10 @@ PAL_BuyMenu_OnItemChange(
     // Draw the cash amount
     //
     PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, NULL, (__buymenu_firsttime_render) ? 6 : 0);
-    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(x + 10, y + 10), 0, false, false, false);
+    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(x + 10, y + 10), 0, false, false);
     PAL_DrawNumber(gpGlobals->dwCash, 6, PAL_XY(x + 49, y + 15), kNumColorYellow, kNumAlignRight);
 
-    VIDEO_UpdateScreen(&rect);
+    // VIDEO_UpdateScreen(&rect);
 
     __buymenu_firsttime_render = false;
 }
@@ -1505,7 +1483,7 @@ PAL_SellMenu_OnItemChange(
     // Draw the cash amount
     //
     PAL_CreateSingleLineBoxWithShadow(PAL_XY(x, y), 5, NULL, 0);
-    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(x + 10, y + 10), 0, false, false, false);
+    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(x + 10, y + 10), 0, false, false);
     PAL_DrawNumber(gpGlobals->dwCash, 6, PAL_XY(x + 48, y + 15), kNumColorYellow, kNumAlignRight);
 
     x += 124;
@@ -1517,7 +1495,7 @@ PAL_SellMenu_OnItemChange(
 
     if (gpGlobals->g.rgObject[wCurrentItem].item.wFlags & kItemFlagSellable)
     {
-        PAL_DrawText(PAL_GetWord(SELLMENU_LABEL_PRICE), PAL_XY(x + 10, y + 10), 0, false, false, false);
+        PAL_DrawText(PAL_GetWord(SELLMENU_LABEL_PRICE), PAL_XY(x + 10, y + 10), 0, false, false);
         PAL_DrawNumber(gpGlobals->g.rgObject[wCurrentItem].item.wPrice / 2, 6,
                        PAL_XY(x + 48, y + 15), kNumColorYellow, kNumAlignRight);
     }
@@ -1581,8 +1559,6 @@ void PAL_EquipItemMenu(
     unsigned short iCurrentPlayer = 0;
     int i;
     unsigned char bColor;
-    unsigned char bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
-    unsigned long dwColorChangeTime = UTIL_GetMilliseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
     unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
     gpGlobals->wLastUnequippedItem = wItem;
 
@@ -1594,7 +1570,7 @@ void PAL_EquipItemMenu(
         RES_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM, Res_FBP);
 
         // Draw the item picture
-        if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wItem].item.wBitmap, Res_BALL) > 0)
+        if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wItem].item.wBitmap, Res_BALL))
         {
             PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY_OFFSET(EquipImageBox, 8, 8));
         }
@@ -1606,7 +1582,7 @@ void PAL_EquipItemMenu(
             if (gpGlobals->g.PlayerRoles->rgwEquipment[i][w] != 0)
             {
                 PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwEquipment[i][w]),
-                             EquipNames[i], MENUITEM_COLOR, true, false, false);
+                             EquipNames[i], MENUITEM_COLOR, true, false);
             }
         }
 
@@ -1629,7 +1605,7 @@ void PAL_EquipItemMenu(
             {
                 if (gpGlobals->g.rgObject[wItem].item.wFlags & (kItemFlagEquipableByPlayerRole_First << w))
                 {
-                    bColor = bSelectedColor;
+                    bColor = MENUITEM_COLOR_SELECTED_FIRST;
                 }
                 else
                 {
@@ -1649,50 +1625,37 @@ void PAL_EquipItemMenu(
             }
 
             PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]),
-                         PAL_XY_OFFSET(EquipRoleListBox, 13, 13 + 18 * i), bColor, true, false, false);
+                         PAL_XY_OFFSET(EquipRoleListBox, 13, 13 + 18 * i), bColor, true, false);
         }
 
         // Draw the text label and amount of the item
         if (wItem != 0)
         {
-            PAL_DrawText(PAL_GetWord(wItem), EquipItemName, MENUITEM_COLOR_CONFIRMED, true, false, false);
+            PAL_DrawText(PAL_GetWord(wItem), EquipItemName, MENUITEM_COLOR_CONFIRMED, true, false);
             PAL_DrawNumber(PAL_GetItemAmount(wItem), 2, EquipItemAmount, kNumColorCyan, kNumAlignRight);
         }
 
         // Update the screen
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
 
         // Accept input
         PAL_ClearKeyState();
 
         while (true)
         {
-            // See if we should change the highlight color
-            if (UTIL_GetMilliseconds() >= dwColorChangeTime)
+            // Redraw the selected item if needed.
+            w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;
+
+            if (gpGlobals->g.rgObject[wItem].item.wFlags & (kItemFlagEquipableByPlayerRole_First << w))
             {
-                if ((unsigned short)bSelectedColor + 1 >=
-                    (unsigned short)MENUITEM_COLOR_SELECTED_FIRST + MENUITEM_COLOR_SELECTED_TOTALNUM)
-                {
-                    bSelectedColor = MENUITEM_COLOR_SELECTED_FIRST;
-                }
-                else
-                {
-                    bSelectedColor++;
-                }
-
-                dwColorChangeTime = UTIL_GetMilliseconds() + (600U / MENUITEM_COLOR_SELECTED_TOTALNUM);
-
-                // Redraw the selected item if needed.
-                w = gpGlobals->rgParty[iCurrentPlayer].wPlayerRole;
-
-                if (gpGlobals->g.rgObject[wItem].item.wFlags & (kItemFlagEquipableByPlayerRole_First << w))
-                {
-                    PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]),
-                                 PAL_XY_OFFSET(EquipRoleListBox, 13, 13 + 18 * iCurrentPlayer), bSelectedColor, true, true, false);
-                }
+                PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]),
+                             PAL_XY_OFFSET(EquipRoleListBox, 13, 13 + 18 * iCurrentPlayer), MENUITEM_COLOR_SELECTED, true, true);
             }
 
-            if (UTIL_WaitKeys(1, 0) != kKeyNone)
+            // Update the screen
+            VIDEO_UpdateScreen(NULL);
+            // Wait for any key
+            if (UTIL_WaitKeys(FRAME_TIME, 0) != kKeyNone)
             {
                 break;
             }

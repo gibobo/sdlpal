@@ -60,7 +60,7 @@ static void PAL_ExtractAndDecompressMKFChunks(PALRES res)
     for (index = 0; index < uiChunkCount; index++)
     {
         unsigned char *buffer = NULL;
-        int len = PAL_MKFDecompressChunk(&buffer, 0, index, fp);
+        unsigned int len = PAL_MKFDecompressChunk(&buffer, 0, index, fp);
         if (len < 0)
         {
             break;
@@ -287,7 +287,7 @@ int PAL_LoadConsolidatedResources(void)
         UTIL_free(buffer_u32);
         return -5; // File format error: incomplete offset table
     }
-
+    // unsigned int max_data_len[Res_Count][2] = {0};
     for (PALRES res = 0; res < Res_Count; res++)
     {
         // Read offset information from buffer
@@ -354,6 +354,10 @@ int PAL_LoadConsolidatedResources(void)
                 unsigned int data_length = buffer_u32[buffer_offset++];
                 g_CachedResourceIndex[res].resource_file_info[i][j].data_offset = data_offset;
                 g_CachedResourceIndex[res].resource_file_info[i][j].data_length = data_length;
+                // if (data_length > 0 && (max_data_len[res][0] == 0 || max_data_len[res][0] > data_length))
+                //     max_data_len[res][0] = data_length;
+                // if (max_data_len[res][1] < data_length)
+                //     max_data_len[res][1] = data_length;
             }
         }
     }
@@ -418,17 +422,20 @@ int RES_ReadAnimationFrame(
     return data_length;
 }
 
-int RES_MKFDecompressChunk(
+unsigned int RES_MKFDecompressChunk(
     void **chunk_buffer,
     unsigned int buffer_size,
     unsigned int chunk_index,
     unsigned char resource_id)
 {
+    if (g_CachedResourceIndex[resource_id].chunk_count <= chunk_index)
+        return 0;
+
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
 
-    if (data_length > 0)
+    if (data_length)
     {
-        if (buffer_size == 0 || *chunk_buffer == NULL)
+        if (buffer_size == 0 || buffer_size != data_length || *chunk_buffer == NULL)
         {
             UTIL_free(*chunk_buffer);
             buffer_size = data_length;
@@ -441,20 +448,24 @@ int RES_MKFDecompressChunk(
     return data_length;
 }
 
-int RES_MKFReadChunk(
+unsigned int RES_MKFReadChunk(
     void *output_buffer,
     unsigned int buffer_size,
     unsigned int chunk_index,
     unsigned char resource_id)
 {
-    if (output_buffer == NULL || buffer_size == 0)
-        return -1;
+    if (g_CachedResourceIndex[resource_id].chunk_count <= chunk_index)
+        return 0;
 
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
 
-    if (data_length > buffer_size)
-        return -2;
+    if (data_length)
+    {
+        if (buffer_size == 0 || data_length > buffer_size || output_buffer == NULL)
+            return 0;
 
-    UTIL_fseek(g_ConsolidatedResourceFile, g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset, SEEK_SET);
-    return UTIL_fread(output_buffer, 1, data_length, g_ConsolidatedResourceFile);
+        UTIL_fseek(g_ConsolidatedResourceFile, g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset, SEEK_SET);
+        UTIL_fread(output_buffer, 1, data_length, g_ConsolidatedResourceFile);
+    }
+    return data_length;
 }

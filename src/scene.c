@@ -495,7 +495,7 @@ void PAL_MakeScene(
     //
     if (gpGlobals->fNeedToFadeIn)
     {
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
         PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
         gpGlobals->fNeedToFadeIn = false;
     }

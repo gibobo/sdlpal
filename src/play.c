@@ -153,7 +153,7 @@ void PAL_GameUpdate(
                         PAL_UpdatePartyGestures(false);
 
                         PAL_MakeScene();
-                        VIDEO_UpdateScreen(NULL);
+                        // VIDEO_UpdateScreen(NULL);
                     }
 
                     //
@@ -463,7 +463,7 @@ void PAL_Search(
                 // Redraw everything
                 //
                 PAL_MakeScene();
-                VIDEO_UpdateScreen(NULL);
+                // VIDEO_UpdateScreen(NULL);
             }
 
             //
@@ -474,8 +474,9 @@ void PAL_Search(
             //
             // Clear inputs and delay for a short time
             //
+            VIDEO_UpdateScreen(NULL);
             UTIL_Delay(50);
-            PAL_ClearKeyState();
+            // PAL_ClearKeyState();
 
             return; // don't go further
         }
@@ -509,9 +510,14 @@ void PAL_StartFrame(
     // Update the positions and gestures of party members
     PAL_UpdateParty();
 
-    // Update the scene
+    // Redraw the scene
     PAL_MakeScene();
+
+    // Update the screen
     VIDEO_UpdateScreen(NULL);
+
+    // Wait for the time of one frame. Accept input here.
+    UTIL_Delay(FRAME_TIME);
 
     if (PAL_GetKeyInput() & kKeyMenu)
     {

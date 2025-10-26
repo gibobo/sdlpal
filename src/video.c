@@ -124,15 +124,15 @@ void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
 
     if (lpRect != NULL)
     {
-        DRIVER_FrameShow(gpScreen->pixels, lpRect->x, lpRect->y, lpRect->w, lpRect->h, 0);
+        DRIVER_FrameShow(gpScreen->pixels, lpRect->x, lpRect->y, lpRect->w, lpRect->h, false);
     }
     else if (g_wShakeTime != 0)
     {
         g_wShakeTime--;
-        DRIVER_FrameShow(gpScreen->pixels, 0, (g_wShakeTime & 0x1) * g_wShakeLevel, SCREEN_W, SCREEN_H - g_wShakeLevel, 1);
+        DRIVER_FrameShow(gpScreen->pixels, 0, (unsigned short)((g_wShakeTime & 0x1) * g_wShakeLevel), SCREEN_W, (unsigned short)(SCREEN_H - g_wShakeLevel), true);
     }
     else
-        DRIVER_FrameShow(gpScreen->pixels, 0, 0, SCREEN_W, SCREEN_H, 0);
+        DRIVER_FrameShow(gpScreen->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
 }
 
 void VIDEO_SetPalette(const unsigned char *rgPalette)
@@ -196,7 +196,7 @@ void VIDEO_ShakeScreen(unsigned short wShakeTime, unsigned short wShakeLevel)
     g_wShakeLevel = wShakeLevel;
 }
 
-void VIDEO_SwitchScreen(unsigned short wSpeed)
+void VIDEO_SwitchScreen(void)
 /*++
   Purpose:
 
@@ -205,7 +205,7 @@ void VIDEO_SwitchScreen(unsigned short wSpeed)
 
   Parameters:
 
-    [IN]  wSpeed - speed of fading (the larger value, the slower).
+    None.
 
   Return value:
 
@@ -216,15 +216,13 @@ void VIDEO_SwitchScreen(unsigned short wSpeed)
     int i, j;
     const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
-    wSpeed = (wSpeed + 1) * 10;
-
     for (i = 0; i < 6; i++)
     {
         // Draw the backup buffer to the screen
         for (j = rgIndex[i]; j < SCREEN_SIZE; j += 6)
             gpBackup[0]->pixels[j] = gpScreen->pixels[j];
-        DRIVER_FrameShow(gpBackup[0]->pixels, 0, 0, SCREEN_W, SCREEN_H, 0);
-        UTIL_Delay(wSpeed);
+        DRIVER_FrameShow(gpBackup[0]->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
+        UTIL_Delay(60);
     }
 }
 
@@ -245,24 +243,17 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
 
 --*/
 {
-    unsigned short i, j, k;
+    unsigned int i, j, k;
     const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
     unsigned char a, b;
-    PAL_Rect ROI;
+    PAL_Rect ROI = {0, 0, SCREEN_W, SCREEN_H};
 
-    wSpeed++;
-    wSpeed *= 10;
-
-    ROI.x = 0;
-    ROI.y = 0;
-    ROI.w = SCREEN_W;
-    ROI.h = SCREEN_H;
+    wSpeed = (wSpeed + 1) * 10;
 
     for (i = 0; i < 12; i++)
     {
         for (j = 0; j < 6; j++)
         {
-            UTIL_Delay(wSpeed);
             // Draw the backup buffer to the screen
             if (g_wShakeTime != 0)
             {
@@ -285,7 +276,8 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
                 }
                 gpBackup[0]->pixels[k] = (a & 0xF0) | (b & 0x0F);
             }
-            DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, 1);
+            DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, true);
+            UTIL_Delay(wSpeed);
         }
     }
 

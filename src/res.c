@@ -123,7 +123,18 @@ int PAL_InitResources(void)
     {
         return -1; // Memory allocation failed
     }
-    
+
+    // Create the map instance.
+    gpResources->lpMap = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
+    if (gpResources->lpMap == NULL)
+    {
+        UTIL_free(gpResources);
+        return -2;
+    }
+    gpResources->lpMap->iMapNum = 0;
+    gpResources->lpMap->Tiles = NULL;
+    gpResources->lpMap->pTileSprite = NULL;
+
     return 0; // Success
 }
 
@@ -156,6 +167,7 @@ void PAL_FreeResources(
         // Free map
         //
         PAL_FreeMap(gpResources->lpMap);
+        UTIL_free(gpResources->lpMap);
 
         //
         // Delete the instance
@@ -186,6 +198,7 @@ void PAL_SetLoadFlags(
     if (gpResources)
     {
         gpResources->bLoadFlags |= bFlags;
+        PAL_LoadResources();
     }
 }
 
@@ -231,11 +244,10 @@ void PAL_LoadResources(void)
 
         // Free previous loaded scene (sprites and map)
         PAL_FreeEventObjectSprites();
-        PAL_FreeMap(gpResources->lpMap);
 
         // Load map
         i = gpGlobals->wNumScene - 1;
-        gpResources->lpMap = PAL_LoadMap(gpGlobals->g.rgScene[i].wMapNum);
+        PAL_LoadMap(gpResources->lpMap, gpGlobals->g.rgScene[i].wMapNum);
 
         if (gpResources->lpMap == NULL)
         {
@@ -256,7 +268,7 @@ void PAL_LoadResources(void)
         for (i = 0; i < gpResources->nEventObjectSprites; i++, index++)
         {
             gpResources->lppEventObjectSprites[i] = NULL;
-            if (RES_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, Res_MGO) > 0)
+            if (RES_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, Res_MGO))
                 gpGlobals->g.lprgEventObject[index].nSpriteFramesAuto = PAL_SpriteGetNumFrames(gpResources->lppEventObjectSprites[i]);
         }
         gpGlobals->partyoffset = PAL_XY(160, 112);

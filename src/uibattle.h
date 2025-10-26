@@ -112,10 +112,7 @@ typedef struct tagBATTLEUI
 
 void PAL_PlayerInfoBox(
     unsigned int pos,
-    unsigned short wPlayerRole,
-    int iTimeMeter,
-    unsigned char bTimeMeterColor,
-    int fUpdate);
+    unsigned short wPlayerRole);
 
 void PAL_BattleUIShowText(
     const wchar_t *lpszText,

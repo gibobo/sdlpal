@@ -24,7 +24,7 @@
 #include "util.h"
 #include <stdlib.h>
 
-PALMAP *PAL_LoadMap(int iMapNum)
+void PAL_LoadMap(PALMAP *lpMap, int iMapNum)
 /*++
   Purpose:
 
@@ -51,16 +51,12 @@ PALMAP *PAL_LoadMap(int iMapNum)
     if (iMapNum <= 0)
         return NULL;
 
-    // Create the map instance.
-    PALMAP *map = (PALMAP *)UTIL_malloc(sizeof(PALMAP));
-    map->iMapNum = iMapNum;
+    lpMap->iMapNum = iMapNum;
 
-    RES_MKFDecompressChunk(&map->Tiles, 0, iMapNum, Res_MAP);
+    RES_MKFDecompressChunk(&lpMap->Tiles, 65536, iMapNum, Res_MAP);
 
     // Load the tile bitmaps.
-    RES_MKFDecompressChunk(&map->pTileSprite, 0, iMapNum, Res_GOP);
-
-    return map;
+    RES_MKFDecompressChunk(&lpMap->pTileSprite, 128736, iMapNum, Res_GOP);
 }
 
 void PAL_FreeMap(PALMAP *lpMap)
@@ -90,8 +86,6 @@ void PAL_FreeMap(PALMAP *lpMap)
 
     // Free the tiles.
     UTIL_free(lpMap->Tiles);
-    // Delete the instance.
-    UTIL_free(lpMap);
 }
 
 const unsigned char *PAL_MapGetTileBitmap(

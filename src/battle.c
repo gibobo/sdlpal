@@ -618,19 +618,20 @@ void PAL_BattleFadeScene(
 {
     int i, j, k;
     unsigned char a, b;
+    unsigned char *pSrc = g_Battle->lpSceneBuf->pixels;
+    unsigned char *pDst = gpScreen->pixels;
     const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
     for (i = 0; i < 12; i++)
     {
         for (j = 0; j < 6; j++)
         {
-            UTIL_Delay(16);
             // Blend the pixels in the 2 buffers, and put the result into the
             // backup buffer
             for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
             {
-                a = g_Battle->lpSceneBuf->pixels[k];
-                b = gpScreen->pixels[k];
+                a = pSrc[k];
+                b = pDst[k];
 
                 if (i > 0)
                 {
@@ -644,12 +645,13 @@ void PAL_BattleFadeScene(
                     }
                 }
 
-                gpScreen->pixels[k] = (a & 0xF0) | (b & 0x0F);
+                pDst[k] = (a & 0xF0) | (b & 0x0F);
             }
 
             // Draw the backup buffer to the screen
-            PAL_BattleUIUpdate();
+            // PAL_BattleUIUpdate();
             VIDEO_UpdateScreen(NULL);
+            UTIL_Delay(16);
         }
     }
 
@@ -657,9 +659,9 @@ void PAL_BattleFadeScene(
     // Draw the result buffer to the screen as the final step
     //
     VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
-    PAL_BattleUIUpdate();
+    // PAL_BattleUIUpdate();
 
-    VIDEO_UpdateScreen(NULL);
+    // VIDEO_UpdateScreen(NULL);
 }
 
 static BATTLERESULT
@@ -699,7 +701,7 @@ PAL_BattleMain(
     //
     // Switch the screen
     //
-    VIDEO_SwitchScreen(5);
+    VIDEO_SwitchScreen();
 
     //
     // Play the battle music
@@ -734,8 +736,6 @@ PAL_BattleMain(
         g_Battle->BattleResult = kBattleResultOnGoing;
     }
 
-    PAL_ClearKeyState();
-
     //
     // Run the main battle loop.
     //
@@ -747,14 +747,14 @@ PAL_BattleMain(
             break;
         }
 
-        // Wait for the time of one frame. Accept input here.
-        UTIL_Delay(BATTLE_FRAME_TIME);
-
         // Run the main frame routine.
         PAL_BattleStartFrame();
 
         // Update the screen.
         VIDEO_UpdateScreen(NULL);
+
+        // Wait for the time of one frame. Accept input here.
+        UTIL_Delay(BATTLE_FRAME_TIME);
     }
 
     //
@@ -827,7 +827,7 @@ void PAL_LoadBattleSprites(
     {
         s = PAL_GetPlayerBattleSprite(gpGlobals->rgParty[i].wPlayerRole);
 
-        if (RES_MKFDecompressChunk(&g_Battle->rgPlayer[i].lpSprite, 0, s, Res_F) <= 0)
+        if (!RES_MKFDecompressChunk(&g_Battle->rgPlayer[i].lpSprite, 0, s, Res_F))
             continue;
 
         //
@@ -846,7 +846,7 @@ void PAL_LoadBattleSprites(
         if (g_Battle->rgEnemy[i].wObjectID == 0)
             continue;
 
-        if (RES_MKFDecompressChunk(&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, Res_ABC) <= 0)
+        if (!RES_MKFDecompressChunk(&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, Res_ABC))
             continue;
 
         //
@@ -936,9 +936,9 @@ PAL_BattleWon(
         PAL_CreateSingleLineBox(PAL_XY(83 - ww1, 60), w1, NULL);
         PAL_CreateSingleLineBox(PAL_XY(65, 105), 10, NULL);
 
-        PAL_DrawText(PAL_GetWord(BATTLEWIN_GETEXP_LABEL), PAL_XY(95 - ww1, 70), 0, false, false, false);
-        PAL_DrawText(PAL_GetWord(BATTLEWIN_BEATENEMY_LABEL), PAL_XY(77, 115), 0, false, false, false);
-        PAL_DrawText(PAL_GetWord(BATTLEWIN_DOLLAR_LABEL), PAL_XY(197, 115), 0, false, false, false);
+        PAL_DrawText(PAL_GetWord(BATTLEWIN_GETEXP_LABEL), PAL_XY(95 - ww1, 70), 0, false, false);
+        PAL_DrawText(PAL_GetWord(BATTLEWIN_BEATENEMY_LABEL), PAL_XY(77, 115), 0, false, false);
+        PAL_DrawText(PAL_GetWord(BATTLEWIN_DOLLAR_LABEL), PAL_XY(197, 115), 0, false, false);
 
         PAL_DrawNumber(g_Battle->iExpGained, 5, PAL_XY(182 + ww1, 74), kNumColorYellow, kNumAlignRight);
         PAL_DrawNumber(g_Battle->iCashGained, 5, PAL_XY(162, 119), kNumColorYellow, kNumAlignMid);
@@ -1028,21 +1028,21 @@ PAL_BattleWon(
 
             wchar_t buffer[32] = L"";
             PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]), PAL_GetWord(STATUS_LABEL_LEVEL), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL));
-            PAL_DrawText(buffer, PAL_XY(110, 10), 0, false, false, false);
+            PAL_DrawText(buffer, PAL_XY(110, 10), 0, false, false);
 
             for (j = 0; j < 8; j++)
             {
                 PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ARROW), gpScreen, PAL_XY(-offsetX + 180, 48 + 18 * j));
             }
 
-            PAL_DrawText(PAL_GetWord(STATUS_LABEL_LEVEL), PAL_XY(offsetX + 100, 44), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
-            PAL_DrawText(PAL_GetWord(STATUS_LABEL_HP), PAL_XY(offsetX + 100, 62), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
-            PAL_DrawText(PAL_GetWord(STATUS_LABEL_MP), PAL_XY(offsetX + 100, 80), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
-            PAL_DrawText(PAL_GetWord(STATUS_LABEL_ATTACKPOWER), PAL_XY(offsetX + 100, 98), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
-            PAL_DrawText(PAL_GetWord(STATUS_LABEL_MAGICPOWER), PAL_XY(offsetX + 100, 116), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
-            PAL_DrawText(PAL_GetWord(STATUS_LABEL_RESISTANCE), PAL_XY(offsetX + 100, 134), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
-            PAL_DrawText(PAL_GetWord(STATUS_LABEL_DEXTERITY), PAL_XY(offsetX + 100, 152), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
-            PAL_DrawText(PAL_GetWord(STATUS_LABEL_FLEERATE), PAL_XY(offsetX + 100, 170), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false, false);
+            PAL_DrawText(PAL_GetWord(STATUS_LABEL_LEVEL), PAL_XY(offsetX + 100, 44), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false);
+            PAL_DrawText(PAL_GetWord(STATUS_LABEL_HP), PAL_XY(offsetX + 100, 62), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false);
+            PAL_DrawText(PAL_GetWord(STATUS_LABEL_MP), PAL_XY(offsetX + 100, 80), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false);
+            PAL_DrawText(PAL_GetWord(STATUS_LABEL_ATTACKPOWER), PAL_XY(offsetX + 100, 98), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false);
+            PAL_DrawText(PAL_GetWord(STATUS_LABEL_MAGICPOWER), PAL_XY(offsetX + 100, 116), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false);
+            PAL_DrawText(PAL_GetWord(STATUS_LABEL_RESISTANCE), PAL_XY(offsetX + 100, 134), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false);
+            PAL_DrawText(PAL_GetWord(STATUS_LABEL_DEXTERITY), PAL_XY(offsetX + 100, 152), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false);
+            PAL_DrawText(PAL_GetWord(STATUS_LABEL_FLEERATE), PAL_XY(offsetX + 100, 170), BATTLEWIN_LEVELUP_LABEL_COLOR, true, false);
 
             //
             // Draw the original stats and stats after level up
@@ -1134,7 +1134,7 @@ PAL_BattleWon(
             wchar_t buffer[32] = L"";                                                                                                                                                             \
             PAL_swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls%ls%ls", PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]), PAL_GetWord(label), PAL_GetWord(BATTLEWIN_LEVELUP_LABEL));    \
             PAL_CreateSingleLineBox(PAL_XY(offsetX + 78, 60), maxNameWidth + maxPropertyWidth + PAL_TextWidth(PAL_GetWord(BATTLEWIN_LEVELUP_LABEL)) / 32 + 4, NULL);                              \
-            PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, false, false, false);                                                                                                               \
+            PAL_DrawText(buffer, PAL_XY(offsetX + 90, 70), 0, false, false);                                                                                                                      \
             PAL_DrawNumber(gpGlobals->g.PlayerRoles->statname[w] - OrigPlayerRoles.statname[w], 5, PAL_XY(183 + (maxNameWidth + maxPropertyWidth - 3) * 8, 74), kNumColorYellow, kNumAlignRight); \
             VIDEO_UpdateScreen(&rect);                                                                                                                                                            \
             UTIL_WaitKeys(3000, 0);                                                                                                                                                               \
@@ -1184,9 +1184,9 @@ PAL_BattleWon(
                 ww = (unsigned int)(w1 + w2 + w3 - 10) << 3;
                 PAL_CreateSingleLineBox(PAL_XY(65 - ww, 105), w1 + w2 + w3, NULL);
 
-                PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]), PAL_XY(75 - ww, 115), 0, false, false, false);
-                PAL_DrawText(PAL_GetWord(BATTLEWIN_ADDMAGIC_LABEL), PAL_XY(75 + 16 * w1 - ww, 115), 0, false, false, false);
-                PAL_DrawText(PAL_GetWord(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic), PAL_XY(75 + 16 * (w1 + w2) - ww, 115), 0x1B, false, false, false);
+                PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]), PAL_XY(75 - ww, 115), 0, false, false);
+                PAL_DrawText(PAL_GetWord(BATTLEWIN_ADDMAGIC_LABEL), PAL_XY(75 + 16 * w1 - ww, 115), 0, false, false);
+                PAL_DrawText(PAL_GetWord(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic), PAL_XY(75 + 16 * (w1 + w2) - ww, 115), 0x1B, false, false);
 
                 VIDEO_UpdateScreen(&rect);
                 UTIL_WaitKeys(3000, 0);

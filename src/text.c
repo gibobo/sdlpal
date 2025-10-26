@@ -258,10 +258,9 @@ void PAL_DrawText(
     unsigned int pos,
     unsigned char bColor,
     int fShadow,
-    int fUpdate,
-    int fUse8x8Font)
+    int fUpdate)
 {
-    PAL_DrawTextUnescape(lpszText, pos, bColor, fShadow, fUpdate, fUse8x8Font, true);
+    PAL_DrawTextUnescape(lpszText, pos, bColor, fShadow, fUpdate, true);
 }
 
 void PAL_DrawTextUnescape(
@@ -270,7 +269,6 @@ void PAL_DrawTextUnescape(
     unsigned char bColor,
     int fShadow,
     int fUpdate,
-    int fUse8x8Font,
     int fUnescape)
 /*++
   Purpose:
@@ -338,7 +336,7 @@ void PAL_DrawTextUnescape(
         urect.y = max(urect.y - 10, 0);
         urect.w = min(SCREEN_W - urect.x, urect.w + 20);
         urect.h = min(SCREEN_H - urect.y, urect.h + 20);
-        VIDEO_UpdateScreen(&urect);
+        // VIDEO_UpdateScreen(&urect);
     }
 }
 
@@ -400,14 +398,12 @@ void PAL_StartDialogWithOffset(
 --*/
 {
     unsigned char *buf = NULL;
-    const unsigned int buf_sz = 8192; // SCREEN_SIZE
     PAL_Rect rect;
 
-    buf = (unsigned char *)UTIL_malloc(buf_sz);
     if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
     {
         // Update the screen in battle, or the graphics may seem messed up
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
         g_fUpdatedInBattle = true;
     }
 
@@ -434,14 +430,14 @@ void PAL_StartDialogWithOffset(
             if (iNumCharFace > 0)
             {
                 // Display the character face at the upper part of the screen
-                if (RES_MKFReadChunk(buf, buf_sz, iNumCharFace, Res_RGM) > 0)
+                if (RES_MKFDecompressChunk(&buf, 0, iNumCharFace, Res_RGM))
                 {
                     rect.w = PAL_RLEGetWidth((const unsigned char *)buf);
                     rect.h = PAL_RLEGetHeight((const unsigned char *)buf);
                     rect.x = max(48 - rect.w / 2 + xOff, 0);
                     rect.y = max(55 - rect.h / 2 + yOff, 0);
                     PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
-                    VIDEO_UpdateScreen(&rect);
+                    // VIDEO_UpdateScreen(&rect);
                 }
             }
             g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 80 : 12, 8);
@@ -456,12 +452,12 @@ void PAL_StartDialogWithOffset(
             if (iNumCharFace > 0)
             {
                 // Display the character face at the lower part of the screen
-                if (RES_MKFReadChunk(buf, buf_sz, iNumCharFace, Res_RGM) > 0)
+                if (RES_MKFDecompressChunk(&buf, 0, iNumCharFace, Res_RGM))
                 {
                     rect.x = 270 - PAL_RLEGetWidth((const unsigned char *)buf) / 2 + xOff;
                     rect.y = 144 - PAL_RLEGetHeight((const unsigned char *)buf) / 2 + yOff;
                     PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
-                    VIDEO_UpdateScreen(NULL);
+                    // VIDEO_UpdateScreen(NULL);
                 }
             }
             g_TextLib.posDialogTitle = PAL_XY(iNumCharFace > 0 ? 4 : 12, 108);
@@ -523,7 +519,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
             rect.h = 16;
 
             PAL_RLEBlitToSurface(p, gpScreen, g_TextLib.posIcon);
-            VIDEO_UpdateScreen(&rect);
+            // VIDEO_UpdateScreen(&rect);
         }
     }
 
@@ -556,10 +552,10 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
         g_TextLib.bDialogPosition != kDialogCenter)
     {
         VIDEO_SetPalette(org_palette);
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
     }
 
-    PAL_ClearKeyState();
+    // PAL_ClearKeyState();
 
     g_TextLib.fUserSkip = false;
 }
@@ -701,11 +697,12 @@ int TEXT_DisplayText(
                 if (isNumber)
                     PAL_DrawNumber(text[0] - '0', 1, PAL_XY(x, y + 4), kNumColorYellow, kNumAlignLeft);
                 else
-                    PAL_DrawTextUnescape(text, PAL_XY(x, y), color, !isDialog, !isDialog && !g_TextLib.fUserSkip, false, false);
+                    PAL_DrawTextUnescape(text, PAL_XY(x, y), color, !isDialog, !isDialog && !g_TextLib.fUserSkip, false);
                 x += PAL_CharWidth(text[0]);
 
                 if (!isDialog && !g_TextLib.fUserSkip)
                 {
+                    VIDEO_UpdateScreen(NULL);
                     if (UTIL_WaitKeys(g_TextLib.iDelayTime * 8, kKeySearch | kKeyMenu))
                     {
                         // User pressed a key to skip the dialog
@@ -738,7 +735,7 @@ void PAL_ShowDialogText(
     PAL_Rect rect;
     int x, y;
 
-    PAL_ClearKeyState();
+    // PAL_ClearKeyState();
     g_TextLib.bIcon = 0;
 
     if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
@@ -746,7 +743,7 @@ void PAL_ShowDialogText(
         //
         // Update the screen in battle, or the graphics may seem messed up
         //
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
         g_fUpdatedInBattle = true;
     }
 
@@ -758,7 +755,7 @@ void PAL_ShowDialogText(
         PAL_DialogWaitForKeyWithMaximumSeconds(0.0f);
         g_TextLib.nCurrentDialogLine = 0;
         VIDEO_RestoreScreen(gpScreen);
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
     }
 
     x = PAL_X(g_TextLib.posDialogText);
@@ -786,7 +783,7 @@ void PAL_ShowDialogText(
             // Follow behavior of original version
             PAL_CreateSingleLineBoxWithShadow(PAL_XY(rect.x, rect.y), (len + 1) / 2, NULL, iDialogShadow);
 
-            VIDEO_UpdateScreen(&rect);
+            // VIDEO_UpdateScreen(&rect);
 
             // Show the text on the screen
             TEXT_DisplayText(lpszText, rect.x + 8 + ((len & 1) << 2), rect.y + 10, true);
@@ -794,7 +791,7 @@ void PAL_ShowDialogText(
 
             PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
 
-            VIDEO_UpdateScreen(&rect);
+            // VIDEO_UpdateScreen(&rect);
 
             PAL_EndDialog();
         }
@@ -811,7 +808,7 @@ void PAL_ShowDialogText(
             //
             // name of character
             //
-            PAL_DrawText(lpszText, g_TextLib.posDialogTitle, FONT_COLOR_CYAN_ALT, true, true, false);
+            PAL_DrawText(lpszText, g_TextLib.posDialogTitle, FONT_COLOR_CYAN_ALT, true, true);
         }
         else
         {
@@ -828,7 +825,7 @@ void PAL_ShowDialogText(
             // and update the full screen at once after all texts are drawn
             if (g_TextLib.fUserSkip)
             {
-                VIDEO_UpdateScreen(NULL);
+                // VIDEO_UpdateScreen(NULL);
             }
 
             g_TextLib.posIcon = PAL_XY(x, y);

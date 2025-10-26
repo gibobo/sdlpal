@@ -154,8 +154,6 @@ PAL_PartyWalkTo(
 
     while (xOffset != 0 || yOffset != 0)
     {
-        UTIL_Delay(FRAME_TIME);
-
         // Store trail
         for (i = 3; i >= 0; i--)
         {
@@ -204,6 +202,7 @@ PAL_PartyWalkTo(
         PAL_GameUpdate(false);
         PAL_MakeScene();
         VIDEO_UpdateScreen(NULL);
+        UTIL_Delay(FRAME_TIME);
 
         xOffset = x * 32 + h * 16 - (PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset));
         yOffset = y * 16 + h * 8 - (PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset));
@@ -254,8 +253,6 @@ PAL_PartyRideEventObject(
 
     while (xOffset != 0 || yOffset != 0)
     {
-        UTIL_Delay(FRAME_TIME);
-
         if (yOffset < 0)
         {
             gpGlobals->wPartyDirection = ((xOffset < 0) ? kDirWest : kDirNorth);
@@ -307,6 +304,7 @@ PAL_PartyRideEventObject(
         PAL_GameUpdate(false);
         PAL_MakeScene();
         VIDEO_UpdateScreen(NULL);
+        UTIL_Delay(FRAME_TIME);
 
         xOffset = x * 32 + h * 16 - PAL_X(gpGlobals->viewport) - PAL_X(gpGlobals->partyoffset);
         yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
@@ -1077,7 +1075,7 @@ PAL_InterpretInstruction(
             // Show the buy item menu
             //
             PAL_MakeScene();
-            VIDEO_UpdateScreen(NULL);
+            // VIDEO_UpdateScreen(NULL);
             PAL_BuyMenu(pScript->rgwOperand[0]);
             break;
 
@@ -1086,7 +1084,7 @@ PAL_InterpretInstruction(
             // Show the sell item menu
             //
             PAL_MakeScene();
-            VIDEO_UpdateScreen(NULL);
+            // VIDEO_UpdateScreen(NULL);
             PAL_SellMenu();
             break;
 
@@ -1396,7 +1394,7 @@ PAL_InterpretInstruction(
                 static unsigned char bufImage[2048];
                 if (gpGlobals->g.rgObject[wObject].item.wBitmap != wPrevImageIndex)
                 {
-                    if (RES_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, Res_BALL) > 0)
+                    if (RES_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, Res_BALL))
                     {
                         wPrevImageIndex = gpGlobals->g.rgObject[wObject].item.wBitmap;
                     }
@@ -1410,7 +1408,7 @@ PAL_InterpretInstruction(
                     PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(PAL_X(pos) + 8, PAL_Y(pos) + 7));
                 }
 
-                VIDEO_UpdateScreen(&rect);
+                // VIDEO_UpdateScreen(&rect);
 
                 PAL_ShowDialogText(s, 5);
             }
@@ -1679,7 +1677,7 @@ PAL_InterpretInstruction(
             //
             // screen fade out
             //
-            VIDEO_UpdateScreen(NULL);
+            // VIDEO_UpdateScreen(NULL);
             PAL_FadeOut(pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1);
             gpGlobals->fNeedToFadeIn = true;
             break;
@@ -1688,7 +1686,7 @@ PAL_InterpretInstruction(
             //
             // screen fade in
             //
-            VIDEO_UpdateScreen(NULL);
+            // VIDEO_UpdateScreen(NULL);
             PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
                        (pScript->rgwOperand[0]) ? pScript->rgwOperand[0] : 1);
             gpGlobals->fNeedToFadeIn = false;
@@ -1785,7 +1783,6 @@ PAL_InterpretInstruction(
                 gpGlobals->fEnteringScene = true;
                 gpGlobals->wLayer = 0;
                 PAL_SetLoadFlags(kLoadScene);
-                PAL_LoadResources();
             }
             break;
 
@@ -1905,7 +1902,6 @@ PAL_InterpretInstruction(
             if (!gpGlobals->fInBattle && pScript->rgwOperand[2])
             {
                 PAL_SetLoadFlags(kLoadPlayerSprite);
-                PAL_LoadResources();
             }
             break;
 
@@ -2087,7 +2083,6 @@ PAL_InterpretInstruction(
             // Reload the player sprites
             //
             PAL_SetLoadFlags(kLoadPlayerSprite);
-            PAL_LoadResources();
 
             memset(gpGlobals->rgPoisonStatus, 0, sizeof(gpGlobals->rgPoisonStatus));
             PAL_UpdateEquipments();
@@ -2599,7 +2594,6 @@ PAL_InterpretInstruction(
                     gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + curFollower].wPlayerRole = pScript->rgwOperand[i];
 
                     PAL_SetLoadFlags(kLoadPlayerSprite);
-                    PAL_LoadResources();
 
                     //
                     // Update the position and gesture for the follower
@@ -2625,7 +2619,6 @@ PAL_InterpretInstruction(
             {
                 gpGlobals->g.rgScene[gpGlobals->wNumScene - 1].wMapNum = pScript->rgwOperand[1];
                 PAL_SetLoadFlags(kLoadScene);
-                PAL_LoadResources();
             }
             else
             {
@@ -3129,8 +3122,6 @@ PAL_RunTriggerScript(
 
                 for (i = 0; i < (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1); i++)
                 {
-                    UTIL_Delay(FRAME_TIME);
-
                     if (pScript->rgwOperand[2])
                     {
                         PAL_UpdatePartyGestures(false);
@@ -3139,6 +3130,7 @@ PAL_RunTriggerScript(
                     PAL_GameUpdate(pScript->rgwOperand[1] ? true : false);
                     PAL_MakeScene();
                     VIDEO_UpdateScreen(NULL);
+                    UTIL_Delay(FRAME_TIME);
                 }
                 wScriptEntry++;
                 break;
@@ -3356,7 +3348,7 @@ begin:
             XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : PAL_XY(102, 0);
             YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 : 3;
             iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
-            PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, true, false, false);
+            PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, true, false);
             wScriptEntry++;
             break;
 

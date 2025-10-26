@@ -700,7 +700,8 @@ static int SOUND_Play(
     WAVEDATA *cursnd;
     unsigned char *buf = NULL;
     const void *snddata;
-    int len, i;
+    unsigned char i;
+    unsigned int len;
 
     // Check for NULL pointer.
     if (player == NULL)

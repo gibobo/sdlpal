@@ -172,7 +172,7 @@ PAL_MagicSelectionMenuUpdate(
             //
             // Draw the text
             //
-            PAL_DrawText(PAL_GetWord(rgMagicItem[i].wMagic), PAL_XY(35 + k * iItemTextWidth, 54 + j * 18 + iBoxYOffset), bColor, true, false, false);
+            PAL_DrawText(PAL_GetWord(rgMagicItem[i].wMagic), PAL_XY(35 + k * iItemTextWidth, 54 + j * 18 + iBoxYOffset), bColor, true, false);
 
             //
             // Draw the cursor on the current selected item
@@ -197,7 +197,7 @@ PAL_MagicSelectionMenuUpdate(
             j = 35 + j * iItemTextWidth;
             k = 54 + k * 18 + iBoxYOffset;
 
-            PAL_DrawText(PAL_GetWord(rgMagicItem[g_iCurrentItem].wMagic), PAL_XY(j, k), MENUITEM_COLOR_CONFIRMED, false, true, false);
+            PAL_DrawText(PAL_GetWord(rgMagicItem[g_iCurrentItem].wMagic), PAL_XY(j, k), MENUITEM_COLOR_CONFIRMED, false, true);
 
             //
             // Draw the cursor on the current selected item
@@ -355,7 +355,7 @@ PAL_MagicSelectionMenu(
         PAL_MakeScene();
         for (i = 0, j = 45; i <= gpGlobals->wMaxPartyMemberIndex; i++, j += 78)
         {
-            PAL_PlayerInfoBox(PAL_XY(j, 165), gpGlobals->rgParty[i].wPlayerRole, 100, TIMEMETER_COLOR_DEFAULT, false);
+            PAL_PlayerInfoBox(PAL_XY(j, 165), gpGlobals->rgParty[i].wPlayerRole);
         }
 
         w = PAL_MagicSelectionMenuUpdate();

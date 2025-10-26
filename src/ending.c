@@ -60,7 +60,7 @@ static void PAL_ShowFBP(
     unsigned int k;
     PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
 
-    RES_MKFDecompressChunk(&buf, 0, wChunkNum, Res_FBP);
+    RES_MKFDecompressChunk(&buf, SCREEN_SIZE, wChunkNum, Res_FBP);
 
     if (g_wCurEffectSprite)
     {
@@ -168,14 +168,13 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
                                  gpScreen, PAL_XY(0, 0));
         }
 
-        VIDEO_UpdateScreen(NULL);
-
         if (gpGlobals->fNeedToFadeIn)
         {
             PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
             gpGlobals->fNeedToFadeIn = false;
         }
 
+        VIDEO_UpdateScreen(NULL);
         UTIL_Delay(53);
     }
 
@@ -236,13 +235,13 @@ static void PAL_EndingAnimation(void)
         PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufGirl, (UTIL_GetMilliseconds() / 50U) % 4U),
                              gpScreen, PAL_XY(220, yPosGirl));
 
-        VIDEO_UpdateScreen(NULL);
         if (gpGlobals->fNeedToFadeIn)
         {
             PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
             gpGlobals->fNeedToFadeIn = false;
         }
 
+        VIDEO_UpdateScreen(NULL);
         UTIL_Delay(50);
     }
 

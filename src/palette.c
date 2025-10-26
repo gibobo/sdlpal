@@ -60,9 +60,8 @@ unsigned char *PAL_GetPalette(int iPaletteNum, unsigned char fNight)
 
     unsigned char buf[PALETTE_SIZE * 2];
     // Read the palette data from the pat.mkf file
-    int i = RES_MKFReadChunk(buf, PALETTE_SIZE * 2, iPaletteNum, Res_PAT);
-
-    if (i < 0)
+    unsigned int i = RES_MKFReadChunk(buf, PALETTE_SIZE * 2, iPaletteNum, Res_PAT);
+    if (i == 0)
         return NULL; // Read failed
     else if (i <= PALETTE_SIZE)
         fNight = 0; // There is no night colors in the palette
@@ -98,7 +97,7 @@ void PAL_SetPalette(int iPaletteNum, unsigned char fNight)
     if (p != NULL)
     {
         VIDEO_SetPalette(p);
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
     }
 }
 
@@ -148,7 +147,7 @@ void PAL_FadeOut(int iDelay)
 
     memset(new_palette, 0, sizeof(new_palette));
     VIDEO_SetPalette(new_palette);
-    VIDEO_UpdateScreen(NULL);
+    // VIDEO_UpdateScreen(NULL);
 }
 
 void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay)
@@ -189,7 +188,7 @@ void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay)
     }
 
     VIDEO_SetPalette(palette);
-    VIDEO_UpdateScreen(NULL);
+    // VIDEO_UpdateScreen(NULL);
 }
 
 void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
@@ -241,7 +240,7 @@ void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
             PAL_SetDirInput(kDirUnknown);
             PAL_GameUpdate(false);
             PAL_MakeScene();
-            VIDEO_UpdateScreen(NULL);
+            // VIDEO_UpdateScreen(NULL);
 
             // Calculate the current palette...
             for (j = 0; j < PALETTE_SIZE; j++)
@@ -263,7 +262,7 @@ void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
             PAL_SetDirInput(kDirUnknown);
             PAL_GameUpdate(false);
             PAL_MakeScene();
-            VIDEO_UpdateScreen(NULL);
+            // VIDEO_UpdateScreen(NULL);
 
             // Calculate the current palette...
             for (j = 0; j < PALETTE_SIZE; j++)
@@ -315,7 +314,7 @@ void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene)
             tmp_palette[j] = (unsigned char)(((int)org_palette[j] * (31 - i) + (int)(new_palette[j]) * i) / 31);
         }
         VIDEO_SetPalette(tmp_palette);
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
 
         if (fUpdateScene)
         {
@@ -323,9 +322,9 @@ void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene)
             PAL_SetDirInput(kDirUnknown);
             PAL_GameUpdate(false);
             PAL_MakeScene();
-            VIDEO_UpdateScreen(NULL);
         }
 
+        VIDEO_UpdateScreen(NULL);
         UTIL_Delay(fUpdateScene ? FRAME_TIME : FRAME_TIME / 4);
     }
 }
@@ -388,7 +387,7 @@ void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom)
         }
 
         VIDEO_SetPalette(org_palette);
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
     }
     else
     {
@@ -414,7 +413,7 @@ void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom)
         }
 
         VIDEO_SetPalette(new_palette);
-        VIDEO_UpdateScreen(NULL);
+        // VIDEO_UpdateScreen(NULL);
     }
 }
 
@@ -450,7 +449,7 @@ void PAL_FadeToRed(void)
         }
     }
 
-    VIDEO_UpdateScreen(NULL);
+    // VIDEO_UpdateScreen(NULL);
 
     for (i = 0; i < 32; i++)
     {

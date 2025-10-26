@@ -47,14 +47,14 @@ int RES_ReadAnimationFrame(
     unsigned char resource_id);
 
 // Decompresses a chunk from the resource file into a buffer
-int RES_MKFDecompressChunk(
+unsigned int RES_MKFDecompressChunk(
     void **chunk_buffer,
     unsigned int buffer_size,
     unsigned int chunk_index,
     unsigned char resource_id);
 
 // Reads a raw chunk from the resource file into a provided buffer.
-int RES_MKFReadChunk(
+unsigned int RES_MKFReadChunk(
     void *output_buffer,
     unsigned int buffer_size,
     unsigned int chunk_index,

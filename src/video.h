@@ -32,10 +32,10 @@ typedef struct PAL_Surface {
 } PAL_Surface;
 
 typedef struct PAL_Rect {
-    int x;
-    int y;
-    int w;
-    int h;
+    unsigned short x;
+    unsigned short y;
+    unsigned short w;
+    unsigned short h;
 } PAL_Rect;
 
 extern PAL_Surface *gpScreen;
@@ -54,7 +54,7 @@ void VIDEO_ShakeScreen(
     unsigned short wShakeTime,
     unsigned short wShakeLevel);
 
-void VIDEO_SwitchScreen(unsigned short wSpeed);
+void VIDEO_SwitchScreen(void);
 
 void VIDEO_FadeScreen(unsigned short wSpeed);
 

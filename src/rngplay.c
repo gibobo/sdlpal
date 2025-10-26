@@ -312,18 +312,15 @@ void PAL_RNGPlay(
         if (PAL_RNGBlitToSurface(rng, RNGBlit_len, gpScreen) < 0)
             break; // Failed to get the frame, don't go further
 
-        // Update the screen
-        VIDEO_UpdateScreen(NULL);
-
-        // Fade in the screen if needed
-
         if (gpGlobals)
         {
+            // Fade in the screen if needed
             if (gpGlobals->fNeedToFadeIn)
                 PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
             gpGlobals->fNeedToFadeIn = 0;
         }
-
+        // Update the screen
+        VIDEO_UpdateScreen(NULL);
         // Delay for a while
         UTIL_Delay(iDelay);
     }

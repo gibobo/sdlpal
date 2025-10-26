@@ -88,7 +88,7 @@ int PAL_BattleSelectAutoTarget(
     return PAL_BattleSelectAutoTargetFrom(0);
 }
 
-int PAL_BattleSelectAutoTargetFrom(
+short PAL_BattleSelectAutoTargetFrom(
     int begin)
 /*++
   Purpose:
@@ -105,8 +105,8 @@ int PAL_BattleSelectAutoTargetFrom(
 
 --*/
 {
-    int i;
-    int count;
+    short i;
+    unsigned char count;
 
     i = g_Battle->UI.iPrevEnemyTarget;
 
@@ -130,7 +130,7 @@ int PAL_BattleSelectAutoTargetFrom(
     return -1;
 }
 
-static short
+static unsigned short
 PAL_CalcBaseDamage(
     unsigned short wAttackStrength,
     unsigned short wDefense)
@@ -151,18 +151,18 @@ PAL_CalcBaseDamage(
 
 --*/
 {
-    short sDamage;
+    unsigned short sDamage = 0;
 
     //
     // Formula courtesy of palxex and shenyanduxing
     //
     if (wAttackStrength > wDefense)
     {
-        sDamage = (short)(wAttackStrength * 2 - wDefense * 1.6 + 0.5);
+        sDamage = (unsigned short)((float)wAttackStrength * 2.0 - (float)wDefense * 1.6 + 0.5);
     }
     else if (wAttackStrength > wDefense * 0.6)
     {
-        sDamage = (short)(wAttackStrength - wDefense * 0.6 + 0.5);
+        sDamage = (unsigned short)((float)wAttackStrength - (float)wDefense * 0.6 + 0.5);
     }
     else
     {
@@ -205,7 +205,7 @@ PAL_CalcMagicDamage(
 
 --*/
 {
-    short sDamage;
+    unsigned short sDamage;
     unsigned short wElem;
 
     wMagicID = gpGlobals->g.rgObject[wMagicID].magic.wMagicNumber;
@@ -272,7 +272,7 @@ short PAL_CalcPhysicalAttackDamage(
 
 --*/
 {
-    short sDamage;
+    unsigned short sDamage = 0;
 
     sDamage = PAL_CalcBaseDamage(wAttackStrength, wDefense);
     if (wAttackResistance != 0)
@@ -399,9 +399,6 @@ void PAL_BattleDelay(
             }
         }
 
-        // Wait for the time of one frame. Accept input here.
-        UTIL_Delay(BATTLE_FRAME_TIME);
-
         PAL_BattleMakeScene();
         VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
         PAL_BattleUIUpdate();
@@ -410,19 +407,21 @@ void PAL_BattleDelay(
         {
             if (wObjectID == BATTLE_LABEL_ESCAPEFAIL) // HACKHACK
             {
-                PAL_DrawText(PAL_GetWord(wObjectID), PAL_XY(130, 75), 15, true, false, false);
+                PAL_DrawText(PAL_GetWord(wObjectID), PAL_XY(130, 75), 15, true, false);
             }
             else if ((short)wObjectID < 0)
             {
-                PAL_DrawText(PAL_GetWord(-((short)wObjectID)), PAL_XY(170, 45), DESCTEXT_COLOR, true, false, false);
+                PAL_DrawText(PAL_GetWord(-((short)wObjectID)), PAL_XY(170, 45), DESCTEXT_COLOR, true, false);
             }
             else
             {
-                PAL_DrawText(PAL_GetWord(wObjectID), PAL_XY(210, 50), 15, true, false, false);
+                PAL_DrawText(PAL_GetWord(wObjectID), PAL_XY(210, 50), 15, true, false);
             }
         }
 
         VIDEO_UpdateScreen(NULL);
+        // Wait for the time of one frame. Accept input here.
+        UTIL_Delay(BATTLE_FRAME_TIME);
     }
 }
 
@@ -1666,9 +1665,6 @@ PAL_BattleShowPlayerAttackAnim(
     {
         const unsigned char *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, index++);
 
-        // Wait for the time of one frame. Accept input here.
-        UTIL_Delay(BATTLE_FRAME_TIME);
-
         // Update the gesture of enemies.
         for (j = 0; j <= g_Battle->wMaxEnemyIndex; j++)
         {
@@ -1736,14 +1732,16 @@ PAL_BattleShowPlayerAttackAnim(
             PAL_BattleBackupStat();
         }
 
-        VIDEO_UpdateScreen(NULL);
-
         if (i == 1)
         {
             g_Battle->rgPlayer[wPlayerIndex].pos =
                 PAL_XY(PAL_X(g_Battle->rgPlayer[wPlayerIndex].pos) + 2,
                        PAL_Y(g_Battle->rgPlayer[wPlayerIndex].pos) + 1);
         }
+
+        VIDEO_UpdateScreen(NULL);
+        // Wait for the time of one frame. Accept input here.
+        UTIL_Delay(BATTLE_FRAME_TIME);
     }
 
     dist = 8;
@@ -1908,9 +1906,6 @@ void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
         {
             const unsigned char *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, index++);
 
-            // Wait for the time of one frame. Accept input here.
-            UTIL_Delay(BATTLE_FRAME_TIME);
-
             // Update the gesture of enemies.
             for (j = 0; j <= g_Battle->wMaxEnemyIndex; j++)
             {
@@ -1942,6 +1937,8 @@ void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
             PAL_BattleUIUpdate();
 
             VIDEO_UpdateScreen(NULL);
+            // Wait for the time of one frame. Accept input here.
+            UTIL_Delay(BATTLE_FRAME_TIME);
         }
     }
 
@@ -1978,8 +1975,7 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-    n = RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE);
-    if (n <= 0)
+    if (!RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE))
         return;
 
     n = PAL_SpriteGetNumFrames(lpSpriteEffect);
@@ -1993,9 +1989,6 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
 
         if (i == 0)
             AUDIO_PlaySound(gpGlobals->g.lprgMagic[iMagicNum].wSound);
-
-        // Wait for the time of one frame. Accept input here.
-        UTIL_Delay((gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10);
 
         // Magic layers offset
         sLayerOffset = (short)gpGlobals->g.lprgMagic[iMagicNum].rgSpecific.sLayerOffset;
@@ -2039,6 +2032,8 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
         PAL_BattleUIUpdate();
 
         VIDEO_UpdateScreen(NULL);
+        // Wait for the time of one frame. Accept input here.
+        UTIL_Delay((gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10);
     }
 
     UTIL_free(lpSpriteEffect);
@@ -2104,15 +2099,14 @@ PAL_BattleShowPlayerOffMagicAnim(
 --*/
 {
     unsigned char *lpSpriteEffect = NULL;
-    unsigned short n;
-    int iMagicNum, iEffectNum, i, k, l, x, y, wave, blow;
+    unsigned short n, wave;
+    int iMagicNum, iEffectNum, i, k, l, x, y, blow;
     short sLayerOffset;
 
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-    n = RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE);
-    if (n <= 0)
+    if (!RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE))
         return;
 
     n = PAL_SpriteGetNumFrames(lpSpriteEffect);
@@ -2175,9 +2169,6 @@ PAL_BattleShowPlayerOffMagicAnim(
             VIDEO_ShakeScreen(i, 3);
             *b = PAL_SpriteGetFrame(lpSpriteEffect, (l - gpGlobals->g.lprgMagic[iMagicNum].wShake - 1) % n);
         }
-
-        // Wait for the time of one frame. Accept input here.
-        UTIL_Delay((gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10);
 
         //
         // Magic layers offset
@@ -2280,6 +2271,8 @@ PAL_BattleShowPlayerOffMagicAnim(
         PAL_BattleUIUpdate();
 
         VIDEO_UpdateScreen(NULL);
+        // Wait for the time of one frame. Accept input here.
+        UTIL_Delay(gpGlobals->g.lprgMagic[iMagicNum].wSpeed * 10 + 50);
     }
 
     gpGlobals->wScreenWave = wave;
@@ -2321,8 +2314,7 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
 
-    n = RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE);
-    if (n <= 0)
+    if (!RES_MKFDecompressChunk(&lpSpriteEffect, 0, iEffectNum, Res_FIRE))
         return;
 
     n = PAL_SpriteGetNumFrames(lpSpriteEffect);
@@ -2386,9 +2378,6 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
             else
                 *b = PAL_SpriteGetFrame(lpSpriteEffect, (l - gpGlobals->g.lprgMagic[iMagicNum].wShake - 1) % n);
         }
-
-        // Wait for the time of one frame. Accept input here.
-        UTIL_Delay((gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10);
 
         //
         // Magic layers offset
@@ -2491,6 +2480,8 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
         PAL_BattleUIUpdate();
 
         VIDEO_UpdateScreen(NULL);
+        // Wait for the time of one frame. Accept input here.
+        UTIL_Delay((gpGlobals->g.lprgMagic[iMagicNum].wSpeed + 5) * 10);
     }
 
     gpGlobals->wScreenWave = wave;
@@ -2578,15 +2569,14 @@ static void PAL_BattleShowPlayerSummonMagicAnim(unsigned short wPlayerIndex, uns
     //
     while (g_Battle->iSummonFrame < PAL_SpriteGetNumFrames(g_Battle->lpSummonSprite) - 1)
     {
-        // Wait for the time of one frame. Accept input here.
-        UTIL_Delay((gpGlobals->g.lprgMagic[wMagicNum].wSpeed + 5) * 10);
-
         PAL_BattleMakeScene();
         VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
 
         PAL_BattleUIUpdate();
 
-        VIDEO_UpdateScreen(NULL);
+        VIDEO_UpdateScreen(NULL);        
+        // Wait for the time of one frame. Accept input here.
+        UTIL_Delay((gpGlobals->g.lprgMagic[wMagicNum].wSpeed + 5) * 10);
 
         g_Battle->iSummonFrame++;
     }
@@ -3832,10 +3822,12 @@ void PAL_BattleEnemyPerformAction(
 
 --*/
 {
-    int str, def, iCoverIndex, i, x, y, ex, ey, iSound;
+    unsigned short str, def;
+    int iCoverIndex, i, x, y, ex, ey, iSound;
     unsigned short rgwElementalResistance[NUM_MAGIC_ELEMENTAL];
     unsigned short wPlayerRole, w, wMagic, wMagicNum;
-    short sTarget, sDamage;
+    int sTarget;
+    unsigned short sDamage;
     int fAutoDefend = false, rgfMagAutoDefend[MAX_PLAYERS_IN_PARTY];
 
     PAL_BattleBackupStat();
@@ -3883,8 +3875,6 @@ void PAL_BattleEnemyPerformAction(
         {
             const unsigned char *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, i);
 
-            UTIL_Delay(BATTLE_FRAME_TIME);
-
             PAL_BattleMakeScene();
             VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
 
@@ -3893,13 +3883,15 @@ void PAL_BattleEnemyPerformAction(
             PAL_BattleUIUpdate();
 
             VIDEO_UpdateScreen(NULL);
+            // Wait for the time of one frame. Accept input here.
+            UTIL_Delay(BATTLE_FRAME_TIME);
         }
 
-        int str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
-        str += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
-        int def = (short)g_Battle->rgEnemy[iTarget].e.wDefense;
-        def += (g_Battle->rgEnemy[iTarget].e.wLevel + 6) * 4;
-        sDamage = PAL_CalcBaseDamage(str, def) * 2 / g_Battle->rgEnemy[iTarget].e.wPhysicalResistance;
+        unsigned short str2 = g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
+        unsigned short def2 = g_Battle->rgEnemy[iTarget].e.wDefense;
+        str2 += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
+        def2 += (g_Battle->rgEnemy[iTarget].e.wLevel + 6) * 4;
+        sDamage = PAL_CalcBaseDamage(str2, def2) * 2 / g_Battle->rgEnemy[iTarget].e.wPhysicalResistance;
 
         if (sDamage <= 0)
         {
@@ -3934,7 +3926,7 @@ void PAL_BattleEnemyPerformAction(
 
         wMagicNum = gpGlobals->g.rgObject[wMagic].magic.wMagicNumber;
 
-        str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wMagicStrength;
+        str = g_Battle->rgEnemy[wEnemyIndex].e.wMagicStrength;
         str += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
         if (str < 0)
         {
@@ -4025,7 +4017,7 @@ void PAL_BattleEnemyPerformAction(
                 PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess, wPlayerRole);
         }
 
-        if ((short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) > 0)
+        if (gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage)
         {
             if (sTarget == -1)
             {
@@ -4170,7 +4162,7 @@ void PAL_BattleEnemyPerformAction(
         //
         unsigned short wFrameBak = g_Battle->rgPlayer[sTarget].wCurrentFrame;
 
-        str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
+        str = g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
         str += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
         if (str < 0)
         {
@@ -4314,7 +4306,7 @@ void PAL_BattleEnemyPerformAction(
                 sDamage /= 2;
             }
 
-            if ((short)gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] < sDamage)
+            if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] < sDamage)
             {
                 sDamage = gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole];
             }

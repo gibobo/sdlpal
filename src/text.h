@@ -66,8 +66,7 @@ void PAL_DrawText(
     unsigned int pos,
     unsigned char bColor,
     int fShadow,
-    int fUpdate,
-    int fUse8x8Font);
+    int fUpdate);
 
 void PAL_DrawTextUnescape(
     const wchar_t *lpszText,
@@ -75,7 +74,6 @@ void PAL_DrawTextUnescape(
     unsigned char bColor,
     int fShadow,
     int fUpdate,
-    int fUse8x8Font,
     int fUnescape);
 
 void PAL_DialogSetDelayTime(

@@ -170,7 +170,7 @@ PAL_ItemSelectMenuUpdate(
             //
             // Draw the text
             //
-            PAL_DrawText(PAL_GetWord(wObject), PAL_XY(15 + k * iItemTextWidth, 12 + j * 18), bColor, true, false, false);
+            PAL_DrawText(PAL_GetWord(wObject), PAL_XY(15 + k * iItemTextWidth, 12 + j * 18), bColor, true, false);
 
             if (i == gpGlobals->iCurInvMenuItem)
             {
@@ -184,7 +184,7 @@ PAL_ItemSelectMenuUpdate(
                 PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen,
                                      PAL_XY(xBase, yBase - iPictureYOffset));
 
-                if (RES_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, Res_BALL) > 0)
+                if (RES_MKFReadChunk(bufImage, sizeof(bufImage), gpGlobals->g.rgObject[wObject].item.wBitmap, Res_BALL))
                 {
                     PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(xBase + 8, yBase + 7 - iPictureYOffset));
                 }
@@ -243,7 +243,7 @@ PAL_ItemSelectMenuUpdate(
                 j = (gpGlobals->iCurInvMenuItem < iItemsPerLine * iPageLineOffset) ? (gpGlobals->iCurInvMenuItem / iItemsPerLine) : iPageLineOffset;
                 k = gpGlobals->iCurInvMenuItem % iItemsPerLine;
 
-                PAL_DrawText(PAL_GetWord(wObject), PAL_XY(15 + k * iItemTextWidth, 12 + j * 18), MENUITEM_COLOR_CONFIRMED, false, false, false);
+                PAL_DrawText(PAL_GetWord(wObject), PAL_XY(15 + k * iItemTextWidth, 12 + j * 18), MENUITEM_COLOR_CONFIRMED, false, false);
 
                 //
                 // Draw the cursor on the current selected item
