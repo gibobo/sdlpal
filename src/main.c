@@ -31,6 +31,7 @@
 #include "res.h"
 #include "resource.h"
 #include "rngplay.h"
+#include "scene.h"
 #include "text.h"
 #include "ui.h"
 #include "uigame.h"
@@ -178,6 +179,7 @@ void PAL_Shutdown(int exit_code)
     PAL_DeInitFont();
     PAL_FreeGlobals();
     PAL_FreeResourceIndex();
+    PAL_FreeSceneResources();
 
     g_exit_code = exit_code;
     longjmp(g_exit_jmp_buf, 1);
@@ -283,7 +285,7 @@ void PAL_SplashScreen(void)
         {
             for (i = 0; i < PALETTE_SIZE; i++)
                 rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
-            VIDEO_SetPalette(rgCurrentPalette);
+            DRIVER_UpdatePalette(rgCurrentPalette);
         }
 
         // Draw the screen
@@ -343,12 +345,12 @@ void PAL_SplashScreen(void)
     {
         for (i = 0; i < PALETTE_SIZE; i++)
             rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
-        VIDEO_SetPalette(rgCurrentPalette);
+        DRIVER_UpdatePalette(rgCurrentPalette);
         VIDEO_UpdateScreen(NULL);
         UTIL_Delay(8);
         dwTime += 4;
     }
-    VIDEO_SetPalette(palette);
+    DRIVER_UpdatePalette(palette);
     VIDEO_UpdateScreen(NULL);
 
     UTIL_free(cranepos);

@@ -9,7 +9,7 @@
 #include "esp_system.h"
 
 // Define to enable/disable memory usage reporting
-#define ENABLE_MEMORY_REPORT 0
+#define ENABLE_MEMORY_REPORT 1
 
 // Function to report memory usage on ESP32
 static void report_memory_usage(const char* operation, size_t allocated_size)

@@ -32,10 +32,10 @@ typedef struct PAL_Surface {
 } PAL_Surface;
 
 typedef struct PAL_Rect {
-    int x;
-    int y;
-    int w;
-    int h;
+    short x;
+    short y;
+    short w;
+    short h;
 } PAL_Rect;
 
 extern PAL_Surface *gpScreen;
@@ -45,10 +45,6 @@ int VIDEO_Startup(void);
 void VIDEO_Shutdown(void);
 
 void VIDEO_UpdateScreen(const PAL_Rect *lpRect);
-
-void VIDEO_SetPalette(const unsigned char *rgPalette);
-
-const unsigned char *VIDEO_GetPalette(void);
 
 void VIDEO_ShakeScreen(
     unsigned short wShakeTime,

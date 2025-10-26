@@ -35,6 +35,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX_SPRITE_TO_DRAW 2048
+
 typedef struct tagSPRITE_TO_DRAW
 {
     const unsigned char *lpSpriteFrame; // pointer to the frame bitmap
@@ -44,6 +46,7 @@ typedef struct tagSPRITE_TO_DRAW
 
 static SPRITE_TO_DRAW *g_rgSpriteToDraw = NULL;
 static int g_nSpriteToDraw = 0;
+static int p_nSpriteToDraw = 0;
 
 static void
 PAL_AddSpriteToDraw(
@@ -72,7 +75,13 @@ PAL_AddSpriteToDraw(
 
 --*/
 {
-    g_rgSpriteToDraw = UTIL_realloc(g_rgSpriteToDraw, g_nSpriteToDraw + 1, sizeof(SPRITE_TO_DRAW));
+    assert(g_nSpriteToDraw < MAX_SPRITE_TO_DRAW);
+
+    if (p_nSpriteToDraw < (g_nSpriteToDraw + 1))
+    {
+        p_nSpriteToDraw = g_nSpriteToDraw + 1;
+        g_rgSpriteToDraw = UTIL_realloc(g_rgSpriteToDraw, p_nSpriteToDraw, sizeof(SPRITE_TO_DRAW));
+    }
 
     g_rgSpriteToDraw[g_nSpriteToDraw].lpSpriteFrame = lpSpriteFrame;
     g_rgSpriteToDraw[g_nSpriteToDraw].pos = PAL_XY(x, y);
@@ -364,9 +373,6 @@ PAL_SceneDrawSprites(
 
         PAL_RLEBlitToSurface(p->lpSpriteFrame, gpScreen, PAL_XY(x, y));
     }
-    UTIL_free(g_rgSpriteToDraw);
-    g_rgSpriteToDraw = NULL;
-    g_nSpriteToDraw = 0;
 }
 
 void PAL_ApplyWave(
@@ -888,4 +894,12 @@ void PAL_NPCWalkOneStep(
         p->wCurrentFrameNum++;
         p->wCurrentFrameNum %= p->nSpriteFramesAuto;
     }
+}
+
+void PAL_FreeSceneResources(void)
+{
+    UTIL_free(g_rgSpriteToDraw);
+    g_rgSpriteToDraw = NULL;
+    g_nSpriteToDraw = 0;
+    p_nSpriteToDraw = 0;
 }

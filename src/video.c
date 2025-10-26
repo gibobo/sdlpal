@@ -32,7 +32,6 @@ static PAL_Surface *gpBackup[] = {NULL, NULL}; // Backup screen buffer
 volatile unsigned char g_bRenderPaused = false;
 static unsigned short g_wShakeTime = 0;
 static unsigned short g_wShakeLevel = 0;
-static unsigned char *bufPalette = NULL;
 
 int VIDEO_Startup(void)
 /*++
@@ -51,13 +50,6 @@ int VIDEO_Startup(void)
 
 --*/
 {
-    // Create palette object
-    bufPalette = (unsigned char *)UTIL_malloc(256 * 3);
-    if (bufPalette == NULL)
-    {
-        return -1; // Memory allocation failed
-    }
-
     // Create the screen buffer and the backup screen buffer.
     gpScreen = VIDEO_CreateCompatibleSizedSurface(NULL);
     if (gpScreen == NULL)
@@ -70,7 +62,7 @@ int VIDEO_Startup(void)
     gpBackup[1] = VIDEO_CreateCompatibleSizedSurface(NULL);
     if (gpBackup[0] == NULL || gpBackup[1] == NULL)
     {
-        return -3; // Fail to create backup buffers
+        return -2; // Fail to create backup buffers
     }
 
     return 0;
@@ -95,12 +87,10 @@ void VIDEO_Shutdown(void)
     PAL_FreeSurface(gpScreen);
     PAL_FreeSurface(gpBackup[0]);
     PAL_FreeSurface(gpBackup[1]);
-    UTIL_free(bufPalette);
 
     gpScreen = NULL;
     gpBackup[0] = NULL;
     gpBackup[1] = NULL;
-    bufPalette = NULL;
 }
 
 void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
@@ -133,45 +123,6 @@ void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
     }
     else
         DRIVER_FrameShow(gpScreen->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
-}
-
-void VIDEO_SetPalette(const unsigned char *rgPalette)
-/*++
-  Purpose:
-
-    Set the palette of the screen.
-
-  Parameters:
-
-    [IN]  rgPalette - array of 256 colors.
-
-  Return value:
-
-    None.
-
---*/
-{
-    memcpy(bufPalette, rgPalette, 256 * 3);
-    DRIVER_UpdatePalette(bufPalette);
-}
-
-const unsigned char *VIDEO_GetPalette(void)
-/*++
-  Purpose:
-
-    Get the current palette of the screen.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    Pointer to the current palette.
-
---*/
-{
-    return (const unsigned char *)bufPalette;
 }
 
 void VIDEO_ShakeScreen(unsigned short wShakeTime, unsigned short wShakeLevel)
@@ -276,7 +227,7 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
                 }
                 gpBackup[0]->pixels[k] = (a & 0xF0) | (b & 0x0F);
             }
-            DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, true);
+                DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, true);
             UTIL_Delay(wSpeed);
         }
     }
@@ -351,6 +302,9 @@ void VIDEO_CopySurface(
     PAL_Surface *dst,
     PAL_Rect *dstrect)
 {
+    if (src == NULL || dst == NULL || src->pixels == NULL || dst->pixels == NULL)
+        return;
+
     unsigned int sr_x = (srcrect) ? srcrect->x : 0;
     unsigned int sr_y = (srcrect) ? srcrect->y : 0;
     unsigned int sr_w = (srcrect) ? min(src->w, srcrect->x + srcrect->w) - sr_x : src->w;

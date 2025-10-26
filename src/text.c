@@ -543,7 +543,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
             new_palette[0xFE * 3 + 1] = t[1];
             new_palette[0xFE * 3 + 2] = t[2];
 
-            VIDEO_SetPalette(new_palette);
+            DRIVER_UpdatePalette(new_palette);
             VIDEO_UpdateScreen(NULL);
         }
     }
@@ -551,7 +551,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
     if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
         g_TextLib.bDialogPosition != kDialogCenter)
     {
-        VIDEO_SetPalette(org_palette);
+        DRIVER_UpdatePalette(org_palette);
         // VIDEO_UpdateScreen(NULL);
     }
 

@@ -75,7 +75,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
     unsigned char *p;
 
     // Check for NULL pointer.
-    if (lpBitmapRLE == NULL || lpDstSurface == NULL)
+    if (lpBitmapRLE == NULL || lpDstSurface == NULL || lpDstSurface->pixels == NULL)
     {
         return -1;
     }

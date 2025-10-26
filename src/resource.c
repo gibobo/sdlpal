@@ -36,7 +36,10 @@ typedef struct
     ResourceFileInfo **resource_file_info;
 } ResourceIndex;
 
+static char filename[256] = {0};
+static unsigned char g_resource_id = 0xff;
 static void *g_ConsolidatedResourceFile = NULL;
+static unsigned int resource_offsets[Res_Count + 1] = {0};
 
 /* Initialize the global resource export/import array to ensure a single
    defined object with zero-initialized contents to avoid multiple-definition
@@ -189,7 +192,6 @@ void PAL_ConsolidateExtractedResources(void)
     sprintf(filename_info, "%s/pal.dat", CACHES_PATH);
     FILE *fpRes_out = UTIL_fopen(filename_res, "wb");
     FILE *fpInfo_out = UTIL_fopen(filename_info, "wb");
-    unsigned int offset_res = 0;
     unsigned int offset_info = 0;
     long Info_start_pos = ftell(fpInfo_out);
 
@@ -207,7 +209,7 @@ void PAL_ConsolidateExtractedResources(void)
         unsigned char *buffer_u8 = (unsigned char *)UTIL_malloc(res_len);
         UTIL_fread(buffer_u8, sizeof(char), res_len, fpRes);
         UTIL_fclose(fpRes);
-        fwrite(buffer_u8, sizeof(char), res_len, fpRes_out);
+        UTIL_fwrite(buffer_u8, sizeof(char), res_len, fpRes_out);
         UTIL_free(buffer_u8);
 
         // resource info concatenation
@@ -219,28 +221,11 @@ void PAL_ConsolidateExtractedResources(void)
 
         long curr_pos = ftell(fpInfo_out);
         offset_info = (curr_pos - Info_start_pos) / sizeof(unsigned int);
-        fseek(fpInfo_out, res * sizeof(unsigned int), SEEK_SET);
-        fwrite(&offset_info, sizeof(unsigned int), 1, fpInfo_out);
-        fseek(fpInfo_out, curr_pos, SEEK_SET);
-
-        unsigned int offset = 0;
-        unsigned int uiChunkCount = buffer_u32[offset++];
-        fwrite(&uiChunkCount, sizeof(unsigned int), 1, fpInfo_out);
-        for (unsigned int i = 0; i < uiChunkCount; i++)
-        {
-            unsigned int frame_num = buffer_u32[offset++];
-            fwrite(&frame_num, sizeof(unsigned int), 1, fpInfo_out);
-            for (unsigned int j = 0; j < frame_num; j++)
-            {
-                unsigned int data_offset = buffer_u32[offset++] + offset_res;
-                unsigned int data_length = buffer_u32[offset++];
-                fwrite(&data_offset, sizeof(unsigned int), 1, fpInfo_out);
-                fwrite(&data_length, sizeof(unsigned int), 1, fpInfo_out);
-            }
-        }
+        UTIL_fseek(fpInfo_out, res * sizeof(unsigned int), SEEK_SET);
+        UTIL_fwrite(&offset_info, sizeof(unsigned int), 1, fpInfo_out);
+        UTIL_fseek(fpInfo_out, curr_pos, SEEK_SET);
+        UTIL_fwrite(buffer_u32, sizeof(char), info_len, fpInfo_out);
         UTIL_free(buffer_u32);
-
-        offset_res += res_len;
     }
     UTIL_fclose(fpRes_out);
     UTIL_fclose(fpInfo_out);
@@ -248,7 +233,6 @@ void PAL_ConsolidateExtractedResources(void)
 
 int PAL_LoadConsolidatedResources(void)
 {
-    g_ConsolidatedResourceFile = UTIL_fopen(CACHES_PATH "/pal.bin", "rb");
     FILE *fpInfo = UTIL_fopen(CACHES_PATH "/pal.dat", "rb");
     if (!fpInfo)
     {
@@ -290,6 +274,7 @@ int PAL_LoadConsolidatedResources(void)
     // unsigned int max_data_len[Res_Count][2] = {0};
     for (PALRES res = 0; res < Res_Count; res++)
     {
+        unsigned int res_size = 0;
         // Read offset information from buffer
         offset_info = buffer_u32[res];
 
@@ -354,12 +339,14 @@ int PAL_LoadConsolidatedResources(void)
                 unsigned int data_length = buffer_u32[buffer_offset++];
                 g_CachedResourceIndex[res].resource_file_info[i][j].data_offset = data_offset;
                 g_CachedResourceIndex[res].resource_file_info[i][j].data_length = data_length;
+                res_size += data_length;
                 // if (data_length > 0 && (max_data_len[res][0] == 0 || max_data_len[res][0] > data_length))
                 //     max_data_len[res][0] = data_length;
                 // if (max_data_len[res][1] < data_length)
                 //     max_data_len[res][1] = data_length;
             }
         }
+        // resource_offsets[res + 1] = resource_offsets[res] + res_size;
     }
 
     UTIL_free(buffer_u32);
@@ -370,6 +357,8 @@ void PAL_FreeResourceIndex(void)
 {
     UTIL_fclose(g_ConsolidatedResourceFile);
     g_ConsolidatedResourceFile = NULL;
+    g_resource_id = 0xff;
+
     for (PALRES res = 0; res < Res_Count; res++)
     {
         for (unsigned int i = 0; i < g_CachedResourceIndex[res].chunk_count; i++)
@@ -405,13 +394,26 @@ int RES_ReadAnimationFrame(
     if (frame_index >= g_CachedResourceIndex[resource_id].frame_count[animation_index])
         return -2;
 
+    static unsigned int p_frame_index = 0xFFFF;
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_length;
     if (data_length > 0)
     {
         UTIL_free(*frame_buffer);
         *frame_buffer = UTIL_malloc(data_length);
-        UTIL_fseek(g_ConsolidatedResourceFile, g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_offset, SEEK_SET);
+        if (g_resource_id != resource_id)
+        {
+            p_frame_index = 0xFFFF;
+            g_resource_id = resource_id;
+            UTIL_fclose(g_ConsolidatedResourceFile);
+            sprintf(filename, "%s/res_%d.bin", CACHES_PATH, (unsigned int)resource_id);
+            g_ConsolidatedResourceFile = UTIL_fopen(filename, "rb");
+        }
+        if (p_frame_index + 1 != frame_index)
+            UTIL_fseek(g_ConsolidatedResourceFile,
+                       resource_offsets[resource_id] + g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_offset,
+                       SEEK_SET);
         UTIL_fread(*frame_buffer, 1, data_length, g_ConsolidatedResourceFile);
+        p_frame_index = frame_index;
     }
     else
     {
@@ -441,7 +443,16 @@ unsigned int RES_MKFDecompressChunk(
             buffer_size = data_length;
             *chunk_buffer = UTIL_malloc(buffer_size);
         }
-        UTIL_fseek(g_ConsolidatedResourceFile, g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset, SEEK_SET);
+        if (g_resource_id != resource_id)
+        {
+            g_resource_id = resource_id;
+            UTIL_fclose(g_ConsolidatedResourceFile);
+            sprintf(filename, "%s/res_%d.bin", CACHES_PATH, (unsigned int)resource_id);
+            g_ConsolidatedResourceFile = UTIL_fopen(filename, "rb");
+        }
+        UTIL_fseek(g_ConsolidatedResourceFile,
+                   resource_offsets[resource_id] + g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset,
+                   SEEK_SET);
         UTIL_fread(*chunk_buffer, 1, buffer_size, g_ConsolidatedResourceFile);
     }
 
@@ -464,7 +475,16 @@ unsigned int RES_MKFReadChunk(
         if (buffer_size == 0 || data_length > buffer_size || output_buffer == NULL)
             return 0;
 
-        UTIL_fseek(g_ConsolidatedResourceFile, g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset, SEEK_SET);
+        if (g_resource_id != resource_id)
+        {
+            g_resource_id = resource_id;
+            UTIL_fclose(g_ConsolidatedResourceFile);
+            sprintf(filename, "%s/res_%d.bin", CACHES_PATH, (unsigned int)resource_id);
+            g_ConsolidatedResourceFile = UTIL_fopen(filename, "rb");
+        }
+        UTIL_fseek(g_ConsolidatedResourceFile,
+                   resource_offsets[resource_id] + g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset,
+                   SEEK_SET);
         UTIL_fread(output_buffer, 1, data_length, g_ConsolidatedResourceFile);
     }
     return data_length;

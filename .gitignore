@@ -295,3 +295,4 @@ out/
 src_backup/
 cache_data/res_*.bin
 cache_data/res_*.dat
+cache_data/clips/*.bin

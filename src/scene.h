@@ -35,4 +35,6 @@ void PAL_UpdateParty(void);
 
 void PAL_NPCWalkOneStep(unsigned short wEventObjectID, int iSpeed);
 
+void PAL_FreeSceneResources(void);
+
 #endif

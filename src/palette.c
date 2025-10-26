@@ -96,7 +96,7 @@ void PAL_SetPalette(int iPaletteNum, unsigned char fNight)
 
     if (p != NULL)
     {
-        VIDEO_SetPalette(p);
+        DRIVER_UpdatePalette(p);
         // VIDEO_UpdateScreen(NULL);
     }
 }
@@ -140,13 +140,13 @@ void PAL_FadeOut(int iDelay)
             new_palette[i] = (org_palette[i] * j) >> 6;
         }
 
-        VIDEO_SetPalette(new_palette);
+        DRIVER_UpdatePalette(new_palette);
         VIDEO_UpdateScreen(NULL);
         UTIL_Delay(iDelay * 10);
     }
 
     memset(new_palette, 0, sizeof(new_palette));
-    VIDEO_SetPalette(new_palette);
+    DRIVER_UpdatePalette(new_palette);
     // VIDEO_UpdateScreen(NULL);
 }
 
@@ -182,12 +182,12 @@ void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay)
             newpalette[i] = (unsigned char)(((unsigned short)palette[i] * j) >> 6U);
         }
 
-        VIDEO_SetPalette(newpalette);
+        DRIVER_UpdatePalette(newpalette);
         VIDEO_UpdateScreen(NULL);
         UTIL_Delay(iDelay * 10U);
     }
 
-    VIDEO_SetPalette(palette);
+    DRIVER_UpdatePalette(palette);
     // VIDEO_UpdateScreen(NULL);
 }
 
@@ -247,7 +247,7 @@ void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
             {
                 newpalette[j] = (unsigned char)(((unsigned int)palette[j] * (unsigned int)i) >> 6U);
             }
-            VIDEO_SetPalette(newpalette);
+            DRIVER_UpdatePalette(newpalette);
             VIDEO_UpdateScreen(NULL);
 
             UTIL_Delay(FRAME_TIME);
@@ -269,7 +269,7 @@ void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
             {
                 newpalette[j] = (unsigned char)(((unsigned int)palette[j] * (unsigned int)i) >> 6U);
             }
-            VIDEO_SetPalette(newpalette);
+            DRIVER_UpdatePalette(newpalette);
             VIDEO_UpdateScreen(NULL);
 
             UTIL_Delay(FRAME_TIME);
@@ -313,7 +313,7 @@ void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene)
         {
             tmp_palette[j] = (unsigned char)(((int)org_palette[j] * (31 - i) + (int)(new_palette[j]) * i) / 31);
         }
-        VIDEO_SetPalette(tmp_palette);
+        DRIVER_UpdatePalette(tmp_palette);
         // VIDEO_UpdateScreen(NULL);
 
         if (fUpdateScene)
@@ -381,12 +381,12 @@ void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom)
                 Converge(new_palette[j * 3 + 2], org_palette[j * 3 + 2]);
             }
 
-            VIDEO_SetPalette(new_palette);
+            DRIVER_UpdatePalette(new_palette);
             VIDEO_UpdateScreen(NULL);
             UTIL_Delay(iDelay);
         }
 
-        VIDEO_SetPalette(org_palette);
+        DRIVER_UpdatePalette(org_palette);
         // VIDEO_UpdateScreen(NULL);
     }
     else
@@ -402,7 +402,7 @@ void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom)
                 Converge(new_palette[j * 3 + 2], org_palette[bColor * 3 + 2]);
             }
 
-            VIDEO_SetPalette(new_palette);
+            DRIVER_UpdatePalette(new_palette);
             VIDEO_UpdateScreen(NULL);
             UTIL_Delay(iDelay);
         }
@@ -412,7 +412,7 @@ void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom)
             new_palette[i] = org_palette[bColor];
         }
 
-        VIDEO_SetPalette(new_palette);
+        DRIVER_UpdatePalette(new_palette);
         // VIDEO_UpdateScreen(NULL);
     }
 }
@@ -474,7 +474,7 @@ void PAL_FadeToRed(void)
                 new_palette[j * 3 + 2] -= (new_palette[j * 3 + 2] > 8 ? 8 : new_palette[j * 3 + 2]);
         }
 
-        VIDEO_SetPalette(new_palette);
+        DRIVER_UpdatePalette(new_palette);
         VIDEO_UpdateScreen(NULL);
         UTIL_Delay(75);
     }

@@ -129,7 +129,7 @@ static int
 PAL_RNGBlitToSurface(
     const unsigned char *rng,
     int length,
-    PAL_Surface *lpDstSurface)
+    unsigned char *dstSurface)
 /*++
   Purpose:
 
@@ -158,11 +158,11 @@ PAL_RNGBlitToSurface(
     unsigned char *dst = NULL;
 
     // Check for invalid parameters.
-    if (lpDstSurface == NULL || length < 0)
+    if (dstSurface == NULL || length < 0 || rng == NULL)
     {
         return -1;
     }
-    dst = lpDstSurface->pixels;
+    dst = dstSurface;
 
     // Draw the frame to the surface.
     while (ptr < length)
@@ -309,7 +309,7 @@ void PAL_RNGPlay(
         int RNGBlit_len = RES_ReadAnimationFrame(&rng, iNumRNG, iStartFrame, Res_RNG);
         if (RNGBlit_len <= 0)
             break; // Failed to get the frame, don't go further
-        if (PAL_RNGBlitToSurface(rng, RNGBlit_len, gpScreen) < 0)
+        if (PAL_RNGBlitToSurface(rng, RNGBlit_len, gpScreen->pixels) < 0)
             break; // Failed to get the frame, don't go further
 
         if (gpGlobals)
