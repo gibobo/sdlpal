@@ -332,35 +332,6 @@ void PAL_BattleAddSpriteObject(
     }
 }
 
-void PAL_BattleRemoveSpriteObject(
-    unsigned short wSpriteObjectIndex)
-/*++
-  Purpose:
-
-    Removes the specified sprite object from the drawn sequence by index.
-
-  Parameters:
-
-    [IN]  wSpriteObjectIndex - Specifies the index of the sprite object to be removed.
-
-  Return value:
-
-    None.
-
---*/
-{
-    BATTLESPRITESEQ *SpriteObject;
-
-    if (wSpriteObjectIndex < MAX_BATTLESPRITESEQ_ITEMS)
-    {
-        SpriteObject = &g_Battle->SpriteDrawSeq[wSpriteObjectIndex];
-
-        memset(SpriteObject, 0, sizeof(*SpriteObject));
-
-        g_Battle->wMaxSpriteDrawSeqIndex--;
-    }
-}
-
 void PAL_BattleAddFighterSpriteObject(
     void)
 /*++
@@ -500,7 +471,7 @@ void PAL_BattleDrawAllSprites(
 }
 
 void PAL_BattleDrawAllSpritesWithColorShift(
-    int fColorShift)
+    unsigned char fColorShift)
 /*++
   Purpose:
 
@@ -1371,7 +1342,7 @@ void PAL_BattlePlayerEscape(
 BATTLERESULT
 PAL_StartBattle(
     unsigned short wEnemyTeam,
-    int fIsBoss)
+    unsigned char fIsBoss)
 /*++
   Purpose:
 
@@ -1492,7 +1463,6 @@ PAL_StartBattle(
     g_Battle->UI.state = kBattleUIWait;
     g_Battle->UI.fAutoAttack = false;
     g_Battle->UI.iSelectedIndex = 0;
-    g_Battle->UI.iPrevEnemyTarget = -1;
 
     memset(g_Battle->UI.rgShowNum, 0, sizeof(g_Battle->UI.rgShowNum));
 

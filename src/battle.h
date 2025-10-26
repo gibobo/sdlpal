@@ -144,10 +144,10 @@ typedef enum tabBATTLEPHASE
 
 typedef struct tagACTIONQUEUE
 {
-    int fIsEnemy;
+    unsigned char fIsEnemy;
     unsigned short wDexterity;
     unsigned short wIndex;
-    int fIsSecond;
+    unsigned char fIsSecond;
 } ACTIONQUEUE;
 
 typedef struct tagBATTLE
@@ -164,14 +164,14 @@ typedef struct tagBATTLE
 
     unsigned char *lpSummonSprite; // sprite of summoned god
     unsigned int posSummon;
-    int iSummonFrame; // current frame of the summoned god
-    int fSummonColorShift;
+    unsigned short iSummonFrame; // current frame of the summoned god
+    unsigned char fSummonColorShift;
 
     int iExpGained;  // total experience value gained
     int iCashGained; // total cash gained
 
-    int fIsBoss;       // TRUE if boss fight
-    int fEnemyCleared; // TRUE if enemies are cleared
+    unsigned char fIsBoss;       // TRUE if boss fight
+    unsigned char fEnemyCleared; // TRUE if enemies are cleared
     BATTLERESULT BattleResult;
 
     float flTimeChargingUnit; // the base waiting time unit
@@ -180,7 +180,7 @@ typedef struct tagBATTLE
 
     unsigned char *lpEffectSprite;
 
-    int fEnemyMoving; // TRUE if enemy is moving
+    unsigned char fEnemyMoving; // TRUE if enemy is moving
 
     int iHidingTime; // Time of hiding
 
@@ -192,19 +192,19 @@ typedef struct tagBATTLE
 
     BATTLESPRITESEQ SpriteDrawSeq[MAX_BATTLESPRITESEQ_ITEMS];
     unsigned short wMaxSpriteDrawSeqIndex;
-    int fSpriteAddLock;
+    unsigned char fSpriteAddLock;
 
     BATTLEPHASE Phase;
     ACTIONQUEUE ActionQueue[MAX_ACTIONQUEUE_ITEMS];
-    int iCurAction;
-    int fRepeat;            // TRUE if player pressed Repeat
-    int fForce;             // TRUE if player pressed Force
-    int fFlee;              // TRUE if player pressed Flee
-    int fPrevAutoAtk;       // TRUE if auto-attack was used in the previous turn
-    int fPrevPlayerAutoAtk; // TRUE if auto-attack was used by previous player in the same turn
+    unsigned char iCurAction;
+    unsigned char fRepeat;            // TRUE if player pressed Repeat
+    unsigned char fForce;             // TRUE if player pressed Force
+    unsigned char fFlee;              // TRUE if player pressed Flee
+    unsigned char fPrevAutoAtk;       // TRUE if auto-attack was used in the previous turn
+    unsigned char fPrevPlayerAutoAtk; // TRUE if auto-attack was used by previous player in the same turn
 
     unsigned short coopContributors[MAX_PLAYERS_IN_PARTY];
-    int fThisTurnCoop;
+    unsigned char fThisTurnCoop;
 } BATTLE;
 
 void PAL_LoadBattleSprites(void);
@@ -235,15 +235,13 @@ void PAL_BattleAddSpriteObject(
     short sLayerOffset,
     int fHaveColorShift);
 
-void PAL_BattleRemoveSpriteObject(unsigned short wSpriteObjectIndex);
-
 void PAL_BattleAddFighterSpriteObject(void);
 
 void PAL_BattleSortSpriteObjecByPos(void);
 
 void PAL_BattleDrawAllSprites(void);
 
-void PAL_BattleDrawAllSpritesWithColorShift(int fColorShift);
+void PAL_BattleDrawAllSpritesWithColorShift(unsigned char fColorShift);
 
 void PAL_BattleMakeScene(void);
 
@@ -255,7 +253,7 @@ void PAL_BattlePlayerEscape(void);
 
 BATTLERESULT PAL_StartBattle(
     unsigned short wEnemyTeam,
-    int fIsBoss);
+    unsigned char fIsBoss);
 
 void PAL_GetPlayerPos(
     unsigned char PlayerIndex,

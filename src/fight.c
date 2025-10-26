@@ -105,17 +105,7 @@ short PAL_BattleSelectAutoTargetFrom(
 
 --*/
 {
-    short i;
-    unsigned char count;
-
-    i = g_Battle->UI.iPrevEnemyTarget;
-
-    if (i >= 0 && i <= g_Battle->wMaxEnemyIndex &&
-        g_Battle->rgEnemy[i].wObjectID != 0 &&
-        g_Battle->rgEnemy[i].e.wHealth > 0)
-    {
-        return i;
-    }
+    short i, count;
 
     for (count = 0, i = (begin >= 0 ? begin : 0); count < MAX_ENEMIES_IN_TEAM; count++)
     {

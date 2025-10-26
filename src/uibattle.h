@@ -21,93 +21,92 @@
 #ifndef UIBATTLE_H
 #define UIBATTLE_H
 
-#include <wchar.h>
 #include "ui.h"
+#include <wchar.h>
 
 typedef enum tagBATTLEUISTATE
 {
-   kBattleUIWait,
-   kBattleUISelectMove,
-   kBattleUISelectTargetEnemy,
-   kBattleUISelectTargetPlayer,
-   kBattleUISelectTargetEnemyAll,
-   kBattleUISelectTargetPlayerAll,
+    kBattleUIWait,
+    kBattleUISelectMove,
+    kBattleUISelectTargetEnemy,
+    kBattleUISelectTargetPlayer,
+    kBattleUISelectTargetEnemyAll,
+    kBattleUISelectTargetPlayerAll,
 } BATTLEUISTATE;
 
 typedef enum tagBATTLEMENUSTATE
 {
-   kBattleMenuMain,
-   kBattleMenuMagicSelect,
-   kBattleMenuUseItemSelect,
-   kBattleMenuThrowItemSelect,
-   kBattleMenuMisc,
-   kBattleMenuMiscItemSubMenu,
+    kBattleMenuMain,
+    kBattleMenuMagicSelect,
+    kBattleMenuUseItemSelect,
+    kBattleMenuThrowItemSelect,
+    kBattleMenuMisc,
+    kBattleMenuMiscItemSubMenu,
 } BATTLEMENUSTATE;
 
 typedef enum tagBATTLEUIACTION
 {
-   kBattleUIActionAttack,
-   kBattleUIActionMagic,
-   kBattleUIActionCoopMagic,
-   kBattleUIActionMisc,
+    kBattleUIActionAttack,
+    kBattleUIActionMagic,
+    kBattleUIActionCoopMagic,
+    kBattleUIActionMisc,
 } BATTLEUIACTION;
 
-#define SPRITENUM_BATTLEICON_ATTACK 40
-#define SPRITENUM_BATTLEICON_MAGIC 41
-#define SPRITENUM_BATTLEICON_COOPMAGIC 42
-#define SPRITENUM_BATTLEICON_MISCMENU 43
+#define SPRITENUM_BATTLEICON_ATTACK               40
+#define SPRITENUM_BATTLEICON_MAGIC                41
+#define SPRITENUM_BATTLEICON_COOPMAGIC            42
+#define SPRITENUM_BATTLEICON_MISCMENU             43
 
-#define SPRITENUM_BATTLE_ARROW_CURRENTPLAYER 69
-#define SPRITENUM_BATTLE_ARROW_CURRENTPLAYER_RED 68
+#define SPRITENUM_BATTLE_ARROW_CURRENTPLAYER      69
+#define SPRITENUM_BATTLE_ARROW_CURRENTPLAYER_RED  68
 
-#define SPRITENUM_BATTLE_ARROW_SELECTEDPLAYER 67
+#define SPRITENUM_BATTLE_ARROW_SELECTEDPLAYER     67
 #define SPRITENUM_BATTLE_ARROW_SELECTEDPLAYER_RED 66
 
-#define BATTLEUI_LABEL_ITEM 5
-#define BATTLEUI_LABEL_DEFEND 58
-#define BATTLEUI_LABEL_AUTO 56
-#define BATTLEUI_LABEL_INVENTORY 57
-#define BATTLEUI_LABEL_FLEE 59
-#define BATTLEUI_LABEL_STATUS 60
+#define BATTLEUI_LABEL_ITEM                       5
+#define BATTLEUI_LABEL_DEFEND                     58
+#define BATTLEUI_LABEL_AUTO                       56
+#define BATTLEUI_LABEL_INVENTORY                  57
+#define BATTLEUI_LABEL_FLEE                       59
+#define BATTLEUI_LABEL_STATUS                     60
 
-#define BATTLEUI_LABEL_USEITEM 23
-#define BATTLEUI_LABEL_THROWITEM 24
+#define BATTLEUI_LABEL_USEITEM                    23
+#define BATTLEUI_LABEL_THROWITEM                  24
 
-#define TIMEMETER_COLOR_DEFAULT 0x1B
-#define TIMEMETER_COLOR_SLOW 0x5B
-#define TIMEMETER_COLOR_HASTE 0x2A
+#define TIMEMETER_COLOR_DEFAULT                   0x1B
+#define TIMEMETER_COLOR_SLOW                      0x5B
+#define TIMEMETER_COLOR_HASTE                     0x2A
 
-#define BATTLEUI_MAX_SHOWNUM 16
+#define BATTLEUI_MAX_SHOWNUM                      16
 
 typedef struct tagSHOWNUM
 {
-   unsigned short wNum;
-   unsigned int pos;
-   unsigned long dwTime;
-   NUMCOLOR color;
+    unsigned short wNum;
+    unsigned int pos;
+    unsigned long dwTime;
+    NUMCOLOR color;
 } SHOWNUM;
 
 typedef struct tagBATTLEUI
 {
-   BATTLEUISTATE state;
-   BATTLEMENUSTATE MenuState;
+    BATTLEUISTATE state;
+    BATTLEMENUSTATE MenuState;
 
-   wchar_t szMsg[32];               // message to be shown on the screen
-   wchar_t szNextMsg[32];           // next message to be shown on the screen
-   unsigned long dwMsgShowTime;      // the end time of showing the message
-   unsigned short wNextMsgDuration; // duration of the next message
+    wchar_t szMsg[32];               // message to be shown on the screen
+    wchar_t szNextMsg[32];           // next message to be shown on the screen
+    unsigned long dwMsgShowTime;     // the end time of showing the message
+    unsigned short wNextMsgDuration; // duration of the next message
 
-   unsigned short wCurPlayerIndex; // index of the current player
-   unsigned short wSelectedAction; // current selected action
-   int iSelectedIndex;             // current selected index of player or enemy
-   int iPrevEnemyTarget;           // previous enemy target
+    unsigned short wCurPlayerIndex; // index of the current player
+    unsigned short wSelectedAction; // current selected action
+    int iSelectedIndex;             // current selected index of player or enemy
 
-   unsigned short wActionType; // type of action to be performed
-   unsigned short wObjectID;   // object ID of the item or magic to use
+    unsigned short wActionType; // type of action to be performed
+    unsigned short wObjectID;   // object ID of the item or magic to use
 
-   int fAutoAttack; // TRUE if auto attack
+    unsigned char fAutoAttack; // TRUE if auto attack
 
-   SHOWNUM rgShowNum[BATTLEUI_MAX_SHOWNUM];
+    SHOWNUM rgShowNum[BATTLEUI_MAX_SHOWNUM];
 } BATTLEUI;
 
 void PAL_PlayerInfoBox(

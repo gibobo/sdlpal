@@ -32,10 +32,10 @@ typedef struct PAL_Surface {
 } PAL_Surface;
 
 typedef struct PAL_Rect {
-    unsigned short x;
-    unsigned short y;
-    unsigned short w;
-    unsigned short h;
+    int x;
+    int y;
+    int w;
+    int h;
 } PAL_Rect;
 
 extern PAL_Surface *gpScreen;

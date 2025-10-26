@@ -199,7 +199,7 @@ void PAL_PlayerInfoBox(
     //     rect.x = PAL_X(pos) - 2;
     //     rect.y = PAL_Y(pos) - 4;
     //     rect.w = 77;
-    //     rect.h = 3
+    //     rect.h = 3;
     //     VIDEO_UpdateScreen(&rect);
     // }
 }
@@ -577,8 +577,6 @@ PAL_BattleUIThrowItem(
             }
             else
             {
-                if (g_Battle->UI.iPrevEnemyTarget != -1)
-                    g_Battle->UI.iSelectedIndex = g_Battle->UI.iPrevEnemyTarget;
                 g_Battle->UI.state = kBattleUISelectTargetEnemy;
                 g_Battle->UI.iSelectedIndex = 0;
             }
@@ -941,8 +939,6 @@ void PAL_BattleUIUpdate(
                                     }
                                     else
                                     {
-                                        if (g_Battle->UI.iPrevEnemyTarget != -1)
-                                            g_Battle->UI.iSelectedIndex = g_Battle->UI.iPrevEnemyTarget;
                                         g_Battle->UI.state = kBattleUISelectTargetEnemy;
                                         g_Battle->UI.iSelectedIndex = 0;
                                     }
@@ -974,8 +970,6 @@ void PAL_BattleUIUpdate(
                                         }
                                         else
                                         {
-                                            if (g_Battle->UI.iPrevEnemyTarget != -1)
-                                                g_Battle->UI.iSelectedIndex = g_Battle->UI.iPrevEnemyTarget;
                                             g_Battle->UI.state = kBattleUISelectTargetEnemy;
                                             g_Battle->UI.iSelectedIndex = 0;
                                         }
@@ -1131,8 +1125,6 @@ void PAL_BattleUIUpdate(
                                     }
                                     else
                                     {
-                                        if (g_Battle->UI.iPrevEnemyTarget != -1)
-                                            g_Battle->UI.iSelectedIndex = g_Battle->UI.iPrevEnemyTarget;
                                         g_Battle->UI.state = kBattleUISelectTargetEnemy;
                                         g_Battle->UI.iSelectedIndex = 0;
                                     }
@@ -1254,7 +1246,6 @@ void PAL_BattleUIUpdate(
             //
             if (y == 1)
             {
-                //         g_Battle->UI.iPrevEnemyTarget = x;  //disabled due to not same as both original version
                 if (g_Battle->UI.iSelectedIndex == -1)
                     g_Battle->UI.iSelectedIndex = x;
                 else
@@ -1306,7 +1297,6 @@ void PAL_BattleUIUpdate(
             }
             else if (PAL_GetKeyInput() & kKeySearch)
             {
-                //         g_Battle->UI.iPrevEnemyTarget = g_Battle->UI.iSelectedIndex; //disabled due to not same as both original version
                 PAL_BattleCommitAction(false);
             }
             else if (PAL_GetKeyInput() & (kKeyLeft | kKeyDown))

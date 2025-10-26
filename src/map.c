@@ -49,7 +49,7 @@ void PAL_LoadMap(PALMAP *lpMap, int iMapNum)
 {
     // Check for invalid map number.
     if (iMapNum <= 0)
-        return NULL;
+        return;
 
     lpMap->iMapNum = iMapNum;
 
