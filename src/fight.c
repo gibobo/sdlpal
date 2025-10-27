@@ -88,7 +88,7 @@ int PAL_BattleSelectAutoTarget(
     return PAL_BattleSelectAutoTargetFrom(0);
 }
 
-short PAL_BattleSelectAutoTargetFrom(
+int PAL_BattleSelectAutoTargetFrom(
     int begin)
 /*++
   Purpose:
@@ -120,7 +120,7 @@ short PAL_BattleSelectAutoTargetFrom(
     return -1;
 }
 
-static unsigned short
+static short
 PAL_CalcBaseDamage(
     unsigned short wAttackStrength,
     unsigned short wDefense)
@@ -141,18 +141,18 @@ PAL_CalcBaseDamage(
 
 --*/
 {
-    unsigned short sDamage = 0;
+    short sDamage;
 
     //
     // Formula courtesy of palxex and shenyanduxing
     //
     if (wAttackStrength > wDefense)
     {
-        sDamage = (unsigned short)((float)wAttackStrength * 2.0 - (float)wDefense * 1.6 + 0.5);
+        sDamage = (short)(wAttackStrength * 2 - wDefense * 1.6 + 0.5);
     }
     else if (wAttackStrength > wDefense * 0.6)
     {
-        sDamage = (unsigned short)((float)wAttackStrength - (float)wDefense * 0.6 + 0.5);
+        sDamage = (short)(wAttackStrength - wDefense * 0.6 + 0.5);
     }
     else
     {
@@ -195,7 +195,7 @@ PAL_CalcMagicDamage(
 
 --*/
 {
-    unsigned short sDamage;
+    short sDamage;
     unsigned short wElem;
 
     wMagicID = gpGlobals->g.rgObject[wMagicID].magic.wMagicNumber;
@@ -262,7 +262,7 @@ short PAL_CalcPhysicalAttackDamage(
 
 --*/
 {
-    unsigned short sDamage = 0;
+    short sDamage;
 
     sDamage = PAL_CalcBaseDamage(wAttackStrength, wDefense);
     if (wAttackResistance != 0)
@@ -2089,8 +2089,8 @@ PAL_BattleShowPlayerOffMagicAnim(
 --*/
 {
     unsigned char *lpSpriteEffect = NULL;
-    unsigned short n, wave;
-    int iMagicNum, iEffectNum, i, k, l, x, y, blow;
+    unsigned short n;
+    int iMagicNum, iEffectNum, i, k, l, x, y, wave, blow;
     short sLayerOffset;
 
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
@@ -3812,12 +3812,10 @@ void PAL_BattleEnemyPerformAction(
 
 --*/
 {
-    unsigned short str, def;
-    int iCoverIndex, i, x, y, ex, ey, iSound;
+    int str, def, iCoverIndex, i, x, y, ex, ey, iSound;
     unsigned short rgwElementalResistance[NUM_MAGIC_ELEMENTAL];
     unsigned short wPlayerRole, w, wMagic, wMagicNum;
-    int sTarget;
-    unsigned short sDamage;
+    short sTarget, sDamage;
     int fAutoDefend = false, rgfMagAutoDefend[MAX_PLAYERS_IN_PARTY];
 
     PAL_BattleBackupStat();
@@ -3877,11 +3875,11 @@ void PAL_BattleEnemyPerformAction(
             UTIL_Delay(BATTLE_FRAME_TIME);
         }
 
-        unsigned short str2 = g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
-        unsigned short def2 = g_Battle->rgEnemy[iTarget].e.wDefense;
-        str2 += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
-        def2 += (g_Battle->rgEnemy[iTarget].e.wLevel + 6) * 4;
-        sDamage = PAL_CalcBaseDamage(str2, def2) * 2 / g_Battle->rgEnemy[iTarget].e.wPhysicalResistance;
+        int str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
+        str += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
+        int def = (short)g_Battle->rgEnemy[iTarget].e.wDefense;
+        def += (g_Battle->rgEnemy[iTarget].e.wLevel + 6) * 4;
+        sDamage = PAL_CalcBaseDamage(str, def) * 2 / g_Battle->rgEnemy[iTarget].e.wPhysicalResistance;
 
         if (sDamage <= 0)
         {
@@ -3916,7 +3914,7 @@ void PAL_BattleEnemyPerformAction(
 
         wMagicNum = gpGlobals->g.rgObject[wMagic].magic.wMagicNumber;
 
-        str = g_Battle->rgEnemy[wEnemyIndex].e.wMagicStrength;
+        str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wMagicStrength;
         str += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
         if (str < 0)
         {
@@ -4007,7 +4005,7 @@ void PAL_BattleEnemyPerformAction(
                 PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess, wPlayerRole);
         }
 
-        if (gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage)
+        if ((short)(gpGlobals->g.lprgMagic[wMagicNum].wBaseDamage) > 0)
         {
             if (sTarget == -1)
             {
@@ -4152,7 +4150,7 @@ void PAL_BattleEnemyPerformAction(
         //
         unsigned short wFrameBak = g_Battle->rgPlayer[sTarget].wCurrentFrame;
 
-        str = g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
+        str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
         str += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
         if (str < 0)
         {
@@ -4296,7 +4294,7 @@ void PAL_BattleEnemyPerformAction(
                 sDamage /= 2;
             }
 
-            if (gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] < sDamage)
+            if ((short)gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole] < sDamage)
             {
                 sDamage = gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole];
             }

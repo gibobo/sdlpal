@@ -21,7 +21,7 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-short PAL_BattleSelectAutoTargetFrom(
+int PAL_BattleSelectAutoTargetFrom(
     int);
 
 int PAL_IsPlayerDying(

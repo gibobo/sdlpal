@@ -703,7 +703,8 @@ int TEXT_DisplayText(
                 if (!isDialog && !g_TextLib.fUserSkip)
                 {
                     VIDEO_UpdateScreen(NULL);
-                    if (UTIL_WaitKeys(g_TextLib.iDelayTime * 8, kKeySearch | kKeyMenu))
+                    UTIL_Delay(g_TextLib.iDelayTime * 8);
+                    if (PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
                     {
                         // User pressed a key to skip the dialog
                         g_TextLib.fUserSkip = true;

@@ -630,7 +630,7 @@ void PAL_BattleFadeScene(
     // Draw the result buffer to the screen as the final step
     //
     VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
-    // PAL_BattleUIUpdate();
+    PAL_BattleUIUpdate();
 
     // VIDEO_UpdateScreen(NULL);
 }
@@ -710,14 +710,8 @@ PAL_BattleMain(
     //
     // Run the main battle loop.
     //
-    while (true)
+    while (g_Battle->BattleResult == kBattleResultOnGoing) // Break out if the battle ended.
     {
-        // Break out if the battle ended.
-        if (g_Battle->BattleResult != kBattleResultOnGoing)
-        {
-            break;
-        }
-
         // Run the main frame routine.
         PAL_BattleStartFrame();
 

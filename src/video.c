@@ -227,7 +227,7 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
                 }
                 gpBackup[0]->pixels[k] = (a & 0xF0) | (b & 0x0F);
             }
-                DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, true);
+            DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, true);
             UTIL_Delay(wSpeed);
         }
     }
