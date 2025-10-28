@@ -6,21 +6,21 @@
 #include <string.h>
 
 static const char *g_ResourceFilePaths[Res_Count] = {
-    [Res_ABC] = RESOURCE_PATH "/abc.mkf",
-    [Res_BALL] = RESOURCE_PATH "/ball.mkf",
-    [Res_DATA] = RESOURCE_PATH "/data.mkf",
-    [Res_F] = RESOURCE_PATH "/f.mkf",
-    [Res_FBP] = RESOURCE_PATH "/fbp.mkf",
-    [Res_FIRE] = RESOURCE_PATH "/fire.mkf",
-    [Res_GOP] = RESOURCE_PATH "/gop.mkf",
-    [Res_MAP] = RESOURCE_PATH "/map.mkf",
-    [Res_MGO] = RESOURCE_PATH "/mgo.mkf",
-    [Res_MUS] = RESOURCE_PATH "/mus.mkf",
-    [Res_PAT] = RESOURCE_PATH "/pat.mkf",
-    [Res_RGM] = RESOURCE_PATH "/rgm.mkf",
-    [Res_RNG] = RESOURCE_PATH "/rng.mkf",
-    [Res_SOUNDS] = RESOURCE_PATH "/sounds.mkf",
-    [Res_SSS] = RESOURCE_PATH "/sss.mkf",
+    [Res_ABC] = "abc.mkf",
+    [Res_BALL] = "ball.mkf",
+    [Res_DATA] = "data.mkf",
+    [Res_F] = "f.mkf",
+    [Res_FBP] = "fbp.mkf",
+    [Res_FIRE] = "fire.mkf",
+    [Res_GOP] = "gop.mkf",
+    [Res_MAP] = "map.mkf",
+    [Res_MGO] = "mgo.mkf",
+    [Res_MUS] = "mus.mkf",
+    [Res_PAT] = "pat.mkf",
+    [Res_RGM] = "rgm.mkf",
+    [Res_RNG] = "rng.mkf",
+    [Res_SOUNDS] = "sounds.mkf",
+    [Res_SSS] = "sss.mkf",
 };
 
 typedef struct
@@ -36,9 +36,6 @@ typedef struct
     ResourceFileInfo **resource_file_info;
 } ResourceIndex;
 
-static char filename[256] = {0};
-static unsigned char g_resource_id = 0xff;
-static void *g_ConsolidatedResourceFile = NULL;
 static unsigned int resource_offsets[Res_Count + 1] = {0};
 
 /* Initialize the global resource export/import array to ensure a single
@@ -48,13 +45,9 @@ static ResourceIndex g_CachedResourceIndex[Res_Count] = {0};
 
 static void PAL_ExtractAndDecompressMKFChunks(PALRES res)
 {
-    char filename_res[256] = {0};
-    char filename_info[256] = {0};
-    sprintf(filename_res, "%s/res_%d.bin", CACHES_PATH, (unsigned int)res);
-    sprintf(filename_info, "%s/res_%d.dat", CACHES_PATH, (unsigned int)res);
-    FILE *fp = UTIL_fopen(g_ResourceFilePaths[res], "rb");
-    FILE *fpRes = UTIL_fopen(filename_res, "wb");
-    FILE *fpInfo = UTIL_fopen(filename_info, "wb");
+    FILE *fp = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
+    FILE *fpRes = UTIL_fopen(UTIL_Filename("%s/res_%d.bin", CACHES_PATH, (unsigned int)res), "wb");
+    FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/res_%d.dat", CACHES_PATH, (unsigned int)res), "wb");
     unsigned int index = 0;
     unsigned int offset = 0;
     unsigned int frame_num = 1;
@@ -85,13 +78,9 @@ static void PAL_ExtractAndDecompressMKFChunks(PALRES res)
 
 static void PAL_ExtractRawMKFChunks(PALRES res)
 {
-    char filename_res[256] = {0};
-    char filename_info[256] = {0};
-    sprintf(filename_res, "%s/res_%d.bin", CACHES_PATH, (unsigned int)res);
-    sprintf(filename_info, "%s/res_%d.dat", CACHES_PATH, (unsigned int)res);
-    FILE *fp = UTIL_fopen(g_ResourceFilePaths[res], "rb");
-    FILE *fpRes = UTIL_fopen(filename_res, "wb");
-    FILE *fpInfo = UTIL_fopen(filename_info, "wb");
+    FILE *fp = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
+    FILE *fpRes = UTIL_fopen(UTIL_Filename("%s/res_%d.bin", CACHES_PATH, (unsigned int)res), "wb");
+    FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/res_%d.dat", CACHES_PATH, (unsigned int)res), "wb");
     unsigned int index = 0;
     unsigned int offset = 0;
     unsigned int frame_num = 1;
@@ -121,13 +110,9 @@ static void PAL_ExtractRawMKFChunks(PALRES res)
 
 static void PAL_ExtractRNGAnimationFrames(PALRES res)
 {
-    char filename_res[256] = {0};
-    char filename_info[256] = {0};
-    sprintf(filename_res, "%s/res_%d.bin", CACHES_PATH, (unsigned int)res);
-    sprintf(filename_info, "%s/res_%d.dat", CACHES_PATH, (unsigned int)res);
-    FILE *fp = UTIL_fopen(g_ResourceFilePaths[res], "rb");
-    FILE *fpRes = UTIL_fopen(filename_res, "wb");
-    FILE *fpInfo = UTIL_fopen(filename_info, "wb");
+    FILE *fp = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
+    FILE *fpRes = UTIL_fopen(UTIL_Filename("%s/res_%d.bin", CACHES_PATH, (unsigned int)res), "wb");
+    FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/res_%d.dat", CACHES_PATH, (unsigned int)res), "wb");
     unsigned int index = 0;
     unsigned int offset = 0;
     unsigned int frame_num = 0;
@@ -186,12 +171,8 @@ void PAL_ConsolidateExtractedResources(void)
     PAL_ExtractRawMKFChunks(Res_SOUNDS);
     PAL_ExtractRawMKFChunks(Res_SSS);
 
-    char filename_res[256] = {0};
-    char filename_info[256] = {0};
-    sprintf(filename_res, "%s/pal.bin", CACHES_PATH);
-    sprintf(filename_info, "%s/pal.dat", CACHES_PATH);
-    FILE *fpRes_out = UTIL_fopen(filename_res, "wb");
-    FILE *fpInfo_out = UTIL_fopen(filename_info, "wb");
+    FILE *fpRes_out = UTIL_fopen(UTIL_Filename("%s/pal.bin", CACHES_PATH), "wb");
+    FILE *fpInfo_out = UTIL_fopen(UTIL_Filename("%s/pal.dat", CACHES_PATH), "wb");
     unsigned int offset_info = 0;
     long Info_start_pos = ftell(fpInfo_out);
 
@@ -200,11 +181,8 @@ void PAL_ConsolidateExtractedResources(void)
 
     for (PALRES res = 0; res < Res_Count; res++)
     {
-        sprintf(filename_res, "%s/res_%d.bin", CACHES_PATH, (unsigned int)res);
-        sprintf(filename_info, "%s/res_%d.dat", CACHES_PATH, (unsigned int)res);
-
         // resource file concatenation
-        FILE *fpRes = UTIL_fopen(filename_res, "rb");
+        FILE *fpRes = UTIL_fopen(UTIL_Filename("%s/res_%d.bin", CACHES_PATH, (unsigned int)res), "rb");
         unsigned int res_len = UTIL_FileLength(fpRes);
         unsigned char *buffer_u8 = (unsigned char *)UTIL_malloc(res_len);
         UTIL_fread(buffer_u8, sizeof(char), res_len, fpRes);
@@ -213,7 +191,7 @@ void PAL_ConsolidateExtractedResources(void)
         UTIL_free(buffer_u8);
 
         // resource info concatenation
-        FILE *fpInfo = UTIL_fopen(filename_info, "rb");
+        FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/res_%d.dat", CACHES_PATH, (unsigned int)res), "rb");
         unsigned int info_len = UTIL_FileLength(fpInfo);
         unsigned int *buffer_u32 = (unsigned int *)UTIL_malloc(info_len);
         UTIL_fread(buffer_u32, sizeof(char), info_len, fpInfo);
@@ -233,7 +211,7 @@ void PAL_ConsolidateExtractedResources(void)
 
 int PAL_LoadConsolidatedResources(void)
 {
-    FILE *fpInfo = UTIL_fopen(CACHES_PATH "/pal.dat", "rb");
+    FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/pal.dat", CACHES_PATH), "rb");
     if (!fpInfo)
     {
         return -1; // Failed to open resource file
@@ -355,10 +333,6 @@ int PAL_LoadConsolidatedResources(void)
 
 void PAL_FreeResourceIndex(void)
 {
-    UTIL_fclose(g_ConsolidatedResourceFile);
-    g_ConsolidatedResourceFile = NULL;
-    g_resource_id = 0xff;
-
     for (PALRES res = 0; res < Res_Count; res++)
     {
         for (unsigned int i = 0; i < g_CachedResourceIndex[res].chunk_count; i++)
@@ -389,37 +363,40 @@ int RES_ReadAnimationFrame(
     unsigned int frame_index,
     unsigned char resource_id)
 {
-    if (animation_index >= g_CachedResourceIndex[resource_id].chunk_count)
-        return -1;
-    if (frame_index >= g_CachedResourceIndex[resource_id].frame_count[animation_index])
-        return -2;
-
-    static unsigned int p_frame_index = 0xFFFF;
+    static void *fpRes = NULL;
+    static unsigned int p_data_length = 0;
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_length;
-    if (data_length > 0)
+    char filename[256] = {0};
+
+    if (animation_index >= g_CachedResourceIndex[resource_id].chunk_count ||
+        frame_index >= g_CachedResourceIndex[resource_id].frame_count[animation_index] ||
+        data_length == 0)
     {
         UTIL_free(*frame_buffer);
-        *frame_buffer = UTIL_malloc(data_length);
-        if (g_resource_id != resource_id)
-        {
-            p_frame_index = 0xFFFF;
-            g_resource_id = resource_id;
-            UTIL_fclose(g_ConsolidatedResourceFile);
-            sprintf(filename, "%s/res_%d.bin", CACHES_PATH, (unsigned int)resource_id);
-            g_ConsolidatedResourceFile = UTIL_fopen(filename, "rb");
-        }
-        if (p_frame_index + 1 != frame_index)
-            UTIL_fseek(g_ConsolidatedResourceFile,
-                       resource_offsets[resource_id] + g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_offset,
-                       SEEK_SET);
-        UTIL_fread(*frame_buffer, 1, data_length, g_ConsolidatedResourceFile);
-        p_frame_index = frame_index;
-    }
-    else
-    {
-        UTIL_free(*frame_buffer);
+        UTIL_fclose(fpRes);
         *frame_buffer = NULL;
+        fpRes = NULL;
+        p_data_length = 0;
+        return 0;
     }
+
+    if (p_data_length < data_length)
+    {
+        p_data_length = data_length;
+        UTIL_free(*frame_buffer);
+    }
+
+    *frame_buffer = UTIL_malloc(data_length);
+
+    if (fpRes == NULL)
+    {
+        sprintf(filename, "%s/res_%d.bin", CACHES_PATH, (unsigned int)resource_id);
+        fpRes = UTIL_fopen(filename, "rb");
+        UTIL_fseek(fpRes,
+                   resource_offsets[resource_id] + g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_offset,
+                   SEEK_SET);
+    }
+    UTIL_fread(*frame_buffer, 1, data_length, fpRes);
 
     return data_length;
 }
@@ -430,62 +407,51 @@ unsigned int RES_MKFDecompressChunk(
     unsigned int chunk_index,
     unsigned char resource_id)
 {
-    if (g_CachedResourceIndex[resource_id].chunk_count <= chunk_index)
-        return 0;
-
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
 
-    if (data_length)
+    if (g_CachedResourceIndex[resource_id].chunk_count <= chunk_index || data_length == 0)
+        return 0;
+
+    if (buffer_size == 0 || buffer_size < data_length)
     {
-        if (buffer_size == 0 || buffer_size != data_length || *chunk_buffer == NULL)
-        {
-            UTIL_free(*chunk_buffer);
-            buffer_size = data_length;
-            *chunk_buffer = UTIL_malloc(buffer_size);
-        }
-        if (g_resource_id != resource_id)
-        {
-            g_resource_id = resource_id;
-            UTIL_fclose(g_ConsolidatedResourceFile);
-            sprintf(filename, "%s/res_%d.bin", CACHES_PATH, (unsigned int)resource_id);
-            g_ConsolidatedResourceFile = UTIL_fopen(filename, "rb");
-        }
-        UTIL_fseek(g_ConsolidatedResourceFile,
-                   resource_offsets[resource_id] + g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset,
-                   SEEK_SET);
-        UTIL_fread(*chunk_buffer, 1, buffer_size, g_ConsolidatedResourceFile);
+        UTIL_free(*chunk_buffer);
+        *chunk_buffer = NULL;
     }
 
-    return data_length;
+    if (*chunk_buffer == NULL)
+    {
+        *chunk_buffer = UTIL_malloc(data_length);
+    }
+
+    return RES_MKFReadChunk(
+        *chunk_buffer,
+        data_length,
+        chunk_index,
+        resource_id);
 }
 
 unsigned int RES_MKFReadChunk(
-    void *output_buffer,
+    void *chunk_buffer,
     unsigned int buffer_size,
     unsigned int chunk_index,
     unsigned char resource_id)
 {
-    if (g_CachedResourceIndex[resource_id].chunk_count <= chunk_index)
-        return 0;
-
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
 
-    if (data_length)
-    {
-        if (buffer_size == 0 || data_length > buffer_size || output_buffer == NULL)
-            return 0;
+    if (g_CachedResourceIndex[resource_id].chunk_count <= chunk_index || data_length == 0)
+        return 0;
 
-        if (g_resource_id != resource_id)
-        {
-            g_resource_id = resource_id;
-            UTIL_fclose(g_ConsolidatedResourceFile);
-            sprintf(filename, "%s/res_%d.bin", CACHES_PATH, (unsigned int)resource_id);
-            g_ConsolidatedResourceFile = UTIL_fopen(filename, "rb");
-        }
-        UTIL_fseek(g_ConsolidatedResourceFile,
-                   resource_offsets[resource_id] + g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset,
-                   SEEK_SET);
-        UTIL_fread(output_buffer, 1, data_length, g_ConsolidatedResourceFile);
-    }
+    if (buffer_size == 0 || buffer_size < data_length || chunk_buffer == NULL)
+        return 0;
+
+    char filename[256] = {0};
+    sprintf(filename, "%s/res_%d.bin", CACHES_PATH, (unsigned int)resource_id);
+    void *fpRes = UTIL_fopen(filename, "rb");
+    UTIL_fseek(fpRes,
+               resource_offsets[resource_id] + g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_offset,
+               SEEK_SET);
+    UTIL_fread(chunk_buffer, 1, data_length, fpRes);
+    UTIL_fclose(fpRes);
+
     return data_length;
 }

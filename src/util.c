@@ -134,6 +134,18 @@ float RandomFloat(float from, float to)
     return from + (float)lrand() / (INT_MAX / (to - from));
 }
 
+char *UTIL_Filename(
+    const char *fmt,
+    ...)
+{
+    va_list args;
+    static char buffer[512];
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+    return buffer;
+}
+
 void TerminateOnError(
     const char *fmt,
     ...)

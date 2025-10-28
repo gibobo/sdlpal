@@ -19,6 +19,7 @@
 //
 
 #include "../audio.h"
+#include "../driver.h"
 #include "../global.h"
 #include "../palcommon.h"
 #include "../resource.h"
@@ -26,6 +27,10 @@
 #include "resampler.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
+
+/* Maximum number of simultaneous sounds allowed in the queue */
+#define MAX_SOUND_QUEUE_DEPTH 4
 
 typedef struct RIFFHeader
 {
@@ -741,9 +746,24 @@ static int SOUND_Play(
         return false;
     }
 
+    DRIVER_Audio_Lock();
+
     cursnd = &player->soundlist;
+    int queue_depth = 0;
     while (cursnd->next && cursnd->base)
+    {
         cursnd = cursnd->next;
+        queue_depth++;
+    }
+
+    // Limit queue depth to prevent memory accumulation
+    if (queue_depth >= MAX_SOUND_QUEUE_DEPTH)
+    {
+        DRIVER_Audio_Unlock();
+        UTIL_free(buf);
+        return false;
+    }
+
     if (cursnd->base)
     {
         WAVEDATA *obj = (WAVEDATA *)UTIL_malloc(sizeof(WAVEDATA));
@@ -767,6 +787,8 @@ static int SOUND_Play(
     cursnd->spec = wavespec;
     cursnd->ResampleMix = mixer;
     player->cursounds++;
+
+    DRIVER_Audio_Unlock();
 
     return true;
 }

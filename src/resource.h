@@ -55,7 +55,7 @@ unsigned int RES_MKFDecompressChunk(
 
 // Reads a raw chunk from the resource file into a provided buffer.
 unsigned int RES_MKFReadChunk(
-    void *output_buffer,
+    void *chunk_buffer,
     unsigned int buffer_size,
     unsigned int chunk_index,
     unsigned char resource_id);

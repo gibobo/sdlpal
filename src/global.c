@@ -245,9 +245,7 @@ static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int 
 {
     unsigned int n = 0;
     // Try to open the specified file
-    char save_path[256] = {0};
-    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
-    void *fpSAVE = UTIL_fopen_without_checking(save_path, "rb");
+    void *fpSAVE = UTIL_fopen_without_checking(UTIL_Filename("%s/%d.rpg", RESOURCE_PATH, iSaveSlot), "rb");
     if (fpSAVE)
     {
         // Read all data from the file and close.
@@ -363,16 +361,11 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
     memcpy(s->rgScene, gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene));
 
     // Try writing to file
-    char save_path[256] = {0};
-    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
-    void *fpSAVE = UTIL_fopen(save_path, "wb");
-    if (fpSAVE)
-    {
-        unsigned int i = RES_MKFGetChunkSize(0, Res_SSS);
-        i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
-        UTIL_fwrite(s, i, 1, fpSAVE);
-        UTIL_fclose(fpSAVE);
-    }
+    void *fpSAVE = UTIL_fopen(UTIL_Filename("%s/%d.rpg", RESOURCE_PATH, iSaveSlot), "wb");
+    unsigned int i = RES_MKFGetChunkSize(0, Res_SSS);
+    i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
+    UTIL_fwrite(s, i, 1, fpSAVE);
+    UTIL_fclose(fpSAVE);
 }
 
 static void

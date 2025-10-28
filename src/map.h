@@ -59,10 +59,13 @@
 #define PALMAP_X 64
 #define PALMAP_Z 2
 
-typedef struct tagPALMAP {
-   unsigned int *Tiles;
-   unsigned char *pTileSprite;
-   int iMapNum;
+typedef struct tagPALMAP
+{
+    unsigned int *Tiles;
+    unsigned int Len_Tiles;
+    unsigned char *pTileSprite;
+    unsigned int Len_TileSprite;
+    int iMapNum;
 } PALMAP;
 
 void PAL_LoadMap(PALMAP *lpMap, int iMapNum);

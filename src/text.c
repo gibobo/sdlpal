@@ -85,11 +85,10 @@ int PAL_InitText(void)
     unsigned int wpos;
     unsigned int i;
     unsigned char data;
-    char path[128];
 
     // Open the word data files.
     {
-        void *fpWLEN = UTIL_fopen(CACHES_PATH "/word_len.bin", "rb");
+        void *fpWLEN = UTIL_fopen(UTIL_Filename("%s/word_len.bin", CACHES_PATH), "rb");
         g_TextLib.nWords = UTIL_FileLength(fpWLEN);
         WordLen = (unsigned int *)UTIL_calloc(g_TextLib.nWords, sizeof(unsigned int));
         for (i = 0, wpos = 0, data = 0, WordLen_max = 0; i < g_TextLib.nWords; i++)
@@ -103,8 +102,7 @@ int PAL_InitText(void)
         UTIL_fclose(fpWLEN);
     }
     {
-        sprintf(path, "%s/word_%db.bin", CACHES_PATH, sizeof(wchar_t));
-        void *fpWORD = UTIL_fopen(path, "rb");
+        void *fpWORD = UTIL_fopen(UTIL_Filename("%s/word_%db.bin", CACHES_PATH, sizeof(wchar_t)), "rb");
         unsigned int word_buffer_size = UTIL_FileLength(fpWORD) / sizeof(wchar_t);
         WordData = (wchar_t *)UTIL_calloc(word_buffer_size, sizeof(wchar_t));
         UTIL_fread(WordData, sizeof(wchar_t), word_buffer_size, fpWORD);
@@ -112,7 +110,7 @@ int PAL_InitText(void)
     }
     // Open the message data files.
     {
-        void *fpMLEN = UTIL_fopen(CACHES_PATH "/msg_len.bin", "rb");
+        void *fpMLEN = UTIL_fopen(UTIL_Filename("%s/msg_len.bin", CACHES_PATH), "rb");
         g_TextLib.nMsgs = UTIL_FileLength(fpMLEN);
         MsgLen = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs, sizeof(unsigned int));
         for (i = 0, wpos = 0, data = 0, MsgLen_max = 0; i < g_TextLib.nMsgs; i++, data = 0)
@@ -126,8 +124,7 @@ int PAL_InitText(void)
         UTIL_fclose(fpMLEN);
     }
     {
-        sprintf(path, "%s/msg_%db.bin", CACHES_PATH, sizeof(wchar_t));
-        void *fpMSG = UTIL_fopen(path, "rb");
+        void *fpMSG = UTIL_fopen(UTIL_Filename("%s/msg_%db.bin", CACHES_PATH, sizeof(wchar_t)), "rb");
         unsigned int msg_buffer_size = UTIL_FileLength(fpMSG) / sizeof(wchar_t);
         MsgData = (wchar_t *)UTIL_calloc(msg_buffer_size, sizeof(wchar_t));
         UTIL_fread(MsgData, sizeof(wchar_t), msg_buffer_size, fpMSG);

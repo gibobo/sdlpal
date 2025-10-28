@@ -114,7 +114,7 @@ void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
             struct tm *tm_info = localtime(&now);
             char time_str[32];
             strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", tm_info);
-            printf("[%s] WebSocket message received: %.*s\n", time_str, (int)wm->data.len, wm->data.buf);
+            fprintf(stdout, "[%s] WebSocket message received: %.*s\n", time_str, (int)wm->data.len, wm->data.buf);
             if ((int)wm->data.buf[0] >= '0' && (int)wm->data.buf[0] <= '2')
                 handle_input(wm->data.buf, wm->data.len);
         }

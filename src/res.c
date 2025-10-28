@@ -131,9 +131,6 @@ int PAL_InitResources(void)
         UTIL_free(gpResources);
         return -2;
     }
-    gpResources->lpMap->iMapNum = 0;
-    gpResources->lpMap->Tiles = NULL;
-    gpResources->lpMap->pTileSprite = NULL;
 
     return 0; // Success
 }

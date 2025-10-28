@@ -122,9 +122,7 @@ static const unsigned int MagicDescMsgPos = PAL_XY(102, 0);
 static unsigned short GetSavedTimes(int iSaveSlot)
 {
     unsigned short wSavedTimes = 0;
-    char save_path[256] = {0};
-    sprintf(save_path, RESOURCE_PATH "/%d.rpg", iSaveSlot);
-    void *fpSAVE = UTIL_fopen_without_checking(save_path, "rb");
+    void *fpSAVE = UTIL_fopen_without_checking(UTIL_Filename("%s/%d.rpg", RESOURCE_PATH, iSaveSlot), "rb");
     if (fpSAVE)
     {
         if (UTIL_fread(&wSavedTimes, sizeof(unsigned short), 1, fpSAVE) != 1)

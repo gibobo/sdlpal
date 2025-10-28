@@ -243,7 +243,7 @@ int PAL_InitFont(void)
 #endif
 
     // Open font data file containing actual bitmap data
-    fp_font_data = UTIL_fopen(CACHES_PATH "/unicode_font.bin", "rb");
+    fp_font_data = UTIL_fopen(UTIL_Filename("%s/unicode_font.bin", CACHES_PATH), "rb");
     if (fp_font_data == NULL)
     {
         return -1; // Failed to open font data file
@@ -253,7 +253,7 @@ int PAL_InitFont(void)
     // This bitmap determines whether each character uses 16x16 or 32x32 font
     if (font_size_bitmap == NULL)
     {
-        void *fp_font_size = UTIL_fopen(CACHES_PATH "/unicode_font_size.bin", "rb");
+        void *fp_font_size = UTIL_fopen(UTIL_Filename("%s/unicode_font_size.bin", CACHES_PATH), "rb");
         if (fp_font_size == NULL)
         {
             UTIL_fclose(fp_font_data);

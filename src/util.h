@@ -59,6 +59,8 @@ int RandomLong(int from, int to);
 
 float RandomFloat(float from, float to);
 
+char *UTIL_Filename(const char *fmt, ...);
+
 void TerminateOnError(const char *fmt, ...);
 
 void *UTIL_malloc(unsigned int buffer_size);
