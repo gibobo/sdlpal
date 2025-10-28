@@ -111,7 +111,6 @@ static struct
     unsigned char padding[1]; // Padding for alignment
     unsigned char font_data[FONT_DATA_SIZE];
 } font_cache[FONT_CACHE_SIZE];
-static int cache_next_slot = 0;
 #endif
 
 // Lightweight font width calculation for memory-constrained systems
@@ -175,14 +174,18 @@ static unsigned char PAL_GetCharFontSize(unsigned short wChar)
 static unsigned char *PAL_GetFontData(unsigned short wChar, unsigned char *out_font_size)
 {
 #if FONT_CACHE_ENABLED
-    // Check cache first (only if caching is enabled)
-    for (int i = 0; i < FONT_CACHE_SIZE; i++)
+    // Use direct-mapped cache for O(1) lookup
+    int cache_slot;
+    #if ((FONT_CACHE_SIZE & (FONT_CACHE_SIZE - 1)) == 0)
+    cache_slot = wChar & (FONT_CACHE_SIZE - 1);
+    #else
+    cache_slot = wChar % FONT_CACHE_SIZE;
+    #endif
+
+    if (font_cache[cache_slot].wChar == wChar)
     {
-        if (font_cache[i].wChar == wChar)
-        {
-            *out_font_size = font_cache[i].font_size;
-            return font_cache[i].font_data;
-        }
+        *out_font_size = font_cache[cache_slot].font_size;
+        return font_cache[cache_slot].font_data;
     }
 #endif
 
@@ -200,13 +203,10 @@ static unsigned char *PAL_GetFontData(unsigned short wChar, unsigned char *out_f
     UTIL_fseek(fp_font_data, wChar * FONT_DATA_SIZE, SEEK_SET);
 
 #if FONT_CACHE_ENABLED
-    // Store in cache if caching is enabled
-    int cache_slot = cache_next_slot;
-    cache_next_slot = (cache_next_slot + 1) % FONT_CACHE_SIZE;
-
+    // Store in the direct-mapped slot
+    UTIL_fread(font_cache[cache_slot].font_data, sizeof(unsigned char), FONT_DATA_SIZE, fp_font_data);
     font_cache[cache_slot].wChar = wChar;
     font_cache[cache_slot].font_size = *out_font_size;
-    UTIL_fread(font_cache[cache_slot].font_data, sizeof(unsigned char), FONT_DATA_SIZE, fp_font_data);
 
     return font_cache[cache_slot].font_data;
 #else
@@ -232,7 +232,7 @@ int PAL_InitFont(void)
     font_wChar = 0xFFFF; // Reset cached character
 
 #if FONT_CACHE_ENABLED
-    cache_next_slot = 0; // Reset cache
+    // Reset cache
 
     // Initialize font cache (only if enabled)
     for (int i = 0; i < FONT_CACHE_SIZE; i++)
@@ -304,7 +304,6 @@ void PAL_DeInitFont(void)
 
 #if FONT_CACHE_ENABLED
     // Reset cache state (only if enabled)
-    cache_next_slot = 0;
 
     // Clear font cache
     for (int i = 0; i < FONT_CACHE_SIZE; i++)

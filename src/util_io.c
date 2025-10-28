@@ -1,5 +1,11 @@
 #include "util.h"
 #include <stdio.h>
+#if defined(_WIN32) || defined(_WIN64)
+#include <io.h>
+#include <windows.h>
+#else
+#include <sys/stat.h>
+#endif
 
 void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode)
 {
@@ -9,9 +15,6 @@ void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode)
         TerminateOnError("%s() failed: invalid arguments (filename or mode is NULL)\n", __func__);
     else
         fp = fopen(_FileName, _Mode);
-
-    if (fp != NULL)
-        fprintf(stdout, "File %s loaded\n", _FileName);
 
     return fp;
 }
@@ -28,21 +31,46 @@ void *UTIL_fopen(const char *_FileName, const char *_Mode)
 int UTIL_fseek(void *_Stream, long _Offset, int _Origin)
 {
     if (_Stream == NULL)
+    {
         TerminateOnError("%s() failed: invalid argument (stream is NULL)\n", __func__);
+        return -1;
+    }
     else
+    {
+#if defined(_MSC_VER)
+        /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.
+           Use this only when the caller guarantees single-threaded access or external synchronization. */
+        return _fseek_nolock((FILE *)_Stream, _Offset, _Origin);
+#else
+        /* Portable fallback */
         return fseek((FILE *)_Stream, _Offset, _Origin);
-
-    return 0;
+#endif
+    }
 }
 
 unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream)
 {
     if (_Buffer == NULL || _Stream == NULL)
+    {
         TerminateOnError("%s() failed: invalid arguments (buffer or stream is NULL)\n", __func__);
-    else
-        return (unsigned int)fread(_Buffer, _ElementSize, _ElementCount, (FILE *)_Stream);
+        return 0;
+    }
 
-    return 0;
+    /* Match fread signature types to avoid unnecessary casts and allow optimized CRT calls */
+    size_t elemSize = (size_t)_ElementSize;
+    size_t elemCount = (size_t)_ElementCount;
+
+#if defined(_MSC_VER)
+    /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.
+       Use this only when the caller guarantees single-threaded access or external synchronization. */
+    return (unsigned int)_fread_nolock(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+#elif defined(_POSIX_VERSION) || defined(__unix__) || defined(__APPLE__)
+    /* On POSIX, fread_unlocked reduces locking overhead in similar scenarios. */
+    return (unsigned int)fread_unlocked(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+#else
+    /* Portable fallback */
+    return (unsigned int)fread(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+#endif
 }
 
 unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream)
@@ -50,7 +78,23 @@ unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int 
     if (_Buffer == NULL || _Stream == NULL)
         TerminateOnError("%s() failed: invalid arguments (buffer or stream is NULL)\n", __func__);
     else
-        return (unsigned int)fwrite(_Buffer, _ElementSize, _ElementCount, (FILE *)_Stream);
+    {
+        /* Match fwrite signature types to avoid unnecessary casts and allow optimized CRT calls */
+        size_t elemSize = (size_t)_ElementSize;
+        size_t elemCount = (size_t)_ElementCount;
+
+#if defined(_MSC_VER)
+        /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.
+           Use this only when the caller guarantees single-threaded access or external synchronization. */
+        return (unsigned int)_fwrite_nolock(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+#elif defined(_POSIX_VERSION) || defined(__unix__) || defined(__APPLE__)
+        /* On POSIX, fwrite_unlocked reduces locking overhead in similar scenarios. */
+        return (unsigned int)fwrite_unlocked(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+#else
+        /* Portable fallback */
+        return (unsigned int)fwrite(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+#endif
+    }
 
     return 0;
 }
@@ -58,7 +102,16 @@ unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int 
 void UTIL_fclose(void *fp)
 {
     if (fp != NULL)
+    {
+#if defined(_MSC_VER)
+        /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.
+           Use this only when the caller guarantees single-threaded access or external synchronization. */
+        _fclose_nolock((FILE *)fp);
+#else
+        /* Portable fallback */
         fclose((FILE *)fp);
+#endif
+    }
 }
 
 long UTIL_FileLength(void *fp)
@@ -66,20 +119,29 @@ long UTIL_FileLength(void *fp)
     if (fp == NULL)
         TerminateOnError("%s() failed: invalid argument (file pointer is NULL)\n", __func__);
 
-    long old_pos = ftell((FILE *)fp);
-
-    if (old_pos == -1)
-        TerminateOnError("%s() failed: ftell() error - cannot get current file position\n", __func__);
-
-    if (UTIL_fseek((FILE *)fp, 0, SEEK_END) == -1)
-        TerminateOnError("%s() failed: fseek() error - cannot seek to end of file\n", __func__);
-
-    long length = ftell((FILE *)fp); // Get the file length
-    if (length == -1)
-        TerminateOnError("%s() failed: ftell() error - cannot get file length\n", __func__);
-
-    if (UTIL_fseek((FILE *)fp, old_pos, SEEK_SET) == -1)
-        TerminateOnError("%s() failed: fseek() error - cannot restore file position\n", __func__);
-
-    return length;
+#if defined(_WIN32) || defined(_WIN64)
+    /* On Windows, use GetFileSizeEx for efficiency */
+    LARGE_INTEGER size;
+    if (GetFileSizeEx((HANDLE)_get_osfhandle(_fileno((FILE *)fp)), &size))
+    {
+        return (long)size.QuadPart;
+    }
+    else
+    {
+        TerminateOnError("%s() failed: GetFileSizeEx error\n", __func__);
+        return 0;
+    }
+#else
+    /* On POSIX, use fstat for efficiency */
+    struct stat st;
+    if (fstat(fileno((FILE *)fp), &st) == 0)
+    {
+        return (long)st.st_size;
+    }
+    else
+    {
+        TerminateOnError("%s() failed: fstat error\n", __func__);
+        return 0;
+    }
+#endif
 }

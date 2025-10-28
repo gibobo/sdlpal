@@ -72,13 +72,19 @@ int PAL_RLEBlitToSurfaceWithShadow(
     unsigned char T;
     int dx = PAL_X(pos);
     int dy = PAL_Y(pos);
-    unsigned char *p;
+
+    unsigned char *dstPixels;
+    int dst_w, dst_h;
 
     // Check for NULL pointer.
     if (lpBitmapRLE == NULL || lpDstSurface == NULL || lpDstSurface->pixels == NULL)
     {
         return -1;
     }
+
+    dstPixels = lpDstSurface->pixels;
+    dst_w = lpDstSurface->w;
+    dst_h = lpDstSurface->h;
 
     // Skip the 0x00000002 in the file header.
     if (lpBitmapRLE[0] == 0x02 && lpBitmapRLE[1] == 0x00 &&
@@ -92,8 +98,8 @@ int PAL_RLEBlitToSurfaceWithShadow(
     uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
 
     // Check whether bitmap intersects the surface.
-    if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
-        uiHeight + dy <= 0 || dy >= lpDstSurface->h)
+    if (uiWidth + dx <= 0 || dx >= dst_w ||
+        uiHeight + dy <= 0 || dy >= dst_h)
     {
         return 0;
     }
@@ -102,6 +108,16 @@ int PAL_RLEBlitToSurfaceWithShadow(
     // The bitmap is 8-bpp, each pixel will use 1 byte.
     uiLen = uiWidth * uiHeight;
 
+    // Prepare a static shadow lookup table to avoid repeated bit ops in hot loop.
+    static unsigned char shadow_tbl[256];
+    static int shadow_tbl_inited = 0;
+    if (bShadow && !shadow_tbl_inited)
+    {
+        for (int t = 0; t < 256; ++t)
+            shadow_tbl[t] = (unsigned char)((t & 0xF0) | ((t & 0x0F) >> 1));
+        shadow_tbl_inited = 1;
+    }
+
     // Start decoding and blitting the bitmap.
     lpBitmapRLE += 4;
     for (i = 0; i < uiLen;)
@@ -109,8 +125,9 @@ int PAL_RLEBlitToSurfaceWithShadow(
         T = *lpBitmapRLE++;
         if ((T & 0x80) && T <= 0x80 + uiWidth)
         {
-            i += T - 0x80;
-            uiSrcX += T - 0x80;
+            int skip = T - 0x80;
+            i += skip;
+            uiSrcX += skip;
             if (uiSrcX >= uiWidth)
             {
                 uiSrcX -= uiWidth;
@@ -131,7 +148,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
                 j += -y * uiWidth;
                 y = 0;
             }
-            else if (y >= lpDstSurface->h)
+            else if (y >= dst_h)
             {
                 return 0; // No more pixels needed, break out
             }
@@ -141,19 +158,20 @@ int PAL_RLEBlitToSurfaceWithShadow(
                 // Skip the points which are out of the surface.
                 if (x < 0)
                 {
-                    j += -x;
+                    int skipx = -x;
+                    j += skipx;
                     if (j >= T)
                         break;
-                    sx += -x;
+                    sx += skipx;
                     x = 0;
                 }
-                else if (x >= lpDstSurface->w)
+                else if (x >= dst_w)
                 {
                     j += uiWidth - sx;
                     x -= sx;
                     sx = 0;
                     y++;
-                    if (y >= lpDstSurface->h)
+                    if (y >= dst_h)
                     {
                         return 0; // No more pixels needed, break out
                     }
@@ -162,37 +180,45 @@ int PAL_RLEBlitToSurfaceWithShadow(
 
                 // Put the pixels in row onto the surface
                 k = T - j;
-                if (lpDstSurface->w - x < k)
-                    k = lpDstSurface->w - x;
+                if (dst_w - x < k)
+                    k = dst_w - x;
                 if (uiWidth - sx < k)
                     k = uiWidth - sx;
-                sx += k;
-                p = lpDstSurface->pixels + y * lpDstSurface->w;
+
+                // Row pointer
+                unsigned char *row = dstPixels + (size_t)y * dst_w;
                 if (bShadow)
                 {
-                    j += k;
-                    for (; k != 0; k--)
+                    // Apply shadow to existing destination pixels.
+                    unsigned char *dst = row + x;
+                    int kk = k;
+                    // use lookup table per-byte for speed
+                    while (kk--)
                     {
-                        p[x] = (p[x] & 0xF0) | ((p[x] & 0x0F) >> 1);
-                        x++;
+                        *dst = shadow_tbl[*dst];
+                        dst++;
                     }
+                    j += k;
+                    x += k;
                 }
                 else
                 {
-                    for (; k != 0; k--)
-                    {
-                        p[x] = lpBitmapRLE[j];
-                        j++;
-                        x++;
-                    }
+                    // Fast bulk copy from RLE buffer to surface row.
+                    unsigned char *dst = row + x;
+                    const unsigned char *src = lpBitmapRLE + j;
+                    // memcpy is faster for large k; safe since src and dst do not overlap.
+                    memcpy(dst, src, (size_t)k);
+                    j += k;
+                    x += k;
                 }
 
+                sx += k;
                 if (sx >= uiWidth)
                 {
                     sx -= uiWidth;
                     x -= uiWidth;
                     y++;
-                    if (y >= lpDstSurface->h)
+                    if (y >= dst_h)
                     {
                         return 0; // No more pixels needed, break out
                     }
