@@ -384,9 +384,11 @@ int RES_ReadAnimationFrame(
     {
         p_data_length = data_length;
         UTIL_free(*frame_buffer);
+        *frame_buffer = NULL;
     }
 
-    *frame_buffer = UTIL_malloc(data_length);
+    if (*frame_buffer == NULL)
+        *frame_buffer = UTIL_malloc(data_length);
 
     if (fpRes == NULL)
     {
