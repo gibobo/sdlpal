@@ -312,7 +312,7 @@ void PAL_DrawTextUnescape(
     while (*lpszText)
     {
         // Draw the character
-        unsigned char char_width = PAL_CharWidth(*lpszText);
+        unsigned char char_width = PAL_CharWidth(*lpszText) << 3;
         if (char_width)
         {
             PAL_DrawCharOnSurface(*lpszText++, fontX, fontY, bColor, fShadow);
@@ -578,42 +578,21 @@ int TEXT_DisplayText(
                 //
                 // Set the font color to Cyan
                 //
-                if (g_TextLib.bCurrentFontColor == FONT_COLOR_CYAN)
-                {
-                    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-                }
-                else
-                {
-                    g_TextLib.bCurrentFontColor = FONT_COLOR_CYAN;
-                }
+                g_TextLib.bCurrentFontColor = (g_TextLib.bCurrentFontColor == FONT_COLOR_CYAN) ? FONT_COLOR_DEFAULT : FONT_COLOR_CYAN;
                 lpszText++;
                 break;
             case '\'':
                 //
                 // Set the font color to Red
                 //
-                if (g_TextLib.bCurrentFontColor == FONT_COLOR_RED)
-                {
-                    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-                }
-                else
-                {
-                    g_TextLib.bCurrentFontColor = FONT_COLOR_RED;
-                }
+                g_TextLib.bCurrentFontColor = (g_TextLib.bCurrentFontColor == FONT_COLOR_RED) ? FONT_COLOR_DEFAULT : FONT_COLOR_RED;
                 lpszText++;
                 break;
             case '@':
                 //
                 // Set the font color to Red
                 //
-                if (g_TextLib.bCurrentFontColor == FONT_COLOR_RED_ALT)
-                {
-                    g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-                }
-                else
-                {
-                    g_TextLib.bCurrentFontColor = FONT_COLOR_RED_ALT;
-                }
+                g_TextLib.bCurrentFontColor = (g_TextLib.bCurrentFontColor == FONT_COLOR_RED_ALT) ? FONT_COLOR_DEFAULT : FONT_COLOR_RED_ALT;
                 lpszText++;
                 break;
             case '\"':
@@ -622,10 +601,7 @@ int TEXT_DisplayText(
                 //
                 if (!isDialog)
                 {
-                    if (g_TextLib.bCurrentFontColor == FONT_COLOR_YELLOW)
-                        g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-                    else
-                        g_TextLib.bCurrentFontColor = FONT_COLOR_YELLOW;
+                    g_TextLib.bCurrentFontColor = (g_TextLib.bCurrentFontColor == FONT_COLOR_YELLOW) ? FONT_COLOR_DEFAULT : FONT_COLOR_YELLOW;
                 }
                 lpszText++;
                 break;
@@ -695,7 +671,7 @@ int TEXT_DisplayText(
                     PAL_DrawNumber(text[0] - '0', 1, PAL_XY(x, y + 4), kNumColorYellow, kNumAlignLeft);
                 else
                     PAL_DrawTextUnescape(text, PAL_XY(x, y), color, !isDialog, !isDialog && !g_TextLib.fUserSkip, false);
-                x += PAL_CharWidth(text[0]);
+                x += (PAL_CharWidth(text[0]) << 3);
 
                 if (!isDialog && !g_TextLib.fUserSkip)
                 {
@@ -764,35 +740,28 @@ void PAL_ShowDialogText(
         //
         // The text should be shown in a small window at the center of the screen
         //
-        {
-            int i;
-            int w = (int)wcslen(lpszText);
-            int len = 0;
+        unsigned int len = PAL_TextWidth(lpszText);
 
-            for (i = 0; i < w; i++)
-                len += PAL_CharWidth(lpszText[i]) >> 3;
+        // Create the window box
+        rect.x = PAL_X(g_TextLib.posDialogText) - len * 4;
+        rect.y = PAL_Y(g_TextLib.posDialogText);
+        rect.w = SCREEN_W - rect.x * 2 + 32;
+        rect.h = 64;
 
-            // Create the window box
-            rect.x = PAL_X(g_TextLib.posDialogText) - len * 4;
-            rect.y = PAL_Y(g_TextLib.posDialogText);
-            rect.w = SCREEN_W - rect.x * 2 + 32;
-            rect.h = 64;
+        // Follow behavior of original version
+        PAL_CreateSingleLineBoxWithShadow(PAL_XY(rect.x, rect.y), (len + 1) / 2, NULL, iDialogShadow);
 
-            // Follow behavior of original version
-            PAL_CreateSingleLineBoxWithShadow(PAL_XY(rect.x, rect.y), (len + 1) / 2, NULL, iDialogShadow);
+        // VIDEO_UpdateScreen(&rect);
 
-            // VIDEO_UpdateScreen(&rect);
+        // Show the text on the screen
+        TEXT_DisplayText(lpszText, rect.x + 8 + ((len & 1) << 2), rect.y + 10, true);
+        VIDEO_UpdateScreen(&rect);
 
-            // Show the text on the screen
-            TEXT_DisplayText(lpszText, rect.x + 8 + ((len & 1) << 2), rect.y + 10, true);
-            VIDEO_UpdateScreen(&rect);
+        PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
 
-            PAL_DialogWaitForKeyWithMaximumSeconds(1.4f);
+        // VIDEO_UpdateScreen(&rect);
 
-            // VIDEO_UpdateScreen(&rect);
-
-            PAL_EndDialog();
-        }
+        PAL_EndDialog();
     }
     else
     {

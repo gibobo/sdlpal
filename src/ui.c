@@ -693,7 +693,7 @@ PAL_TextWidth(
     for (i = 0; i < l; i++)
         w += PAL_CharWidth(itemText[i]);
 
-    return w;
+    return w << 3;
 }
 
 unsigned int PAL_MenuTextMaxWidth(

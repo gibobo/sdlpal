@@ -41,7 +41,7 @@ extern "C"
     None.
 
 --*/
-int PAL_InitFont(void);
+void PAL_InitFont(void);
 
 /*++
   Purpose:
