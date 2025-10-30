@@ -296,6 +296,7 @@ void PAL_DrawTextUnescape(
 {
     unsigned short fontX = (unsigned short)PAL_X(pos);
     unsigned short fontY = (unsigned short)PAL_Y(pos);
+    unsigned char char_width;
     PAL_Rect urect;
     urect.x = fontX;
     urect.y = fontY;
@@ -312,12 +313,13 @@ void PAL_DrawTextUnescape(
     while (*lpszText)
     {
         // Draw the character
-        unsigned char char_width = PAL_CharWidth(*lpszText) << 3;
+        char_width = PAL_CharWidth(*lpszText) << 3;
         if (char_width)
         {
-            PAL_DrawCharOnSurface(*lpszText++, fontX, fontY, bColor, fShadow);
+            PAL_DrawCharOnSurface(*lpszText, fontX, fontY, bColor, fShadow);
             fontX += char_width;
             urect.w += char_width;
+            *lpszText++;
         }
     }
 

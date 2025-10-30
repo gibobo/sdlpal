@@ -24,29 +24,115 @@
 #include "video.h"
 #include <stdlib.h>
 
-#define ReLU(A)            ((A) > 0 ? (A) : 0)
-#define unicode_lower_top  0xD800
-#define unicode_upper_base 0xF900
-#define unicode_upper_top  0xFFFE
+#define FONT_DATA_CACHE_SIZE 256
+#define ReLU(A)              ((A) > 0 ? (A) : 0)
+#define unicode_lower_top    0xD800
+#define unicode_upper_base   0xF900
+#define unicode_upper_top    0xFFFE
+
+typedef struct
+{
+    unsigned short wChar;
+    unsigned char size;
+    unsigned char data[32];
+} font_data_cache;
 
 static void *fp_font_data = NULL;
 static void *fp_font_size = NULL;
-static unsigned char font_size = 0;
-static unsigned char font_data[32];
-static unsigned short font_wChar = 0xFFFF;
+static font_data_cache *font_cache = NULL;
+static unsigned short font_cache_index = 0;
+static unsigned short font_cache_filled = 0;
+static font_data_cache *font_cache_last_hit = NULL;
+
+static font_data_cache *FontCacheLookupOrLoad(unsigned short wChar)
+{
+    if (font_cache == NULL || fp_font_data == NULL || fp_font_size == NULL)
+        return NULL;
+
+    // Check for invalid char code.
+    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || (wChar >= unicode_upper_top))
+        return NULL;
+
+    if (font_cache_last_hit != NULL && font_cache_last_hit->size > 0 && font_cache_last_hit->wChar == wChar)
+        return font_cache_last_hit;
+
+    for (unsigned short i = 0; i < font_cache_filled; i++)
+    {
+        font_data_cache *entry = &font_cache[i];
+        if (entry->size > 0 && entry->wChar == wChar)
+        {
+            font_cache_last_hit = entry;
+            return entry;
+        }
+    }
+
+    font_data_cache *pCache = &font_cache[font_cache_index];
+    unsigned short current_index = font_cache_index;
+    unsigned char was_empty = (pCache->size == 0);
+
+    unsigned short wCharOffset = wChar;
+    if (wCharOffset >= unicode_upper_base)
+        wCharOffset -= (unicode_upper_base - unicode_lower_top);
+
+    unsigned char size_bits;
+    if (UTIL_fseek(fp_font_size, sizeof(unsigned char) * wCharOffset / 8, SEEK_SET) != 0)
+    {
+        pCache->size = 0;
+        return NULL;
+    }
+    if (UTIL_fread(&size_bits, sizeof(unsigned char), 1, fp_font_size) != 1)
+    {
+        pCache->size = 0;
+        return NULL;
+    }
+    if (UTIL_fseek(fp_font_data, sizeof(unsigned char) * wCharOffset * 32, SEEK_SET) != 0)
+    {
+        pCache->size = 0;
+        return NULL;
+    }
+    if (UTIL_fread(pCache->data, sizeof(unsigned char), 32, fp_font_data) != 32)
+    {
+        pCache->size = 0;
+        return NULL;
+    }
+
+    pCache->wChar = wChar;
+    pCache->size = (size_bits & (1U << (wCharOffset % 8))) ? 2 : 1;
+    font_cache_last_hit = pCache;
+
+    if (was_empty && font_cache_filled < FONT_DATA_CACHE_SIZE)
+    {
+        if (current_index >= font_cache_filled)
+            font_cache_filled = current_index + 1;
+        else
+            font_cache_filled++;
+    }
+
+    font_cache_index = (current_index + 1) % FONT_DATA_CACHE_SIZE;
+    return pCache;
+}
 
 void PAL_InitFont(void)
 {
     fp_font_data = UTIL_fopen(UTIL_Filename("%s/unicode_font.bin", CACHES_PATH), "rb");
     fp_font_size = UTIL_fopen(UTIL_Filename("%s/unicode_font_size.bin", CACHES_PATH), "rb");
+    font_cache = (font_data_cache *)UTIL_calloc(FONT_DATA_CACHE_SIZE, sizeof(font_data_cache));
+    font_cache_index = 0;
+    font_cache_filled = 0;
+    font_cache_last_hit = NULL;
 }
 
 void PAL_DeInitFont(void)
 {
     UTIL_fclose(fp_font_data);
     UTIL_fclose(fp_font_size);
+    UTIL_free(font_cache);
     fp_font_data = NULL;
     fp_font_size = NULL;
+    font_cache = NULL;
+    font_cache_index = 0;
+    font_cache_filled = 0;
+    font_cache_last_hit = NULL;
 }
 
 void PAL_DrawCharOnSurface(
@@ -56,45 +142,30 @@ void PAL_DrawCharOnSurface(
     const unsigned char bColor,
     const unsigned char fShadow)
 {
+    unsigned short i;
+    unsigned short j;
+    unsigned char font_size;
+    font_data_cache *pCache = FontCacheLookupOrLoad(wChar);
+
+    // Check for cache miss
+    if (pCache == NULL)
+        return;
+
     // Check for NULL screen surface.
     if (gpScreen == NULL)
         return;
 
-    // Check for NULL pointer & invalid char code.
-    if ((fp_font_data == NULL) || (fp_font_size == NULL))
-        return;
+    font_size = pCache->size << 4;
 
-    // Check for invalid char code.
-    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || (wChar >= unicode_upper_top))
-        return;
-
-    // Locate for this character in the font lib.
-    if (wChar >= unicode_upper_base)
-        wChar -= (unicode_upper_base - unicode_lower_top);
-
-    if (font_wChar != wChar)
-    {
-        font_wChar = wChar;
-        UTIL_fseek(fp_font_size, sizeof(unsigned char) * wChar / 8, SEEK_SET);
-        UTIL_fread(&font_size, sizeof(unsigned char), 1, fp_font_size);
-
-        UTIL_fseek(fp_font_data, sizeof(unsigned char) * wChar * 32, SEEK_SET);
-        UTIL_fread(font_data, sizeof(unsigned char), 32, fp_font_data);
-
-        font_size = (font_size & (1U << (wChar % 8))) ? 32U : 16U;
-    }
-
-    unsigned short i;
-    unsigned short j;
     // Draw the character to the surface.
     unsigned char *dst = gpScreen->pixels + gpScreen->w * ReLU(y) + x;
     unsigned char *top = gpScreen->pixels + gpScreen->w * gpScreen->h;
-    for (i = 0; i < font_size && dst < top; i += (font_size >> 4), dst += gpScreen->w)
+    for (i = 0; i < font_size && dst < top; i += pCache->size, dst += gpScreen->w)
     {
         unsigned char *shadow_row = dst + gpScreen->w;
-        for (j = 0; (j < (font_size >> 1)) && ((x + j) < gpScreen->w); j++)
+        for (j = 0; (j < (pCache->size << 3)) && ((x + j) < gpScreen->w); j++)
         {
-            if (font_data[i + ((font_size == 32 && j >= 8) ? 1 : 0)] & (1 << (j % 8)))
+            if (pCache->data[i + ((pCache->size == 2 && j >= 8) ? 1 : 0)] & (1 << (j % 8)))
             {
                 dst[j] = bColor;
                 // Draw shadow with optimized bounds checking
@@ -119,19 +190,9 @@ void PAL_DrawCharOnSurface(
 
 unsigned char PAL_CharWidth(unsigned short wChar)
 {
-    if (fp_font_size == NULL)
+    font_data_cache *pCache = FontCacheLookupOrLoad(wChar);
+    if (pCache == NULL)
         return 0;
 
-    // Check for invalid char code.
-    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || (wChar >= unicode_upper_top))
-        return 0;
-
-    // Locate for this character in the font lib.
-    if (wChar >= unicode_upper_base)
-        wChar -= (unicode_upper_base - unicode_lower_top);
-
-    unsigned char size;
-    UTIL_fseek(fp_font_size, sizeof(unsigned char) * wChar / 8, SEEK_SET);
-    UTIL_fread(&size, sizeof(unsigned char), 1, fp_font_size);
-    return (size & (1U << (wChar % 8))) ? 2 : 1;
+    return pCache->size;
 }
