@@ -303,6 +303,9 @@ void PAL_DrawTextUnescape(
     urect.h = FONT_HEIGHT;
     urect.w = 0;
 
+    if (lpszText == NULL || *lpszText == L'\0')
+        return;
+
     // Handle text overflow
     if (fontX >= SCREEN_W)
         return;

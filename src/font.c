@@ -144,7 +144,6 @@ void PAL_DrawCharOnSurface(
 {
     unsigned short i;
     unsigned short j;
-    unsigned char font_size;
     font_data_cache *pCache = FontCacheLookupOrLoad(wChar);
 
     // Check for cache miss
@@ -155,28 +154,51 @@ void PAL_DrawCharOnSurface(
     if (gpScreen == NULL)
         return;
 
-    font_size = pCache->size << 4;
+    unsigned short screen_w = gpScreen->w;
+    if (x >= screen_w)
+        return;
+
+    unsigned char glyph_width = pCache->size;
+    unsigned char rows = glyph_width << 4;
+    unsigned char bits_per_row = glyph_width << 3;
+    unsigned short max_columns = screen_w - x;
+    unsigned char column_limit = bits_per_row;
+    if (column_limit > max_columns)
+        column_limit = (unsigned char)max_columns;
+
+    if (column_limit == 0)
+        return;
+
+    unsigned char draw_shadow = fShadow ? 1 : 0;
 
     // Draw the character to the surface.
-    unsigned char *dst = gpScreen->pixels + gpScreen->w * ReLU(y) + x;
-    unsigned char *top = gpScreen->pixels + gpScreen->w * gpScreen->h;
-    for (i = 0; i < font_size && dst < top; i += pCache->size, dst += gpScreen->w)
+    unsigned char *dst = gpScreen->pixels + screen_w * ReLU(y) + x;
+    unsigned char *top = gpScreen->pixels + screen_w * gpScreen->h;
+    for (i = 0; i < rows && dst < top; i += glyph_width, dst += screen_w)
     {
-        unsigned char *shadow_row = dst + gpScreen->w;
-        for (j = 0; (j < (pCache->size << 3)) && ((x + j) < gpScreen->w); j++)
+        unsigned char *shadow_row = dst + screen_w;
+        unsigned char has_bottom = (shadow_row < top);
+        unsigned char *glyph_row = pCache->data + i;
+        unsigned int glyph_bits = glyph_row[0];
+        if (glyph_width == 2)
+            glyph_bits |= ((unsigned int)glyph_row[1]) << 8;
+
+        if (glyph_bits == 0)
+            continue;
+
+        for (j = 0; j < column_limit; j++)
         {
-            if (pCache->data[i + ((pCache->size == 2 && j >= 8) ? 1 : 0)] & (1 << (j % 8)))
+            if ((glyph_bits >> j) & 0x1)
             {
                 dst[j] = bColor;
                 // Draw shadow with optimized bounds checking
-                if (fShadow)
+                if (draw_shadow)
                 {
-                    unsigned char can_draw_right = (x + j + 1 < gpScreen->w);
-                    unsigned char can_draw_bottom = (shadow_row + j < top);
+                    unsigned char can_draw_right = (j + 1 < max_columns);
 
                     if (can_draw_right)
                         dst[j + 1] = 0;
-                    if (can_draw_bottom)
+                    if (has_bottom)
                     {
                         shadow_row[j] = 0;
                         if (can_draw_right)

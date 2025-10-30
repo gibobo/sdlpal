@@ -3348,7 +3348,8 @@ begin:
             XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : PAL_XY(102, 0);
             YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 : 3;
             iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
-            PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, true, false);
+            wchar_t *word = PAL_GetWord(pScript->rgwOperand[0]);
+            PAL_DrawText(word, PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, true, false);
             wScriptEntry++;
             break;
 
