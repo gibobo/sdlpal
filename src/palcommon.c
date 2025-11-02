@@ -30,7 +30,7 @@
 
 int PAL_RLEBlitToSurface(
     const unsigned char *lpBitmapRLE,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos)
 {
     return PAL_RLEBlitToSurfaceWithShadow(lpBitmapRLE, lpDstSurface, pos, false);
@@ -38,7 +38,7 @@ int PAL_RLEBlitToSurface(
 
 int PAL_RLEBlitToSurfaceWithShadow(
     const unsigned char *lpBitmapRLE,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos,
     int bShadow)
 /*++
@@ -241,7 +241,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
 
 int PAL_RLEBlitWithColorShift(
     const unsigned char *lpBitmapRLE,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos,
     int iColorShift)
 /*++
@@ -438,7 +438,7 @@ int PAL_RLEBlitWithColorShift(
 
 int PAL_RLEBlitMonoColor(
     const unsigned char *lpBitmapRLE,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos,
     unsigned char bColor,
     int iColorShift)
@@ -623,7 +623,7 @@ int PAL_RLEBlitMonoColor(
 
 int PAL_FBPBlitToSurface(
     unsigned char *lpBitmapFBP,
-    PAL_Surface *lpDstSurface)
+    VIDEO_Surface *lpDstSurface)
 /*++
   Purpose:
 

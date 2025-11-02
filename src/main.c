@@ -184,10 +184,10 @@ void PAL_SplashScreen(void)
 {
     unsigned char *palette = PAL_GetPalette(1, false);
     unsigned char rgCurrentPalette[PALETTE_SIZE];
-    PAL_Surface *lpBitmapUp = VIDEO_GetBackupSurface(0);
-    PAL_Surface *lpBitmapDown = VIDEO_GetBackupSurface(1);
-    PAL_Rect srcrect;
-    PAL_Rect dstrect;
+    VIDEO_Surface *lpBitmapUp = VIDEO_GetBackupSurface(0);
+    VIDEO_Surface *lpBitmapDown = VIDEO_GetBackupSurface(1);
+    VIDEO_Rect srcrect;
+    VIDEO_Rect dstrect;
     unsigned char *lpTitleBuf = NULL;
     unsigned char *lpSpriteCrane = NULL;
     unsigned char *lpBitmapTitle = NULL;

@@ -58,7 +58,7 @@ static void PAL_ShowFBP(
     const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
     unsigned char i;
     unsigned int k;
-    PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
+    VIDEO_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
 
     RES_MKFDecompressChunk(&buf, SCREEN_SIZE, wChunkNum, Res_FBP);
 
@@ -135,8 +135,8 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
 {
     unsigned char *bufSprite = NULL;
     int i;
-    PAL_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
-    PAL_Surface *p = VIDEO_GetBackupSurface(1);
+    VIDEO_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
+    VIDEO_Surface *p = VIDEO_GetBackupSurface(1);
 
     RES_MKFDecompressChunk(&p->pixels, SCREEN_SIZE, wChunkNum, Res_FBP);
 
@@ -152,12 +152,12 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
         i = min(y, SCREEN_H);
 
         // Copy bottom part from backup
-        VIDEO_CopySurface(gpScreenBak, &(PAL_Rect){0, 0, SCREEN_W, SCREEN_H - i},
-                          gpScreen, &(PAL_Rect){0, i, SCREEN_W, SCREEN_H - i});
+        VIDEO_CopySurface(gpScreenBak, &(VIDEO_Rect){0, 0, SCREEN_W, SCREEN_H - i},
+                          gpScreen, &(VIDEO_Rect){0, i, SCREEN_W, SCREEN_H - i});
 
         // Copy top part from new image
-        VIDEO_CopySurface(p, &(PAL_Rect){0, SCREEN_H - i, SCREEN_W, i},
-                          gpScreen, &(PAL_Rect){0, 0, SCREEN_W, i});
+        VIDEO_CopySurface(p, &(VIDEO_Rect){0, SCREEN_H - i, SCREEN_W, i},
+                          gpScreen, &(VIDEO_Rect){0, 0, SCREEN_W, i});
 
         PAL_ApplyWave(gpScreen->pixels);
 
@@ -199,8 +199,8 @@ static void PAL_EndingAnimation(void)
 
 --*/
 {
-    PAL_Surface *pUpper = VIDEO_GetBackupSurface(0);
-    PAL_Surface *pLower = VIDEO_GetBackupSurface(1);
+    VIDEO_Surface *pUpper = VIDEO_GetBackupSurface(0);
+    VIDEO_Surface *pLower = VIDEO_GetBackupSurface(1);
     unsigned char *bufBeast = NULL;
     unsigned char *bufGirl = NULL;
     int yPosGirl = 180;
@@ -218,10 +218,10 @@ static void PAL_EndingAnimation(void)
         int halfI = i / 2;
 
         // Draw background layers
-        VIDEO_CopySurface(pLower, &(PAL_Rect){0, 0, SCREEN_W, SCREEN_H - halfI},
-                          gpScreen, &(PAL_Rect){0, halfI, SCREEN_W, SCREEN_H - halfI});
-        VIDEO_CopySurface(pUpper, &(PAL_Rect){0, SCREEN_H - halfI, SCREEN_W, halfI},
-                          gpScreen, &(PAL_Rect){0, 0, SCREEN_W, halfI});
+        VIDEO_CopySurface(pLower, &(VIDEO_Rect){0, 0, SCREEN_W, SCREEN_H - halfI},
+                          gpScreen, &(VIDEO_Rect){0, halfI, SCREEN_W, SCREEN_H - halfI});
+        VIDEO_CopySurface(pUpper, &(VIDEO_Rect){0, SCREEN_H - halfI, SCREEN_W, halfI},
+                          gpScreen, &(VIDEO_Rect){0, 0, SCREEN_W, halfI});
 
         PAL_ApplyWave(gpScreen->pixels);
 
@@ -287,7 +287,7 @@ void PAL_EndingScreen(void)
     PAL_FadeOut(1);
 #endif
 #if 1 // beast sence 2
-    PAL_CleanScreen();
+    VIDEO_CleanScreen();
     gpGlobals->wNumPalette = 4;
     gpGlobals->fNeedToFadeIn = true;
     PAL_EndingAnimation();
@@ -300,14 +300,14 @@ void PAL_EndingScreen(void)
     AUDIO_PlayMusic(-1, false, 0);
     AUDIO_PlayMusic(0x11, true, 0);
 
-    PAL_CleanScreen();
+    VIDEO_CleanScreen();
     PAL_SetPalette(0, false);
     PAL_RNGPlay(11, 0, -1, 7);
 
     PAL_FadeOut(2);
 #endif
 #if 1 // GIRL 3
-    PAL_CleanScreen();
+    VIDEO_CleanScreen();
     gpGlobals->wNumPalette = 8;
     gpGlobals->fNeedToFadeIn = true;
     PAL_RNGPlay(10, 0, -1, 6);

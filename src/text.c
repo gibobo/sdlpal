@@ -297,7 +297,7 @@ void PAL_DrawTextUnescape(
     unsigned short fontX = (unsigned short)PAL_X(pos);
     unsigned short fontY = (unsigned short)PAL_Y(pos);
     unsigned char char_width;
-    PAL_Rect urect;
+    VIDEO_Rect urect;
     urect.x = fontX;
     urect.y = fontY;
     urect.h = FONT_HEIGHT;
@@ -400,7 +400,7 @@ void PAL_StartDialogWithOffset(
 --*/
 {
     unsigned char *buf = NULL;
-    PAL_Rect rect;
+    VIDEO_Rect rect;
 
     if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
     {
@@ -513,7 +513,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
         const unsigned char *p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
         if (p != NULL)
         {
-            PAL_Rect rect;
+            VIDEO_Rect rect;
 
             rect.x = PAL_X(g_TextLib.posIcon);
             rect.y = PAL_Y(g_TextLib.posIcon);
@@ -711,7 +711,7 @@ void PAL_ShowDialogText(
 
 --*/
 {
-    PAL_Rect rect;
+    VIDEO_Rect rect;
     int x, y;
 
     // PAL_ClearKeyState();

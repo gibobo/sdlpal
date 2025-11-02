@@ -27,8 +27,8 @@
 #include <string.h>
 
 // The global palette
-PAL_Surface *gpScreen = NULL;                  // Screen buffer
-static PAL_Surface *gpBackup[] = {NULL, NULL}; // Backup screen buffer
+VIDEO_Surface *gpScreen = NULL;                  // Screen buffer
+static VIDEO_Surface *gpBackup[] = {NULL, NULL}; // Backup screen buffer
 volatile unsigned char g_bRenderPaused = false;
 static unsigned short g_wShakeTime = 0;
 static unsigned short g_wShakeLevel = 0;
@@ -84,16 +84,16 @@ void VIDEO_Shutdown(void)
 
 --*/
 {
-    PAL_FreeSurface(gpScreen);
-    PAL_FreeSurface(gpBackup[0]);
-    PAL_FreeSurface(gpBackup[1]);
+    VIDEO_FreeSurface(gpScreen);
+    VIDEO_FreeSurface(gpBackup[0]);
+    VIDEO_FreeSurface(gpBackup[1]);
 
     gpScreen = NULL;
     gpBackup[0] = NULL;
     gpBackup[1] = NULL;
 }
 
-void VIDEO_UpdateScreen(const PAL_Rect *lpRect)
+void VIDEO_UpdateScreen(const VIDEO_Rect *lpRect)
 /*++
   Purpose:
 
@@ -197,7 +197,7 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
     unsigned int i, j, k;
     const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
     unsigned char a, b;
-    PAL_Rect ROI = {0, 0, SCREEN_W, SCREEN_H};
+    VIDEO_Rect ROI = {0, 0, SCREEN_W, SCREEN_H};
 
     wSpeed = (wSpeed + 1) * 10;
 
@@ -236,7 +236,7 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
     VIDEO_UpdateScreen(NULL);
 }
 
-PAL_Surface *VIDEO_CreateCompatibleSizedSurface(const PAL_Rect *pSize)
+VIDEO_Surface *VIDEO_CreateCompatibleSizedSurface(const VIDEO_Rect *pSize)
 /*++
   Purpose:
 
@@ -254,8 +254,8 @@ PAL_Surface *VIDEO_CreateCompatibleSizedSurface(const PAL_Rect *pSize)
 --*/
 {
     // Create the surface
-    PAL_Surface *dest = NULL;
-    dest = (PAL_Surface *)UTIL_malloc(sizeof(PAL_Surface));
+    VIDEO_Surface *dest = NULL;
+    dest = (VIDEO_Surface *)UTIL_malloc(sizeof(VIDEO_Surface));
     dest->w = pSize ? max((unsigned short)pSize->w, 0) : SCREEN_W;
     dest->h = pSize ? max((unsigned short)pSize->h, 0) : SCREEN_H;
     if (dest->w && dest->h)
@@ -269,7 +269,7 @@ PAL_Surface *VIDEO_CreateCompatibleSizedSurface(const PAL_Rect *pSize)
     return dest;
 }
 
-PAL_Surface *VIDEO_DuplicateSurface(const PAL_Rect *pRect)
+VIDEO_Surface *VIDEO_DuplicateSurface(const VIDEO_Rect *pRect)
 /*++
   Purpose:
 
@@ -286,7 +286,7 @@ PAL_Surface *VIDEO_DuplicateSurface(const PAL_Rect *pRect)
 
 --*/
 {
-    PAL_Surface *dest = VIDEO_CreateCompatibleSizedSurface(pRect);
+    VIDEO_Surface *dest = VIDEO_CreateCompatibleSizedSurface(pRect);
     VIDEO_CopySurface(gpScreen, pRect, dest, NULL);
     return dest;
 }
@@ -297,10 +297,10 @@ void VIDEO_RenderPaused(unsigned char flag)
 }
 
 void VIDEO_CopySurface(
-    PAL_Surface *src,
-    const PAL_Rect *srcrect,
-    PAL_Surface *dst,
-    PAL_Rect *dstrect)
+    VIDEO_Surface *src,
+    const VIDEO_Rect *srcrect,
+    VIDEO_Surface *dst,
+    VIDEO_Rect *dstrect)
 {
     if (src == NULL || dst == NULL || src->pixels == NULL || dst->pixels == NULL)
         return;
@@ -319,25 +319,25 @@ void VIDEO_CopySurface(
     }
 }
 
-void VIDEO_CopyEntireSurface(PAL_Surface *src, PAL_Surface *dst)
+void VIDEO_CopyEntireSurface(VIDEO_Surface *src, VIDEO_Surface *dst)
 {
     if (src && dst && dst != src)
         memcpy(dst->pixels, src->pixels, dst->w * dst->h);
 }
 
-void VIDEO_BackupScreen(PAL_Surface *src)
+void VIDEO_BackupScreen(VIDEO_Surface *src)
 {
     if (src)
         memcpy(gpBackup[0]->pixels, src->pixels, SCREEN_SIZE);
 }
 
-void VIDEO_RestoreScreen(PAL_Surface *dst)
+void VIDEO_RestoreScreen(VIDEO_Surface *dst)
 {
     if (dst)
         memcpy(dst->pixels, gpBackup[0]->pixels, SCREEN_SIZE);
 }
 
-void PAL_FreeSurface(PAL_Surface *surface)
+void VIDEO_FreeSurface(VIDEO_Surface *surface)
 {
     if (surface)
     {
@@ -346,12 +346,12 @@ void PAL_FreeSurface(PAL_Surface *surface)
     }
 }
 
-void PAL_CleanScreen(void)
+void VIDEO_CleanScreen(void)
 {
     memset(gpScreen->pixels, 0, SCREEN_SIZE);
 }
 
-PAL_Surface *VIDEO_GetBackupSurface(unsigned char idx)
+VIDEO_Surface *VIDEO_GetBackupSurface(unsigned char idx)
 {
     return (idx < 2) ? gpBackup[idx] : NULL;
 }

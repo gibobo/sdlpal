@@ -58,7 +58,7 @@ void PAL_PlayerInfoBox(
 
 --*/
 {
-    // PAL_Rect rect;
+    // VIDEO_Rect rect;
     unsigned char bPoisonColor;
     int i, iPartyIndex;
     unsigned short wMaxLevel, w;

@@ -103,7 +103,7 @@ void PAL_BattleDrawBackground(
 
 void PAL_BattleDrawEnemySprites(
     unsigned short wEnemyIndex,
-    PAL_Surface *lpDstSurface)
+    VIDEO_Surface *lpDstSurface)
 /*++
   Purpose:
 
@@ -155,7 +155,7 @@ void PAL_BattleDrawEnemySprites(
 
 void PAL_BattleDrawPlayerSprites(
     unsigned short wPlayerIndex,
-    PAL_Surface *lpDstSurface)
+    VIDEO_Surface *lpDstSurface)
 /*++
   Purpose:
 
@@ -228,7 +228,7 @@ void PAL_BattleDrawPlayerSprites(
 
 void PAL_BattleDrawMagicSprites(
     int iMagicNum,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos)
 /*++
   Purpose:
@@ -870,8 +870,8 @@ PAL_BattleWon(
 
 --*/
 {
-    const PAL_Rect rect = {0, 60, SCREEN_W, 100};
-    PAL_Rect rect1 = {80, 0, 180, SCREEN_H};
+    const VIDEO_Rect rect = {0, 60, SCREEN_W, 100};
+    VIDEO_Rect rect1 = {80, 0, 180, SCREEN_H};
 
     int i, j, iTotalCount;
     unsigned int dwExp;
@@ -1509,8 +1509,8 @@ PAL_StartBattle(
     UTIL_free(g_Battle->lpEffectSprite);
 
     // Free the surfaces for the background picture and scene buffer
-    PAL_FreeSurface(g_Battle->lpBackground);
-    PAL_FreeSurface(g_Battle->lpSceneBuf);
+    VIDEO_FreeSurface(g_Battle->lpBackground);
+    VIDEO_FreeSurface(g_Battle->lpSceneBuf);
 
     g_Battle->lpBackground = NULL;
     g_Battle->lpSceneBuf = NULL;

@@ -78,6 +78,6 @@ int PAL_MapTileIsBlocked(unsigned char x, unsigned char y, unsigned char h, PALM
 
 unsigned char PAL_MapGetTileHeight(unsigned char x, unsigned char y, unsigned char h, unsigned char ucLayer, PALMAP *lpMap);
 
-void PAL_MapBlitToSurface(PALMAP *lpMap, const PAL_Rect *lpSrcRect, unsigned char ucLayer);
+void PAL_MapBlitToSurface(PALMAP *lpMap, const VIDEO_Rect *lpSrcRect, unsigned char ucLayer);
 
 #endif

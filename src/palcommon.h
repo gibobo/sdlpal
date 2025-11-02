@@ -23,38 +23,38 @@
 
 #include "video.h"
 
-#define PAL_XY(x, y) (unsigned int)(((((unsigned int)(y)) << 16) & 0xFFFF0000) | (((unsigned int)(x)) & 0xFFFF))
-#define PAL_X(xy) (short)((xy) & 0xFFFF)
-#define PAL_Y(xy) (short)(((xy) >> 16) & 0xFFFF)
+#define PAL_XY(x, y)            (unsigned int)(((((unsigned int)(y)) << 16) & 0xFFFF0000) | (((unsigned int)(x)) & 0xFFFF))
+#define PAL_X(xy)               (short)((xy) & 0xFFFF)
+#define PAL_Y(xy)               (short)(((xy) >> 16) & 0xFFFF)
 #define PAL_XY_OFFSET(xy, x, y) (unsigned int)(((((int)(y) << 16) & 0xFFFF0000) + ((xy) & 0xFFFF0000)) | (((int)(x) & 0xFFFF) + ((xy) & 0xFFFF)))
 
 int PAL_RLEBlitToSurface(
     const unsigned char *lpBitmapRLE,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos);
 
 int PAL_RLEBlitToSurfaceWithShadow(
     const unsigned char *lpBitmapRLE,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos,
     int bShadow);
 
 int PAL_RLEBlitWithColorShift(
     const unsigned char *lpBitmapRLE,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos,
     int iColorShift);
 
 int PAL_RLEBlitMonoColor(
     const unsigned char *lpBitmapRLE,
-    PAL_Surface *lpDstSurface,
+    VIDEO_Surface *lpDstSurface,
     unsigned int pos,
     unsigned char bColor,
     int iColorShift);
 
 int PAL_FBPBlitToSurface(
     unsigned char *lpBitmapFBP,
-    PAL_Surface *lpDstSurface);
+    VIDEO_Surface *lpDstSurface);
 
 int PAL_RLEGetWidth(
     const unsigned char *lpBitmapRLE);

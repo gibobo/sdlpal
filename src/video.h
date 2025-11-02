@@ -21,30 +21,32 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#define SCREEN_W 320
-#define SCREEN_H 200
+#define SCREEN_W    320
+#define SCREEN_H    200
 #define SCREEN_SIZE (SCREEN_W * SCREEN_H)
 
-typedef struct PAL_Surface {
-    unsigned short w;       /**< Read-only */
-    unsigned short h;       /**< Read-only */
-    unsigned char *pixels;  /**< Read-write */
-} PAL_Surface;
+typedef struct VIDEO_Surface
+{
+    unsigned short w;      /**< Read-only */
+    unsigned short h;      /**< Read-only */
+    unsigned char *pixels; /**< Read-write */
+} VIDEO_Surface;
 
-typedef struct PAL_Rect {
+typedef struct VIDEO_Rect
+{
     short x;
     short y;
     short w;
     short h;
-} PAL_Rect;
+} VIDEO_Rect;
 
-extern PAL_Surface *gpScreen;
+extern VIDEO_Surface *gpScreen;
 
 int VIDEO_Startup(void);
 
 void VIDEO_Shutdown(void);
 
-void VIDEO_UpdateScreen(const PAL_Rect *lpRect);
+void VIDEO_UpdateScreen(const VIDEO_Rect *lpRect);
 
 void VIDEO_ShakeScreen(
     unsigned short wShakeTime,
@@ -54,30 +56,30 @@ void VIDEO_SwitchScreen(void);
 
 void VIDEO_FadeScreen(unsigned short wSpeed);
 
-PAL_Surface *VIDEO_DuplicateSurface(const PAL_Rect *pRect);
+VIDEO_Surface *VIDEO_DuplicateSurface(const VIDEO_Rect *pRect);
 
-PAL_Surface *VIDEO_CreateCompatibleSizedSurface(const PAL_Rect *pSize);
+VIDEO_Surface *VIDEO_CreateCompatibleSizedSurface(const VIDEO_Rect *pSize);
 
 void VIDEO_RenderPaused(unsigned char flag);
 
 void VIDEO_CopySurface(
-    PAL_Surface *src,
-    const PAL_Rect *srcrect,
-    PAL_Surface *dst,
-    PAL_Rect *dstrect);
+    VIDEO_Surface *src,
+    const VIDEO_Rect *srcrect,
+    VIDEO_Surface *dst,
+    VIDEO_Rect *dstrect);
 
 void VIDEO_CopyEntireSurface(
-    PAL_Surface *src,
-    PAL_Surface *dst);
+    VIDEO_Surface *src,
+    VIDEO_Surface *dst);
 
-void VIDEO_BackupScreen(PAL_Surface *src);
+void VIDEO_BackupScreen(VIDEO_Surface *src);
 
-void VIDEO_RestoreScreen(PAL_Surface *dst);
+void VIDEO_RestoreScreen(VIDEO_Surface *dst);
 
-void PAL_FreeSurface(PAL_Surface *surface);
+void VIDEO_FreeSurface(VIDEO_Surface *surface);
 
-void PAL_CleanScreen(void);
+void VIDEO_CleanScreen(void);
 
-PAL_Surface *VIDEO_GetBackupSurface(unsigned char idx);
+VIDEO_Surface *VIDEO_GetBackupSurface(unsigned char idx);
 
 #endif

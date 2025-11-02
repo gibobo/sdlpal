@@ -1386,7 +1386,7 @@ PAL_InterpretInstruction(
                 int iBG_X = (SCREEN_W - iBGWidth) / 2;
                 int iBG_Y = (SCREEN_H - iBGHeight) / 2;
                 unsigned int pos = PAL_XY(iBG_X, iBG_Y);
-                PAL_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
+                VIDEO_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
                 PAL_RLEBlitToSurface(pBG, gpScreen, pos);
 
                 unsigned short wObject = gpGlobals->g.lprgStore[0].rgwItems[i];
@@ -2092,7 +2092,7 @@ PAL_InterpretInstruction(
             //
             // Show FBP picture
             //
-            PAL_CleanScreen();
+            VIDEO_CleanScreen();
             VIDEO_UpdateScreen(NULL);
             break;
 

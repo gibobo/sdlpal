@@ -234,7 +234,7 @@ PAL_MapGetTileHeight(
 
 void PAL_MapBlitToSurface(
     PALMAP *lpMap,
-    const PAL_Rect *lpSrcRect,
+    const VIDEO_Rect *lpSrcRect,
     unsigned char ucLayer)
 /*++
   Purpose:

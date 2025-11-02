@@ -226,7 +226,7 @@ unsigned short PAL_SaveSlotMenu(
 
     MENUITEM rgMenuItem[5];
 
-    const PAL_Rect rect = {195 - dx, 7, 120 + dx, 190};
+    const VIDEO_Rect rect = {195 - dx, 7, 120 + dx, 190};
 
     //
     // Create the boxes and create the menu items
@@ -305,7 +305,7 @@ PAL_SelectionMenu(
         PAL_XY(220 + dx[0], 110),
         PAL_XY(145, 160),
         PAL_XY(220 + dx[2], 160)};
-    const PAL_Rect rect = {130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100};
+    const VIDEO_Rect rect = {130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100};
 
     //
     // Create menu items
@@ -459,7 +459,7 @@ PAL_SystemMenu(
     unsigned short wReturnValue;
     unsigned short iSlot;
     int i;
-    const PAL_Rect rect = {40, 60, 280, 135};
+    const VIDEO_Rect rect = {40, 60, 280, 135};
 
     //
     // Create menu items
@@ -669,7 +669,7 @@ start_magicmenu:
             // Need to select which player to use the magic on.
             //
             unsigned short wPlayer = 0;
-            PAL_Rect rect;
+            VIDEO_Rect rect;
 
             while (wPlayer != MENUITEM_VALUE_CANCELLED)
             {
@@ -1119,7 +1119,7 @@ PAL_ItemUseMenu(
     unsigned char bColor;
     unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
     static unsigned short sSelectedPlayer = 0;
-    PAL_Rect rect = {110, 2, 200, 180};
+    VIDEO_Rect rect = {110, 2, 200, 180};
     int i;
 
     while (true)
@@ -1281,7 +1281,7 @@ PAL_BuyMenu_OnItemChange(
 
 --*/
 {
-    const PAL_Rect rect = {20, 8, 300, 175};
+    const VIDEO_Rect rect = {20, 8, 300, 175};
     int i, j, n, iPlayerID, x, y;
     unsigned char *bufImage;
 

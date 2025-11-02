@@ -31,7 +31,7 @@
 
 unsigned char *gpSpriteUI = NULL;
 
-static BOX *PAL_CreateBoxInternal(const PAL_Rect *rect)
+static BOX *PAL_CreateBoxInternal(const VIDEO_Rect *rect)
 {
     BOX *lpBox = (BOX *)UTIL_calloc(1, sizeof(BOX));
     lpBox->pos = PAL_XY(rect->x, rect->y);
@@ -130,7 +130,7 @@ void PAL_CreateBoxWithShadow(
 {
     int i, j, x, m, n;
     const unsigned char *rglpBorderBitmap[3][3];
-    PAL_Rect rect;
+    VIDEO_Rect rect;
 
     //
     // Get the bitmaps
@@ -234,7 +234,7 @@ void PAL_CreateSingleLineBoxWithShadow(
     const unsigned char *lpBitmapLeft;
     const unsigned char *lpBitmapMid;
     const unsigned char *lpBitmapRight;
-    PAL_Rect rect;
+    VIDEO_Rect rect;
     int i;
     int xSaved;
 
@@ -316,7 +316,7 @@ void PAL_DeleteBox(BOX *lpBox)
 
 --*/
 {
-    PAL_Rect rect;
+    VIDEO_Rect rect;
 
     //
     // Check for NULL pointer.
@@ -339,7 +339,7 @@ void PAL_DeleteBox(BOX *lpBox)
     //
     // Free the memory used by the box
     //
-    PAL_FreeSurface(lpBox->lpSavedArea);
+    VIDEO_FreeSurface(lpBox->lpSavedArea);
     UTIL_free(lpBox);
 }
 
