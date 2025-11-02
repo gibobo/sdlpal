@@ -119,6 +119,8 @@ static const unsigned int MagicMPCurrentPos = PAL_XY(50, 14);
 // Magic Desc Message Pos
 static const unsigned int MagicDescMsgPos = PAL_XY(102, 0);
 
+extern unsigned char *gpSpriteUI;
+
 static unsigned short GetSavedTimes(int iSaveSlot)
 {
     unsigned short wSavedTimes = 0;
@@ -647,12 +649,12 @@ start_magicmenu:
             gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse =
                 PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse, 0);
 
-            if (g_fScriptSuccess)
+            if (PAL_ScriptStatus())
             {
                 gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess =
                     PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess, 0);
 
-                if (g_fScriptSuccess)
+                if (PAL_ScriptStatus())
                     gpGlobals->g.PlayerRoles->rgwMP[gpGlobals->rgParty[w].wPlayerRole] -=
                         gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP;
             }
@@ -714,13 +716,13 @@ start_magicmenu:
                             PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse,
                                                  gpGlobals->rgParty[wPlayer].wPlayerRole);
 
-                        if (g_fScriptSuccess)
+                        if (PAL_ScriptStatus())
                         {
                             gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess =
                                 PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess,
                                                      gpGlobals->rgParty[wPlayer].wPlayerRole);
 
-                            if (g_fScriptSuccess)
+                            if (PAL_ScriptStatus())
                             {
                                 gpGlobals->g.PlayerRoles->rgwMP[gpGlobals->rgParty[w].wPlayerRole] -=
                                     gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP;

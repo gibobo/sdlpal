@@ -21,20 +21,18 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-#define PAL_ITEM_DESC_BOTTOM	(1 << 15)
+#define PAL_ITEM_DESC_BOTTOM (1 << 15)
 
 unsigned short
 PAL_RunTriggerScript(
-   unsigned short           wScriptEntry,
-   unsigned short           wEventObjectID
-);
+    unsigned short wScriptEntry,
+    unsigned short wEventObjectID);
 
 unsigned short
 PAL_RunAutoScript(
-   unsigned short           wScriptEntry,
-   unsigned short           wEventObjectID
-);
+    unsigned short wScriptEntry,
+    unsigned short wEventObjectID);
 
-extern unsigned char       g_fScriptSuccess;
+unsigned char PAL_ScriptStatus(void);
 
 #endif

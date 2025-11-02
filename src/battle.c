@@ -32,6 +32,7 @@
 #include "script.h"
 #include "text.h"
 #include "ui.h"
+#include "uibattle.h"
 #include "util.h"
 #include "video.h"
 #include <assert.h>
@@ -39,6 +40,10 @@
 #include <string.h>
 
 BATTLE *g_Battle = NULL;
+BATTLEUI *UI_Battle = NULL;
+static VIDEO_Surface *lpBackground = NULL;
+static VIDEO_Surface *lpSceneBuf = NULL;
+extern unsigned char *gpSpriteUI;
 
 unsigned short g_rgPlayerPos[MAX_PLAYERS_IN_PARTY][3][2] = {
     {{240, 170}},                        // one player
@@ -70,15 +75,12 @@ void PAL_BattleDrawBackground(
 --*/
 {
     int i;
-    unsigned char *pSrc;
-    unsigned char *pDst;
-    unsigned char b;
+    unsigned short b;
+    unsigned char *pSrc = lpBackground->pixels;
+    unsigned char *pDst = lpSceneBuf->pixels;
 
     // Draw the background
-    pSrc = g_Battle->lpBackground->pixels;
-    pDst = g_Battle->lpSceneBuf->pixels;
-
-    for (i = 0; i < g_Battle->lpSceneBuf->w * g_Battle->lpSceneBuf->h; i++)
+    for (i = 0; i < SCREEN_SIZE; i++)
     {
         b = (*pSrc & 0x0F);
         b += g_Battle->sBackgroundColorShift;
@@ -98,12 +100,12 @@ void PAL_BattleDrawBackground(
         ++pDst;
     }
 
-    PAL_ApplyWave(g_Battle->lpSceneBuf->pixels);
+    PAL_ApplyWave(lpSceneBuf->pixels);
 }
 
 void PAL_BattleDrawEnemySprites(
     unsigned short wEnemyIndex,
-    VIDEO_Surface *lpDstSurface)
+    void *lpDstSurface)
 /*++
   Purpose:
 
@@ -155,7 +157,7 @@ void PAL_BattleDrawEnemySprites(
 
 void PAL_BattleDrawPlayerSprites(
     unsigned short wPlayerIndex,
-    VIDEO_Surface *lpDstSurface)
+    void *lpDstSurface)
 /*++
   Purpose:
 
@@ -227,8 +229,7 @@ void PAL_BattleDrawPlayerSprites(
 }
 
 void PAL_BattleDrawMagicSprites(
-    int iMagicNum,
-    VIDEO_Surface *lpDstSurface,
+    void *lpDstSurface,
     unsigned int pos)
 /*++
   Purpose:
@@ -514,15 +515,15 @@ void PAL_BattleDrawAllSpritesWithColorShift(
                 break;
 
             case kBattleSpriteTypeEnemy:
-                PAL_BattleDrawEnemySprites(SpriteObject->wObjectIndex, g_Battle->lpSceneBuf);
+                PAL_BattleDrawEnemySprites(SpriteObject->wObjectIndex, lpSceneBuf);
                 break;
 
             case kBattleSpriteTypePlayer:
-                PAL_BattleDrawPlayerSprites(SpriteObject->wObjectIndex, g_Battle->lpSceneBuf);
+                PAL_BattleDrawPlayerSprites(SpriteObject->wObjectIndex, lpSceneBuf);
                 break;
 
             case kBattleSpriteTypeMagic:
-                PAL_BattleDrawMagicSprites(SpriteObject->wObjectIndex, g_Battle->lpSceneBuf, SpriteObject->pos);
+                PAL_BattleDrawMagicSprites(lpSceneBuf, SpriteObject->pos);
                 break;
         }
     }
@@ -589,7 +590,7 @@ void PAL_BattleFadeScene(
 {
     int i, j, k;
     unsigned char a, b;
-    unsigned char *pSrc = g_Battle->lpSceneBuf->pixels;
+    unsigned char *pSrc = lpSceneBuf->pixels;
     unsigned char *pDst = gpScreen->pixels;
     const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
@@ -629,7 +630,7 @@ void PAL_BattleFadeScene(
     //
     // Draw the result buffer to the screen as the final step
     //
-    VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
+    PAL_BattleUpdateScreen();
     PAL_BattleUIUpdate();
 
     // VIDEO_UpdateScreen(NULL);
@@ -661,7 +662,7 @@ PAL_BattleMain(
     // Generate the scene and draw the scene to the screen buffer
     //
     PAL_BattleMakeScene();
-    VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
+    PAL_BattleUpdateScreen();
 
     //
     // Fade out the music and delay for a while
@@ -846,10 +847,10 @@ PAL_LoadBattleBackground(
 --*/
 {
     // Create the surface
-    g_Battle->lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
+    lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
 
     // Load the picture
-    RES_MKFDecompressChunk(&g_Battle->lpBackground->pixels, SCREEN_SIZE, gpGlobals->wNumBattleField, Res_FBP);
+    RES_MKFDecompressChunk(&lpBackground->pixels, SCREEN_SIZE, gpGlobals->wNumBattleField, Res_FBP);
 }
 
 static void
@@ -1232,7 +1233,7 @@ void PAL_BattleEnemyEscape(
         }
 
         PAL_BattleMakeScene();
-        VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
+        PAL_BattleUpdateScreen();
         VIDEO_UpdateScreen(NULL);
 
         UTIL_Delay(10);
@@ -1359,6 +1360,7 @@ PAL_StartBattle(
     short sPrevWaveProgression;
 
     g_Battle = (BATTLE *)UTIL_malloc(sizeof(BATTLE));
+    UI_Battle = (BATTLEUI *)UTIL_malloc(sizeof(BATTLEUI));
 
     // Set the screen waving effects
     wPrevWaveLevel = gpGlobals->wScreenWave;
@@ -1438,7 +1440,7 @@ PAL_StartBattle(
     PAL_LoadBattleBackground();
 
     // Create the surface for scene buffer
-    g_Battle->lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(NULL);
+    lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(NULL);
 
     PAL_UpdateEquipments();
 
@@ -1451,14 +1453,14 @@ PAL_StartBattle(
     g_Battle->iHidingTime = 0;
     g_Battle->wMovingPlayerIndex = 0;
 
-    g_Battle->UI.szMsg[0] = '\0';
-    g_Battle->UI.szNextMsg[0] = '\0';
-    g_Battle->UI.dwMsgShowTime = 0;
-    g_Battle->UI.state = kBattleUIWait;
-    g_Battle->UI.fAutoAttack = false;
-    g_Battle->UI.iSelectedIndex = 0;
+    UI_Battle->szMsg[0] = '\0';
+    UI_Battle->szNextMsg[0] = '\0';
+    UI_Battle->dwMsgShowTime = 0;
+    UI_Battle->state = kBattleUIWait;
+    UI_Battle->fAutoAttack = false;
+    UI_Battle->iSelectedIndex = 0;
 
-    memset(g_Battle->UI.rgShowNum, 0, sizeof(g_Battle->UI.rgShowNum));
+    memset(UI_Battle->rgShowNum, 0, sizeof(UI_Battle->rgShowNum));
 
     g_Battle->lpSummonSprite = NULL;
     g_Battle->sBackgroundColorShift = 0;
@@ -1509,13 +1511,15 @@ PAL_StartBattle(
     UTIL_free(g_Battle->lpEffectSprite);
 
     // Free the surfaces for the background picture and scene buffer
-    VIDEO_FreeSurface(g_Battle->lpBackground);
-    VIDEO_FreeSurface(g_Battle->lpSceneBuf);
+    VIDEO_FreeSurface(lpBackground);
+    VIDEO_FreeSurface(lpSceneBuf);
 
-    g_Battle->lpBackground = NULL;
-    g_Battle->lpSceneBuf = NULL;
+    lpBackground = NULL;
+    lpSceneBuf = NULL;
     UTIL_free(g_Battle);
+    UTIL_free(UI_Battle);
     g_Battle = NULL;
+    UI_Battle = NULL;
 
     gpGlobals->fInBattle = false;
 
@@ -1526,4 +1530,23 @@ PAL_StartBattle(
     gpGlobals->wScreenWave = wPrevWaveLevel;
 
     return i;
+}
+
+void PAL_RLEBlitToBattleSurface(const unsigned char *lpBitmapRLE, int posX, int posY)
+{
+    PAL_RLEBlitToSurfaceWithShadow(
+        lpBitmapRLE,
+        lpBackground,
+        PAL_XY(posX - PAL_RLEGetWidth(lpBitmapRLE) / 2, posY - PAL_RLEGetHeight(lpBitmapRLE)),
+        false);
+}
+
+void PAL_BattleUpdateScreen(void)
+{
+    VIDEO_CopyEntireSurface(lpSceneBuf, gpScreen);
+}
+
+void PAL_BattleBackupScreen(void)
+{
+    VIDEO_BackupScreen(lpSceneBuf);
 }

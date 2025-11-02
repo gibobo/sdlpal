@@ -41,6 +41,7 @@ static struct MAGICITEM
 static int g_iNumMagic = 0;
 static int g_iCurrentItem = 0;
 static unsigned short g_wPlayerMP = 0;
+extern unsigned char *gpSpriteUI;
 
 unsigned short
 PAL_MagicSelectionMenuUpdate(

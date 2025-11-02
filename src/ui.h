@@ -191,8 +191,7 @@ PAL_ReadMenu(
     unsigned short wDefaultItem,
     unsigned char bLabelColor);
 
-void
-PAL_DrawNumber(
+void PAL_DrawNumber(
     unsigned int iNum,
     unsigned int nLength,
     unsigned int pos,
@@ -216,7 +215,5 @@ PAL_WordMaxWidth(
 unsigned int
 PAL_WordWidth(
     unsigned int nWordIndex);
-
-extern unsigned char *gpSpriteUI;
 
 #endif

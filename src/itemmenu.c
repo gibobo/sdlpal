@@ -35,6 +35,7 @@
 static int g_iNumInventory = 0;
 static unsigned short g_wItemFlags = 0;
 static unsigned char g_fNoDesc = false;
+extern unsigned char *gpSpriteUI;
 
 unsigned short
 PAL_ItemSelectMenuUpdate(

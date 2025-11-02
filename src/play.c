@@ -301,7 +301,7 @@ void PAL_GameUseItem(
                 // Remove the item if the item is consuming and the script succeeded
                 //
                 if ((gpGlobals->g.rgObject[wObject].item.wFlags & kItemFlagConsuming) &&
-                    g_fScriptSuccess)
+                    PAL_ScriptStatus())
                 {
                     PAL_AddItemToInventory(wObject, -1);
                 }
@@ -318,8 +318,7 @@ void PAL_GameUseItem(
             //
             // Remove the item if the item is consuming and the script succeeded
             //
-            if ((gpGlobals->g.rgObject[wObject].item.wFlags & kItemFlagConsuming) &&
-                g_fScriptSuccess)
+            if ((gpGlobals->g.rgObject[wObject].item.wFlags & kItemFlagConsuming) && PAL_ScriptStatus())
             {
                 PAL_AddItemToInventory(wObject, -1);
             }

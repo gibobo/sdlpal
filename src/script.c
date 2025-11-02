@@ -38,6 +38,7 @@
 #include "rngplay.h"
 #include "scene.h"
 #include "text.h"
+#include "ui.h"
 #include "uigame.h"
 #include "util.h"
 #include "video.h"
@@ -48,6 +49,7 @@
 unsigned char g_fScriptSuccess = true;
 static int g_iCurEquipPart = -1;
 extern BATTLE *g_Battle;
+extern unsigned char *gpSpriteUI;
 
 static int
 PAL_NPCWalkTo(
@@ -2532,7 +2534,8 @@ PAL_InterpretInstruction(
                     }
                     PAL_BattleDelay(1, 0, true);
                 }
-                VIDEO_BackupScreen(g_Battle->lpSceneBuf);
+
+                PAL_BattleBackupScreen();
                 PAL_BattleUpdateFighters();
                 PAL_BattleMakeScene();
                 PAL_BattleFadeScene();
@@ -2803,7 +2806,7 @@ PAL_InterpretInstruction(
                     }
                 }
 
-                VIDEO_BackupScreen(g_Battle->lpSceneBuf);
+                PAL_BattleBackupScreen();
                 PAL_LoadBattleSprites();
                 PAL_BattleMakeScene();
                 AUDIO_PlaySound(212);
@@ -2816,8 +2819,7 @@ PAL_InterpretInstruction(
                 {
                     g_Battle->rgEnemy[i].iColorShift = 0;
                 }
-
-                VIDEO_BackupScreen(g_Battle->lpSceneBuf);
+                PAL_BattleBackupScreen();
                 PAL_BattleMakeScene();
                 PAL_BattleFadeScene();
             }
@@ -2850,7 +2852,7 @@ PAL_InterpretInstruction(
                 g_Battle->rgEnemy[wEventObjectID].iColorShift = 0;
 
                 AUDIO_PlaySound(47);
-                VIDEO_BackupScreen(g_Battle->lpSceneBuf);
+                PAL_BattleBackupScreen();
                 PAL_LoadBattleSprites();
                 PAL_BattleMakeScene();
                 PAL_BattleFadeScene();
@@ -3053,7 +3055,7 @@ PAL_RunTriggerScript(
                 else if (gpGlobals->fInBattle)
                 {
                     PAL_BattleMakeScene();
-                    VIDEO_CopyEntireSurface(g_Battle->lpSceneBuf, gpScreen);
+                    PAL_BattleUpdateScreen();
                     VIDEO_UpdateScreen(NULL);
                 }
                 else
@@ -3366,4 +3368,9 @@ begin:
     }
 
     return wScriptEntry;
+}
+
+unsigned char PAL_ScriptStatus()
+{
+    return g_fScriptSuccess;
 }

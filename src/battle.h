@@ -22,8 +22,6 @@
 #define BATTLE_H
 
 #include "global.h"
-#include "uibattle.h"
-#include "video.h"
 
 #define BATTLE_FRAME_TIME            (1000 / 25) // 25 FPS
 #define MAX_BATTLE_MAGICSPRITE_ITEMS 3
@@ -157,10 +155,7 @@ typedef struct tagBATTLE
 
     unsigned short wMaxEnemyIndex;
 
-    VIDEO_Surface *lpSceneBuf;
-    VIDEO_Surface *lpBackground;
-
-    short sBackgroundColorShift;
+    unsigned short sBackgroundColorShift;
 
     unsigned char *lpSummonSprite; // sprite of summoned god
     unsigned int posSummon;
@@ -175,8 +170,6 @@ typedef struct tagBATTLE
     BATTLERESULT BattleResult;
 
     float flTimeChargingUnit; // the base waiting time unit
-
-    BATTLEUI UI;
 
     unsigned char *lpEffectSprite;
 
@@ -213,15 +206,14 @@ void PAL_BattleDrawBackground(void);
 
 void PAL_BattleDrawEnemySprites(
     unsigned short wEnemyIndex,
-    VIDEO_Surface *lpDstSurface);
+    void *lpDstSurface);
 
 void PAL_BattleDrawPlayerSprites(
     unsigned short wPlayerIndex,
-    VIDEO_Surface *lpDstSurface);
+    void *lpDstSurface);
 
 void PAL_BattleDrawMagicSprites(
-    int iMagicNum,
-    VIDEO_Surface *lpDstSurface,
+    void *lpDstSurface,
     unsigned int pos);
 
 void PAL_BattleClearSpriteObject(void);
@@ -259,5 +251,14 @@ void PAL_GetPlayerPos(
     unsigned char PlayerIndex,
     int *posX,
     int *posY);
+
+void PAL_RLEBlitToBattleSurface(
+    const unsigned char *lpBitmapRLE,
+    int posX,
+    int posY);
+
+void PAL_BattleBackupScreen(void);
+
+void PAL_BattleUpdateScreen(void);
 
 #endif
