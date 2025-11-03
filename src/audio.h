@@ -37,7 +37,7 @@
 
 #define AUDIOPLAYER_COMMONS               \
     int iMusic;                           \
-    int fLoop;                            \
+    unsigned char fLoop;                  \
     void (*Shutdown)(void *);             \
     int (*Play)(void *, int, int, float); \
     void (*FillBuffer)(void *, unsigned char *, unsigned int)
@@ -53,7 +53,7 @@ void AUDIO_CloseDevice(void);
 
 void AUDIO_FillBuffer(void *stream, unsigned int len);
 
-void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime);
+void AUDIO_PlayMusic(int iNumRIX, unsigned char fLoop, float flFadeTime);
 
 void AUDIO_PlaySound(int iSoundNum);
 
@@ -62,6 +62,8 @@ int AUDIO_MusicEnabled(void);
 
 void AUDIO_EnableSound(int fEnable);
 int AUDIO_SoundEnabled(void);
+
+int AUDIO_GetCurrentMusic(void);
 
 /* RIX */
 AUDIOPLAYER *RIX_Init(void);

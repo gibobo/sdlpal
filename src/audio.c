@@ -209,7 +209,7 @@ void AUDIO_PlaySound(int iSoundNum)
     }
 }
 
-void AUDIO_PlayMusic(int iNumRIX, int fLoop, float flFadeTime)
+void AUDIO_PlayMusic(int iNumRIX, unsigned char fLoop, float flFadeTime)
 {
     if (gAudioDevice.pMusPlayer)
     {
@@ -237,4 +237,32 @@ void AUDIO_EnableSound(int fEnable)
 int AUDIO_SoundEnabled(void)
 {
     return gAudioDevice.fSoundEnabled;
+}
+
+int AUDIO_GetCurrentMusic(void)
+/*++
+  Purpose:
+
+    Get the current playing music number.
+
+  Parameters:
+
+    None.
+
+  Return value:
+
+    Current music number, or -1 if no music is playing.
+
+--*/
+{
+    int result = -1;
+    
+    if (gAudioDevice.pMusPlayer)
+    {
+        DRIVER_Audio_Lock();
+        result = gAudioDevice.pMusPlayer->iMusic;
+        DRIVER_Audio_Unlock();
+    }
+    
+    return result;
 }

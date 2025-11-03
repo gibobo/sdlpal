@@ -62,7 +62,7 @@ void PAL_Init(void)
 {
     printf("Initializing game...\n");
     // PAL_ConsolidateExtractedResources();
-    if (PAL_LoadConsolidatedResources())
+    if (PAL_LoadConsolidatedResources() != 0)
         TerminateOnError("%s() failed: load consolidated resources error\n", __func__);
     fprintf(stdout, "==> Consolidated resources loaded successfully.\n");
 
@@ -164,6 +164,115 @@ void PAL_TrademarkScreen(void)
     PAL_RNGPlay(6, 0, -1, 25);
     UTIL_Delay(1000);
     PAL_FadeOut(1);
+}
+
+void PAL_MusicPlayer(void)
+/*++
+  Purpose:
+
+    Interactive music player - allows user to select and play music tracks.
+    Enter 0 to exit.
+
+  Parameters:
+
+    None.
+
+  Return value:
+
+    None.
+
+--*/
+{
+    if (PAL_LoadConsolidatedResources() != 0)
+        TerminateOnError("%s() failed: load consolidated resources error\n", __func__);
+
+    if (DRIVER_Init() != 0)
+        TerminateOnError("%s() failed: driver initialization error\n", __func__);
+
+    if (AUDIO_Startup() != 0)
+        TerminateOnError("%s() failed: audio subsystem initialization error\n", __func__);
+
+    const char *anim = "|/-\\";
+    while (1)
+    {
+        int animIdx = 0;
+        int musicNum = 0;
+        printf("Enter music number (1-255, 0 to exit): ");
+        fflush(stdout);
+
+        if (scanf("%d", &musicNum) != 1)
+        {
+            // Clear invalid input
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+            printf("Invalid input! Please enter a number.\n");
+            continue;
+        }
+
+        // Clear the input buffer
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+
+        // Exit if user enters 0
+        if (musicNum == 0)
+        {
+            break;
+        }
+
+        // Validate music number
+        if (musicNum < 0 || musicNum > 255)
+        {
+            printf("Invalid music number! Please enter 0-255.\n");
+            continue;
+        }
+
+        // Play the selected music
+        AUDIO_PlayMusic(musicNum, false, 0.0);
+
+        unsigned long startTime = UTIL_GetMilliseconds();
+        unsigned long lastUpdateTime = startTime;
+        int lastMusicNum = musicNum;
+
+        // Playback monitoring loop
+        while (1)
+        {
+            UTIL_Delay(100);
+            int currentMusic = AUDIO_GetCurrentMusic();
+            unsigned long currentTime = UTIL_GetMilliseconds();
+            unsigned long elapsed = (currentTime - startTime) / 1000;
+
+            // Check if music has stopped (music number changed to -1 or different number)
+            if (currentMusic != lastMusicNum)
+            {
+                if (currentMusic == -1)
+                {
+                    printf("\rMusic playback completed. Duration: %02lu:%02lu          \n",
+                           elapsed / 60, elapsed % 60);
+                    break;
+                }
+                lastMusicNum = currentMusic;
+            }
+
+            // Update progress every 500ms
+            if (currentTime - lastUpdateTime >= 500)
+            {
+                unsigned long minutes = elapsed / 60;
+                unsigned long seconds = elapsed % 60;
+
+                // Simple animated progress indicator
+
+                printf("\r♪ Playing #%d [%c] Time: %02lu:%02lu     ",
+                       lastMusicNum, anim[animIdx % 4], minutes, seconds);
+                fflush(stdout);
+                animIdx++;
+                lastUpdateTime = currentTime;
+            }
+        }
+    }
+
+    AUDIO_CloseDevice();
+    DRIVER_DeInit();
+    PAL_FreeResourceIndex();
 }
 
 void PAL_SplashScreen(void)
@@ -339,11 +448,17 @@ int main(int argc, char *argv[])
 
 --*/
 {
+    (void)argc; // Unused parameter
+    (void)argv; // Unused parameter
+
     if (setjmp(g_exit_jmp_buf) != 0)
     {
         // A longjmp is made, should exit here
         return g_exit_code;
     }
+    // Run interactive music player
+    PAL_MusicPlayer();
+
     // Initialize everything
     PAL_Init();
 

@@ -679,7 +679,7 @@ static int SOUND_ResampleMix_S16_Stereo_Stereo(
 static int SOUND_Play(
     void *object,
     int iSoundNum,
-    int fLoop,
+    unsigned char fLoop,
     float flFadeTime)
 /*++
   Purpose:

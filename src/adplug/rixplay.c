@@ -27,14 +27,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PAL_MIX_MAXVOLUME 128
+#define PAL_MIX_MAXVOLUME (128U)
 
-enum
+typedef enum tagFade_Types
 {
-    FADE_NONE,
+    FADE_NONE = 0,
     FADE_IN,
     FADE_OUT
-} FadeType; // fade in or fade out ?
+} Fade_Types;
 
 typedef struct tagRIXPLAYER
 {
@@ -47,9 +47,11 @@ typedef struct tagRIXPLAYER
     int iTotalFadeOutSamples;
     int iTotalFadeInSamples;
     int iRemainingFadeSamples;
-    unsigned char FadeType;
-    int fNextLoop;
+    Fade_Types FadeType;
+    unsigned char fNextLoop;
     int fReady;
+    // Minimal playback tracking
+    unsigned long dwMusicStartTime;
 } RIXPLAYER;
 
 static void
@@ -126,6 +128,7 @@ RIX_FillBuffer(
                             pRixPlayer->dwStartFadeTime = UTIL_GetMilliseconds();
                         pRixPlayer->iTotalFadeOutSamples = 0;
                         pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeInSamples;
+                        pRixPlayer->dwMusicStartTime = UTIL_GetMilliseconds();
                         CrixPlayer_rewind(pRixPlayer->iMusic, true);
 
                         continue;
@@ -189,8 +192,8 @@ RIX_FillBuffer(
                 Copl_update((short *)pRixPlayer->buf, PAL_AUDIO_SAMPLE_RATE / PAL_AUDIO_CHUNK_PER_SECOND);
             }
 
-            unsigned int l = pRixPlayer->buf_max_len - (int)(pRixPlayer->pos - pRixPlayer->buf);
-            l = (l > len) ? len / sizeof(short) : l / sizeof(short);
+            unsigned int l = pRixPlayer->buf_max_len - (unsigned int)(pRixPlayer->pos - pRixPlayer->buf);
+            l = min(l, len) / sizeof(short);
 
             // Put audio data into buffer and adjust volume
             if (pRixPlayer->FadeType != FADE_NONE)
@@ -252,7 +255,7 @@ static int
 RIX_Play(
     void *object,
     int iNumRIX,
-    int fLoop,
+    unsigned char fLoop,
     float flFadeTime)
 /*++
     Purpose:
@@ -296,7 +299,7 @@ RIX_Play(
         pRixPlayer->dwStartFadeTime = UTIL_GetMilliseconds();
         if (pRixPlayer->FadeType == FADE_IN && pRixPlayer->iTotalFadeInSamples > 0 && pRixPlayer->iRemainingFadeSamples > 0)
         {
-            pRixPlayer->dwStartFadeTime -= ((float)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples * flFadeTime * (1000U / 2U));
+            pRixPlayer->dwStartFadeTime -= (unsigned long)((float)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples * flFadeTime * (1000U / 2U));
         }
         pRixPlayer->iTotalFadeOutSamples = (int)round(flFadeTime / 2.0f * PAL_AUDIO_SAMPLE_RATE) * PAL_AUDIO_CHANNEL_NUM;
         pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeOutSamples;
@@ -349,6 +352,7 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->fLoop = false;
     pRixPlayer->fNextLoop = false;
     pRixPlayer->fReady = false;
+    pRixPlayer->dwMusicStartTime = 0;
 
     return (AUDIOPLAYER *)pRixPlayer;
 }
