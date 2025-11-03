@@ -653,8 +653,8 @@ int PAL_FBPBlitToSurface(
     return 0;
 }
 
-int PAL_RLEGetWidth(
-    const unsigned char *lpBitmapRLE)
+unsigned short PAL_RLEGetWidth(
+    unsigned char *lpBitmapRLE)
 /*++
   Purpose:
 
@@ -683,11 +683,11 @@ int PAL_RLEGetWidth(
     }
 
     // Return the width of the bitmap.
-    return lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
+    return lpBitmapRLE[0] | ((unsigned short)lpBitmapRLE[1] << 8);
 }
 
-int PAL_RLEGetHeight(
-    const unsigned char *lpBitmapRLE)
+unsigned short PAL_RLEGetHeight(
+    unsigned char *lpBitmapRLE)
 /*++
   Purpose:
 
@@ -716,12 +716,12 @@ int PAL_RLEGetHeight(
     }
 
     // Return the height of the bitmap.
-    return lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
+    return lpBitmapRLE[2] | ((unsigned short)lpBitmapRLE[3] << 8);
 }
 
 unsigned short
 PAL_SpriteGetNumFrames(
-    const unsigned char *lpSprite)
+    unsigned char *lpSprite)
 /*++
   Purpose:
 
@@ -745,9 +745,9 @@ PAL_SpriteGetNumFrames(
     return (lpSprite[0] | (int)((unsigned int)lpSprite[1] << 8)) - 1;
 }
 
-const unsigned char *
+unsigned char *
 PAL_SpriteGetFrame(
-    const unsigned char *lpSprite,
+    unsigned char *lpSprite,
     int iFrameNum)
 /*++
   Purpose:

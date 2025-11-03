@@ -56,17 +56,17 @@ int PAL_FBPBlitToSurface(
     unsigned char *lpBitmapFBP,
     VIDEO_Surface *lpDstSurface);
 
-int PAL_RLEGetWidth(
-    const unsigned char *lpBitmapRLE);
+unsigned short PAL_RLEGetWidth(
+    unsigned char *lpBitmapRLE);
 
-int PAL_RLEGetHeight(
-    const unsigned char *lpBitmapRLE);
+unsigned short PAL_RLEGetHeight(
+    unsigned char *lpBitmapRLE);
 
 unsigned short PAL_SpriteGetNumFrames(
-    const unsigned char *lpSprite);
+    unsigned char *lpSprite);
 
-const unsigned char *PAL_SpriteGetFrame(
-    const unsigned char *lpSprite,
+unsigned char *PAL_SpriteGetFrame(
+    unsigned char *lpSprite,
     int iFrameNum);
 
 unsigned int PAL_MKFGetChunkCount(void *fp);

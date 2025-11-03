@@ -22,7 +22,6 @@
 #define UIBATTLE_H
 
 #include "ui.h"
-#include <wchar.h>
 
 typedef enum tagBATTLEUISTATE
 {
@@ -92,8 +91,6 @@ typedef struct tagBATTLEUI
     BATTLEUISTATE state;
     BATTLEMENUSTATE MenuState;
 
-    wchar_t szMsg[32];               // message to be shown on the screen
-    wchar_t szNextMsg[32];           // next message to be shown on the screen
     unsigned long dwMsgShowTime;     // the end time of showing the message
     unsigned short wNextMsgDuration; // duration of the next message
 
@@ -112,10 +109,6 @@ typedef struct tagBATTLEUI
 void PAL_PlayerInfoBox(
     unsigned int pos,
     unsigned short wPlayerRole);
-
-void PAL_BattleUIShowText(
-    const wchar_t *lpszText,
-    unsigned short wDuration);
 
 void PAL_BattleUIPlayerReady(
     unsigned short wPlayerIndex);

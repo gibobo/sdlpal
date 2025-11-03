@@ -94,7 +94,7 @@ void PAL_BattleDrawBackground(
             b = 0x0F;
         }
 
-        *pDst = (b | (*pSrc & 0xF0));
+        *pDst = (unsigned char)(b | (*pSrc & 0xF0));
 
         ++pSrc;
         ++pDst;
@@ -1452,9 +1452,6 @@ PAL_StartBattle(
     g_Battle->fEnemyMoving = false;
     g_Battle->iHidingTime = 0;
     g_Battle->wMovingPlayerIndex = 0;
-
-    UI_Battle->szMsg[0] = '\0';
-    UI_Battle->szNextMsg[0] = '\0';
     UI_Battle->dwMsgShowTime = 0;
     UI_Battle->state = kBattleUIWait;
     UI_Battle->fAutoAttack = false;

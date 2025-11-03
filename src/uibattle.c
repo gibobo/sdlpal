@@ -32,8 +32,8 @@
 #include "video.h"
 #include <stdbool.h>
 
-static int g_iCurMiscMenuItem = 0;
-static int g_iCurSubMenuItem = 0;
+static unsigned short g_iCurMiscMenuItem = 0;
+static unsigned short g_iCurSubMenuItem = 0;
 extern BATTLE *g_Battle;
 extern BATTLEUI *UI_Battle;
 extern unsigned char *gpSpriteUI;
@@ -348,19 +348,17 @@ PAL_BattleUIMiscMenuUpdate(
     //
     if (PAL_GetKeyInput() & (kKeyUp | kKeyLeft))
     {
-        g_iCurMiscMenuItem--;
-        if (g_iCurMiscMenuItem < 0)
-        {
+        if (g_iCurMiscMenuItem == 0)
             g_iCurMiscMenuItem = 4;
-        }
+        else
+            g_iCurMiscMenuItem--;
     }
     else if (PAL_GetKeyInput() & (kKeyDown | kKeyRight))
     {
-        g_iCurMiscMenuItem++;
-        if (g_iCurMiscMenuItem > 4)
-        {
+        if (g_iCurMiscMenuItem == 4)
             g_iCurMiscMenuItem = 0;
-        }
+        else
+            g_iCurMiscMenuItem++;
     }
     else if (PAL_GetKeyInput() & kKeySearch)
     {
@@ -443,38 +441,6 @@ PAL_BattleUIMiscItemSubMenuUpdate(
     }
 
     return 0xFFFF;
-}
-
-void PAL_BattleUIShowText(
-    const wchar_t *lpszText,
-    unsigned short wDuration)
-/*++
-  Purpose:
-
-    Show a text message in the battle.
-
-  Parameters:
-
-    [IN]  lpszText - the text message to be shown.
-
-    [IN]  wDuration - the duration of the message, in milliseconds.
-
-  Return value:
-
-    None.
-
---*/
-{
-    if (UTIL_GetMilliseconds() < UI_Battle->dwMsgShowTime)
-    {
-        wcscpy(UI_Battle->szNextMsg, lpszText);
-        UI_Battle->wNextMsgDuration = wDuration;
-    }
-    else
-    {
-        wcscpy(UI_Battle->szMsg, lpszText);
-        UI_Battle->dwMsgShowTime = UTIL_GetMilliseconds() + wDuration;
-    }
 }
 
 void PAL_BattleUIPlayerReady(
@@ -712,7 +678,7 @@ void PAL_BattleUIUpdate(
         {
             if (g_Battle->rgPlayer[i].state == kFighterCom)
             {
-                PAL_BattleUIPlayerReady(i);
+                PAL_BattleUIPlayerReady((unsigned short)i);
                 break;
             }
         }
@@ -861,7 +827,7 @@ void PAL_BattleUIUpdate(
                 {
                     if (g_Battle->rgPlayer[i].state == kFighterCom)
                     {
-                        PAL_BattleUIPlayerReady(i);
+                        PAL_BattleUIPlayerReady((unsigned short)i);
                         break;
                     }
                 }
@@ -1354,7 +1320,7 @@ void PAL_BattleUIUpdate(
             //
             // Draw arrows on the selected player
             //
-            PAL_GetPlayerPos(UI_Battle->iSelectedIndex, &x, &y);
+            PAL_GetPlayerPos((unsigned char)UI_Battle->iSelectedIndex, &x, &y);
             x -= 8;
             y -= 67;
 

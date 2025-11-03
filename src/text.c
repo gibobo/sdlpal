@@ -42,26 +42,20 @@
 #include <string.h>
 #include <wctype.h>
 
-#define FONT_COLOR_DEFAULT  0x4F
-#define FONT_COLOR_YELLOW   0x2D
-#define FONT_COLOR_RED      0x1A
-#define FONT_COLOR_CYAN     0x8D
-#define FONT_COLOR_CYAN_ALT 0x8C
-#define FONT_COLOR_RED_ALT  0x17
-#define BUFFER_WORD_NUM     (3)
+#define FONT_COLOR_DEFAULT    0x4F
+#define FONT_COLOR_YELLOW     0x2D
+#define FONT_COLOR_RED        0x1A
+#define FONT_COLOR_CYAN       0x8D
+#define FONT_COLOR_CYAN_ALT   0x8C
+#define FONT_COLOR_RED_ALT    0x17
+#define INTERNAL_WBUFFER_SIZE (32)
 
 unsigned char g_fUpdatedInBattle = false;
+static wchar_t internal_wbuffer[INTERNAL_WBUFFER_SIZE] = {0};
 static wchar_t *WordData = NULL;
-static unsigned int *WordLen = NULL;
-static unsigned int WordLen_max = 0;
-static wchar_t **WordBuffer = NULL;
-
 static wchar_t *MsgData = NULL;
+static unsigned int *WordLen = NULL;
 static unsigned int *MsgLen = NULL;
-static unsigned int MsgLen_max = 0;
-
-static wchar_t *internal_wbuffer = NULL;
-static unsigned int internal_wbuffer_size = 0;
 
 TEXTLIB g_TextLib;
 
@@ -84,20 +78,18 @@ int PAL_InitText(void)
 {
     unsigned int wpos;
     unsigned int i;
-    unsigned char data;
+    unsigned char data = 0;
 
     // Open the word data files.
     {
         void *fpWLEN = UTIL_fopen(UTIL_Filename("%s/word_len.bin", CACHES_PATH), "rb");
         g_TextLib.nWords = UTIL_FileLength(fpWLEN);
         WordLen = (unsigned int *)UTIL_calloc(g_TextLib.nWords, sizeof(unsigned int));
-        for (i = 0, wpos = 0, data = 0, WordLen_max = 0; i < g_TextLib.nWords; i++)
+        for (i = 0, wpos = 0, data = 0; i < g_TextLib.nWords; i++)
         {
             UTIL_fread(&data, sizeof(data), 1, fpWLEN);
             WordLen[i] = (unsigned int)data << 24 | wpos;
             wpos += data;
-            if (WordLen_max < data)
-                WordLen_max = data;
         }
         UTIL_fclose(fpWLEN);
     }
@@ -113,13 +105,11 @@ int PAL_InitText(void)
         void *fpMLEN = UTIL_fopen(UTIL_Filename("%s/msg_len.bin", CACHES_PATH), "rb");
         g_TextLib.nMsgs = UTIL_FileLength(fpMLEN);
         MsgLen = (unsigned int *)UTIL_calloc(g_TextLib.nMsgs, sizeof(unsigned int));
-        for (i = 0, wpos = 0, data = 0, MsgLen_max = 0; i < g_TextLib.nMsgs; i++, data = 0)
+        for (i = 0, wpos = 0, data = 0; i < g_TextLib.nMsgs; i++, data = 0)
         {
             UTIL_fread(&data, sizeof(data), 1, fpMLEN);
             MsgLen[i] = (unsigned int)data << 24 | wpos;
             wpos += data;
-            if (MsgLen_max < data)
-                MsgLen_max = data;
         }
         UTIL_fclose(fpMLEN);
     }
@@ -130,8 +120,6 @@ int PAL_InitText(void)
         UTIL_fread(MsgData, sizeof(wchar_t), msg_buffer_size, fpMSG);
         UTIL_fclose(fpMSG);
     }
-    internal_wbuffer_size = max(WordLen_max, MsgLen_max);
-    internal_wbuffer = UTIL_calloc(internal_wbuffer_size + 1, sizeof(wchar_t));
 
     g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
     g_TextLib.bIcon = 0;
@@ -168,13 +156,11 @@ void PAL_FreeText(
     UTIL_free(WordLen);
     UTIL_free(MsgData);
     UTIL_free(MsgLen);
-    UTIL_free(internal_wbuffer);
 
     WordData = NULL;
     WordLen = NULL;
     MsgData = NULL;
     MsgLen = NULL;
-    internal_wbuffer = NULL;
 }
 
 const wchar_t *PAL_GetWord(unsigned int iNumWord)
@@ -224,7 +210,7 @@ wchar_t *PAL_UnescapeText(const wchar_t *lpszText)
     if (wcsstr(lpszText, L"\\") == NULL)
         return (wchar_t *)lpszText;
 
-    memset(internal_wbuffer, 0, sizeof(wchar_t) * internal_wbuffer_size);
+    memset(internal_wbuffer, 0, sizeof(wchar_t) * INTERNAL_WBUFFER_SIZE);
 
     while (*lpszText != L'\0')
     {
@@ -254,8 +240,8 @@ void PAL_DrawText(
     const wchar_t *lpszText,
     unsigned int pos,
     unsigned char bColor,
-    int fShadow,
-    int fUpdate)
+    unsigned char fShadow,
+    unsigned char fUpdate)
 {
     PAL_DrawTextUnescape(lpszText, pos, bColor, fShadow, fUpdate, true);
 }
@@ -264,9 +250,9 @@ void PAL_DrawTextUnescape(
     const wchar_t *lpszText,
     unsigned int pos,
     unsigned char bColor,
-    int fShadow,
-    int fUpdate,
-    int fUnescape)
+    unsigned char fShadow,
+    unsigned char fUpdate,
+    unsigned char fUnescape)
 /*++
   Purpose:
 
@@ -283,8 +269,6 @@ void PAL_DrawTextUnescape(
     [IN]  fShadow - true if the text is shadowed or not.
 
     [IN]  fUpdate - true if update the screen area.
-
-    [IN]  fUse8x8Font - true if use 8x8 font.
 
     [IN]  fUnescape - true if unescaping needed.
 
@@ -434,11 +418,11 @@ void PAL_StartDialogWithOffset(
                 // Display the character face at the upper part of the screen
                 if (RES_MKFDecompressChunk(&buf, 0, iNumCharFace, Res_RGM))
                 {
-                    rect.w = PAL_RLEGetWidth((const unsigned char *)buf);
-                    rect.h = PAL_RLEGetHeight((const unsigned char *)buf);
-                    rect.x = max(48 - rect.w / 2 + xOff, 0);
-                    rect.y = max(55 - rect.h / 2 + yOff, 0);
-                    PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
+                    rect.w = (short)PAL_RLEGetWidth(buf);
+                    rect.h = (short)PAL_RLEGetHeight(buf);
+                    rect.x = (short)max(48 - rect.w / 2 + xOff, 0);
+                    rect.y = (short)max(55 - rect.h / 2 + yOff, 0);
+                    PAL_RLEBlitToSurface(buf, gpScreen, PAL_XY(rect.x, rect.y));
                     // VIDEO_UpdateScreen(&rect);
                 }
             }
@@ -456,9 +440,9 @@ void PAL_StartDialogWithOffset(
                 // Display the character face at the lower part of the screen
                 if (RES_MKFDecompressChunk(&buf, 0, iNumCharFace, Res_RGM))
                 {
-                    rect.x = 270 - PAL_RLEGetWidth((const unsigned char *)buf) / 2 + xOff;
-                    rect.y = 144 - PAL_RLEGetHeight((const unsigned char *)buf) / 2 + yOff;
-                    PAL_RLEBlitToSurface((const unsigned char *)buf, gpScreen, PAL_XY(rect.x, rect.y));
+                    rect.x = (short)(270 - PAL_RLEGetWidth(buf) / 2 + xOff);
+                    rect.y = (short)(144 - PAL_RLEGetHeight(buf) / 2 + yOff);
+                    PAL_RLEBlitToSurface(buf, gpScreen, PAL_XY(rect.x, rect.y));
                     // VIDEO_UpdateScreen(NULL);
                 }
             }
