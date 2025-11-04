@@ -33,24 +33,49 @@
 #ifndef OPL_OPL3_H
 #define OPL_OPL3_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <inttypes.h>
 
 #ifndef OPL_ENABLE_STEREOEXT
 #define OPL_ENABLE_STEREOEXT 0
 #endif
 
-#define OPL_WRITEBUF_SIZE   1024
-#define OPL_WRITEBUF_DELAY  2
+#define OPL_WRITEBUF_SIZE  1024
+#define OPL_WRITEBUF_DELAY 2
+
+#if defined(ESP_PLATFORM)
+#include "esp_attr.h"
+#ifndef OPL3_IRAM_ATTR
+#define OPL3_IRAM_ATTR IRAM_ATTR
+#endif
+#ifndef OPL3_FORCE_INLINE
+#define OPL3_FORCE_INLINE __attribute__((always_inline)) inline
+#endif
+#else
+#ifndef OPL3_IRAM_ATTR
+#define OPL3_IRAM_ATTR
+#endif
+#ifndef OPL3_FORCE_INLINE
+#define OPL3_FORCE_INLINE inline
+#endif
+#endif
+
+#if ((OPL_WRITEBUF_SIZE & (OPL_WRITEBUF_SIZE - 1)) == 0)
+#define OPL_WRITEBUF_MASK     (OPL_WRITEBUF_SIZE - 1)
+#define OPL3_CIRCULAR_NEXT(x) (((x) + 1) & OPL_WRITEBUF_MASK)
+#else
+#define OPL3_CIRCULAR_NEXT(x) (((x) + 1) % OPL_WRITEBUF_SIZE)
+#endif
 
 typedef struct _opl3_slot opl3_slot;
 typedef struct _opl3_channel opl3_channel;
 typedef struct _opl3_chip opl3_chip;
 
-struct _opl3_slot {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct _opl3_slot
+{
     opl3_channel *channel;
     opl3_chip *chip;
     int16_t out;
@@ -82,8 +107,9 @@ struct _opl3_slot {
     uint8_t slot_num;
 };
 
-struct _opl3_channel {
-    opl3_slot *slotz[2];/*Don't use "slots" keyword to avoid conflict with Qt applications*/
+struct _opl3_channel
+{
+    opl3_slot *slotz[2]; /*Don't use "slots" keyword to avoid conflict with Qt applications*/
     opl3_channel *pair;
     opl3_chip *chip;
     int16_t *out[4];
@@ -105,13 +131,15 @@ struct _opl3_channel {
     uint8_t ch_num;
 };
 
-typedef struct _opl3_writebuf {
+typedef struct _opl3_writebuf
+{
     uint64_t time;
     uint16_t reg;
     uint8_t data;
 } opl3_writebuf;
 
-struct _opl3_chip {
+struct _opl3_chip
+{
     opl3_channel channel[18];
     opl3_slot slot[36];
     uint16_t timer;
@@ -155,11 +183,12 @@ struct _opl3_chip {
     opl3_writebuf writebuf[OPL_WRITEBUF_SIZE];
 };
 
-void OPL3_Generate(opl3_chip *chip, int16_t *buf);
-void OPL3_GenerateResampled(opl3_chip *chip, int16_t *buf);
 void OPL3_Reset(opl3_chip *chip, uint32_t samplerate);
 void OPL3_WriteReg(opl3_chip *chip, uint16_t reg, uint8_t v);
 void OPL3_WriteRegBuffered(opl3_chip *chip, uint16_t reg, uint8_t v);
+
+void OPL3_Generate(opl3_chip *chip, int16_t *buf);
+void OPL3_GenerateResampled(opl3_chip *chip, int16_t *buf);
 void OPL3_GenerateStream(opl3_chip *chip, int16_t *sndptr, uint32_t numsamples);
 
 void OPL3_Generate4Ch(opl3_chip *chip, int16_t *buf4);

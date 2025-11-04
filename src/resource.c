@@ -409,9 +409,14 @@ unsigned int RES_MKFDecompressChunk(
     unsigned int chunk_index,
     unsigned char resource_id)
 {
+    // Validate chunk index
+    if (resource_id >= Res_Count || g_CachedResourceIndex[resource_id].chunk_count <= chunk_index)
+        return 0;
+
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
 
-    if (g_CachedResourceIndex[resource_id].chunk_count <= chunk_index || data_length == 0)
+    // Check for zero-length chunk
+    if (data_length == 0)
         return 0;
 
     if (buffer_size == 0 || buffer_size < data_length)
@@ -438,12 +443,13 @@ unsigned int RES_MKFReadChunk(
     unsigned int chunk_index,
     unsigned char resource_id)
 {
-    unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
-
-    if (g_CachedResourceIndex[resource_id].chunk_count <= chunk_index || data_length == 0)
+    // Validate chunk index
+    if (resource_id >= Res_Count || g_CachedResourceIndex[resource_id].chunk_count <= chunk_index)
         return 0;
 
-    if (buffer_size == 0 || buffer_size < data_length || chunk_buffer == NULL)
+    unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
+
+    if (data_length == 0 || buffer_size == 0 || buffer_size < data_length || chunk_buffer == NULL)
         return 0;
 
     char filename[256] = {0};

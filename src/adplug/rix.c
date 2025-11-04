@@ -186,6 +186,7 @@ void data_initial()
     }
     else
         I = mus_block = length; // file too short; will stop playing immediately
+
     if (rhythm != 0)
     {
         ad_a0b0l_reg_(8, 0x18, 0);

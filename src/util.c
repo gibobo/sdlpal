@@ -23,11 +23,14 @@
 #include "main.h"
 #include <limits.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 #if defined(_WIN32)
 #include <windows.h>
 #elif defined(ARDUINO_ARCH_ESP32)
+#include <esp_system.h>
+#include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #else
@@ -39,18 +42,18 @@ static int glSeed = 0; // Our random number generator's seed.
 
 static void lsrand(unsigned int iInitialSeed)
 /*++
-  Purpose:
+ Purpose:
 
-   This function initializes the random seed based on the initial seed value passed in the
-   iInitialSeed parameter.
+ This function initializes the random seed based on the initial seed value passed in the
+ iInitialSeed parameter.
 
-  Parameters:
+ Parameters:
 
    [IN]  iInitialSeed - The initial random seed.
 
-  Return value:
+ Return value:
 
-   None.
+ None.
 
 --*/
 {
@@ -62,19 +65,19 @@ static void lsrand(unsigned int iInitialSeed)
 
 static int lrand(void)
 /*++
-  Purpose:
+ Purpose:
 
-   This function is the equivalent of the rand() standard C library function, except that
-   whereas rand() works only with short integers (i.e. not above 32767), this function is
-   able to generate 32-bit random numbers.
+ This function is the equivalent of the rand() standard C library function, except that
+ whereas rand() works only with short integers (i.e. not above 32767), this function is
+ able to generate 32-bit random numbers.
 
-  Parameters:
+ Parameters:
 
-   None.
+ None.
 
-  Return value:
+ Return value:
 
-   The generated random number.
+ The generated random number.
 
 --*/
 {
@@ -86,52 +89,71 @@ static int lrand(void)
 
 int RandomLong(int from, int to)
 /*++
-  Purpose:
+ Purpose:
 
-   This function returns a random integer number between (and including) the starting and
-   ending values passed by parameters from and to.
+ This function returns a random integer number between (and including) the starting and
+ ending values passed by parameters from and to.
 
-  Parameters:
+ Parameters:
 
-   from - the starting value.
+ from - the starting value.
 
-   to - the ending value.
+ to - the ending value.
 
-  Return value:
+ Return value:
 
-   The generated random number.
+ The generated random number.
 
 --*/
 {
     if (to <= from)
         return from;
 
-    return from + lrand() / (INT_MAX / (to - from + 1));
+#if defined(ARDUINO_ARCH_ESP32)
+    // Unbiased mapping using rejection sampling with hardware RNG
+    uint32_t range = (uint32_t)((int64_t)to - (int64_t)from + 1);
+    uint32_t limit = UINT32_MAX - (UINT32_MAX % range);
+    uint32_t r;
+    do
+    {
+        r = esp_random();
+    } while (r >= limit);
+    return from + (int)(r % range);
+#else
+    return from + (int)(lrand() / (INT_MAX / (double)((to - from) + 1)));
+#endif
 }
 
 float RandomFloat(float from, float to)
 /*++
-  Purpose:
+ Purpose:
 
-   This function returns a random floating-point number between (and including) the starting
-   and ending values passed by parameters from and to.
+ This function returns a random floating-point number between (and including) the starting
+ and ending values passed by parameters from and to.
 
-  Parameters:
+ Parameters:
 
-   from - the starting value.
+ from - the starting value.
 
-   to - the ending value.
+ to - the ending value.
 
-  Return value:
+ Return value:
 
-   The generated random number.
+ The generated random number.
 
 --*/
 {
     if (to <= from)
         return from;
 
+#if defined(ARDUINO_ARCH_ESP32)
+    // Map hardware RNG to [0,1] then scale to [from, to]
+    uint32_t r = esp_random();
+    float u = (float)r / 4294967295.0f; // UINT32_MAX as float
+    return from + u * (to - from);
+#else
     return from + (float)lrand() / (INT_MAX / (to - from));
+#endif
 }
 
 char *UTIL_Filename(
@@ -187,7 +209,8 @@ int gettimeofday(struct timeval *tp, void *tzp)
 unsigned long UTIL_GetMilliseconds(void)
 {
 #ifdef ARDUINO_ARCH_ESP32
-    return xTaskGetTickCount() * portTICK_PERIOD_MS;
+    // High resolution monotonic time since boot in microseconds
+    return (unsigned long)(esp_timer_get_time() / 1000ULL);
 #else
     struct timeval tv;
     gettimeofday(&tv, NULL);
