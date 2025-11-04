@@ -1,31 +1,35 @@
-#include "opl.h"
+#include "convertopl.h"
 #include "../util.h"
-#include "opl3.h"
+#include "nuked/opl3.h"
 #include <stdio.h>
 #include <string.h>
 
 static short *buffer = NULL;
 static unsigned int bufsamples = 0;
 static unsigned int rate;
-static opl3_chip chip;
 static unsigned char stereo_flag = 0;
 
-// Same specification
-void update_direct(short *buf, unsigned int samples)
+// Resize the internal buffer is necessary before update data into it
+void update_to_internal_buffer(unsigned int samples)
 {
-    OPL3_GenerateStream(&chip, buf, samples);
-}
-
-// 16bit, stereo -> 16bit, mono
-void update_16s_16m(short *buf, unsigned int samples)
-{
-    // Resize the internal buffer is necessary before update data into it
     if (bufsamples < samples)
     {
         bufsamples = samples;
         UTIL_free(buffer);
         buffer = (short *)UTIL_calloc(samples * 2, sizeof(short));
     }
+}
+
+// Same specification
+void update_direct(short *buf, unsigned int samples)
+{
+    OPL3_GenerateStream(buf, samples);
+}
+
+// 16bit, stereo -> 16bit, mono
+void update_16s_16m(short *buf, unsigned int samples)
+{
+    update_to_internal_buffer(samples);
     update_direct(buffer, samples);
 
     for (unsigned int i = 0, j = 0; i < samples; i++, j += 2)
@@ -37,13 +41,7 @@ void update_16s_16m(short *buf, unsigned int samples)
 // 16bit, stereo -> 8bit, stereo
 void update_16s_8s(short *buf, unsigned int samples)
 {
-    // Resize the internal buffer is necessary before update data into it
-    if (bufsamples < samples)
-    {
-        bufsamples = samples;
-        UTIL_free(buffer);
-        buffer = (short *)UTIL_calloc(samples * 2, sizeof(short));
-    }
+    update_to_internal_buffer(samples);
     update_direct(buffer, samples);
 
     for (unsigned int i = 0; i < samples * 2; i++)
@@ -55,13 +53,7 @@ void update_16s_8s(short *buf, unsigned int samples)
 // 16bit, stereo -> 8bit, stereo
 void update_16s_8m(short *buf, unsigned int samples)
 {
-    // Resize the internal buffer is necessary before update data into it
-    if (bufsamples < samples)
-    {
-        bufsamples = samples;
-        UTIL_free(buffer);
-        buffer = (short *)UTIL_calloc(samples * 2, sizeof(short));
-    }
+    update_to_internal_buffer(samples);
     update_direct(buffer, samples);
 
     for (unsigned int i = 0, j = 0; i < samples; i++, j += 2)
@@ -70,33 +62,33 @@ void update_16s_8m(short *buf, unsigned int samples)
     }
 }
 
-void Copl_init(unsigned int samplerate, unsigned char stereo)
+void Copl_Init(unsigned int samplerate, unsigned char stereo)
 {
     rate = samplerate;
     stereo_flag = stereo;
-    Copl_reset();
+    Copl_Reset();
 }
 
-void Copl_deinit(void)
+void Copl_Deinit(void)
 {
     UTIL_free(buffer);
     buffer = NULL;
 }
 
 // reinitialize OPL chip(s)
-void Copl_reset()
+void Copl_Reset()
 {
-    OPL3_Reset(&chip, rate);
+    OPL3_Reset(rate);
 };
 
 // combined register select + data write
-void Copl_write(unsigned short reg, unsigned char val)
+void Copl_Write(unsigned short reg, unsigned char val)
 {
-    OPL3_WriteRegBuffered(&chip, reg & 0xFF, val);
+    OPL3_WriteRegBuffered(reg & 0xFF, val);
 };
 
 // Emulation only: fill buffer
-void Copl_update(short *buf, unsigned int samples)
+void Copl_Generate(short *buf, unsigned int samples)
 {
     if (stereo_flag)
         update_direct(buf, samples);

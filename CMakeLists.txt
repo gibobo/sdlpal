@@ -26,6 +26,8 @@ set(CACHES_PATH     ${CMAKE_BINARY_DIR}/caches)
 file(GLOB GAME_SOURCES
     ${GAME_DIR}/*.c
     ${GAME_DIR}/adplug/*.c
+    ${GAME_DIR}/adplug/dosbox/*.c    
+    ${GAME_DIR}/adplug/nuked/*.c
     ${GAME_DIR}/sound/*.c
 )
 
@@ -211,17 +213,17 @@ set_project_warnings(${PROJECT_NAME}_webserver)
 
 # Symlink creation
 if(WIN32)
-    set(MKLINK_SCRIPT "${CMAKE_BINARY_DIR}/create_symlinks.bat")
-    file(WRITE "${MKLINK_SCRIPT}" 
-        "mklink \"${CMAKE_BINARY_DIR}/index.html\" \"${CMAKE_SOURCE_DIR}/index.html\"\n"
-        "mklink /D \"${RESOURCE_PATH}\" \"${CMAKE_SOURCE_DIR}/Pal98rqptw\"\n"
-        "mklink /D \"${CACHES_PATH}\" \"${CMAKE_SOURCE_DIR}/cache_data\"\n"
-        "mklink /D \"${CMAKE_BINARY_DIR}/shaders\" \"${CMAKE_SOURCE_DIR}/shaders\"\n"
-    )
-    execute_process(
-        COMMAND powershell -Command "Start-Process cmd -ArgumentList '/c \"${MKLINK_SCRIPT}\"' -Verb runAs"
-        RESULT_VARIABLE elevate_result
-    )
+    # set(MKLINK_SCRIPT "${CMAKE_BINARY_DIR}/create_symlinks.bat")
+    # file(WRITE "${MKLINK_SCRIPT}" 
+    #     "mklink \"${CMAKE_BINARY_DIR}/index.html\" \"${CMAKE_SOURCE_DIR}/index.html\"\n"
+    #     "mklink /D \"${RESOURCE_PATH}\" \"${CMAKE_SOURCE_DIR}/Pal98rqptw\"\n"
+    #     "mklink /D \"${CACHES_PATH}\" \"${CMAKE_SOURCE_DIR}/cache_data\"\n"
+    #     "mklink /D \"${CMAKE_BINARY_DIR}/shaders\" \"${CMAKE_SOURCE_DIR}/shaders\"\n"
+    # )
+    # execute_process(
+    #     COMMAND powershell -Command "Start-Process cmd -ArgumentList '/c \"${MKLINK_SCRIPT}\"' -Verb runAs"
+    #     RESULT_VARIABLE elevate_result
+    # )
 else()
     execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_SOURCE_DIR}/index.html" "${CMAKE_BINARY_DIR}/index.html")
     execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_SOURCE_DIR}/shaders"    "${CMAKE_BINARY_DIR}/shaders")

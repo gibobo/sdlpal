@@ -20,7 +20,7 @@
 
 #include "../audio.h"
 #include "../util.h"
-#include "opl.h"
+#include "convertopl.h"
 #include "rix.h"
 #include <math.h>
 #include <stdbool.h>
@@ -189,7 +189,7 @@ RIX_FillBuffer(
                     }
                 }
 
-                Copl_update((short *)pRixPlayer->buf, PAL_AUDIO_SAMPLE_RATE / PAL_AUDIO_CHUNK_PER_SECOND);
+                Copl_Generate((short *)pRixPlayer->buf, PAL_AUDIO_SAMPLE_RATE / PAL_AUDIO_CHUNK_PER_SECOND);
             }
 
             unsigned int l = pRixPlayer->buf_max_len - (unsigned int)(pRixPlayer->pos - pRixPlayer->buf);
@@ -245,7 +245,7 @@ static void RIX_Shutdown(void *object)
         RIXPLAYER *pRixPlayer = (RIXPLAYER *)object;
         pRixPlayer->fReady = false;
         CrixPlayer_deinit();
-        Copl_deinit();
+        Copl_Deinit();
         UTIL_free(pRixPlayer->buf);
         UTIL_free(pRixPlayer);
     }
@@ -340,7 +340,7 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->Play = RIX_Play;
     pRixPlayer->buf_max_len = ((PAL_AUDIO_SAMPLE_RATE + PAL_AUDIO_CHUNK_PER_SECOND - 1) / PAL_AUDIO_CHUNK_PER_SECOND) * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
     pRixPlayer->buf = (unsigned char *)UTIL_malloc(pRixPlayer->buf_max_len);
-    Copl_init(PAL_AUDIO_SAMPLE_RATE, PAL_AUDIO_CHANNEL_NUM == 2);
+    Copl_Init(PAL_AUDIO_SAMPLE_RATE, PAL_AUDIO_CHANNEL_NUM == 2);
 
     // Load the MKF file.
     CrixPlayer_load();

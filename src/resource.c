@@ -347,7 +347,13 @@ void PAL_FreeResourceIndex(void)
     }
 }
 
-int RES_MKFGetChunkSize(
+unsigned short RES_MKFGetChunkCount(
+    unsigned char resource_id)
+{
+    return (resource_id >= Res_Count) ? 0 : g_CachedResourceIndex[resource_id].chunk_count;
+}
+
+unsigned short RES_MKFGetChunkSize(
     unsigned int chunk_index,
     unsigned char resource_id)
 {

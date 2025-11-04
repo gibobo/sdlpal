@@ -194,6 +194,9 @@ static int32_t panpot_lut[256];
 static uint8_t panpot_lut_build = 0;
 #endif
 
+static opl3_chip opl3_chip_instance;
+
+
 /*
  Envelope generator
 */
@@ -1304,7 +1307,7 @@ void OPL3_GenerateResampled(opl3_chip *chip, int16_t *buf)
     buf[1] = samples[1];
 }
 
-void OPL3_Reset(opl3_chip *chip, uint32_t samplerate)
+void OPL3_Reset(uint32_t samplerate)
 {
     opl3_slot *slot;
     opl3_channel *channel;
@@ -1312,39 +1315,39 @@ void OPL3_Reset(opl3_chip *chip, uint32_t samplerate)
     uint8_t channum;
     uint8_t local_ch_slot;
 
-    memset(chip, 0, sizeof(opl3_chip));
+    memset(&opl3_chip_instance, 0, sizeof(opl3_chip));
     for (slotnum = 0; slotnum < 36; slotnum++)
     {
-        slot = &chip->slot[slotnum];
-        slot->chip = chip;
-        slot->mod = &chip->zeromod;
+        slot = &opl3_chip_instance.slot[slotnum];
+        slot->chip = &opl3_chip_instance;
+        slot->mod = &opl3_chip_instance.zeromod;
         slot->eg_rout = 0x1ff;
         slot->eg_out = 0x1ff;
         slot->eg_gen = envelope_gen_num_release;
-        slot->trem = (uint8_t *)&chip->zeromod;
+        slot->trem = (uint8_t *)&opl3_chip_instance.zeromod;
         slot->slot_num = slotnum;
     }
     for (channum = 0; channum < 18; channum++)
     {
-        channel = &chip->channel[channum];
+        channel = &opl3_chip_instance.channel[channum];
         local_ch_slot = ch_slot[channum];
-        channel->slotz[0] = &chip->slot[local_ch_slot];
-        channel->slotz[1] = &chip->slot[local_ch_slot + 3u];
-        chip->slot[local_ch_slot].channel = channel;
-        chip->slot[local_ch_slot + 3u].channel = channel;
+        channel->slotz[0] = &opl3_chip_instance.slot[local_ch_slot];
+        channel->slotz[1] = &opl3_chip_instance.slot[local_ch_slot + 3u];
+        opl3_chip_instance.slot[local_ch_slot].channel = channel;
+        opl3_chip_instance.slot[local_ch_slot + 3u].channel = channel;
         if ((channum % 9) < 3)
         {
-            channel->pair = &chip->channel[channum + 3u];
+            channel->pair = &opl3_chip_instance.channel[channum + 3u];
         }
         else if ((channum % 9) < 6)
         {
-            channel->pair = &chip->channel[channum - 3u];
+            channel->pair = &opl3_chip_instance.channel[channum - 3u];
         }
-        channel->chip = chip;
-        channel->out[0] = &chip->zeromod;
-        channel->out[1] = &chip->zeromod;
-        channel->out[2] = &chip->zeromod;
-        channel->out[3] = &chip->zeromod;
+        channel->chip = &opl3_chip_instance;
+        channel->out[0] = &channel->chip->zeromod;
+        channel->out[1] = &channel->chip->zeromod;
+        channel->out[2] = &channel->chip->zeromod;
+        channel->out[3] = &channel->chip->zeromod;
         channel->chtype = ch_2op;
         channel->cha = 0xffff;
         channel->chb = 0xffff;
@@ -1355,10 +1358,10 @@ void OPL3_Reset(opl3_chip *chip, uint32_t samplerate)
         channel->ch_num = channum;
         OPL3_ChannelSetupAlg(channel);
     }
-    chip->noise = 1;
-    chip->rateratio = (samplerate << RSM_FRAC) / 49716;
-    chip->tremoloshift = 4;
-    chip->vibshift = 1;
+    opl3_chip_instance.noise = 1;
+    opl3_chip_instance.rateratio = (samplerate << RSM_FRAC) / 49716;
+    opl3_chip_instance.tremoloshift = 4;
+    opl3_chip_instance.vibshift = 1;
 
 #if OPL_ENABLE_STEREOEXT
     if (!panpot_lut_build)
@@ -1483,27 +1486,27 @@ void OPL3_WriteReg(opl3_chip *chip, uint16_t reg, uint8_t v)
     }
 }
 
-void OPL3_WriteRegBuffered(opl3_chip *chip, uint16_t reg, uint8_t v)
+void OPL3_WriteRegBuffered(int16_t reg, uint8_t v)
 {
     uint64_t time1, time2;
     opl3_writebuf *writebuf;
     uint32_t writebuf_last;
 
-    writebuf_last = chip->writebuf_last;
-    writebuf = &chip->writebuf[writebuf_last];
+    writebuf_last = opl3_chip_instance.writebuf_last;
+    writebuf = &opl3_chip_instance.writebuf[writebuf_last];
 
     if (writebuf->reg & 0x200)
     {
-        OPL3_WriteReg(chip, writebuf->reg & 0x1ff, writebuf->data);
+        OPL3_WriteReg(&opl3_chip_instance, writebuf->reg & 0x1ff, writebuf->data);
 
-        chip->writebuf_cur = OPL3_CIRCULAR_NEXT(writebuf_last);
-        chip->writebuf_samplecnt = writebuf->time;
+        opl3_chip_instance.writebuf_cur = OPL3_CIRCULAR_NEXT(writebuf_last);
+        opl3_chip_instance.writebuf_samplecnt = writebuf->time;
     }
 
     writebuf->reg = reg | 0x200;
     writebuf->data = v;
-    time1 = chip->writebuf_lasttime + OPL_WRITEBUF_DELAY;
-    time2 = chip->writebuf_samplecnt;
+    time1 = opl3_chip_instance.writebuf_lasttime + OPL_WRITEBUF_DELAY;
+    time2 = opl3_chip_instance.writebuf_samplecnt;
 
     if (time1 < time2)
     {
@@ -1511,8 +1514,8 @@ void OPL3_WriteRegBuffered(opl3_chip *chip, uint16_t reg, uint8_t v)
     }
 
     writebuf->time = time1;
-    chip->writebuf_lasttime = time1;
-    chip->writebuf_last = OPL3_CIRCULAR_NEXT(writebuf_last);
+    opl3_chip_instance.writebuf_lasttime = time1;
+    opl3_chip_instance.writebuf_last = OPL3_CIRCULAR_NEXT(writebuf_last);
 }
 
 void OPL3_Generate4ChStream(opl3_chip *chip, int16_t *sndptr1, int16_t *sndptr2, uint32_t numsamples)
@@ -1532,13 +1535,13 @@ void OPL3_Generate4ChStream(opl3_chip *chip, int16_t *sndptr1, int16_t *sndptr2,
     }
 }
 
-void OPL3_GenerateStream(opl3_chip *chip, int16_t *sndptr, uint32_t numsamples)
+void OPL3_GenerateStream(int16_t *sndptr, uint32_t numsamples)
 {
     uint_fast32_t i;
 
     for (i = 0; i < numsamples; i++)
     {
-        OPL3_GenerateResampled(chip, sndptr);
+        OPL3_GenerateResampled(&opl3_chip_instance, sndptr);
         sndptr += 2;
     }
 }

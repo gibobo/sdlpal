@@ -36,16 +36,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * -------------------------------------------------------------------------
  *
- * opl.h - OPL base class, by Simon Peter <dn.tlp@gmx.net>
+ * convertopl.h - OPL base class, by Simon Peter <dn.tlp@gmx.net>
  */
 
 #ifndef _OPL_H_
 #define _OPL_H_
 
-void Copl_init(unsigned int samplerate, unsigned char stereo);
-void Copl_deinit(void);
-void Copl_reset(void);                                  // reinitialize OPL chip(s)
-void Copl_write(unsigned short reg, unsigned char val); // combined register select + data write
-void Copl_update(short *buf, unsigned int samples);     // Emulation only: fill buffer
+void Copl_Init(unsigned int samplerate, unsigned char stereo);
+void Copl_Deinit(void);
+void Copl_Reset(void);                                  // reinitialize OPL chip(s)
+void Copl_Write(unsigned short reg, unsigned char val); // combined register select + data write
+void Copl_Generate(short *buf, unsigned int samples);     // Emulation only: fill buffer
 
 #endif

@@ -21,9 +21,9 @@
  */
 
 #include "rix.h"
-#include "../util.h"
 #include "../resource.h"
-#include "opl.h"
+#include "../util.h"
+#include "convertopl.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -46,7 +46,7 @@ static const unsigned char bd_reg_data[] = {
     0x00, 0x01, 0x00, 0x0F, 0x0B, 0x00, 0x07, 0x05, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00};
 
-static unsigned char *rix_buf = NULL; /* rix files' f_buffer */
+static unsigned char *rix_buf = NULL;    /* rix files' f_buffer */
 static unsigned short f_buffer[25 * 12]; // 9C0h-C18h
 static unsigned short a0b0_data2[11];
 static unsigned char a0b0_data3[18];
@@ -159,8 +159,8 @@ void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit)
 
     if (reinit)
     {
-        Copl_reset();
-        Copl_write(1, 32); // go to OPL2 mode
+        Copl_Reset();
+        Copl_Write(1, 32); // go to OPL2 mode
         ad_initial();
         data_initial();
     }
@@ -191,10 +191,10 @@ void data_initial()
     {
         ad_a0b0l_reg_(8, 0x18, 0);
         ad_a0b0l_reg_(7, 0x1F, 0);
-        Copl_write(0xa8, 87);
-        Copl_write(0xb8, 9);
-        Copl_write(0xa7, 3);
-        Copl_write(0xb7, 15 /*10*/); // Changed from 10 (original value) to 15 for better quality
+        Copl_Write(0xa8, 87);
+        Copl_Write(0xb8, 9);
+        Copl_Write(0xa7, 3);
+        Copl_Write(0xb7, 15 /*10*/); // Changed from 10 (original value) to 15 for better quality
     }
     bd_modify = 0;
     band = 0;
@@ -232,7 +232,7 @@ unsigned short ad_initial()
 /*----------------------------------------------------------*/
 void ad_bop(unsigned short reg, unsigned short value)
 {
-    Copl_write(reg & 0xff, value & 0xff);
+    Copl_Write(reg & 0xff, value & 0xff);
 }
 /*--------------------------------------------------------------*/
 void int_08h_entry()

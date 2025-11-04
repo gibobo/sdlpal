@@ -34,8 +34,12 @@ int PAL_LoadConsolidatedResources(void);
 // Free the loaded resource index and close the resource file.
 void PAL_FreeResourceIndex(void);
 
-// Resource access functions
-int RES_MKFGetChunkSize(
+// Get the number of chunks in a resource file
+unsigned short RES_MKFGetChunkCount(
+    unsigned char resource_id);
+
+// Get the size of a specific chunk in a resource file
+unsigned short RES_MKFGetChunkSize(
     unsigned int chunk_index,
     unsigned char resource_id);
 
