@@ -32,9 +32,6 @@ typedef enum tagDIALOGPOSITION
 } DIALOGLOCATION;
 
 typedef struct tagTEXTLIB {
-  unsigned int nWords;
-  unsigned int nMsgs;
-
   int nCurrentDialogLine;
   unsigned char bCurrentFontColor;
   unsigned int posIcon;
