@@ -729,7 +729,7 @@ void PAL_ShowDialogText(
         //
         // The text should be shown in a small window at the center of the screen
         //
-        unsigned int len = PAL_TextWidth(lpszText);
+        unsigned int len = PAL_TextWidth(lpszText) >> 3;
 
         // Create the window box
         rect.x = PAL_X(g_TextLib.posDialogText) - len * 4;

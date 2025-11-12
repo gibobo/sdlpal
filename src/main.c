@@ -456,8 +456,9 @@ int main(int argc, char *argv[])
         // A longjmp is made, should exit here
         return g_exit_code;
     }
+
     // Run interactive music player
-    PAL_MusicPlayer();
+    // PAL_MusicPlayer();
 
     // Initialize everything
     PAL_Init();

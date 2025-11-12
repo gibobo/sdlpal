@@ -1486,7 +1486,7 @@ void OPL3_WriteReg(opl3_chip *chip, uint16_t reg, uint8_t v)
     }
 }
 
-void OPL3_WriteRegBuffered(int16_t reg, uint8_t v)
+void OPL3_WriteRegBuffered(uint8_t reg, uint8_t v)
 {
     uint64_t time1, time2;
     opl3_writebuf *writebuf;

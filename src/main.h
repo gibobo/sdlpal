@@ -25,6 +25,7 @@
 extern "C" {
 #endif
 
+void PAL_MusicPlayer(void);
 void PAL_TrademarkScreen(void);
 void PAL_SplashScreen(void);
 void PAL_Init(void);
