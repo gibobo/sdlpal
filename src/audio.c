@@ -79,9 +79,9 @@ void AUDIO_FillBuffer(void *stream, unsigned int len)
     if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer && gAudioDevice.pSoundBuffer)
     {
         // Prevent buffer overflow by limiting the size to the allocated buffer size
-        int buffer_size = PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM * sizeof(short);
+        int buffer_size = PAL_AUDIO_MIX_BUFFER_FRAMES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * sizeof(short);
         int safe_len = (len > buffer_size) ? buffer_size : len;
-        
+
         memset(gAudioDevice.pSoundBuffer, 0, safe_len);
         gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, safe_len);
 
@@ -134,7 +134,7 @@ int AUDIO_Startup(void)
     else
     {
         // Allocate sound buffer
-        gAudioDevice.pSoundBuffer = UTIL_calloc(PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM, sizeof(short));
+        gAudioDevice.pSoundBuffer = UTIL_calloc(PAL_AUDIO_MIX_BUFFER_FRAMES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT, sizeof(short));
         if (gAudioDevice.pSoundBuffer == NULL)
         {
             // Sound buffer allocation failed
@@ -256,13 +256,13 @@ int AUDIO_GetCurrentMusic(void)
 --*/
 {
     int result = -1;
-    
+
     if (gAudioDevice.pMusPlayer)
     {
         DRIVER_Audio_Lock();
         result = gAudioDevice.pMusPlayer->iMusic;
         DRIVER_Audio_Unlock();
     }
-    
+
     return result;
 }

@@ -732,13 +732,13 @@ static int SOUND_Play(
         return false;
     }
 
-    if (wavespec.channels == 1 && PAL_AUDIO_CHANNEL_NUM == 1)
+    if (wavespec.channels == 1 && PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 1)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Mono : SOUND_ResampleMix_U8_Mono_Mono;
-    else if (wavespec.channels == 1 && PAL_AUDIO_CHANNEL_NUM == 2)
+    else if (wavespec.channels == 1 && PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 2)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
-    else if (wavespec.channels == 2 && PAL_AUDIO_CHANNEL_NUM == 1)
+    else if (wavespec.channels == 2 && PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 1)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Mono : SOUND_ResampleMix_U8_Stereo_Mono;
-    else if (wavespec.channels == 2 && PAL_AUDIO_CHANNEL_NUM == 2)
+    else if (wavespec.channels == 2 && PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 2)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
     else
     {
@@ -777,8 +777,8 @@ static int SOUND_Play(
             cursnd->resampler[i] = resampler_create();
         else
             resampler_clear(cursnd->resampler[i]);
-        resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % PAL_AUDIO_SAMPLE_RATE) == 0 || (PAL_AUDIO_SAMPLE_RATE % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
-        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)PAL_AUDIO_SAMPLE_RATE);
+        resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % PAL_AUDIO_OUTPUT_SAMPLE_RATE) == 0 || (PAL_AUDIO_OUTPUT_SAMPLE_RATE % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
+        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)PAL_AUDIO_OUTPUT_SAMPLE_RATE);
     }
 
     cursnd->base = buf;

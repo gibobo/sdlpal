@@ -10,7 +10,7 @@ static unsigned char *send_audio = NULL;
 static unsigned int send_audio_size = 0;
 static double duration_sum = 0.0;
 static unsigned long audio_start_tick = 0;
-static const double duration_ms = 1000.0 * (double)PAL_AUDIO_BUFFER_SIZE / (double)PAL_AUDIO_SAMPLE_RATE;
+static const double duration_ms = 1000.0 * (double)PAL_AUDIO_MIX_BUFFER_FRAMES / (double)PAL_AUDIO_OUTPUT_SAMPLE_RATE;
 extern struct mg_connection *ws_conn;
 
 /* Function prototypes */
@@ -43,11 +43,11 @@ void send_audio_data(void)
 void send_audio_config(void)
 {
     uint8_t send_config[] = {
-        3,                                   // Type 3: audio format
-        (PAL_AUDIO_SAMPLE_RATE >> 8) & 0xFF, // Frequency high byte
-        PAL_AUDIO_SAMPLE_RATE & 0xFF,        // Frequency low byte
-        PAL_AUDIO_CHANNEL_NUM,               // Number of channels (1 byte)
-        PAL_AUDIO_BIT_DEPTH,                 // Bit depth (1 byte)
+        3,                                          // Type 3: audio format
+        (PAL_AUDIO_OUTPUT_SAMPLE_RATE >> 8) & 0xFF, // Frequency high byte
+        PAL_AUDIO_OUTPUT_SAMPLE_RATE & 0xFF,        // Frequency low byte
+        PAL_AUDIO_OUTPUT_CHANNEL_COUNT,             // Number of channels (1 byte)
+        PAL_AUDIO_BIT_DEPTH,                        // Bit depth (1 byte)
     };
 
     if (ws_conn == NULL || (size_t)mg_ws_send(ws_conn, send_config, sizeof(send_config), WEBSOCKET_OP_BINARY) == (size_t)-1)
@@ -57,7 +57,7 @@ void send_audio_config(void)
     else
     {
         fprintf(stdout, "Audio config sent: %d Hz, %d channels, %d bits\n",
-                PAL_AUDIO_SAMPLE_RATE, PAL_AUDIO_CHANNEL_NUM, PAL_AUDIO_BIT_DEPTH);
+                PAL_AUDIO_OUTPUT_SAMPLE_RATE, PAL_AUDIO_OUTPUT_CHANNEL_COUNT, PAL_AUDIO_BIT_DEPTH);
     }
 
     duration_sum = 0.0;
@@ -66,7 +66,7 @@ void send_audio_config(void)
 
 int DRIVER_Init_Audio(void)
 {
-    send_audio_size = 1 + PAL_AUDIO_BUFFER_SIZE * PAL_AUDIO_CHANNEL_NUM * PAL_AUDIO_BYTES_PER_SAMPLE;
+    send_audio_size = 1 + PAL_AUDIO_MIX_BUFFER_FRAMES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
     send_audio = (unsigned char *)UTIL_malloc(send_audio_size);
     send_audio[0] = 1;
     return 0;

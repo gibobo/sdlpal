@@ -197,7 +197,7 @@ void PAL_MusicPlayer(void)
     {
         int animIdx = 0;
         int musicNum = 0;
-        printf("Enter music number (1-255, 0 to exit): ");
+        printf("Enter music number (1-87, 0 to exit): ");
         fflush(stdout);
 
         if (scanf("%d", &musicNum) != 1)
@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
     }
 
     // Run interactive music player
-    // PAL_MusicPlayer();
+    PAL_MusicPlayer();
 
     // Initialize everything
     PAL_Init();
