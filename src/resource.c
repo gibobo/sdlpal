@@ -164,15 +164,15 @@ void PAL_ConsolidateExtractedResources(void)
     PAL_ExtractRawMKFChunks(Res_GOP);
     PAL_ExtractAndDecompressMKFChunks(Res_MAP);
     PAL_ExtractAndDecompressMKFChunks(Res_MGO);
-    PAL_ExtractRawMKFChunks(Res_MUS); //TODO
+    PAL_ExtractRawMKFChunks(Res_MUS);
     PAL_ExtractRawMKFChunks(Res_PAT);
     PAL_ExtractRawMKFChunks(Res_RGM);
     PAL_ExtractRNGAnimationFrames(Res_RNG);
     PAL_ExtractRawMKFChunks(Res_SOUNDS);
     PAL_ExtractRawMKFChunks(Res_SSS);
 
-    FILE *fpRes_out = UTIL_fopen(UTIL_Filename("%s/pal.bin", CACHES_PATH), "wb");
-    FILE *fpInfo_out = UTIL_fopen(UTIL_Filename("%s/pal.dat", CACHES_PATH), "wb");
+    FILE *fpRes_out = UTIL_fopen(UTIL_Filename("%s/resource.bin", CACHES_PATH), "wb");
+    FILE *fpInfo_out = UTIL_fopen(UTIL_Filename("%s/resource.dat", CACHES_PATH), "wb");
     unsigned int offset_info = 0;
     long Info_start_pos = ftell(fpInfo_out);
 
@@ -211,7 +211,7 @@ void PAL_ConsolidateExtractedResources(void)
 
 int PAL_LoadConsolidatedResources(void)
 {
-    FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/pal.dat", CACHES_PATH), "rb");
+    FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/resource.dat", CACHES_PATH), "rb");
     if (!fpInfo)
     {
         return -1; // Failed to open resource file

@@ -22,121 +22,125 @@
 #include "driver.h"
 #include "util.h"
 #include "video.h"
+#include <stddef.h>
 #include <stdlib.h>
 
-#define FONT_DATA_CACHE_SIZE 256
-#define ReLU(A)              ((A) > 0 ? (A) : 0)
-#define unicode_lower_top    0xD800
-#define unicode_upper_base   0xF900
-#define unicode_upper_top    0xFFFE
-
+// Font glyph cache entry structure
 typedef struct
 {
-    unsigned short wChar;
-    unsigned char size;
-    unsigned char data[32];
-} font_data_cache;
+    unsigned short codepoint;   // The Unicode codepoint of the glyph
+    unsigned char glyphWidth;   // The width of the glyph in pixels
+    unsigned char data[32];     // The bitmap data for the glyph
+} FontGlyphCacheEntry;
 
-static void *fp_font_data = NULL;
-static void *fp_font_size = NULL;
-static font_data_cache *font_cache = NULL;
-static unsigned short font_cache_index = 0;
-static unsigned short font_cache_filled = 0;
-static font_data_cache *font_cache_last_hit = NULL;
+// Font glyph cache definitions
+static const unsigned short kFontCacheCapacity = 256;
+// Unicode codepoint ranges
+static const unsigned short kUnicodeSurrogateRangeBegin = 0xD800;
+static const unsigned short kUnicodePrivateUseBase = 0xF900;
+static const unsigned short kUnicodeInvalidUpperBound = 0xFFFE;
 
-static font_data_cache *FontCacheLookupOrLoad(unsigned short wChar)
+static void *gFontDataStream = NULL;
+static void *gFontSizeStream = NULL;
+static FontGlyphCacheEntry *gFontCache = NULL;
+static unsigned short gFontCacheNextIndex = 0;
+static unsigned short gFontCachePopulation = 0;
+static FontGlyphCacheEntry *gFontCacheLastHit = NULL;
+
+static FontGlyphCacheEntry *FontCacheFetchGlyph(unsigned short codepoint)
 {
-    if (font_cache == NULL || fp_font_data == NULL || fp_font_size == NULL)
+    if (gFontCache == NULL || gFontDataStream == NULL || gFontSizeStream == NULL)
         return NULL;
 
     // Check for invalid char code.
-    if ((wChar >= unicode_lower_top && wChar < unicode_upper_base) || (wChar >= unicode_upper_top))
+    if ((codepoint >= kUnicodeSurrogateRangeBegin && codepoint < kUnicodePrivateUseBase) ||
+        (codepoint >= kUnicodeInvalidUpperBound))
         return NULL;
 
-    if (font_cache_last_hit != NULL && font_cache_last_hit->size > 0 && font_cache_last_hit->wChar == wChar)
-        return font_cache_last_hit;
+    if (gFontCacheLastHit != NULL && gFontCacheLastHit->glyphWidth > 0 && gFontCacheLastHit->codepoint == codepoint)
+        return gFontCacheLastHit;
 
-    for (unsigned short i = 0; i < font_cache_filled; i++)
+    for (unsigned short i = 0; i < gFontCachePopulation; i++)
     {
-        font_data_cache *entry = &font_cache[i];
-        if (entry->size > 0 && entry->wChar == wChar)
+        FontGlyphCacheEntry *entry = &gFontCache[i];
+        if (entry->glyphWidth > 0 && entry->codepoint == codepoint)
         {
-            font_cache_last_hit = entry;
+            gFontCacheLastHit = entry;
             return entry;
         }
     }
 
-    font_data_cache *pCache = &font_cache[font_cache_index];
-    unsigned short current_index = font_cache_index;
-    unsigned char was_empty = (pCache->size == 0);
+    FontGlyphCacheEntry *cacheEntry = &gFontCache[gFontCacheNextIndex];
+    unsigned short writeIndex = gFontCacheNextIndex;
+    unsigned char entryWasEmpty = (cacheEntry->glyphWidth == 0);
 
-    unsigned short wCharOffset = wChar;
-    if (wCharOffset >= unicode_upper_base)
-        wCharOffset -= (unicode_upper_base - unicode_lower_top);
+    unsigned short glyphIndex = codepoint;
+    if (glyphIndex >= kUnicodePrivateUseBase)
+        glyphIndex -= (kUnicodePrivateUseBase - kUnicodeSurrogateRangeBegin);
 
-    unsigned char size_bits;
-    if (UTIL_fseek(fp_font_size, sizeof(unsigned char) * wCharOffset / 8, SEEK_SET) != 0)
+    unsigned char widthBitMask;
+    if (UTIL_fseek(gFontSizeStream, sizeof(unsigned char) * glyphIndex / 8, SEEK_SET) != 0)
     {
-        pCache->size = 0;
+        cacheEntry->glyphWidth = 0;
         return NULL;
     }
-    if (UTIL_fread(&size_bits, sizeof(unsigned char), 1, fp_font_size) != 1)
+    if (UTIL_fread(&widthBitMask, sizeof(unsigned char), 1, gFontSizeStream) != 1)
     {
-        pCache->size = 0;
+        cacheEntry->glyphWidth = 0;
         return NULL;
     }
-    if (UTIL_fseek(fp_font_data, sizeof(unsigned char) * wCharOffset * 32, SEEK_SET) != 0)
+    if (UTIL_fseek(gFontDataStream, sizeof(unsigned char) * glyphIndex * 32, SEEK_SET) != 0)
     {
-        pCache->size = 0;
+        cacheEntry->glyphWidth = 0;
         return NULL;
     }
-    if (UTIL_fread(pCache->data, sizeof(unsigned char), 32, fp_font_data) != 32)
+    if (UTIL_fread(cacheEntry->data, sizeof(unsigned char), 32, gFontDataStream) != 32)
     {
-        pCache->size = 0;
+        cacheEntry->glyphWidth = 0;
         return NULL;
     }
 
-    pCache->wChar = wChar;
-    pCache->size = (size_bits & (1U << (wCharOffset % 8))) ? 2 : 1;
-    font_cache_last_hit = pCache;
+    cacheEntry->codepoint = codepoint;
+    cacheEntry->glyphWidth = (widthBitMask & (1U << (glyphIndex % 8))) ? 2 : 1;
+    gFontCacheLastHit = cacheEntry;
 
-    if (was_empty && font_cache_filled < FONT_DATA_CACHE_SIZE)
+    if (entryWasEmpty && gFontCachePopulation < kFontCacheCapacity)
     {
-        if (current_index >= font_cache_filled)
-            font_cache_filled = current_index + 1;
+        if (writeIndex >= gFontCachePopulation)
+            gFontCachePopulation = writeIndex + 1;
         else
-            font_cache_filled++;
+            gFontCachePopulation++;
     }
 
-    font_cache_index = (current_index + 1) % FONT_DATA_CACHE_SIZE;
-    return pCache;
+    gFontCacheNextIndex = (writeIndex + 1) % kFontCacheCapacity;
+    return cacheEntry;
 }
 
 void PAL_InitFont(void)
 {
-    fp_font_data = UTIL_fopen(UTIL_Filename("%s/unicode_font.bin", CACHES_PATH), "rb");
-    fp_font_size = UTIL_fopen(UTIL_Filename("%s/unicode_font_size.bin", CACHES_PATH), "rb");
-    font_cache = (font_data_cache *)UTIL_calloc(FONT_DATA_CACHE_SIZE, sizeof(font_data_cache));
-    font_cache_index = 0;
-    font_cache_filled = 0;
-    font_cache_last_hit = NULL;
+    gFontDataStream = UTIL_fopen(UTIL_Filename("%s/unicode_font.bin", CACHES_PATH), "rb");
+    gFontSizeStream = UTIL_fopen(UTIL_Filename("%s/unicode_font.dat", CACHES_PATH), "rb");
+    gFontCache = (FontGlyphCacheEntry *)UTIL_calloc(kFontCacheCapacity, sizeof(FontGlyphCacheEntry));
+    gFontCacheNextIndex = 0;
+    gFontCachePopulation = 0;
+    gFontCacheLastHit = NULL;
 }
 
 void PAL_DeInitFont(void)
 {
-    UTIL_fclose(fp_font_data);
-    UTIL_fclose(fp_font_size);
-    UTIL_free(font_cache);
-    fp_font_data = NULL;
-    fp_font_size = NULL;
-    font_cache = NULL;
-    font_cache_index = 0;
-    font_cache_filled = 0;
-    font_cache_last_hit = NULL;
+    UTIL_fclose(gFontDataStream);
+    UTIL_fclose(gFontSizeStream);
+    UTIL_free(gFontCache);
+    gFontDataStream = NULL;
+    gFontSizeStream = NULL;
+    gFontCache = NULL;
+    gFontCacheNextIndex = 0;
+    gFontCachePopulation = 0;
+    gFontCacheLastHit = NULL;
 }
 
 void PAL_DrawCharOnSurface(
-    unsigned short wChar,
+    unsigned short codepoint,
     const unsigned short x,
     const unsigned short y,
     const unsigned char bColor,
@@ -144,10 +148,10 @@ void PAL_DrawCharOnSurface(
 {
     unsigned short i;
     unsigned short j;
-    font_data_cache *pCache = FontCacheLookupOrLoad(wChar);
+    FontGlyphCacheEntry *glyphEntry = FontCacheFetchGlyph(codepoint);
 
     // Check for cache miss
-    if (pCache == NULL)
+    if (glyphEntry == NULL)
         return;
 
     // Check for NULL screen surface.
@@ -158,11 +162,11 @@ void PAL_DrawCharOnSurface(
     if (x >= screen_w)
         return;
 
-    unsigned char glyph_width = pCache->size;
-    unsigned char rows = glyph_width << 4;
-    unsigned char bits_per_row = glyph_width << 3;
+    unsigned char glyphWidth = glyphEntry->glyphWidth;
+    unsigned char rows = glyphWidth << 4;
+    unsigned char bitsPerRow = glyphWidth << 3;
     unsigned short max_columns = screen_w - x;
-    unsigned char column_limit = bits_per_row;
+    unsigned char column_limit = bitsPerRow;
     if (column_limit > max_columns)
         column_limit = (unsigned char)max_columns;
 
@@ -172,15 +176,15 @@ void PAL_DrawCharOnSurface(
     unsigned char draw_shadow = fShadow ? 1 : 0;
 
     // Draw the character to the surface.
-    unsigned char *dst = gpScreen->pixels + screen_w * ReLU(y) + x;
+    unsigned char *dst = gpScreen->pixels + screen_w * y + x;
     unsigned char *top = gpScreen->pixels + screen_w * gpScreen->h;
-    for (i = 0; i < rows && dst < top; i += glyph_width, dst += screen_w)
+    for (i = 0; i < rows && dst < top; i += glyphWidth, dst += screen_w)
     {
         unsigned char *shadow_row = dst + screen_w;
         unsigned char has_bottom = (shadow_row < top);
-        unsigned char *glyph_row = pCache->data + i;
+        unsigned char *glyph_row = glyphEntry->data + i;
         unsigned int glyph_bits = glyph_row[0];
-        if (glyph_width == 2)
+        if (glyphWidth == 2)
             glyph_bits |= ((unsigned int)glyph_row[1]) << 8;
 
         if (glyph_bits == 0)
@@ -210,11 +214,11 @@ void PAL_DrawCharOnSurface(
     }
 }
 
-unsigned char PAL_CharWidth(unsigned short wChar)
+unsigned char PAL_CharWidth(unsigned short codepoint)
 {
-    font_data_cache *pCache = FontCacheLookupOrLoad(wChar);
-    if (pCache == NULL)
+    FontGlyphCacheEntry *glyphEntry = FontCacheFetchGlyph(codepoint);
+    if (glyphEntry == NULL)
         return 0;
 
-    return pCache->size;
+    return glyphEntry->glyphWidth;
 }

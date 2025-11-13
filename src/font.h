@@ -65,7 +65,7 @@ void PAL_DeInitFont(void);
 
   Parameters:
 
-    [IN]  wChar - the unicode character to be drawn.
+    [IN]  codepoint - the unicode character to be drawn.
 
     [OUT] lpSurface - the destination surface.
 
@@ -79,7 +79,7 @@ void PAL_DeInitFont(void);
 
 --*/
 void PAL_DrawCharOnSurface(
-    unsigned short wChar,
+    unsigned short codepoint,
     const unsigned short x,
     const unsigned short y,
     const unsigned char bColor,
@@ -92,14 +92,14 @@ void PAL_DrawCharOnSurface(
 
   Parameters:
 
-    [IN]  wChar - the unicode character for width calculation.
+    [IN]  codepoint - the unicode character for width calculation.
 
   Return value:
 
     The width of the character in pixels, 16 for full-width char and 8 for half-width char.
 
 --*/
-unsigned char PAL_CharWidth(unsigned short wChar);
+unsigned char PAL_CharWidth(unsigned short codepoint);
 
 #ifdef __cplusplus
 }
