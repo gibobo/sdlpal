@@ -6,11 +6,13 @@
 #include "mongoose.h"
 #include <math.h>
 
-static unsigned char *send_audio = NULL;
-static unsigned int send_audio_size = 0;
+static unsigned char *audio_package = NULL;
+static unsigned int audio_package_size = 0;
+static void *audio_data = NULL;
+static unsigned int audio_data_size = 0;
 static double duration_sum = 0.0;
 static unsigned long audio_start_tick = 0;
-static const double duration_ms = 1000.0 * (double)PAL_AUDIO_MIX_BUFFER_FRAMES / (double)PAL_AUDIO_OUTPUT_SAMPLE_RATE;
+static const double duration_ms = 1000.0 * (double)PAL_AUDIO_SAMPLES / (double)PAL_AUDIO_OUTPUT_SAMPLE_RATE;
 extern struct mg_connection *ws_conn;
 
 /* Function prototypes */
@@ -19,14 +21,13 @@ void send_audio_config(void);
 
 void send_audio_data(void)
 {
-    int16_t *audio_data = (int16_t *)(send_audio + 1);
-    memset(audio_data, 0, send_audio_size - 1);
-
     if (UTIL_GetMilliseconds() + duration_ms < audio_start_tick + duration_sum)
         return;
 
-    AUDIO_FillBuffer(audio_data, send_audio_size - 1);
-    if (ws_conn == NULL || (size_t)mg_ws_send(ws_conn, send_audio, send_audio_size, WEBSOCKET_OP_BINARY) == (size_t)-1)
+    memset(audio_data, 0, audio_data_size);
+    AUDIO_FillBuffer(audio_data, audio_data_size);
+
+    if (ws_conn == NULL || (size_t)mg_ws_send(ws_conn, audio_package, audio_package_size, WEBSOCKET_OP_BINARY) == (size_t)-1)
     {
         fprintf(stderr, "Failed to send audio data\n");
         duration_sum = 0.0;
@@ -66,17 +67,19 @@ void send_audio_config(void)
 
 int DRIVER_Init_Audio(void)
 {
-    send_audio_size = 1 + PAL_AUDIO_MIX_BUFFER_FRAMES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
-    send_audio = (unsigned char *)UTIL_malloc(send_audio_size);
-    send_audio[0] = 1;
+    audio_data_size = PAL_AUDIO_SAMPLES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
+    audio_package_size = 1 + audio_data_size;
+    audio_package = (unsigned char *)UTIL_malloc(audio_package_size);
+    audio_package[0] = 1;
+    audio_data = (void *)(audio_package + 1);
     return 0;
 }
 
 void DRIVER_DeInit_Audio(void)
 {
-    UTIL_free(send_audio);
-    send_audio = NULL;
-    send_audio_size = 0;
+    UTIL_free(audio_package);
+    audio_package = NULL;
+    audio_package_size = 0;
 }
 
 void DRIVER_Audio_Lock(void) {}

@@ -87,7 +87,8 @@ RIX_FillBuffer(
 
     while (len > 0)
     {
-        int volume, delta_samples = 0, vol_delta = 0;
+        unsigned int volume = PAL_MIX_MAXVOLUME;
+        int delta_samples = 0, vol_delta = 0;
         // fading in or fading out
         switch (pRixPlayer->FadeType)
         {
@@ -193,32 +194,35 @@ RIX_FillBuffer(
             }
 
             unsigned int l = pRixPlayer->buf_max_len - (unsigned int)(pRixPlayer->pos - pRixPlayer->buf);
-            l = min(l, len) / sizeof(short);
+            l = min(l, len) / PAL_AUDIO_BYTES_PER_SAMPLE;
 
             // Put audio data into buffer and adjust volume
             if (pRixPlayer->FadeType != FADE_NONE)
             {
-                short *ptr = (short *)stream;
                 for (unsigned int i = 0; i < l && pRixPlayer->iRemainingFadeSamples > 0; volume += vol_delta)
                 {
                     unsigned int j = 0;
                     for (j = 0; i < l && (int)j < delta_samples; i++, j++)
                     {
-                        *ptr++ = *(short *)pRixPlayer->pos * volume / PAL_MIX_MAXVOLUME;
-                        pRixPlayer->pos += sizeof(short);
+                        if (PAL_AUDIO_BYTES_PER_SAMPLE == 2U)
+                            *(short *)stream = (*(short *)pRixPlayer->pos * volume) / PAL_MIX_MAXVOLUME;
+                        else
+                            *(unsigned char *)stream = (*(unsigned char *)pRixPlayer->pos * volume) / PAL_MIX_MAXVOLUME;
+
+                        pRixPlayer->pos += PAL_AUDIO_BYTES_PER_SAMPLE;
+                        stream += PAL_AUDIO_BYTES_PER_SAMPLE;
+                        len -= PAL_AUDIO_BYTES_PER_SAMPLE;
                     }
                     pRixPlayer->iRemainingFadeSamples -= j;
                 }
                 fContinue = (pRixPlayer->iRemainingFadeSamples > 0);
-                len -= (int)((unsigned char *)ptr - stream);
-                stream = (unsigned char *)ptr;
             }
             else
             {
-                memcpy(stream, pRixPlayer->pos, l * sizeof(short));
-                pRixPlayer->pos += l * sizeof(short);
-                stream += l * sizeof(short);
-                len -= l * sizeof(short);
+                memcpy(stream, pRixPlayer->pos, l * PAL_AUDIO_BYTES_PER_SAMPLE);
+                pRixPlayer->pos += l * PAL_AUDIO_BYTES_PER_SAMPLE;
+                stream += l * PAL_AUDIO_BYTES_PER_SAMPLE;
+                len -= l * PAL_AUDIO_BYTES_PER_SAMPLE;
             }
         }
     }
@@ -338,7 +342,7 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->FillBuffer = RIX_FillBuffer;
     pRixPlayer->Shutdown = RIX_Shutdown;
     pRixPlayer->Play = RIX_Play;
-    pRixPlayer->buf_max_len = ((PAL_AUDIO_OUTPUT_SAMPLE_RATE + PAL_AUDIO_CHUNK_PER_SECOND - 1) / PAL_AUDIO_CHUNK_PER_SECOND) * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * sizeof(short);
+    pRixPlayer->buf_max_len = PAL_AUDIO_SAMPLES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
     pRixPlayer->buf = (unsigned char *)UTIL_malloc(pRixPlayer->buf_max_len);
     Copl_Init(PAL_AUDIO_OUTPUT_SAMPLE_RATE, PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 2);
 

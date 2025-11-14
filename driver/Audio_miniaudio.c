@@ -15,9 +15,10 @@ static void audio_callback(ma_device *pDevice, void *stream, const void *pInput,
 {
     (void)pDevice;
     (void)pInput;
-    unsigned int len = frameCount * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * sizeof(short);
-    memset(stream, 0, len);
-    AUDIO_FillBuffer(stream, len);
+    AUDIO_FillBuffer(
+        stream, 
+        frameCount * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE
+    );
 }
 
 void DRIVER_DeInit_Audio(void)
@@ -33,9 +34,10 @@ int DRIVER_Init_Audio(void)
 {
     ma_device_config deviceConfig;
     deviceConfig = ma_device_config_init(ma_device_type_playback);
-    deviceConfig.playback.format = ma_format_s16;
+    deviceConfig.playback.format = PAL_AUDIO_BYTES_PER_SAMPLE;
     deviceConfig.playback.channels = PAL_AUDIO_OUTPUT_CHANNEL_COUNT;
     deviceConfig.sampleRate = PAL_AUDIO_OUTPUT_SAMPLE_RATE;
+    deviceConfig.periodSizeInFrames = PAL_AUDIO_SAMPLES;
     deviceConfig.dataCallback = audio_callback;
     deviceConfig.pUserData = NULL;
 

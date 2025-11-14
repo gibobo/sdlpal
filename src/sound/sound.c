@@ -701,7 +701,7 @@ static int SOUND_Play(
 {
     SOUNDPLAYER *player = (SOUNDPLAYER *)object;
     WAVESPEC wavespec;
-    ResampleMixer mixer;
+    ResampleMixer mixer = NULL;
     WAVEDATA *cursnd;
     unsigned char *buf = NULL;
     const void *snddata;
@@ -731,16 +731,18 @@ static int SOUND_Play(
         UTIL_free(buf);
         return false;
     }
-
-    if (wavespec.channels == 1 && PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 1)
+#if PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 1U
+    if (wavespec.channels == 1)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Mono : SOUND_ResampleMix_U8_Mono_Mono;
-    else if (wavespec.channels == 1 && PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 2)
-        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
-    else if (wavespec.channels == 2 && PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 1)
+    if (wavespec.channels == 2)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Mono : SOUND_ResampleMix_U8_Stereo_Mono;
-    else if (wavespec.channels == 2 && PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 2)
+#elif PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 2U
+    if (wavespec.channels == 1)
+        mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
+    if (wavespec.channels == 2)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Stereo : SOUND_ResampleMix_U8_Stereo_Stereo;
-    else
+#endif
+    if (mixer == NULL)
     {
         UTIL_free(buf);
         return false;

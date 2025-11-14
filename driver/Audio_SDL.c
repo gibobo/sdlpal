@@ -39,7 +39,7 @@ int DRIVER_Init_Audio(void)
     audio_spec.freq = PAL_AUDIO_OUTPUT_SAMPLE_RATE;
     audio_spec.format = AUDIO_S16SYS;
     audio_spec.channels = PAL_AUDIO_OUTPUT_CHANNEL_COUNT;
-    audio_spec.samples = PAL_AUDIO_MIX_BUFFER_FRAMES;
+    audio_spec.samples = PAL_AUDIO_SAMPLES;
     audio_spec.callback = audio_callback;
     AudioDeviceId = SDL_OpenAudioDevice(NULL, 0, &audio_spec, NULL, 0);
     if (AudioDeviceId == 0)
