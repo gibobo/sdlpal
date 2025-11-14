@@ -75,7 +75,7 @@ void AUDIO_FillBuffer(void *stream, unsigned int len)
     if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer && gAudioDevice.pSoundBuffer)
     {
         // Prevent buffer overflow by limiting the size to the allocated buffer size
-        unsigned int buffer_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
+        unsigned int buffer_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
         unsigned int safe_len = min(len, buffer_size);
         memset(gAudioDevice.pSoundBuffer, PAL_AUDIO_SAMPLE_SILENCE, buffer_size);
         gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, safe_len);
@@ -131,7 +131,7 @@ int AUDIO_Startup(void)
     else
     {
         // Allocate sound buffer
-        gAudioDevice.pSoundBuffer = UTIL_calloc(PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_OUTPUT_CHANNEL_COUNT, PAL_AUDIO_BYTES_PER_SAMPLE);
+        gAudioDevice.pSoundBuffer = UTIL_calloc(PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_CHANNEL_COUNT, PAL_AUDIO_BYTES_PER_SAMPLE);
         if (gAudioDevice.pSoundBuffer == NULL)
         {
             // Sound buffer allocation failed

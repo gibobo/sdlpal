@@ -21,6 +21,7 @@
  */
 
 #include "rix.h"
+#include "../audio.h"
 #include "../resource.h"
 #include "../util.h"
 #include "convertopl.h"
@@ -254,7 +255,7 @@ void int_08h_entry()
         else
         {
             if (band_sus)
-                sustain -= 14; /* aging */
+                sustain -= (int)(1000U / PAL_AUDIO_CHUNK_PER_SECOND); /* aging */
             break;
         }
     }
@@ -403,7 +404,7 @@ void rix_B0_pro(unsigned short ctrl_l, unsigned short index)
 {
     if (ctrl_l >= 11)
         return;
-    int temp = 0;
+    unsigned short temp = 0;
     if (rhythm == 0 || ctrl_l < 6)
         temp = modify[ctrl_l * 2 + 1];
     else
@@ -505,7 +506,7 @@ void ad_C0_reg(unsigned short index)
 /*--------------------------------------------------------------*/
 void ad_40_reg(unsigned short index)
 {
-    unsigned int res = 0;
+    unsigned short res = 0;
     unsigned short data = 0, temp = reg_bufs[index][0];
     data = 0x3F - (0x3F & reg_bufs[index][8]);
     data *= for40reg[index];
@@ -534,7 +535,7 @@ void ad_a0b0_reg(unsigned short index)
 /*--------------------------------------------------------------*/
 void music_ctrl()
 {
-    int i;
+    unsigned short i;
     for (i = 0; i < 11; i++)
         switch_ad_bd(i);
 }

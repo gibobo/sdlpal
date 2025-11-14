@@ -167,7 +167,7 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
     lpSpec->format = (lpFormat->wBitsPerSample == 16);
     lpSpec->freq = lpFormat->nSamplesPerSec;
     lpSpec->size = len;
-    lpSpec->align = (lpFormat->nChannels * lpFormat->wBitsPerSample) >> 3;
+    lpSpec->align = (unsigned char)((lpFormat->nChannels * lpFormat->wBitsPerSample) >> 3);
 
     return lpWaveData;
 }
@@ -590,6 +590,9 @@ static int SOUND_Play(
     unsigned char i;
     unsigned int len;
 
+    (void)fLoop;
+    (void)flFadeTime;
+
     // Check for NULL pointer.
     if (player == NULL)
     {
@@ -613,12 +616,12 @@ static int SOUND_Play(
         UTIL_free(buf);
         return false;
     }
-#if PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 1U
+#if PAL_AUDIO_CHANNEL_COUNT == 1U
     if (wavespec.channels == 1)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Mono : SOUND_ResampleMix_U8_Mono_Mono;
     if (wavespec.channels == 2)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Stereo_Mono : SOUND_ResampleMix_U8_Stereo_Mono;
-#elif PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 2U
+#elif PAL_AUDIO_CHANNEL_COUNT == 2U
     if (wavespec.channels == 1)
         mixer = (wavespec.format) ? SOUND_ResampleMix_S16_Mono_Stereo : SOUND_ResampleMix_U8_Mono_Stereo;
     if (wavespec.channels == 2)
@@ -661,8 +664,8 @@ static int SOUND_Play(
             cursnd->resampler[i] = resampler_create();
         else
             resampler_clear(cursnd->resampler[i]);
-        resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % PAL_AUDIO_OUTPUT_SAMPLE_RATE) == 0 || (PAL_AUDIO_OUTPUT_SAMPLE_RATE % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
-        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)PAL_AUDIO_OUTPUT_SAMPLE_RATE);
+        resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % PAL_AUDIO_SAMPLING_RATE) == 0 || (PAL_AUDIO_SAMPLING_RATE % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
+        resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)PAL_AUDIO_SAMPLING_RATE);
     }
 
     cursnd->base = buf;

@@ -21,19 +21,12 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#define PAL_AUDIO_CHUNK_PER_SECOND (70U)
-#define PAL_AUDIO_BIT_DEPTH        (16U)
-
-#ifdef ARDUINO_ARCH_ESP32
-#define PAL_AUDIO_OUTPUT_CHANNEL_COUNT (1U)
-#define PAL_AUDIO_OUTPUT_SAMPLE_RATE   (22050U)
-#else
-#define PAL_AUDIO_OUTPUT_CHANNEL_COUNT (2U)
-#define PAL_AUDIO_OUTPUT_SAMPLE_RATE   (44100U)
-#endif
-
-#define PAL_AUDIO_SAMPLES_PER_CHUNK ((PAL_AUDIO_CHUNK_PER_SECOND + PAL_AUDIO_OUTPUT_SAMPLE_RATE - 1) / PAL_AUDIO_CHUNK_PER_SECOND)
+#define PAL_AUDIO_CHANNEL_COUNT     (2U)
+#define PAL_AUDIO_SAMPLING_RATE     (44100U)
+#define PAL_AUDIO_CHUNK_PER_SECOND  (100U)
+#define PAL_AUDIO_BIT_DEPTH         (16U)
 #define PAL_AUDIO_BYTES_PER_SAMPLE  (PAL_AUDIO_BIT_DEPTH >> 3)
+#define PAL_AUDIO_SAMPLES_PER_CHUNK ((PAL_AUDIO_CHUNK_PER_SECOND + PAL_AUDIO_SAMPLING_RATE - 1) / PAL_AUDIO_CHUNK_PER_SECOND)
 
 #if PAL_AUDIO_BIT_DEPTH == 8U
 typedef unsigned char PAL_AUDIO_SAMPLE;
@@ -78,11 +71,11 @@ static inline PAL_AUDIO_SAMPLE PAL_AudioMixValueToSample(int value)
 #endif
 }
 
-#define AUDIOPLAYER_COMMONS               \
-    int iMusic;                           \
-    unsigned char fLoop;                  \
-    void (*Shutdown)(void *);             \
-    int (*Play)(void *, int, int, float); \
+#define AUDIOPLAYER_COMMONS                         \
+    int iMusic;                                     \
+    unsigned char fLoop;                            \
+    void (*Shutdown)(void *);                       \
+    int (*Play)(void *, int, unsigned char, float); \
     void (*FillBuffer)(void *, unsigned char *, unsigned int)
 
 typedef struct tagAUDIOPLAYER

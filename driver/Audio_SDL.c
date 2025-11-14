@@ -36,7 +36,7 @@ int DRIVER_Init_Audio(void)
 {
     SDL_AudioSpec audio_spec;
     // Open the audio device.
-    audio_spec.freq = PAL_AUDIO_OUTPUT_SAMPLE_RATE;
+    audio_spec.freq = PAL_AUDIO_SAMPLING_RATE;
 #if PAL_AUDIO_BIT_DEPTH == 8U
     audio_spec.format = AUDIO_U8;
 #elif PAL_AUDIO_BIT_DEPTH == 16U
@@ -44,7 +44,7 @@ int DRIVER_Init_Audio(void)
 #else
 #error Unsupported PAL_AUDIO_BIT_DEPTH for SDL audio backend
 #endif
-    audio_spec.channels = PAL_AUDIO_OUTPUT_CHANNEL_COUNT;
+    audio_spec.channels = PAL_AUDIO_CHANNEL_COUNT;
     audio_spec.samples = PAL_AUDIO_SAMPLES_PER_CHUNK;
     audio_spec.callback = audio_callback;
     audio_spec.silence = (Uint8)(PAL_AUDIO_SAMPLE_SILENCE & 0xFF);

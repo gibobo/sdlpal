@@ -16,9 +16,8 @@ static void audio_callback(ma_device *pDevice, void *stream, const void *pInput,
     (void)pDevice;
     (void)pInput;
     AUDIO_FillBuffer(
-        stream, 
-        frameCount * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE
-    );
+        stream,
+        frameCount * PAL_AUDIO_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE);
 }
 
 void DRIVER_DeInit_Audio(void)
@@ -41,8 +40,8 @@ int DRIVER_Init_Audio(void)
 #else
 #error Unsupported PAL_AUDIO_BIT_DEPTH for miniaudio backend
 #endif
-    deviceConfig.playback.channels = PAL_AUDIO_OUTPUT_CHANNEL_COUNT;
-    deviceConfig.sampleRate = PAL_AUDIO_OUTPUT_SAMPLE_RATE;
+    deviceConfig.playback.channels = PAL_AUDIO_CHANNEL_COUNT;
+    deviceConfig.sampleRate = PAL_AUDIO_SAMPLING_RATE;
     deviceConfig.periodSizeInFrames = PAL_AUDIO_SAMPLES_PER_CHUNK;
     deviceConfig.dataCallback = audio_callback;
     deviceConfig.pUserData = NULL;

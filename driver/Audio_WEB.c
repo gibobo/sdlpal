@@ -12,7 +12,7 @@ static void *audio_data = NULL;
 static unsigned int audio_data_size = 0;
 static double duration_sum = 0.0;
 static unsigned long audio_start_tick = 0;
-static const double duration_ms = 1000.0 * (double)PAL_AUDIO_SAMPLES_PER_CHUNK / (double)PAL_AUDIO_OUTPUT_SAMPLE_RATE;
+static const double duration_ms = 1000.0 * (double)PAL_AUDIO_SAMPLES_PER_CHUNK / (double)PAL_AUDIO_SAMPLING_RATE;
 extern struct mg_connection *ws_conn;
 
 /* Function prototypes */
@@ -44,11 +44,11 @@ void send_audio_data(void)
 void send_audio_config(void)
 {
     uint8_t send_config[] = {
-        3,                                          // Type 3: audio format
-        (PAL_AUDIO_OUTPUT_SAMPLE_RATE >> 8) & 0xFF, // Frequency high byte
-        PAL_AUDIO_OUTPUT_SAMPLE_RATE & 0xFF,        // Frequency low byte
-        PAL_AUDIO_OUTPUT_CHANNEL_COUNT,             // Number of channels (1 byte)
-        PAL_AUDIO_BIT_DEPTH,                        // Bit depth (1 byte)
+        3,                                     // Type 3: audio format
+        (PAL_AUDIO_SAMPLING_RATE >> 8) & 0xFF, // Frequency high byte
+        PAL_AUDIO_SAMPLING_RATE & 0xFF,        // Frequency low byte
+        PAL_AUDIO_CHANNEL_COUNT,               // Number of channels (1 byte)
+        PAL_AUDIO_BIT_DEPTH,                   // Bit depth (1 byte)
     };
 
     if (ws_conn == NULL || (size_t)mg_ws_send(ws_conn, send_config, sizeof(send_config), WEBSOCKET_OP_BINARY) == (size_t)-1)
@@ -58,7 +58,7 @@ void send_audio_config(void)
     else
     {
         fprintf(stdout, "Audio config sent: %d Hz, %d channels, %d bits\n",
-                PAL_AUDIO_OUTPUT_SAMPLE_RATE, PAL_AUDIO_OUTPUT_CHANNEL_COUNT, PAL_AUDIO_BIT_DEPTH);
+                PAL_AUDIO_SAMPLING_RATE, PAL_AUDIO_CHANNEL_COUNT, PAL_AUDIO_BIT_DEPTH);
     }
 
     duration_sum = 0.0;
@@ -67,7 +67,7 @@ void send_audio_config(void)
 
 int DRIVER_Init_Audio(void)
 {
-    audio_data_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
+    audio_data_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
     audio_package_size = 1 + audio_data_size;
     audio_package = (unsigned char *)UTIL_malloc(audio_package_size);
     audio_package[0] = 1;
