@@ -35,6 +35,7 @@
 #define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
 #endif
 #endif
+
 #define PAL_MAX_VOLUME 100
 
 typedef struct tagAUDIODEVICE
@@ -50,17 +51,12 @@ typedef struct tagAUDIODEVICE
 
 static AUDIODEVICE gAudioDevice;
 
-PAL_FORCE_INLINE void AUDIO_MixNative(short *dst, short *src, unsigned int samples)
+PAL_FORCE_INLINE void AUDIO_MixNative(PAL_AUDIO_SAMPLE *dst, const PAL_AUDIO_SAMPLE *src, unsigned int samples)
 {
     while (samples--)
     {
-        int val = *src++ + *dst;
-        if (val > SHRT_MAX)
-            *dst++ = SHRT_MAX;
-        else if (val < SHRT_MIN)
-            *dst++ = SHRT_MIN;
-        else
-            *dst++ = (short)val;
+        int mixed = PAL_AudioSampleToMixValue(*dst) + PAL_AudioSampleToMixValue(*src++);
+        *dst++ = PAL_AudioMixValueToSample(mixed);
     }
 }
 
@@ -79,13 +75,15 @@ void AUDIO_FillBuffer(void *stream, unsigned int len)
     if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer && gAudioDevice.pSoundBuffer)
     {
         // Prevent buffer overflow by limiting the size to the allocated buffer size
-        unsigned int buffer_size = PAL_AUDIO_SAMPLES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
+        unsigned int buffer_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
         unsigned int safe_len = min(len, buffer_size);
-        memset(gAudioDevice.pSoundBuffer, 0, buffer_size);
+        memset(gAudioDevice.pSoundBuffer, PAL_AUDIO_SAMPLE_SILENCE, buffer_size);
         gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, safe_len);
 
         // Mix sound & music
-        AUDIO_MixNative(stream, gAudioDevice.pSoundBuffer, safe_len >> 1);
+        AUDIO_MixNative((PAL_AUDIO_SAMPLE *)stream,
+                        (const PAL_AUDIO_SAMPLE *)gAudioDevice.pSoundBuffer,
+                        safe_len / PAL_AUDIO_BYTES_PER_SAMPLE);
     }
 }
 
@@ -133,7 +131,7 @@ int AUDIO_Startup(void)
     else
     {
         // Allocate sound buffer
-        gAudioDevice.pSoundBuffer = UTIL_calloc(PAL_AUDIO_SAMPLES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT, PAL_AUDIO_BYTES_PER_SAMPLE);
+        gAudioDevice.pSoundBuffer = UTIL_calloc(PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_OUTPUT_CHANNEL_COUNT, PAL_AUDIO_BYTES_PER_SAMPLE);
         if (gAudioDevice.pSoundBuffer == NULL)
         {
             // Sound buffer allocation failed

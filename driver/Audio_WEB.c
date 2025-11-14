@@ -12,7 +12,7 @@ static void *audio_data = NULL;
 static unsigned int audio_data_size = 0;
 static double duration_sum = 0.0;
 static unsigned long audio_start_tick = 0;
-static const double duration_ms = 1000.0 * (double)PAL_AUDIO_SAMPLES / (double)PAL_AUDIO_OUTPUT_SAMPLE_RATE;
+static const double duration_ms = 1000.0 * (double)PAL_AUDIO_SAMPLES_PER_CHUNK / (double)PAL_AUDIO_OUTPUT_SAMPLE_RATE;
 extern struct mg_connection *ws_conn;
 
 /* Function prototypes */
@@ -24,7 +24,7 @@ void send_audio_data(void)
     if (UTIL_GetMilliseconds() + duration_ms < audio_start_tick + duration_sum)
         return;
 
-    memset(audio_data, 0, audio_data_size);
+    memset(audio_data, PAL_AUDIO_SAMPLE_SILENCE, audio_data_size);
     AUDIO_FillBuffer(audio_data, audio_data_size);
 
     if (ws_conn == NULL || (size_t)mg_ws_send(ws_conn, audio_package, audio_package_size, WEBSOCKET_OP_BINARY) == (size_t)-1)
@@ -67,7 +67,7 @@ void send_audio_config(void)
 
 int DRIVER_Init_Audio(void)
 {
-    audio_data_size = PAL_AUDIO_SAMPLES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
+    audio_data_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
     audio_package_size = 1 + audio_data_size;
     audio_package = (unsigned char *)UTIL_malloc(audio_package_size);
     audio_package[0] = 1;

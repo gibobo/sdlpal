@@ -28,12 +28,55 @@
 #define PAL_AUDIO_OUTPUT_CHANNEL_COUNT (1U)
 #define PAL_AUDIO_OUTPUT_SAMPLE_RATE   (22050U)
 #else
-#define PAL_AUDIO_OUTPUT_CHANNEL_COUNT (1U)
+#define PAL_AUDIO_OUTPUT_CHANNEL_COUNT (2U)
 #define PAL_AUDIO_OUTPUT_SAMPLE_RATE   (44100U)
 #endif
 
-#define PAL_AUDIO_SAMPLES          ((PAL_AUDIO_CHUNK_PER_SECOND + PAL_AUDIO_OUTPUT_SAMPLE_RATE - 1) / PAL_AUDIO_CHUNK_PER_SECOND)
-#define PAL_AUDIO_BYTES_PER_SAMPLE (PAL_AUDIO_BIT_DEPTH >> 3)
+#define PAL_AUDIO_SAMPLES_PER_CHUNK ((PAL_AUDIO_CHUNK_PER_SECOND + PAL_AUDIO_OUTPUT_SAMPLE_RATE - 1) / PAL_AUDIO_CHUNK_PER_SECOND)
+#define PAL_AUDIO_BYTES_PER_SAMPLE  (PAL_AUDIO_BIT_DEPTH >> 3)
+
+#if PAL_AUDIO_BIT_DEPTH == 8U
+typedef unsigned char PAL_AUDIO_SAMPLE;
+#define PAL_AUDIO_SAMPLE_MIN    (-128)
+#define PAL_AUDIO_SAMPLE_MAX    (127)
+#define PAL_AUDIO_SAMPLE_OFFSET (128)
+#elif PAL_AUDIO_BIT_DEPTH == 16U
+typedef short PAL_AUDIO_SAMPLE;
+#define PAL_AUDIO_SAMPLE_MIN    (-32768)
+#define PAL_AUDIO_SAMPLE_MAX    (32767)
+#define PAL_AUDIO_SAMPLE_OFFSET (0)
+#else
+#error Unsupported PAL_AUDIO_BIT_DEPTH
+#endif
+#define PAL_AUDIO_SAMPLE_SILENCE (PAL_AUDIO_SAMPLE_OFFSET)
+
+static inline int PAL_AudioSampleToMixValue(PAL_AUDIO_SAMPLE sample)
+{
+#if PAL_AUDIO_BIT_DEPTH == 8U
+    return ((int)sample - PAL_AUDIO_SAMPLE_OFFSET) << 8;
+#else
+    return (int)sample;
+#endif
+}
+
+static inline PAL_AUDIO_SAMPLE PAL_AudioMixValueToSample(int value)
+{
+    if (value > 32767)
+        value = 32767;
+    else if (value < -32768)
+        value = -32768;
+
+#if PAL_AUDIO_BIT_DEPTH == 8U
+    int sample = value >> 8;
+    if (sample > PAL_AUDIO_SAMPLE_MAX)
+        sample = PAL_AUDIO_SAMPLE_MAX;
+    else if (sample < PAL_AUDIO_SAMPLE_MIN)
+        sample = PAL_AUDIO_SAMPLE_MIN;
+    return (PAL_AUDIO_SAMPLE)(sample + PAL_AUDIO_SAMPLE_OFFSET);
+#else
+    return (PAL_AUDIO_SAMPLE)value;
+#endif
+}
 
 #define AUDIOPLAYER_COMMONS               \
     int iMusic;                           \

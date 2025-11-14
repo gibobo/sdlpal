@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
     }
 
     // Run interactive music player
-    PAL_MusicPlayer();
+    // PAL_MusicPlayer();
 
     // Initialize everything
     PAL_Init();

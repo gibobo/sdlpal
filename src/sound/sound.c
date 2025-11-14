@@ -172,6 +172,112 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
     return lpWaveData;
 }
 
+static int SOUND_ResampleMix_Common(
+    void *resampler[2],
+    const void *lpData,
+    const WAVESPEC *lpSpec,
+    void *lpBuffer,
+    unsigned int iBufLen,
+    const void **llpData,
+    bool is16bit,
+    unsigned int input_channels,
+    unsigned int output_channels)
+{
+    const unsigned char *src_u8 = (const unsigned char *)lpData;
+    const short *src_s16 = (const short *)lpData;
+    const void *src_any = lpData;
+    PAL_AUDIO_SAMPLE *dst = (PAL_AUDIO_SAMPLE *)lpBuffer;
+    const unsigned int bytes_per_sample = is16bit ? sizeof(short) : sizeof(unsigned char);
+    const unsigned int bytes_per_frame = input_channels * bytes_per_sample;
+    unsigned int frames = bytes_per_frame ? (lpSpec->size / bytes_per_frame) : 0U;
+    unsigned int channel_len = (output_channels > 0U) ? (iBufLen / output_channels) : 0U;
+    unsigned int total_bytes = 0U;
+
+    while (total_bytes < channel_len && frames > 0U)
+    {
+        unsigned int to_write = resampler_get_free_count(resampler[0]);
+        if (to_write > frames)
+            to_write = frames;
+
+        if (is16bit)
+        {
+            for (unsigned int j = 0; j < to_write; ++j)
+            {
+                resampler_write_sample(resampler[0], *src_s16++);
+                if (input_channels == 2U)
+                    resampler_write_sample(resampler[1], *src_s16++);
+            }
+            src_any = src_s16;
+        }
+        else
+        {
+            for (unsigned int j = 0; j < to_write; ++j)
+            {
+                resampler_write_sample(resampler[0], (*src_u8++ ^ 0x80) << 8);
+                if (input_channels == 2U)
+                    resampler_write_sample(resampler[1], (*src_u8++ ^ 0x80) << 8);
+            }
+            src_any = src_u8;
+        }
+
+        frames -= to_write;
+
+        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
+        {
+            if (output_channels == 1U)
+            {
+                int mixed;
+                if (input_channels == 1U)
+                {
+                    int sample = resampler_get_sample(resampler[0]) >> 8;
+                    mixed = PAL_AudioSampleToMixValue(*dst) + sample;
+                    resampler_remove_sample(resampler[0]);
+                }
+                else
+                {
+                    int left = resampler_get_sample(resampler[0]) >> 8;
+                    int right = resampler_get_sample(resampler[1]) >> 8;
+                    mixed = PAL_AudioSampleToMixValue(*dst) + ((left + right) >> 1);
+                    resampler_remove_sample(resampler[0]);
+                    resampler_remove_sample(resampler[1]);
+                }
+                *dst++ = PAL_AudioMixValueToSample(mixed);
+                total_bytes += PAL_AUDIO_BYTES_PER_SAMPLE;
+            }
+            else
+            {
+                int left_sample = resampler_get_sample(resampler[0]) >> 8;
+                int mixed_left = PAL_AudioSampleToMixValue(dst[0]) + left_sample;
+                PAL_AUDIO_SAMPLE output_left = PAL_AudioMixValueToSample(mixed_left);
+
+                if (input_channels == 1U)
+                {
+                    dst[0] = output_left;
+                    dst[1] = output_left;
+                    resampler_remove_sample(resampler[0]);
+                }
+                else
+                {
+                    int right_sample = resampler_get_sample(resampler[1]) >> 8;
+                    int mixed_right = PAL_AudioSampleToMixValue(dst[1]) + right_sample;
+                    dst[0] = output_left;
+                    dst[1] = PAL_AudioMixValueToSample(mixed_right);
+                    resampler_remove_sample(resampler[0]);
+                    resampler_remove_sample(resampler[1]);
+                }
+
+                dst += 2;
+                total_bytes += PAL_AUDIO_BYTES_PER_SAMPLE;
+            }
+        }
+    }
+
+    if (llpData)
+        *llpData = src_any;
+
+    return total_bytes;
+}
+
 static int SOUND_ResampleMix_U8_Mono_Mono(
     void *resampler[2],
     const void *lpData,
@@ -204,32 +310,7 @@ static int SOUND_ResampleMix_U8_Mono_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-    unsigned int src_samples = lpSpec->size;
-    const unsigned char *src = (const unsigned char *)lpData;
-    short *dst = (short *)lpBuffer;
-    unsigned int channel_len = iBufLen;
-    unsigned int total_bytes = 0;
-
-    while (total_bytes < channel_len && src_samples > 0)
-    {
-        unsigned int j, to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-            resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
-        {
-            int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-        }
-    }
-
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+    return SOUND_ResampleMix_Common(resampler, lpData, lpSpec, lpBuffer, iBufLen, llpData, false, 1U, 1U);
 }
 
 static int SOUND_ResampleMix_U8_Mono_Stereo(
@@ -264,33 +345,7 @@ static int SOUND_ResampleMix_U8_Mono_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-    unsigned int src_samples = lpSpec->size;
-    const unsigned char *src = (const unsigned char *)lpData;
-    short *dst = (short *)lpBuffer;
-    unsigned int channel_len = iBufLen >> 1;
-    unsigned int total_bytes = 0;
-
-    while (total_bytes < channel_len && src_samples > 0)
-    {
-        unsigned int j, to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-            resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
-        {
-            int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            dst[0] = dst[1] = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            dst += 2;
-            resampler_remove_sample(resampler[0]);
-        }
-    }
-
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+    return SOUND_ResampleMix_Common(resampler, lpData, lpSpec, lpBuffer, iBufLen, llpData, false, 1U, 2U);
 }
 
 static int SOUND_ResampleMix_U8_Stereo_Mono(
@@ -325,36 +380,7 @@ static int SOUND_ResampleMix_U8_Stereo_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-    unsigned int src_samples = lpSpec->size >> 1;
-    const unsigned char *src = (const unsigned char *)lpData;
-    short *dst = (short *)lpBuffer;
-    unsigned int channel_len = iBufLen;
-    unsigned int total_bytes = 0;
-
-    while (total_bytes < channel_len && src_samples > 0)
-    {
-        unsigned int j, to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-        {
-            resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
-            resampler_write_sample(resampler[1], (*src++ ^ 0x80) << 8);
-        }
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
-        {
-            int sample = (((resampler_get_sample(resampler[0]) >> 8) + (resampler_get_sample(resampler[1]) >> 8)) >> 1) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-            resampler_remove_sample(resampler[1]);
-        }
-    }
-
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+    return SOUND_ResampleMix_Common(resampler, lpData, lpSpec, lpBuffer, iBufLen, llpData, false, 2U, 1U);
 }
 
 static int SOUND_ResampleMix_U8_Stereo_Stereo(
@@ -389,39 +415,7 @@ static int SOUND_ResampleMix_U8_Stereo_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-    unsigned int src_samples = lpSpec->size >> 1;
-    const unsigned char *src = (const unsigned char *)lpData;
-    short *dst = (short *)lpBuffer;
-    unsigned int channel_len = iBufLen >> 1;
-    unsigned int total_bytes = 0;
-
-    while (total_bytes < channel_len && src_samples > 0)
-    {
-        unsigned int j, to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-        {
-            resampler_write_sample(resampler[0], (*src++ ^ 0x80) << 8);
-            resampler_write_sample(resampler[1], (*src++ ^ 0x80) << 8);
-        }
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
-        {
-            int sample;
-            sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            sample = (resampler_get_sample(resampler[1]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-            resampler_remove_sample(resampler[1]);
-        }
-    }
-
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+    return SOUND_ResampleMix_Common(resampler, lpData, lpSpec, lpBuffer, iBufLen, llpData, false, 2U, 2U);
 }
 
 static int SOUND_ResampleMix_S16_Mono_Mono(
@@ -456,32 +450,7 @@ static int SOUND_ResampleMix_S16_Mono_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-    unsigned int src_samples = lpSpec->size >> 1;
-    const short *src = (const short *)lpData;
-    short *dst = (short *)lpBuffer;
-    unsigned int channel_len = iBufLen;
-    unsigned int total_bytes = 0;
-
-    while (total_bytes < channel_len && src_samples > 0)
-    {
-        unsigned int j, to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-            resampler_write_sample(resampler[0], *src++);
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
-        {
-            int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-        }
-    }
-
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+    return SOUND_ResampleMix_Common(resampler, lpData, lpSpec, lpBuffer, iBufLen, llpData, true, 1U, 1U);
 }
 
 static int SOUND_ResampleMix_S16_Mono_Stereo(
@@ -516,33 +485,7 @@ static int SOUND_ResampleMix_S16_Mono_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-    unsigned int src_samples = lpSpec->size >> 1;
-    const short *src = (const short *)lpData;
-    short *dst = (short *)lpBuffer;
-    unsigned int channel_len = iBufLen >> 1;
-    unsigned int total_bytes = 0;
-
-    while (total_bytes < channel_len && src_samples > 0)
-    {
-        unsigned int j, to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-            resampler_write_sample(resampler[0], *src++);
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
-        {
-            int sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            dst[0] = dst[1] = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            dst += 2;
-            resampler_remove_sample(resampler[0]);
-        }
-    }
-
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+    return SOUND_ResampleMix_Common(resampler, lpData, lpSpec, lpBuffer, iBufLen, llpData, true, 1U, 2U);
 }
 
 static int SOUND_ResampleMix_S16_Stereo_Mono(
@@ -577,36 +520,7 @@ static int SOUND_ResampleMix_S16_Stereo_Mono(
     The number of output buffer used, in bytes.
 --*/
 {
-    unsigned int src_samples = lpSpec->size >> 2;
-    const short *src = (const short *)lpData;
-    short *dst = (short *)lpBuffer;
-    unsigned int channel_len = iBufLen;
-    unsigned int total_bytes = 0;
-
-    while (total_bytes < channel_len && src_samples > 0)
-    {
-        unsigned int j, to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-        {
-            resampler_write_sample(resampler[0], *src++);
-            resampler_write_sample(resampler[1], *src++);
-        }
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
-        {
-            int sample = (((resampler_get_sample(resampler[0]) >> 8) + (resampler_get_sample(resampler[1]) >> 8)) >> 1) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-            resampler_remove_sample(resampler[1]);
-        }
-    }
-
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+    return SOUND_ResampleMix_Common(resampler, lpData, lpSpec, lpBuffer, iBufLen, llpData, true, 2U, 1U);
 }
 
 static int SOUND_ResampleMix_S16_Stereo_Stereo(
@@ -641,39 +555,7 @@ static int SOUND_ResampleMix_S16_Stereo_Stereo(
     The number of output buffer used, in bytes.
 --*/
 {
-    unsigned int src_samples = lpSpec->size >> 2;
-    const short *src = (const short *)lpData;
-    short *dst = (short *)lpBuffer;
-    unsigned int channel_len = iBufLen >> 1;
-    unsigned int total_bytes = 0;
-
-    while (total_bytes < channel_len && src_samples > 0)
-    {
-        unsigned int j, to_write = resampler_get_free_count(resampler[0]);
-        if (to_write > src_samples)
-            to_write = src_samples;
-        for (j = 0; j < to_write; j++)
-        {
-            resampler_write_sample(resampler[0], *src++);
-            resampler_write_sample(resampler[1], *src++);
-        }
-        src_samples -= to_write;
-        while (total_bytes < channel_len && resampler_get_sample_count(resampler[0]) > 0)
-        {
-            int sample;
-            sample = (resampler_get_sample(resampler[0]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            sample = (resampler_get_sample(resampler[1]) >> 8) + *dst;
-            *dst++ = (sample <= 32767) ? ((sample >= -32768) ? sample : -32768) : 32767;
-            total_bytes += sizeof(short);
-            resampler_remove_sample(resampler[0]);
-            resampler_remove_sample(resampler[1]);
-        }
-    }
-
-    if (llpData)
-        *llpData = src;
-    return total_bytes;
+    return SOUND_ResampleMix_Common(resampler, lpData, lpSpec, lpBuffer, iBufLen, llpData, true, 2U, 2U);
 }
 
 static int SOUND_Play(

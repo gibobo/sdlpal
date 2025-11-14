@@ -28,7 +28,7 @@ static void SDLCALL audio_callback(void *udata, unsigned char *stream, int len)
 --*/
 {
     (void)udata;
-    memset(stream, 0, (size_t)len);
+    memset(stream, PAL_AUDIO_SAMPLE_SILENCE, (size_t)len);
     AUDIO_FillBuffer(stream, (unsigned int)len);
 }
 
@@ -37,10 +37,17 @@ int DRIVER_Init_Audio(void)
     SDL_AudioSpec audio_spec;
     // Open the audio device.
     audio_spec.freq = PAL_AUDIO_OUTPUT_SAMPLE_RATE;
+#if PAL_AUDIO_BIT_DEPTH == 8U
+    audio_spec.format = AUDIO_U8;
+#elif PAL_AUDIO_BIT_DEPTH == 16U
     audio_spec.format = AUDIO_S16SYS;
+#else
+#error Unsupported PAL_AUDIO_BIT_DEPTH for SDL audio backend
+#endif
     audio_spec.channels = PAL_AUDIO_OUTPUT_CHANNEL_COUNT;
-    audio_spec.samples = PAL_AUDIO_SAMPLES;
+    audio_spec.samples = PAL_AUDIO_SAMPLES_PER_CHUNK;
     audio_spec.callback = audio_callback;
+    audio_spec.silence = (Uint8)(PAL_AUDIO_SAMPLE_SILENCE & 0xFF);
     AudioDeviceId = SDL_OpenAudioDevice(NULL, 0, &audio_spec, NULL, 0);
     if (AudioDeviceId == 0)
         return -3; // Failed

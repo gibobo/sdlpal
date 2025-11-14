@@ -39,9 +39,9 @@ typedef enum tagFade_Types
 typedef struct tagRIXPLAYER
 {
     AUDIOPLAYER_COMMONS;
-    unsigned char *buf;
-    unsigned int buf_max_len;
-    unsigned char *pos;
+    short *buf;
+    unsigned int buf_max_samples;
+    short *pos;
     int iNextMusic; // the next music number to switch to
     unsigned long dwStartFadeTime;
     int iTotalFadeOutSamples;
@@ -161,7 +161,7 @@ RIX_FillBuffer(
         char fContinue = true;
         while (len > 0 && fContinue)
         {
-            if (pRixPlayer->pos == NULL || (unsigned int)(pRixPlayer->pos - pRixPlayer->buf) >= pRixPlayer->buf_max_len)
+            if (pRixPlayer->pos == NULL || (unsigned int)(pRixPlayer->pos - pRixPlayer->buf) >= pRixPlayer->buf_max_samples)
             {
                 pRixPlayer->pos = pRixPlayer->buf;
                 if (!CrixPlayer_update())
@@ -190,38 +190,41 @@ RIX_FillBuffer(
                     }
                 }
 
-                Copl_Generate((short *)pRixPlayer->buf, PAL_AUDIO_OUTPUT_SAMPLE_RATE / PAL_AUDIO_CHUNK_PER_SECOND);
+                Copl_Generate(pRixPlayer->buf, PAL_AUDIO_OUTPUT_SAMPLE_RATE / PAL_AUDIO_CHUNK_PER_SECOND);
             }
 
-            unsigned int l = pRixPlayer->buf_max_len - (unsigned int)(pRixPlayer->pos - pRixPlayer->buf);
-            l = min(l, len) / PAL_AUDIO_BYTES_PER_SAMPLE;
+            unsigned int available_samples = pRixPlayer->buf_max_samples - (unsigned int)(pRixPlayer->pos - pRixPlayer->buf);
+            unsigned int max_output_samples = len / PAL_AUDIO_BYTES_PER_SAMPLE;
+            unsigned int l = min(available_samples, max_output_samples);
 
             // Put audio data into buffer and adjust volume
             if (pRixPlayer->FadeType != FADE_NONE)
             {
+                PAL_AUDIO_SAMPLE *dst = (PAL_AUDIO_SAMPLE *)stream;
+                unsigned int processed = 0;
+
                 for (unsigned int i = 0; i < l && pRixPlayer->iRemainingFadeSamples > 0; volume += vol_delta)
                 {
                     unsigned int j = 0;
                     for (j = 0; i < l && (int)j < delta_samples; i++, j++)
                     {
-                        if (PAL_AUDIO_BYTES_PER_SAMPLE == 2U)
-                            *(short *)stream = (*(short *)pRixPlayer->pos * volume) / PAL_MIX_MAXVOLUME;
-                        else
-                            *(unsigned char *)stream = (*(unsigned char *)pRixPlayer->pos * volume) / PAL_MIX_MAXVOLUME;
-
-                        pRixPlayer->pos += PAL_AUDIO_BYTES_PER_SAMPLE;
-                        stream += PAL_AUDIO_BYTES_PER_SAMPLE;
+                        int sample = (*pRixPlayer->pos++ * (int)volume) / (int)PAL_MIX_MAXVOLUME;
+                        dst[processed++] = PAL_AudioMixValueToSample(sample);
                         len -= PAL_AUDIO_BYTES_PER_SAMPLE;
                     }
                     pRixPlayer->iRemainingFadeSamples -= j;
                 }
+                stream = (unsigned char *)(dst + processed);
                 fContinue = (pRixPlayer->iRemainingFadeSamples > 0);
             }
             else
             {
-                memcpy(stream, pRixPlayer->pos, l * PAL_AUDIO_BYTES_PER_SAMPLE);
-                pRixPlayer->pos += l * PAL_AUDIO_BYTES_PER_SAMPLE;
-                stream += l * PAL_AUDIO_BYTES_PER_SAMPLE;
+                PAL_AUDIO_SAMPLE *dst = (PAL_AUDIO_SAMPLE *)stream;
+                for (unsigned int i = 0; i < l; ++i)
+                {
+                    dst[i] = PAL_AudioMixValueToSample(*pRixPlayer->pos++);
+                }
+                stream = (unsigned char *)(dst + l);
                 len -= l * PAL_AUDIO_BYTES_PER_SAMPLE;
             }
         }
@@ -342,8 +345,8 @@ AUDIOPLAYER *RIX_Init(void)
     pRixPlayer->FillBuffer = RIX_FillBuffer;
     pRixPlayer->Shutdown = RIX_Shutdown;
     pRixPlayer->Play = RIX_Play;
-    pRixPlayer->buf_max_len = PAL_AUDIO_SAMPLES * PAL_AUDIO_OUTPUT_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
-    pRixPlayer->buf = (unsigned char *)UTIL_malloc(pRixPlayer->buf_max_len);
+    pRixPlayer->buf_max_samples = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_OUTPUT_CHANNEL_COUNT;
+    pRixPlayer->buf = (short *)UTIL_malloc(pRixPlayer->buf_max_samples * sizeof(short));
     Copl_Init(PAL_AUDIO_OUTPUT_SAMPLE_RATE, PAL_AUDIO_OUTPUT_CHANNEL_COUNT == 2);
 
     // Load the MKF file.

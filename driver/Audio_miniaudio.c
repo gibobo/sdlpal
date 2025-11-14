@@ -34,10 +34,16 @@ int DRIVER_Init_Audio(void)
 {
     ma_device_config deviceConfig;
     deviceConfig = ma_device_config_init(ma_device_type_playback);
-    deviceConfig.playback.format = PAL_AUDIO_BYTES_PER_SAMPLE;
+#if PAL_AUDIO_BIT_DEPTH == 8U
+    deviceConfig.playback.format = ma_format_u8;
+#elif PAL_AUDIO_BIT_DEPTH == 16U
+    deviceConfig.playback.format = ma_format_s16;
+#else
+#error Unsupported PAL_AUDIO_BIT_DEPTH for miniaudio backend
+#endif
     deviceConfig.playback.channels = PAL_AUDIO_OUTPUT_CHANNEL_COUNT;
     deviceConfig.sampleRate = PAL_AUDIO_OUTPUT_SAMPLE_RATE;
-    deviceConfig.periodSizeInFrames = PAL_AUDIO_SAMPLES;
+    deviceConfig.periodSizeInFrames = PAL_AUDIO_SAMPLES_PER_CHUNK;
     deviceConfig.dataCallback = audio_callback;
     deviceConfig.pUserData = NULL;
 
