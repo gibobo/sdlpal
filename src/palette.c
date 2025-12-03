@@ -147,7 +147,7 @@ void PAL_FadeOut(int iDelay)
 
     memset(new_palette, 0, sizeof(new_palette));
     DRIVER_UpdatePalette(new_palette);
-    // VIDEO_UpdateScreen(NULL);
+    VIDEO_UpdateScreen(NULL);
 }
 
 void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay)

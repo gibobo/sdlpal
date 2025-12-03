@@ -61,7 +61,12 @@ int PAL_InitUI(
     //
     // Load the UI sprite.
     //
-    RES_MKFDecompressChunk(&gpSpriteUI, 0, CHUNKNUM_SPRITEUI, Res_DATA);
+    int iSize = RES_MKFGetChunkSize(CHUNKNUM_SPRITEUI, Res_DATA);
+    if (iSize > 0)
+    {
+        gpSpriteUI = (unsigned char *)UTIL_calloc(1, iSize);
+        RES_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, Res_DATA);
+    }
     return (gpSpriteUI != NULL) ? 0 : -1;
 }
 

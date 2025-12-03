@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
+// #define USING_RESOURCE_CACHE
+
 static const char *g_ResourceFilePaths[Res_Count] = {
     [Res_ABC] = "abc.mkf",
     [Res_BALL] = "ball.mkf",
@@ -23,6 +25,7 @@ static const char *g_ResourceFilePaths[Res_Count] = {
     [Res_SSS] = "sss.mkf",
 };
 
+#ifdef USING_RESOURCE_CACHE
 typedef struct
 {
     unsigned int data_offset;
@@ -42,7 +45,11 @@ static unsigned int resource_offsets[Res_Count + 1] = {0};
    defined object with zero-initialized contents to avoid multiple-definition
    or uninitialized-data issues across builds. */
 static ResourceIndex g_CachedResourceIndex[Res_Count] = {0};
+#else
+static FILE *g_ResourceFileHandles[Res_Count] = {0};
+#endif
 
+#ifdef USING_RESOURCE_CACHE
 static void PAL_ExtractAndDecompressMKFChunks(PALRES res)
 {
     FILE *fp = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
@@ -134,10 +141,10 @@ static void PAL_ExtractRNGAnimationFrames(PALRES res)
             }
             unsigned int rng_size = *(unsigned int *)buf;
             unsigned char *rng = (unsigned char *)UTIL_malloc(rng_size);
-            unsigned int RNGBlit_len = YJ2_Decompress(buf, rng, rng_size);
-            fwrite(rng, sizeof(char), RNGBlit_len, fpRes);
+            YJ2_Decompress(buf, rng, rng_size);
+            fwrite(rng, sizeof(char), rng_size, fpRes);
             fwrite(&offset, sizeof(unsigned int), 1, fpInfo);
-            fwrite(&RNGBlit_len, sizeof(unsigned int), 1, fpInfo);
+            fwrite(&rng_size, sizeof(unsigned int), 1, fpInfo);
             offset += rng_size;
             UTIL_free(rng);
             UTIL_free(buf);
@@ -152,9 +159,11 @@ static void PAL_ExtractRNGAnimationFrames(PALRES res)
     UTIL_fclose(fpRes);
     UTIL_fclose(fpInfo);
 }
+#endif
 
 void PAL_ConsolidateExtractedResources(void)
 {
+#ifdef USING_RESOURCE_CACHE
     PAL_ExtractAndDecompressMKFChunks(Res_ABC);
     PAL_ExtractRawMKFChunks(Res_BALL);
     PAL_ExtractRawMKFChunks(Res_DATA);
@@ -207,10 +216,12 @@ void PAL_ConsolidateExtractedResources(void)
     }
     UTIL_fclose(fpRes_out);
     UTIL_fclose(fpInfo_out);
+#endif
 }
 
 int PAL_LoadConsolidatedResources(void)
 {
+#ifdef USING_RESOURCE_CACHE
     FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/resource.dat", CACHES_PATH), "rb");
     if (!fpInfo)
     {
@@ -328,11 +339,18 @@ int PAL_LoadConsolidatedResources(void)
     }
 
     UTIL_free(buffer_u32);
+#else
+    for (PALRES res = 0; res < Res_Count; res++)
+    {
+        g_ResourceFileHandles[res] = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
+    }
+#endif
     return 0; // Success
 }
 
 void PAL_FreeResourceIndex(void)
 {
+#ifdef USING_RESOURCE_CACHE
     for (PALRES res = 0; res < Res_Count; res++)
     {
         for (unsigned int i = 0; i < g_CachedResourceIndex[res].chunk_count; i++)
@@ -345,30 +363,53 @@ void PAL_FreeResourceIndex(void)
         g_CachedResourceIndex[res].frame_count = NULL;
         g_CachedResourceIndex[res].resource_file_info = NULL;
     }
+#else
+    for (PALRES res = 0; res < Res_Count; res++)
+    {
+        if (g_ResourceFileHandles[res] != NULL)
+        {
+            UTIL_fclose(g_ResourceFileHandles[res]);
+            g_ResourceFileHandles[res] = NULL;
+        }
+    }
+#endif
 }
 
-unsigned short RES_MKFGetChunkCount(
+unsigned int RES_MKFGetChunkCount(
     unsigned char resource_id)
 {
-    return (resource_id >= Res_Count) ? 0 : g_CachedResourceIndex[resource_id].chunk_count;
+    if (resource_id >= Res_Count)
+        return 0;
+#ifdef USING_RESOURCE_CACHE
+    return g_CachedResourceIndex[resource_id].chunk_count;
+#else
+    return PAL_MKFGetChunkCount(g_ResourceFileHandles[resource_id]);
+#endif
 }
 
 unsigned int RES_MKFGetChunkSize(
     unsigned int chunk_index,
     unsigned char resource_id)
 {
+#ifdef USING_RESOURCE_CACHE
     if (chunk_index >= g_CachedResourceIndex[resource_id].chunk_count)
         return 0;
 
     return g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
+#else
+    if (resource_id >= Res_Count || g_ResourceFileHandles[resource_id] == NULL)
+        return 0;
+    return PAL_MKFGetChunkSize(chunk_index, g_ResourceFileHandles[resource_id]);
+#endif
 }
 
-int RES_ReadAnimationFrame(
+int RES_RNGReadFrame(
     void **frame_buffer,
     unsigned int animation_index,
     unsigned int frame_index,
     unsigned char resource_id)
 {
+#ifdef USING_RESOURCE_CACHE
     static void *fpRes = NULL;
     static unsigned int p_data_length = 0;
     unsigned int data_length = g_CachedResourceIndex[resource_id].resource_file_info[animation_index][frame_index].data_length;
@@ -407,6 +448,27 @@ int RES_ReadAnimationFrame(
     UTIL_fread(*frame_buffer, 1, data_length, fpRes);
 
     return data_length;
+#else
+    if (resource_id >= Res_Count || g_ResourceFileHandles[resource_id] == NULL)
+        return 0;
+
+    unsigned char *buf = NULL;
+    int buf_size = PAL_RNGReadFrame(&buf, animation_index, frame_index, g_ResourceFileHandles[resource_id]);
+    if (buf_size < 0 || buf == NULL)
+        return 0;
+
+    UTIL_free(*frame_buffer);
+    unsigned int rng_size = *(unsigned int *)buf;
+    *frame_buffer = (unsigned char *)UTIL_malloc(rng_size);
+    if (!YJ2_Decompress(buf, *frame_buffer, rng_size))
+    {
+        UTIL_free(*frame_buffer);
+        *frame_buffer = NULL;
+        rng_size = 0;
+    }
+    UTIL_free(buf);
+    return rng_size;
+#endif
 }
 
 unsigned int RES_MKFDecompressChunk(
@@ -415,6 +477,7 @@ unsigned int RES_MKFDecompressChunk(
     unsigned int chunk_index,
     unsigned char resource_id)
 {
+#ifdef USING_RESOURCE_CACHE
     // Validate chunk index
     if (resource_id >= Res_Count || g_CachedResourceIndex[resource_id].chunk_count <= chunk_index)
         return 0;
@@ -441,6 +504,15 @@ unsigned int RES_MKFDecompressChunk(
         data_length,
         chunk_index,
         resource_id);
+#else
+    if (resource_id >= Res_Count || g_ResourceFileHandles[resource_id] == NULL)
+        return 0;
+    return PAL_MKFDecompressChunk(
+        (unsigned char **)chunk_buffer,
+        buffer_size,
+        chunk_index,
+        g_ResourceFileHandles[resource_id]);
+#endif
 }
 
 unsigned int RES_MKFReadChunk(
@@ -449,6 +521,7 @@ unsigned int RES_MKFReadChunk(
     unsigned int chunk_index,
     unsigned char resource_id)
 {
+#ifdef USING_RESOURCE_CACHE
     // Validate chunk index
     if (resource_id >= Res_Count || g_CachedResourceIndex[resource_id].chunk_count <= chunk_index)
         return 0;
@@ -468,4 +541,13 @@ unsigned int RES_MKFReadChunk(
     UTIL_fclose(fpRes);
 
     return data_length;
+#else
+    if (resource_id >= Res_Count || g_ResourceFileHandles[resource_id] == NULL)
+        return 0;
+    return PAL_MKFReadChunk(
+        chunk_buffer,
+        buffer_size,
+        chunk_index,
+        g_ResourceFileHandles[resource_id]);
+#endif
 }

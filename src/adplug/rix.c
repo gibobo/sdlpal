@@ -155,7 +155,12 @@ void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit)
         UTIL_free(rix_buf);
         rix_buf = NULL;
         subsong_id = subsong;
-        length = RES_MKFDecompressChunk(&rix_buf, 0, subsong_id, Res_MUS);
+        length = RES_MKFGetChunkSize(subsong, Res_MUS);
+        if (length > 0)
+        {
+            rix_buf = (unsigned char *)UTIL_calloc(length, sizeof(unsigned char));
+            RES_MKFReadChunk(rix_buf, length, subsong, Res_MUS);
+        }
     }
 
     if (reinit)

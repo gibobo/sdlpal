@@ -71,26 +71,26 @@ unsigned char *PAL_SpriteGetFrame(
 
 unsigned int PAL_MKFGetChunkCount(void *fp);
 
-int PAL_MKFGetChunkSize(
+unsigned int PAL_MKFGetChunkSize(
     unsigned int uiChunkNum,
     void *fp);
 
-int PAL_MKFReadChunk(
+unsigned int PAL_MKFReadChunk(
     void *lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
     void *fp);
 
-int PAL_MKFDecompressChunk(
+unsigned int PAL_MKFDecompressChunk(
     unsigned char **lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
     void *fp);
 
 // From yj1.c:
-int YJ2_Decompress(
+unsigned char YJ2_Decompress(
     const void *Source,
     void *Destination,
-    int DestSize);
+    unsigned int DestSize);
 
 #endif // _PALUTILS_H

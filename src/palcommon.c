@@ -26,7 +26,7 @@
 
 #define Check_fread(buf, elem, num, fp)                 \
     if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
-    return -1
+    return 0
 
 int PAL_RLEBlitToSurface(
     const unsigned char *lpBitmapRLE,
@@ -806,18 +806,16 @@ unsigned int PAL_MKFGetChunkCount(void *fp)
 --*/
 {
     unsigned int iNumChunk = 0;
-    unsigned int read_len = 0;
     if (fp)
     {
         UTIL_fseek(fp, 0, SEEK_SET);
-        read_len = UTIL_fread(&iNumChunk, sizeof(iNumChunk), 1, fp);
-        if (read_len == 1)
+        if (UTIL_fread(&iNumChunk, sizeof(unsigned int), 1, fp) == 1)
             return (iNumChunk >> 2) - 1;
     }
     return 0;
 }
 
-int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
+unsigned int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
 /*++
   Purpose:
 
@@ -840,12 +838,14 @@ int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
     unsigned int uiNextOffset = 0;
     unsigned int uiChunkCount = 0;
 
+    if (fp == NULL)
+        return 0;
     //
     // Get the total number of chunks.
     //
     uiChunkCount = PAL_MKFGetChunkCount(fp);
     if (uiChunkNum >= uiChunkCount)
-        return -1;
+        return 0;
 
     //
     // Get the offset of the specified chunk and the next chunk.
@@ -854,6 +854,8 @@ int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
     Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
     Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
+    if (uiOffset > uiNextOffset)
+        return 0;
     //
     // Return the length of the chunk.
     //
@@ -861,7 +863,7 @@ int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
 }
 
 //TO DO
-int PAL_MKFReadChunk(
+unsigned int PAL_MKFReadChunk(
     void *lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
@@ -895,14 +897,14 @@ int PAL_MKFReadChunk(
     unsigned int uiChunkLen;
 
     if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0)
-        return -1;
+        return 0;
 
     //
     // Get the total number of chunks.
     //
     uiChunkCount = PAL_MKFGetChunkCount(fp);
     if (uiChunkNum >= uiChunkCount)
-        return -1;
+        return 0;
 
     // Get the offset of the chunk.
     UTIL_fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
@@ -910,19 +912,19 @@ int PAL_MKFReadChunk(
     Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
 
     if (uiOffset > uiNextOffset)
-        return -2;
+        return 0;
 
     // Get the length of the chunk.
     uiChunkLen = uiNextOffset - uiOffset;
 
     if (uiChunkLen > uiBufferSize)
-        return -3;
+        return 0;
 
     UTIL_fseek(fp, uiOffset, SEEK_SET);
     return (int)UTIL_fread(lpBuffer, 1, uiChunkLen, fp);
 }
 
-int PAL_MKFDecompressChunk(
+unsigned int PAL_MKFDecompressChunk(
     unsigned char **lpBuffer,
     unsigned int uiBufferSize,
     unsigned int uiChunkNum,
@@ -950,7 +952,7 @@ int PAL_MKFDecompressChunk(
 
 --*/
 {
-    int len = PAL_MKFGetChunkSize(uiChunkNum, fp);
+    unsigned int len = PAL_MKFGetChunkSize(uiChunkNum, fp);
 
     if (len > 0)
     {
@@ -965,7 +967,7 @@ int PAL_MKFDecompressChunk(
             *lpBuffer = UTIL_malloc(uiBufferSize);
         }
 
-        len = YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
+        YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
         UTIL_free(buf);
     }
 

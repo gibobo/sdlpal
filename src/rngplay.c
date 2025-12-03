@@ -306,7 +306,7 @@ void PAL_RNGPlay(
 
     while (iStartFrame != iEndFrame)
     {
-        int RNGBlit_len = RES_ReadAnimationFrame(&rng, iNumRNG, iStartFrame++, Res_RNG);
+        int RNGBlit_len = RES_RNGReadFrame(&rng, iNumRNG, iStartFrame++, Res_RNG);
         if (RNGBlit_len <= 0)
             break; // Failed to get the frame, don't go further
         if (PAL_RNGBlitToSurface(rng, RNGBlit_len, gpScreen->pixels) < 0)

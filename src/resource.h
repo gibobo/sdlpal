@@ -35,7 +35,7 @@ int PAL_LoadConsolidatedResources(void);
 void PAL_FreeResourceIndex(void);
 
 // Get the number of chunks in a resource file
-unsigned short RES_MKFGetChunkCount(
+unsigned int RES_MKFGetChunkCount(
     unsigned char resource_id);
 
 // Get the size of a specific chunk in a resource file
@@ -44,7 +44,7 @@ unsigned int RES_MKFGetChunkSize(
     unsigned char resource_id);
 
 // Reads an animation frame into a buffer
-int RES_ReadAnimationFrame(
+int RES_RNGReadFrame(
     void **frame_buffer,
     unsigned int animation_index,
     unsigned int frame_index,

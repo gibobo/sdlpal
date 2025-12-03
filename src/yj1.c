@@ -105,9 +105,10 @@ static void yj2_adjust_tree(YJ2_Tree tree, unsigned short value)
     node->weight++;
 }
 
-static int yj2_build_tree(YJ2_Tree *tree)
+static void yj2_build_tree(YJ2_Tree *tree)
 {
-    int i, ptr;
+    unsigned short i;
+    unsigned short ptr;
     YJ2_TreeNode **list = (YJ2_TreeNode **)UTIL_calloc(321, sizeof(YJ2_TreeNode *));
     YJ2_TreeNode *node = (YJ2_TreeNode *)UTIL_calloc(641, sizeof(YJ2_TreeNode));
     for (i = 0; i <= 0x140; i++)
@@ -127,35 +128,31 @@ static int yj2_build_tree(YJ2_Tree *tree)
     }
     tree->list = list;
     tree->node = node;
-    return 1;
 }
 
-static int yj2_bt(const unsigned char *data, unsigned int pos)
+static unsigned int yj2_bt(const unsigned char *data, unsigned int pos)
 {
     return (data[pos >> 3] & (unsigned char)(1 << (pos & 0x7))) >> (pos & 0x7);
 }
 
-int YJ2_Decompress(
+unsigned char YJ2_Decompress(
     const void *Source,
     void *Destination,
-    int DestSize)
+    unsigned int DestSize)
 {
-    int Length;
-    unsigned int len = 0, ptr = 0;
-    unsigned char *src = (unsigned char *)Source + 4;
-    unsigned char *dest;
+    unsigned int len = 0;
+    unsigned int ptr = 0;
+    unsigned char *src = NULL;
+    unsigned char *dest = NULL;
     YJ2_Tree tree;
     YJ2_TreeNode *node;
 
-    if (Source == NULL)
-        return -1;
+    if (Source == NULL || Destination == NULL)
+        return 0;
 
-    if (!yj2_build_tree(&tree))
-        return -1;
+    yj2_build_tree(&tree);
 
-    Length = *(unsigned int *)Source;
-    if (Length > DestSize)
-        return -1;
+    src = (unsigned char *)Source + 4;
     dest = (unsigned char *)Destination;
 
     while (1)
@@ -187,10 +184,10 @@ int YJ2_Decompress(
             unsigned int temp, tmp, pos;
             unsigned char *pre;
             for (i = 0, temp = 0; i < 8; i++, ptr++)
-                temp |= (unsigned int)yj2_bt(src, ptr) << i;
+                temp |= yj2_bt(src, ptr) << i;
             tmp = temp & 0xff;
             for (; i < yj2_data2[tmp & 0xf] + 6; i++, ptr++)
-                temp |= (unsigned int)yj2_bt(src, ptr) << i;
+                temp |= yj2_bt(src, ptr) << i;
             temp >>= yj2_data2[tmp & 0xf];
             pos = (temp & 0x3f) | ((unsigned int)yj2_data1[tmp] << 6);
             if (pos == 0xfff)
@@ -209,7 +206,7 @@ int YJ2_Decompress(
 
     UTIL_free(tree.list);
     UTIL_free(tree.node);
-    return Length;
+    return 1;
 }
 
 int (*Decompress)(const void *, void *, int);
