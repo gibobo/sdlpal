@@ -64,4 +64,9 @@ unsigned int RES_MKFReadChunk(
     unsigned int chunk_index,
     unsigned char resource_id);
 
+unsigned int RES_MKFCreateChunk(
+    void **chunk_buffer,
+    unsigned int chunk_index,
+    unsigned char resource_id);
+
 #endif // RESOURCE_H

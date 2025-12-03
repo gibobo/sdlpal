@@ -391,6 +391,7 @@ void PAL_StartDialogWithOffset(
 --*/
 {
     unsigned char *buf = NULL;
+    unsigned int buf_size = RES_MKFCreateChunk(&buf, iNumCharFace, Res_RGM);
     VIDEO_Rect rect;
 
     if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
@@ -423,7 +424,7 @@ void PAL_StartDialogWithOffset(
             if (iNumCharFace > 0)
             {
                 // Display the character face at the upper part of the screen
-                if (RES_MKFDecompressChunk(&buf, 0, iNumCharFace, Res_RGM))
+                if (RES_MKFReadChunk(buf, buf_size, iNumCharFace, Res_RGM))
                 {
                     rect.w = (short)PAL_RLEGetWidth(buf);
                     rect.h = (short)PAL_RLEGetHeight(buf);
@@ -445,7 +446,7 @@ void PAL_StartDialogWithOffset(
             if (iNumCharFace > 0)
             {
                 // Display the character face at the lower part of the screen
-                if (RES_MKFDecompressChunk(&buf, 0, iNumCharFace, Res_RGM))
+                if (RES_MKFReadChunk(buf, buf_size, iNumCharFace, Res_RGM))
                 {
                     rect.x = (short)(270 - PAL_RLEGetWidth(buf) / 2 + xOff);
                     rect.y = (short)(144 - PAL_RLEGetHeight(buf) / 2 + yOff);

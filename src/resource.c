@@ -551,3 +551,16 @@ unsigned int RES_MKFReadChunk(
         g_ResourceFileHandles[resource_id]);
 #endif
 }
+
+unsigned int RES_MKFCreateChunk(
+    void **chunk_buffer,
+    unsigned int chunk_index,
+    unsigned char resource_id)
+{
+    UTIL_free(*chunk_buffer);
+    unsigned int buffer_size = RES_MKFGetChunkSize(chunk_index, resource_id);
+    if (buffer_size == 0)
+        return 0;
+    *chunk_buffer = UTIL_malloc(buffer_size);
+    return buffer_size;
+}

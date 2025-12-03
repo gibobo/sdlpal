@@ -220,9 +220,9 @@ void PAL_MusicPlayer(void)
         }
 
         // Validate music number
-        if (musicNum < 0 || musicNum > 255)
+        if (musicNum < 0 || musicNum > 87)
         {
-            printf("Invalid music number! Please enter 0-255.\n");
+            printf("Invalid music number! Please enter 0-87.\n");
             continue;
         }
 
@@ -269,7 +269,7 @@ void PAL_MusicPlayer(void)
             }
         }
     }
-
+    printf("\nExiting music player...\n");
     AUDIO_CloseDevice();
     DRIVER_DeInit();
     PAL_FreeResourceIndex();

@@ -1471,7 +1471,8 @@ PAL_StartBattle(
     //
     // Load the battle effect sprite.
     //
-    RES_MKFDecompressChunk(&g_Battle->lpEffectSprite, 0, 10, Res_DATA);
+    unsigned int buf_size = RES_MKFCreateChunk(&g_Battle->lpEffectSprite, 10, Res_DATA);
+    RES_MKFReadChunk(g_Battle->lpEffectSprite, buf_size, 10, Res_DATA);
 
     g_Battle->Phase = kBattlePhaseSelectAction;
     g_Battle->fRepeat = false;

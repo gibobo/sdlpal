@@ -2400,6 +2400,8 @@ PAL_InterpretInstruction(
             //
             // Jump if the specified item is not equipped
             //
+            if (pScript->rgwOperand[1] == 0)
+                pScript->rgwOperand[1] = 1;
             y = 0;
             for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
             {

@@ -108,20 +108,30 @@ static void PAL_InitGlobalGameData(void)
 
 --*/
 {
+#define PAL_DOALLOCATE(fp, num, type, ptr, n)   \
+    if (ptr == NULL)                            \
+    {                                           \
+        int len = RES_MKFGetChunkSize(num, fp); \
+        ptr = (type *)UTIL_malloc(len);         \
+        n = len / sizeof(type);                 \
+        RES_MKFReadChunk(ptr, len, num, fp);    \
+    }
+
     // If the memory has not been allocated, allocate first.
-    gpGlobals->g.nEventObject = RES_MKFDecompressChunk(&gpGlobals->g.lprgEventObject, 0, 0, Res_SSS) / sizeof(EVENTOBJECT);
-    gpGlobals->g.nScriptEntry = RES_MKFDecompressChunk(&gpGlobals->g.lprgScriptEntry, 0, 4, Res_SSS) / sizeof(SCRIPTENTRY);
-    gpGlobals->g.nStore = RES_MKFDecompressChunk(&gpGlobals->g.lprgStore, 0, 0, Res_DATA) / sizeof(STORE);
-    gpGlobals->g.nEnemy = RES_MKFDecompressChunk(&gpGlobals->g.lprgEnemy, 0, 1, Res_DATA) / sizeof(ENEMY);
-    gpGlobals->g.nEnemyTeam = RES_MKFDecompressChunk(&gpGlobals->g.lprgEnemyTeam, 0, 2, Res_DATA) / sizeof(ENEMYTEAM);
-    gpGlobals->g.nMagic = RES_MKFDecompressChunk(&gpGlobals->g.lprgMagic, 0, 4, Res_DATA) / sizeof(MAGIC);
-    gpGlobals->g.nBattleField = RES_MKFDecompressChunk(&gpGlobals->g.lprgBattleField, 0, 5, Res_DATA) / sizeof(BATTLEFIELD);
-    gpGlobals->g.nLevelUpMagic = RES_MKFDecompressChunk(&gpGlobals->g.lprgLevelUpMagic, 0, 6, Res_DATA) / sizeof(LEVELUPMAGIC_ALL);
-    gpGlobals->g.nPlayerRoles = RES_MKFDecompressChunk(&gpGlobals->g.PlayerRoles, 0, 3, Res_DATA) / sizeof(PLAYERROLES);
+    PAL_DOALLOCATE(Res_SSS, 0, EVENTOBJECT, gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject);
+    PAL_DOALLOCATE(Res_SSS, 4, SCRIPTENTRY, gpGlobals->g.lprgScriptEntry, gpGlobals->g.nScriptEntry);
+    PAL_DOALLOCATE(Res_DATA, 0, STORE, gpGlobals->g.lprgStore, gpGlobals->g.nStore);
+    PAL_DOALLOCATE(Res_DATA, 1, ENEMY, gpGlobals->g.lprgEnemy, gpGlobals->g.nEnemy);
+    PAL_DOALLOCATE(Res_DATA, 2, ENEMYTEAM, gpGlobals->g.lprgEnemyTeam, gpGlobals->g.nEnemyTeam);
+    PAL_DOALLOCATE(Res_DATA, 4, MAGIC, gpGlobals->g.lprgMagic, gpGlobals->g.nMagic);
+    PAL_DOALLOCATE(Res_DATA, 5, BATTLEFIELD, gpGlobals->g.lprgBattleField, gpGlobals->g.nBattleField);
+    PAL_DOALLOCATE(Res_DATA, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
+    PAL_DOALLOCATE(Res_DATA, 3, PLAYERROLES, gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles);
 
     RES_MKFReadChunk(gpGlobals->g.rgwBattleEffectIndex, sizeof(gpGlobals->g.rgwBattleEffectIndex), 11, Res_DATA);
     RES_MKFReadChunk(gpGlobals->g.EnemyPos, sizeof(gpGlobals->g.EnemyPos), 13, Res_DATA);
     RES_MKFReadChunk(gpGlobals->g.rgLevelUpExp, sizeof(gpGlobals->g.rgLevelUpExp), 14, Res_DATA);
+#undef PAL_DOALLOCATE
 }
 
 static void PAL_LoadDefaultGame(void)

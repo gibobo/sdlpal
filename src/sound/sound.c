@@ -586,6 +586,7 @@ static int SOUND_Play(
     ResampleMixer mixer = NULL;
     WAVEDATA *cursnd;
     unsigned char *buf = NULL;
+    unsigned int buf_size = RES_MKFCreateChunk(&buf, iSoundNum, Res_SOUNDS);
     const void *snddata;
     unsigned char i;
     unsigned int len;
@@ -604,7 +605,7 @@ static int SOUND_Play(
 
     player->lastSFX = iSoundNum;
 
-    len = RES_MKFDecompressChunk(&buf, 0, iSoundNum, Res_SOUNDS);
+    len = RES_MKFReadChunk(buf, buf_size, iSoundNum, Res_SOUNDS);
     if (len <= 0)
     {
         return false;
