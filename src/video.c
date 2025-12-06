@@ -54,7 +54,7 @@ int VIDEO_Startup(void)
     gpScreen = VIDEO_CreateCompatibleSizedSurface(NULL);
     if (gpScreen == NULL)
     {
-        return -2; // Fail to create screen buffer
+        return -1; // Fail to create screen buffer
     }
 
     // Create backup buffers

@@ -9,7 +9,7 @@
 static int window_width = 320;
 static int window_height = 200;
 static unsigned char *framebuffer = NULL; // RGB888
-static const unsigned char *palette = NULL;
+static unsigned char *palette = NULL;
 GLFWwindow *window = NULL;
 
 extern void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -73,7 +73,11 @@ void DRIVER_FrameShow(
     }
 }
 
-void DRIVER_UpdatePalette(const unsigned char *rgPalette) { palette = rgPalette; }
+void DRIVER_UpdatePalette(const unsigned char *rgPalette)
+{
+    if (rgPalette)
+        memcpy(palette, rgPalette, 256 * 3);
+}
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -115,6 +119,7 @@ int DRIVER_Init_Video(void)
 
     glfwGetWindowSize(window, &window_width, &window_height);
     framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
+    palette = (unsigned char *)UTIL_malloc(256 * 3);
     glfwSwapInterval(1);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     return 0;
@@ -128,7 +133,9 @@ void DRIVER_DeInit_Video(void)
         VIDEO_GLSL_Destroy();
     }
     UTIL_free(framebuffer);
+    UTIL_free(palette);
     glfwTerminate();
     window = NULL;
     framebuffer = NULL;
+    palette = NULL;
 }

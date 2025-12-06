@@ -8,7 +8,7 @@
 static int window_width = 320;
 static int window_height = 200;
 static unsigned char *framebuffer = NULL; // RGB888
-static const unsigned char *palette = NULL;
+static unsigned char *palette = NULL;
 static SDL_Window *gpWindow = NULL;
 static SDL_Renderer *gpRenderer = NULL;
 static SDL_Texture *gpTexture = NULL;
@@ -80,7 +80,8 @@ void DRIVER_FrameResize(unsigned int width, unsigned int height)
 
 void DRIVER_UpdatePalette(const unsigned char *rgPalette)
 {
-    palette = rgPalette;
+    if (rgPalette)
+        memcpy(palette, rgPalette, 256 * 3);
 }
 
 int DRIVER_Init_Video(void)
@@ -124,12 +125,14 @@ int DRIVER_Init_Video(void)
     }
 
     framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
+    palette = (unsigned char *)UTIL_malloc(256 * 3);
     return 0;
 }
 
 void DRIVER_DeInit_Video(void)
 {
     UTIL_free(framebuffer);
+    UTIL_free(palette);
     if (gpTexture)
         SDL_DestroyTexture(gpTexture);
     if (gpRenderer)
@@ -137,6 +140,8 @@ void DRIVER_DeInit_Video(void)
     if (gpWindow)
         SDL_DestroyWindow(gpWindow);
 
+    framebuffer = NULL;
+    palette = NULL;
     gpTexture = NULL;
     gpRenderer = NULL;
     gpWindow = NULL;

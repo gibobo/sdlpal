@@ -62,6 +62,9 @@ void DRIVER_FrameShow(
 
 void DRIVER_UpdatePalette(const unsigned char *rgPalette)
 {
+    if (rgPalette == NULL)
+        return;
+
     unsigned int r[256] = {0};
     unsigned int g[256] = {0};
     unsigned int b[256] = {0};
