@@ -251,10 +251,10 @@ void PAL_BattleDrawMagicSprites(
     short x, y;
     const unsigned char *lpBitmap = g_Battle->lpMagicBitmap;
 
-    x = PAL_X(pos);
-    y = PAL_Y(pos);
+    x = PAL_X(pos) - PAL_RLEGetWidth(lpBitmap) / 2;
+    y = PAL_Y(pos) - PAL_RLEGetHeight(lpBitmap);
 
-    PAL_RLEBlitToSurface(lpBitmap, lpDstSurface, PAL_XY(x - PAL_RLEGetWidth(lpBitmap) / 2, y - PAL_RLEGetHeight(lpBitmap)));
+    PAL_RLEBlitToSurface(lpBitmap, lpDstSurface, PAL_XY(x, y));
 }
 
 void PAL_BattleClearSpriteObject(

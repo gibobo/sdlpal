@@ -57,13 +57,13 @@ int PAL_FBPBlitToSurface(
     VIDEO_Surface *lpDstSurface);
 
 unsigned short PAL_RLEGetWidth(
-    unsigned char *lpBitmapRLE);
+    const unsigned char *lpBitmapRLE);
 
 unsigned short PAL_RLEGetHeight(
-    unsigned char *lpBitmapRLE);
+    const unsigned char *lpBitmapRLE);
 
 unsigned short PAL_SpriteGetNumFrames(
-    unsigned char *lpSprite);
+    const unsigned char *lpSprite);
 
 unsigned char *PAL_SpriteGetFrame(
     unsigned char *lpSprite,
@@ -90,7 +90,6 @@ unsigned int PAL_MKFDecompressChunk(
 // From yj1.c:
 unsigned char YJ2_Decompress(
     const void *Source,
-    void *Destination,
-    unsigned int DestSize);
+    void *Destination);
 
 #endif // _PALUTILS_H

@@ -598,7 +598,7 @@ int PAL_IncreaseHPMP(
     short sHP,
     short sMP);
 
-int PAL_GetItemAmount(
+unsigned short PAL_GetItemAmount(
     unsigned short wItem);
 
 void PAL_UpdateEquipments(

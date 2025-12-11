@@ -31,64 +31,28 @@ void PAL_OpeningMenu(void);
 }
 #endif
 
-unsigned short
-PAL_SaveSlotMenu(
-   unsigned short        wDefaultSlot
-);
+unsigned short PAL_SaveSlotMenu(unsigned short wDefaultSlot);
 
-unsigned short
-PAL_TripleMenu(
-   unsigned short  wThirdWord
-);
+unsigned short PAL_TripleMenu(unsigned short wThirdWord);
 
-int
-PAL_ConfirmMenu(
-   void
-);
+unsigned char PAL_ConfirmMenu(void);
 
-int
-PAL_SwitchMenu(
-   int      fEnabled
-);
+unsigned char PAL_SwitchMenu(unsigned char fEnabled);
 
-void
-PAL_InGameMagicMenu(
-   void
-);
+void PAL_InGameMagicMenu(void);
 
-void
-PAL_InGameMenu(
-   void
-);
+void PAL_InGameMenu(void);
 
-void
-PAL_PlayerStatus(
-   void
-);
+void PAL_PlayerStatus(void);
 
-unsigned short
-PAL_ItemUseMenu(
-   unsigned short           wItemToUse
-);
+unsigned short PAL_ItemUseMenu(unsigned short wItemToUse);
 
-void
-PAL_BuyMenu(
-   unsigned short           wStoreNum
-);
+void PAL_BuyMenu(unsigned short wStoreNum);
 
-void
-PAL_SellMenu(
-   void
-);
+void PAL_SellMenu(void);
 
-void
-PAL_EquipItemMenu(
-   unsigned short           wItem
-);
+void PAL_EquipItemMenu(unsigned short wItem);
 
-void
-PAL_QuitGame(
-   void
-);
+void PAL_QuitGame(void);
 
 #endif

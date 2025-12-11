@@ -42,11 +42,10 @@ typedef struct tagAUDIODEVICE
 {
     AUDIOPLAYER *pMusPlayer;
     AUDIOPLAYER *pSoundPlayer;
-    void *pSoundBuffer; /* The output buffer for sound */
-    unsigned int id;
-    int fMusicEnabled; /* Is BGM enabled? */
-    int fSoundEnabled; /* Is sound effect enabled? */
-    int fOpened;       /* Is the audio device opened? */
+    void *pSoundBuffer;          /* The output buffer for sound */
+    unsigned char fMusicEnabled; /* Is BGM enabled? */
+    unsigned char fSoundEnabled; /* Is sound effect enabled? */
+    unsigned char fOpened;       /* Is the audio device opened? */
 } AUDIODEVICE;
 
 static AUDIODEVICE gAudioDevice;
@@ -216,22 +215,22 @@ void AUDIO_PlayMusic(int iNumRIX, unsigned char fLoop, float flFadeTime)
     }
 }
 
-void AUDIO_EnableMusic(int fEnable)
+void AUDIO_EnableMusic(unsigned char fEnable)
 {
     gAudioDevice.fMusicEnabled = fEnable;
 }
 
-int AUDIO_MusicEnabled(void)
+unsigned char AUDIO_MusicEnabled(void)
 {
     return gAudioDevice.fMusicEnabled;
 }
 
-void AUDIO_EnableSound(int fEnable)
+void AUDIO_EnableSound(unsigned char fEnable)
 {
     gAudioDevice.fSoundEnabled = fEnable;
 }
 
-int AUDIO_SoundEnabled(void)
+unsigned char AUDIO_SoundEnabled(void)
 {
     return gAudioDevice.fSoundEnabled;
 }

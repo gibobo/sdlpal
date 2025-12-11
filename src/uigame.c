@@ -221,14 +221,14 @@ unsigned short PAL_SaveSlotMenu(
 
 --*/
 {
-    unsigned int i;
+    unsigned short i;
     unsigned int w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5U);
     unsigned int dx = (w > 4) ? (w - 4) * 16U : 0U;
     unsigned short wItemSelected;
 
     MENUITEM rgMenuItem[5];
 
-    const VIDEO_Rect rect = {195 - dx, 7, 120 + dx, 190};
+    // const VIDEO_Rect rect = {195 - dx, 7, 120 + dx, 190};
 
     //
     // Create the boxes and create the menu items
@@ -307,7 +307,7 @@ PAL_SelectionMenu(
         PAL_XY(220 + dx[0], 110),
         PAL_XY(145, 160),
         PAL_XY(220 + dx[2], 160)};
-    const VIDEO_Rect rect = {130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100};
+    // const VIDEO_Rect rect = {130, 100, 125 + max(dx[0] + dx[1], dx[2] + dx[3]), 100};
 
     //
     // Create menu items
@@ -373,7 +373,7 @@ PAL_TripleMenu(
     return PAL_SelectionMenu(3, 0, wItems);
 }
 
-int PAL_ConfirmMenu(
+unsigned char PAL_ConfirmMenu(
     void)
 /*++
   Purpose:
@@ -396,8 +396,8 @@ int PAL_ConfirmMenu(
     return (wReturnValue == MENUITEM_VALUE_CANCELLED || wReturnValue == 0) ? false : true;
 }
 
-int PAL_SwitchMenu(
-    int fEnabled)
+unsigned char PAL_SwitchMenu(
+    unsigned char fEnabled)
 /*++
   Purpose:
 
@@ -578,7 +578,7 @@ void PAL_InGameMagicMenu(
 --*/
 {
     MENUITEM rgMenuItem[MAX_PLAYERS_IN_PARTY];
-    int i, y;
+    unsigned short i, y;
     static unsigned short w;
     unsigned short wMagic;
 
@@ -969,7 +969,7 @@ void PAL_PlayerStatus(
     int labels1[] = {STATUS_LABEL_EXP_LAYOUT, STATUS_LABEL_LEVEL_LAYOUT, STATUS_LABEL_HP_LAYOUT, STATUS_LABEL_MP_LAYOUT};
     int labels[] = {STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE, STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE};
     int iCurrent = 0;
-    int iPlayerRole;
+    unsigned short iPlayerRole;
     int i;
     int j;
     unsigned short w;
@@ -1121,8 +1121,8 @@ PAL_ItemUseMenu(
     unsigned char bColor;
     unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
     static unsigned short sSelectedPlayer = 0;
-    VIDEO_Rect rect = {110, 2, 200, 180};
-    int i;
+    // VIDEO_Rect rect = {110, 2, 200, 180};
+    unsigned short i;
 
     while (true)
     {
@@ -1283,7 +1283,7 @@ PAL_BuyMenu_OnItemChange(
 
 --*/
 {
-    const VIDEO_Rect rect = {20, 8, 300, 175};
+    // const VIDEO_Rect rect = {20, 8, 300, 175};
     int i, j, n, iPlayerID, x, y;
     unsigned char *bufImage;
 
@@ -1382,8 +1382,7 @@ void PAL_BuyMenu(
 --*/
 {
     MENUITEM rgMenuItem[MAX_STORE_ITEM];
-    int i, y;
-    unsigned short w;
+    unsigned short i, y, w;
 
     //
     // create the menu items
@@ -1703,8 +1702,7 @@ void PAL_EquipItemMenu(
 
 void PAL_QuitGame(void)
 {
-    unsigned short wReturnValue = PAL_ConfirmMenu(); // No config menu available
-    if (wReturnValue == 1 || wReturnValue == 2)
+    if (PAL_ConfirmMenu())
     {
         AUDIO_PlayMusic(0x00, false, 2);
         PAL_FadeOut(2);

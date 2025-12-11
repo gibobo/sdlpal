@@ -93,11 +93,11 @@ void AUDIO_PlayMusic(int iNumRIX, unsigned char fLoop, float flFadeTime);
 
 void AUDIO_PlaySound(int iSoundNum);
 
-void AUDIO_EnableMusic(int fEnable);
-int AUDIO_MusicEnabled(void);
+void AUDIO_EnableMusic(unsigned char fEnable);
+unsigned char AUDIO_MusicEnabled(void);
 
-void AUDIO_EnableSound(int fEnable);
-int AUDIO_SoundEnabled(void);
+void AUDIO_EnableSound(unsigned char fEnable);
+unsigned char AUDIO_SoundEnabled(void);
 
 int AUDIO_GetCurrentMusic(void);
 

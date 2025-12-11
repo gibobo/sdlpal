@@ -261,7 +261,7 @@ void PAL_MusicPlayer(void)
 
                 // Simple animated progress indicator
 
-                printf("\r♪ Playing #%d [%c] Time: %02lu:%02lu     ",
+                printf("\rPlaying #%d [%c] Time: %02lu:%02lu     ",
                        lastMusicNum, anim[animIdx % 4], minutes, seconds);
                 fflush(stdout);
                 animIdx++;
@@ -303,8 +303,8 @@ void PAL_SplashScreen(void)
     const unsigned char crane_num = 9;
     int *cranepos = NULL;
     unsigned int i;
-    unsigned int iImgPos = SCREEN_H;
-    unsigned int iTitleHeight;
+    unsigned short iImgPos = SCREEN_H;
+    unsigned short iTitleHeight;
     unsigned int dwTime = 0;
 
     if (palette == NULL)
@@ -320,7 +320,7 @@ void PAL_SplashScreen(void)
     RES_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, Res_MGO);
 
     lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
-    iTitleHeight = lpBitmapTitle[2] | ((unsigned int)lpBitmapTitle[3] << 8);
+    iTitleHeight = lpBitmapTitle[2] | ((unsigned short)lpBitmapTitle[3] << 8);
     lpBitmapTitle[2] = 0;
     lpBitmapTitle[3] = 0; // HACKHACK
 
@@ -363,7 +363,7 @@ void PAL_SplashScreen(void)
         // The lower part...
         srcrect.y = 0;
         dstrect.y = SCREEN_H - iImgPos;
-        srcrect.h = iImgPos;
+        srcrect.h = (short)iImgPos;
         dstrect.h = srcrect.h;
         if (srcrect.h && dstrect.h)
             VIDEO_CopySurface(lpBitmapDown, &srcrect, gpScreen, &dstrect);
@@ -404,8 +404,8 @@ void PAL_SplashScreen(void)
             break;
     }
     // Quit the splash screen
-    lpBitmapTitle[2] = iTitleHeight & 0xFF;
-    lpBitmapTitle[3] = iTitleHeight >> 8; // HACKHACK
+    lpBitmapTitle[2] = (unsigned char)(iTitleHeight & 0xFF);
+    lpBitmapTitle[3] = (unsigned char)((iTitleHeight >> 8) & 0xFF); // HACKHACK
     PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
 
     // If the picture has not completed fading in, complete the rest

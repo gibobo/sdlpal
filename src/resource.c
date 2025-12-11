@@ -141,7 +141,7 @@ static void PAL_ExtractRNGAnimationFrames(PALRES res)
             }
             unsigned int rng_size = *(unsigned int *)buf;
             unsigned char *rng = (unsigned char *)UTIL_malloc(rng_size);
-            YJ2_Decompress(buf, rng, rng_size);
+            YJ2_Decompress(buf, rng);
             fwrite(rng, sizeof(char), rng_size, fpRes);
             fwrite(&offset, sizeof(unsigned int), 1, fpInfo);
             fwrite(&rng_size, sizeof(unsigned int), 1, fpInfo);
@@ -460,7 +460,7 @@ int RES_RNGReadFrame(
     UTIL_free(*frame_buffer);
     unsigned int rng_size = *(unsigned int *)buf;
     *frame_buffer = (unsigned char *)UTIL_malloc(rng_size);
-    if (!YJ2_Decompress(buf, *frame_buffer, rng_size))
+    if (!YJ2_Decompress(buf, *frame_buffer))
     {
         UTIL_free(*frame_buffer);
         *frame_buffer = NULL;

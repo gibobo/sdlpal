@@ -696,7 +696,7 @@ int PAL_AddItemToInventory(
     }
 }
 
-int PAL_GetItemAmount(
+unsigned short PAL_GetItemAmount(
     unsigned short wItem)
 /*++
   Purpose:

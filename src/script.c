@@ -1388,7 +1388,7 @@ PAL_InterpretInstruction(
                 int iBG_X = (SCREEN_W - iBGWidth) / 2;
                 int iBG_Y = (SCREEN_H - iBGHeight) / 2;
                 unsigned int pos = PAL_XY(iBG_X, iBG_Y);
-                VIDEO_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
+                // VIDEO_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
                 PAL_RLEBlitToSurface(pBG, gpScreen, pos);
 
                 unsigned short wObject = gpGlobals->g.lprgStore[0].rgwItems[i];
@@ -3352,7 +3352,7 @@ begin:
             XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : PAL_XY(102, 0);
             YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 : 3;
             iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
-            wchar_t *word = PAL_GetWord(pScript->rgwOperand[0]);
+            const wchar_t *word = PAL_GetWord(pScript->rgwOperand[0]);
             PAL_DrawText(word, PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, true, false);
             wScriptEntry++;
             break;

@@ -654,7 +654,7 @@ int PAL_FBPBlitToSurface(
 }
 
 unsigned short PAL_RLEGetWidth(
-    unsigned char *lpBitmapRLE)
+    const unsigned char *lpBitmapRLE)
 /*++
   Purpose:
 
@@ -687,7 +687,7 @@ unsigned short PAL_RLEGetWidth(
 }
 
 unsigned short PAL_RLEGetHeight(
-    unsigned char *lpBitmapRLE)
+    const unsigned char *lpBitmapRLE)
 /*++
   Purpose:
 
@@ -721,7 +721,7 @@ unsigned short PAL_RLEGetHeight(
 
 unsigned short
 PAL_SpriteGetNumFrames(
-    unsigned char *lpSprite)
+    const unsigned char *lpSprite)
 /*++
   Purpose:
 
@@ -967,7 +967,7 @@ unsigned int PAL_MKFDecompressChunk(
             *lpBuffer = UTIL_malloc(uiBufferSize);
         }
 
-        YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
+        YJ2_Decompress(buf, *lpBuffer);
         UTIL_free(buf);
     }
 

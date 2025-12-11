@@ -137,8 +137,7 @@ static unsigned int yj2_bt(const unsigned char *data, unsigned int pos)
 
 unsigned char YJ2_Decompress(
     const void *Source,
-    void *Destination,
-    unsigned int DestSize)
+    void *Destination)
 {
     unsigned int len = 0;
     unsigned int ptr = 0;
@@ -170,7 +169,7 @@ unsigned char YJ2_Decompress(
         val = node->value;
         if (tree.node[0x280].weight == 0x8000)
         {
-            int i;
+            unsigned short i;
             for (i = 0; i < 0x141; i++)
                 if (tree.list[i]->weight & 0x1)
                     yj2_adjust_tree(tree, i);
@@ -180,7 +179,7 @@ unsigned char YJ2_Decompress(
         yj2_adjust_tree(tree, val);
         if (val > 0xff)
         {
-            int i;
+            unsigned short i;
             unsigned int temp, tmp, pos;
             unsigned char *pre;
             for (i = 0, temp = 0; i < 8; i++, ptr++)
