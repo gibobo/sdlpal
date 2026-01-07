@@ -1,10 +1,11 @@
-#include "../src/driver.h"
+﻿#include "../src/driver.h"
 #include "../src/global.h"
 #include "../src/input.h"
 #include "../src/util.h"
 #include "../src/video.h"
 #include "DrvIf_internal.h"
 #include <SDL_events.h>
+#include <stdint.h>
 #include <stdio.h>
 
 static const int g_KeyMap[][2] = {
@@ -47,19 +48,19 @@ static SDL_Joystick *g_pJoy = NULL;
 static int joystick_axis_X = 0;
 static int joystick_axis_Y = 0;
 #endif
-extern void DRIVER_FrameResize(unsigned int width, unsigned int height);
+extern void DRIVER_FrameResize(uint32_t width, uint32_t height);
 
 static void SDL_UpdateKeyboardState(SDL_Keycode key)
 {
     (void)key;
-    static unsigned char rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
-    const unsigned char *keyState = (const unsigned char *)SDL_GetKeyboardState(NULL);
-    unsigned char i;
+    static uint8_t rgdwKeyLastTime[sizeof(g_KeyMap) / sizeof(g_KeyMap[0])] = {0};
+    const uint8_t *keyState = (const uint8_t *)SDL_GetKeyboardState(NULL);
+    uint8_t i;
 
     for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++)
     {
         SDL_Scancode keyCode = SDL_GetScancodeFromKey(g_KeyMap[i][0]);
-        unsigned char keyPress = keyState[keyCode];
+        uint8_t keyPress = keyState[keyCode];
 
         if (keyPress == SDL_PRESSED)
         {
@@ -83,7 +84,7 @@ static void PAL_DetectJoystick(void)
 {
     if (SDL_NumJoysticks() > 0)
     {
-        int i;
+        int32_t i;
         for (i = 0; i < SDL_NumJoysticks(); i++)
         {
             g_pJoy = SDL_JoystickOpen(i);
@@ -138,7 +139,7 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
             if (lpEvent->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             {
                 // resized the window
-                DRIVER_FrameResize((unsigned int)lpEvent->window.data1, (unsigned int)lpEvent->window.data2);
+                DRIVER_FrameResize((uint32_t)lpEvent->window.data1, (uint32_t)lpEvent->window.data2);
             }
             break;
 
@@ -244,7 +245,7 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
 
 int DRIVER_Process_Events(void)
 {
-    int res = 0;
+    int32_t res = 0;
     SDL_Event evt;
     while (SDL_PollEvent(&evt))
     {

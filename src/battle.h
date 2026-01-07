@@ -21,6 +21,8 @@
 #ifndef BATTLE_H
 #define BATTLE_H
 
+#include <stdint.h>
+
 #include "global.h"
 
 #define BATTLE_FRAME_TIME            (1000 / 25) // 25 FPS
@@ -64,51 +66,51 @@ typedef enum tagBATTLEACTIONTYPE
 typedef struct tagBATTLEACTION
 {
     BATTLEACTIONTYPE ActionType;
-    unsigned short wActionID; // item/magic to use
-    short sTarget;            // -1 for everyone
-    float flRemainingTime;    // remaining waiting time before the action start
+    uint16_t wActionID;    // item/magic to use
+    int16_t sTarget;       // -1 for everyone
+    float flRemainingTime; // remaining waiting time before the action start
 } BATTLEACTION;
 
 typedef struct tagBATTLEENEMY
 {
-    unsigned short wObjectID;             // Object ID of this enemy
-    ENEMY e;                              // detailed data of this enemy
-    unsigned short rgwStatus[kStatusAll]; // status effects
-    float flTimeMeter;                    // time-charging meter (0 = empty, 100 = full).
-    POISONSTATUS rgPoisons[MAX_POISONS];  // poisons
-    unsigned char *lpSprite;
-    unsigned int pos;             // current position on the screen
-    unsigned int posOriginal;     // original position on the screen
-    unsigned short wCurrentFrame; // current frame number
-    FIGHTERSTATE state;           // state of this enemy
+    uint16_t wObjectID;                  // Object ID of this enemy
+    ENEMY e;                             // detailed data of this enemy
+    uint16_t rgwStatus[kStatusAll];      // status effects
+    float flTimeMeter;                   // time-charging meter (0 = empty, 100 = full).
+    POISONSTATUS rgPoisons[MAX_POISONS]; // poisons
+    uint8_t *lpSprite;
+    uint32_t pos;           // current position on the screen
+    uint32_t posOriginal;   // original position on the screen
+    uint16_t wCurrentFrame; // current frame number
+    FIGHTERSTATE state;     // state of this enemy
 
-    unsigned short wScriptOnTurnStart;
-    unsigned short wScriptOnBattleEnd;
-    unsigned short wScriptOnReady;
+    uint16_t wScriptOnTurnStart;
+    uint16_t wScriptOnBattleEnd;
+    uint16_t wScriptOnReady;
 
-    unsigned short wPrevHP; // HP value prior to action
+    uint16_t wPrevHP; // HP value prior to action
 
-    int iColorShift;
+    int32_t iColorShift;
 } BATTLEENEMY;
 
 // We only put some data used in battle here; other data can be accessed in the global data.
 typedef struct tagBATTLEPLAYER
 {
-    int iColorShift;
+    int32_t iColorShift;
     float flTimeMeter; // time-charging meter (0 = empty, 100 = full).
     float flTimeSpeedModifier;
-    unsigned short wHidingTime; // remaining hiding time
-    unsigned char *lpSprite;
-    unsigned int pos;             // current position on the screen
-    unsigned int posOriginal;     // original position on the screen
-    unsigned short wCurrentFrame; // current frame number
-    FIGHTERSTATE state;           // state of this player
-    BATTLEACTION action;          // action to perform
-    BATTLEACTION prevAction;      // action of the previous turn
-    int fDefending;               // TRUE if player is defending
-    int fSecondAttack;            // FALSE for the first full attack, TRUE for the second full attack
-    unsigned short wPrevHP;       // HP value prior to action
-    unsigned short wPrevMP;       // MP value prior to action
+    uint16_t wHidingTime; // remaining hiding time
+    uint8_t *lpSprite;
+    uint32_t pos;            // current position on the screen
+    uint32_t posOriginal;    // original position on the screen
+    uint16_t wCurrentFrame;  // current frame number
+    FIGHTERSTATE state;      // state of this player
+    BATTLEACTION action;     // action to perform
+    BATTLEACTION prevAction; // action of the previous turn
+    int32_t fDefending;      // TRUE if player is defending
+    int32_t fSecondAttack;   // FALSE for the first full attack, TRUE for the second full attack
+    uint16_t wPrevHP;        // HP value prior to action
+    uint16_t wPrevMP;        // MP value prior to action
 } BATTLEPLAYER;
 
 typedef enum tagBATTLESPRITETYPE
@@ -121,17 +123,17 @@ typedef enum tagBATTLESPRITETYPE
 
 typedef struct tagBATTLESPRITESEQ
 {
-    unsigned short wType;
-    unsigned short wObjectIndex;
-    unsigned int pos;
-    short sLayerOffset;
-    int fHaveColorShift;
+    uint16_t wType;
+    uint16_t wObjectIndex;
+    uint32_t pos;
+    int16_t sLayerOffset;
+    int32_t fHaveColorShift;
 } BATTLESPRITESEQ;
 
 typedef struct tagSUMMON
 {
-    unsigned char *lpSprite;
-    unsigned short wCurrentFrame;
+    uint8_t *lpSprite;
+    uint16_t wCurrentFrame;
 } SUMMON;
 
 typedef enum tabBATTLEPHASE
@@ -142,10 +144,10 @@ typedef enum tabBATTLEPHASE
 
 typedef struct tagACTIONQUEUE
 {
-    unsigned char fIsEnemy;
-    unsigned short wDexterity;
-    unsigned short wIndex;
-    unsigned char fIsSecond;
+    uint8_t fIsEnemy;
+    uint16_t wDexterity;
+    uint16_t wIndex;
+    uint8_t fIsSecond;
 } ACTIONQUEUE;
 
 typedef struct tagBATTLE
@@ -153,51 +155,51 @@ typedef struct tagBATTLE
     BATTLEPLAYER rgPlayer[MAX_PLAYERS_IN_PARTY];
     BATTLEENEMY rgEnemy[MAX_ENEMIES_IN_TEAM];
 
-    unsigned short wMaxEnemyIndex;
+    uint16_t wMaxEnemyIndex;
 
-    unsigned short sBackgroundColorShift;
+    uint16_t sBackgroundColorShift;
 
-    unsigned char *lpSummonSprite; // sprite of summoned god
-    unsigned int posSummon;
-    unsigned short iSummonFrame; // current frame of the summoned god
-    unsigned char fSummonColorShift;
+    uint8_t *lpSummonSprite; // sprite of summoned god
+    uint32_t posSummon;
+    uint16_t iSummonFrame; // current frame of the summoned god
+    uint8_t fSummonColorShift;
 
-    int iExpGained;  // total experience value gained
-    int iCashGained; // total cash gained
+    int32_t iExpGained;  // total experience value gained
+    int32_t iCashGained; // total cash gained
 
-    unsigned char fIsBoss;       // TRUE if boss fight
-    unsigned char fEnemyCleared; // TRUE if enemies are cleared
+    uint8_t fIsBoss;       // TRUE if boss fight
+    uint8_t fEnemyCleared; // TRUE if enemies are cleared
     BATTLERESULT BattleResult;
 
     float flTimeChargingUnit; // the base waiting time unit
 
-    unsigned char *lpEffectSprite;
+    uint8_t *lpEffectSprite;
 
-    unsigned char fEnemyMoving; // TRUE if enemy is moving
+    uint8_t fEnemyMoving; // TRUE if enemy is moving
 
-    int iHidingTime; // Time of hiding
+    int32_t iHidingTime; // Time of hiding
 
-    unsigned short wMovingPlayerIndex; // current moving player index
+    uint16_t wMovingPlayerIndex; // current moving player index
 
-    int iBlow;
+    int32_t iBlow;
 
-    const unsigned char *lpMagicBitmap; // current magic frame bitmap
+    const uint8_t *lpMagicBitmap; // current magic frame bitmap
 
     BATTLESPRITESEQ SpriteDrawSeq[MAX_BATTLESPRITESEQ_ITEMS];
-    unsigned short wMaxSpriteDrawSeqIndex;
-    unsigned char fSpriteAddLock;
+    uint16_t wMaxSpriteDrawSeqIndex;
+    uint8_t fSpriteAddLock;
 
     BATTLEPHASE Phase;
     ACTIONQUEUE ActionQueue[MAX_ACTIONQUEUE_ITEMS];
-    unsigned char iCurAction;
-    unsigned char fRepeat;            // TRUE if player pressed Repeat
-    unsigned char fForce;             // TRUE if player pressed Force
-    unsigned char fFlee;              // TRUE if player pressed Flee
-    unsigned char fPrevAutoAtk;       // TRUE if auto-attack was used in the previous turn
-    unsigned char fPrevPlayerAutoAtk; // TRUE if auto-attack was used by previous player in the same turn
+    uint8_t iCurAction;
+    uint8_t fRepeat;            // TRUE if player pressed Repeat
+    uint8_t fForce;             // TRUE if player pressed Force
+    uint8_t fFlee;              // TRUE if player pressed Flee
+    uint8_t fPrevAutoAtk;       // TRUE if auto-attack was used in the previous turn
+    uint8_t fPrevPlayerAutoAtk; // TRUE if auto-attack was used by previous player in the same turn
 
-    unsigned short coopContributors[MAX_PLAYERS_IN_PARTY];
-    unsigned char fThisTurnCoop;
+    uint16_t coopContributors[MAX_PLAYERS_IN_PARTY];
+    uint8_t fThisTurnCoop;
 } BATTLE;
 
 void PAL_LoadBattleSprites(void);
@@ -205,26 +207,26 @@ void PAL_LoadBattleSprites(void);
 void PAL_BattleDrawBackground(void);
 
 void PAL_BattleDrawEnemySprites(
-    unsigned short wEnemyIndex,
+    uint16_t wEnemyIndex,
     void *lpDstSurface);
 
 void PAL_BattleDrawPlayerSprites(
-    unsigned short wPlayerIndex,
+    uint16_t wPlayerIndex,
     void *lpDstSurface);
 
 void PAL_BattleDrawMagicSprites(
     void *lpDstSurface,
-    unsigned int pos);
+    uint32_t pos);
 
 void PAL_BattleClearSpriteObject(void);
 
 void PAL_BattleSpriteAddUnlock(void);
 
 void PAL_BattleAddSpriteObject(
-    unsigned short wType,
-    unsigned short wObjectIndex,
-    unsigned int pos,
-    short sLayerOffset,
+    uint16_t wType,
+    uint16_t wObjectIndex,
+    uint32_t pos,
+    int16_t sLayerOffset,
     int fHaveColorShift);
 
 void PAL_BattleAddFighterSpriteObject(void);
@@ -233,7 +235,7 @@ void PAL_BattleSortSpriteObjecByPos(void);
 
 void PAL_BattleDrawAllSprites(void);
 
-void PAL_BattleDrawAllSpritesWithColorShift(unsigned char fColorShift);
+void PAL_BattleDrawAllSpritesWithColorShift(uint8_t fColorShift);
 
 void PAL_BattleMakeScene(void);
 
@@ -244,18 +246,18 @@ void PAL_BattleEnemyEscape(void);
 void PAL_BattlePlayerEscape(void);
 
 BATTLERESULT PAL_StartBattle(
-    unsigned short wEnemyTeam,
-    unsigned char fIsBoss);
+    uint16_t wEnemyTeam,
+    uint8_t fIsBoss);
 
 void PAL_GetPlayerPos(
-    unsigned char PlayerIndex,
-    int *posX,
-    int *posY);
+    uint8_t PlayerIndex,
+    int32_t *posX,
+    int32_t *posY);
 
 void PAL_RLEBlitToBattleSurface(
-    const unsigned char *lpBitmapRLE,
-    int posX,
-    int posY);
+    const uint8_t *lpBitmapRLE,
+    int32_t posX,
+    int32_t posY);
 
 void PAL_BattleBackupScreen(void);
 

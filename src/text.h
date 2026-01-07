@@ -21,6 +21,7 @@
 #ifndef _TEXT_H
 #define _TEXT_H
 
+#include <stdint.h>
 #include <wchar.h>
 
 typedef enum tagDIALOGPOSITION
@@ -31,19 +32,19 @@ typedef enum tagDIALOGPOSITION
     kDialogCenterWindow
 } DIALOGLOCATION;
 
-typedef struct tagTEXTLIB {
-  int nCurrentDialogLine;
-  unsigned char bCurrentFontColor;
-  unsigned int posIcon;
-  unsigned int posDialogTitle;
-  unsigned int posDialogText;
-  unsigned char bDialogPosition;
-  unsigned char bIcon;
-  int iDelayTime;
-  int fUserSkip;
-  int fPlayingRNG;
-
-  unsigned char bufDialogIcons[282];
+typedef struct tagTEXTLIB
+{
+    int32_t nCurrentDialogLine;
+    uint8_t bCurrentFontColor;
+    uint32_t posIcon;
+    uint32_t posDialogTitle;
+    uint32_t posDialogText;
+    uint8_t bDialogPosition;
+    uint8_t bIcon;
+    int32_t iDelayTime;
+    int32_t fUserSkip;
+    int32_t fPlayingRNG;
+    uint8_t bufDialogIcons[282];
 } TEXTLIB;
 
 int PAL_InitText(
@@ -52,53 +53,53 @@ int PAL_InitText(
 void PAL_FreeText(
     void);
 
-const wchar_t *PAL_GetWord(unsigned int iNumWord);
+const wchar_t *PAL_GetWord(uint32_t iNumWord);
 
-const wchar_t *PAL_GetMsg(unsigned int iNumMsg);
+const wchar_t *PAL_GetMsg(uint32_t iNumMsg);
 
 wchar_t *PAL_UnescapeText(const wchar_t *lpszText);
 
 void PAL_DrawText(
     const wchar_t *lpszText,
-    unsigned int pos,
-    unsigned char bColor,
-    unsigned char fShadow,
-    unsigned char fUpdate);
+    uint32_t pos,
+    uint8_t bColor,
+    uint8_t fShadow,
+    uint8_t fUpdate);
 
 void PAL_DrawTextUnescape(
     const wchar_t *lpszText,
-    unsigned int pos,
-    unsigned char bColor,
-    unsigned char fShadow,
-    unsigned char fUpdate,
-    unsigned char fUnescape);
+    uint32_t pos,
+    uint8_t bColor,
+    uint8_t fShadow,
+    uint8_t fUpdate,
+    uint8_t fUnescape);
 
 void PAL_DialogSetDelayTime(
     int iDelayTime);
 
 void PAL_StartDialog(
-    unsigned char bDialogLocation,
-    unsigned char bFontColor,
-    int iNumCharFace,
+    uint8_t bDialogLocation,
+    uint8_t bFontColor,
+    int32_t iNumCharFace,
     int fPlayingRNG);
 
 void PAL_StartDialogWithOffset(
-    unsigned char bDialogLocation,
-    unsigned char bFontColor,
-    int iNumCharFace,
-    int fPlayingRNG,
-    int xOff,
+    uint8_t bDialogLocation,
+    uint8_t bFontColor,
+    int32_t iNumCharFace,
+    int32_t fPlayingRNG,
+    int32_t xOff,
     int yOff);
 
 int TEXT_DisplayText(
     const wchar_t *lpszText,
-    int x,
-    int y,
+    int32_t x,
+    int32_t y,
     int isDialog);
 
 void PAL_ShowDialogText(
     const wchar_t *lpszText,
-    unsigned char iDialogShadow);
+    uint8_t iDialogShadow);
 
 void PAL_ClearDialog(
     char fWaitForKey);
@@ -111,7 +112,7 @@ int PAL_DialogIsPlayingRNG(
 
 int PAL_swprintf(
     wchar_t *buffer,
-    int count,
+    int32_t count,
     const wchar_t *format,
     ...);
 

@@ -1,7 +1,8 @@
-#include "../src/driver.h"
+﻿#include "../src/driver.h"
 #include "../src/input.h"
 #include "DrvIf_internal.h"
 #include "caca.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,8 +42,8 @@ static const int g_KeyMap[][2] = {
 int DRIVER_Process_Events(void)
 {
     caca_event_t ev;
-    int res = 0;
-    int event, key, i;
+    int32_t res = 0;
+    int32_t event, key, i;
     if (dp)
         res = caca_get_event(dp, CACA_EVENT_QUIT | CACA_EVENT_KEY_PRESS | CACA_EVENT_KEY_RELEASE, &ev, 0);
     if (res)

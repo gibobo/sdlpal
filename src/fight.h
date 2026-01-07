@@ -21,14 +21,16 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
+#include <stdint.h>
+
 int PAL_BattleSelectAutoTargetFrom(
     int);
 
 int PAL_IsPlayerDying(
-    unsigned short);
+    uint16_t);
 
 int PAL_IsPlayerHealthy(
-    unsigned short wPlayerRole);
+    uint16_t wPlayerRole);
 
 int PAL_BattleSelectAutoTarget(
     void);
@@ -46,27 +48,27 @@ void PAL_BattleCommitAction(
     int fRepeat);
 
 void PAL_BattlePlayerPerformAction(
-    unsigned short wPlayerIndex);
+    uint16_t wPlayerIndex);
 
 void PAL_BattleEnemyPerformAction(
-    unsigned short wEnemyIndex);
+    uint16_t wEnemyIndex);
 
 void PAL_BattleShowPlayerPreMagicAnim(
-    unsigned short wPlayerIndex,
+    uint16_t wPlayerIndex,
     int fSummon);
 
 void PAL_BattleDelay(
-    unsigned short wDuration,
-    unsigned short wObjectID,
+    uint16_t wDuration,
+    uint16_t wObjectID,
     int fUpdateGesture);
 
 void PAL_BattleStealFromEnemy(
-    unsigned short wTarget,
-    unsigned short wStealRate);
+    uint16_t wTarget,
+    uint16_t wStealRate);
 
 void PAL_BattleSimulateMagic(
-    short sTarget,
-    unsigned short wMagicObjectID,
-    unsigned short wBaseDamage);
+    int16_t sTarget,
+    uint16_t wMagicObjectID,
+    uint16_t wBaseDamage);
 
 #endif

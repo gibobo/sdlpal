@@ -21,23 +21,25 @@
 #ifndef UIGAME_H
 #define UIGAME_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void PAL_OpeningMenu(void);
+    void PAL_OpeningMenu(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-unsigned short PAL_SaveSlotMenu(unsigned short wDefaultSlot);
+uint16_t PAL_SaveSlotMenu(uint16_t wDefaultSlot);
 
-unsigned short PAL_TripleMenu(unsigned short wThirdWord);
+uint16_t PAL_TripleMenu(uint16_t wThirdWord);
 
-unsigned char PAL_ConfirmMenu(void);
+uint8_t PAL_ConfirmMenu(void);
 
-unsigned char PAL_SwitchMenu(unsigned char fEnabled);
+uint8_t PAL_SwitchMenu(uint8_t fEnabled);
 
 void PAL_InGameMagicMenu(void);
 
@@ -45,13 +47,13 @@ void PAL_InGameMenu(void);
 
 void PAL_PlayerStatus(void);
 
-unsigned short PAL_ItemUseMenu(unsigned short wItemToUse);
+uint16_t PAL_ItemUseMenu(uint16_t wItemToUse);
 
-void PAL_BuyMenu(unsigned short wStoreNum);
+void PAL_BuyMenu(uint16_t wStoreNum);
 
 void PAL_SellMenu(void);
 
-void PAL_EquipItemMenu(unsigned short wItem);
+void PAL_EquipItemMenu(uint16_t wItem);
 
 void PAL_QuitGame(void);
 

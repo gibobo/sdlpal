@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
 //
@@ -24,6 +24,7 @@
 #include "../src/driver.h"
 #include "../src/video.h"
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,7 +38,7 @@
 #include <GLFW/glfw3.h>
 #endif
 
-static unsigned int gProgramId = 0;
+static uint32_t gProgramId = 0;
 static int position = -1;
 static int texcoord = -1;
 static int texture = -1;
@@ -54,7 +55,7 @@ GLuint compileProgram(const char *vtx, const char *frag, int is_source);
 
 char *readShaderFile(const char *filename)
 {
-    long filesize = 0;
+    int64_t filesize = 0;
     char *buf = NULL;
     FILE *fp = NULL;
     if ((fp = fopen(filename, "rb")))
@@ -72,7 +73,7 @@ char *readShaderFile(const char *filename)
 
 char *skip_version(char *src)
 {
-    int glslVersion = -1;
+    int32_t glslVersion = -1;
     sscanf(src, "#version %d", &glslVersion);
     if (glslVersion != -1)
     {
@@ -88,7 +89,7 @@ GLuint compileShader(const char *sourceOrFilename, GLuint shaderType, int is_sou
 #define SHADER_TYPE(shaderType) (shaderType == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT")
     char *pShaderBuffer;
     char *source = (is_source) ? (char *)sourceOrFilename : readShaderFile(sourceOrFilename);
-    unsigned int sourceLen = (unsigned int)strlen(source) * 2U;
+    uint32_t sourceLen = (uint32_t)strlen(source) * 2U;
     pShaderBuffer = (char *)malloc(sourceLen);
     memset(pShaderBuffer, 0, sourceLen);
 
@@ -152,7 +153,7 @@ GLuint compileProgram(const char *vtx, const char *frag, int is_source)
     return programId;
 }
 
-void VIDEO_GLSL_Initialize(int width, int height)
+void VIDEO_GLSL_Initialize(uint32_t width, uint32_t height)
 {
     window_width = width;
     window_height = height;

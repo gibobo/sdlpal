@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -33,17 +33,17 @@
 
 static struct MAGICITEM
 {
-    unsigned short wMagic;
-    unsigned short wMP;
-    int fEnabled;
+    uint16_t wMagic;
+    uint16_t wMP;
+    int32_t fEnabled;
 } rgMagicItem[MAX_PLAYER_MAGICS];
 
 static int g_iNumMagic = 0;
 static int g_iCurrentItem = 0;
-static unsigned short g_wPlayerMP = 0;
-extern unsigned char *gpSpriteUI;
+static uint16_t g_wPlayerMP = 0;
+extern uint8_t *gpSpriteUI;
 
-unsigned short
+uint16_t
 PAL_MagicSelectionMenuUpdate(
     void)
 /*++
@@ -61,15 +61,15 @@ PAL_MagicSelectionMenuUpdate(
 
 --*/
 {
-    int i, j, k, line, item_delta = 0;
-    unsigned char bColor;
-    unsigned short wScript;
-    const int iItemsPerLine = 32 / 10;
-    const int iItemTextWidth = 8 * 10 + 7;
-    const int iLinesPerPage = 5;
-    const int iBoxYOffset = 0;
-    const int iCursorXOffset = 10 * 5 / 2;
-    const int iPageLineOffset = iLinesPerPage / 2;
+    int32_t i, j, k, line, item_delta = 0;
+    uint8_t bColor;
+    uint16_t wScript;
+    const int32_t iItemsPerLine = 32 / 10;
+    const int32_t iItemTextWidth = 8 * 10 + 7;
+    const int32_t iLinesPerPage = 5;
+    const int32_t iBoxYOffset = 0;
+    const int32_t iCursorXOffset = 10 * 5 / 2;
+    const int32_t iPageLineOffset = iLinesPerPage / 2;
 
     //
     // Check for inputs
@@ -112,7 +112,7 @@ PAL_MagicSelectionMenuUpdate(
     {
         if (gpGlobals->g.lprgScriptEntry[wScript].wOperation == 0xFFFF)
         {
-            int line_incr = (gpGlobals->g.lprgScriptEntry[wScript].rgwOperand[1] != 1) ? 1 : 0;
+            int32_t line_incr = (gpGlobals->g.lprgScriptEntry[wScript].rgwOperand[1] != 1) ? 1 : 0;
             wScript = PAL_RunAutoScript(wScript, line);
             line += line_incr;
         }
@@ -215,9 +215,9 @@ PAL_MagicSelectionMenuUpdate(
 }
 
 void PAL_MagicSelectionMenuInit(
-    unsigned short wPlayerRole,
-    unsigned char fInBattle,
-    unsigned short wDefaultMagic)
+    uint16_t wPlayerRole,
+    uint8_t fInBattle,
+    uint16_t wDefaultMagic)
 /*++
   Purpose:
 
@@ -237,8 +237,8 @@ void PAL_MagicSelectionMenuInit(
 
 --*/
 {
-    unsigned short w;
-    int i, j;
+    uint16_t w;
+    int32_t i, j;
 
     g_iCurrentItem = 0;
     g_iNumMagic = 0;
@@ -290,7 +290,7 @@ void PAL_MagicSelectionMenuInit(
     //
     for (i = 0; i < g_iNumMagic - 1; i++)
     {
-        int fCompleted = true;
+        int32_t fCompleted = true;
 
         for (j = 0; j < g_iNumMagic - 1 - i; j++)
         {
@@ -323,11 +323,11 @@ void PAL_MagicSelectionMenuInit(
     }
 }
 
-unsigned short
+uint16_t
 PAL_MagicSelectionMenu(
-    unsigned short wPlayerRole,
-    unsigned char fInBattle,
-    unsigned short wDefaultMagic)
+    uint16_t wPlayerRole,
+    uint8_t fInBattle,
+    uint16_t wDefaultMagic)
 /*++
   Purpose:
 
@@ -347,8 +347,8 @@ PAL_MagicSelectionMenu(
 
 --*/
 {
-    int i, j;
-    unsigned short w = 0xFFFF;
+    int32_t i, j;
+    uint16_t w = 0xFFFF;
 
     PAL_MagicSelectionMenuInit(wPlayerRole, fInBattle, wDefaultMagic);
     PAL_ClearKeyState();

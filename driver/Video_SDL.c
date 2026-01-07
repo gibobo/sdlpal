@@ -1,37 +1,38 @@
-#include "../src/driver.h"
+﻿#include "../src/driver.h"
 #include "../src/util.h"
 #include "../src/video.h"
 #include "DrvIf_internal.h"
 #include <SDL.h>
+#include <stdint.h>
 #include <string.h>
 
 static int window_width = 320;
 static int window_height = 200;
-static unsigned char *framebuffer = NULL; // RGB888
-static unsigned char *palette = NULL;
+static uint8_t *framebuffer = NULL; // RGB888
+static uint8_t *palette = NULL;
 static SDL_Window *gpWindow = NULL;
 static SDL_Renderer *gpRenderer = NULL;
 static SDL_Texture *gpTexture = NULL;
 
 // Function prototypes
-void DRIVER_FrameResize(unsigned int width, unsigned int height);
+void DRIVER_FrameResize(uint32_t width, uint32_t height);
 
 void DRIVER_FrameShow(
-    unsigned char *frame,
-    const unsigned short roi_x,
-    const unsigned short roi_y,
-    const unsigned short roi_w,
-    const unsigned short roi_h,
-    const unsigned char padding_flag)
+    uint8_t *frame,
+    const uint16_t roi_x,
+    const uint16_t roi_y,
+    const uint16_t roi_w,
+    const uint16_t roi_h,
+    const uint8_t padding_flag)
 {
     if (!gpRenderer || !gpTexture || framebuffer == NULL || palette == NULL)
         return;
 
-    unsigned short x, y;
-    unsigned short roi_x2 = roi_x + roi_w;
-    unsigned short roi_y2 = roi_y + roi_h;
-    unsigned char *src = frame;
-    unsigned char *dst = framebuffer;
+    uint16_t x, y;
+    uint16_t roi_x2 = roi_x + roi_w;
+    uint16_t roi_y2 = roi_y + roi_h;
+    uint8_t *src = frame;
+    uint8_t *dst = framebuffer;
 
     for (y = 0; y < SCREEN_H; y++)
     {
@@ -71,14 +72,14 @@ void DRIVER_FrameShow(
     SDL_RenderPresent(gpRenderer);
 }
 
-void DRIVER_FrameResize(unsigned int width, unsigned int height)
+void DRIVER_FrameResize(uint32_t width, uint32_t height)
 {
     window_width = (int)width;
     window_height = (int)height;
     // Renderer automatically handles scaling
 }
 
-void DRIVER_UpdatePalette(const unsigned char *rgPalette)
+void DRIVER_UpdatePalette(const uint8_t *rgPalette)
 {
     if (rgPalette)
         memcpy(palette, rgPalette, 256 * 3);
@@ -124,8 +125,8 @@ int DRIVER_Init_Video(void)
         return -1;
     }
 
-    framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
-    palette = (unsigned char *)UTIL_malloc(256 * 3);
+    framebuffer = (uint8_t *)UTIL_malloc(SCREEN_SIZE * 3);
+    palette = (uint8_t *)UTIL_malloc(256 * 3);
     return 0;
 }
 

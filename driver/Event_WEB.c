@@ -1,4 +1,4 @@
-#include "../src/audio.h"
+﻿#include "../src/audio.h"
 #include "../src/driver.h"
 #include "../src/input.h"
 #include "../src/util.h"
@@ -16,7 +16,7 @@ extern void send_audio_config(void);
 extern void send_audio_data(void);
 
 void handle_input(const char *data, size_t len);
-void ev_handler(struct mg_connection *nc, int ev, void *ev_data);
+void ev_handler(struct mg_connection *nc, int32_t ev, void *ev_data);
 
 typedef struct
 {
@@ -86,7 +86,7 @@ void handle_input(const char *data, size_t len)
     }
 }
 
-void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
+void ev_handler(struct mg_connection *nc, int32_t ev, void *ev_data)
 {
     if (ev == MG_EV_HTTP_MSG)
     {
@@ -149,9 +149,9 @@ void DRIVER_DeInit_Event(void)
 
 int DRIVER_Process_Events(void)
 {
-    static unsigned long video_trigger_ticks = 0;
-    static unsigned long audio_trigger_ticks = 0;
-    unsigned long current_time;
+    static uint32_t video_trigger_ticks = 0;
+    static uint32_t audio_trigger_ticks = 0;
+    uint32_t current_time;
 
     while (ws_conn == NULL) // Wait for WebSocket connection to be established
     {

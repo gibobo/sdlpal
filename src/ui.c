@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -29,15 +29,15 @@
 #include "video.h"
 #include <stdbool.h>
 
-unsigned char *gpSpriteUI = NULL;
+uint8_t *gpSpriteUI = NULL;
 
 static BOX *PAL_CreateBoxInternal(const VIDEO_Rect *rect)
 {
     BOX *lpBox = (BOX *)UTIL_calloc(1, sizeof(BOX));
     lpBox->pos = PAL_XY(rect->x, rect->y);
     lpBox->lpSavedArea = VIDEO_DuplicateSurface(rect);
-    lpBox->wWidth = (unsigned short)rect->w;
-    lpBox->wHeight = (unsigned short)rect->h;
+    lpBox->wWidth = (uint16_t)rect->w;
+    lpBox->wHeight = (uint16_t)rect->h;
     return lpBox;
 }
 
@@ -61,10 +61,10 @@ int PAL_InitUI(
     //
     // Load the UI sprite.
     //
-    int iSize = RES_MKFGetChunkSize(CHUNKNUM_SPRITEUI, Res_DATA);
+    int32_t iSize = RES_MKFGetChunkSize(CHUNKNUM_SPRITEUI, Res_DATA);
     if (iSize > 0)
     {
-        gpSpriteUI = (unsigned char *)UTIL_calloc(1, iSize);
+        gpSpriteUI = (uint8_t *)UTIL_calloc(1, iSize);
         RES_MKFReadChunk(gpSpriteUI, iSize, CHUNKNUM_SPRITEUI, Res_DATA);
     }
     return (gpSpriteUI != NULL) ? 0 : -1;
@@ -93,22 +93,22 @@ void PAL_FreeUI(
 }
 
 void PAL_CreateBox(
-    unsigned int pos,
-    int nRows,
-    int nColumns,
-    int iStyle,
+    uint32_t pos,
+    int32_t nRows,
+    int32_t nColumns,
+    int32_t iStyle,
     BOX **lpBox)
 {
     PAL_CreateBoxWithShadow(pos, nRows, nColumns, iStyle, lpBox, 6);
 }
 
 void PAL_CreateBoxWithShadow(
-    unsigned int pos,
-    int nRows,
-    int nColumns,
-    int iStyle,
+    uint32_t pos,
+    int32_t nRows,
+    int32_t nColumns,
+    int32_t iStyle,
     BOX **lpBox,
-    unsigned char nShadowOffset)
+    uint8_t nShadowOffset)
 /*++
   Purpose:
 
@@ -133,8 +133,8 @@ void PAL_CreateBoxWithShadow(
 
 --*/
 {
-    int i, j, x, m, n;
-    const unsigned char *rglpBorderBitmap[3][3];
+    int32_t i, j, x, m, n;
+    const uint8_t *rglpBorderBitmap[3][3];
     VIDEO_Rect rect;
 
     //
@@ -204,18 +204,18 @@ void PAL_CreateBoxWithShadow(
 }
 
 void PAL_CreateSingleLineBox(
-    unsigned int pos,
-    unsigned short nLen,
+    uint32_t pos,
+    uint16_t nLen,
     BOX **lpBox)
 {
     PAL_CreateSingleLineBoxWithShadow(pos, nLen, lpBox, 6);
 }
 
 void PAL_CreateSingleLineBoxWithShadow(
-    unsigned int pos,
-    unsigned short nLen,
+    uint32_t pos,
+    uint16_t nLen,
     BOX **lpBox,
-    unsigned char nShadowOffset)
+    uint8_t nShadowOffset)
 /*++
   Purpose:
 
@@ -236,12 +236,12 @@ void PAL_CreateSingleLineBoxWithShadow(
 
 --*/
 {
-    const unsigned char *lpBitmapLeft;
-    const unsigned char *lpBitmapMid;
-    const unsigned char *lpBitmapRight;
+    const uint8_t *lpBitmapLeft;
+    const uint8_t *lpBitmapMid;
+    const uint8_t *lpBitmapRight;
     VIDEO_Rect rect;
-    int i;
-    int xSaved;
+    int32_t i;
+    int32_t xSaved;
 
     //
     // Get the bitmaps
@@ -348,13 +348,13 @@ void PAL_DeleteBox(BOX *lpBox)
     UTIL_free(lpBox);
 }
 
-unsigned short
+uint16_t
 PAL_ReadMenu(
-    void (*lpfnMenuItemChanged)(unsigned short),
+    void (*lpfnMenuItemChanged)(uint16_t),
     const MENUITEM *rgMenuItem,
-    int nMenuItem,
-    unsigned short wDefaultItem,
-    unsigned char bLabelColor)
+    int32_t nMenuItem,
+    uint16_t wDefaultItem,
+    uint8_t bLabelColor)
 /*++
   Purpose:
 
@@ -379,8 +379,8 @@ PAL_ReadMenu(
 
 --*/
 {
-    int i;
-    unsigned short wCurrentItem = (wDefaultItem < nMenuItem) ? wDefaultItem : 0;
+    int32_t i;
+    uint16_t wCurrentItem = (wDefaultItem < nMenuItem) ? wDefaultItem : 0;
 
     //
     // Fix issue #166
@@ -391,7 +391,7 @@ PAL_ReadMenu(
     //
     for (i = 0; i < nMenuItem; i++)
     {
-        unsigned char bColor = bLabelColor;
+        uint8_t bColor = bLabelColor;
 
         if (!rgMenuItem[i].fEnabled)
         {
@@ -581,9 +581,9 @@ PAL_ReadMenu(
 }
 
 void PAL_DrawNumber(
-    unsigned int iNum,
-    unsigned int nLength,
-    unsigned int pos,
+    uint32_t iNum,
+    uint32_t nLength,
+    uint32_t pos,
     NUMCOLOR color,
     NUMALIGN align)
 /*++
@@ -609,9 +609,9 @@ void PAL_DrawNumber(
 
 --*/
 {
-    unsigned int nActualLength, i;
-    int x, y;
-    const unsigned char *rglpBitmap[10];
+    uint32_t nActualLength, i;
+    int32_t x, y;
+    const uint8_t *rglpBitmap[10];
 
     //
     // Get the bitmaps. Blue starts from 29, Cyan from 56, Yellow from 19.
@@ -620,7 +620,7 @@ void PAL_DrawNumber(
 
     for (i = 0; i < 10; i++)
     {
-        rglpBitmap[i] = PAL_SpriteGetFrame(gpSpriteUI, (unsigned int)x + i);
+        rglpBitmap[i] = PAL_SpriteGetFrame(gpSpriteUI, (uint32_t)x + i);
     }
 
     i = iNum;
@@ -673,7 +673,7 @@ void PAL_DrawNumber(
     }
 }
 
-unsigned int
+uint32_t
 PAL_TextWidth(
     const wchar_t *itemText)
 /*++
@@ -691,9 +691,9 @@ PAL_TextWidth(
 
 --*/
 {
-    const unsigned int l = (unsigned int)wcslen(itemText);
-    unsigned int i = 0;
-    unsigned int w = 0;
+    const uint32_t l = (uint32_t)wcslen(itemText);
+    uint32_t i = 0;
+    uint32_t w = 0;
 
     for (i = 0; i < l; i++)
         w += PAL_CharWidth(itemText[i]);
@@ -701,9 +701,9 @@ PAL_TextWidth(
     return w << 3;
 }
 
-unsigned int PAL_MenuTextMaxWidth(
+uint32_t PAL_MenuTextMaxWidth(
     const MENUITEM *rgMenuItem,
-    unsigned int nMenuItem)
+    uint32_t nMenuItem)
 /*++
   Purpose:
 
@@ -720,9 +720,9 @@ unsigned int PAL_MenuTextMaxWidth(
 
 --*/
 {
-    unsigned int i = 0;
-    unsigned int r = 0;
-    unsigned int w = 0;
+    uint32_t i = 0;
+    uint32_t r = 0;
+    uint32_t w = 0;
     for (i = 0; i < nMenuItem; i++)
     {
         const wchar_t *itemText = PAL_GetWord(rgMenuItem[i].wNumWord);
@@ -733,9 +733,9 @@ unsigned int PAL_MenuTextMaxWidth(
     return r;
 }
 
-unsigned int PAL_WordMaxWidth(
-    int nFirstWord,
-    unsigned int nWordNum)
+uint32_t PAL_WordMaxWidth(
+    int32_t nFirstWord,
+    uint32_t nWordNum)
 /*++
   Purpose:
 
@@ -752,9 +752,9 @@ unsigned int PAL_WordMaxWidth(
 
 --*/
 {
-    unsigned int i = 0;
-    unsigned int w = 0;
-    unsigned int r = 0;
+    uint32_t i = 0;
+    uint32_t w = 0;
+    uint32_t r = 0;
     for (i = 0; i < nWordNum; i++)
     {
         w = PAL_WordWidth(nFirstWord + i);
@@ -764,8 +764,8 @@ unsigned int PAL_WordMaxWidth(
     return r;
 }
 
-unsigned int PAL_WordWidth(
-    unsigned int nWordIndex)
+uint32_t PAL_WordWidth(
+    uint32_t nWordIndex)
 /*++
   Purpose:
 

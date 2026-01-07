@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -39,9 +39,9 @@
 
 typedef struct tagSPRITE_TO_DRAW
 {
-    const unsigned char *lpSpriteFrame; // pointer to the frame bitmap
-    unsigned int pos;                   // position on the scene
-    int iLayer;                         // logical layer
+    const uint8_t *lpSpriteFrame; // pointer to the frame bitmap
+    uint32_t pos;                 // position on the scene
+    int32_t iLayer;               // logical layer
 } SPRITE_TO_DRAW;
 
 static SPRITE_TO_DRAW *g_rgSpriteToDraw = NULL;
@@ -50,9 +50,9 @@ static int p_nSpriteToDraw = 0;
 
 static void
 PAL_AddSpriteToDraw(
-    const unsigned char *lpSpriteFrame,
-    int x,
-    int y,
+    const uint8_t *lpSpriteFrame,
+    int32_t x,
+    int32_t y,
     int iLayer)
 /*++
    Purpose:
@@ -109,8 +109,8 @@ PAL_CalcCoverTiles(
 
 --*/
 {
-    int x, y, i, l, iTileHeight;
-    const unsigned char *lpTile;
+    int32_t x, y, i, l, iTileHeight;
+    const uint8_t *lpTile;
 
     const int sx = PAL_X(gpGlobals->viewport) + PAL_X(lpSpriteToDraw->pos) - lpSpriteToDraw->iLayer / 2;
     const int sy = PAL_Y(gpGlobals->viewport) + PAL_Y(lpSpriteToDraw->pos) - lpSpriteToDraw->iLayer;
@@ -119,9 +119,9 @@ PAL_CalcCoverTiles(
     const int width = PAL_RLEGetWidth(lpSpriteToDraw->lpSpriteFrame);
     const int height = PAL_RLEGetHeight(lpSpriteToDraw->lpSpriteFrame);
 
-    int dx = 0;
-    int dy = 0;
-    int dh = 0;
+    int32_t dx = 0;
+    int32_t dy = 0;
+    int32_t dh = 0;
 
     //
     // Loop through all the tiles in the area of the sprite.
@@ -172,7 +172,7 @@ PAL_CalcCoverTiles(
                 for (l = 0; l < 2; l++)
                 {
                     lpTile = PAL_MapGetTileBitmap(dx, dy, dh, l, (PALMAP *)PAL_GetCurrentMap());
-                    iTileHeight = (signed char)PAL_MapGetTileHeight(dx, dy, dh, l, (PALMAP *)PAL_GetCurrentMap());
+                    iTileHeight = (int8_t)PAL_MapGetTileHeight(dx, dy, dh, l, (PALMAP *)PAL_GetCurrentMap());
 
                     //
                     // Check if this tile may cover the sprites
@@ -211,7 +211,7 @@ PAL_SceneDrawSprites(
 
 --*/
 {
-    int i, x, y, vy;
+    int32_t i, x, y, vy;
 
     g_nSpriteToDraw = 0;
     //
@@ -223,8 +223,8 @@ PAL_SceneDrawSprites(
     //
     for (i = 0; i <= (gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower); i++)
     {
-        const unsigned char *lpBitmap =
-            PAL_SpriteGetFrame(PAL_GetPlayerSprite((unsigned char)i), gpGlobals->rgParty[i].wFrame);
+        const uint8_t *lpBitmap =
+            PAL_SpriteGetFrame(PAL_GetPlayerSprite((uint8_t)i), gpGlobals->rgParty[i].wFrame);
 
         if (lpBitmap == NULL)
         {
@@ -251,12 +251,12 @@ PAL_SceneDrawSprites(
     for (i = gpGlobals->g.rgScene[gpGlobals->wNumScene - 1].wEventObjectIndex;
          i < gpGlobals->g.rgScene[gpGlobals->wNumScene].wEventObjectIndex; i++)
     {
-        const unsigned char *lpFrame;
-        const unsigned char *lpSprite;
+        const uint8_t *lpFrame;
+        const uint8_t *lpSprite;
 
         EVENTOBJECT *lpEvtObj = &gpGlobals->g.lprgEventObject[i];
 
-        int iFrame;
+        int32_t iFrame;
 
         if (lpEvtObj->sState == kObjStateHidden || lpEvtObj->sVanishTime > 0 ||
             lpEvtObj->sState < 0)
@@ -267,7 +267,7 @@ PAL_SceneDrawSprites(
         //
         // Get the sprite
         //
-        lpSprite = PAL_GetEventObjectSprite((unsigned short)i + 1);
+        lpSprite = PAL_GetEventObjectSprite((uint16_t)i + 1);
         if (lpSprite == NULL)
         {
             continue;
@@ -341,7 +341,7 @@ PAL_SceneDrawSprites(
     for (x = 0; x < g_nSpriteToDraw - 1; x++)
     {
         SPRITE_TO_DRAW tmp;
-        int fSwap = false;
+        int32_t fSwap = false;
 
         for (y = 0; y < g_nSpriteToDraw - 1 - x; y++)
         {
@@ -376,7 +376,7 @@ PAL_SceneDrawSprites(
 }
 
 void PAL_ApplyWave(
-    unsigned char *pixels)
+    uint8_t *pixels)
 /*++
    Purpose:
 
@@ -392,11 +392,11 @@ void PAL_ApplyWave(
 
 --*/
 {
-    int wave[32];
-    int i, a, b;
+    int32_t wave[32];
+    int32_t i, a, b;
     static int index = 0;
-    unsigned char *p;
-    unsigned char buf[SCREEN_W];
+    uint8_t *p;
+    uint8_t buf[SCREEN_W];
 
     gpGlobals->wScreenWave += gpGlobals->sWaveProgression;
 
@@ -508,17 +508,17 @@ void PAL_MakeScene(
 }
 
 int PAL_CheckObstacle(
-    unsigned int pos,
-    int fCheckEventObjects,
-    unsigned short wSelfObject)
+    uint32_t pos,
+    int32_t fCheckEventObjects,
+    uint16_t wSelfObject)
 {
     return PAL_CheckObstacleWithRange(pos, fCheckEventObjects, wSelfObject, false);
 }
 
 int PAL_CheckObstacleWithRange(
-    unsigned int pos,
-    int fCheckEventObjects,
-    unsigned short wSelfObject,
+    uint32_t pos,
+    int32_t fCheckEventObjects,
+    uint16_t wSelfObject,
     int fCheckRange)
 /*++
    Purpose:
@@ -542,10 +542,10 @@ int PAL_CheckObstacleWithRange(
 
 --*/
 {
-    int x, y;
-    int h, xr, yr;
-    int blockX = PAL_X(gpGlobals->partyoffset) / 32;
-    int blockY = PAL_Y(gpGlobals->partyoffset) / 16;
+    int32_t x, y;
+    int32_t h, xr, yr;
+    int32_t blockX = PAL_X(gpGlobals->partyoffset) / 32;
+    int32_t blockY = PAL_Y(gpGlobals->partyoffset) / 16;
 
     //
     // Check if the map tile at the specified position is blocking
@@ -599,7 +599,7 @@ int PAL_CheckObstacleWithRange(
         //
         // Loop through all event objects in the current scene
         //
-        int i;
+        int32_t i;
         for (i = gpGlobals->g.rgScene[gpGlobals->wNumScene - 1].wEventObjectIndex;
              i < gpGlobals->g.rgScene[gpGlobals->wNumScene].wEventObjectIndex; i++)
         {
@@ -649,8 +649,8 @@ void PAL_UpdatePartyGestures(
 --*/
 {
     static int s_iThisStepFrame = 0;
-    int iStepFrameFollower = 0, iStepFrameLeader = 0;
-    int i;
+    int32_t iStepFrameFollower = 0, iStepFrameLeader = 0;
+    int32_t i;
 
     if (fWalking)
     {
@@ -754,7 +754,7 @@ void PAL_UpdatePartyGestures(
 
         for (i = 1; i <= (short)gpGlobals->wMaxPartyMemberIndex; i++)
         {
-            int f = gpGlobals->g.PlayerRoles->rgwWalkFrames[gpGlobals->rgParty[i].wPlayerRole];
+            int32_t f = gpGlobals->g.PlayerRoles->rgwWalkFrames[gpGlobals->rgParty[i].wPlayerRole];
             if (f == 0)
             {
                 f = 3;
@@ -790,7 +790,7 @@ void PAL_UpdateParty(
 
 --*/
 {
-    int xSource, ySource, xTarget, yTarget, xOffset, yOffset, i;
+    int32_t xSource, ySource, xTarget, yTarget, xOffset, yOffset, i;
 
     //
     // Has user pressed one of the arrow keys?
@@ -844,8 +844,8 @@ void PAL_UpdateParty(
 }
 
 void PAL_NPCWalkOneStep(
-    unsigned short wEventObjectID,
-    int iSpeed)
+    uint16_t wEventObjectID,
+    uint16_t iSpeed)
 /*++
   Purpose:
 

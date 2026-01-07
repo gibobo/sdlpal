@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -50,8 +50,8 @@ void PAL_GameUpdate(
 
 --*/
 {
-    unsigned short wEventObjectID, wDir;
-    int i;
+    uint16_t wEventObjectID, wDir;
+    int32_t i;
     EVENTOBJECT *p;
 
     //
@@ -131,7 +131,7 @@ void PAL_GameUpdate(
                         //
                         // The sprite has multiple frames. Try to adjust the direction.
                         //
-                        int xOffset, yOffset;
+                        int32_t xOffset, yOffset;
 
                         p->wCurrentFrameNum = 0;
 
@@ -186,7 +186,7 @@ void PAL_GameUpdate(
 
         if (p->sState > 0 && p->sVanishTime == 0)
         {
-            unsigned short wScriptEntry = p->wAutoScript;
+            uint16_t wScriptEntry = p->wAutoScript;
             if (wScriptEntry != 0)
             {
                 p->wAutoScript = PAL_RunAutoScript(wScriptEntry, wEventObjectID);
@@ -211,8 +211,8 @@ void PAL_GameUpdate(
             wDir = (p->wDirection + 1) % 4;
             for (i = 0; i < 4; i++)
             {
-                int x, y;
-                unsigned int pos;
+                int32_t x, y;
+                uint32_t pos;
 
                 x = PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset);
                 y = PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset);
@@ -264,7 +264,7 @@ void PAL_GameUseItem(
 
 --*/
 {
-    unsigned short wObject;
+    uint16_t wObject;
 
     while (true)
     {
@@ -280,7 +280,7 @@ void PAL_GameUseItem(
             //
             // Select the player to use the item on
             //
-            unsigned short wPlayer = 0;
+            uint16_t wPlayer = 0;
 
             while (true)
             {
@@ -345,7 +345,7 @@ void PAL_GameEquipItem(
 
 --*/
 {
-    unsigned short wObject;
+    uint16_t wObject;
 
     while (true)
     {
@@ -377,9 +377,9 @@ void PAL_Search(
 
 --*/
 {
-    int x, y, xOffset, yOffset, dx, dy, dh, ex, ey, eh, i, k, l;
+    int32_t x, y, xOffset, yOffset, dx, dy, dh, ex, ey, eh, i, k, l;
     EVENTOBJECT *p;
-    unsigned int rgPos[13];
+    uint32_t rgPos[13];
 
     //
     // Get the party location

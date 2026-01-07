@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -40,7 +40,7 @@
 
 static int glSeed = 0; // Our random number generator's seed.
 
-static void lsrand(unsigned int iInitialSeed)
+static void lsrand(uint32_t iInitialSeed)
 /*++
  Purpose:
 
@@ -82,12 +82,12 @@ static int lrand(void)
 --*/
 {
     if (glSeed == 0)                          // if the random seed isn't initialized...
-        lsrand((unsigned int)time(NULL));     // initialize it first
+        lsrand((uint32_t)time(NULL));         // initialize it first
     glSeed = 1664525L * glSeed + 1013904223L; // do some twisted math (infinite suite)
     return ((glSeed >> 1) + 1073741824L);     // and return the result.
 }
 
-int RandomLong(int from, int to)
+int RandomLong(int32_t from, int32_t to)
 /*++
  Purpose:
 
@@ -207,11 +207,11 @@ int gettimeofday(struct timeval *tp, void *tzp)
 }
 #endif
 
-unsigned long UTIL_GetMilliseconds(void)
+uint32_t UTIL_GetMilliseconds(void)
 {
 #ifdef ARDUINO_ARCH_ESP32
     // High resolution monotonic time since boot in microseconds
-    return (unsigned long)(esp_timer_get_time() / 1000ULL);
+    return (uint32_t)(esp_timer_get_time() / 1000ULL);
 #else
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -219,7 +219,7 @@ unsigned long UTIL_GetMilliseconds(void)
 #endif
 }
 
-void UTIL_Sleep(unsigned int ms)
+void UTIL_Sleep(uint32_t ms)
 {
 #if defined(ARDUINO_ARCH_ESP32)
     vTaskDelay(pdMS_TO_TICKS(ms));
@@ -230,12 +230,12 @@ void UTIL_Sleep(unsigned int ms)
 #endif
 }
 
-unsigned int UTIL_Delay(unsigned int ms)
+uint32_t UTIL_Delay(uint32_t ms)
 {
     // Clear previous key states
     PAL_ClearKeyState();
 
-    unsigned long end_time = UTIL_GetMilliseconds() + ms;
+    uint32_t end_time = UTIL_GetMilliseconds() + ms;
     while (UTIL_GetMilliseconds() < end_time)
     {
         UTIL_Sleep(1);
@@ -245,7 +245,7 @@ unsigned int UTIL_Delay(unsigned int ms)
     return PAL_GetKeyInput();
 }
 
-unsigned int UTIL_WaitKeys(unsigned int ms, unsigned int wait_keys)
+uint32_t UTIL_WaitKeys(uint32_t ms, uint32_t wait_keys)
 {
     // If no specific keys are specified, wait for any key.
     if (wait_keys == 0)
@@ -255,7 +255,7 @@ unsigned int UTIL_WaitKeys(unsigned int ms, unsigned int wait_keys)
     PAL_ClearKeyState();
 
     PALKEY pressed_key = kKeyNone;
-    unsigned long end_time = UTIL_GetMilliseconds() + ms;
+    uint32_t end_time = UTIL_GetMilliseconds() + ms;
     while ((ms == 0 || UTIL_GetMilliseconds() < end_time) && (pressed_key == kKeyNone))
     {
         UTIL_Sleep(1);

@@ -1,7 +1,10 @@
 #ifndef _RESAMPLER_H_
 #define _RESAMPLER_H_
 
-enum {
+#include <stdint.h>
+
+enum
+{
     RESAMPLER_QUALITY_MIN = 0,
     RESAMPLER_QUALITY_ZOH = 0,
     RESAMPLER_QUALITY_BLEP = 1,
@@ -16,11 +19,11 @@ void resampler_deinit(void);
 void *resampler_create(void);
 void resampler_delete(void *);
 void resampler_set_quality(void *, int quality);
-unsigned int resampler_get_free_count(void *);
-void resampler_write_sample(void *, short sample);
+uint32_t resampler_get_free_count(void *);
+void resampler_write_sample(void *, int16_t sample);
 void resampler_set_rate(void *, double new_factor);
 void resampler_clear(void *);
-unsigned int resampler_get_sample_count(void *);
+uint32_t resampler_get_sample_count(void *);
 int resampler_get_sample(void *);
 void resampler_remove_sample(void *);
 

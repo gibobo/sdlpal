@@ -1,36 +1,37 @@
-#include "../src/driver.h"
+﻿#include "../src/driver.h"
 #include "../src/util.h"
 #include "../src/video.h"
 #include "DrvIf_internal.h"
 #include "utils/video_glsl.h"
 #include <GLFW/glfw3.h>
+#include <stdint.h>
 #include <string.h>
 
-static int window_width = 320;
-static int window_height = 200;
-static unsigned char *framebuffer = NULL; // RGB888
-static unsigned char *palette = NULL;
+static uint32_t window_width = 320;
+static uint32_t window_height = 200;
+static uint8_t *framebuffer = NULL; // RGB888
+static uint8_t *palette = NULL;
 GLFWwindow *window = NULL;
 
-extern void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+extern void key_callback(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int mods);
+void framebuffer_size_callback(GLFWwindow *window, int32_t width, int height);
 
 void DRIVER_FrameShow(
-    unsigned char *frame,
-    const unsigned short roi_x,
-    const unsigned short roi_y,
-    const unsigned short roi_w,
-    const unsigned short roi_h,
-    const unsigned char padding_flag)
+    uint8_t *frame,
+    const uint16_t roi_x,
+    const uint16_t roi_y,
+    const uint16_t roi_w,
+    const uint16_t roi_h,
+    const uint8_t padding_flag)
 {
     if (window == NULL || framebuffer == NULL || palette == NULL)
         return;
 
-    unsigned short x, y;
-    unsigned short roi_x2 = roi_x + roi_w;
-    unsigned short roi_y2 = roi_y + roi_h;
-    unsigned char *src = frame;
-    unsigned char *dst = framebuffer;
+    uint16_t x, y;
+    uint16_t roi_x2 = roi_x + roi_w;
+    uint16_t roi_y2 = roi_y + roi_h;
+    uint8_t *src = frame;
+    uint8_t *dst = framebuffer;
 
     for (y = 0; y < SCREEN_H; y++)
     {
@@ -73,13 +74,13 @@ void DRIVER_FrameShow(
     }
 }
 
-void DRIVER_UpdatePalette(const unsigned char *rgPalette)
+void DRIVER_UpdatePalette(const uint8_t *rgPalette)
 {
     if (rgPalette)
         memcpy(palette, rgPalette, 256 * 3);
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+void framebuffer_size_callback(GLFWwindow *window, int32_t width, int height)
 {
     (void)window;
     window_width = width;
@@ -118,8 +119,8 @@ int DRIVER_Init_Video(void)
     VIDEO_GLSL_Initialize(window_width, window_height);
 
     glfwGetWindowSize(window, &window_width, &window_height);
-    framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE * 3);
-    palette = (unsigned char *)UTIL_malloc(256 * 3);
+    framebuffer = (uint8_t *)UTIL_malloc(SCREEN_SIZE * 3);
+    palette = (uint8_t *)UTIL_malloc(256 * 3);
     glfwSwapInterval(1);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     return 0;

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -29,17 +29,17 @@
     return 0
 
 int PAL_RLEBlitToSurface(
-    const unsigned char *lpBitmapRLE,
+    const uint8_t *lpBitmapRLE,
     VIDEO_Surface *lpDstSurface,
-    unsigned int pos)
+    uint32_t pos)
 {
     return PAL_RLEBlitToSurfaceWithShadow(lpBitmapRLE, lpDstSurface, pos, false);
 }
 
 int PAL_RLEBlitToSurfaceWithShadow(
-    const unsigned char *lpBitmapRLE,
+    const uint8_t *lpBitmapRLE,
     VIDEO_Surface *lpDstSurface,
-    unsigned int pos,
+    uint32_t pos,
     int bShadow)
 /*++
   Purpose:
@@ -63,18 +63,18 @@ int PAL_RLEBlitToSurfaceWithShadow(
 
 --*/
 {
-    int i, j, k, sx;
-    int x, y;
-    int uiLen = 0;
-    int uiWidth = 0;
-    int uiHeight = 0;
-    int uiSrcX = 0;
-    unsigned char T;
-    int dx = PAL_X(pos);
-    int dy = PAL_Y(pos);
+    int32_t i, j, k, sx;
+    int32_t x, y;
+    int32_t uiLen = 0;
+    int32_t uiWidth = 0;
+    int32_t uiHeight = 0;
+    int32_t uiSrcX = 0;
+    uint8_t T;
+    int32_t dx = PAL_X(pos);
+    int32_t dy = PAL_Y(pos);
 
-    unsigned char *dstPixels;
-    int dst_w, dst_h;
+    uint8_t *dstPixels;
+    int32_t dst_w, dst_h;
 
     // Check for NULL pointer.
     if (lpBitmapRLE == NULL || lpDstSurface == NULL || lpDstSurface->pixels == NULL)
@@ -94,8 +94,8 @@ int PAL_RLEBlitToSurfaceWithShadow(
     }
 
     // Get the width and height of the bitmap.
-    uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
-    uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
+    uiWidth = lpBitmapRLE[0] | (int)((uint32_t)lpBitmapRLE[1] << 8);
+    uiHeight = lpBitmapRLE[2] | (int)((uint32_t)lpBitmapRLE[3] << 8);
 
     // Check whether bitmap intersects the surface.
     if (uiWidth + dx <= 0 || dx >= dst_w ||
@@ -109,12 +109,12 @@ int PAL_RLEBlitToSurfaceWithShadow(
     uiLen = uiWidth * uiHeight;
 
     // Prepare a static shadow lookup table to avoid repeated bit ops in hot loop.
-    static unsigned char shadow_tbl[256];
+    static uint8_t shadow_tbl[256];
     static int shadow_tbl_inited = 0;
     if (bShadow && !shadow_tbl_inited)
     {
         for (int t = 0; t < 256; ++t)
-            shadow_tbl[t] = (unsigned char)((t & 0xF0) | ((t & 0x0F) >> 1));
+            shadow_tbl[t] = (uint8_t)((t & 0xF0) | ((t & 0x0F) >> 1));
         shadow_tbl_inited = 1;
     }
 
@@ -125,7 +125,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
         T = *lpBitmapRLE++;
         if ((T & 0x80) && T <= 0x80 + uiWidth)
         {
-            int skip = T - 0x80;
+            int32_t skip = T - 0x80;
             i += skip;
             uiSrcX += skip;
             if (uiSrcX >= uiWidth)
@@ -158,7 +158,7 @@ int PAL_RLEBlitToSurfaceWithShadow(
                 // Skip the points which are out of the surface.
                 if (x < 0)
                 {
-                    int skipx = -x;
+                    int32_t skipx = -x;
                     j += skipx;
                     if (j >= T)
                         break;
@@ -186,12 +186,12 @@ int PAL_RLEBlitToSurfaceWithShadow(
                     k = uiWidth - sx;
 
                 // Row pointer
-                unsigned char *row = dstPixels + (size_t)y * dst_w;
+                uint8_t *row = dstPixels + (size_t)y * dst_w;
                 if (bShadow)
                 {
                     // Apply shadow to existing destination pixels.
-                    unsigned char *dst = row + x;
-                    int kk = k;
+                    uint8_t *dst = row + x;
+                    int32_t kk = k;
                     // use lookup table per-byte for speed
                     while (kk--)
                     {
@@ -204,8 +204,8 @@ int PAL_RLEBlitToSurfaceWithShadow(
                 else
                 {
                     // Fast bulk copy from RLE buffer to surface row.
-                    unsigned char *dst = row + x;
-                    const unsigned char *src = lpBitmapRLE + j;
+                    uint8_t *dst = row + x;
+                    const uint8_t *src = lpBitmapRLE + j;
                     // memcpy is faster for large k; safe since src and dst do not overlap.
                     memcpy(dst, src, (size_t)k);
                     j += k;
@@ -240,9 +240,9 @@ int PAL_RLEBlitToSurfaceWithShadow(
 }
 
 int PAL_RLEBlitWithColorShift(
-    const unsigned char *lpBitmapRLE,
+    const uint8_t *lpBitmapRLE,
     VIDEO_Surface *lpDstSurface,
-    unsigned int pos,
+    uint32_t pos,
     int iColorShift)
 /*++
   Purpose:
@@ -266,16 +266,16 @@ int PAL_RLEBlitWithColorShift(
 
 --*/
 {
-    int i, j, k, sx;
-    int x, y;
-    int uiLen = 0;
-    int uiWidth = 0;
-    int uiHeight = 0;
-    int uiSrcX = 0;
-    unsigned char T, b;
-    int dx = PAL_X(pos);
-    int dy = PAL_Y(pos);
-    unsigned char *p;
+    int32_t i, j, k, sx;
+    int32_t x, y;
+    int32_t uiLen = 0;
+    int32_t uiWidth = 0;
+    int32_t uiHeight = 0;
+    int32_t uiSrcX = 0;
+    uint8_t T, b;
+    int32_t dx = PAL_X(pos);
+    int32_t dy = PAL_Y(pos);
+    uint8_t *p;
 
     //
     // Check for NULL pointer.
@@ -297,8 +297,8 @@ int PAL_RLEBlitWithColorShift(
     //
     // Get the width and height of the bitmap.
     //
-    uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
-    uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
+    uiWidth = lpBitmapRLE[0] | (int)((uint32_t)lpBitmapRLE[1] << 8);
+    uiHeight = lpBitmapRLE[2] | (int)((uint32_t)lpBitmapRLE[3] << 8);
 
     //
     // Check whether bitmap intersects the surface.
@@ -437,10 +437,10 @@ int PAL_RLEBlitWithColorShift(
 }
 
 int PAL_RLEBlitMonoColor(
-    const unsigned char *lpBitmapRLE,
+    const uint8_t *lpBitmapRLE,
     VIDEO_Surface *lpDstSurface,
-    unsigned int pos,
-    unsigned char bColor,
+    uint32_t pos,
+    uint8_t bColor,
     int iColorShift)
 /*++
   Purpose:
@@ -466,16 +466,16 @@ int PAL_RLEBlitMonoColor(
 
 --*/
 {
-    int i, j, k, sx;
-    int x, y;
-    int uiLen = 0;
-    int uiWidth = 0;
-    int uiHeight = 0;
-    int uiSrcX = 0;
-    unsigned char T, b;
-    int dx = PAL_X(pos);
-    int dy = PAL_Y(pos);
-    unsigned char *p;
+    int32_t i, j, k, sx;
+    int32_t x, y;
+    int32_t uiLen = 0;
+    int32_t uiWidth = 0;
+    int32_t uiHeight = 0;
+    int32_t uiSrcX = 0;
+    uint8_t T, b;
+    int32_t dx = PAL_X(pos);
+    int32_t dy = PAL_Y(pos);
+    uint8_t *p;
 
     // Check for NULL pointer.
     if (lpBitmapRLE == NULL || lpDstSurface == NULL)
@@ -491,8 +491,8 @@ int PAL_RLEBlitMonoColor(
     }
 
     // Get the width and height of the bitmap.
-    uiWidth = lpBitmapRLE[0] | (int)((unsigned int)lpBitmapRLE[1] << 8);
-    uiHeight = lpBitmapRLE[2] | (int)((unsigned int)lpBitmapRLE[3] << 8);
+    uiWidth = lpBitmapRLE[0] | (int)((uint32_t)lpBitmapRLE[1] << 8);
+    uiHeight = lpBitmapRLE[2] | (int)((uint32_t)lpBitmapRLE[3] << 8);
 
     // Check whether bitmap intersects the surface.
     if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
@@ -622,7 +622,7 @@ int PAL_RLEBlitMonoColor(
 }
 
 int PAL_FBPBlitToSurface(
-    unsigned char *lpBitmapFBP,
+    uint8_t *lpBitmapFBP,
     VIDEO_Surface *lpDstSurface)
 /*++
   Purpose:
@@ -653,8 +653,8 @@ int PAL_FBPBlitToSurface(
     return 0;
 }
 
-unsigned short PAL_RLEGetWidth(
-    const unsigned char *lpBitmapRLE)
+uint16_t PAL_RLEGetWidth(
+    const uint8_t *lpBitmapRLE)
 /*++
   Purpose:
 
@@ -683,11 +683,11 @@ unsigned short PAL_RLEGetWidth(
     }
 
     // Return the width of the bitmap.
-    return lpBitmapRLE[0] | ((unsigned short)lpBitmapRLE[1] << 8);
+    return lpBitmapRLE[0] | ((uint16_t)lpBitmapRLE[1] << 8);
 }
 
-unsigned short PAL_RLEGetHeight(
-    const unsigned char *lpBitmapRLE)
+uint16_t PAL_RLEGetHeight(
+    const uint8_t *lpBitmapRLE)
 /*++
   Purpose:
 
@@ -716,12 +716,12 @@ unsigned short PAL_RLEGetHeight(
     }
 
     // Return the height of the bitmap.
-    return lpBitmapRLE[2] | ((unsigned short)lpBitmapRLE[3] << 8);
+    return lpBitmapRLE[2] | ((uint16_t)lpBitmapRLE[3] << 8);
 }
 
-unsigned short
+uint16_t
 PAL_SpriteGetNumFrames(
-    const unsigned char *lpSprite)
+    const uint8_t *lpSprite)
 /*++
   Purpose:
 
@@ -742,12 +742,12 @@ PAL_SpriteGetNumFrames(
         return 0;
     }
 
-    return (lpSprite[0] | (int)((unsigned int)lpSprite[1] << 8)) - 1;
+    return (lpSprite[0] | (int)((uint32_t)lpSprite[1] << 8)) - 1;
 }
 
-unsigned char *
+uint8_t *
 PAL_SpriteGetFrame(
-    unsigned char *lpSprite,
+    uint8_t *lpSprite,
     int iFrameNum)
 /*++
   Purpose:
@@ -766,30 +766,30 @@ PAL_SpriteGetFrame(
 
 --*/
 {
-    unsigned int imagecount, offset;
+    uint32_t imagecount, offset;
 
     if (lpSprite == NULL)
     {
         return NULL;
     }
 
-    imagecount = lpSprite[0] | (unsigned int)lpSprite[1] << 8;
+    imagecount = lpSprite[0] | (uint32_t)lpSprite[1] << 8;
 
-    if (iFrameNum < 0 || (unsigned int)iFrameNum >= imagecount)
+    if (iFrameNum < 0 || (uint32_t)iFrameNum >= imagecount)
     {
         // The frame does not exist
         return NULL;
     }
 
     // Get the offset of the frame
-    iFrameNum = (unsigned int)iFrameNum << 1;
-    offset = (lpSprite[iFrameNum] | (unsigned int)lpSprite[iFrameNum + 1] << 8) << 1;
+    iFrameNum = (uint32_t)iFrameNum << 1;
+    offset = (lpSprite[iFrameNum] | (uint32_t)lpSprite[iFrameNum + 1] << 8) << 1;
     if (offset == 0x18444)
-        offset = (unsigned short)offset;
+        offset = (uint16_t)offset;
     return &lpSprite[offset];
 }
 
-unsigned int PAL_MKFGetChunkCount(void *fp)
+uint32_t PAL_MKFGetChunkCount(void *fp)
 /*++
   Purpose:
 
@@ -805,17 +805,17 @@ unsigned int PAL_MKFGetChunkCount(void *fp)
 
 --*/
 {
-    unsigned int iNumChunk = 0;
+    uint32_t iNumChunk = 0;
     if (fp)
     {
         UTIL_fseek(fp, 0, SEEK_SET);
-        if (UTIL_fread(&iNumChunk, sizeof(unsigned int), 1, fp) == 1)
+        if (UTIL_fread(&iNumChunk, sizeof(uint32_t), 1, fp) == 1)
             return (iNumChunk >> 2) - 1;
     }
     return 0;
 }
 
-unsigned int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
+uint32_t PAL_MKFGetChunkSize(uint32_t uiChunkNum, void *fp)
 /*++
   Purpose:
 
@@ -834,9 +834,9 @@ unsigned int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
 
 --*/
 {
-    unsigned int uiOffset = 0;
-    unsigned int uiNextOffset = 0;
-    unsigned int uiChunkCount = 0;
+    uint32_t uiOffset = 0;
+    uint32_t uiNextOffset = 0;
+    uint32_t uiChunkCount = 0;
 
     if (fp == NULL)
         return 0;
@@ -850,9 +850,9 @@ unsigned int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
     //
     // Get the offset of the specified chunk and the next chunk.
     //
-    UTIL_fseek(fp, uiChunkNum * sizeof(unsigned int), SEEK_SET);
-    Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
-    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
+    UTIL_fseek(fp, uiChunkNum * sizeof(uint32_t), SEEK_SET);
+    Check_fread(&uiOffset, sizeof(uint32_t), 1, fp);
+    Check_fread(&uiNextOffset, sizeof(uint32_t), 1, fp);
 
     if (uiOffset > uiNextOffset)
         return 0;
@@ -863,10 +863,10 @@ unsigned int PAL_MKFGetChunkSize(unsigned int uiChunkNum, void *fp)
 }
 
 //TO DO
-unsigned int PAL_MKFReadChunk(
+uint32_t PAL_MKFReadChunk(
     void *lpBuffer,
-    unsigned int uiBufferSize,
-    unsigned int uiChunkNum,
+    uint32_t uiBufferSize,
+    uint32_t uiChunkNum,
     void *fp)
 /*++
   Purpose:
@@ -891,10 +891,10 @@ unsigned int PAL_MKFReadChunk(
 
 --*/
 {
-    unsigned int uiOffset = 0;
-    unsigned int uiNextOffset = 0;
-    unsigned int uiChunkCount;
-    unsigned int uiChunkLen;
+    uint32_t uiOffset = 0;
+    uint32_t uiNextOffset = 0;
+    uint32_t uiChunkCount;
+    uint32_t uiChunkLen;
 
     if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0)
         return 0;
@@ -907,9 +907,9 @@ unsigned int PAL_MKFReadChunk(
         return 0;
 
     // Get the offset of the chunk.
-    UTIL_fseek(fp, sizeof(unsigned int) * uiChunkNum, SEEK_SET);
-    Check_fread(&uiOffset, sizeof(unsigned int), 1, fp);
-    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fp);
+    UTIL_fseek(fp, sizeof(uint32_t) * uiChunkNum, SEEK_SET);
+    Check_fread(&uiOffset, sizeof(uint32_t), 1, fp);
+    Check_fread(&uiNextOffset, sizeof(uint32_t), 1, fp);
 
     if (uiOffset > uiNextOffset)
         return 0;
@@ -924,10 +924,10 @@ unsigned int PAL_MKFReadChunk(
     return (int)UTIL_fread(lpBuffer, 1, uiChunkLen, fp);
 }
 
-unsigned int PAL_MKFDecompressChunk(
-    unsigned char **lpBuffer,
-    unsigned int uiBufferSize,
-    unsigned int uiChunkNum,
+uint32_t PAL_MKFDecompressChunk(
+    uint8_t **lpBuffer,
+    uint32_t uiBufferSize,
+    uint32_t uiChunkNum,
     void *fp)
 /*++
   Purpose:
@@ -952,18 +952,18 @@ unsigned int PAL_MKFDecompressChunk(
 
 --*/
 {
-    unsigned int len = PAL_MKFGetChunkSize(uiChunkNum, fp);
+    uint32_t len = PAL_MKFGetChunkSize(uiChunkNum, fp);
 
     if (len > 0)
     {
-        unsigned char *buf = (unsigned char *)UTIL_malloc(len);
+        uint8_t *buf = (uint8_t *)UTIL_malloc(len);
 
         PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
 
         if (uiBufferSize == 0 || *lpBuffer == NULL)
         {
             UTIL_free(*lpBuffer);
-            uiBufferSize = *(unsigned int *)buf;
+            uiBufferSize = *(uint32_t *)buf;
             *lpBuffer = UTIL_malloc(uiBufferSize);
         }
 

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Adplug - Replayer for many OPL2/OPL3 audio file formats.
  * Copyright (C) 1999 - 2007 Simon Peter, <dn.tlp@gmx.net>, et al.
  *
@@ -42,10 +42,12 @@
 #ifndef _OPL_H_
 #define _OPL_H_
 
-void Copl_Init(unsigned int samplerate, unsigned char stereo);
+#include <stdint.h>
+
+void Copl_Init(uint32_t samplerate, uint8_t stereo);
 void Copl_Deinit(void);
-void Copl_Reset(void);                                  // reinitialize OPL chip(s)
-void Copl_Write(unsigned short reg, unsigned char val); // combined register select + data write
-void Copl_Generate(short *buf, unsigned int samples);     // Emulation only: fill buffer
+void Copl_Reset(void);                            // reinitialize OPL chip(s)
+void Copl_Write(uint16_t reg, uint8_t val);       // combined register select + data write
+void Copl_Generate(int16_t *buf, uint32_t samples); // Emulation only: fill buffer
 
 #endif

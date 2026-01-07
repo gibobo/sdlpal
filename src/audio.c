@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -42,24 +42,24 @@ typedef struct tagAUDIODEVICE
 {
     AUDIOPLAYER *pMusPlayer;
     AUDIOPLAYER *pSoundPlayer;
-    void *pSoundBuffer;          /* The output buffer for sound */
-    unsigned char fMusicEnabled; /* Is BGM enabled? */
-    unsigned char fSoundEnabled; /* Is sound effect enabled? */
-    unsigned char fOpened;       /* Is the audio device opened? */
+    void *pSoundBuffer;    /* The output buffer for sound */
+    uint8_t fMusicEnabled; /* Is BGM enabled? */
+    uint8_t fSoundEnabled; /* Is sound effect enabled? */
+    uint8_t fOpened;       /* Is the audio device opened? */
 } AUDIODEVICE;
 
 static AUDIODEVICE gAudioDevice;
 
-PAL_FORCE_INLINE void AUDIO_MixNative(PAL_AUDIO_SAMPLE *dst, const PAL_AUDIO_SAMPLE *src, unsigned int samples)
+PAL_FORCE_INLINE void AUDIO_MixNative(PAL_AUDIO_SAMPLE *dst, const PAL_AUDIO_SAMPLE *src, uint32_t samples)
 {
     while (samples--)
     {
-        int mixed = PAL_AudioSampleToMixValue(*dst) + PAL_AudioSampleToMixValue(*src++);
+        int32_t mixed = PAL_AudioSampleToMixValue(*dst) + PAL_AudioSampleToMixValue(*src++);
         *dst++ = PAL_AudioMixValueToSample(mixed);
     }
 }
 
-void AUDIO_FillBuffer(void *stream, unsigned int len)
+void AUDIO_FillBuffer(void *stream, uint32_t len)
 {
     if (gAudioDevice.fOpened == false)
         return;
@@ -74,8 +74,8 @@ void AUDIO_FillBuffer(void *stream, unsigned int len)
     if (gAudioDevice.fSoundEnabled && gAudioDevice.pSoundPlayer && gAudioDevice.pSoundBuffer)
     {
         // Prevent buffer overflow by limiting the size to the allocated buffer size
-        unsigned int buffer_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
-        unsigned int safe_len = min(len, buffer_size);
+        uint32_t buffer_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
+        uint32_t safe_len = min(len, buffer_size);
         memset(gAudioDevice.pSoundBuffer, PAL_AUDIO_SAMPLE_SILENCE, buffer_size);
         gAudioDevice.pSoundPlayer->FillBuffer(gAudioDevice.pSoundPlayer, gAudioDevice.pSoundBuffer, safe_len);
 
@@ -205,7 +205,7 @@ void AUDIO_PlaySound(int iSoundNum)
     }
 }
 
-void AUDIO_PlayMusic(int iNumRIX, unsigned char fLoop, float flFadeTime)
+void AUDIO_PlayMusic(int32_t iNumRIX, uint8_t fLoop, float flFadeTime)
 {
     if (gAudioDevice.pMusPlayer)
     {
@@ -215,22 +215,22 @@ void AUDIO_PlayMusic(int iNumRIX, unsigned char fLoop, float flFadeTime)
     }
 }
 
-void AUDIO_EnableMusic(unsigned char fEnable)
+void AUDIO_EnableMusic(uint8_t fEnable)
 {
     gAudioDevice.fMusicEnabled = fEnable;
 }
 
-unsigned char AUDIO_MusicEnabled(void)
+uint8_t AUDIO_MusicEnabled(void)
 {
     return gAudioDevice.fMusicEnabled;
 }
 
-void AUDIO_EnableSound(unsigned char fEnable)
+void AUDIO_EnableSound(uint8_t fEnable)
 {
     gAudioDevice.fSoundEnabled = fEnable;
 }
 
-unsigned char AUDIO_SoundEnabled(void)
+uint8_t AUDIO_SoundEnabled(void)
 {
     return gAudioDevice.fSoundEnabled;
 }
@@ -251,7 +251,7 @@ int AUDIO_GetCurrentMusic(void)
 
 --*/
 {
-    int result = -1;
+    int32_t result = -1;
 
     if (gAudioDevice.pMusPlayer)
     {

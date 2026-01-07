@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -195,23 +195,25 @@ void PAL_MusicPlayer(void)
     const char *anim = "|/-\\";
     while (1)
     {
-        int animIdx = 0;
-        int musicNum = 0;
+        int32_t animIdx = 0;
+        int32_t musicNum = 0;
         printf("Enter music number (1-87, 0 to exit): ");
         fflush(stdout);
 
         if (scanf("%d", &musicNum) != 1)
         {
             // Clear invalid input
-            int c;
-            while ((c = getchar()) != '\n' && c != EOF);
+            int32_t c;
+            while ((c = getchar()) != '\n' && c != EOF)
+                ;
             printf("Invalid input! Please enter a number.\n");
             continue;
         }
 
         // Clear the input buffer
-        int c;
-        while ((c = getchar()) != '\n' && c != EOF);
+        int32_t c;
+        while ((c = getchar()) != '\n' && c != EOF)
+            ;
 
         // Exit if user enters 0
         if (musicNum == 0)
@@ -229,17 +231,17 @@ void PAL_MusicPlayer(void)
         // Play the selected music
         AUDIO_PlayMusic(musicNum, false, 0.0);
 
-        unsigned long startTime = UTIL_GetMilliseconds();
-        unsigned long lastUpdateTime = startTime;
-        int lastMusicNum = musicNum;
+        uint32_t startTime = UTIL_GetMilliseconds();
+        uint32_t lastUpdateTime = startTime;
+        int32_t lastMusicNum = musicNum;
 
         // Playback monitoring loop
         while (1)
         {
             UTIL_Delay(100);
-            int currentMusic = AUDIO_GetCurrentMusic();
-            unsigned long currentTime = UTIL_GetMilliseconds();
-            unsigned long elapsed = (currentTime - startTime) / 1000;
+            int32_t currentMusic = AUDIO_GetCurrentMusic();
+            uint32_t currentTime = UTIL_GetMilliseconds();
+            uint32_t elapsed = (currentTime - startTime) / 1000;
 
             // Check if music has stopped (music number changed to -1 or different number)
             if (currentMusic != lastMusicNum)
@@ -256,8 +258,8 @@ void PAL_MusicPlayer(void)
             // Update progress every 500ms
             if (currentTime - lastUpdateTime >= 500)
             {
-                unsigned long minutes = elapsed / 60;
-                unsigned long seconds = elapsed % 60;
+                uint32_t minutes = elapsed / 60;
+                uint32_t seconds = elapsed % 60;
 
                 // Simple animated progress indicator
 
@@ -291,21 +293,21 @@ void PAL_SplashScreen(void)
 
 --*/
 {
-    unsigned char *palette = PAL_GetPalette(1, false);
-    unsigned char rgCurrentPalette[PALETTE_SIZE];
+    uint8_t *palette = PAL_GetPalette(1, false);
+    uint8_t rgCurrentPalette[PALETTE_SIZE];
     VIDEO_Surface *lpBitmapUp = VIDEO_GetBackupSurface(0);
     VIDEO_Surface *lpBitmapDown = VIDEO_GetBackupSurface(1);
     VIDEO_Rect srcrect;
     VIDEO_Rect dstrect;
-    unsigned char *lpTitleBuf = NULL;
-    unsigned char *lpSpriteCrane = NULL;
-    unsigned char *lpBitmapTitle = NULL;
-    const unsigned char crane_num = 9;
-    int *cranepos = NULL;
-    unsigned int i;
-    unsigned short iImgPos = SCREEN_H;
-    unsigned short iTitleHeight;
-    unsigned int dwTime = 0;
+    uint8_t *lpTitleBuf = NULL;
+    uint8_t *lpSpriteCrane = NULL;
+    uint8_t *lpBitmapTitle = NULL;
+    const uint8_t crane_num = 9;
+    int32_t *cranepos = NULL;
+    uint32_t i;
+    uint16_t iImgPos = SCREEN_H;
+    uint16_t iTitleHeight;
+    uint32_t dwTime = 0;
 
     if (palette == NULL)
     {
@@ -319,8 +321,8 @@ void PAL_SplashScreen(void)
     RES_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, Res_MGO);
     RES_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, Res_MGO);
 
-    lpBitmapTitle = (unsigned char *)PAL_SpriteGetFrame(lpTitleBuf, 0);
-    iTitleHeight = lpBitmapTitle[2] | ((unsigned short)lpBitmapTitle[3] << 8);
+    lpBitmapTitle = (uint8_t *)PAL_SpriteGetFrame(lpTitleBuf, 0);
+    iTitleHeight = lpBitmapTitle[2] | ((uint16_t)lpBitmapTitle[3] << 8);
     lpBitmapTitle[2] = 0;
     lpBitmapTitle[3] = 0; // HACKHACK
 
@@ -352,7 +354,7 @@ void PAL_SplashScreen(void)
         if (dwTime <= iTitleHeight)
         {
             for (i = 0; i < PALETTE_SIZE; i++)
-                rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
+                rgCurrentPalette[i] = (uint8_t)(palette[i] * dwTime / iTitleHeight);
             DRIVER_UpdatePalette(rgCurrentPalette);
         }
 
@@ -380,7 +382,7 @@ void PAL_SplashScreen(void)
         {
             if (cranepos[i * 3 + 0] > -35)
             {
-                const unsigned char *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane, cranepos[i * 3 + 2]);
+                const uint8_t *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane, cranepos[i * 3 + 2]);
                 PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i * 3 + 0], cranepos[i * 3 + 1]));
                 cranepos[i * 3 + 0]--;
                 cranepos[i * 3 + 1] += (iImgPos & 1) ? 1 : 0;
@@ -404,15 +406,15 @@ void PAL_SplashScreen(void)
             break;
     }
     // Quit the splash screen
-    lpBitmapTitle[2] = (unsigned char)(iTitleHeight & 0xFF);
-    lpBitmapTitle[3] = (unsigned char)((iTitleHeight >> 8) & 0xFF); // HACKHACK
+    lpBitmapTitle[2] = (uint8_t)(iTitleHeight & 0xFF);
+    lpBitmapTitle[3] = (uint8_t)((iTitleHeight >> 8) & 0xFF); // HACKHACK
     PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
 
     // If the picture has not completed fading in, complete the rest
     while (dwTime < iTitleHeight)
     {
         for (i = 0; i < PALETTE_SIZE; i++)
-            rgCurrentPalette[i] = (unsigned char)(palette[i] * dwTime / iTitleHeight);
+            rgCurrentPalette[i] = (uint8_t)(palette[i] * dwTime / iTitleHeight);
         DRIVER_UpdatePalette(rgCurrentPalette);
         VIDEO_UpdateScreen(NULL);
         UTIL_Delay(8);

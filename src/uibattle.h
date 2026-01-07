@@ -22,6 +22,7 @@
 #define UIBATTLE_H
 
 #include "ui.h"
+#include <stdint.h>
 
 typedef enum tagBATTLEUISTATE
 {
@@ -80,9 +81,9 @@ typedef enum tagBATTLEUIACTION
 
 typedef struct tagSHOWNUM
 {
-    unsigned short wNum;
-    unsigned int pos;
-    unsigned long dwTime;
+    uint16_t wNum;
+    uint32_t pos;
+    uint32_t dwTime;
     NUMCOLOR color;
 } SHOWNUM;
 
@@ -91,34 +92,34 @@ typedef struct tagBATTLEUI
     BATTLEUISTATE state;
     BATTLEMENUSTATE MenuState;
 
-    unsigned long dwMsgShowTime;     // the end time of showing the message
-    unsigned short wNextMsgDuration; // duration of the next message
+    uint32_t dwMsgShowTime;    // the end time of showing the message
+    uint16_t wNextMsgDuration; // duration of the next message
 
-    unsigned short wCurPlayerIndex; // index of the current player
-    unsigned short wSelectedAction; // current selected action
-    int iSelectedIndex;             // current selected index of player or enemy
+    uint16_t wCurPlayerIndex; // index of the current player
+    uint16_t wSelectedAction; // current selected action
+    int32_t iSelectedIndex;   // current selected index of player or enemy
 
-    unsigned short wActionType; // type of action to be performed
-    unsigned short wObjectID;   // object ID of the item or magic to use
+    uint16_t wActionType; // type of action to be performed
+    uint16_t wObjectID;   // object ID of the item or magic to use
 
-    unsigned char fAutoAttack; // TRUE if auto attack
+    uint8_t fAutoAttack; // TRUE if auto attack
 
     SHOWNUM rgShowNum[BATTLEUI_MAX_SHOWNUM];
 } BATTLEUI;
 
 void PAL_PlayerInfoBox(
-    unsigned int pos,
-    unsigned short wPlayerRole);
+    uint32_t pos,
+    uint16_t wPlayerRole);
 
 void PAL_BattleUIPlayerReady(
-    unsigned short wPlayerIndex);
+    uint16_t wPlayerIndex);
 
 void PAL_BattleUIUpdate(
     void);
 
 void PAL_BattleUIShowNum(
-    unsigned short wNum,
-    unsigned int pos,
+    uint16_t wNum,
+    uint32_t pos,
     NUMCOLOR color);
 
 #endif

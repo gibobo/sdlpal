@@ -21,13 +21,14 @@
 #ifndef FONT_H
 #define FONT_H
 
+#include <stdint.h>
+
 #define FONT_HEIGHT (16)
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-/*++
+    /*++
   Purpose:
 
     Initialize the font subsystem.
@@ -43,7 +44,7 @@ extern "C"
 --*/
 void PAL_InitFont(void);
 
-/*++
+    /*++
   Purpose:
 
     Deinitialize the font subsystem.
@@ -58,7 +59,7 @@ void PAL_InitFont(void);
 --*/
 void PAL_DeInitFont(void);
 
-/*++
+    /*++
   Purpose:
 
     Draw a Unicode character on a surface.
@@ -79,13 +80,13 @@ void PAL_DeInitFont(void);
 
 --*/
 void PAL_DrawCharOnSurface(
-    unsigned short codepoint,
-    const unsigned short x,
-    const unsigned short y,
-    const unsigned char bColor,
-    const unsigned char fShadow);
+    uint16_t codepoint,
+    const uint16_t x,
+    const uint16_t y,
+    const uint8_t bColor,
+    const uint8_t fShadow);
 
-/*++
+    /*++
   Purpose:
 
     Get the text width of a character.
@@ -99,7 +100,7 @@ void PAL_DrawCharOnSurface(
     The width of the character in pixels, 16 for full-width char and 8 for half-width char.
 
 --*/
-unsigned char PAL_CharWidth(unsigned short codepoint);
+uint8_t PAL_CharWidth(uint16_t codepoint);
 
 #ifdef __cplusplus
 }

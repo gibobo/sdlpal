@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -29,9 +29,9 @@
 // The global palette
 VIDEO_Surface *gpScreen = NULL;                  // Screen buffer
 static VIDEO_Surface *gpBackup[] = {NULL, NULL}; // Backup screen buffer
-volatile unsigned char g_bRenderPaused = false;
-static unsigned short g_wShakeTime = 0;
-static unsigned short g_wShakeLevel = 0;
+volatile uint8_t g_bRenderPaused = false;
+static uint16_t g_wShakeTime = 0;
+static uint16_t g_wShakeLevel = 0;
 
 int VIDEO_Startup(void)
 /*++
@@ -119,13 +119,13 @@ void VIDEO_UpdateScreen(const VIDEO_Rect *lpRect)
     else if (g_wShakeTime != 0)
     {
         g_wShakeTime--;
-        DRIVER_FrameShow(gpScreen->pixels, 0, (unsigned short)((g_wShakeTime & 0x1) * g_wShakeLevel), SCREEN_W, (unsigned short)(SCREEN_H - g_wShakeLevel), true);
+        DRIVER_FrameShow(gpScreen->pixels, 0, (uint16_t)((g_wShakeTime & 0x1) * g_wShakeLevel), SCREEN_W, (uint16_t)(SCREEN_H - g_wShakeLevel), true);
     }
     else
         DRIVER_FrameShow(gpScreen->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
 }
 
-void VIDEO_ShakeScreen(unsigned short wShakeTime, unsigned short wShakeLevel)
+void VIDEO_ShakeScreen(uint16_t wShakeTime, uint16_t wShakeLevel)
 /*++
   Purpose:
 
@@ -164,7 +164,7 @@ void VIDEO_SwitchScreen(void)
 
 --*/
 {
-    int i, j;
+    int32_t i, j;
     const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
     for (i = 0; i < 6; i++)
@@ -177,7 +177,7 @@ void VIDEO_SwitchScreen(void)
     }
 }
 
-void VIDEO_FadeScreen(unsigned short wSpeed)
+void VIDEO_FadeScreen(uint16_t wSpeed)
 /*++
   Purpose:
 
@@ -194,9 +194,9 @@ void VIDEO_FadeScreen(unsigned short wSpeed)
 
 --*/
 {
-    unsigned int i, j, k;
-    const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
-    unsigned char a, b;
+    uint32_t i, j, k;
+    const uint32_t rgIndex[6] = {0, 3, 1, 5, 2, 4};
+    uint8_t a, b;
     VIDEO_Rect ROI = {0, 0, SCREEN_W, SCREEN_H};
 
     wSpeed = (wSpeed + 1) * 10;
@@ -256,10 +256,10 @@ VIDEO_Surface *VIDEO_CreateCompatibleSizedSurface(const VIDEO_Rect *pSize)
     // Create the surface
     VIDEO_Surface *dest = NULL;
     dest = (VIDEO_Surface *)UTIL_malloc(sizeof(VIDEO_Surface));
-    dest->w = pSize ? max((unsigned short)pSize->w, 0) : SCREEN_W;
-    dest->h = pSize ? max((unsigned short)pSize->h, 0) : SCREEN_H;
+    dest->w = pSize ? max((uint16_t)pSize->w, 0) : SCREEN_W;
+    dest->h = pSize ? max((uint16_t)pSize->h, 0) : SCREEN_H;
     if (dest->w && dest->h)
-        dest->pixels = (unsigned char *)UTIL_calloc(dest->w * dest->h, sizeof(unsigned char));
+        dest->pixels = (uint8_t *)UTIL_calloc(dest->w * dest->h, sizeof(uint8_t));
     else
     {
         UTIL_free(dest);
@@ -291,7 +291,7 @@ VIDEO_Surface *VIDEO_DuplicateSurface(const VIDEO_Rect *pRect)
     return dest;
 }
 
-void VIDEO_RenderPaused(unsigned char flag)
+void VIDEO_RenderPaused(uint8_t flag)
 {
     g_bRenderPaused = flag;
 }
@@ -305,15 +305,15 @@ void VIDEO_CopySurface(
     if (src == NULL || dst == NULL || src->pixels == NULL || dst->pixels == NULL)
         return;
 
-    unsigned int sr_x = (srcrect) ? srcrect->x : 0;
-    unsigned int sr_y = (srcrect) ? srcrect->y : 0;
-    unsigned int sr_w = (srcrect) ? min(src->w, srcrect->x + srcrect->w) - sr_x : src->w;
-    unsigned int sr_h = (srcrect) ? min(src->h, srcrect->y + srcrect->h) - sr_y : src->h;
-    unsigned int dr_x = (dstrect) ? dstrect->x : 0;
-    unsigned int dr_y = (dstrect) ? dstrect->y : 0;
-    unsigned char *p_src = src->pixels + sr_y * src->w + sr_x;
-    unsigned char *p_dst = dst->pixels + dr_y * dst->w + dr_x;
-    for (unsigned int dy = 0; dy < sr_h; dy++)
+    uint32_t sr_x = (srcrect) ? srcrect->x : 0;
+    uint32_t sr_y = (srcrect) ? srcrect->y : 0;
+    uint32_t sr_w = (srcrect) ? min(src->w, srcrect->x + srcrect->w) - sr_x : src->w;
+    uint32_t sr_h = (srcrect) ? min(src->h, srcrect->y + srcrect->h) - sr_y : src->h;
+    uint32_t dr_x = (dstrect) ? dstrect->x : 0;
+    uint32_t dr_y = (dstrect) ? dstrect->y : 0;
+    uint8_t *p_src = src->pixels + sr_y * src->w + sr_x;
+    uint8_t *p_dst = dst->pixels + dr_y * dst->w + dr_x;
+    for (uint32_t dy = 0; dy < sr_h; dy++)
     {
         memcpy(p_dst + dy * dst->w, p_src + dy * src->w, sr_w);
     }
@@ -351,7 +351,7 @@ void VIDEO_CleanScreen(void)
     memset(gpScreen->pixels, 0, SCREEN_SIZE);
 }
 
-VIDEO_Surface *VIDEO_GetBackupSurface(unsigned char idx)
+VIDEO_Surface *VIDEO_GetBackupSurface(uint8_t idx)
 {
     return (idx < 2) ? gpBackup[idx] : NULL;
 }

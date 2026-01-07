@@ -21,6 +21,8 @@
 #ifndef RES_H
 #define RES_H
 
+#include <stdint.h>
+
 enum tagLOADRESFLAG
 {
     kLoadNone = 0,                // no need to load anything
@@ -33,19 +35,19 @@ int PAL_InitResources(void);
 
 void PAL_FreeResources(void);
 
-void PAL_SetLoadFlags(unsigned char bFlags);
+void PAL_SetLoadFlags(uint8_t bFlags);
 
 void *PAL_GetCurrentMap(void);
 
-unsigned char *PAL_GetPlayerSprite(unsigned char bPlayerIndex);
+uint8_t *PAL_GetPlayerSprite(uint8_t bPlayerIndex);
 
-unsigned char *PAL_GetEventObjectSprite(unsigned short wEventObjectID);
+uint8_t *PAL_GetEventObjectSprite(uint16_t wEventObjectID);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void PAL_LoadResources(void);
+    void PAL_LoadResources(void);
 
 #ifdef __cplusplus
 }

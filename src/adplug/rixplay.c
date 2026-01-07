@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -40,25 +40,25 @@ typedef struct tagRIXPLAYER
 {
     AUDIOPLAYER_COMMONS;
     short *buf;
-    unsigned int buf_max_samples;
+    uint32_t buf_max_samples;
     short *pos;
-    int iNextMusic; // the next music number to switch to
-    unsigned long dwStartFadeTime;
-    int iTotalFadeOutSamples;
-    int iTotalFadeInSamples;
-    int iRemainingFadeSamples;
+    int32_t iNextMusic; // the next music number to switch to
+    uint32_t dwStartFadeTime;
+    int32_t iTotalFadeOutSamples;
+    int32_t iTotalFadeInSamples;
+    int32_t iRemainingFadeSamples;
     Fade_Types FadeType;
-    unsigned char fNextLoop;
-    int fReady;
+    uint8_t fNextLoop;
+    int32_t fReady;
     // Minimal playback tracking
-    unsigned long dwMusicStartTime;
+    uint32_t dwMusicStartTime;
 } RIXPLAYER;
 
 static void
 RIX_FillBuffer(
     void *object,
-    unsigned char *stream,
-    unsigned int len)
+    uint8_t *stream,
+    uint32_t len)
 /*++
     Purpose:
 
@@ -87,8 +87,8 @@ RIX_FillBuffer(
 
     while (len > 0)
     {
-        unsigned int volume = PAL_MIX_MAXVOLUME;
-        int delta_samples = 0, vol_delta = 0;
+        uint32_t volume = PAL_MIX_MAXVOLUME;
+        int32_t delta_samples = 0, vol_delta = 0;
         // fading in or fading out
         switch (pRixPlayer->FadeType)
         {
@@ -161,7 +161,7 @@ RIX_FillBuffer(
         char fContinue = true;
         while (len > 0 && fContinue)
         {
-            if (pRixPlayer->pos == NULL || (unsigned int)(pRixPlayer->pos - pRixPlayer->buf) >= pRixPlayer->buf_max_samples)
+            if (pRixPlayer->pos == NULL || (uint32_t)(pRixPlayer->pos - pRixPlayer->buf) >= pRixPlayer->buf_max_samples)
             {
                 pRixPlayer->pos = pRixPlayer->buf;
                 if (!CrixPlayer_update())
@@ -193,38 +193,38 @@ RIX_FillBuffer(
                 Copl_Generate(pRixPlayer->buf, PAL_AUDIO_SAMPLES_PER_CHUNK);
             }
 
-            unsigned int available_samples = pRixPlayer->buf_max_samples - (unsigned int)(pRixPlayer->pos - pRixPlayer->buf);
-            unsigned int max_output_samples = len / PAL_AUDIO_BYTES_PER_SAMPLE;
-            unsigned int l = min(available_samples, max_output_samples);
+            uint32_t available_samples = pRixPlayer->buf_max_samples - (uint32_t)(pRixPlayer->pos - pRixPlayer->buf);
+            uint32_t max_output_samples = len / PAL_AUDIO_BYTES_PER_SAMPLE;
+            uint32_t l = min(available_samples, max_output_samples);
 
             // Put audio data into buffer and adjust volume
             if (pRixPlayer->FadeType != FADE_NONE)
             {
                 PAL_AUDIO_SAMPLE *dst = (PAL_AUDIO_SAMPLE *)stream;
-                unsigned int processed = 0;
+                uint32_t processed = 0;
 
-                for (unsigned int i = 0; i < l && pRixPlayer->iRemainingFadeSamples > 0; volume += vol_delta)
+                for (uint32_t i = 0; i < l && pRixPlayer->iRemainingFadeSamples > 0; volume += vol_delta)
                 {
-                    unsigned int j = 0;
+                    uint32_t j = 0;
                     for (j = 0; i < l && (int)j < delta_samples; i++, j++)
                     {
-                        int sample = (*pRixPlayer->pos++ * (int)volume) / (int)PAL_MIX_MAXVOLUME;
+                        int32_t sample = (*pRixPlayer->pos++ * (int)volume) / (int)PAL_MIX_MAXVOLUME;
                         dst[processed++] = PAL_AudioMixValueToSample(sample);
                         len -= PAL_AUDIO_BYTES_PER_SAMPLE;
                     }
                     pRixPlayer->iRemainingFadeSamples -= j;
                 }
-                stream = (unsigned char *)(dst + processed);
+                stream = (uint8_t *)(dst + processed);
                 fContinue = (pRixPlayer->iRemainingFadeSamples > 0);
             }
             else
             {
                 PAL_AUDIO_SAMPLE *dst = (PAL_AUDIO_SAMPLE *)stream;
-                for (unsigned int i = 0; i < l; ++i)
+                for (uint32_t i = 0; i < l; ++i)
                 {
                     dst[i] = PAL_AudioMixValueToSample(*pRixPlayer->pos++);
                 }
-                stream = (unsigned char *)(dst + l);
+                stream = (uint8_t *)(dst + l);
                 len -= l * PAL_AUDIO_BYTES_PER_SAMPLE;
             }
         }
@@ -261,8 +261,8 @@ static void RIX_Shutdown(void *object)
 static int
 RIX_Play(
     void *object,
-    int iNumRIX,
-    unsigned char fLoop,
+    int32_t iNumRIX,
+    uint8_t fLoop,
     float flFadeTime)
 /*++
     Purpose:
@@ -306,7 +306,7 @@ RIX_Play(
         pRixPlayer->dwStartFadeTime = UTIL_GetMilliseconds();
         if (pRixPlayer->FadeType == FADE_IN && pRixPlayer->iTotalFadeInSamples > 0 && pRixPlayer->iRemainingFadeSamples > 0)
         {
-            pRixPlayer->dwStartFadeTime -= (unsigned long)((float)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples * flFadeTime * (1000U / 2U));
+            pRixPlayer->dwStartFadeTime -= (uint32_t)((float)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples * flFadeTime * (1000U / 2U));
         }
         pRixPlayer->iTotalFadeOutSamples = (int)round(flFadeTime / 2.0f * PAL_AUDIO_SAMPLING_RATE) * PAL_AUDIO_CHANNEL_COUNT;
         pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeOutSamples;

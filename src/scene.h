@@ -21,19 +21,21 @@
 #ifndef _SCENE_H
 #define _SCENE_H
 
-void PAL_ApplyWave(unsigned char *pixels);
+#include <stdint.h>
+
+void PAL_ApplyWave(uint8_t *pixels);
 
 void PAL_MakeScene(void);
 
-int PAL_CheckObstacleWithRange(unsigned int pos, int fCheckEventObjects, unsigned short wSelfObject, int fCheckRange);
+int PAL_CheckObstacleWithRange(uint32_t pos, int32_t fCheckEventObjects, uint16_t wSelfObject, int fCheckRange);
 
-int PAL_CheckObstacle(unsigned int pos, int fCheckEventObjects, unsigned short wSelfObject);
+int PAL_CheckObstacle(uint32_t pos, int32_t fCheckEventObjects, uint16_t wSelfObject);
 
 void PAL_UpdatePartyGestures(int fWalking);
 
 void PAL_UpdateParty(void);
 
-void PAL_NPCWalkOneStep(unsigned short wEventObjectID, int iSpeed);
+void PAL_NPCWalkOneStep(uint16_t wEventObjectID, uint16_t iSpeed);
 
 void PAL_FreeSceneResources(void);
 

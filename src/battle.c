@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -43,15 +43,15 @@ BATTLE *g_Battle = NULL;
 BATTLEUI *UI_Battle = NULL;
 static VIDEO_Surface *lpBackground = NULL;
 static VIDEO_Surface *lpSceneBuf = NULL;
-extern unsigned char *gpSpriteUI;
+extern uint8_t *gpSpriteUI;
 
-unsigned short g_rgPlayerPos[MAX_PLAYERS_IN_PARTY][3][2] = {
+uint16_t g_rgPlayerPos[MAX_PLAYERS_IN_PARTY][3][2] = {
     {{240, 170}},                        // one player
     {{200, 176}, {256, 152}},            // two players
     {{180, 180}, {234, 170}, {270, 146}} // three players
 };
 
-void PAL_GetPlayerPos(unsigned char PlayerIndex, int *posX, int *posY)
+void PAL_GetPlayerPos(uint8_t PlayerIndex, int *posX, int *posY)
 {
     (*posX) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][0];
     (*posY) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][1];
@@ -74,10 +74,10 @@ void PAL_BattleDrawBackground(
 
 --*/
 {
-    int i;
-    unsigned short b;
-    unsigned char *pSrc = lpBackground->pixels;
-    unsigned char *pDst = lpSceneBuf->pixels;
+    int32_t i;
+    uint16_t b;
+    uint8_t *pSrc = lpBackground->pixels;
+    uint8_t *pDst = lpSceneBuf->pixels;
 
     // Draw the background
     for (i = 0; i < SCREEN_SIZE; i++)
@@ -94,7 +94,7 @@ void PAL_BattleDrawBackground(
             b = 0x0F;
         }
 
-        *pDst = (unsigned char)(b | (*pSrc & 0xF0));
+        *pDst = (uint8_t)(b | (*pSrc & 0xF0));
 
         ++pSrc;
         ++pDst;
@@ -104,7 +104,7 @@ void PAL_BattleDrawBackground(
 }
 
 void PAL_BattleDrawEnemySprites(
-    unsigned short wEnemyIndex,
+    uint16_t wEnemyIndex,
     void *lpDstSurface)
 /*++
   Purpose:
@@ -123,7 +123,7 @@ void PAL_BattleDrawEnemySprites(
 
 --*/
 {
-    unsigned int pos;
+    uint32_t pos;
 
     // Draw the enemies
     pos = g_Battle->rgEnemy[wEnemyIndex].pos;
@@ -156,7 +156,7 @@ void PAL_BattleDrawEnemySprites(
 }
 
 void PAL_BattleDrawPlayerSprites(
-    unsigned short wPlayerIndex,
+    uint16_t wPlayerIndex,
     void *lpDstSurface)
 /*++
   Purpose:
@@ -175,7 +175,7 @@ void PAL_BattleDrawPlayerSprites(
 
 --*/
 {
-    unsigned int pos;
+    uint32_t pos;
 
     if (wPlayerIndex == 0xFFFF)
     {
@@ -230,7 +230,7 @@ void PAL_BattleDrawPlayerSprites(
 
 void PAL_BattleDrawMagicSprites(
     void *lpDstSurface,
-    unsigned int pos)
+    uint32_t pos)
 /*++
   Purpose:
 
@@ -248,8 +248,8 @@ void PAL_BattleDrawMagicSprites(
 
 --*/
 {
-    short x, y;
-    const unsigned char *lpBitmap = g_Battle->lpMagicBitmap;
+    int16_t x, y;
+    const uint8_t *lpBitmap = g_Battle->lpMagicBitmap;
 
     x = PAL_X(pos) - PAL_RLEGetWidth(lpBitmap) / 2;
     y = PAL_Y(pos) - PAL_RLEGetHeight(lpBitmap);
@@ -288,10 +288,10 @@ void PAL_BattleSpriteAddUnlock(
 }
 
 void PAL_BattleAddSpriteObject(
-    unsigned short wType,
-    unsigned short wObjectIndex,
-    unsigned int pos,
-    short sLayerOffset,
+    uint16_t wType,
+    uint16_t wObjectIndex,
+    uint32_t pos,
+    int16_t sLayerOffset,
     int fHaveColorShift)
 /*++
   Purpose:
@@ -316,7 +316,7 @@ void PAL_BattleAddSpriteObject(
 
 --*/
 {
-    unsigned short *wMaxIndex = &g_Battle->wMaxSpriteDrawSeqIndex;
+    uint16_t *wMaxIndex = &g_Battle->wMaxSpriteDrawSeqIndex;
     BATTLESPRITESEQ *SpriteObject;
 
     if (*wMaxIndex + 1 < MAX_BATTLESPRITESEQ_ITEMS)
@@ -350,7 +350,7 @@ void PAL_BattleAddFighterSpriteObject(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     //
     // Place enemies in the drawing sequence.
@@ -396,9 +396,9 @@ void PAL_BattleSortSpriteObjecByPos(
 
 --*/
 {
-    int i, j;
+    int32_t i, j;
     BATTLESPRITESEQ *this, *next, tmp;
-    short thisPosX, thisPosY, nextPosX, nextPosY;
+    int16_t thisPosX, thisPosY, nextPosX, nextPosY;
 
     //
     // Sort the players drawing order by Y coordinate
@@ -472,7 +472,7 @@ void PAL_BattleDrawAllSprites(
 }
 
 void PAL_BattleDrawAllSpritesWithColorShift(
-    unsigned char fColorShift)
+    uint8_t fColorShift)
 /*++
   Purpose:
 
@@ -488,7 +488,7 @@ void PAL_BattleDrawAllSpritesWithColorShift(
 
 --*/
 {
-    int i;
+    int32_t i;
     BATTLESPRITESEQ *SpriteObject;
 
     //
@@ -588,10 +588,10 @@ void PAL_BattleFadeScene(
 
 --*/
 {
-    int i, j, k;
-    unsigned char a, b;
-    unsigned char *pSrc = lpSceneBuf->pixels;
-    unsigned char *pDst = gpScreen->pixels;
+    int32_t i, j, k;
+    uint8_t a, b;
+    uint8_t *pSrc = lpSceneBuf->pixels;
+    uint8_t *pDst = gpScreen->pixels;
     const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
     for (i = 0; i < 12; i++)
@@ -654,7 +654,7 @@ PAL_BattleMain(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     VIDEO_BackupScreen(gpScreen);
 
@@ -747,7 +747,7 @@ PAL_FreeBattleSprites(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     //
     // Free all the loaded sprites
@@ -785,7 +785,7 @@ void PAL_LoadBattleSprites(
 
 --*/
 {
-    int i, x, y, s;
+    int32_t i, x, y, s;
     PAL_FreeBattleSprites();
 
     // Load battle sprites for players
@@ -874,10 +874,10 @@ PAL_BattleWon(
     const VIDEO_Rect rect = {0, 60, SCREEN_W, 100};
     VIDEO_Rect rect1 = {80, 0, 180, SCREEN_H};
 
-    int i, j, iTotalCount;
-    unsigned int dwExp;
-    unsigned short w;
-    int fLevelUp;
+    int32_t i, j, iTotalCount;
+    uint32_t dwExp;
+    uint16_t w;
+    int32_t fLevelUp;
     PLAYERROLES OrigPlayerRoles;
 
     //
@@ -889,8 +889,8 @@ PAL_BattleWon(
 
     if (g_Battle->iExpGained > 0)
     {
-        unsigned int w1 = PAL_WordWidth(BATTLEWIN_GETEXP_LABEL) + 3;
-        unsigned int ww1 = (unsigned int)(w1 - 8) << 3;
+        uint32_t w1 = PAL_WordWidth(BATTLEWIN_GETEXP_LABEL) + 3;
+        uint32_t ww1 = (uint32_t)(w1 - 8) << 3;
         //
         // Play the "battle win" music
         //
@@ -928,7 +928,7 @@ PAL_BattleWon(
             {5, gpGlobals->g.PlayerRoles->rgwName[4], true, PAL_XY(0, 0)},
             {6, gpGlobals->g.PlayerRoles->rgwName[5], true, PAL_XY(0, 0)},
         };
-    unsigned int maxNameWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem, sizeof(rgFakeMenuItem) / sizeof(MENUITEM));
+    uint32_t maxNameWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem, sizeof(rgFakeMenuItem) / sizeof(MENUITEM));
     const MENUITEM rgFakeMenuItem2[] =
         {
             // value  label                        enabled   pos
@@ -941,9 +941,9 @@ PAL_BattleWon(
             {7, STATUS_LABEL_DEXTERITY, true, PAL_XY(0, 0)},
             {8, STATUS_LABEL_FLEERATE, true, PAL_XY(0, 0)},
         };
-    unsigned int maxPropertyWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem2, sizeof(rgFakeMenuItem2) / sizeof(MENUITEM)) - 1;
-    int propertyLength = maxPropertyWidth - 1;
-    int offsetX = -8 * propertyLength;
+    uint32_t maxPropertyWidth = PAL_MenuTextMaxWidth(rgFakeMenuItem2, sizeof(rgFakeMenuItem2) / sizeof(MENUITEM)) - 1;
+    int32_t propertyLength = maxPropertyWidth - 1;
+    int32_t offsetX = -8 * propertyLength;
     rect1.x += offsetX;
     rect1.w -= 2 * offsetX;
     //
@@ -981,7 +981,7 @@ PAL_BattleWon(
             }
         }
 
-        gpGlobals->Exp.rgPrimaryExp[w].wExp = (unsigned short)dwExp;
+        gpGlobals->Exp.rgPrimaryExp[w].wExp = (uint16_t)dwExp;
 
         if (fLevelUp)
         {
@@ -1093,7 +1093,7 @@ PAL_BattleWon(
             }                                                                                                                                                                                     \
         }                                                                                                                                                                                         \
                                                                                                                                                                                                   \
-        gpGlobals->Exp.expname[w].wExp = (unsigned short)dwExp;                                                                                                                                   \
+        gpGlobals->Exp.expname[w].wExp = (uint16_t)dwExp;                                                                                                                                         \
                                                                                                                                                                                                   \
         if (gpGlobals->g.PlayerRoles->statname[w] != OrigPlayerRoles.statname[w])                                                                                                                 \
         {                                                                                                                                                                                         \
@@ -1143,11 +1143,11 @@ PAL_BattleWon(
 
             if (PAL_AddMagic(w, gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic))
             {
-                unsigned int ww;
-                unsigned int w1 = (ww = PAL_WordWidth(gpGlobals->g.PlayerRoles->rgwName[w])) > 3 ? ww : 3;
-                unsigned int w2 = (ww = PAL_WordWidth(BATTLEWIN_ADDMAGIC_LABEL)) > 2 ? ww : 2;
-                unsigned int w3 = (ww = PAL_WordWidth(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic)) > 5 ? ww : 5;
-                ww = (unsigned int)(w1 + w2 + w3 - 10) << 3;
+                uint32_t ww;
+                uint32_t w1 = (ww = PAL_WordWidth(gpGlobals->g.PlayerRoles->rgwName[w])) > 3 ? ww : 3;
+                uint32_t w2 = (ww = PAL_WordWidth(BATTLEWIN_ADDMAGIC_LABEL)) > 2 ? ww : 2;
+                uint32_t w3 = (ww = PAL_WordWidth(gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic)) > 5 ? ww : 5;
+                ww = (uint32_t)(w1 + w2 + w3 - 10) << 3;
                 PAL_CreateSingleLineBox(PAL_XY(65 - ww, 105), w1 + w2 + w3, NULL);
 
                 PAL_DrawText(PAL_GetWord(gpGlobals->g.PlayerRoles->rgwName[w]), PAL_XY(75 - ww, 115), 0, false, false);
@@ -1200,8 +1200,8 @@ void PAL_BattleEnemyEscape(
 
 --*/
 {
-    int j, x, y, w;
-    int f = true;
+    int32_t j, x, y, w;
+    int32_t f = true;
 
     AUDIO_PlaySound(45);
 
@@ -1260,8 +1260,8 @@ void PAL_BattlePlayerEscape(
 
 --*/
 {
-    int i, j;
-    unsigned short wPlayerRole;
+    int32_t i, j;
+    uint16_t wPlayerRole;
 
     AUDIO_PlaySound(45);
 
@@ -1336,8 +1336,8 @@ void PAL_BattlePlayerEscape(
 
 BATTLERESULT
 PAL_StartBattle(
-    unsigned short wEnemyTeam,
-    unsigned char fIsBoss)
+    uint16_t wEnemyTeam,
+    uint8_t fIsBoss)
 /*++
   Purpose:
 
@@ -1355,9 +1355,9 @@ PAL_StartBattle(
 
 --*/
 {
-    int i, j;
-    unsigned short w, wPrevWaveLevel;
-    short sPrevWaveProgression;
+    int32_t i, j;
+    uint16_t w, wPrevWaveLevel;
+    int16_t sPrevWaveProgression;
 
     g_Battle = (BATTLE *)UTIL_malloc(sizeof(BATTLE));
     UI_Battle = (BATTLEUI *)UTIL_malloc(sizeof(BATTLEUI));
@@ -1471,7 +1471,7 @@ PAL_StartBattle(
     //
     // Load the battle effect sprite.
     //
-    unsigned int buf_size = RES_MKFCreateChunk(&g_Battle->lpEffectSprite, 10, Res_DATA);
+    uint32_t buf_size = RES_MKFCreateChunk(&g_Battle->lpEffectSprite, 10, Res_DATA);
     RES_MKFReadChunk(g_Battle->lpEffectSprite, buf_size, 10, Res_DATA);
 
     g_Battle->Phase = kBattlePhaseSelectAction;
@@ -1530,7 +1530,7 @@ PAL_StartBattle(
     return i;
 }
 
-void PAL_RLEBlitToBattleSurface(const unsigned char *lpBitmapRLE, int posX, int posY)
+void PAL_RLEBlitToBattleSurface(const uint8_t *lpBitmapRLE, int32_t posX, int32_t posY)
 {
     PAL_RLEBlitToSurfaceWithShadow(
         lpBitmapRLE,

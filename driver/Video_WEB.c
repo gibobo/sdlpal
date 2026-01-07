@@ -1,12 +1,13 @@
-#include "../src/driver.h"
+﻿#include "../src/driver.h"
 #include "../src/util.h"
 #include "../src/video.h"
 #include "DrvIf_internal.h"
 #include "mongoose.h"
+#include <stdint.h>
 #include <string.h>
 
-unsigned char *framebuffer = NULL;
-static unsigned char *send_palette = NULL;
+uint8_t *framebuffer = NULL;
+static uint8_t *send_palette = NULL;
 extern struct mg_connection *ws_conn;
 extern struct mg_mgr mgr;
 
@@ -14,21 +15,21 @@ extern struct mg_mgr mgr;
 void send_video_frame(void);
 
 void DRIVER_FrameShow(
-    unsigned char *frame,
-    const unsigned short roi_x,
-    const unsigned short roi_y,
-    const unsigned short roi_w,
-    const unsigned short roi_h,
-    const unsigned char padding_flag)
+    uint8_t *frame,
+    const uint16_t roi_x,
+    const uint16_t roi_y,
+    const uint16_t roi_w,
+    const uint16_t roi_h,
+    const uint8_t padding_flag)
 {
     if (framebuffer == NULL)
         return;
 
-    unsigned short x, y;
-    unsigned short roi_x2 = roi_x + roi_w;
-    unsigned short roi_y2 = roi_y + roi_h;
-    unsigned char *src = frame;
-    unsigned char *dst = framebuffer + 5;
+    uint16_t x, y;
+    uint16_t roi_x2 = roi_x + roi_w;
+    uint16_t roi_y2 = roi_y + roi_h;
+    uint8_t *src = frame;
+    uint8_t *dst = framebuffer + 5;
 
     for (y = 0; y < SCREEN_H; y++)
     {
@@ -55,7 +56,7 @@ void DRIVER_FrameShow(
     }
 }
 
-void DRIVER_UpdatePalette(const unsigned char *rgPalette)
+void DRIVER_UpdatePalette(const uint8_t *rgPalette)
 {
     if (send_palette == NULL)
         return;
@@ -81,14 +82,14 @@ void send_video_frame(void)
 
 int DRIVER_Init_Video(void)
 {
-    framebuffer = (unsigned char *)UTIL_malloc(5 + SCREEN_SIZE);
+    framebuffer = (uint8_t *)UTIL_malloc(5 + SCREEN_SIZE);
     framebuffer[0] = 0;
     framebuffer[1] = (SCREEN_W >> 8) & 0xFF;
     framebuffer[2] = SCREEN_W & 0xFF;
     framebuffer[3] = (SCREEN_H >> 8) & 0xFF;
     framebuffer[4] = SCREEN_H & 0xFF;
 
-    send_palette = (unsigned char *)UTIL_malloc(1 + 256 * 3);
+    send_palette = (uint8_t *)UTIL_malloc(1 + 256 * 3);
     send_palette[0] = 2;
 
     return 0;

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -108,13 +108,13 @@ static void PAL_InitGlobalGameData(void)
 
 --*/
 {
-#define PAL_DOALLOCATE(fp, num, type, ptr, n)   \
-    if (ptr == NULL)                            \
-    {                                           \
-        int len = RES_MKFGetChunkSize(num, fp); \
-        ptr = (type *)UTIL_malloc(len);         \
-        n = len / sizeof(type);                 \
-        RES_MKFReadChunk(ptr, len, num, fp);    \
+#define PAL_DOALLOCATE(fp, num, type, ptr, n)       \
+    if (ptr == NULL)                                \
+    {                                               \
+        int32_t len = RES_MKFGetChunkSize(num, fp); \
+        ptr = (type *)UTIL_malloc(len);             \
+        n = len / sizeof(type);                     \
+        RES_MKFReadChunk(ptr, len, num, fp);        \
     }
 
     // If the memory has not been allocated, allocate first.
@@ -150,7 +150,7 @@ static void PAL_LoadDefaultGame(void)
 
 --*/
 {
-    unsigned int i;
+    uint32_t i;
     // Load the default data from the game data files.
     RES_MKFReadChunk(gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject * sizeof(EVENTOBJECT), 0, Res_SSS);
     RES_MKFReadChunk(gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene), 1, Res_SSS);
@@ -193,24 +193,24 @@ static void PAL_LoadDefaultGame(void)
 
 typedef struct tagSAVEDGAME_COMMON
 {
-    unsigned short wSavedTimes;            // saved times
-    unsigned short wViewportX, wViewportY; // viewport location
-    unsigned short nPartyMember;           // number of members in party
-    unsigned short wNumScene;              // scene number
-    unsigned short wPaletteOffset;
-    unsigned short wPartyDirection; // party direction
-    unsigned short wNumMusic;       // music number
-    unsigned short wNumBattleMusic; // battle music number
-    unsigned short wNumBattleField; // battle field number
-    unsigned short wScreenWave;     // level of screen waving
-    unsigned short wBattleSpeed;    // battle speed
-    unsigned short wCollectValue;   // value of "collected" items
-    unsigned short wLayer;
-    unsigned short wChaseRange;
-    unsigned short wChasespeedChangeCycles;
-    unsigned short nFollower;
-    unsigned short rgwReserved2[3];           // unused
-    unsigned int dwCash;                      // amount of cash
+    uint16_t wSavedTimes;            // saved times
+    uint16_t wViewportX, wViewportY; // viewport location
+    uint16_t nPartyMember;           // number of members in party
+    uint16_t wNumScene;              // scene number
+    uint16_t wPaletteOffset;
+    uint16_t wPartyDirection; // party direction
+    uint16_t wNumMusic;       // music number
+    uint16_t wNumBattleMusic; // battle music number
+    uint16_t wNumBattleField; // battle field number
+    uint16_t wScreenWave;     // level of screen waving
+    uint16_t wBattleSpeed;    // battle speed
+    uint16_t wCollectValue;   // value of "collected" items
+    uint16_t wLayer;
+    uint16_t wChaseRange;
+    uint16_t wChasespeedChangeCycles;
+    uint16_t nFollower;
+    uint16_t rgwReserved2[3];                 // unused
+    uint32_t dwCash;                          // amount of cash
     PARTY rgParty[MAX_PLAYABLE_PLAYER_ROLES]; // player party
     TRAIL rgTrail[MAX_PLAYABLE_PLAYER_ROLES]; // player trail
     ALLEXPERIENCE Exp;                        // experience data
@@ -222,24 +222,24 @@ typedef struct tagSAVEDGAME_COMMON
 
 typedef struct tagSAVEDGAME_WIN
 {
-    unsigned short wSavedTimes;            // saved times
-    unsigned short wViewportX, wViewportY; // viewport location
-    unsigned short nPartyMember;           // number of members in party
-    unsigned short wNumScene;              // scene number
-    unsigned short wPaletteOffset;
-    unsigned short wPartyDirection; // party direction
-    unsigned short wNumMusic;       // music number
-    unsigned short wNumBattleMusic; // battle music number
-    unsigned short wNumBattleField; // battle field number
-    unsigned short wScreenWave;     // level of screen waving
-    unsigned short wBattleSpeed;    // battle speed
-    unsigned short wCollectValue;   // value of "collected" items
-    unsigned short wLayer;
-    unsigned short wChaseRange;
-    unsigned short wChasespeedChangeCycles;
-    unsigned short nFollower;
-    unsigned short rgwReserved2[3];           // unused
-    unsigned int dwCash;                      // amount of cash
+    uint16_t wSavedTimes;            // saved times
+    uint16_t wViewportX, wViewportY; // viewport location
+    uint16_t nPartyMember;           // number of members in party
+    uint16_t wNumScene;              // scene number
+    uint16_t wPaletteOffset;
+    uint16_t wPartyDirection; // party direction
+    uint16_t wNumMusic;       // music number
+    uint16_t wNumBattleMusic; // battle music number
+    uint16_t wNumBattleField; // battle field number
+    uint16_t wScreenWave;     // level of screen waving
+    uint16_t wBattleSpeed;    // battle speed
+    uint16_t wCollectValue;   // value of "collected" items
+    uint16_t wLayer;
+    uint16_t wChaseRange;
+    uint16_t wChasespeedChangeCycles;
+    uint16_t nFollower;
+    uint16_t rgwReserved2[3];                 // unused
+    uint32_t dwCash;                          // amount of cash
     PARTY rgParty[MAX_PLAYABLE_PLAYER_ROLES]; // player party
     TRAIL rgTrail[MAX_PLAYABLE_PLAYER_ROLES]; // player trail
     ALLEXPERIENCE Exp;                        // experience data
@@ -251,9 +251,9 @@ typedef struct tagSAVEDGAME_WIN
     EVENTOBJECT rgEventObject[MAX_EVENT_OBJECTS];
 } SAVEDGAME_WIN;
 
-static int PAL_LoadGame_Common(int iSaveSlot, SAVEDGAME_COMMON *s, unsigned int size)
+static uint8_t PAL_LoadGame_Common(int32_t iSaveSlot, SAVEDGAME_COMMON *s, uint32_t size)
 {
-    unsigned int n = 0;
+    uint32_t n = 0;
     // Try to open the specified file
     void *fpSAVE = UTIL_fopen_without_checking(UTIL_Filename("%s/%d.rpg", RESOURCE_PATH, iSaveSlot), "rb");
     if (fpSAVE)
@@ -341,11 +341,11 @@ static int PAL_LoadGame(int iSaveSlot)
     return PAL_LoadGame_WIN(iSaveSlot);
 }
 
-static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVEDGAME_COMMON *s, unsigned int size)
+static void PAL_SaveGame_Common(int32_t iSaveSlot, uint16_t wSavedTimes, SAVEDGAME_COMMON *s, uint32_t size)
 {
     s->wSavedTimes = wSavedTimes;
-    s->wViewportX = (unsigned short)PAL_X(gpGlobals->viewport);
-    s->wViewportY = (unsigned short)PAL_Y(gpGlobals->viewport);
+    s->wViewportX = (uint16_t)PAL_X(gpGlobals->viewport);
+    s->wViewportY = (uint16_t)PAL_Y(gpGlobals->viewport);
     s->nPartyMember = gpGlobals->wMaxPartyMemberIndex;
     s->wNumScene = gpGlobals->wNumScene;
     s->wPaletteOffset = (gpGlobals->fNightPalette ? (256 * 3) / 2 : 0);
@@ -372,7 +372,7 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
 
     // Try writing to file
     void *fpSAVE = UTIL_fopen(UTIL_Filename("%s/%d.rpg", RESOURCE_PATH, iSaveSlot), "wb");
-    unsigned int i = RES_MKFGetChunkSize(0, Res_SSS);
+    uint32_t i = RES_MKFGetChunkSize(0, Res_SSS);
     i += size - sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS;
     UTIL_fwrite(s, i, 1, fpSAVE);
     UTIL_fclose(fpSAVE);
@@ -380,8 +380,8 @@ static void PAL_SaveGame_Common(int iSaveSlot, unsigned short wSavedTimes, SAVED
 
 static void
 PAL_SaveGame_WIN(
-    int iSaveSlot,
-    unsigned short wSavedTimes)
+    int32_t iSaveSlot,
+    uint16_t wSavedTimes)
 /*++
   Purpose:
 
@@ -411,13 +411,13 @@ PAL_SaveGame_WIN(
 }
 
 void PAL_SaveGame(
-    int iSaveSlot,
-    unsigned short wSavedTimes)
+    int32_t iSaveSlot,
+    uint16_t wSavedTimes)
 {
     PAL_SaveGame_WIN(iSaveSlot, wSavedTimes);
 }
 
-void PAL_ReloadInNextTick(unsigned char iSaveSlot)
+void PAL_ReloadInNextTick(uint8_t iSaveSlot)
 /*++
   Purpose:
 
@@ -459,7 +459,7 @@ void PAL_InitGameData(
 {
     PAL_InitGlobalGameData();
 
-    gpGlobals->bCurrentSaveSlot = (unsigned char)iSaveSlot;
+    gpGlobals->bCurrentSaveSlot = (uint8_t)iSaveSlot;
 
     //
     // try loading from the saved game file.
@@ -481,7 +481,7 @@ void PAL_InitGameData(
 }
 
 int PAL_CountItem(
-    unsigned short wObjectID)
+    uint16_t wObjectID)
 /*++
  Purpose:
 
@@ -497,9 +497,9 @@ int PAL_CountItem(
 
  --*/
 {
-    int index;
-    int count;
-    int i, j, w;
+    int32_t index;
+    int32_t count;
+    int32_t i, j, w;
 
     if (wObjectID == 0)
     {
@@ -542,8 +542,8 @@ int PAL_CountItem(
 }
 
 int PAL_GetItemIndexToInventory(
-    unsigned short wObjectID,
-    int *index)
+    uint16_t wObjectID,
+    int32_t *index)
 /*++
   Purpose:
 
@@ -561,7 +561,7 @@ int PAL_GetItemIndexToInventory(
 
 --*/
 {
-    int fFound = false;
+    int32_t fFound = false;
 
     *index = 0;
 
@@ -583,7 +583,7 @@ int PAL_GetItemIndexToInventory(
 }
 
 int PAL_AddItemToInventory(
-    unsigned short wObjectID,
+    uint16_t wObjectID,
     int iNum)
 /*++
   Purpose:
@@ -604,8 +604,8 @@ int PAL_AddItemToInventory(
 
 --*/
 {
-    int index;
-    int fFound;
+    int32_t index;
+    int32_t fFound;
 
     if (wObjectID == 0)
     {
@@ -696,8 +696,8 @@ int PAL_AddItemToInventory(
     }
 }
 
-unsigned short PAL_GetItemAmount(
-    unsigned short wItem)
+uint16_t PAL_GetItemAmount(
+    uint16_t wItem)
 /*++
   Purpose:
 
@@ -713,7 +713,7 @@ unsigned short PAL_GetItemAmount(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < MAX_INVENTORY; i++)
     {
@@ -748,7 +748,7 @@ void PAL_CompressInventory(
 
 --*/
 {
-    int i, j;
+    int32_t i, j;
 
     j = 0;
 
@@ -772,9 +772,9 @@ void PAL_CompressInventory(
 }
 
 int PAL_IncreaseHPMP(
-    unsigned short wPlayerRole,
-    short sHP,
-    short sMP)
+    uint16_t wPlayerRole,
+    int16_t sHP,
+    int16_t sMP)
 /*++
   Purpose:
 
@@ -796,9 +796,9 @@ int PAL_IncreaseHPMP(
 
 --*/
 {
-    int fSuccess = false;
-    unsigned short wOrigHP = gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole];
-    unsigned short wOrigMP = gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole];
+    int32_t fSuccess = false;
+    uint16_t wOrigHP = gpGlobals->g.PlayerRoles->rgwHP[wPlayerRole];
+    uint16_t wOrigMP = gpGlobals->g.PlayerRoles->rgwMP[wPlayerRole];
 
     //
     // Only care about alive players
@@ -865,8 +865,8 @@ void PAL_UpdateEquipments(
 
 --*/
 {
-    int i, j;
-    unsigned short w;
+    int32_t i, j;
+    uint16_t w;
 
     memset(gpGlobals->rgEquipmentEffect, 0, sizeof(PLAYERROLES) * (MAX_PLAYER_EQUIPMENTS + 1));
 
@@ -879,15 +879,15 @@ void PAL_UpdateEquipments(
             if (w != 0)
             {
                 gpGlobals->g.rgObject[w].item.wScriptOnEquip =
-                    PAL_RunTriggerScript(gpGlobals->g.rgObject[w].item.wScriptOnEquip, (unsigned short)i);
+                    PAL_RunTriggerScript(gpGlobals->g.rgObject[w].item.wScriptOnEquip, (uint16_t)i);
             }
         }
     }
 }
 
 void PAL_RemoveEquipmentEffect(
-    unsigned short wPlayerRole,
-    unsigned short wEquipPart)
+    uint16_t wPlayerRole,
+    uint16_t wEquipPart)
 /*++
   Purpose:
 
@@ -905,12 +905,12 @@ void PAL_RemoveEquipmentEffect(
 
 --*/
 {
-    unsigned short *p;
-    unsigned short i, j;
+    uint16_t *p;
+    uint16_t i, j;
 
-    p = (unsigned short *)&gpGlobals->rgEquipmentEffect[wEquipPart]; // HACKHACK
+    p = (uint16_t *)&gpGlobals->rgEquipmentEffect[wEquipPart]; // HACKHACK
 
-    for (i = 0; i < sizeof(PLAYERROLES) / (sizeof(unsigned short) * MAX_PLAYER_ROLES); i++)
+    for (i = 0; i < sizeof(PLAYERROLES) / (sizeof(uint16_t) * MAX_PLAYER_ROLES); i++)
     {
         p[i * MAX_PLAYER_ROLES + wPlayerRole] = 0;
     }
@@ -945,7 +945,7 @@ void PAL_RemoveEquipmentEffect(
 
             for (i = 0; i < MAX_POISONS; i++)
             {
-                unsigned short w = gpGlobals->rgPoisonStatus[i][wPlayerRole].wPoisonID;
+                uint16_t w = gpGlobals->rgPoisonStatus[i][wPlayerRole].wPoisonID;
 
                 if (w == 0)
                 {
@@ -971,8 +971,8 @@ void PAL_RemoveEquipmentEffect(
 }
 
 void PAL_AddPoisonForPlayer(
-    unsigned short wPlayerRole,
-    unsigned short wPoisonID)
+    uint16_t wPlayerRole,
+    uint16_t wPoisonID)
 /*++
   Purpose:
 
@@ -990,8 +990,8 @@ void PAL_AddPoisonForPlayer(
 
 --*/
 {
-    int i, index;
-    unsigned short w;
+    int32_t i, index;
+    uint16_t w;
 
     for (index = 0; index <= gpGlobals->wMaxPartyMemberIndex; index++)
     {
@@ -1030,8 +1030,8 @@ void PAL_AddPoisonForPlayer(
 }
 
 void PAL_CurePoisonByKind(
-    unsigned short wPlayerRole,
-    unsigned short wPoisonID)
+    uint16_t wPlayerRole,
+    uint16_t wPoisonID)
 /*++
   Purpose:
 
@@ -1049,7 +1049,7 @@ void PAL_CurePoisonByKind(
 
 --*/
 {
-    int i, index;
+    int32_t i, index;
 
     for (index = 0; index <= gpGlobals->wMaxPartyMemberIndex; index++)
     {
@@ -1075,8 +1075,8 @@ void PAL_CurePoisonByKind(
 }
 
 void PAL_CurePoisonByLevel(
-    unsigned short wPlayerRole,
-    unsigned short wMaxLevel)
+    uint16_t wPlayerRole,
+    uint16_t wMaxLevel)
 /*++
   Purpose:
 
@@ -1094,8 +1094,8 @@ void PAL_CurePoisonByLevel(
 
 --*/
 {
-    int i, index;
-    unsigned short w;
+    int32_t i, index;
+    uint16_t w;
 
     for (index = 0; index <= gpGlobals->wMaxPartyMemberIndex; index++)
     {
@@ -1123,8 +1123,8 @@ void PAL_CurePoisonByLevel(
 }
 
 int PAL_IsPlayerPoisonedByLevel(
-    unsigned short wPlayerRole,
-    unsigned short wMinLevel)
+    uint16_t wPlayerRole,
+    uint16_t wMinLevel)
 /*++
   Purpose:
 
@@ -1143,8 +1143,8 @@ int PAL_IsPlayerPoisonedByLevel(
 
 --*/
 {
-    int i, index;
-    unsigned short w;
+    int32_t i, index;
+    uint16_t w;
 
     for (index = 0; index <= gpGlobals->wMaxPartyMemberIndex; index++)
     {
@@ -1191,8 +1191,8 @@ int PAL_IsPlayerPoisonedByLevel(
 }
 
 int PAL_IsPlayerPoisonedByKind(
-    unsigned short wPlayerRole,
-    unsigned short wPoisonID)
+    uint16_t wPlayerRole,
+    uint16_t wPoisonID)
 /*++
   Purpose:
 
@@ -1211,7 +1211,7 @@ int PAL_IsPlayerPoisonedByKind(
 
 --*/
 {
-    int i, index;
+    int32_t i, index;
 
     for (index = 0; index <= gpGlobals->wMaxPartyMemberIndex; index++)
     {
@@ -1237,9 +1237,9 @@ int PAL_IsPlayerPoisonedByKind(
     return false;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerAttackStrength(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1255,8 +1255,8 @@ PAL_GetPlayerAttackStrength(
 
 --*/
 {
-    unsigned short w;
-    int i;
+    uint16_t w;
+    int32_t i;
 
     w = gpGlobals->g.PlayerRoles->rgwAttackStrength[wPlayerRole];
 
@@ -1268,9 +1268,9 @@ PAL_GetPlayerAttackStrength(
     return w;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerMagicStrength(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1286,8 +1286,8 @@ PAL_GetPlayerMagicStrength(
 
 --*/
 {
-    unsigned short w;
-    int i;
+    uint16_t w;
+    int32_t i;
 
     w = gpGlobals->g.PlayerRoles->rgwMagicStrength[wPlayerRole];
 
@@ -1299,9 +1299,9 @@ PAL_GetPlayerMagicStrength(
     return w;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerDefense(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1317,8 +1317,8 @@ PAL_GetPlayerDefense(
 
 --*/
 {
-    unsigned short w;
-    int i;
+    uint16_t w;
+    int32_t i;
 
     w = gpGlobals->g.PlayerRoles->rgwDefense[wPlayerRole];
 
@@ -1330,9 +1330,9 @@ PAL_GetPlayerDefense(
     return w;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerDexterity(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1348,8 +1348,8 @@ PAL_GetPlayerDexterity(
 
 --*/
 {
-    unsigned short w;
-    int i;
+    uint16_t w;
+    int32_t i;
 
     w = gpGlobals->g.PlayerRoles->rgwDexterity[wPlayerRole];
 
@@ -1361,9 +1361,9 @@ PAL_GetPlayerDexterity(
     return w;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerFleeRate(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1379,8 +1379,8 @@ PAL_GetPlayerFleeRate(
 
 --*/
 {
-    unsigned short w;
-    int i;
+    uint16_t w;
+    int32_t i;
 
     w = gpGlobals->g.PlayerRoles->rgwFleeRate[wPlayerRole];
 
@@ -1392,9 +1392,9 @@ PAL_GetPlayerFleeRate(
     return w;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerPoisonResistance(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1410,8 +1410,8 @@ PAL_GetPlayerPoisonResistance(
 
 --*/
 {
-    unsigned short w;
-    int i;
+    uint16_t w;
+    int32_t i;
 
     w = gpGlobals->g.PlayerRoles->rgwPoisonResistance[wPlayerRole];
 
@@ -1428,9 +1428,9 @@ PAL_GetPlayerPoisonResistance(
     return w;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerElementalResistance(
-    unsigned short wPlayerRole,
+    uint16_t wPlayerRole,
     int iAttrib)
 /*++
   Purpose:
@@ -1450,8 +1450,8 @@ PAL_GetPlayerElementalResistance(
 
 --*/
 {
-    unsigned short w;
-    int i;
+    uint16_t w;
+    int32_t i;
 
     w = gpGlobals->g.PlayerRoles->rgwElementalResistance[iAttrib][wPlayerRole];
 
@@ -1468,9 +1468,9 @@ PAL_GetPlayerElementalResistance(
     return w;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerBattleSprite(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1486,8 +1486,8 @@ PAL_GetPlayerBattleSprite(
 
 --*/
 {
-    int i;
-    unsigned short w;
+    int32_t i;
+    uint16_t w;
 
     w = gpGlobals->g.PlayerRoles->rgwSpriteNumInBattle[wPlayerRole];
 
@@ -1502,9 +1502,9 @@ PAL_GetPlayerBattleSprite(
     return w;
 }
 
-unsigned short
+uint16_t
 PAL_GetPlayerCooperativeMagic(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1520,8 +1520,8 @@ PAL_GetPlayerCooperativeMagic(
 
 --*/
 {
-    int i;
-    unsigned short w;
+    int32_t i;
+    uint16_t w;
 
     w = gpGlobals->g.PlayerRoles->rgwCooperativeMagic[wPlayerRole];
 
@@ -1537,7 +1537,7 @@ PAL_GetPlayerCooperativeMagic(
 }
 
 int PAL_PlayerCanAttackAll(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -1553,8 +1553,8 @@ int PAL_PlayerCanAttackAll(
 
 --*/
 {
-    int i;
-    int f;
+    int32_t i;
+    int32_t f;
 
     f = false;
 
@@ -1571,8 +1571,8 @@ int PAL_PlayerCanAttackAll(
 }
 
 int PAL_AddMagic(
-    unsigned short wPlayerRole,
-    unsigned short wMagic)
+    uint16_t wPlayerRole,
+    uint16_t wMagic)
 /*++
   Purpose:
 
@@ -1590,7 +1590,7 @@ int PAL_AddMagic(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < MAX_PLAYER_MAGICS; i++)
     {
@@ -1624,8 +1624,8 @@ int PAL_AddMagic(
 }
 
 void PAL_RemoveMagic(
-    unsigned short wPlayerRole,
-    unsigned short wMagic)
+    uint16_t wPlayerRole,
+    uint16_t wMagic)
 /*++
   Purpose:
 
@@ -1643,7 +1643,7 @@ void PAL_RemoveMagic(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < MAX_PLAYER_MAGICS; i++)
     {
@@ -1656,9 +1656,9 @@ void PAL_RemoveMagic(
 }
 
 int PAL_SetPlayerStatus(
-    unsigned short wPlayerRole,
-    unsigned short wStatusID,
-    unsigned short wNumRound)
+    uint16_t wPlayerRole,
+    uint16_t wStatusID,
+    uint16_t wNumRound)
 /*++
   Purpose:
 
@@ -1678,7 +1678,7 @@ int PAL_SetPlayerStatus(
 
 --*/
 {
-    int fSuccess = true;
+    int32_t fSuccess = true;
 
     switch (wStatusID)
     {
@@ -1735,8 +1735,8 @@ int PAL_SetPlayerStatus(
 }
 
 void PAL_RemovePlayerStatus(
-    unsigned short wPlayerRole,
-    unsigned short wStatusID)
+    uint16_t wPlayerRole,
+    uint16_t wStatusID)
 /*++
   Purpose:
 
@@ -1780,7 +1780,7 @@ void PAL_ClearAllPlayerStatus(
 
 --*/
 {
-    int i, j;
+    int32_t i, j;
 
     for (i = 0; i < MAX_PLAYER_ROLES; i++)
     {
@@ -1798,8 +1798,8 @@ void PAL_ClearAllPlayerStatus(
 }
 
 void PAL_PlayerLevelUp(
-    unsigned short wPlayerRole,
-    unsigned short wNumLevel)
+    uint16_t wPlayerRole,
+    uint16_t wNumLevel)
 /*++
   Purpose:
 
@@ -1817,7 +1817,7 @@ void PAL_PlayerLevelUp(
 
 --*/
 {
-    unsigned short i;
+    uint16_t i;
 
     //
     // Add the level

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Adplug - Replayer for many OPL2/OPL3 audio file formats.
  * Copyright (C) 1999 - 2006 Simon Peter, <dn.tlp@gmx.net>, et al.
  *
@@ -23,9 +23,11 @@
 #ifndef _RIX_H_
 #define _RIX_H_
 
+#include <stdint.h>
+
 void CrixPlayer_deinit(void);
-unsigned char CrixPlayer_load(void);
-unsigned char CrixPlayer_update(void);
-void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit); /* For seamless continuous */
+uint8_t CrixPlayer_load(void);
+uint8_t CrixPlayer_update(void);
+void CrixPlayer_rewind(uint32_t subsong, uint8_t reinit); /* For seamless continuous */
 
 #endif

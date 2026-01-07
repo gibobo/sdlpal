@@ -21,23 +21,25 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include <stdint.h>
+
 #define SCREEN_W    320
 #define SCREEN_H    200
 #define SCREEN_SIZE (SCREEN_W * SCREEN_H)
 
 typedef struct VIDEO_Surface
 {
-    unsigned short w;      /**< Read-only */
-    unsigned short h;      /**< Read-only */
-    unsigned char *pixels; /**< Read-write */
+    uint16_t w;      /**< Read-only */
+    uint16_t h;      /**< Read-only */
+    uint8_t *pixels; /**< Read-write */
 } VIDEO_Surface;
 
 typedef struct VIDEO_Rect
 {
-    short x;
-    short y;
-    short w;
-    short h;
+    int16_t x;
+    int16_t y;
+    int16_t w;
+    int16_t h;
 } VIDEO_Rect;
 
 extern VIDEO_Surface *gpScreen;
@@ -49,18 +51,18 @@ void VIDEO_Shutdown(void);
 void VIDEO_UpdateScreen(const VIDEO_Rect *lpRect);
 
 void VIDEO_ShakeScreen(
-    unsigned short wShakeTime,
-    unsigned short wShakeLevel);
+    uint16_t wShakeTime,
+    uint16_t wShakeLevel);
 
 void VIDEO_SwitchScreen(void);
 
-void VIDEO_FadeScreen(unsigned short wSpeed);
+void VIDEO_FadeScreen(uint16_t wSpeed);
 
 VIDEO_Surface *VIDEO_DuplicateSurface(const VIDEO_Rect *pRect);
 
 VIDEO_Surface *VIDEO_CreateCompatibleSizedSurface(const VIDEO_Rect *pSize);
 
-void VIDEO_RenderPaused(unsigned char flag);
+void VIDEO_RenderPaused(uint8_t flag);
 
 void VIDEO_CopySurface(
     VIDEO_Surface *src,
@@ -80,6 +82,6 @@ void VIDEO_FreeSurface(VIDEO_Surface *surface);
 
 void VIDEO_CleanScreen(void);
 
-VIDEO_Surface *VIDEO_GetBackupSurface(unsigned char idx);
+VIDEO_Surface *VIDEO_GetBackupSurface(uint8_t idx);
 
 #endif

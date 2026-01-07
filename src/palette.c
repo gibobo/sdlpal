@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -30,9 +30,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-static unsigned char gPalette[PALETTE_SIZE];
+static uint8_t gPalette[PALETTE_SIZE];
 
-unsigned char *PAL_GetPalette(int iPaletteNum, unsigned char fNight)
+uint8_t *PAL_GetPalette(int32_t iPaletteNum, uint8_t fNight)
 /*++
   Purpose:
 
@@ -51,22 +51,22 @@ unsigned char *PAL_GetPalette(int iPaletteNum, unsigned char fNight)
 --*/
 {
     static int iPaletteNum_cached = 0xFFFF;
-    static unsigned char fNight_cached = 0xFF;
+    static uint8_t fNight_cached = 0xFF;
     if (iPaletteNum == iPaletteNum_cached && fNight == fNight_cached)
         return gPalette;
 
     iPaletteNum_cached = iPaletteNum;
     fNight_cached = fNight;
 
-    unsigned char buf[PALETTE_SIZE * 2];
+    uint8_t buf[PALETTE_SIZE * 2];
     // Read the palette data from the pat.mkf file
-    unsigned int i = RES_MKFReadChunk(buf, PALETTE_SIZE * 2, iPaletteNum, Res_PAT);
+    uint32_t i = RES_MKFReadChunk(buf, PALETTE_SIZE * 2, iPaletteNum, Res_PAT);
     if (i == 0)
         return NULL; // Read failed
     else if (i <= PALETTE_SIZE)
         fNight = 0; // There is no night colors in the palette
 
-    unsigned char *ptr = buf + PALETTE_SIZE * ((fNight) ? 1 : 0);
+    uint8_t *ptr = buf + PALETTE_SIZE * ((fNight) ? 1 : 0);
 
     for (i = 0; i < PALETTE_SIZE; i++)
         gPalette[i] = ptr[i] << 2;
@@ -74,7 +74,7 @@ unsigned char *PAL_GetPalette(int iPaletteNum, unsigned char fNight)
     return gPalette;
 }
 
-void PAL_SetPalette(int iPaletteNum, unsigned char fNight)
+void PAL_SetPalette(int32_t iPaletteNum, uint8_t fNight)
 /*++
   Purpose:
 
@@ -92,7 +92,7 @@ void PAL_SetPalette(int iPaletteNum, unsigned char fNight)
 
 --*/
 {
-    unsigned char *p = PAL_GetPalette(iPaletteNum, fNight);
+    uint8_t *p = PAL_GetPalette(iPaletteNum, fNight);
 
     if (p != NULL)
     {
@@ -101,7 +101,7 @@ void PAL_SetPalette(int iPaletteNum, unsigned char fNight)
     }
 }
 
-void PAL_FadeOut(int iDelay)
+void PAL_FadeOut(uint32_t iDelay)
 /*++
   Purpose:
 
@@ -121,9 +121,9 @@ void PAL_FadeOut(int iDelay)
 
 --*/
 {
-    unsigned int i, j;
-    unsigned char org_palette[PALETTE_SIZE];
-    unsigned char new_palette[PALETTE_SIZE];
+    uint32_t i, j;
+    uint8_t org_palette[PALETTE_SIZE];
+    uint8_t new_palette[PALETTE_SIZE];
 
     // Get the original palette...
     memcpy(org_palette, gPalette, PALETTE_SIZE);
@@ -149,7 +149,7 @@ void PAL_FadeOut(int iDelay)
     VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay)
+void PAL_FadeIn(int32_t iPaletteNum, uint8_t fNight, uint16_t iDelay)
 /*++
   Purpose:
 
@@ -169,16 +169,16 @@ void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay)
 
 --*/
 {
-    unsigned short i, j;
-    unsigned char *palette = PAL_GetPalette(iPaletteNum, fNight);
-    unsigned char newpalette[PALETTE_SIZE] = {0};
+    uint16_t i, j;
+    uint8_t *palette = PAL_GetPalette(iPaletteNum, fNight);
+    uint8_t newpalette[PALETTE_SIZE] = {0};
 
     // Start fading in...
     for (j = 0; j < 60U; j += (iDelay > 10U ? iDelay / 10U : 1U))
     {
         for (i = 0; i < PALETTE_SIZE; i++)
         {
-            newpalette[i] = (unsigned char)(((unsigned short)palette[i] * j) >> 6U);
+            newpalette[i] = (uint8_t)(((uint16_t)palette[i] * j) >> 6U);
         }
 
         DRIVER_UpdatePalette(newpalette);
@@ -190,7 +190,7 @@ void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay)
     // VIDEO_UpdateScreen(NULL);
 }
 
-void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
+void PAL_SceneFade(int32_t iPaletteNum, uint8_t fNight, int iStep)
 /*++
   Purpose:
 
@@ -210,10 +210,10 @@ void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
 
 --*/
 {
-    unsigned char *palette;
-    unsigned char newpalette[PALETTE_SIZE];
-    int i;
-    unsigned int j;
+    uint8_t *palette;
+    uint8_t newpalette[PALETTE_SIZE];
+    int32_t i;
+    uint32_t j;
 
     palette = PAL_GetPalette(iPaletteNum, fNight);
     memset(newpalette, 0, sizeof(newpalette));
@@ -244,7 +244,7 @@ void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
             // Calculate the current palette...
             for (j = 0; j < PALETTE_SIZE; j++)
             {
-                newpalette[j] = (unsigned char)(((unsigned int)palette[j] * (unsigned int)i) >> 6U);
+                newpalette[j] = (uint8_t)(((uint32_t)palette[j] * (uint32_t)i) >> 6U);
             }
             DRIVER_UpdatePalette(newpalette);
             VIDEO_UpdateScreen(NULL);
@@ -266,7 +266,7 @@ void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
             // Calculate the current palette...
             for (j = 0; j < PALETTE_SIZE; j++)
             {
-                newpalette[j] = (unsigned char)(((unsigned int)palette[j] * (unsigned int)i) >> 6U);
+                newpalette[j] = (uint8_t)(((uint32_t)palette[j] * (uint32_t)i) >> 6U);
             }
             DRIVER_UpdatePalette(newpalette);
             VIDEO_UpdateScreen(NULL);
@@ -276,7 +276,7 @@ void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep)
     }
 }
 
-void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene)
+void PAL_PaletteFade(int32_t iPaletteNum, uint8_t fNight, int fUpdateScene)
 /*++
   Purpose:
 
@@ -296,10 +296,10 @@ void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene)
 
 --*/
 {
-    int i, j;
-    unsigned char *new_palette = NULL;
-    unsigned char org_palette[PALETTE_SIZE];
-    unsigned char tmp_palette[PALETTE_SIZE];
+    int32_t i, j;
+    uint8_t *new_palette = NULL;
+    uint8_t org_palette[PALETTE_SIZE];
+    uint8_t tmp_palette[PALETTE_SIZE];
 
     memcpy(org_palette, gPalette, PALETTE_SIZE);
     memset(tmp_palette, 0xff, PALETTE_SIZE);
@@ -310,7 +310,7 @@ void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene)
     {
         for (j = 0; j < PALETTE_SIZE; j++)
         {
-            tmp_palette[j] = (unsigned char)(((int)org_palette[j] * (31 - i) + (int)(new_palette[j]) * i) / 31);
+            tmp_palette[j] = (uint8_t)(((int)org_palette[j] * (31 - i) + (int)(new_palette[j]) * i) / 31);
         }
         DRIVER_UpdatePalette(tmp_palette);
         // VIDEO_UpdateScreen(NULL);
@@ -328,7 +328,7 @@ void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene)
     }
 }
 
-void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom)
+void PAL_ColorFade(int32_t iDelay, uint8_t bColor, int fFrom)
 /*++
   Purpose:
 
@@ -348,9 +348,9 @@ void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom)
 
 --*/
 {
-    int i, j;
-    unsigned char *org_palette = NULL;
-    unsigned char new_palette[PALETTE_SIZE];
+    int32_t i, j;
+    uint8_t *org_palette = NULL;
+    uint8_t new_palette[PALETTE_SIZE];
 
     org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
     memset(new_palette, 0, sizeof(new_palette));
@@ -432,10 +432,10 @@ void PAL_FadeToRed(void)
 
 --*/
 {
-    int i, j;
-    unsigned char color;
-    unsigned char *org_palette = NULL;
-    unsigned char new_palette[PALETTE_SIZE];
+    int32_t i, j;
+    uint8_t color;
+    uint8_t *org_palette = NULL;
+    uint8_t new_palette[PALETTE_SIZE];
 
     org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
     memcpy(new_palette, org_palette, PALETTE_SIZE);

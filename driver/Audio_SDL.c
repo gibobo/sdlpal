@@ -1,13 +1,14 @@
-#include "../src/audio.h"
+﻿#include "../src/audio.h"
 #include "../src/driver.h"
 #include "../src/global.h"
 #include "DrvIf_internal.h"
 #include <SDL_audio.h>
+#include <stdint.h>
 #include <string.h>
 
-static unsigned int AudioDeviceId = 0;
+static uint32_t AudioDeviceId = 0;
 
-static void SDLCALL audio_callback(void *udata, unsigned char *stream, int len)
+static void SDLCALL audio_callback(void *udata, uint8_t *stream, int len)
 /*++
   Purpose:
 
@@ -29,7 +30,7 @@ static void SDLCALL audio_callback(void *udata, unsigned char *stream, int len)
 {
     (void)udata;
     memset(stream, PAL_AUDIO_SAMPLE_SILENCE, (size_t)len);
-    AUDIO_FillBuffer(stream, (unsigned int)len);
+    AUDIO_FillBuffer(stream, (uint32_t)len);
 }
 
 int DRIVER_Init_Audio(void)

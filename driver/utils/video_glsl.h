@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
 //
@@ -22,8 +22,9 @@
 
 #ifndef video_glsl_h
 #define video_glsl_h
+#include <stdint.h>
 
-void VIDEO_GLSL_Initialize(int width, int height);
+void VIDEO_GLSL_Initialize(uint32_t width, uint32_t height);
 void VIDEO_GLSL_RenderCopy(const void *data);
 void VIDEO_GLSL_Destroy(void);
 

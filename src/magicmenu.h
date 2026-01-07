@@ -21,16 +21,18 @@
 #ifndef MAGICMENU_H
 #define MAGICMENU_H
 
-unsigned short PAL_MagicSelectionMenuUpdate(void);
+#include <stdint.h>
+
+uint16_t PAL_MagicSelectionMenuUpdate(void);
 
 void PAL_MagicSelectionMenuInit(
-    unsigned short wPlayerRole,
-    unsigned char fInBattle,
-    unsigned short wDefaultMagic);
+    uint16_t wPlayerRole,
+    uint8_t fInBattle,
+    uint16_t wDefaultMagic);
 
-unsigned short PAL_MagicSelectionMenu(
-    unsigned short wPlayerRole,
-    unsigned char fInBattle,
-    unsigned short wDefaultMagic);
+uint16_t PAL_MagicSelectionMenu(
+    uint16_t wPlayerRole,
+    uint8_t fInBattle,
+    uint16_t wDefaultMagic);
 
 #endif

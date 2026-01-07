@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -33,11 +33,11 @@
 #include <stdbool.h>
 
 static int g_iNumInventory = 0;
-static unsigned short g_wItemFlags = 0;
-static unsigned char g_fNoDesc = false;
-extern unsigned char *gpSpriteUI;
+static uint16_t g_wItemFlags = 0;
+static uint8_t g_fNoDesc = false;
+extern uint8_t *gpSpriteUI;
 
-unsigned short
+uint16_t
 PAL_ItemSelectMenuUpdate(
     void)
 /*++
@@ -55,10 +55,10 @@ PAL_ItemSelectMenuUpdate(
 
 --*/
 {
-    int i, j, k, line, item_delta = 0;
-    unsigned short wObject, wScript;
-    unsigned char bColor;
-    static unsigned char bufImage[2048];
+    int32_t i, j, k, line, item_delta = 0;
+    uint16_t wObject, wScript;
+    uint8_t bColor;
+    static uint8_t bufImage[2048];
     const int iItemsPerLine = 32 / 10;
     const int iItemTextWidth = 8 * 10 + 20;
     const int iLinesPerPage = 7;
@@ -66,7 +66,7 @@ PAL_ItemSelectMenuUpdate(
     const int iAmountXOffset = 10 * 8 + 1;
     const int iPageLineOffset = (iLinesPerPage + 1) / 2;
     const int iPictureYOffset = 0;
-    unsigned int cursorPos = PAL_XY(15 + iCursorXOffset, 22);
+    uint32_t cursorPos = PAL_XY(15 + iCursorXOffset, 22);
 
     //
     // Process input
@@ -222,7 +222,7 @@ PAL_ItemSelectMenuUpdate(
         {
             if (gpGlobals->g.lprgScriptEntry[wScript].wOperation == 0xFFFF)
             {
-                int line_incr = (gpGlobals->g.lprgScriptEntry[wScript].rgwOperand[1] != 1) ? 1 : 0;
+                int32_t line_incr = (gpGlobals->g.lprgScriptEntry[wScript].rgwOperand[1] != 1) ? 1 : 0;
                 wScript = PAL_RunAutoScript(wScript, PAL_ITEM_DESC_BOTTOM | line);
                 line += line_incr;
             }
@@ -260,7 +260,7 @@ PAL_ItemSelectMenuUpdate(
 }
 
 void PAL_ItemSelectMenuInit(
-    unsigned short wItemFlags)
+    uint16_t wItemFlags)
 /*++
   Purpose:
 
@@ -276,8 +276,8 @@ void PAL_ItemSelectMenuInit(
 
 --*/
 {
-    int i, j;
-    unsigned short w;
+    int32_t i, j;
+    uint16_t w;
 
     g_wItemFlags = wItemFlags;
 
@@ -313,7 +313,7 @@ void PAL_ItemSelectMenuInit(
                     {
                         gpGlobals->rgInventory[g_iNumInventory].wItem = gpGlobals->g.PlayerRoles->rgwEquipment[j][w];
                         gpGlobals->rgInventory[g_iNumInventory].nAmount = 0;
-                        gpGlobals->rgInventory[g_iNumInventory].nAmountInUse = (unsigned short)-1;
+                        gpGlobals->rgInventory[g_iNumInventory].nAmountInUse = (uint16_t)-1;
 
                         g_iNumInventory++;
                     }
@@ -323,10 +323,10 @@ void PAL_ItemSelectMenuInit(
     }
 }
 
-unsigned short
+uint16_t
 PAL_ItemSelectMenu(
-    void (*lpfnMenuItemChanged)(unsigned short),
-    unsigned short wItemFlags)
+    void (*lpfnMenuItemChanged)(uint16_t),
+    uint16_t wItemFlags)
 /*++
   Purpose:
 
@@ -345,8 +345,8 @@ PAL_ItemSelectMenu(
 
 --*/
 {
-    unsigned short w = 0xFFFF;
-    int iPrevIndex = gpGlobals->iCurInvMenuItem;
+    uint16_t w = 0xFFFF;
+    int32_t iPrevIndex = gpGlobals->iCurInvMenuItem;
 
     PAL_ItemSelectMenuInit(wItemFlags);
     PAL_ClearKeyState();

@@ -1,4 +1,4 @@
-#include "util.h"
+﻿#include "util.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,19 +12,19 @@
 #define ENABLE_MEMORY_REPORT 0
 
 // Function to report memory usage on ESP32
-static void report_memory_usage(const char* operation, size_t allocated_size)
+static void report_memory_usage(const char *operation, size_t allocated_size)
 {
 #if ENABLE_MEMORY_REPORT
     size_t free_internal = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
     size_t free_spiram = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
     size_t total_free = esp_get_free_heap_size();
-    printf("Memory %s %zu bytes. Remaining - Internal: %zu bytes, SPIRAM: %zu bytes, Total: %zu bytes\n", 
+    printf("Memory %s %zu bytes. Remaining - Internal: %zu bytes, SPIRAM: %zu bytes, Total: %zu bytes\n",
            operation, allocated_size, free_internal, free_spiram, total_free);
 #endif
 }
 #endif
 
-void *UTIL_malloc(unsigned int buffer_size)
+void *UTIL_malloc(uint32_t buffer_size)
 {
     // handy wrapper for operations we always forget, like checking malloc's returned pointer.
     void *buffer = NULL;
@@ -37,8 +37,9 @@ void *UTIL_malloc(unsigned int buffer_size)
     // buffer = heap_caps_malloc(buffer_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     // if (buffer == NULL)
     buffer = heap_caps_malloc(buffer_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
-    
-    if (buffer != NULL) {
+
+    if (buffer != NULL)
+    {
         report_memory_usage("allocated", buffer_size);
     }
 #endif
@@ -56,7 +57,7 @@ void *UTIL_malloc(unsigned int buffer_size)
     return buffer; // nothing went wrong, so return buffer pointer
 }
 
-void *UTIL_calloc(unsigned int n, unsigned int size)
+void *UTIL_calloc(uint32_t n, uint32_t size)
 {
     // handy wrapper for operations we always forget, like checking calloc's returned pointer.
     void *buffer = NULL;
@@ -73,8 +74,9 @@ void *UTIL_calloc(unsigned int n, unsigned int size)
     // buffer = heap_caps_calloc(n, size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     // if (buffer == NULL)
     buffer = heap_caps_calloc(n, size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
-    
-    if (buffer != NULL) {
+
+    if (buffer != NULL)
+    {
         size_t allocated_size = n * size;
         report_memory_usage("allocated", allocated_size);
     }
@@ -93,7 +95,7 @@ void *UTIL_calloc(unsigned int n, unsigned int size)
     return buffer; // nothing went wrong, so return buffer pointer
 }
 
-void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size)
+void *UTIL_realloc(void *ptr, uint32_t n, uint32_t size)
 {
     // handy wrapper for operations we always forget, like checking realloc's returned pointer.
     void *buffer = NULL;
@@ -106,8 +108,9 @@ void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size)
     // buffer = heap_caps_realloc(ptr, n * size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     // if (buffer == NULL)
     buffer = heap_caps_realloc(ptr, n * size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
-    
-    if (buffer != NULL) {
+
+    if (buffer != NULL)
+    {
         size_t allocated_size = n * size;
         report_memory_usage("reallocated", allocated_size);
     }

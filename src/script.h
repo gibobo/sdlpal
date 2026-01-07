@@ -21,18 +21,20 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
+#include <stdint.h>
+
 #define PAL_ITEM_DESC_BOTTOM (1 << 15)
 
-unsigned short
+uint16_t
 PAL_RunTriggerScript(
-    unsigned short wScriptEntry,
-    unsigned short wEventObjectID);
+    uint16_t wScriptEntry,
+    uint16_t wEventObjectID);
 
-unsigned short
+uint16_t
 PAL_RunAutoScript(
-    unsigned short wScriptEntry,
-    unsigned short wEventObjectID);
+    uint16_t wScriptEntry,
+    uint16_t wEventObjectID);
 
-unsigned char PAL_ScriptStatus(void);
+uint8_t PAL_ScriptStatus(void);
 
 #endif

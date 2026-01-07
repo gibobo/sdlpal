@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -31,11 +31,11 @@
 
 typedef struct tagRESOURCES
 {
-    unsigned char bLoadFlags;
-    PALMAP *lpMap;                                              // current loaded map
-    unsigned char **lppEventObjectSprites;                      // event object sprites
-    int nEventObjectSprites;                                    // number of event objects
-    unsigned char *rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
+    uint8_t bLoadFlags;
+    PALMAP *lpMap;                                        // current loaded map
+    uint8_t **lppEventObjectSprites;                      // event object sprites
+    int32_t nEventObjectSprites;                          // number of event objects
+    uint8_t *rglpPlayerSprite[MAX_PLAYABLE_PLAYER_ROLES]; // player sprites
 } RESOURCES;
 
 static RESOURCES *gpResources = NULL;
@@ -58,7 +58,7 @@ PAL_FreeEventObjectSprites(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     if (gpResources->lppEventObjectSprites != NULL)
     {
@@ -92,7 +92,7 @@ PAL_FreePlayerSprites(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < MAX_PLAYABLE_PLAYER_ROLES; i++)
     {
@@ -176,7 +176,7 @@ void PAL_FreeResources(
 }
 
 void PAL_SetLoadFlags(
-    unsigned char bFlags)
+    uint8_t bFlags)
 /*++
   Purpose:
 
@@ -215,8 +215,8 @@ void PAL_LoadResources(void)
 
 --*/
 {
-    int i, index;
-    unsigned short wPlayerID, wSpriteNum;
+    int32_t i, index;
+    uint16_t wPlayerID, wSpriteNum;
 
     if (gpResources == NULL || gpResources->bLoadFlags == kLoadNone)
     {
@@ -259,7 +259,7 @@ void PAL_LoadResources(void)
 
         if (gpResources->nEventObjectSprites > 0)
         {
-            gpResources->lppEventObjectSprites = (unsigned char **)UTIL_calloc(gpResources->nEventObjectSprites, sizeof(unsigned char *));
+            gpResources->lppEventObjectSprites = (uint8_t **)UTIL_calloc(gpResources->nEventObjectSprites, sizeof(uint8_t *));
         }
 
         for (i = 0; i < gpResources->nEventObjectSprites; i++, index++)
@@ -327,9 +327,9 @@ void *PAL_GetCurrentMap(void)
     return (void *)gpResources->lpMap;
 }
 
-unsigned char *
+uint8_t *
 PAL_GetPlayerSprite(
-    unsigned char bPlayerIndex)
+    uint8_t bPlayerIndex)
 /*++
   Purpose:
 
@@ -353,9 +353,9 @@ PAL_GetPlayerSprite(
     return gpResources->rglpPlayerSprite[bPlayerIndex];
 }
 
-unsigned char *
+uint8_t *
 PAL_GetEventObjectSprite(
-    unsigned short wEventObjectID)
+    uint16_t wEventObjectID)
 /*++
   Purpose:
 

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -31,8 +31,8 @@
 
 typedef struct _YJ2_TreeNode
 {
-    unsigned short weight;
-    unsigned short value;
+    uint16_t weight;
+    uint16_t value;
     struct _YJ2_TreeNode *parent;
     struct _YJ2_TreeNode *left;
     struct _YJ2_TreeNode *right;
@@ -44,7 +44,7 @@ typedef struct _YJ2_Tree
     YJ2_TreeNode **list;
 } YJ2_Tree;
 
-static unsigned char yj2_data1[0x100] = {
+static uint8_t yj2_data1[0x100] = {
     0x3f, 0x0b, 0x17, 0x03, 0x2f, 0x0a, 0x16, 0x00, 0x2e, 0x09, 0x15, 0x02, 0x2d, 0x01, 0x08, 0x00,
     0x3e, 0x07, 0x14, 0x03, 0x2c, 0x06, 0x13, 0x00, 0x2b, 0x05, 0x12, 0x02, 0x2a, 0x01, 0x04, 0x00,
     0x3d, 0x0b, 0x11, 0x03, 0x29, 0x0a, 0x10, 0x00, 0x28, 0x09, 0x0f, 0x02, 0x27, 0x01, 0x08, 0x00,
@@ -61,10 +61,10 @@ static unsigned char yj2_data1[0x100] = {
     0x32, 0x07, 0x14, 0x03, 0x20, 0x06, 0x13, 0x00, 0x1f, 0x05, 0x12, 0x02, 0x1e, 0x01, 0x04, 0x00,
     0x31, 0x0b, 0x11, 0x03, 0x1d, 0x0a, 0x10, 0x00, 0x1c, 0x09, 0x0f, 0x02, 0x1b, 0x01, 0x08, 0x00,
     0x30, 0x07, 0x0e, 0x03, 0x1a, 0x06, 0x0d, 0x00, 0x19, 0x05, 0x0c, 0x02, 0x18, 0x01, 0x04, 0x00};
-static unsigned char yj2_data2[0x10] = {
+static uint8_t yj2_data2[0x10] = {
     0x08, 0x05, 0x06, 0x04, 0x07, 0x05, 0x06, 0x03, 0x07, 0x05, 0x06, 0x04, 0x07, 0x04, 0x05, 0x03};
 
-static void yj2_adjust_tree(YJ2_Tree tree, unsigned short value)
+static void yj2_adjust_tree(YJ2_Tree tree, uint16_t value)
 {
     YJ2_TreeNode *node = tree.list[value];
     YJ2_TreeNode tmp;
@@ -108,8 +108,8 @@ static void yj2_adjust_tree(YJ2_Tree tree, unsigned short value)
 
 static void yj2_build_tree(YJ2_Tree *tree)
 {
-    unsigned short i;
-    unsigned short ptr;
+    uint16_t i;
+    uint16_t ptr;
     YJ2_TreeNode **list = (YJ2_TreeNode **)UTIL_calloc(321, sizeof(YJ2_TreeNode *));
     YJ2_TreeNode *node = (YJ2_TreeNode *)UTIL_calloc(641, sizeof(YJ2_TreeNode));
     for (i = 0; i <= 0x140; i++)
@@ -131,19 +131,19 @@ static void yj2_build_tree(YJ2_Tree *tree)
     tree->node = node;
 }
 
-static unsigned int yj2_bt(const unsigned char *data, unsigned int pos)
+static uint32_t yj2_bt(const uint8_t *data, uint32_t pos)
 {
-    return (data[pos >> 3] & (unsigned char)(1 << (pos & 0x7))) >> (pos & 0x7);
+    return (data[pos >> 3] & (uint8_t)(1 << (pos & 0x7))) >> (pos & 0x7);
 }
 
-unsigned char YJ2_Decompress(
+uint8_t YJ2_Decompress(
     const void *Source,
     void *Destination)
 {
-    unsigned int len = 0;
-    unsigned int ptr = 0;
-    unsigned char *src = NULL;
-    unsigned char *dest = NULL;
+    uint32_t len = 0;
+    uint32_t ptr = 0;
+    uint8_t *src = NULL;
+    uint8_t *dest = NULL;
     YJ2_Tree tree;
     YJ2_TreeNode *node;
 
@@ -152,12 +152,12 @@ unsigned char YJ2_Decompress(
 
     yj2_build_tree(&tree);
 
-    src = (unsigned char *)Source + 4;
-    dest = (unsigned char *)Destination;
+    src = (uint8_t *)Source + 4;
+    dest = (uint8_t *)Destination;
 
     while (1)
     {
-        unsigned short val;
+        uint16_t val;
         node = tree.node + 0x280;
         while (node->value > 0x140)
         {
@@ -170,7 +170,7 @@ unsigned char YJ2_Decompress(
         val = node->value;
         if (tree.node[0x280].weight == 0x8000)
         {
-            unsigned short i;
+            uint16_t i;
             for (i = 0; i < 0x141; i++)
                 if (tree.list[i]->weight & 0x1)
                     yj2_adjust_tree(tree, i);
@@ -180,16 +180,16 @@ unsigned char YJ2_Decompress(
         yj2_adjust_tree(tree, val);
         if (val > 0xff)
         {
-            unsigned short i;
-            unsigned int temp, tmp, pos;
-            unsigned char *pre;
+            uint16_t i;
+            uint32_t temp, tmp, pos;
+            uint8_t *pre;
             for (i = 0, temp = 0; i < 8; i++, ptr++)
                 temp |= yj2_bt(src, ptr) << i;
             tmp = temp & 0xff;
             for (; i < yj2_data2[tmp & 0xf] + 6; i++, ptr++)
                 temp |= yj2_bt(src, ptr) << i;
             temp >>= yj2_data2[tmp & 0xf];
-            pos = (temp & 0x3f) | ((unsigned int)yj2_data1[tmp] << 6);
+            pos = (temp & 0x3f) | ((uint32_t)yj2_data1[tmp] << 6);
             if (pos == 0xfff)
                 break;
             pre = dest - pos - 1;
@@ -199,7 +199,7 @@ unsigned char YJ2_Decompress(
         }
         else
         {
-            *dest++ = (unsigned char)val;
+            *dest++ = (uint8_t)val;
             len++;
         }
     }

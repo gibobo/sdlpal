@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -43,63 +43,63 @@
 
 static int __buymenu_firsttime_render;
 // Equipment Screen
-static const unsigned int EquipImageBox = PAL_XY(8, 8);
-static const unsigned int EquipRoleListBox = PAL_XY(2, 95);
-static const unsigned int EquipItemName = PAL_XY(5, 70);
-static const unsigned int EquipItemAmount = PAL_XY(51, 57);
-static const unsigned int EquipLabels[] = {
+static const uint32_t EquipImageBox = PAL_XY(8, 8);
+static const uint32_t EquipRoleListBox = PAL_XY(2, 95);
+static const uint32_t EquipItemName = PAL_XY(5, 70);
+static const uint32_t EquipItemAmount = PAL_XY(51, 57);
+static const uint32_t EquipLabels[] = {
     PAL_XY(92, 11), PAL_XY(92, 33),
     PAL_XY(92, 55), PAL_XY(92, 77),
     PAL_XY(92, 99), PAL_XY(92, 121)};
-static const unsigned int EquipNames[] = {
+static const uint32_t EquipNames[] = {
     PAL_XY(130, 11), PAL_XY(130, 33),
     PAL_XY(130, 55), PAL_XY(130, 77),
     PAL_XY(130, 99), PAL_XY(130, 121)};
-static const unsigned int EquipStatusLabels[] = {
+static const uint32_t EquipStatusLabels[] = {
     PAL_XY(226, 10), PAL_XY(226, 32),
     PAL_XY(226, 54), PAL_XY(226, 76),
     PAL_XY(226, 98)};
-static const unsigned int EquipStatusValues[] = {
+static const uint32_t EquipStatusValues[] = {
     PAL_XY(260, 14), PAL_XY(260, 36),
     PAL_XY(260, 58), PAL_XY(260, 80),
     PAL_XY(260, 102)};
 
 // Status Screen
-static const unsigned int RoleName = PAL_XY(110, 8);
-static const unsigned int RoleImage = PAL_XY(110, 30);
-static const unsigned int RoleLabels[] = {
+static const uint32_t RoleName = PAL_XY(110, 8);
+static const uint32_t RoleImage = PAL_XY(110, 30);
+static const uint32_t RoleLabels[] = {
     PAL_XY(6, 6),  //RoleExpLabel
     PAL_XY(6, 32), //RoleLevelLabel
     PAL_XY(6, 54), //RoleHPLabel
     PAL_XY(6, 76)  //RoleMPLabel
 };
-static const unsigned int RoleStatusLabels[] = {
+static const uint32_t RoleStatusLabels[] = {
     PAL_XY(6, 98), PAL_XY(6, 118),
     PAL_XY(6, 138), PAL_XY(6, 158),
     PAL_XY(6, 178)};
-static const unsigned int RoleCurrExp = PAL_XY(58, 6);
-static const unsigned int RoleNextExp = PAL_XY(58, 15);
-static const unsigned int RoleExpSlash = PAL_XY(0, 0);
-static const unsigned int RoleLevel = PAL_XY(54, 35);
-static const unsigned int RoleCurHP = PAL_XY(42, 56);
-static const unsigned int RoleMaxHP = PAL_XY(63, 61);
-static const unsigned int RoleHPSlash = PAL_XY(65, 58);
-static const unsigned int RoleCurMP = PAL_XY(42, 78);
-static const unsigned int RoleMaxMP = PAL_XY(63, 83);
-static const unsigned int RoleMPSlash = PAL_XY(65, 80);
-static const unsigned int RoleStatusValues[] = {
+static const uint32_t RoleCurrExp = PAL_XY(58, 6);
+static const uint32_t RoleNextExp = PAL_XY(58, 15);
+static const uint32_t RoleExpSlash = PAL_XY(0, 0);
+static const uint32_t RoleLevel = PAL_XY(54, 35);
+static const uint32_t RoleCurHP = PAL_XY(42, 56);
+static const uint32_t RoleMaxHP = PAL_XY(63, 61);
+static const uint32_t RoleHPSlash = PAL_XY(65, 58);
+static const uint32_t RoleCurMP = PAL_XY(42, 78);
+static const uint32_t RoleMaxMP = PAL_XY(63, 83);
+static const uint32_t RoleMPSlash = PAL_XY(65, 80);
+static const uint32_t RoleStatusValues[] = {
     PAL_XY(42, 102), PAL_XY(42, 122),
     PAL_XY(42, 142), PAL_XY(42, 162),
     PAL_XY(42, 182)};
-static const unsigned int RoleEquipImageBoxes[] = {
+static const uint32_t RoleEquipImageBoxes[] = {
     PAL_XY(189, -1), PAL_XY(247, 39),
     PAL_XY(251, 101), PAL_XY(201, 133),
     PAL_XY(141, 141), PAL_XY(81, 125)};
-static const unsigned int RoleEquipNames[] = {
+static const uint32_t RoleEquipNames[] = {
     PAL_XY(195, 38), PAL_XY(253, 78),
     PAL_XY(257, 140), PAL_XY(207, 172),
     PAL_XY(147, 180), PAL_XY(87, 164)};
-static const unsigned int RolePoisonNames[] = {
+static const uint32_t RolePoisonNames[] = {
     PAL_XY(185, 58), PAL_XY(185, 76),
     PAL_XY(185, 94), PAL_XY(185, 112),
     PAL_XY(185, 130), PAL_XY(185, 148),
@@ -107,27 +107,27 @@ static const unsigned int RolePoisonNames[] = {
     PAL_XY(185, 184), PAL_XY(185, 184)};
 
 // Extra Lines
-static const unsigned int ExtraItemDescLines = PAL_XY(0, 0);
-static const unsigned int ExtraMagicDescLines = PAL_XY(0, 0);
+static const uint32_t ExtraItemDescLines = PAL_XY(0, 0);
+static const uint32_t ExtraMagicDescLines = PAL_XY(0, 0);
 
 // Magic Menu Desc
-static const unsigned int MagicMPDescLines = PAL_XY(5, 0);
-static const unsigned int MagicMPSlashPos = PAL_XY(45, 14);
-static const unsigned int MagicMPNeededPos = PAL_XY(15, 14);
-static const unsigned int MagicMPCurrentPos = PAL_XY(50, 14);
+static const uint32_t MagicMPDescLines = PAL_XY(5, 0);
+static const uint32_t MagicMPSlashPos = PAL_XY(45, 14);
+static const uint32_t MagicMPNeededPos = PAL_XY(15, 14);
+static const uint32_t MagicMPCurrentPos = PAL_XY(50, 14);
 
 // Magic Desc Message Pos
-static const unsigned int MagicDescMsgPos = PAL_XY(102, 0);
+static const uint32_t MagicDescMsgPos = PAL_XY(102, 0);
 
-extern unsigned char *gpSpriteUI;
+extern uint8_t *gpSpriteUI;
 
-static unsigned short GetSavedTimes(int iSaveSlot)
+static uint16_t GetSavedTimes(int iSaveSlot)
 {
-    unsigned short wSavedTimes = 0;
+    uint16_t wSavedTimes = 0;
     void *fpSAVE = UTIL_fopen_without_checking(UTIL_Filename("%s/%d.rpg", RESOURCE_PATH, iSaveSlot), "rb");
     if (fpSAVE)
     {
-        if (UTIL_fread(&wSavedTimes, sizeof(unsigned short), 1, fpSAVE) != 1)
+        if (UTIL_fread(&wSavedTimes, sizeof(uint16_t), 1, fpSAVE) != 1)
             wSavedTimes = 0;
         UTIL_fclose(fpSAVE);
     }
@@ -150,9 +150,9 @@ void PAL_OpeningMenu(void)
 
 --*/
 {
-    unsigned short wItemSelected;
-    unsigned short wDefaultItem = 0;
-    unsigned int w[2] = {PAL_WordWidth(MAINMENU_LABEL_NEWGAME), PAL_WordWidth(MAINMENU_LABEL_LOADGAME)};
+    uint16_t wItemSelected;
+    uint16_t wDefaultItem = 0;
+    uint32_t w[2] = {PAL_WordWidth(MAINMENU_LABEL_NEWGAME), PAL_WordWidth(MAINMENU_LABEL_LOADGAME)};
 
     MENUITEM rgMainMenuItem[2] = {
         // value   label                     enabled   position
@@ -204,8 +204,8 @@ void PAL_OpeningMenu(void)
     PAL_ReloadInNextTick(wItemSelected & 0xFF);
 }
 
-unsigned short PAL_SaveSlotMenu(
-    unsigned short wDefaultSlot)
+uint16_t PAL_SaveSlotMenu(
+    uint16_t wDefaultSlot)
 /*++
   Purpose:
 
@@ -221,10 +221,10 @@ unsigned short PAL_SaveSlotMenu(
 
 --*/
 {
-    unsigned short i;
-    unsigned int w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5U);
-    unsigned int dx = (w > 4) ? (w - 4) * 16U : 0U;
-    unsigned short wItemSelected;
+    uint16_t i;
+    uint32_t w = PAL_WordMaxWidth(LOADMENU_LABEL_SLOT_FIRST, 5U);
+    uint32_t dx = (w > 4) ? (w - 4) * 16U : 0U;
+    uint16_t wItemSelected;
 
     MENUITEM rgMenuItem[5];
 
@@ -252,7 +252,7 @@ unsigned short PAL_SaveSlotMenu(
         //
         // Draw the number
         //
-        PAL_DrawNumber((unsigned int)GetSavedTimes(i), 4, PAL_XY(270, 38 * i - 17),
+        PAL_DrawNumber((uint32_t)GetSavedTimes(i), 4, PAL_XY(270, 38 * i - 17),
                        kNumColorYellow, kNumAlignRight);
     }
 
@@ -266,11 +266,11 @@ unsigned short PAL_SaveSlotMenu(
     return wItemSelected;
 }
 
-static unsigned short
+static uint16_t
 PAL_SelectionMenu(
-    const unsigned char nWords,
-    const unsigned char nDefault,
-    const unsigned short *wItems)
+    const uint8_t nWords,
+    const uint8_t nDefault,
+    const uint16_t *wItems)
 /*++
   Purpose:
 
@@ -290,19 +290,19 @@ PAL_SelectionMenu(
 {
     BOX *rgpBox[4];
     MENUITEM rgMenuItem[4];
-    unsigned char i;
-    unsigned short wReturnValue;
-    unsigned int w[4] = {
+    uint8_t i;
+    uint16_t wReturnValue;
+    uint32_t w[4] = {
         (nWords >= 1 && wItems[0]) ? PAL_WordWidth(wItems[0]) : 1,
         (nWords >= 2 && wItems[1]) ? PAL_WordWidth(wItems[1]) : 1,
         (nWords >= 3 && wItems[2]) ? PAL_WordWidth(wItems[2]) : 1,
         (nWords >= 4 && wItems[3]) ? PAL_WordWidth(wItems[3]) : 1};
-    unsigned int dx[4] = {
+    uint32_t dx[4] = {
         (w[0] - 1) * 16,
         (w[1] - 1) * 16,
         (w[2] - 1) * 16,
         (w[3] - 1) * 16};
-    unsigned int pos[4] = {
+    uint32_t pos[4] = {
         PAL_XY(145, 110),
         PAL_XY(220 + dx[0], 110),
         PAL_XY(145, 160),
@@ -351,9 +351,9 @@ PAL_SelectionMenu(
     return wReturnValue;
 }
 
-unsigned short
+uint16_t
 PAL_TripleMenu(
-    unsigned short wThirdWord)
+    uint16_t wThirdWord)
 /*++
   Purpose:
 
@@ -369,11 +369,11 @@ PAL_TripleMenu(
 
 --*/
 {
-    unsigned short wItems[3] = {CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES, wThirdWord};
+    uint16_t wItems[3] = {CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES, wThirdWord};
     return PAL_SelectionMenu(3, 0, wItems);
 }
 
-unsigned char PAL_ConfirmMenu(
+uint8_t PAL_ConfirmMenu(
     void)
 /*++
   Purpose:
@@ -390,14 +390,14 @@ unsigned char PAL_ConfirmMenu(
 
 --*/
 {
-    unsigned short wItems[2] = {CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES};
-    unsigned short wReturnValue = PAL_SelectionMenu(2, 0, wItems);
+    uint16_t wItems[2] = {CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES};
+    uint16_t wReturnValue = PAL_SelectionMenu(2, 0, wItems);
 
     return (wReturnValue == MENUITEM_VALUE_CANCELLED || wReturnValue == 0) ? false : true;
 }
 
-unsigned char PAL_SwitchMenu(
-    unsigned char fEnabled)
+uint8_t PAL_SwitchMenu(
+    uint8_t fEnabled)
 /*++
   Purpose:
 
@@ -413,14 +413,14 @@ unsigned char PAL_SwitchMenu(
 
 --*/
 {
-    unsigned short wItems[2] = {SWITCHMENU_LABEL_DISABLE, SWITCHMENU_LABEL_ENABLE};
-    unsigned short wReturnValue = PAL_SelectionMenu(2, fEnabled ? 1 : 0, wItems);
+    uint16_t wItems[2] = {SWITCHMENU_LABEL_DISABLE, SWITCHMENU_LABEL_ENABLE};
+    uint16_t wReturnValue = PAL_SelectionMenu(2, fEnabled ? 1 : 0, wItems);
     return (wReturnValue == MENUITEM_VALUE_CANCELLED) ? fEnabled : ((wReturnValue == 0) ? false : true);
 }
 
 static void
 PAL_SystemMenu_OnItemChange(
-    unsigned short wCurrentItem)
+    uint16_t wCurrentItem)
 /*++
   Purpose:
 
@@ -458,9 +458,9 @@ PAL_SystemMenu(
 --*/
 {
     BOX *lpMenuBox = NULL;
-    unsigned short wReturnValue;
-    unsigned short iSlot;
-    int i;
+    uint16_t wReturnValue;
+    uint16_t iSlot;
+    int32_t i;
     const VIDEO_Rect rect = {40, 60, 280, 135};
 
     //
@@ -506,12 +506,12 @@ PAL_SystemMenu(
             iSlot = PAL_SaveSlotMenu(gpGlobals->bCurrentSaveSlot);
             if (iSlot != MENUITEM_VALUE_CANCELLED)
             {
-                unsigned short wSavedTimes = 0;
-                gpGlobals->bCurrentSaveSlot = (unsigned char)iSlot;
+                uint16_t wSavedTimes = 0;
+                gpGlobals->bCurrentSaveSlot = (uint8_t)iSlot;
 
                 for (i = 1; i <= 5; i++)
                 {
-                    unsigned short curSavedTimes = GetSavedTimes(i);
+                    uint16_t curSavedTimes = GetSavedTimes(i);
                     if (curSavedTimes > wSavedTimes)
                     {
                         wSavedTimes = curSavedTimes;
@@ -578,9 +578,9 @@ void PAL_InGameMagicMenu(
 --*/
 {
     MENUITEM rgMenuItem[MAX_PLAYERS_IN_PARTY];
-    unsigned short i, y;
-    static unsigned short w;
-    unsigned short wMagic;
+    uint16_t i, y;
+    static uint16_t w;
+    uint16_t wMagic;
 
     if (gpGlobals->wMaxPartyMemberIndex == 0)
     {
@@ -670,7 +670,7 @@ start_magicmenu:
             //
             // Need to select which player to use the magic on.
             //
-            unsigned short wPlayer = 0;
+            uint16_t wPlayer = 0;
             VIDEO_Rect rect;
 
             while (wPlayer != MENUITEM_VALUE_CANCELLED)
@@ -794,7 +794,7 @@ PAL_InventoryMenu(
 
 --*/
 {
-    static unsigned short w = 0;
+    static uint16_t w = 0;
 
     MENUITEM rgMenuItem[2] =
         {
@@ -821,7 +821,7 @@ PAL_InventoryMenu(
 
 static void
 PAL_InGameMenu_OnItemChange(
-    unsigned short wCurrentItem)
+    uint16_t wCurrentItem)
 /*++
   Purpose:
 
@@ -859,8 +859,8 @@ void PAL_InGameMenu(
 {
     BOX *lpCashBox = NULL;
     BOX *lpMenuBox = NULL;
-    unsigned short wReturnValue;
-    unsigned char loop_flag = 1;
+    uint16_t wReturnValue;
+    uint8_t loop_flag = 1;
 
     // Fix render problem with shadow
     VIDEO_BackupScreen(gpScreen);
@@ -964,17 +964,17 @@ void PAL_PlayerStatus(
 
 --*/
 {
-    unsigned char *bufImage = NULL;
-    int labels0[] = {STATUS_LABEL_EXP, STATUS_LABEL_LEVEL, STATUS_LABEL_HP, STATUS_LABEL_MP};
-    int labels1[] = {STATUS_LABEL_EXP_LAYOUT, STATUS_LABEL_LEVEL_LAYOUT, STATUS_LABEL_HP_LAYOUT, STATUS_LABEL_MP_LAYOUT};
-    int labels[] = {STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE, STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE};
-    int iCurrent = 0;
-    unsigned short iPlayerRole;
-    int i;
-    int j;
-    unsigned short w;
+    uint8_t *bufImage = NULL;
+    int32_t labels0[] = {STATUS_LABEL_EXP, STATUS_LABEL_LEVEL, STATUS_LABEL_HP, STATUS_LABEL_MP};
+    int32_t labels1[] = {STATUS_LABEL_EXP_LAYOUT, STATUS_LABEL_LEVEL_LAYOUT, STATUS_LABEL_HP_LAYOUT, STATUS_LABEL_MP_LAYOUT};
+    int32_t labels[] = {STATUS_LABEL_ATTACKPOWER, STATUS_LABEL_MAGICPOWER, STATUS_LABEL_RESISTANCE, STATUS_LABEL_DEXTERITY, STATUS_LABEL_FLEERATE};
+    int32_t iCurrent = 0;
+    uint16_t iPlayerRole;
+    int32_t i;
+    int32_t j;
+    uint16_t w;
 
-    bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
+    bufImage = (uint8_t *)UTIL_malloc(bufImageSize);
 
     while (iCurrent >= 0 && iCurrent <= gpGlobals->wMaxPartyMemberIndex)
     {
@@ -992,7 +992,7 @@ void PAL_PlayerStatus(
         // Draw the equipments
         for (i = 0; i < MAX_PLAYER_EQUIPMENTS; i++)
         {
-            int offset;
+            int32_t offset;
 
             w = gpGlobals->g.PlayerRoles->rgwEquipment[i][iPlayerRole];
 
@@ -1068,7 +1068,7 @@ void PAL_PlayerStatus(
 
             if (w != 0 && gpGlobals->g.rgObject[w].poison.wPoisonLevel <= 3)
             {
-                PAL_DrawText(PAL_GetWord(w), RolePoisonNames[j++], (unsigned char)(gpGlobals->g.rgObject[w].poison.wColor + 10), true, false);
+                PAL_DrawText(PAL_GetWord(w), RolePoisonNames[j++], (uint8_t)(gpGlobals->g.rgObject[w].poison.wColor + 10), true, false);
             }
         }
 
@@ -1099,9 +1099,9 @@ void PAL_PlayerStatus(
     UTIL_free(bufImage);
 }
 
-unsigned short
+uint16_t
 PAL_ItemUseMenu(
-    unsigned short wItemToUse)
+    uint16_t wItemToUse)
 /*++
   Purpose:
 
@@ -1118,11 +1118,11 @@ PAL_ItemUseMenu(
 
 --*/
 {
-    unsigned char bColor;
-    unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
-    static unsigned short sSelectedPlayer = 0;
+    uint8_t bColor;
+    uint8_t *bufImage = (uint8_t *)UTIL_malloc(bufImageSize);
+    static uint16_t sSelectedPlayer = 0;
     // VIDEO_Rect rect = {110, 2, 200, 180};
-    unsigned short i;
+    uint16_t i;
 
     while (true)
     {
@@ -1265,7 +1265,7 @@ PAL_ItemUseMenu(
 
 static void
 PAL_BuyMenu_OnItemChange(
-    unsigned short wCurrentItem)
+    uint16_t wCurrentItem)
 /*++
   Purpose:
 
@@ -1284,8 +1284,8 @@ PAL_BuyMenu_OnItemChange(
 --*/
 {
     // const VIDEO_Rect rect = {20, 8, 300, 175};
-    int i, j, n, iPlayerID, x, y;
-    unsigned char *bufImage;
+    int32_t i, j, n, iPlayerID, x, y;
+    uint8_t *bufImage;
 
     // Prepare item bakcground box pos
     x = 40;
@@ -1303,7 +1303,7 @@ PAL_BuyMenu_OnItemChange(
     x = 48;
     y = 15;
 
-    bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
+    bufImage = (uint8_t *)UTIL_malloc(bufImageSize);
     if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, Res_BALL))
     {
         PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(x, y));
@@ -1365,7 +1365,7 @@ PAL_BuyMenu_OnItemChange(
 }
 
 void PAL_BuyMenu(
-    unsigned short wStoreNum)
+    uint16_t wStoreNum)
 /*++
   Purpose:
 
@@ -1382,7 +1382,7 @@ void PAL_BuyMenu(
 --*/
 {
     MENUITEM rgMenuItem[MAX_STORE_ITEM];
-    unsigned short i, y, w;
+    uint16_t i, y, w;
 
     //
     // create the menu items
@@ -1458,7 +1458,7 @@ void PAL_BuyMenu(
 
 static void
 PAL_SellMenu_OnItemChange(
-    unsigned short wCurrentItem)
+    uint16_t wCurrentItem)
 /*++
   Purpose:
 
@@ -1476,8 +1476,8 @@ PAL_SellMenu_OnItemChange(
 
 --*/
 {
-    unsigned short x = 100;
-    unsigned short y = 150;
+    uint16_t x = 100;
+    uint16_t y = 150;
     //
     // Draw the cash amount
     //
@@ -1517,7 +1517,7 @@ void PAL_SellMenu(
 
 --*/
 {
-    unsigned short w;
+    uint16_t w;
 
     while (true)
     {
@@ -1538,7 +1538,7 @@ void PAL_SellMenu(
 }
 
 void PAL_EquipItemMenu(
-    unsigned short wItem)
+    uint16_t wItem)
 /*++
   Purpose:
 
@@ -1554,11 +1554,11 @@ void PAL_EquipItemMenu(
 
 --*/
 {
-    unsigned short w;
-    unsigned short iCurrentPlayer = 0;
-    int i;
-    unsigned char bColor;
-    unsigned char *bufImage = (unsigned char *)UTIL_malloc(bufImageSize);
+    uint16_t w;
+    uint16_t iCurrentPlayer = 0;
+    int32_t i;
+    uint8_t bColor;
+    uint8_t *bufImage = (uint8_t *)UTIL_malloc(bufImageSize);
     gpGlobals->wLastUnequippedItem = wItem;
 
     while (true)

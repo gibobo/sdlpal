@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -32,15 +32,15 @@
 #include "video.h"
 #include <stdbool.h>
 
-static unsigned short g_iCurMiscMenuItem = 0;
-static unsigned short g_iCurSubMenuItem = 0;
+static uint16_t g_iCurMiscMenuItem = 0;
+static uint16_t g_iCurSubMenuItem = 0;
 extern BATTLE *g_Battle;
 extern BATTLEUI *UI_Battle;
-extern unsigned char *gpSpriteUI;
+extern uint8_t *gpSpriteUI;
 
 void PAL_PlayerInfoBox(
-    unsigned int pos,
-    unsigned short wPlayerRole)
+    uint32_t pos,
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -61,11 +61,11 @@ void PAL_PlayerInfoBox(
 --*/
 {
     // VIDEO_Rect rect;
-    unsigned char bPoisonColor;
-    int i, iPartyIndex;
-    unsigned short wMaxLevel, w;
+    uint8_t bPoisonColor;
+    int32_t i, iPartyIndex;
+    uint16_t wMaxLevel, w;
 
-    const unsigned char rgStatusPos[kStatusAll][2] = {
+    const uint8_t rgStatusPos[kStatusAll][2] = {
         {35, 19}, // confused
         {44, 12}, // slow
         {54, 1},  // sleep
@@ -77,7 +77,7 @@ void PAL_PlayerInfoBox(
         {0, 0},   // dualattack
     };
 
-    const unsigned short rgwStatusWord[kStatusAll] = {
+    const uint16_t rgwStatusWord[kStatusAll] = {
         0x1D, // confused
         0x1B, // slow
         0x1C, // sleep
@@ -89,7 +89,7 @@ void PAL_PlayerInfoBox(
         0x00, // dualattack
     };
 
-    const unsigned char rgbStatusColor[kStatusAll] = {
+    const uint8_t rgbStatusColor[kStatusAll] = {
         0x5F, // confused
         0xBF, // slow
         0x0E, // sleep
@@ -133,7 +133,7 @@ void PAL_PlayerInfoBox(
                 if (gpGlobals->g.rgObject[w].poison.wPoisonLevel >= wMaxLevel)
                 {
                     wMaxLevel = gpGlobals->g.rgObject[w].poison.wPoisonLevel;
-                    bPoisonColor = (unsigned char)(gpGlobals->g.rgObject[w].poison.wColor);
+                    bPoisonColor = (uint8_t)(gpGlobals->g.rgObject[w].poison.wColor);
                 }
             }
         }
@@ -224,8 +224,8 @@ PAL_BattleUIIsActionValid(
 
 --*/
 {
-    unsigned short wPlayerRole;
-    int i;
+    uint16_t wPlayerRole;
+    int32_t i;
 
     wPlayerRole = gpGlobals->rgParty[UI_Battle->wCurPlayerIndex].wPlayerRole;
 
@@ -248,7 +248,7 @@ PAL_BattleUIIsActionValid(
                 return false;
             }
             {
-                int healthyNumber = 0;
+                int32_t healthyNumber = 0;
                 for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
                     if (PAL_IsPlayerHealthy(gpGlobals->rgParty[i].wPlayerRole))
                         healthyNumber++;
@@ -262,7 +262,7 @@ PAL_BattleUIIsActionValid(
 
 static void
 PAL_BattleUIDrawMiscMenu(
-    unsigned short wCurrentItem,
+    uint16_t wCurrentItem,
     int fConfirmed)
 /*++
   Purpose:
@@ -281,8 +281,8 @@ PAL_BattleUIDrawMiscMenu(
 
 --*/
 {
-    int i;
-    unsigned char bColor;
+    int32_t i;
+    uint8_t bColor;
 
     MENUITEM rgMenuItem[] = {
         // value   label                     enabled   position
@@ -320,7 +320,7 @@ PAL_BattleUIDrawMiscMenu(
     }
 }
 
-static unsigned short
+static uint16_t
 PAL_BattleUIMiscMenuUpdate(
     void)
 /*++
@@ -372,7 +372,7 @@ PAL_BattleUIMiscMenuUpdate(
     return 0xFFFF;
 }
 
-static unsigned short
+static uint16_t
 PAL_BattleUIMiscItemSubMenuUpdate(
     void)
 /*++
@@ -390,8 +390,8 @@ PAL_BattleUIMiscItemSubMenuUpdate(
 
 --*/
 {
-    int i;
-    unsigned char bColor;
+    int32_t i;
+    uint8_t bColor;
 
     MENUITEM rgMenuItem[] = {
         // value   label                      enabled   position
@@ -444,7 +444,7 @@ PAL_BattleUIMiscItemSubMenuUpdate(
 }
 
 void PAL_BattleUIPlayerReady(
-    unsigned short wPlayerIndex)
+    uint16_t wPlayerIndex)
 /*++
   Purpose:
 
@@ -484,7 +484,7 @@ PAL_BattleUIUseItem(
 
 --*/
 {
-    unsigned short wSelectedItem;
+    uint16_t wSelectedItem;
 
     wSelectedItem = PAL_ItemSelectMenuUpdate();
 
@@ -530,7 +530,7 @@ PAL_BattleUIThrowItem(
 
 --*/
 {
-    unsigned short wSelectedItem = PAL_ItemSelectMenuUpdate();
+    uint16_t wSelectedItem = PAL_ItemSelectMenuUpdate();
 
     if (wSelectedItem != 0xFFFF)
     {
@@ -556,10 +556,10 @@ PAL_BattleUIThrowItem(
     }
 }
 
-static unsigned short
+static uint16_t
 PAL_BattleUIPickAutoMagic(
-    unsigned short wPlayerRole,
-    unsigned short wRandomRange)
+    uint16_t wPlayerRole,
+    uint16_t wRandomRange)
 /*++
   Purpose:
 
@@ -577,8 +577,8 @@ PAL_BattleUIPickAutoMagic(
 
 --*/
 {
-    unsigned short wMagic = 0, w, wMagicNum;
-    int i, iMaxPower = 0, iPower;
+    uint16_t wMagic = 0, w, wMagicNum;
+    int32_t i, iMaxPower = 0, iPower;
 
     if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusSilence] != 0)
     {
@@ -635,14 +635,14 @@ void PAL_BattleUIUpdate(
 
 --*/
 {
-    int i, j, x, y;
-    unsigned short wPlayerRole = 0, w;
+    int32_t i, j, x, y;
+    uint16_t wPlayerRole = 0, w;
     static int s_iFrame = 0;
 
     struct
     {
-        int iSpriteNum;
-        unsigned int pos;
+        int32_t iSpriteNum;
+        uint32_t pos;
         BATTLEUIACTION action;
     } rgItems[] =
         {
@@ -678,7 +678,7 @@ void PAL_BattleUIUpdate(
         {
             if (g_Battle->rgPlayer[i].state == kFighterCom)
             {
-                PAL_BattleUIPlayerReady((unsigned short)i);
+                PAL_BattleUIPlayerReady((uint16_t)i);
                 break;
             }
         }
@@ -809,7 +809,7 @@ void PAL_BattleUIUpdate(
             i = SPRITENUM_BATTLE_ARROW_CURRENTPLAYER;
         }
 
-        PAL_GetPlayerPos((unsigned char)UI_Battle->wCurPlayerIndex, &x, &y);
+        PAL_GetPlayerPos((uint8_t)UI_Battle->wCurPlayerIndex, &x, &y);
         x -= 8;
         y -= 74;
 
@@ -827,7 +827,7 @@ void PAL_BattleUIUpdate(
                 {
                     if (g_Battle->rgPlayer[i].state == kFighterCom)
                     {
-                        PAL_BattleUIPlayerReady((unsigned short)i);
+                        PAL_BattleUIPlayerReady((uint16_t)i);
                         break;
                     }
                 }
@@ -1320,7 +1320,7 @@ void PAL_BattleUIUpdate(
             //
             // Draw arrows on the selected player
             //
-            PAL_GetPlayerPos((unsigned char)UI_Battle->iSelectedIndex, &x, &y);
+            PAL_GetPlayerPos((uint8_t)UI_Battle->iSelectedIndex, &x, &y);
             x -= 8;
             y -= 67;
 
@@ -1363,7 +1363,7 @@ void PAL_BattleUIUpdate(
             //
             // Don't bother selecting
             //
-            UI_Battle->iSelectedIndex = (unsigned short)-1;
+            UI_Battle->iSelectedIndex = (uint16_t)-1;
             PAL_BattleCommitAction(false);
             break;
 
@@ -1371,7 +1371,7 @@ void PAL_BattleUIUpdate(
             //
             // Don't bother selecting
             //
-            UI_Battle->iSelectedIndex = (unsigned short)-1;
+            UI_Battle->iSelectedIndex = (uint16_t)-1;
             PAL_BattleCommitAction(false);
             break;
     }
@@ -1385,7 +1385,7 @@ end:
     {
         if (UI_Battle->rgShowNum[i].wNum > 0)
         {
-            int ticks = ((int)UTIL_GetMilliseconds() - (int)UI_Battle->rgShowNum[i].dwTime) / BATTLE_FRAME_TIME;
+            int32_t ticks = ((int)UTIL_GetMilliseconds() - (int)UI_Battle->rgShowNum[i].dwTime) / BATTLE_FRAME_TIME;
             if (ticks > 10)
             {
                 UI_Battle->rgShowNum[i].wNum = 0;
@@ -1403,8 +1403,8 @@ end:
 }
 
 void PAL_BattleUIShowNum(
-    unsigned short wNum,
-    unsigned int pos,
+    uint16_t wNum,
+    uint32_t pos,
     NUMCOLOR color)
 /*++
   Purpose:
@@ -1425,7 +1425,7 @@ void PAL_BattleUIShowNum(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < BATTLEUI_MAX_SHOWNUM; i++)
     {

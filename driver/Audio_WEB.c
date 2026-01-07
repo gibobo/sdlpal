@@ -5,13 +5,14 @@
 #include "DrvIf_internal.h"
 #include "mongoose.h"
 #include <math.h>
+#include <stdint.h>
 
-static unsigned char *audio_package = NULL;
-static unsigned int audio_package_size = 0;
+static uint8_t *audio_package = NULL;
+static uint32_t audio_package_size = 0;
 static void *audio_data = NULL;
-static unsigned int audio_data_size = 0;
+static uint32_t audio_data_size = 0;
 static double duration_sum = 0.0;
-static unsigned long audio_start_tick = 0;
+static uint32_t audio_start_tick = 0;
 static const double duration_ms = 1000.0 * (double)PAL_AUDIO_SAMPLES_PER_CHUNK / (double)PAL_AUDIO_SAMPLING_RATE;
 extern struct mg_connection *ws_conn;
 
@@ -69,7 +70,7 @@ int DRIVER_Init_Audio(void)
 {
     audio_data_size = PAL_AUDIO_SAMPLES_PER_CHUNK * PAL_AUDIO_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE;
     audio_package_size = 1 + audio_data_size;
-    audio_package = (unsigned char *)UTIL_malloc(audio_package_size);
+    audio_package = (uint8_t *)UTIL_malloc(audio_package_size);
     audio_package[0] = 1;
     audio_data = (void *)(audio_package + 1);
     return 0;

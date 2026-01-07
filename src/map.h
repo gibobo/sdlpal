@@ -21,6 +21,8 @@
 #ifndef _MAP_H
 #define _MAP_H
 
+#include <stdint.h>
+
 #include "video.h"
 
 //
@@ -61,23 +63,23 @@
 
 typedef struct tagPALMAP
 {
-    unsigned int *Tiles;
-    unsigned int Len_Tiles;
-    unsigned char *pTileSprite;
-    unsigned int Len_TileSprite;
-    int iMapNum;
+    uint32_t *Tiles;
+    uint32_t Len_Tiles;
+    uint8_t *pTileSprite;
+    uint32_t Len_TileSprite;
+    int32_t iMapNum;
 } PALMAP;
 
-void PAL_LoadMap(PALMAP *lpMap, int iMapNum);
+void PAL_LoadMap(PALMAP *lpMap, int32_t iMapNum);
 
 void PAL_FreeMap(PALMAP *lpMap);
 
-const unsigned char *PAL_MapGetTileBitmap(unsigned char x, unsigned char y, unsigned char h, unsigned char ucLayer, PALMAP *lpMap);
+const uint8_t *PAL_MapGetTileBitmap(uint8_t x, uint8_t y, uint8_t h, uint8_t ucLayer, PALMAP *lpMap);
 
-int PAL_MapTileIsBlocked(unsigned char x, unsigned char y, unsigned char h, PALMAP *lpMap);
+int PAL_MapTileIsBlocked(uint8_t x, uint8_t y, uint8_t h, PALMAP *lpMap);
 
-unsigned char PAL_MapGetTileHeight(unsigned char x, unsigned char y, unsigned char h, unsigned char ucLayer, PALMAP *lpMap);
+uint8_t PAL_MapGetTileHeight(uint8_t x, uint8_t y, uint8_t h, uint8_t ucLayer, PALMAP *lpMap);
 
-void PAL_MapBlitToSurface(PALMAP *lpMap, const VIDEO_Rect *lpSrcRect, unsigned char ucLayer);
+void PAL_MapBlitToSurface(PALMAP *lpMap, const VIDEO_Rect *lpSrcRect, uint8_t ucLayer);
 
 #endif

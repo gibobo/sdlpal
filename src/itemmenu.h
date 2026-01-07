@@ -21,10 +21,12 @@
 #ifndef ITEMMENU_H
 #define ITEMMENU_H
 
-unsigned short PAL_ItemSelectMenuUpdate(void);
+#include <stdint.h>
 
-void PAL_ItemSelectMenuInit(unsigned short wItemFlags);
+uint16_t PAL_ItemSelectMenuUpdate(void);
 
-unsigned short PAL_ItemSelectMenu(void (*)(unsigned short), unsigned short wItemFlags);
+void PAL_ItemSelectMenuInit(uint16_t wItemFlags);
+
+uint16_t PAL_ItemSelectMenu(void (*)(uint16_t), uint16_t wItemFlags);
 
 #endif

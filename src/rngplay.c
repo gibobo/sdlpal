@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -36,7 +36,7 @@
     if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
     return -1
 
-int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned int uiFrameNum, void *fpRngMKF)
+int32_t PAL_RNGReadFrame(uint8_t **lpBuffer, uint32_t uiRngNum, uint32_t uiFrameNum, void *fpRngMKF)
 /*++
   Purpose:
 
@@ -62,11 +62,11 @@ int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned i
 
 --*/
 {
-    unsigned int uiOffset = 0;
-    unsigned int uiSubOffset = 0;
-    unsigned int uiNextOffset = 0;
-    unsigned int uiChunkCount = 0;
-    int iChunkLen = 0;
+    uint32_t uiOffset = 0;
+    uint32_t uiSubOffset = 0;
+    uint32_t uiNextOffset = 0;
+    uint32_t uiChunkCount = 0;
+    int32_t iChunkLen = 0;
 
     if (fpRngMKF == NULL || lpBuffer == NULL)
     {
@@ -85,8 +85,8 @@ int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned i
 
     // Get the offset of the chunk.
     UTIL_fseek(fpRngMKF, 4 * uiRngNum, SEEK_SET);
-    Check_fread(&uiOffset, sizeof(unsigned int), 1, fpRngMKF);
-    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
+    Check_fread(&uiOffset, sizeof(uint32_t), 1, fpRngMKF);
+    Check_fread(&uiNextOffset, sizeof(uint32_t), 1, fpRngMKF);
 
     // Get the length of the chunk.
     iChunkLen = uiNextOffset - uiOffset;
@@ -100,7 +100,7 @@ int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned i
     }
 
     // Get the number of sub chunks.
-    Check_fread(&uiChunkCount, sizeof(unsigned int), 1, fpRngMKF);
+    Check_fread(&uiChunkCount, sizeof(uint32_t), 1, fpRngMKF);
     uiChunkCount = (uiChunkCount >> 2) - 1;
     if (uiFrameNum >= uiChunkCount)
     {
@@ -109,15 +109,15 @@ int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned i
 
     // Get the offset of the sub chunk.
     UTIL_fseek(fpRngMKF, uiOffset + 4 * uiFrameNum, SEEK_SET);
-    Check_fread(&uiSubOffset, sizeof(unsigned int), 1, fpRngMKF);
-    Check_fread(&uiNextOffset, sizeof(unsigned int), 1, fpRngMKF);
+    Check_fread(&uiSubOffset, sizeof(uint32_t), 1, fpRngMKF);
+    Check_fread(&uiNextOffset, sizeof(uint32_t), 1, fpRngMKF);
 
     // Get the length of the sub chunk.
     iChunkLen = uiNextOffset - uiSubOffset;
 
     if (iChunkLen != 0)
     {
-        *lpBuffer = (unsigned char *)UTIL_malloc(iChunkLen);
+        *lpBuffer = (uint8_t *)UTIL_malloc(iChunkLen);
         UTIL_fseek(fpRngMKF, uiOffset + uiSubOffset, SEEK_SET);
         return (int)UTIL_fread(*lpBuffer, 1, iChunkLen, fpRngMKF);
     }
@@ -127,9 +127,9 @@ int PAL_RNGReadFrame(unsigned char **lpBuffer, unsigned int uiRngNum, unsigned i
 
 static int
 PAL_RNGBlitToSurface(
-    const unsigned char *rng,
-    int length,
-    unsigned char *dstSurface)
+    const uint8_t *rng,
+    int32_t length,
+    uint8_t *dstSurface)
 /*++
   Purpose:
 
@@ -153,9 +153,9 @@ PAL_RNGBlitToSurface(
 
 --*/
 {
-    int ptr = 0;
-    unsigned int i, n, data;
-    unsigned char *dst = NULL;
+    int32_t ptr = 0;
+    uint32_t i, n, data;
+    uint8_t *dst = NULL;
 
     // Check for invalid parameters.
     if (dstSurface == NULL || length < 0 || rng == NULL)
@@ -187,7 +187,7 @@ PAL_RNGBlitToSurface(
                 break;
 
             case 0x04:
-                n = rng[ptr] | ((unsigned int)rng[ptr + 1] << 8);
+                n = rng[ptr] | ((uint32_t)rng[ptr + 1] << 8);
                 ptr += 2;
                 dst += (n + 1) * 2;
                 break;
@@ -223,7 +223,7 @@ PAL_RNGBlitToSurface(
                 break;
 
             case 0x0c:
-                n = rng[ptr] | ((unsigned int)rng[ptr + 1] << 8);
+                n = rng[ptr] | ((uint32_t)rng[ptr + 1] << 8);
                 ptr += 2;
                 for (i = 0; i <= n; i++)
                 {
@@ -255,7 +255,7 @@ PAL_RNGBlitToSurface(
                 break;
 
             case 0x12:
-                n = (rng[ptr] | ((unsigned int)rng[ptr + 1] << 8)) + 1;
+                n = (rng[ptr] | ((uint32_t)rng[ptr + 1] << 8)) + 1;
                 ptr += 2;
                 for (i = 0; i < n; i++)
                 {
@@ -271,10 +271,10 @@ PAL_RNGBlitToSurface(
 }
 
 void PAL_RNGPlay(
-    int iNumRNG,
-    int iStartFrame,
-    int iEndFrame,
-    int iSpeed)
+    int32_t iNumRNG,
+    int32_t iStartFrame,
+    int32_t iEndFrame,
+    int32_t iSpeed)
 /*++
   Purpose:
 
@@ -296,9 +296,8 @@ void PAL_RNGPlay(
 
 --*/
 {
-    unsigned char *rng = NULL;
-    unsigned int rng_size = 0;
-    unsigned int iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
+    uint8_t *rng = NULL;
+    uint32_t iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
 
     // Avoid losing the last frame
     if (iEndFrame > 0)
@@ -306,7 +305,7 @@ void PAL_RNGPlay(
 
     while (iStartFrame != iEndFrame)
     {
-        int RNGBlit_len = RES_RNGReadFrame(&rng, iNumRNG, iStartFrame++, Res_RNG);
+        int32_t RNGBlit_len = RES_RNGReadFrame(&rng, iNumRNG, iStartFrame++, Res_RNG);
         if (RNGBlit_len <= 0)
             break; // Failed to get the frame, don't go further
         if (PAL_RNGBlitToSurface(rng, RNGBlit_len, gpScreen->pixels) < 0)

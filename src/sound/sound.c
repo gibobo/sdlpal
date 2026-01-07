@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -34,37 +34,37 @@
 
 typedef struct RIFFHeader
 {
-    unsigned int signature; /* 'RIFF' */
-    unsigned int length;    /* Total length minus eight, little-endian */
-    unsigned int type;      /* 'WAVE', 'AVI ', ... */
+    uint32_t signature; /* 'RIFF' */
+    uint32_t length;    /* Total length minus eight, little-endian */
+    uint32_t type;      /* 'WAVE', 'AVI ', ... */
 } RIFFHeader;
 
 typedef struct RIFFChunkHeader
 {
-    unsigned int type;   /* 'fmt ', 'hdrl', 'movi' and so on */
-    unsigned int length; /* Total chunk length minus eight, little-endian */
+    uint32_t type;   /* 'fmt ', 'hdrl', 'movi' and so on */
+    uint32_t length; /* Total chunk length minus eight, little-endian */
 } RIFFChunkHeader;
 
 typedef struct WAVEFormatPCM
 {
-    unsigned short wFormatTag;    /* format type */
-    unsigned char nChannels;      /* number of channels (i.e. mono, stereo, etc.) */
-    unsigned int nSamplesPerSec;  /* sample rate */
-    unsigned int nAvgBytesPerSec; /* for buffer estimation */
-    unsigned short nBlockAlign;   /* block size of data */
-    unsigned short wBitsPerSample;
+    uint16_t wFormatTag;      /* format type */
+    uint8_t nChannels;        /* number of channels (i.e. mono, stereo, etc.) */
+    uint32_t nSamplesPerSec;  /* sample rate */
+    uint32_t nAvgBytesPerSec; /* for buffer estimation */
+    uint16_t nBlockAlign;     /* block size of data */
+    uint16_t wBitsPerSample;
 } WAVEFormatPCM;
 
 typedef struct tagWAVESPEC
 {
-    unsigned int size;
-    unsigned int freq;
-    unsigned short format;
-    unsigned char channels;
-    unsigned char align;
+    uint32_t size;
+    uint32_t freq;
+    uint16_t format;
+    uint8_t channels;
+    uint8_t align;
 } WAVESPEC;
 
-typedef int (*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, unsigned int, const void **);
+typedef int (*ResampleMixer)(void *[2], const void *, const WAVESPEC *, void *, uint32_t, const void **);
 
 typedef struct tagWAVEDATA
 {
@@ -81,24 +81,24 @@ typedef struct tagSOUNDPLAYER
 {
     AUDIOPLAYER_COMMONS;
     WAVEDATA soundlist;
-    int cursounds;
-    int lastSFX;
+    int32_t cursounds;
+    int32_t lastSFX;
 } SOUNDPLAYER;
 
 typedef struct tagVOCHEADER
 {
-    char signature[0x14];       /* "Creative Voice File" */
-    unsigned short data_offset; /* little endian */
-    unsigned short version;
-    unsigned short version_checksum;
+    char signature[0x14]; /* "Creative Voice File" */
+    uint16_t data_offset; /* little endian */
+    uint16_t version;
+    uint16_t version_checksum;
 } VOCHEADER;
 
-#define RIFF_RIFF (((unsigned int)'R') | (((unsigned int)'I') << 8) | (((unsigned int)'F') << 16) | (((unsigned int)'F') << 24))
-#define RIFF_WAVE (((unsigned int)'W') | (((unsigned int)'A') << 8) | (((unsigned int)'V') << 16) | (((unsigned int)'E') << 24))
-#define WAVE_fmt  (((unsigned int)'f') | (((unsigned int)'m') << 8) | (((unsigned int)'t') << 16) | (((unsigned int)' ') << 24))
-#define WAVE_data (((unsigned int)'d') | (((unsigned int)'a') << 8) | (((unsigned int)'t') << 16) | (((unsigned int)'a') << 24))
+#define RIFF_RIFF (((uint32_t)'R') | (((uint32_t)'I') << 8) | (((uint32_t)'F') << 16) | (((uint32_t)'F') << 24))
+#define RIFF_WAVE (((uint32_t)'W') | (((uint32_t)'A') << 8) | (((uint32_t)'V') << 16) | (((uint32_t)'E') << 24))
+#define WAVE_fmt  (((uint32_t)'f') | (((uint32_t)'m') << 8) | (((uint32_t)'t') << 16) | (((uint32_t)' ') << 24))
+#define WAVE_data (((uint32_t)'d') | (((uint32_t)'a') << 8) | (((uint32_t)'t') << 16) | (((uint32_t)'a') << 24))
 
-static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int dwLen, WAVESPEC *lpSpec)
+static const void *SOUND_LoadWAVEData(const uint8_t *lpData, uint32_t dwLen, WAVESPEC *lpSpec)
 /*++
   Purpose:
 
@@ -121,8 +121,8 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
     const RIFFHeader *lpRiff = (const RIFFHeader *)lpData;
     const RIFFChunkHeader *lpChunk = NULL;
     const WAVEFormatPCM *lpFormat = NULL;
-    const unsigned char *lpWaveData = NULL;
-    unsigned int len = 0, type;
+    const uint8_t *lpWaveData = NULL;
+    uint32_t len = 0, type;
 
     if (dwLen < sizeof(RIFFHeader) || lpRiff->signature != RIFF_RIFF ||
         lpRiff->type != RIFF_WAVE || dwLen < (lpRiff->length + 8))
@@ -151,11 +151,11 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
                 }
                 break;
             case WAVE_data:
-                lpWaveData = (const unsigned char *)(lpChunk + 1);
+                lpWaveData = (const uint8_t *)(lpChunk + 1);
                 dwLen = 0;
                 break;
         }
-        lpChunk = (const RIFFChunkHeader *)((const unsigned char *)(lpChunk + 1) + len);
+        lpChunk = (const RIFFChunkHeader *)((const uint8_t *)(lpChunk + 1) + len);
     }
 
     if (lpFormat == NULL || lpWaveData == NULL)
@@ -167,7 +167,7 @@ static const void *SOUND_LoadWAVEData(const unsigned char *lpData, unsigned int 
     lpSpec->format = (lpFormat->wBitsPerSample == 16);
     lpSpec->freq = lpFormat->nSamplesPerSec;
     lpSpec->size = len;
-    lpSpec->align = (unsigned char)((lpFormat->nChannels * lpFormat->wBitsPerSample) >> 3);
+    lpSpec->align = (uint8_t)((lpFormat->nChannels * lpFormat->wBitsPerSample) >> 3);
 
     return lpWaveData;
 }
@@ -177,31 +177,31 @@ static int SOUND_ResampleMix_Common(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData,
     bool is16bit,
-    unsigned int input_channels,
-    unsigned int output_channels)
+    uint32_t input_channels,
+    uint32_t output_channels)
 {
-    const unsigned char *src_u8 = (const unsigned char *)lpData;
+    const uint8_t *src_u8 = (const uint8_t *)lpData;
     const short *src_s16 = (const short *)lpData;
     const void *src_any = lpData;
     PAL_AUDIO_SAMPLE *dst = (PAL_AUDIO_SAMPLE *)lpBuffer;
-    const unsigned int bytes_per_sample = is16bit ? sizeof(short) : sizeof(unsigned char);
-    const unsigned int bytes_per_frame = input_channels * bytes_per_sample;
-    unsigned int frames = bytes_per_frame ? (lpSpec->size / bytes_per_frame) : 0U;
-    unsigned int channel_len = (output_channels > 0U) ? (iBufLen / output_channels) : 0U;
-    unsigned int total_bytes = 0U;
+    const uint32_t bytes_per_sample = is16bit ? sizeof(short) : sizeof(uint8_t);
+    const uint32_t bytes_per_frame = input_channels * bytes_per_sample;
+    uint32_t frames = bytes_per_frame ? (lpSpec->size / bytes_per_frame) : 0U;
+    uint32_t channel_len = (output_channels > 0U) ? (iBufLen / output_channels) : 0U;
+    uint32_t total_bytes = 0U;
 
     while (total_bytes < channel_len && frames > 0U)
     {
-        unsigned int to_write = resampler_get_free_count(resampler[0]);
+        uint32_t to_write = resampler_get_free_count(resampler[0]);
         if (to_write > frames)
             to_write = frames;
 
         if (is16bit)
         {
-            for (unsigned int j = 0; j < to_write; ++j)
+            for (uint32_t j = 0; j < to_write; ++j)
             {
                 resampler_write_sample(resampler[0], *src_s16++);
                 if (input_channels == 2U)
@@ -211,7 +211,7 @@ static int SOUND_ResampleMix_Common(
         }
         else
         {
-            for (unsigned int j = 0; j < to_write; ++j)
+            for (uint32_t j = 0; j < to_write; ++j)
             {
                 resampler_write_sample(resampler[0], (*src_u8++ ^ 0x80) << 8);
                 if (input_channels == 2U)
@@ -226,17 +226,17 @@ static int SOUND_ResampleMix_Common(
         {
             if (output_channels == 1U)
             {
-                int mixed;
+                int32_t mixed;
                 if (input_channels == 1U)
                 {
-                    int sample = resampler_get_sample(resampler[0]) >> 8;
+                    int32_t sample = resampler_get_sample(resampler[0]) >> 8;
                     mixed = PAL_AudioSampleToMixValue(*dst) + sample;
                     resampler_remove_sample(resampler[0]);
                 }
                 else
                 {
-                    int left = resampler_get_sample(resampler[0]) >> 8;
-                    int right = resampler_get_sample(resampler[1]) >> 8;
+                    int32_t left = resampler_get_sample(resampler[0]) >> 8;
+                    int32_t right = resampler_get_sample(resampler[1]) >> 8;
                     mixed = PAL_AudioSampleToMixValue(*dst) + ((left + right) >> 1);
                     resampler_remove_sample(resampler[0]);
                     resampler_remove_sample(resampler[1]);
@@ -246,8 +246,8 @@ static int SOUND_ResampleMix_Common(
             }
             else
             {
-                int left_sample = resampler_get_sample(resampler[0]) >> 8;
-                int mixed_left = PAL_AudioSampleToMixValue(dst[0]) + left_sample;
+                int32_t left_sample = resampler_get_sample(resampler[0]) >> 8;
+                int32_t mixed_left = PAL_AudioSampleToMixValue(dst[0]) + left_sample;
                 PAL_AUDIO_SAMPLE output_left = PAL_AudioMixValueToSample(mixed_left);
 
                 if (input_channels == 1U)
@@ -258,8 +258,8 @@ static int SOUND_ResampleMix_Common(
                 }
                 else
                 {
-                    int right_sample = resampler_get_sample(resampler[1]) >> 8;
-                    int mixed_right = PAL_AudioSampleToMixValue(dst[1]) + right_sample;
+                    int32_t right_sample = resampler_get_sample(resampler[1]) >> 8;
+                    int32_t mixed_right = PAL_AudioSampleToMixValue(dst[1]) + right_sample;
                     dst[0] = output_left;
                     dst[1] = PAL_AudioMixValueToSample(mixed_right);
                     resampler_remove_sample(resampler[0]);
@@ -283,7 +283,7 @@ static int SOUND_ResampleMix_U8_Mono_Mono(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -318,7 +318,7 @@ static int SOUND_ResampleMix_U8_Mono_Stereo(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -353,7 +353,7 @@ static int SOUND_ResampleMix_U8_Stereo_Mono(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -388,7 +388,7 @@ static int SOUND_ResampleMix_U8_Stereo_Stereo(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -423,7 +423,7 @@ static int SOUND_ResampleMix_S16_Mono_Mono(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -458,7 +458,7 @@ static int SOUND_ResampleMix_S16_Mono_Stereo(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -493,7 +493,7 @@ static int SOUND_ResampleMix_S16_Stereo_Mono(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -528,7 +528,7 @@ static int SOUND_ResampleMix_S16_Stereo_Stereo(
     const void *lpData,
     const WAVESPEC *lpSpec,
     void *lpBuffer,
-    unsigned int iBufLen,
+    uint32_t iBufLen,
     const void **llpData)
 /*++
   Purpose:
@@ -560,8 +560,8 @@ static int SOUND_ResampleMix_S16_Stereo_Stereo(
 
 static int SOUND_Play(
     void *object,
-    int iSoundNum,
-    unsigned char fLoop,
+    int32_t iSoundNum,
+    uint8_t fLoop,
     float flFadeTime)
 /*++
   Purpose:
@@ -585,11 +585,11 @@ static int SOUND_Play(
     WAVESPEC wavespec;
     ResampleMixer mixer = NULL;
     WAVEDATA *cursnd;
-    unsigned char *buf = NULL;
-    unsigned int buf_size = RES_MKFCreateChunk(&buf, iSoundNum, Res_SOUNDS);
+    uint8_t *buf = NULL;
+    uint32_t buf_size = RES_MKFCreateChunk(&buf, iSoundNum, Res_SOUNDS);
     const void *snddata;
-    unsigned char i;
-    unsigned int len;
+    uint8_t i;
+    uint32_t len;
 
     (void)fLoop;
     (void)flFadeTime;
@@ -637,7 +637,7 @@ static int SOUND_Play(
     DRIVER_Audio_Lock();
 
     cursnd = &player->soundlist;
-    int queue_depth = 0;
+    int32_t queue_depth = 0;
     while (cursnd->next && cursnd->base)
     {
         cursnd = cursnd->next;
@@ -671,7 +671,7 @@ static int SOUND_Play(
 
     cursnd->base = buf;
     cursnd->current = snddata;
-    cursnd->end = (const unsigned char *)snddata + wavespec.size;
+    cursnd->end = (const uint8_t *)snddata + wavespec.size;
     cursnd->spec = wavespec;
     cursnd->ResampleMix = mixer;
     player->cursounds++;
@@ -723,8 +723,8 @@ void SOUND_Shutdown(void *object)
 
 static void SOUND_FillBuffer(
     void *object,
-    unsigned char *stream,
-    unsigned int len)
+    uint8_t *stream,
+    uint32_t len)
 /*++
   Purpose:
 
@@ -747,13 +747,13 @@ static void SOUND_FillBuffer(
     if (player)
     {
         WAVEDATA *cursnd = &player->soundlist;
-        int sounds = 0;
+        int32_t sounds = 0;
         do
         {
             if (cursnd->base)
             {
                 cursnd->ResampleMix(cursnd->resampler, cursnd->current, &cursnd->spec, stream, len, &cursnd->current);
-                cursnd->spec.size = (int)((const unsigned char *)cursnd->end - (const unsigned char *)cursnd->current);
+                cursnd->spec.size = (int)((const uint8_t *)cursnd->end - (const uint8_t *)cursnd->current);
                 if (cursnd->spec.size < cursnd->spec.align)
                 {
                     UTIL_free((void *)cursnd->base);

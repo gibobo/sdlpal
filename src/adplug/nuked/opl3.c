@@ -1,4 +1,4 @@
-/* Nuked OPL3
+﻿/* Nuked OPL3
  * Copyright (C) 2013-2020 Nuke.YKT
  *
  * This file is part of Nuked OPL3.
@@ -195,7 +195,6 @@ static uint8_t panpot_lut_build = 0;
 #endif
 
 static opl3_chip opl3_chip_instance;
-
 
 /*
  Envelope generator
@@ -439,14 +438,14 @@ static OPL3_FORCE_INLINE void OPL3_EnvelopeCalc(opl3_slot *slot)
                 switch (eg_shift)
                 {
                     case 12:
-                    shift = 1;
-                    break;
+                        shift = 1;
+                        break;
                     case 13:
-                    shift = (rate_lo >> 1) & 0x01;
-                    break;
+                        shift = (rate_lo >> 1) & 0x01;
+                        break;
                     case 14:
-                    shift = rate_lo & 0x01;
-                    break;
+                        shift = rate_lo & 0x01;
+                        break;
                     default:
                         break;
                 }
@@ -601,28 +600,28 @@ static OPL3_FORCE_INLINE void OPL3_PhaseGenerate(opl3_slot *slot)
         switch (slot->slot_num)
         {
             case 13: /* hh */
-            slot->pg_phase_out = (unsigned int)rm_xor << 9;
-            if (rm_xor ^ (noise & 1))
-            {
-                slot->pg_phase_out |= 0xd0;
-            }
-            else
-            {
-                slot->pg_phase_out |= 0x34;
-            }
-            break;
+                slot->pg_phase_out = (uint32_t)rm_xor << 9;
+                if (rm_xor ^ (noise & 1))
+                {
+                    slot->pg_phase_out |= 0xd0;
+                }
+                else
+                {
+                    slot->pg_phase_out |= 0x34;
+                }
+                break;
             case 16: /* sd */
-            slot->pg_phase_out = ((unsigned int)chip->rm_hh_bit8 << 9) | (((unsigned int)chip->rm_hh_bit8 ^ (noise & 1)) << 8);
-            break;
+                slot->pg_phase_out = ((uint32_t)chip->rm_hh_bit8 << 9) | (((uint32_t)chip->rm_hh_bit8 ^ (noise & 1)) << 8);
+                break;
             case 17: /* tc */
-            slot->pg_phase_out = ((unsigned int)rm_xor << 9) | 0x80;
-            break;
+                slot->pg_phase_out = ((uint32_t)rm_xor << 9) | 0x80;
+                break;
             default:
                 break;
         }
     }
     n_bit = ((noise >> 14) ^ noise) & 0x01;
-    chip->noise = (noise >> 1) | ((unsigned int)n_bit << 22);
+    chip->noise = (noise >> 1) | ((uint32_t)n_bit << 22);
 }
 
 /*
@@ -683,29 +682,29 @@ static OPL3_FORCE_INLINE void OPL3_SlotGenerate(opl3_slot *slot)
     switch (slot->reg_wf & 0x07)
     {
         case 0:
-        slot->out = OPL3_EnvelopeCalcSin0(phase, slot->eg_out);
-        break;
+            slot->out = OPL3_EnvelopeCalcSin0(phase, slot->eg_out);
+            break;
         case 1:
-        slot->out = OPL3_EnvelopeCalcSin1(phase, slot->eg_out);
-        break;
+            slot->out = OPL3_EnvelopeCalcSin1(phase, slot->eg_out);
+            break;
         case 2:
-        slot->out = OPL3_EnvelopeCalcSin2(phase, slot->eg_out);
-        break;
+            slot->out = OPL3_EnvelopeCalcSin2(phase, slot->eg_out);
+            break;
         case 3:
-        slot->out = OPL3_EnvelopeCalcSin3(phase, slot->eg_out);
-        break;
+            slot->out = OPL3_EnvelopeCalcSin3(phase, slot->eg_out);
+            break;
         case 4:
-        slot->out = OPL3_EnvelopeCalcSin4(phase, slot->eg_out);
-        break;
+            slot->out = OPL3_EnvelopeCalcSin4(phase, slot->eg_out);
+            break;
         case 5:
-        slot->out = OPL3_EnvelopeCalcSin5(phase, slot->eg_out);
-        break;
+            slot->out = OPL3_EnvelopeCalcSin5(phase, slot->eg_out);
+            break;
         case 6:
-        slot->out = OPL3_EnvelopeCalcSin6(phase, slot->eg_out);
-        break;
+            slot->out = OPL3_EnvelopeCalcSin6(phase, slot->eg_out);
+            break;
         case 7:
-        slot->out = OPL3_EnvelopeCalcSin7(phase, slot->eg_out);
-        break;
+            slot->out = OPL3_EnvelopeCalcSin7(phase, slot->eg_out);
+            break;
     }
 }
 
@@ -873,13 +872,13 @@ static void OPL3_ChannelSetupAlg(opl3_channel *channel)
         switch (channel->alg & 0x01)
         {
             case 0x00:
-            channel->slotz[0]->mod = &channel->slotz[0]->fbmod;
-            channel->slotz[1]->mod = &channel->slotz[0]->out;
-            break;
+                channel->slotz[0]->mod = &channel->slotz[0]->fbmod;
+                channel->slotz[1]->mod = &channel->slotz[0]->out;
+                break;
             case 0x01:
-            channel->slotz[0]->mod = &channel->slotz[0]->fbmod;
-            channel->slotz[1]->mod = &channel->chip->zeromod;
-            break;
+                channel->slotz[0]->mod = &channel->slotz[0]->fbmod;
+                channel->slotz[1]->mod = &channel->chip->zeromod;
+                break;
         }
         return;
     }
@@ -896,45 +895,45 @@ static void OPL3_ChannelSetupAlg(opl3_channel *channel)
         switch (channel->alg & 0x03)
         {
             case 0x00:
-            channel->pair->slotz[0]->mod = &channel->pair->slotz[0]->fbmod;
-            channel->pair->slotz[1]->mod = &channel->pair->slotz[0]->out;
-            channel->slotz[0]->mod = &channel->pair->slotz[1]->out;
-            channel->slotz[1]->mod = &channel->slotz[0]->out;
-            channel->out[0] = &channel->slotz[1]->out;
-            channel->out[1] = &channel->chip->zeromod;
-            channel->out[2] = &channel->chip->zeromod;
-            channel->out[3] = &channel->chip->zeromod;
-            break;
+                channel->pair->slotz[0]->mod = &channel->pair->slotz[0]->fbmod;
+                channel->pair->slotz[1]->mod = &channel->pair->slotz[0]->out;
+                channel->slotz[0]->mod = &channel->pair->slotz[1]->out;
+                channel->slotz[1]->mod = &channel->slotz[0]->out;
+                channel->out[0] = &channel->slotz[1]->out;
+                channel->out[1] = &channel->chip->zeromod;
+                channel->out[2] = &channel->chip->zeromod;
+                channel->out[3] = &channel->chip->zeromod;
+                break;
             case 0x01:
-            channel->pair->slotz[0]->mod = &channel->pair->slotz[0]->fbmod;
-            channel->pair->slotz[1]->mod = &channel->pair->slotz[0]->out;
-            channel->slotz[0]->mod = &channel->chip->zeromod;
-            channel->slotz[1]->mod = &channel->slotz[0]->out;
-            channel->out[0] = &channel->pair->slotz[1]->out;
-            channel->out[1] = &channel->slotz[1]->out;
-            channel->out[2] = &channel->chip->zeromod;
-            channel->out[3] = &channel->chip->zeromod;
-            break;
+                channel->pair->slotz[0]->mod = &channel->pair->slotz[0]->fbmod;
+                channel->pair->slotz[1]->mod = &channel->pair->slotz[0]->out;
+                channel->slotz[0]->mod = &channel->chip->zeromod;
+                channel->slotz[1]->mod = &channel->slotz[0]->out;
+                channel->out[0] = &channel->pair->slotz[1]->out;
+                channel->out[1] = &channel->slotz[1]->out;
+                channel->out[2] = &channel->chip->zeromod;
+                channel->out[3] = &channel->chip->zeromod;
+                break;
             case 0x02:
-            channel->pair->slotz[0]->mod = &channel->pair->slotz[0]->fbmod;
-            channel->pair->slotz[1]->mod = &channel->chip->zeromod;
-            channel->slotz[0]->mod = &channel->pair->slotz[1]->out;
-            channel->slotz[1]->mod = &channel->slotz[0]->out;
-            channel->out[0] = &channel->pair->slotz[0]->out;
-            channel->out[1] = &channel->slotz[1]->out;
-            channel->out[2] = &channel->chip->zeromod;
-            channel->out[3] = &channel->chip->zeromod;
-            break;
+                channel->pair->slotz[0]->mod = &channel->pair->slotz[0]->fbmod;
+                channel->pair->slotz[1]->mod = &channel->chip->zeromod;
+                channel->slotz[0]->mod = &channel->pair->slotz[1]->out;
+                channel->slotz[1]->mod = &channel->slotz[0]->out;
+                channel->out[0] = &channel->pair->slotz[0]->out;
+                channel->out[1] = &channel->slotz[1]->out;
+                channel->out[2] = &channel->chip->zeromod;
+                channel->out[3] = &channel->chip->zeromod;
+                break;
             case 0x03:
-            channel->pair->slotz[0]->mod = &channel->pair->slotz[0]->fbmod;
-            channel->pair->slotz[1]->mod = &channel->chip->zeromod;
-            channel->slotz[0]->mod = &channel->pair->slotz[1]->out;
-            channel->slotz[1]->mod = &channel->chip->zeromod;
-            channel->out[0] = &channel->pair->slotz[0]->out;
-            channel->out[1] = &channel->slotz[0]->out;
-            channel->out[2] = &channel->slotz[1]->out;
-            channel->out[3] = &channel->chip->zeromod;
-            break;
+                channel->pair->slotz[0]->mod = &channel->pair->slotz[0]->fbmod;
+                channel->pair->slotz[1]->mod = &channel->chip->zeromod;
+                channel->slotz[0]->mod = &channel->pair->slotz[1]->out;
+                channel->slotz[1]->mod = &channel->chip->zeromod;
+                channel->out[0] = &channel->pair->slotz[0]->out;
+                channel->out[1] = &channel->slotz[0]->out;
+                channel->out[2] = &channel->slotz[1]->out;
+                channel->out[3] = &channel->chip->zeromod;
+                break;
         }
     }
     else
@@ -942,21 +941,21 @@ static void OPL3_ChannelSetupAlg(opl3_channel *channel)
         switch (channel->alg & 0x01)
         {
             case 0x00:
-            channel->slotz[0]->mod = &channel->slotz[0]->fbmod;
-            channel->slotz[1]->mod = &channel->slotz[0]->out;
-            channel->out[0] = &channel->slotz[1]->out;
-            channel->out[1] = &channel->chip->zeromod;
-            channel->out[2] = &channel->chip->zeromod;
-            channel->out[3] = &channel->chip->zeromod;
-            break;
+                channel->slotz[0]->mod = &channel->slotz[0]->fbmod;
+                channel->slotz[1]->mod = &channel->slotz[0]->out;
+                channel->out[0] = &channel->slotz[1]->out;
+                channel->out[1] = &channel->chip->zeromod;
+                channel->out[2] = &channel->chip->zeromod;
+                channel->out[3] = &channel->chip->zeromod;
+                break;
             case 0x01:
-            channel->slotz[0]->mod = &channel->slotz[0]->fbmod;
-            channel->slotz[1]->mod = &channel->chip->zeromod;
-            channel->out[0] = &channel->slotz[0]->out;
-            channel->out[1] = &channel->slotz[1]->out;
-            channel->out[2] = &channel->chip->zeromod;
-            channel->out[3] = &channel->chip->zeromod;
-            break;
+                channel->slotz[0]->mod = &channel->slotz[0]->fbmod;
+                channel->slotz[1]->mod = &channel->chip->zeromod;
+                channel->out[0] = &channel->slotz[0]->out;
+                channel->out[1] = &channel->slotz[1]->out;
+                channel->out[2] = &channel->chip->zeromod;
+                channel->out[3] = &channel->chip->zeromod;
+                break;
         }
     }
 }
@@ -1212,7 +1211,7 @@ OPL3_IRAM_ATTR OPL3_FORCE_INLINE void OPL3_Generate4Ch(opl3_chip *chip, int16_t 
     }
     else
     {
-        chip->tremolo = (unsigned short)(210 - chip->tremolopos) >> chip->tremoloshift;
+        chip->tremolo = (uint16_t)(210 - chip->tremolopos) >> chip->tremoloshift;
     }
 
     if ((chip->timer & 0x3ff) == 0x3ff)
@@ -1383,105 +1382,105 @@ void OPL3_WriteReg(opl3_chip *chip, uint16_t reg, uint8_t v)
     switch (regm & 0xf0)
     {
         case 0x00:
-        if (high)
-        {
-            switch (regm & 0x0f)
+            if (high)
             {
+                switch (regm & 0x0f)
+                {
                     case 0x04:
-                OPL3_ChannelSet4Op(chip, v);
-                break;
+                        OPL3_ChannelSet4Op(chip, v);
+                        break;
                     case 0x05:
-                chip->newm = v & 0x01;
+                        chip->newm = v & 0x01;
 #if OPL_ENABLE_STEREOEXT
-                chip->stereoext = (v >> 1) & 0x01;
+                        chip->stereoext = (v >> 1) & 0x01;
 #endif
-                break;
-            }
-        }
-        else
-        {
-            switch (regm & 0x0f)
-            {
-                    case 0x08:
-                chip->nts = (v >> 6) & 0x01;
-                break;
-            }
-        }
-        break;
-        case 0x20:
-        case 0x30:
-        if (ad_slot[regm & 0x1fu] >= 0)
-        {
-            OPL3_SlotWrite20(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
-        }
-        break;
-        case 0x40:
-        case 0x50:
-        if (ad_slot[regm & 0x1fu] >= 0)
-        {
-            OPL3_SlotWrite40(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
-        }
-        break;
-        case 0x60:
-        case 0x70:
-        if (ad_slot[regm & 0x1fu] >= 0)
-        {
-            OPL3_SlotWrite60(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
-        }
-        break;
-        case 0x80:
-        case 0x90:
-        if (ad_slot[regm & 0x1fu] >= 0)
-        {
-            OPL3_SlotWrite80(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
-        }
-        break;
-        case 0xe0:
-        case 0xf0:
-        if (ad_slot[regm & 0x1fu] >= 0)
-        {
-            OPL3_SlotWriteE0(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
-        }
-        break;
-        case 0xa0:
-        if ((regm & 0x0f) < 9)
-        {
-            OPL3_ChannelWriteA0(&chip->channel[9u * high + (regm & 0x0fu)], v);
-        }
-        break;
-        case 0xb0:
-        if (regm == 0xbd && !high)
-        {
-            chip->tremoloshift = (((v >> 7) ^ 1) << 1) + 2;
-            chip->vibshift = ((v >> 6) & 0x01) ^ 1;
-            OPL3_ChannelUpdateRhythm(chip, v);
-        }
-        else if ((regm & 0x0f) < 9)
-        {
-            OPL3_ChannelWriteB0(&chip->channel[9u * high + (regm & 0x0fu)], v);
-            if (v & 0x20)
-            {
-                OPL3_ChannelKeyOn(&chip->channel[9u * high + (regm & 0x0fu)]);
+                        break;
+                }
             }
             else
             {
-                OPL3_ChannelKeyOff(&chip->channel[9u * high + (regm & 0x0fu)]);
+                switch (regm & 0x0f)
+                {
+                    case 0x08:
+                        chip->nts = (v >> 6) & 0x01;
+                        break;
+                }
             }
-        }
-        break;
+            break;
+        case 0x20:
+        case 0x30:
+            if (ad_slot[regm & 0x1fu] >= 0)
+            {
+                OPL3_SlotWrite20(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
+            }
+            break;
+        case 0x40:
+        case 0x50:
+            if (ad_slot[regm & 0x1fu] >= 0)
+            {
+                OPL3_SlotWrite40(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
+            }
+            break;
+        case 0x60:
+        case 0x70:
+            if (ad_slot[regm & 0x1fu] >= 0)
+            {
+                OPL3_SlotWrite60(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
+            }
+            break;
+        case 0x80:
+        case 0x90:
+            if (ad_slot[regm & 0x1fu] >= 0)
+            {
+                OPL3_SlotWrite80(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
+            }
+            break;
+        case 0xe0:
+        case 0xf0:
+            if (ad_slot[regm & 0x1fu] >= 0)
+            {
+                OPL3_SlotWriteE0(&chip->slot[18u * high + ad_slot[regm & 0x1fu]], v);
+            }
+            break;
+        case 0xa0:
+            if ((regm & 0x0f) < 9)
+            {
+                OPL3_ChannelWriteA0(&chip->channel[9u * high + (regm & 0x0fu)], v);
+            }
+            break;
+        case 0xb0:
+            if (regm == 0xbd && !high)
+            {
+                chip->tremoloshift = (((v >> 7) ^ 1) << 1) + 2;
+                chip->vibshift = ((v >> 6) & 0x01) ^ 1;
+                OPL3_ChannelUpdateRhythm(chip, v);
+            }
+            else if ((regm & 0x0f) < 9)
+            {
+                OPL3_ChannelWriteB0(&chip->channel[9u * high + (regm & 0x0fu)], v);
+                if (v & 0x20)
+                {
+                    OPL3_ChannelKeyOn(&chip->channel[9u * high + (regm & 0x0fu)]);
+                }
+                else
+                {
+                    OPL3_ChannelKeyOff(&chip->channel[9u * high + (regm & 0x0fu)]);
+                }
+            }
+            break;
         case 0xc0:
-        if ((regm & 0x0f) < 9)
-        {
-            OPL3_ChannelWriteC0(&chip->channel[9u * high + (regm & 0x0fu)], v);
-        }
-        break;
+            if ((regm & 0x0f) < 9)
+            {
+                OPL3_ChannelWriteC0(&chip->channel[9u * high + (regm & 0x0fu)], v);
+            }
+            break;
 #if OPL_ENABLE_STEREOEXT
         case 0xd0:
-        if ((regm & 0x0f) < 9)
-        {
-            OPL3_ChannelWriteD0(&chip->channel[9u * high + (regm & 0x0fu)], v);
-        }
-        break;
+            if ((regm & 0x0f) < 9)
+            {
+                OPL3_ChannelWriteD0(&chip->channel[9u * high + (regm & 0x0fu)], v);
+            }
+            break;
 #endif
     }
 }

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -38,7 +38,7 @@ extern BATTLE *g_Battle;
 extern BATTLEUI *UI_Battle;
 
 int PAL_IsPlayerDying(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -59,7 +59,7 @@ int PAL_IsPlayerDying(
 }
 
 int PAL_IsPlayerHealthy(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
  Purpose:
 
@@ -106,7 +106,7 @@ int PAL_BattleSelectAutoTargetFrom(
 
 --*/
 {
-    short i, count;
+    int16_t i, count;
 
     for (count = 0, i = (begin >= 0 ? begin : 0); count < MAX_ENEMIES_IN_TEAM; count++)
     {
@@ -123,8 +123,8 @@ int PAL_BattleSelectAutoTargetFrom(
 
 static short
 PAL_CalcBaseDamage(
-    unsigned short wAttackStrength,
-    unsigned short wDefense)
+    uint16_t wAttackStrength,
+    uint16_t wDefense)
 /*++
   Purpose:
 
@@ -142,7 +142,7 @@ PAL_CalcBaseDamage(
 
 --*/
 {
-    short sDamage;
+    int16_t sDamage;
 
     //
     // Formula courtesy of palxex and shenyanduxing
@@ -165,12 +165,12 @@ PAL_CalcBaseDamage(
 
 static short
 PAL_CalcMagicDamage(
-    unsigned short wMagicStrength,
-    unsigned short wDefense,
-    const unsigned short rgwElementalResistance[NUM_MAGIC_ELEMENTAL],
-    unsigned short wPoisonResistance,
-    unsigned short wResistanceMultiplier,
-    unsigned short wMagicID)
+    uint16_t wMagicStrength,
+    uint16_t wDefense,
+    const uint16_t rgwElementalResistance[NUM_MAGIC_ELEMENTAL],
+    uint16_t wPoisonResistance,
+    uint16_t wResistanceMultiplier,
+    uint16_t wMagicID)
 /*++
    Purpose:
 
@@ -196,15 +196,15 @@ PAL_CalcMagicDamage(
 
 --*/
 {
-    short sDamage;
-    unsigned short wElem;
+    int16_t sDamage;
+    uint16_t wElem;
 
     wMagicID = gpGlobals->g.rgObject[wMagicID].magic.wMagicNumber;
 
     //
     // Formula courtesy of palxex and shenyanduxing
     //
-    wMagicStrength = (unsigned short)(((float)wMagicStrength * RandomFloat(10, 11)) / 10.0f);
+    wMagicStrength = (uint16_t)(((float)wMagicStrength * RandomFloat(10, 11)) / 10.0f);
 
     sDamage = PAL_CalcBaseDamage(wMagicStrength, wDefense);
     sDamage /= 4;
@@ -241,9 +241,9 @@ PAL_CalcMagicDamage(
 }
 
 short PAL_CalcPhysicalAttackDamage(
-    unsigned short wAttackStrength,
-    unsigned short wDefense,
-    unsigned short wAttackResistance)
+    uint16_t wAttackStrength,
+    uint16_t wDefense,
+    uint16_t wAttackResistance)
 /*++
   Purpose:
 
@@ -263,7 +263,7 @@ short PAL_CalcPhysicalAttackDamage(
 
 --*/
 {
-    short sDamage;
+    int16_t sDamage;
 
     sDamage = PAL_CalcBaseDamage(wAttackStrength, wDefense);
     if (wAttackResistance != 0)
@@ -276,7 +276,7 @@ short PAL_CalcPhysicalAttackDamage(
 
 static short
 PAL_GetEnemyDexterity(
-    unsigned short wEnemyIndex)
+    uint16_t wEnemyIndex)
 /*++
   Purpose:
 
@@ -292,7 +292,7 @@ PAL_GetEnemyDexterity(
 
 --*/
 {
-    short s;
+    int16_t s;
 
     assert(g_Battle->rgEnemy[wEnemyIndex].wObjectID != 0);
 
@@ -302,9 +302,9 @@ PAL_GetEnemyDexterity(
     return s;
 }
 
-static unsigned short
+static uint16_t
 PAL_GetPlayerActualDexterity(
-    unsigned short wPlayerRole)
+    uint16_t wPlayerRole)
 /*++
   Purpose:
 
@@ -320,7 +320,7 @@ PAL_GetPlayerActualDexterity(
 
 --*/
 {
-    unsigned short wDexterity = PAL_GetPlayerDexterity(wPlayerRole);
+    uint16_t wDexterity = PAL_GetPlayerDexterity(wPlayerRole);
 
     if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusHaste] != 0)
     {
@@ -336,8 +336,8 @@ PAL_GetPlayerActualDexterity(
 }
 
 void PAL_BattleDelay(
-    unsigned short wDuration,
-    unsigned short wObjectID,
+    uint16_t wDuration,
+    uint16_t wObjectID,
     int fUpdateGesture)
 /*++
   Purpose:
@@ -358,7 +358,7 @@ void PAL_BattleDelay(
 
 --*/
 {
-    int i, j;
+    int32_t i, j;
 
     for (i = 0; i < wDuration; i++)
     {
@@ -434,8 +434,8 @@ PAL_BattleBackupStat(
 
 --*/
 {
-    int i;
-    unsigned short wPlayerRole;
+    int32_t i;
+    uint16_t wPlayerRole;
 
     for (i = 0; i <= g_Battle->wMaxEnemyIndex; i++)
     {
@@ -475,10 +475,10 @@ PAL_BattleDisplayStatChange(
 
 --*/
 {
-    int i, x, y;
-    short sDamage;
-    unsigned short wPlayerRole;
-    int f = false;
+    int32_t i, x, y;
+    int16_t sDamage;
+    uint16_t wPlayerRole;
+    int32_t f = false;
 
     for (i = 0; i <= g_Battle->wMaxEnemyIndex; i++)
     {
@@ -504,11 +504,11 @@ PAL_BattleDisplayStatChange(
 
             if (sDamage < 0)
             {
-                PAL_BattleUIShowNum((unsigned short)(-sDamage), PAL_XY(x, y), kNumColorBlue);
+                PAL_BattleUIShowNum((uint16_t)(-sDamage), PAL_XY(x, y), kNumColorBlue);
             }
             else
             {
-                PAL_BattleUIShowNum((unsigned short)(sDamage), PAL_XY(x, y), kNumColorYellow);
+                PAL_BattleUIShowNum((uint16_t)(sDamage), PAL_XY(x, y), kNumColorYellow);
             }
 
             f = true;
@@ -534,11 +534,11 @@ PAL_BattleDisplayStatChange(
 
             if (sDamage < 0)
             {
-                PAL_BattleUIShowNum((unsigned short)(-sDamage), PAL_XY(x, y), kNumColorBlue);
+                PAL_BattleUIShowNum((uint16_t)(-sDamage), PAL_XY(x, y), kNumColorBlue);
             }
             else
             {
-                PAL_BattleUIShowNum((unsigned short)(sDamage), PAL_XY(x, y), kNumColorYellow);
+                PAL_BattleUIShowNum((uint16_t)(sDamage), PAL_XY(x, y), kNumColorYellow);
             }
 
             f = true;
@@ -562,7 +562,7 @@ PAL_BattleDisplayStatChange(
             //
             if (sDamage > 0)
             {
-                PAL_BattleUIShowNum((unsigned short)(sDamage), PAL_XY(x, y), kNumColorCyan);
+                PAL_BattleUIShowNum((uint16_t)(sDamage), PAL_XY(x, y), kNumColorCyan);
             }
 
             f = true;
@@ -590,9 +590,9 @@ PAL_BattlePostActionCheck(
 
 --*/
 {
-    int i, j;
-    int fFade = false;
-    int fEnemyRemaining = false;
+    int32_t i, j;
+    int32_t fFade = false;
+    int32_t fEnemyRemaining = false;
 
     for (i = 0; i <= g_Battle->wMaxEnemyIndex; i++)
     {
@@ -631,7 +631,7 @@ PAL_BattlePostActionCheck(
     {
         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
         {
-            unsigned short w = gpGlobals->rgParty[i].wPlayerRole, wName;
+            uint16_t w = gpGlobals->rgParty[i].wPlayerRole, wName;
 
             if (gpGlobals->g.PlayerRoles->rgwHP[w] < g_Battle->rgPlayer[i].wPrevHP &&
                 gpGlobals->g.PlayerRoles->rgwHP[w] == 0)
@@ -678,7 +678,7 @@ PAL_BattlePostActionCheck(
 
         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
         {
-            unsigned short w = gpGlobals->rgParty[i].wPlayerRole, wName;
+            uint16_t w = gpGlobals->rgParty[i].wPlayerRole, wName;
 
             if (gpGlobals->rgPlayerStatus[w][kStatusSleep] != 0 ||
                 gpGlobals->rgPlayerStatus[w][kStatusConfused] != 0)
@@ -691,7 +691,7 @@ PAL_BattlePostActionCheck(
                 if (gpGlobals->g.PlayerRoles->rgwHP[w] > 0 && PAL_IsPlayerDying(w) &&
                     g_Battle->rgPlayer[i].wPrevHP >= gpGlobals->g.PlayerRoles->rgwMaxHP[w] / 5)
                 {
-                    unsigned short wCover = gpGlobals->g.PlayerRoles->rgwCoveredBy[w];
+                    uint16_t wCover = gpGlobals->g.PlayerRoles->rgwCoveredBy[w];
 
                     if (gpGlobals->rgPlayerStatus[wCover][kStatusSleep] != 0 ||
                         gpGlobals->rgPlayerStatus[wCover][kStatusParalyzed] != 0 ||
@@ -784,8 +784,8 @@ void PAL_BattleUpdateFighters(
 
 --*/
 {
-    int i;
-    unsigned short wPlayerRole;
+    int32_t i;
+    uint16_t wPlayerRole;
 
     //
     // Update the gesture for all players
@@ -879,7 +879,7 @@ void PAL_BattlePlayerCheckReady(
 --*/
 {
     float flMax = 0;
-    int iMax = 0, i;
+    int32_t iMax = 0, i;
 
     //
     // Start the UI for the fastest and ready player
@@ -926,10 +926,10 @@ void PAL_BattleStartFrame(
 
 --*/
 {
-    int i, j;
-    unsigned short wPlayerRole;
-    unsigned short wDexterity;
-    int fOnlyPuppet = true;
+    int32_t i, j;
+    uint16_t wPlayerRole;
+    uint16_t wDexterity;
+    int32_t fOnlyPuppet = true;
 
     if (!g_Battle->fEnemyCleared)
     {
@@ -950,7 +950,7 @@ void PAL_BattleStartFrame(
     }
     else
     {
-        unsigned char fEnded = true;
+        uint8_t fEnded = true;
 
         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
         {
@@ -1066,7 +1066,7 @@ void PAL_BattleStartFrame(
                     g_Battle->ActionQueue[j].wIndex = i;
                     g_Battle->ActionQueue[j].fIsSecond = false;
                     g_Battle->ActionQueue[j].wDexterity = PAL_GetEnemyDexterity(i);
-                    g_Battle->ActionQueue[j].wDexterity = (unsigned short)((float)g_Battle->ActionQueue[j].wDexterity * RandomFloat(0.9f, 1.1f));
+                    g_Battle->ActionQueue[j].wDexterity = (uint16_t)((float)g_Battle->ActionQueue[j].wDexterity * RandomFloat(0.9f, 1.1f));
 
                     j++;
 
@@ -1076,7 +1076,7 @@ void PAL_BattleStartFrame(
                         g_Battle->ActionQueue[j].wIndex = i;
                         g_Battle->ActionQueue[j].fIsSecond = false;
                         g_Battle->ActionQueue[j].wDexterity = PAL_GetEnemyDexterity(i);
-                        g_Battle->ActionQueue[j].wDexterity = (unsigned short)((float)g_Battle->ActionQueue[j].wDexterity * RandomFloat(0.9f, 1.1f));
+                        g_Battle->ActionQueue[j].wDexterity = (uint16_t)((float)g_Battle->ActionQueue[j].wDexterity * RandomFloat(0.9f, 1.1f));
 
                         if (g_Battle->ActionQueue[j].wDexterity <= g_Battle->ActionQueue[j - 1].wDexterity)
                             g_Battle->ActionQueue[j].fIsSecond = true;
@@ -1155,7 +1155,7 @@ void PAL_BattleStartFrame(
                             wDexterity /= 2;
                         }
 
-                        wDexterity = (unsigned short)((float)wDexterity * RandomFloat(0.9f, 1.1f));
+                        wDexterity = (uint16_t)((float)wDexterity * RandomFloat(0.9f, 1.1f));
 
                         g_Battle->ActionQueue[j].wDexterity = wDexterity;
                     }
@@ -1240,7 +1240,7 @@ void PAL_BattleStartFrame(
                     if (g_Battle->rgEnemy[i].rgPoisons[j].wPoisonID != 0)
                     {
                         g_Battle->rgEnemy[i].rgPoisons[j].wPoisonScript =
-                            PAL_RunTriggerScript(g_Battle->rgEnemy[i].rgPoisons[j].wPoisonScript, (unsigned short)i);
+                            PAL_RunTriggerScript(g_Battle->rgEnemy[i].rgPoisons[j].wPoisonScript, (uint16_t)i);
                     }
                 }
 
@@ -1431,7 +1431,7 @@ void PAL_BattleCommitAction(
 
 --*/
 {
-    unsigned short w;
+    uint16_t w;
 
     if (!fRepeat)
     {
@@ -1455,7 +1455,7 @@ void PAL_BattleCommitAction(
     }
     else
     {
-        short target = g_Battle->rgPlayer[UI_Battle->wCurPlayerIndex].action.sTarget;
+        int16_t target = g_Battle->rgPlayer[UI_Battle->wCurPlayerIndex].action.sTarget;
         g_Battle->rgPlayer[UI_Battle->wCurPlayerIndex].action =
             g_Battle->rgPlayer[UI_Battle->wCurPlayerIndex].prevAction;
         g_Battle->rgPlayer[UI_Battle->wCurPlayerIndex].action.sTarget = target;
@@ -1530,7 +1530,7 @@ void PAL_BattleCommitAction(
 
 static void
 PAL_BattleShowPlayerAttackAnim(
-    unsigned short wPlayerIndex,
+    uint16_t wPlayerIndex,
     int fCritical)
 /*++
   Purpose:
@@ -1549,14 +1549,14 @@ PAL_BattleShowPlayerAttackAnim(
 
 --*/
 {
-    unsigned short wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
-    short sTarget = g_Battle->rgPlayer[wPlayerIndex].action.sTarget;
+    uint16_t wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+    int16_t sTarget = g_Battle->rgPlayer[wPlayerIndex].action.sTarget;
 
-    int index, i, j;
-    int enemy_x = 0;
-    int enemy_y = 0;
-    int enemy_h = 0;
-    int x, y, dist = 0;
+    int32_t index, i, j;
+    int32_t enemy_x = 0;
+    int32_t enemy_y = 0;
+    int32_t enemy_h = 0;
+    int32_t x, y, dist = 0;
 
     if (sTarget != -1)
     {
@@ -1603,7 +1603,7 @@ PAL_BattleShowPlayerAttackAnim(
     g_Battle->rgPlayer[wPlayerIndex].wCurrentFrame = 8;
     if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusDualAttack] > 0 && PAL_PlayerCanAttackAll(wPlayerRole))
     {
-        PAL_GetPlayerPos((unsigned char)wPlayerIndex, &x, &y);
+        PAL_GetPlayerPos((uint8_t)wPlayerIndex, &x, &y);
         x -= 8;
         y -= 4;
 
@@ -1625,7 +1625,7 @@ PAL_BattleShowPlayerAttackAnim(
     y -= 2;
     if (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusDualAttack] > 0 && PAL_PlayerCanAttackAll(wPlayerRole))
     {
-        PAL_GetPlayerPos((unsigned char)wPlayerIndex, &x, &y);
+        PAL_GetPlayerPos((uint8_t)wPlayerIndex, &x, &y);
         x -= 8;
         y -= 4;
 
@@ -1654,7 +1654,7 @@ PAL_BattleShowPlayerAttackAnim(
 
     for (i = 0; i < 3; i++)
     {
-        const unsigned char *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, index++);
+        const uint8_t *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, index++);
 
         // Update the gesture of enemies.
         for (j = 0; j <= g_Battle->wMaxEnemyIndex; j++)
@@ -1688,7 +1688,7 @@ PAL_BattleShowPlayerAttackAnim(
             {
                 if (g_Battle->rgEnemy[j].wObjectID != 0)
                 {
-                    unsigned char idx = max(min(j * MAX_ENEMIES_IN_TEAM + g_Battle->wMaxEnemyIndex, 24), 0);
+                    uint8_t idx = max(min(j * MAX_ENEMIES_IN_TEAM + g_Battle->wMaxEnemyIndex, 24), 0);
                     x = gpGlobals->g.EnemyPos[idx].x;
                     y = gpGlobals->g.EnemyPos[idx].y;
                     y += g_Battle->rgEnemy[j].e.wYPosOffset;
@@ -1779,9 +1779,9 @@ PAL_BattleShowPlayerAttackAnim(
 
 static void
 PAL_BattleShowPlayerUseItemAnim(
-    unsigned short wPlayerIndex,
-    unsigned short wObjectID,
-    short sTarget)
+    uint16_t wPlayerIndex,
+    uint16_t wObjectID,
+    int16_t sTarget)
 /*++
   Purpose:
 
@@ -1801,7 +1801,7 @@ PAL_BattleShowPlayerUseItemAnim(
 
 --*/
 {
-    int i, j;
+    int32_t i, j;
 
     PAL_BattleDelay(4, 0, true);
 
@@ -1848,7 +1848,7 @@ PAL_BattleShowPlayerUseItemAnim(
     }
 }
 
-void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
+void PAL_BattleShowPlayerPreMagicAnim(uint16_t wPlayerIndex, int fSummon)
 /*++
   Purpose:
 
@@ -1866,8 +1866,8 @@ void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
 
 --*/
 {
-    int i, j;
-    unsigned short wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+    int32_t i, j;
+    uint16_t wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
 
     for (i = 0; i < 4; i++)
     {
@@ -1884,7 +1884,7 @@ void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
 
     if (!fSummon)
     {
-        int x, y, index;
+        int32_t x, y, index;
 
         x = PAL_X(g_Battle->rgPlayer[wPlayerIndex].pos);
         y = PAL_Y(g_Battle->rgPlayer[wPlayerIndex].pos);
@@ -1895,7 +1895,7 @@ void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
         AUDIO_PlaySound(gpGlobals->g.PlayerRoles->rgwMagicSound[wPlayerRole]);
         for (i = 0; i < 10; i++)
         {
-            const unsigned char *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, index++);
+            const uint8_t *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, index++);
 
             // Update the gesture of enemies.
             for (j = 0; j <= g_Battle->wMaxEnemyIndex; j++)
@@ -1936,7 +1936,7 @@ void PAL_BattleShowPlayerPreMagicAnim(unsigned short wPlayerIndex, int fSummon)
     PAL_BattleDelay(1, 0, true);
 }
 
-static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsigned short wObjectID, short sTarget)
+static void PAL_BattleShowPlayerDefMagicAnim(uint16_t wPlayerIndex, uint16_t wObjectID, int16_t sTarget)
 /*++
   Purpose:
 
@@ -1956,12 +1956,12 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
 
 --*/
 {
-    unsigned char *lpSpriteEffect = NULL;
-    unsigned short n;
-    int l, i, j, x, y;
-    int iMagicNum;
-    int iEffectNum;
-    short sLayerOffset;
+    uint8_t *lpSpriteEffect = NULL;
+    uint16_t n;
+    int32_t l, i, j, x, y;
+    int32_t iMagicNum;
+    int32_t iEffectNum;
+    int16_t sLayerOffset;
 
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
@@ -2066,9 +2066,9 @@ static void PAL_BattleShowPlayerDefMagicAnim(unsigned short wPlayerIndex, unsign
 
 static void
 PAL_BattleShowPlayerOffMagicAnim(
-    unsigned short wPlayerIndex,
-    unsigned short wObjectID,
-    short sTarget,
+    uint16_t wPlayerIndex,
+    uint16_t wObjectID,
+    int16_t sTarget,
     int fSummon)
 /*++
   Purpose:
@@ -2089,10 +2089,10 @@ PAL_BattleShowPlayerOffMagicAnim(
 
 --*/
 {
-    unsigned char *lpSpriteEffect = NULL;
-    unsigned short n;
-    int iMagicNum, iEffectNum, i, k, l, x, y, wave, blow;
-    short sLayerOffset;
+    uint8_t *lpSpriteEffect = NULL;
+    uint16_t n;
+    int32_t iMagicNum, iEffectNum, i, k, l, x, y, wave, blow;
+    int16_t sLayerOffset;
 
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
@@ -2102,7 +2102,7 @@ PAL_BattleShowPlayerOffMagicAnim(
 
     n = PAL_SpriteGetNumFrames(lpSpriteEffect);
 
-    if (wPlayerIndex != (unsigned short)-1)
+    if (wPlayerIndex != (uint16_t)-1)
     {
         g_Battle->rgPlayer[wPlayerIndex].wCurrentFrame = 6;
     }
@@ -2124,7 +2124,7 @@ PAL_BattleShowPlayerOffMagicAnim(
 
     for (i = 0; i < l; i++)
     {
-        const unsigned char **b = &g_Battle->lpMagicBitmap;
+        const uint8_t **b = &g_Battle->lpMagicBitmap;
         blow = ((g_Battle->iBlow > 0) ? RandomLong(0, g_Battle->iBlow) : RandomLong(g_Battle->iBlow, 0));
 
         for (k = 0; k <= g_Battle->wMaxEnemyIndex; k++)
@@ -2274,7 +2274,7 @@ PAL_BattleShowPlayerOffMagicAnim(
     }
 }
 
-static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned short wObjectID, short sTarget)
+static void PAL_BattleShowEnemyMagicAnim(uint16_t wEnemyIndex, uint16_t wObjectID, int16_t sTarget)
 /*++
   Purpose:
 
@@ -2292,12 +2292,12 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
 
 --*/
 {
-    unsigned char *lpSpriteEffect = NULL;
-    unsigned short n;
-    int l, i, k, x, y, wave, blow;
-    int iMagicNum;
-    int iEffectNum;
-    short sLayerOffset;
+    uint8_t *lpSpriteEffect = NULL;
+    uint16_t n;
+    int32_t l, i, k, x, y, wave, blow;
+    int32_t iMagicNum;
+    int32_t iEffectNum;
+    int16_t sLayerOffset;
 
     iMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
     iEffectNum = gpGlobals->g.lprgMagic[iMagicNum].wEffect;
@@ -2317,7 +2317,7 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
 
     for (i = 0; i < l; i++)
     {
-        const unsigned char **b = &g_Battle->lpMagicBitmap;
+        const uint8_t **b = &g_Battle->lpMagicBitmap;
 
         blow = ((g_Battle->iBlow > 0) ? RandomLong(0, g_Battle->iBlow) : RandomLong(g_Battle->iBlow, 0));
 
@@ -2480,7 +2480,7 @@ static void PAL_BattleShowEnemyMagicAnim(unsigned short wEnemyIndex, unsigned sh
     }
 }
 
-static void PAL_BattleShowPlayerSummonMagicAnim(unsigned short wPlayerIndex, unsigned short wObjectID)
+static void PAL_BattleShowPlayerSummonMagicAnim(uint16_t wPlayerIndex, uint16_t wObjectID)
 /*++
   Purpose:
 
@@ -2498,10 +2498,10 @@ static void PAL_BattleShowPlayerSummonMagicAnim(unsigned short wPlayerIndex, uns
 
 --*/
 {
-    int i;
-    int j;
-    unsigned short wMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
-    unsigned short wEffectMagicID = 0;
+    int32_t i;
+    int32_t j;
+    uint16_t wMagicNum = gpGlobals->g.rgObject[wObjectID].magic.wMagicNumber;
+    uint16_t wEffectMagicID = 0;
     void *fpF = NULL;
 
     for (wEffectMagicID = 0; wEffectMagicID < MAX_OBJECTS; wEffectMagicID++)
@@ -2568,7 +2568,7 @@ static void PAL_BattleShowPlayerSummonMagicAnim(unsigned short wPlayerIndex, uns
     }
 
     // Show the actual magic effect
-    PAL_BattleShowPlayerOffMagicAnim((unsigned short)-1, wEffectMagicID, -1, true);
+    PAL_BattleShowPlayerOffMagicAnim((uint16_t)-1, wEffectMagicID, -1, true);
 }
 
 static void
@@ -2589,8 +2589,8 @@ PAL_BattleShowPostMagicAnim(
 
 --*/
 {
-    int i, j, x, y, dist = 8;
-    unsigned int rgEnemyPosBak[MAX_ENEMIES_IN_TEAM];
+    int32_t i, j, x, y, dist = 8;
+    uint32_t rgEnemyPosBak[MAX_ENEMIES_IN_TEAM];
 
     for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
     {
@@ -2631,7 +2631,7 @@ PAL_BattleShowPostMagicAnim(
 
 static void
 PAL_BattlePlayerValidateAction(
-    unsigned short wPlayerIndex)
+    uint16_t wPlayerIndex)
 /*++
   Purpose:
 
@@ -2647,12 +2647,12 @@ PAL_BattlePlayerValidateAction(
 
 --*/
 {
-    const unsigned short wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
-    const unsigned short wObjectID = g_Battle->rgPlayer[wPlayerIndex].action.wActionID;
-    const short sTarget = g_Battle->rgPlayer[wPlayerIndex].action.sTarget;
-    int fValid = true, fToEnemy = false;
-    unsigned short w;
-    int i;
+    const uint16_t wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+    const uint16_t wObjectID = g_Battle->rgPlayer[wPlayerIndex].action.wActionID;
+    const int16_t sTarget = g_Battle->rgPlayer[wPlayerIndex].action.sTarget;
+    int32_t fValid = true, fToEnemy = false;
+    uint16_t w;
+    int32_t i;
 
     switch (g_Battle->rgPlayer[wPlayerIndex].action.ActionType)
     {
@@ -2745,7 +2745,7 @@ PAL_BattlePlayerValidateAction(
             fToEnemy = true;
 
             {
-                int iTotalHealthy = 0;
+                int32_t iTotalHealthy = 0;
                 for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
                 {
                     w = gpGlobals->rgParty[i].wPlayerRole;
@@ -2899,8 +2899,8 @@ PAL_BattleCheckHidingEffect(
 }
 
 short FIGHT_DetectMagicTargetChange(
-    unsigned short wMagicNum,
-    short sTarget)
+    uint16_t wMagicNum,
+    int16_t sTarget)
 {
     if (sTarget == -1 && (gpGlobals->g.lprgMagic[wMagicNum].wType == kMagicTypeNormal || gpGlobals->g.lprgMagic[wMagicNum].wType == kMagicTypeApplyToPlayer || gpGlobals->g.lprgMagic[wMagicNum].wType == kMagicTypeTrance))
         sTarget = 0;
@@ -2912,7 +2912,7 @@ short FIGHT_DetectMagicTargetChange(
 }
 
 void PAL_BattlePlayerPerformAction(
-    unsigned short wPlayerIndex)
+    uint16_t wPlayerIndex)
 /*++
   Purpose:
 
@@ -2928,19 +2928,19 @@ void PAL_BattlePlayerPerformAction(
 
 --*/
 {
-    short sDamage;
-    unsigned short wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
-    short sTarget;
-    int x, y;
-    int i, j, t;
-    unsigned short str, def, res, wObject, wMagicNum;
-    int fCritical;
-    unsigned short rgwCoopPos[3][2] = {{208, 157}, {234, 170}, {260, 183}};
+    int16_t sDamage;
+    uint16_t wPlayerRole = gpGlobals->rgParty[wPlayerIndex].wPlayerRole;
+    int16_t sTarget;
+    int32_t x, y;
+    int32_t i, j, t;
+    uint16_t str, def, res, wObject, wMagicNum;
+    int32_t fCritical;
+    uint16_t rgwCoopPos[3][2] = {{208, 157}, {234, 170}, {260, 183}};
 
     g_Battle->wMovingPlayerIndex = wPlayerIndex;
     g_Battle->iBlow = 0;
 
-    short origTarget = g_Battle->rgPlayer[wPlayerIndex].action.sTarget;
+    int16_t origTarget = g_Battle->rgPlayer[wPlayerIndex].action.sTarget;
     PAL_BattlePlayerValidateAction(wPlayerIndex);
     PAL_BattleBackupStat();
 
@@ -3012,9 +3012,9 @@ void PAL_BattlePlayerPerformAction(
                 //
                 for (t = 0; t < (gpGlobals->rgPlayerStatus[wPlayerRole][kStatusDualAttack] ? 2 : 1); t++)
                 {
-                    short division = 1;
+                    int16_t division = 1;
                     const int index[MAX_ENEMIES_IN_TEAM] = {2, 1, 0, 4, 3};
-                    unsigned char attackFlag = true;
+                    uint8_t attackFlag = true;
 
                     fCritical =
                         (RandomLong(0, 5) == 0 || gpGlobals->rgPlayerStatus[wPlayerRole][kStatusBravery] > 0);
@@ -3055,7 +3055,7 @@ void PAL_BattlePlayerPerformAction(
                             sDamage = 1;
                         }
 
-                        g_Battle->rgEnemy[index[i]].e.wHealth -= (unsigned short)sDamage;
+                        g_Battle->rgEnemy[index[i]].e.wHealth -= (uint16_t)sDamage;
 
                         if (g_Battle->rgEnemy[index[i]].wObjectID != 0)
                             division *= 2;
@@ -3193,7 +3193,7 @@ void PAL_BattlePlayerPerformAction(
             if (gpGlobals->g.lprgMagic[wMagicNum].wType == kMagicTypeSummon)
             {
                 PAL_BattleShowPlayerPreMagicAnim(wPlayerIndex, true);
-                PAL_BattleShowPlayerSummonMagicAnim((unsigned short)-1, wObject);
+                PAL_BattleShowPlayerSummonMagicAnim((uint16_t)-1, wObject);
             }
             else
             {
@@ -3225,7 +3225,7 @@ void PAL_BattlePlayerPerformAction(
 
                     for (j = 0; j <= gpGlobals->wMaxPartyMemberIndex; j++)
                     {
-                        if ((unsigned short)j == wPlayerIndex)
+                        if ((uint16_t)j == wPlayerIndex)
                         {
                             continue;
                         }
@@ -3252,7 +3252,7 @@ void PAL_BattlePlayerPerformAction(
 
                 for (i = gpGlobals->wMaxPartyMemberIndex; i >= 0; i--)
                 {
-                    if ((unsigned short)i == wPlayerIndex)
+                    if ((uint16_t)i == wPlayerIndex)
                     {
                         continue;
                     }
@@ -3272,7 +3272,7 @@ void PAL_BattlePlayerPerformAction(
                 g_Battle->rgPlayer[wPlayerIndex].iColorShift = 0;
                 PAL_BattleDelay(3, 0, true);
 
-                PAL_BattleShowPlayerOffMagicAnim((unsigned short)-1, wObject, sTarget, false);
+                PAL_BattleShowPlayerOffMagicAnim((uint16_t)-1, wObject, sTarget, false);
             }
 
             for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
@@ -3396,7 +3396,7 @@ void PAL_BattlePlayerPerformAction(
 
                         g_Battle->rgPlayer[j].wCurrentFrame = 0;
 
-                        if ((unsigned short)j == wPlayerIndex)
+                        if ((uint16_t)j == wPlayerIndex)
                         {
                             continue;
                         }
@@ -3510,7 +3510,7 @@ void PAL_BattlePlayerPerformAction(
                 //
                 // Using a defensive magic
                 //
-                unsigned short w = 0;
+                uint16_t w = 0;
 
                 if (g_Battle->rgPlayer[wPlayerIndex].action.sTarget != -1)
                 {
@@ -3572,7 +3572,7 @@ void PAL_BattlePlayerPerformAction(
                     }
 
                     gpGlobals->g.rgObject[wObject].magic.wScriptOnSuccess =
-                        PAL_RunTriggerScript(gpGlobals->g.rgObject[wObject].magic.wScriptOnSuccess, (unsigned short)sTarget);
+                        PAL_RunTriggerScript(gpGlobals->g.rgObject[wObject].magic.wScriptOnSuccess, (uint16_t)sTarget);
 
                     //
                     // Inflict damage to enemies
@@ -3667,7 +3667,7 @@ void PAL_BattlePlayerPerformAction(
             // Run the script
             //
             gpGlobals->g.rgObject[wObject].item.wScriptOnThrow =
-                PAL_RunTriggerScript(gpGlobals->g.rgObject[wObject].item.wScriptOnThrow, (unsigned short)sTarget);
+                PAL_RunTriggerScript(gpGlobals->g.rgObject[wObject].item.wScriptOnThrow, (uint16_t)sTarget);
 
             //
             // Remove the thrown item from inventory
@@ -3749,7 +3749,7 @@ PAL_BattleEnemySelectEnemyTargetIndex(
 
  --*/
 {
-    int i;
+    int32_t i;
 
     i = RandomLong(0, g_Battle->wMaxEnemyIndex);
 
@@ -3779,7 +3779,7 @@ PAL_BattleEnemySelectTargetIndex(
 
 --*/
 {
-    int i;
+    int32_t i;
 
     i = RandomLong(0, gpGlobals->wMaxPartyMemberIndex);
 
@@ -3792,7 +3792,7 @@ PAL_BattleEnemySelectTargetIndex(
 }
 
 void PAL_BattleEnemyPerformAction(
-    unsigned short wEnemyIndex)
+    uint16_t wEnemyIndex)
 /*++
   Purpose:
 
@@ -3808,11 +3808,11 @@ void PAL_BattleEnemyPerformAction(
 
 --*/
 {
-    int str, def, iCoverIndex, i, x, y, ex, ey, iSound;
-    unsigned short rgwElementalResistance[NUM_MAGIC_ELEMENTAL];
-    unsigned short wPlayerRole, w, wMagic, wMagicNum;
-    short sTarget, sDamage;
-    int fAutoDefend = false, rgfMagAutoDefend[MAX_PLAYERS_IN_PARTY];
+    int32_t str, def, iCoverIndex, i, x, y, ex, ey, iSound;
+    uint16_t rgwElementalResistance[NUM_MAGIC_ELEMENTAL];
+    uint16_t wPlayerRole, w, wMagic, wMagicNum;
+    int16_t sTarget, sDamage;
+    int32_t fAutoDefend = false, rgfMagAutoDefend[MAX_PLAYERS_IN_PARTY];
 
     PAL_BattleBackupStat();
     g_Battle->iBlow = 0;
@@ -3832,11 +3832,11 @@ void PAL_BattleEnemyPerformAction(
     }
     else if (g_Battle->rgEnemy[wEnemyIndex].rgwStatus[kStatusConfused] > 0)
     {
-        int iTarget = PAL_BattleEnemySelectEnemyTargetIndex();
+        int32_t iTarget = PAL_BattleEnemySelectEnemyTargetIndex();
         if (iTarget == wEnemyIndex)
             goto end;
-        int iX = PAL_X(g_Battle->rgEnemy[iTarget].pos);
-        int iY = PAL_Y(g_Battle->rgEnemy[iTarget].pos);
+        int32_t iX = PAL_X(g_Battle->rgEnemy[iTarget].pos);
+        int32_t iY = PAL_Y(g_Battle->rgEnemy[iTarget].pos);
         for (i = 0; i < 3; i++)
         {
             x = PAL_X(g_Battle->rgEnemy[wEnemyIndex].pos);
@@ -3857,7 +3857,7 @@ void PAL_BattleEnemyPerformAction(
         y = PAL_Y(g_Battle->rgEnemy[iTarget].pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle->rgEnemy[iTarget].lpSprite, 0)) / 3 + 10;
         for (i = 9; i < 12; i++)
         {
-            const unsigned char *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, i);
+            const uint8_t *b = PAL_SpriteGetFrame(g_Battle->lpEffectSprite, i);
 
             PAL_BattleMakeScene();
             PAL_BattleUpdateScreen();
@@ -3871,9 +3871,9 @@ void PAL_BattleEnemyPerformAction(
             UTIL_Delay(BATTLE_FRAME_TIME);
         }
 
-        int str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
+        int32_t str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
         str += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
-        int def = (short)g_Battle->rgEnemy[iTarget].e.wDefense;
+        int32_t def = (short)g_Battle->rgEnemy[iTarget].e.wDefense;
         def += (g_Battle->rgEnemy[iTarget].e.wLevel + 6) * 4;
         sDamage = PAL_CalcBaseDamage(str, def) * 2 / g_Battle->rgEnemy[iTarget].e.wPhysicalResistance;
 
@@ -3988,7 +3988,7 @@ void PAL_BattleEnemyPerformAction(
             g_Battle->rgPlayer[sTarget].wCurrentFrame = 3;
         }
 
-        //      PAL_BattleDelay(12, (unsigned short)(-((short)wMagic)), false);
+        //      PAL_BattleDelay(12, (uint16_t)(-((short)wMagic)), false);
 
         gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse =
             PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnUse, wPlayerRole);
@@ -4144,7 +4144,7 @@ void PAL_BattleEnemyPerformAction(
         //
         // Physical attack
         //
-        unsigned short wFrameBak = g_Battle->rgPlayer[sTarget].wCurrentFrame;
+        uint16_t wFrameBak = g_Battle->rgPlayer[sTarget].wCurrentFrame;
 
         str = (short)g_Battle->rgEnemy[wEnemyIndex].e.wAttackStrength;
         str += (g_Battle->rgEnemy[wEnemyIndex].e.wLevel + 6) * 6;
@@ -4383,8 +4383,8 @@ end:
 }
 
 void PAL_BattleStealFromEnemy(
-    unsigned short wTarget,
-    unsigned short wStealRate)
+    uint16_t wTarget,
+    uint16_t wStealRate)
 /*++
   Purpose:
 
@@ -4402,8 +4402,8 @@ void PAL_BattleStealFromEnemy(
 
 --*/
 {
-    int iPlayerIndex = g_Battle->wMovingPlayerIndex;
-    int offset, x, y, i;
+    int32_t iPlayerIndex = g_Battle->wMovingPlayerIndex;
+    int32_t offset, x, y, i;
     wchar_t s[32] = L"";
 
     g_Battle->rgPlayer[iPlayerIndex].wCurrentFrame = 10;
@@ -4449,7 +4449,7 @@ void PAL_BattleStealFromEnemy(
             //
             // stolen coins
             //
-            int c = g_Battle->rgEnemy[wTarget].e.nStealItem / RandomLong(2, 3);
+            int32_t c = g_Battle->rgEnemy[wTarget].e.nStealItem / RandomLong(2, 3);
             g_Battle->rgEnemy[wTarget].e.nStealItem -= c;
             gpGlobals->dwCash += c;
 
@@ -4477,9 +4477,9 @@ void PAL_BattleStealFromEnemy(
 }
 
 void PAL_BattleSimulateMagic(
-    short sTarget,
-    unsigned short wMagicObjectID,
-    unsigned short wBaseDamage)
+    int16_t sTarget,
+    uint16_t wMagicObjectID,
+    uint16_t wBaseDamage)
 /*++
   Purpose:
 
@@ -4499,8 +4499,8 @@ void PAL_BattleSimulateMagic(
 
 --*/
 {
-    short sDamage;
-    int i, def;
+    int16_t sDamage;
+    int32_t i, def;
 
     if (gpGlobals->g.rgObject[wMagicObjectID].magic.wFlags & kMagicFlagApplyToAll)
     {
@@ -4539,7 +4539,7 @@ void PAL_BattleSimulateMagic(
                     def = 0;
                 }
 
-                sDamage = PAL_CalcMagicDamage(wBaseDamage, (unsigned short)def, g_Battle->rgEnemy[i].e.wElemResistance,
+                sDamage = PAL_CalcMagicDamage(wBaseDamage, (uint16_t)def, g_Battle->rgEnemy[i].e.wElemResistance,
                                               g_Battle->rgEnemy[i].e.wPoisonResistance, 1, wMagicObjectID);
 
                 if (sDamage < 0)
@@ -4563,7 +4563,7 @@ void PAL_BattleSimulateMagic(
                 def = 0;
             }
 
-            sDamage = PAL_CalcMagicDamage(wBaseDamage, (unsigned short)def, g_Battle->rgEnemy[sTarget].e.wElemResistance,
+            sDamage = PAL_CalcMagicDamage(wBaseDamage, (uint16_t)def, g_Battle->rgEnemy[sTarget].e.wElemResistance,
                                           g_Battle->rgEnemy[sTarget].e.wPoisonResistance, 1, wMagicObjectID);
 
             if (sDamage < 0)

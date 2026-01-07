@@ -21,21 +21,23 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
+#include <stdint.h>
+
 #define PALETTE_SIZE (256 * 3)
 
-unsigned char *PAL_GetPalette(int iPaletteNum, unsigned char fNight);
+uint8_t *PAL_GetPalette(int32_t iPaletteNum, uint8_t fNight);
 
-void PAL_SetPalette(int iPaletteNum, unsigned char fNight);
+void PAL_SetPalette(int32_t iPaletteNum, uint8_t fNight);
 
-void PAL_FadeOut(int iDelay);
+void PAL_FadeOut(uint32_t iDelay);
 
-void PAL_FadeIn(int iPaletteNum, unsigned char fNight, unsigned short iDelay);
+void PAL_FadeIn(int32_t iPaletteNum, uint8_t fNight, uint16_t iDelay);
 
-void PAL_SceneFade(int iPaletteNum, unsigned char fNight, int iStep);
+void PAL_SceneFade(int32_t iPaletteNum, uint8_t fNight, int iStep);
 
-void PAL_PaletteFade(int iPaletteNum, unsigned char fNight, int fUpdateScene);
+void PAL_PaletteFade(int32_t iPaletteNum, uint8_t fNight, int fUpdateScene);
 
-void PAL_ColorFade(int iDelay, unsigned char bColor, int fFrom);
+void PAL_ColorFade(int32_t iDelay, uint8_t bColor, int fFrom);
 
 void PAL_FadeToRed(void);
 

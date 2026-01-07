@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Adplug - Replayer for many OPL2/OPL3 audio file formats.
  * Copyright (C) 1999 - 2007 Simon Peter, <dn.tlp@gmx.net>, et al.
  *
@@ -29,11 +29,11 @@
 #include <stdio.h>
 #include <string.h>
 
-static const unsigned char adflag[] = {0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1};
-static const unsigned char reg_data[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21};
-static const unsigned char ad_C0_offs[] = {0, 1, 2, 0, 1, 2, 3, 4, 5, 3, 4, 5, 6, 7, 8, 6, 7, 8};
-static const unsigned char modify[] = {0, 3, 1, 4, 2, 5, 6, 9, 7, 10, 8, 11, 12, 15, 13, 16, 14, 17, 12, 15, 16, 0, 14, 0, 17, 0, 13, 0};
-static const unsigned char bd_reg_data[] = {
+static const uint8_t adflag[] = {0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1};
+static const uint8_t reg_data[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21};
+static const uint8_t ad_C0_offs[] = {0, 1, 2, 0, 1, 2, 3, 4, 5, 3, 4, 5, 6, 7, 8, 6, 7, 8};
+static const uint8_t modify[] = {0, 3, 1, 4, 2, 5, 6, 9, 7, 10, 8, 11, 12, 15, 13, 16, 14, 17, 12, 15, 16, 0, 14, 0, 17, 0, 13, 0};
+static const uint8_t bd_reg_data[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x08, 0x04, 0x02, 0x01,
     0x00, 0x01, 0x01, 0x03, 0x0F, 0x05, 0x00, 0x01, 0x03, 0x0F, 0x00,
     0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x01, 0x0F, 0x07, 0x00, 0x02,
@@ -47,58 +47,58 @@ static const unsigned char bd_reg_data[] = {
     0x00, 0x01, 0x00, 0x0F, 0x0B, 0x00, 0x07, 0x05, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00};
 
-static unsigned char *rix_buf = NULL;    /* rix files' f_buffer */
-static unsigned short f_buffer[25 * 12]; // 9C0h-C18h
-static unsigned short a0b0_data2[11];
-static unsigned char a0b0_data3[18];
-static unsigned char a0b0_data4[18];
-static unsigned char a0b0_data5[96];
-static unsigned char addrs_head[96];
-static unsigned short insbuf[28];
-static unsigned short displace[11];
-static unsigned char reg_bufs[18][14];
-static unsigned int pos, length, subsong_id;
-static unsigned char for40reg[18];
-static unsigned int I, T;
-static unsigned short mus_block;
-static unsigned short ins_block;
-static unsigned char rhythm;
-static unsigned char music_on;
-static unsigned char pause_flag;
-static unsigned short band;
-static unsigned char band_low;
-static unsigned short e0_reg_flag;
-static unsigned char bd_modify;
+static uint8_t *rix_buf = NULL;    /* rix files' f_buffer */
+static uint16_t f_buffer[25 * 12]; // 9C0h-C18h
+static uint16_t a0b0_data2[11];
+static uint8_t a0b0_data3[18];
+static uint8_t a0b0_data4[18];
+static uint8_t a0b0_data5[96];
+static uint8_t addrs_head[96];
+static uint16_t insbuf[28];
+static uint16_t displace[11];
+static uint8_t reg_bufs[18][14];
+static uint32_t pos, length, subsong_id;
+static uint8_t for40reg[18];
+static uint32_t I, T;
+static uint16_t mus_block;
+static uint16_t ins_block;
+static uint8_t rhythm;
+static uint8_t music_on;
+static uint8_t pause_flag;
+static uint16_t band;
+static uint8_t band_low;
+static uint16_t e0_reg_flag;
+static uint8_t bd_modify;
 static int sustain;
-static unsigned char play_end;
+static uint8_t play_end;
 
-void ad_20_reg(unsigned short);
-void ad_40_reg(unsigned short);
-void ad_60_reg(unsigned short);
-void ad_80_reg(unsigned short);
-void ad_a0b0_reg(unsigned short);
-void ad_a0b0l_reg(unsigned short, unsigned short, unsigned short);
-void ad_a0b0l_reg_(unsigned short, unsigned short, unsigned short);
+void ad_20_reg(uint16_t);
+void ad_40_reg(uint16_t);
+void ad_60_reg(uint16_t);
+void ad_80_reg(uint16_t);
+void ad_a0b0_reg(uint16_t);
+void ad_a0b0l_reg(uint16_t, uint16_t, uint16_t);
+void ad_a0b0l_reg_(uint16_t, uint16_t, uint16_t);
 void ad_bd_reg(void);
-void ad_bop(unsigned short, unsigned short);
-void ad_C0_reg(unsigned short);
-void ad_E0_reg(unsigned short);
-unsigned short ad_initial(void);
+void ad_bop(uint16_t, uint16_t);
+void ad_C0_reg(uint16_t);
+void ad_E0_reg(uint16_t);
+uint16_t ad_initial(void);
 void data_initial(void); /* done */
-void ins_to_reg(unsigned short, unsigned short *, unsigned short);
+void ins_to_reg(uint16_t, uint16_t *, uint16_t);
 void int_08h_entry(void);
 void music_ctrl(void);
-void prepare_a0b0(unsigned short, unsigned short);
-void rix_90_pro(unsigned short);
-void rix_A0_pro(unsigned short, unsigned short);
-void rix_B0_pro(unsigned short, unsigned short);
-void rix_C0_pro(unsigned short, unsigned short);
+void prepare_a0b0(uint16_t, uint16_t);
+void rix_90_pro(uint16_t);
+void rix_A0_pro(uint16_t, uint16_t);
+void rix_B0_pro(uint16_t, uint16_t);
+void rix_C0_pro(uint16_t, uint16_t);
 void rix_get_ins(void);
-unsigned short rix_proc(void);
-void switch_ad_bd(unsigned short);
+uint16_t rix_proc(void);
+void switch_ad_bd(uint16_t);
 
 /*** public methods *************************************/
-unsigned char CrixPlayer_update()
+uint8_t CrixPlayer_update()
 {
     int_08h_entry();
     return !play_end;
@@ -111,14 +111,14 @@ void CrixPlayer_deinit(void)
     subsong_id = 0xFFFFFFFF;
 }
 
-unsigned char CrixPlayer_load(void)
+uint8_t CrixPlayer_load(void)
 {
     subsong_id = 0xFFFFFFFF;
     CrixPlayer_rewind(0, true);
     return true;
 }
 
-void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit)
+void CrixPlayer_rewind(uint32_t subsong, uint8_t reinit)
 {
     play_end = 0;
     pos = 0;
@@ -158,7 +158,7 @@ void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit)
         length = RES_MKFGetChunkSize(subsong, Res_MUS);
         if (length > 0)
         {
-            rix_buf = (unsigned char *)UTIL_calloc(length, sizeof(unsigned char));
+            rix_buf = (uint8_t *)UTIL_calloc(length, sizeof(uint8_t));
             RES_MKFReadChunk(rix_buf, length, subsong, Res_MUS);
         }
     }
@@ -173,10 +173,10 @@ void CrixPlayer_rewind(unsigned int subsong, unsigned char reinit)
 }
 
 /*----------------------------------------------------------*/
-void ad_a0b0l_reg_(unsigned short index, unsigned short p2, unsigned short p3)
+void ad_a0b0l_reg_(uint16_t index, uint16_t p2, uint16_t p3)
 {
-    a0b0_data4[index] = (unsigned char)p3;
-    a0b0_data3[index] = (unsigned char)p2;
+    a0b0_data4[index] = (uint8_t)p3;
+    a0b0_data3[index] = (uint8_t)p2;
 }
 
 void data_initial()
@@ -186,8 +186,8 @@ void data_initial()
     if (0x0D < length)
     {
         rhythm = rix_buf[2];
-        mus_block = ((unsigned short)rix_buf[0x0D] << 8) + rix_buf[0x0C];
-        ins_block = ((unsigned short)rix_buf[0x09] << 8) + rix_buf[0x08];
+        mus_block = ((uint16_t)rix_buf[0x0D] << 8) + rix_buf[0x0C];
+        ins_block = ((uint16_t)rix_buf[0x09] << 8) + rix_buf[0x08];
         I = mus_block + 1;
     }
     else
@@ -207,24 +207,24 @@ void data_initial()
     music_on = 1;
 }
 /*----------------------------------------------------------*/
-unsigned short ad_initial()
+uint16_t ad_initial()
 {
-    unsigned short i, j, k = 0;
+    uint16_t i, j, k = 0;
     for (i = 0; i < 25; i++)
     {
-        unsigned int res = ((unsigned int)i * 24 + 10000) * 52088 / 250000 * 0x24000 / 0x1B503;
-        f_buffer[i * 12] = ((unsigned short)res + 4) >> 3;
+        uint32_t res = ((uint32_t)i * 24 + 10000) * 52088 / 250000 * 0x24000 / 0x1B503;
+        f_buffer[i * 12] = ((uint16_t)res + 4) >> 3;
         for (int t = 1; t < 12; t++)
         {
             res = res * 106 / 100;
-            f_buffer[i * 12 + t] = ((unsigned short)res + 4) >> 3;
+            f_buffer[i * 12 + t] = ((uint16_t)res + 4) >> 3;
         }
     }
     for (i = 0; i < 8; i++)
         for (j = 0; j < 12; j++)
         {
-            a0b0_data5[k] = (unsigned char)i;
-            addrs_head[k] = (unsigned char)j;
+            a0b0_data5[k] = (uint8_t)i;
+            addrs_head[k] = (uint8_t)j;
             k++;
         }
     // ad_bd_reg();
@@ -236,14 +236,14 @@ unsigned short ad_initial()
     return 1; // ad_test();
 }
 /*----------------------------------------------------------*/
-void ad_bop(unsigned short reg, unsigned short value)
+void ad_bop(uint16_t reg, uint16_t value)
 {
     Copl_Write(reg & 0xff, value & 0xff);
 }
 /*--------------------------------------------------------------*/
 void int_08h_entry()
 {
-    unsigned short band_sus = 1;
+    uint16_t band_sus = 1;
     while (band_sus)
     {
         if (sustain <= 0)
@@ -266,9 +266,9 @@ void int_08h_entry()
     }
 }
 /*--------------------------------------------------------------*/
-unsigned short rix_proc()
+uint16_t rix_proc()
 {
-    unsigned char ctrl = 0;
+    uint8_t ctrl = 0;
     if (music_on == 0 || pause_flag == 1 || rix_buf == NULL)
         return 0;
     band = 0;
@@ -284,7 +284,7 @@ unsigned short rix_proc()
                 rix_90_pro(ctrl & 0x0F);
                 break;
             case 0xA0:
-                rix_A0_pro(ctrl & 0x0F, ((unsigned short)band_low) << 6);
+                rix_A0_pro(ctrl & 0x0F, ((uint16_t)band_low) << 6);
                 break;
             case 0xB0:
                 rix_B0_pro(ctrl & 0x0F, band_low);
@@ -295,7 +295,7 @@ unsigned short rix_proc()
                     rix_C0_pro(ctrl & 0x0F, band_low);
                 break;
             default:
-                band = ((unsigned short)ctrl << 8) + band_low;
+                band = ((uint16_t)ctrl << 8) + band_low;
                 break;
         }
         if (band != 0)
@@ -315,14 +315,14 @@ void rix_get_ins()
     if (ins_block + (band_low << 6) + sizeof(insbuf) >= length)
         return;
 
-    int i;
-    unsigned char *baddr = (&rix_buf[ins_block]) + (band_low << 6);
+    int32_t i;
+    uint8_t *baddr = (&rix_buf[ins_block]) + (band_low << 6);
 
     for (i = 0; i < 28; i++)
-        insbuf[i] = ((unsigned short)baddr[i * 2 + 1] << 8) + baddr[i * 2];
+        insbuf[i] = ((uint16_t)baddr[i * 2 + 1] << 8) + baddr[i * 2];
 }
 /*--------------------------------------------------------------*/
-void rix_90_pro(unsigned short ctrl_l)
+void rix_90_pro(uint16_t ctrl_l)
 {
     if (ctrl_l >= 11)
         return; // modify[] has size 28
@@ -344,7 +344,7 @@ void rix_90_pro(unsigned short ctrl_l)
     }
 }
 /*--------------------------------------------------------------*/
-void rix_A0_pro(unsigned short ctrl_l, unsigned short index)
+void rix_A0_pro(uint16_t ctrl_l, uint16_t index)
 {
     if (rhythm == 0 || ctrl_l <= 6)
     {
@@ -353,12 +353,12 @@ void rix_A0_pro(unsigned short ctrl_l, unsigned short index)
     }
 }
 /*--------------------------------------------------------------*/
-void prepare_a0b0(unsigned short index, unsigned short v) /* important !*/
+void prepare_a0b0(uint16_t index, uint16_t v) /* important !*/
 {
-    signed short high = 0;
-    signed short low = 0;
-    unsigned int res;
-    int res1 = (v - 0x2000) * 0x19;
+    int16_t high = 0;
+    int16_t low = 0;
+    uint32_t res;
+    int32_t res1 = (v - 0x2000) * 0x19;
     if (res1 == (int)0xff)
         return;
     low = res1 / 0x2000;
@@ -392,10 +392,10 @@ void prepare_a0b0(unsigned short index, unsigned short v) /* important !*/
     displace[index] = low;
 }
 /*--------------------------------------------------------------*/
-void ad_a0b0l_reg(unsigned short index, unsigned short p2, unsigned short p3)
+void ad_a0b0l_reg(uint16_t index, uint16_t p2, uint16_t p3)
 {
-    unsigned short data;
-    unsigned short i = p2 + a0b0_data2[index];
+    uint16_t data;
+    uint16_t i = p2 + a0b0_data2[index];
     ad_a0b0l_reg_(index, p2, p3);
     i = ((signed short)i <= 0x5F ? i : 0x5F);
     i = ((signed short)i >= 0 ? i : 0);
@@ -405,11 +405,11 @@ void ad_a0b0l_reg(unsigned short index, unsigned short p2, unsigned short p3)
     ad_bop(0xB0 + index, data);
 }
 /*--------------------------------------------------------------*/
-void rix_B0_pro(unsigned short ctrl_l, unsigned short index)
+void rix_B0_pro(uint16_t ctrl_l, uint16_t index)
 {
     if (ctrl_l >= 11)
         return;
-    unsigned short temp = 0;
+    uint16_t temp = 0;
     if (rhythm == 0 || ctrl_l < 6)
         temp = modify[ctrl_l * 2 + 1];
     else
@@ -421,9 +421,9 @@ void rix_B0_pro(unsigned short ctrl_l, unsigned short index)
     ad_40_reg(temp);
 }
 /*--------------------------------------------------------------*/
-void rix_C0_pro(unsigned short ctrl_l, unsigned short index)
+void rix_C0_pro(uint16_t ctrl_l, uint16_t index)
 {
-    unsigned short i = index >= 12 ? index - 12 : 0;
+    uint16_t i = index >= 12 ? index - 12 : 0;
     if (ctrl_l < 6 || rhythm == 0)
     {
         ad_a0b0l_reg(ctrl_l, i, 1);
@@ -442,7 +442,7 @@ void rix_C0_pro(unsigned short ctrl_l, unsigned short index)
     }
 }
 /*--------------------------------------------------------------*/
-void switch_ad_bd(unsigned short index)
+void switch_ad_bd(uint16_t index)
 {
     if (rhythm == 0 || index < 6)
         ad_a0b0l_reg(index, a0b0_data3[index], 0);
@@ -453,11 +453,11 @@ void switch_ad_bd(unsigned short index)
     }
 }
 /*--------------------------------------------------------------*/
-void ins_to_reg(unsigned short index, unsigned short *insb, unsigned short value)
+void ins_to_reg(uint16_t index, uint16_t *insb, uint16_t value)
 {
-    unsigned short i;
+    uint16_t i;
     for (i = 0; i < 13; i++)
-        reg_bufs[index][i] = (unsigned char)insb[i];
+        reg_bufs[index][i] = (uint8_t)insb[i];
     reg_bufs[index][13] = value & 3;
     ad_bd_reg();
     ad_bop(8, 0);
@@ -469,15 +469,15 @@ void ins_to_reg(unsigned short index, unsigned short *insb, unsigned short value
     ad_E0_reg(index);
 }
 /*--------------------------------------------------------------*/
-void ad_E0_reg(unsigned short index)
+void ad_E0_reg(uint16_t index)
 {
-    unsigned short data = e0_reg_flag == 0 ? 0 : (reg_bufs[index][13] & 3);
+    uint16_t data = e0_reg_flag == 0 ? 0 : (reg_bufs[index][13] & 3);
     ad_bop(0xE0 + reg_data[index], data);
 }
 /*--------------------------------------------------------------*/
-void ad_20_reg(unsigned short index)
+void ad_20_reg(uint16_t index)
 {
-    unsigned short data = (reg_bufs[index][9] < 1 ? 0 : 0x80);
+    uint16_t data = (reg_bufs[index][9] < 1 ? 0 : 0x80);
     data += (reg_bufs[index][10] < 1 ? 0 : 0x40);
     data += (reg_bufs[index][5] < 1 ? 0 : 0x20);
     data += (reg_bufs[index][11] < 1 ? 0 : 0x10);
@@ -485,34 +485,34 @@ void ad_20_reg(unsigned short index)
     ad_bop(0x20 + reg_data[index], data);
 }
 /*--------------------------------------------------------------*/
-void ad_80_reg(unsigned short index)
+void ad_80_reg(uint16_t index)
 {
-    unsigned short data = (reg_bufs[index][7] & 0x0F), temp = reg_bufs[index][4];
+    uint16_t data = (reg_bufs[index][7] & 0x0F), temp = reg_bufs[index][4];
     data |= (temp << 4);
     ad_bop(0x80 + reg_data[index], data);
 }
 /*--------------------------------------------------------------*/
-void ad_60_reg(unsigned short index)
+void ad_60_reg(uint16_t index)
 {
-    unsigned short data = reg_bufs[index][6] & 0x0F, temp = reg_bufs[index][3];
+    uint16_t data = reg_bufs[index][6] & 0x0F, temp = reg_bufs[index][3];
     data |= (temp << 4);
     ad_bop(0x60 + reg_data[index], data);
 }
 /*--------------------------------------------------------------*/
-void ad_C0_reg(unsigned short index)
+void ad_C0_reg(uint16_t index)
 {
     if (adflag[index] == 1)
         return;
-    unsigned short data = reg_bufs[index][2];
+    uint16_t data = reg_bufs[index][2];
     data *= 2;
     data |= (reg_bufs[index][12] < 1 ? 1 : 0);
     ad_bop(0xC0 + ad_C0_offs[index], data);
 }
 /*--------------------------------------------------------------*/
-void ad_40_reg(unsigned short index)
+void ad_40_reg(uint16_t index)
 {
-    unsigned short res = 0;
-    unsigned short data = 0, temp = reg_bufs[index][0];
+    uint16_t res = 0;
+    uint16_t data = 0, temp = reg_bufs[index][0];
     data = 0x3F - (0x3F & reg_bufs[index][8]);
     data *= for40reg[index];
     data *= 2;
@@ -527,12 +527,12 @@ void ad_40_reg(unsigned short index)
 /*--------------------------------------------------------------*/
 void ad_bd_reg()
 {
-    unsigned short data = rhythm < 1 ? 0 : 0x20;
+    uint16_t data = rhythm < 1 ? 0 : 0x20;
     data |= bd_modify;
     ad_bop(0xBD, data);
 }
 /*--------------------------------------------------------------*/
-void ad_a0b0_reg(unsigned short index)
+void ad_a0b0_reg(uint16_t index)
 {
     ad_bop(0xA0 + index, 0);
     ad_bop(0xB0 + index, 0);
@@ -540,7 +540,7 @@ void ad_a0b0_reg(unsigned short index)
 /*--------------------------------------------------------------*/
 void music_ctrl()
 {
-    unsigned short i;
+    uint16_t i;
     for (i = 0; i < 11; i++)
         switch_ad_bd(i);
 }

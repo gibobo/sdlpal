@@ -1,13 +1,14 @@
-#include "../src/driver.h"
+﻿#include "../src/driver.h"
 #include "../src/input.h"
 #include "DrvIf_internal.h"
 #include <GLFW/glfw3.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 extern GLFWwindow *window;
-static unsigned int counter = 0; // Event index
+static uint32_t counter = 0; // Event index
 static const int g_KeyMap[][2] = {
     {GLFW_KEY_UP, kKeyUp},
     {GLFW_KEY_KP_8, kKeyUp},
@@ -44,14 +45,14 @@ static const int g_KeyMap[][2] = {
     {GLFW_KEY_S, kKeyStatus}};
 
 // Function prototypes
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void key_callback(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int mods);
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void key_callback(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int mods)
 {
     (void)window;
     (void)scancode;
     (void)mods;
-    unsigned char i;
+    uint8_t i;
     for (i = 0; i < sizeof(g_KeyMap) / sizeof(g_KeyMap[0]); i++)
     {
         if (g_KeyMap[i][0] == key)
@@ -64,11 +65,11 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
 }
 
-static void joystick_callback(int jid, int event)
+static void joystick_callback(int32_t jid, int event)
 {
     if (event == GLFW_CONNECTED)
     {
-        int axisCount, buttonCount, hatCount;
+        int32_t axisCount, buttonCount, hatCount;
 
         glfwGetJoystickAxes(jid, &axisCount);
         glfwGetJoystickButtons(jid, &buttonCount);
@@ -105,7 +106,7 @@ static void joystick_callback(int jid, int event)
 
 int DRIVER_Process_Events(void)
 {
-    int res = 0;
+    int32_t res = 0;
     /* Poll for and process events */
     if (glfwWindowShouldClose(window))
         res = -1;

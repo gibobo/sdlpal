@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -24,7 +24,7 @@
 #include "util.h"
 #include <stdlib.h>
 
-void PAL_LoadMap(PALMAP *lpMap, int iMapNum)
+void PAL_LoadMap(PALMAP *lpMap, int32_t iMapNum)
 /*++
   Purpose:
 
@@ -90,11 +90,11 @@ void PAL_FreeMap(PALMAP *lpMap)
     UTIL_free(lpMap->Tiles);
 }
 
-const unsigned char *PAL_MapGetTileBitmap(
-    unsigned char x,
-    unsigned char y,
-    unsigned char h,
-    unsigned char ucLayer,
+const uint8_t *PAL_MapGetTileBitmap(
+    uint8_t x,
+    uint8_t y,
+    uint8_t h,
+    uint8_t ucLayer,
     PALMAP *lpMap)
 /*++
   Purpose:
@@ -120,7 +120,7 @@ const unsigned char *PAL_MapGetTileBitmap(
 
 --*/
 {
-    unsigned int d;
+    uint32_t d;
 
     // Check for invalid parameters.
     if (x >= PALMAP_X || y >= PALMAP_Y || h >= PALMAP_Z || lpMap == NULL)
@@ -145,9 +145,9 @@ const unsigned char *PAL_MapGetTileBitmap(
 }
 
 int PAL_MapTileIsBlocked(
-    unsigned char x,
-    unsigned char y,
-    unsigned char h,
+    uint8_t x,
+    uint8_t y,
+    uint8_t h,
     PALMAP *lpMap)
 /*++
   Purpose:
@@ -180,12 +180,12 @@ int PAL_MapTileIsBlocked(
     return (lpMap->Tiles[y * PALMAP_X * PALMAP_Z + x * PALMAP_Z + h] & 0x2000) >> 13;
 }
 
-unsigned char
+uint8_t
 PAL_MapGetTileHeight(
-    unsigned char x,
-    unsigned char y,
-    unsigned char h,
-    unsigned char ucLayer,
+    uint8_t x,
+    uint8_t y,
+    uint8_t h,
+    uint8_t ucLayer,
     PALMAP *lpMap)
 /*++
   Purpose:
@@ -212,7 +212,7 @@ PAL_MapGetTileHeight(
 
 --*/
 {
-    unsigned int d;
+    uint32_t d;
 
     //
     // Check for invalid parameters.
@@ -230,13 +230,13 @@ PAL_MapGetTileHeight(
     }
 
     d >>= 8;
-    return (unsigned char)(d & 0xf);
+    return (uint8_t)(d & 0xf);
 }
 
 void PAL_MapBlitToSurface(
     PALMAP *lpMap,
     const VIDEO_Rect *lpSrcRect,
-    unsigned char ucLayer)
+    uint8_t ucLayer)
 /*++
   Purpose:
 
@@ -256,8 +256,8 @@ void PAL_MapBlitToSurface(
 
 --*/
 {
-    int sx, sy, dx, dy, x, y, h, xPos, yPos;
-    const unsigned char *lpBitmap = NULL;
+    int32_t sx, sy, dx, dy, x, y, h, xPos, yPos;
+    const uint8_t *lpBitmap = NULL;
 
     //
     // Convert the coordinate

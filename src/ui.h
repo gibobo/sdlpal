@@ -21,6 +21,7 @@
 #ifndef UI_H
 #define UI_H
 
+#include <stdint.h>
 #include <wchar.h>
 
 #define CHUNKNUM_SPRITEUI                9
@@ -118,18 +119,18 @@
 
 typedef struct tagBOX
 {
-    unsigned int pos;
-    unsigned short wWidth;
-    unsigned short wHeight;
+    uint32_t pos;
+    uint16_t wWidth;
+    uint16_t wHeight;
     void *lpSavedArea;
 } BOX;
 
 typedef struct tagMENUITEM
 {
-    unsigned short wValue;
-    unsigned short wNumWord;
-    int fEnabled;
-    unsigned int pos;
+    uint16_t wValue;
+    uint16_t wNumWord;
+    int32_t fEnabled;
+    uint32_t pos;
 } MENUITEM;
 
 #define MENUITEM_VALUE_CANCELLED 0xFFFF
@@ -155,65 +156,65 @@ void PAL_FreeUI(
     void);
 
 void PAL_CreateBox(
-    unsigned int pos,
-    int nRows,
-    int nColumns,
-    int iStyle,
+    uint32_t pos,
+    int32_t nRows,
+    int32_t nColumns,
+    int32_t iStyle,
     BOX **lpBox);
 
 void PAL_CreateBoxWithShadow(
-    unsigned int pos,
-    int nRows,
-    int nColumns,
-    int iStyle,
+    uint32_t pos,
+    int32_t nRows,
+    int32_t nColumns,
+    int32_t iStyle,
     BOX **lpBox,
-    unsigned char nShadowOffset);
+    uint8_t nShadowOffset);
 
 void PAL_CreateSingleLineBox(
-    unsigned int pos,
-    unsigned short nLen,
+    uint32_t pos,
+    uint16_t nLen,
     BOX **lpBox);
 
 void PAL_CreateSingleLineBoxWithShadow(
-    unsigned int pos,
-    unsigned short nLen,
+    uint32_t pos,
+    uint16_t nLen,
     BOX **lpBox,
-    unsigned char nShadowOffset);
+    uint8_t nShadowOffset);
 
 void PAL_DeleteBox(
     BOX *lpBox);
 
-unsigned short
+uint16_t
 PAL_ReadMenu(
-    void (*lpfnMenuItemChanged)(unsigned short),
+    void (*lpfnMenuItemChanged)(uint16_t),
     const MENUITEM *rgMenuItem,
-    int nMenuItem,
-    unsigned short wDefaultItem,
-    unsigned char bLabelColor);
+    int32_t nMenuItem,
+    uint16_t wDefaultItem,
+    uint8_t bLabelColor);
 
 void PAL_DrawNumber(
-    unsigned int iNum,
-    unsigned int nLength,
-    unsigned int pos,
+    uint32_t iNum,
+    uint32_t nLength,
+    uint32_t pos,
     NUMCOLOR color,
     NUMALIGN align);
 
-unsigned int
+uint32_t
 PAL_TextWidth(
     const wchar_t *itemText);
 
-unsigned int
+uint32_t
 PAL_MenuTextMaxWidth(
     const MENUITEM *rgMenuItem,
-    unsigned int nMenuItem);
+    uint32_t nMenuItem);
 
-unsigned int
+uint32_t
 PAL_WordMaxWidth(
-    int nFirstWord,
-    unsigned int nWordNum);
+    int32_t nFirstWord,
+    uint32_t nWordNum);
 
-unsigned int
+uint32_t
 PAL_WordWidth(
-    unsigned int nWordIndex);
+    uint32_t nWordIndex);
 
 #endif

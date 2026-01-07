@@ -21,15 +21,19 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-typedef enum {
-   kDirSouth = 0,
-   kDirWest,
-   kDirNorth,
-   kDirEast,
-   kDirUnknown
+#include <stdint.h>
+
+typedef enum
+{
+    kDirSouth = 0,
+    kDirWest,
+    kDirNorth,
+    kDirEast,
+    kDirUnknown
 } PALDIRECTION;
 
-typedef enum {
+typedef enum
+{
    kKeyNone        = 0,
    kKeyMenu        = (1 << 0),
    kKeySearch      = (1 << 1),
@@ -53,10 +57,10 @@ typedef enum {
 
 typedef struct tagPALINPUTSTATE
 {
-   unsigned char          dir;
-   unsigned int           dwKeyPress;
-   unsigned int           dwKeyOrder[4];
-   unsigned int           dwKeyMaxCount;
+    uint8_t dir;
+    uint32_t dwKeyPress;
+    uint32_t dwKeyOrder[4];
+    uint32_t dwKeyMaxCount;
 } PALINPUTSTATE;
 
 void PAL_InitInput(void);
@@ -81,7 +85,7 @@ void PAL_KeyUp(PALKEY key);
 extern "C" {
 #endif
 
-void PAL_ClearKeyState(void);
+    void PAL_ClearKeyState(void);
 
 #ifdef __cplusplus
 }

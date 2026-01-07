@@ -1,4 +1,4 @@
-#include "util.h"
+﻿#include "util.h"
 #include <stdio.h>
 #if defined(_WIN32) || defined(_WIN64)
 #include <io.h>
@@ -28,7 +28,7 @@ void *UTIL_fopen(const char *_FileName, const char *_Mode)
     return fp;
 }
 
-int UTIL_fseek(void *_Stream, long _Offset, int _Origin)
+int UTIL_fseek(void *_Stream, int64_t _Offset, int _Origin)
 {
     if (_Stream == NULL)
     {
@@ -48,7 +48,7 @@ int UTIL_fseek(void *_Stream, long _Offset, int _Origin)
     }
 }
 
-unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream)
+uint32_t UTIL_fread(void *_Buffer, uint32_t _ElementSize, uint32_t _ElementCount, void *_Stream)
 {
     if (_Buffer == NULL || _Stream == NULL)
     {
@@ -63,17 +63,17 @@ unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _
 #if defined(_MSC_VER)
     /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.
        Use this only when the caller guarantees single-threaded access or external synchronization. */
-    return (unsigned int)_fread_nolock(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+    return (uint32_t)_fread_nolock(_Buffer, elemSize, elemCount, (FILE *)_Stream);
 #elif defined(_POSIX_VERSION) || defined(__unix__) || defined(__APPLE__)
     /* On POSIX, fread_unlocked reduces locking overhead in similar scenarios. */
-    return (unsigned int)fread_unlocked(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+    return (uint32_t)fread_unlocked(_Buffer, elemSize, elemCount, (FILE *)_Stream);
 #else
     /* Portable fallback */
-    return (unsigned int)fread(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+    return (uint32_t)fread(_Buffer, elemSize, elemCount, (FILE *)_Stream);
 #endif
 }
 
-unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream)
+uint32_t UTIL_fwrite(void *_Buffer, uint32_t _ElementSize, uint32_t _ElementCount, void *_Stream)
 {
     if (_Buffer == NULL || _Stream == NULL)
         TerminateOnError("%s() failed: invalid arguments (buffer or stream is NULL)\n", __func__);
@@ -86,13 +86,13 @@ unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int 
 #if defined(_MSC_VER)
         /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.
            Use this only when the caller guarantees single-threaded access or external synchronization. */
-        return (unsigned int)_fwrite_nolock(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+        return (uint32_t)_fwrite_nolock(_Buffer, elemSize, elemCount, (FILE *)_Stream);
 #elif defined(_POSIX_VERSION) || defined(__unix__) || defined(__APPLE__)
         /* On POSIX, fwrite_unlocked reduces locking overhead in similar scenarios. */
-        return (unsigned int)fwrite_unlocked(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+        return (uint32_t)fwrite_unlocked(_Buffer, elemSize, elemCount, (FILE *)_Stream);
 #else
         /* Portable fallback */
-        return (unsigned int)fwrite(_Buffer, elemSize, elemCount, (FILE *)_Stream);
+        return (uint32_t)fwrite(_Buffer, elemSize, elemCount, (FILE *)_Stream);
 #endif
     }
 

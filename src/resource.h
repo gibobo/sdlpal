@@ -1,6 +1,8 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
+#include <stdint.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -35,38 +37,38 @@ int PAL_LoadConsolidatedResources(void);
 void PAL_FreeResourceIndex(void);
 
 // Get the number of chunks in a resource file
-unsigned int RES_MKFGetChunkCount(
-    unsigned char resource_id);
+uint32_t RES_MKFGetChunkCount(
+    uint8_t resource_id);
 
 // Get the size of a specific chunk in a resource file
-unsigned int RES_MKFGetChunkSize(
-    unsigned int chunk_index,
-    unsigned char resource_id);
+uint32_t RES_MKFGetChunkSize(
+    uint32_t chunk_index,
+    uint8_t resource_id);
 
 // Reads an animation frame into a buffer
 int RES_RNGReadFrame(
     void **frame_buffer,
-    unsigned int animation_index,
-    unsigned int frame_index,
-    unsigned char resource_id);
+    uint32_t animation_index,
+    uint32_t frame_index,
+    uint8_t resource_id);
 
 // Decompresses a chunk from the resource file into a buffer
-unsigned int RES_MKFDecompressChunk(
+uint32_t RES_MKFDecompressChunk(
     void **chunk_buffer,
-    unsigned int buffer_size,
-    unsigned int chunk_index,
-    unsigned char resource_id);
+    uint32_t buffer_size,
+    uint32_t chunk_index,
+    uint8_t resource_id);
 
 // Reads a raw chunk from the resource file into a provided buffer.
-unsigned int RES_MKFReadChunk(
+uint32_t RES_MKFReadChunk(
     void *chunk_buffer,
-    unsigned int buffer_size,
-    unsigned int chunk_index,
-    unsigned char resource_id);
+    uint32_t buffer_size,
+    uint32_t chunk_index,
+    uint8_t resource_id);
 
-unsigned int RES_MKFCreateChunk(
+uint32_t RES_MKFCreateChunk(
     void **chunk_buffer,
-    unsigned int chunk_index,
-    unsigned char resource_id);
+    uint32_t chunk_index,
+    uint8_t resource_id);
 
 #endif // RESOURCE_H

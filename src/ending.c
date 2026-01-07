@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -33,9 +33,9 @@
 #include <stddef.h>
 
 static void PAL_ShowFBP(
-    unsigned short wChunkNum,
-    unsigned short wFade,
-    unsigned short g_wCurEffectSprite)
+    uint16_t wChunkNum,
+    uint16_t wFade,
+    uint16_t g_wCurEffectSprite)
 /*++
   Purpose:
 
@@ -53,11 +53,11 @@ static void PAL_ShowFBP(
 
 --*/
 {
-    unsigned char *buf = NULL;
-    unsigned char *bufSprite = NULL;
-    const unsigned int rgIndex[6] = {0, 3, 1, 5, 2, 4};
-    unsigned char i;
-    unsigned int k;
+    uint8_t *buf = NULL;
+    uint8_t *bufSprite = NULL;
+    const uint32_t rgIndex[6] = {0, 3, 1, 5, 2, 4};
+    uint8_t i;
+    uint32_t k;
     VIDEO_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
 
     RES_MKFDecompressChunk(&buf, SCREEN_SIZE, wChunkNum, Res_FBP);
@@ -69,7 +69,7 @@ static void PAL_ShowFBP(
 
     if (wFade > 0)
     {
-        unsigned int fadeDelay = min(max(wFade * 10, 10), 200);
+        uint32_t fadeDelay = min(max(wFade * 10, 10), 200);
         VIDEO_BackupScreen(gpScreen);
 
         for (i = 0; i < 96; i++)
@@ -78,8 +78,8 @@ static void PAL_ShowFBP(
             {
                 if (i >= 6)
                 {
-                    unsigned char target = buf[k] & 0x0F;
-                    unsigned char current = gpScreenBak->pixels[k] & 0x0F;
+                    uint8_t target = buf[k] & 0x0F;
+                    uint8_t current = gpScreenBak->pixels[k] & 0x0F;
 
                     if (target != current)
                     {
@@ -94,7 +94,7 @@ static void PAL_ShowFBP(
 
             if (bufSprite)
             {
-                unsigned long f = UTIL_GetMilliseconds() / 150U;
+                uint32_t f = UTIL_GetMilliseconds() / 150U;
                 PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                                      gpScreen, PAL_XY(0, 0));
             }
@@ -117,7 +117,7 @@ static void PAL_ShowFBP(
     UTIL_free(bufSprite);
 }
 
-static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectSprite)
+static void PAL_ScrollFBP(uint16_t wChunkNum, uint16_t g_wCurEffectSprite)
 /*++
   Purpose:
 
@@ -133,8 +133,8 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
 
 --*/
 {
-    unsigned char *bufSprite = NULL;
-    int i;
+    uint8_t *bufSprite = NULL;
+    int32_t i;
     VIDEO_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
     VIDEO_Surface *p = VIDEO_GetBackupSurface(1);
 
@@ -163,7 +163,7 @@ static void PAL_ScrollFBP(unsigned short wChunkNum, unsigned short g_wCurEffectS
 
         if (bufSprite)
         {
-            unsigned long f = UTIL_GetMilliseconds() / 150U;
+            uint32_t f = UTIL_GetMilliseconds() / 150U;
             PAL_RLEBlitToSurface(PAL_SpriteGetFrame(bufSprite, f % PAL_SpriteGetNumFrames(bufSprite)),
                                  gpScreen, PAL_XY(0, 0));
         }
@@ -201,9 +201,9 @@ static void PAL_EndingAnimation(void)
 {
     VIDEO_Surface *pUpper = VIDEO_GetBackupSurface(0);
     VIDEO_Surface *pLower = VIDEO_GetBackupSurface(1);
-    unsigned char *bufBeast = NULL;
-    unsigned char *bufGirl = NULL;
-    int yPosGirl = 180;
+    uint8_t *bufBeast = NULL;
+    uint8_t *bufGirl = NULL;
+    int32_t yPosGirl = 180;
 
     // Load resources
     RES_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, Res_FBP);
@@ -215,7 +215,7 @@ static void PAL_EndingAnimation(void)
 
     for (int i = 0; i < SCREEN_H * 2; i++)
     {
-        int halfI = i / 2;
+        int32_t halfI = i / 2;
 
         // Draw background layers
         VIDEO_CopySurface(pLower, &(VIDEO_Rect){0, 0, SCREEN_W, SCREEN_H - halfI},

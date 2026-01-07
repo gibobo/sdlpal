@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -21,6 +21,8 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
+#include <stdint.h>
+
 #define PAL_AUDIO_CHANNEL_COUNT     (2U)
 #define PAL_AUDIO_SAMPLING_RATE     (44100U)
 #define PAL_AUDIO_CHUNK_PER_SECOND  (100U)
@@ -29,12 +31,12 @@
 #define PAL_AUDIO_SAMPLES_PER_CHUNK ((PAL_AUDIO_CHUNK_PER_SECOND + PAL_AUDIO_SAMPLING_RATE - 1) / PAL_AUDIO_CHUNK_PER_SECOND)
 
 #if PAL_AUDIO_BIT_DEPTH == 8U
-typedef unsigned char PAL_AUDIO_SAMPLE;
+typedef uint8_t PAL_AUDIO_SAMPLE;
 #define PAL_AUDIO_SAMPLE_MIN    (-128)
 #define PAL_AUDIO_SAMPLE_MAX    (127)
 #define PAL_AUDIO_SAMPLE_OFFSET (128)
 #elif PAL_AUDIO_BIT_DEPTH == 16U
-typedef short PAL_AUDIO_SAMPLE;
+typedef int16_t PAL_AUDIO_SAMPLE;
 #define PAL_AUDIO_SAMPLE_MIN    (-32768)
 #define PAL_AUDIO_SAMPLE_MAX    (32767)
 #define PAL_AUDIO_SAMPLE_OFFSET (0)
@@ -60,7 +62,7 @@ static inline PAL_AUDIO_SAMPLE PAL_AudioMixValueToSample(int value)
         value = -32768;
 
 #if PAL_AUDIO_BIT_DEPTH == 8U
-    int sample = value >> 8;
+    int32_t sample = value >> 8;
     if (sample > PAL_AUDIO_SAMPLE_MAX)
         sample = PAL_AUDIO_SAMPLE_MAX;
     else if (sample < PAL_AUDIO_SAMPLE_MIN)
@@ -71,12 +73,12 @@ static inline PAL_AUDIO_SAMPLE PAL_AudioMixValueToSample(int value)
 #endif
 }
 
-#define AUDIOPLAYER_COMMONS                         \
-    int iMusic;                                     \
-    unsigned char fLoop;                            \
-    void (*Shutdown)(void *);                       \
-    int (*Play)(void *, int, unsigned char, float); \
-    void (*FillBuffer)(void *, unsigned char *, unsigned int)
+#define AUDIOPLAYER_COMMONS                   \
+    int32_t iMusic;                           \
+    uint8_t fLoop;                            \
+    void (*Shutdown)(void *);                 \
+    int (*Play)(void *, int, uint8_t, float); \
+    void (*FillBuffer)(void *, uint8_t *, uint32_t)
 
 typedef struct tagAUDIOPLAYER
 {
@@ -87,17 +89,17 @@ int AUDIO_Startup(void);
 
 void AUDIO_CloseDevice(void);
 
-void AUDIO_FillBuffer(void *stream, unsigned int len);
+void AUDIO_FillBuffer(void *stream, uint32_t len);
 
-void AUDIO_PlayMusic(int iNumRIX, unsigned char fLoop, float flFadeTime);
+void AUDIO_PlayMusic(int32_t iNumRIX, uint8_t fLoop, float flFadeTime);
 
 void AUDIO_PlaySound(int iSoundNum);
 
-void AUDIO_EnableMusic(unsigned char fEnable);
-unsigned char AUDIO_MusicEnabled(void);
+void AUDIO_EnableMusic(uint8_t fEnable);
+uint8_t AUDIO_MusicEnabled(void);
 
-void AUDIO_EnableSound(unsigned char fEnable);
-unsigned char AUDIO_SoundEnabled(void);
+void AUDIO_EnableSound(uint8_t fEnable);
+uint8_t AUDIO_SoundEnabled(void);
 
 int AUDIO_GetCurrentMusic(void);
 

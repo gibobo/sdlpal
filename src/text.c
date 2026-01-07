@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -50,14 +50,14 @@
 #define FONT_COLOR_RED_ALT    0x17
 #define INTERNAL_WBUFFER_SIZE (32)
 
-unsigned char g_fUpdatedInBattle = false;
+uint8_t g_fUpdatedInBattle = false;
 static wchar_t internal_wbuffer[INTERNAL_WBUFFER_SIZE] = {0};
 static wchar_t *WordData = NULL;
 static wchar_t *MsgData = NULL;
 static wchar_t **lpWordBuf = NULL;
 static wchar_t **lpMsgBuf = NULL;
-static unsigned int nWords = 0;
-static unsigned int nMsgs = 0;
+static uint32_t nWords = 0;
+static uint32_t nMsgs = 0;
 
 TEXTLIB g_TextLib;
 
@@ -78,25 +78,25 @@ int PAL_InitText(void)
 
 --*/
 {
-    unsigned int i;
-    unsigned char wchar_size = sizeof(wchar_t);
+    uint32_t i;
+    uint8_t wchar_size = sizeof(wchar_t);
 
     // Open the word data files.
     {
-        unsigned short *pWordData = NULL;
+        uint16_t *pWordData = NULL;
         void *fpWORD = UTIL_fopen(UTIL_Filename("%s/word.bin", CACHES_PATH), "rb");
-        unsigned int word_buffer_size = UTIL_FileLength(fpWORD) / sizeof(unsigned short);
+        uint32_t word_buffer_size = UTIL_FileLength(fpWORD) / sizeof(uint16_t);
         WordData = (wchar_t *)UTIL_calloc(word_buffer_size, wchar_size);
-        pWordData = (unsigned short *)WordData;
+        pWordData = (uint16_t *)WordData;
         for (i = 0, nWords = 0; i < word_buffer_size; i++, pWordData += (wchar_size >> 1))
         {
-            UTIL_fread(pWordData, sizeof(unsigned short), 1, fpWORD);
+            UTIL_fread(pWordData, sizeof(uint16_t), 1, fpWORD);
             if (*pWordData == 0)
                 nWords++;
         }
         UTIL_fclose(fpWORD);
         lpWordBuf = (wchar_t **)UTIL_calloc(nWords, sizeof(wchar_t *));
-        pWordData = (unsigned short *)WordData;
+        pWordData = (uint16_t *)WordData;
         for (i = 0, nWords = 0; i < word_buffer_size; i++, pWordData += (wchar_size >> 1))
         {
             if (lpWordBuf[nWords] == NULL)
@@ -107,20 +107,20 @@ int PAL_InitText(void)
     }
     // Open the message data files.
     {
-        unsigned short *pMsgData = NULL;
+        uint16_t *pMsgData = NULL;
         void *fpMSG = UTIL_fopen(UTIL_Filename("%s/msg.bin", CACHES_PATH), "rb");
-        unsigned int msg_buffer_size = UTIL_FileLength(fpMSG) / sizeof(unsigned short);
+        uint32_t msg_buffer_size = UTIL_FileLength(fpMSG) / sizeof(uint16_t);
         MsgData = (wchar_t *)UTIL_calloc(msg_buffer_size, wchar_size);
-        pMsgData = (unsigned short *)MsgData;
+        pMsgData = (uint16_t *)MsgData;
         for (i = 0, nMsgs = 0; i < msg_buffer_size; i++, pMsgData += (wchar_size >> 1))
         {
-            UTIL_fread(pMsgData, sizeof(unsigned short), 1, fpMSG);
+            UTIL_fread(pMsgData, sizeof(uint16_t), 1, fpMSG);
             if (*pMsgData == 0)
                 nMsgs++;
         }
         UTIL_fclose(fpMSG);
         lpMsgBuf = (wchar_t **)UTIL_calloc(nMsgs, sizeof(wchar_t *));
-        pMsgData = (unsigned short *)MsgData;
+        pMsgData = (uint16_t *)MsgData;
         for (i = 0, nMsgs = 0; i < msg_buffer_size; i++, pMsgData += (wchar_size >> 1))
         {
             if (lpMsgBuf[nMsgs] == NULL)
@@ -172,7 +172,7 @@ void PAL_FreeText(
     lpMsgBuf = NULL;
 }
 
-const wchar_t *PAL_GetWord(unsigned int iNumWord)
+const wchar_t *PAL_GetWord(uint32_t iNumWord)
 /*++
   Purpose:
 
@@ -191,7 +191,7 @@ const wchar_t *PAL_GetWord(unsigned int iNumWord)
     return (iNumWord >= nWords || !lpWordBuf[iNumWord]) ? L"" : lpWordBuf[iNumWord];
 }
 
-const wchar_t *PAL_GetMsg(unsigned int iNumMsg)
+const wchar_t *PAL_GetMsg(uint32_t iNumMsg)
 /*++
   Purpose:
 
@@ -245,21 +245,21 @@ wchar_t *PAL_UnescapeText(const wchar_t *lpszText)
 
 void PAL_DrawText(
     const wchar_t *lpszText,
-    unsigned int pos,
-    unsigned char bColor,
-    unsigned char fShadow,
-    unsigned char fUpdate)
+    uint32_t pos,
+    uint8_t bColor,
+    uint8_t fShadow,
+    uint8_t fUpdate)
 {
     PAL_DrawTextUnescape(lpszText, pos, bColor, fShadow, fUpdate, true);
 }
 
 void PAL_DrawTextUnescape(
     const wchar_t *lpszText,
-    unsigned int pos,
-    unsigned char bColor,
-    unsigned char fShadow,
-    unsigned char fUpdate,
-    unsigned char fUnescape)
+    uint32_t pos,
+    uint8_t bColor,
+    uint8_t fShadow,
+    uint8_t fUpdate,
+    uint8_t fUnescape)
 /*++
   Purpose:
 
@@ -285,9 +285,9 @@ void PAL_DrawTextUnescape(
 
 --*/
 {
-    unsigned short fontX = (unsigned short)PAL_X(pos);
-    unsigned short fontY = (unsigned short)PAL_Y(pos);
-    unsigned char char_width;
+    uint16_t fontX = (uint16_t)PAL_X(pos);
+    uint16_t fontY = (uint16_t)PAL_Y(pos);
+    uint8_t char_width;
     VIDEO_Rect urect;
     urect.x = fontX;
     urect.y = fontY;
@@ -354,20 +354,20 @@ void PAL_DialogSetDelayTime(
 }
 
 void PAL_StartDialog(
-    unsigned char bDialogLocation,
-    unsigned char bFontColor,
-    int iNumCharFace,
+    uint8_t bDialogLocation,
+    uint8_t bFontColor,
+    int32_t iNumCharFace,
     int fPlayingRNG)
 {
     PAL_StartDialogWithOffset(bDialogLocation, bFontColor, iNumCharFace, fPlayingRNG, 0, 0);
 }
 
 void PAL_StartDialogWithOffset(
-    unsigned char bDialogLocation,
-    unsigned char bFontColor,
-    int iNumCharFace,
-    int fPlayingRNG,
-    int xOff,
+    uint8_t bDialogLocation,
+    uint8_t bFontColor,
+    int32_t iNumCharFace,
+    int32_t fPlayingRNG,
+    int32_t xOff,
     int yOff)
 /*++
   Purpose:
@@ -390,8 +390,8 @@ void PAL_StartDialogWithOffset(
 
 --*/
 {
-    unsigned char *buf = NULL;
-    unsigned int buf_size = RES_MKFCreateChunk(&buf, iNumCharFace, Res_RGM);
+    uint8_t *buf = NULL;
+    uint32_t buf_size = RES_MKFCreateChunk(&buf, iNumCharFace, Res_RGM);
     VIDEO_Rect rect;
 
     if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
@@ -488,11 +488,11 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
 --*/
 {
-    unsigned char new_palette[PALETTE_SIZE];
-    unsigned char *org_palette = NULL;
-    unsigned char t[3];
-    int i;
-    unsigned long dwTime = UTIL_GetMilliseconds() + (unsigned long)(1000U * fMaxSeconds);
+    uint8_t new_palette[PALETTE_SIZE];
+    uint8_t *org_palette = NULL;
+    uint8_t t[3];
+    int32_t i;
+    uint32_t dwTime = UTIL_GetMilliseconds() + (uint32_t)(1000U * fMaxSeconds);
 
     // get the current palette
     org_palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
@@ -502,7 +502,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
         g_TextLib.bDialogPosition != kDialogCenter)
     {
         // show the icon
-        const unsigned char *p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
+        const uint8_t *p = PAL_SpriteGetFrame(g_TextLib.bufDialogIcons, g_TextLib.bIcon);
         if (p != NULL)
         {
             VIDEO_Rect rect;
@@ -556,16 +556,16 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
 int TEXT_DisplayText(
     const wchar_t *lpszText,
-    int x,
-    int y,
+    int32_t x,
+    int32_t y,
     int isDialog)
 {
     //
     // normal texts
     //
     wchar_t text[2];
-    unsigned char color;
-    unsigned char isNumber = 0;
+    uint8_t color;
+    uint8_t isNumber = 0;
 
     while (lpszText != NULL && *lpszText != '\0')
     {
@@ -687,7 +687,7 @@ int TEXT_DisplayText(
 
 void PAL_ShowDialogText(
     const wchar_t *lpszText,
-    unsigned char iDialogShadow)
+    uint8_t iDialogShadow)
 /*++
   Purpose:
 
@@ -704,7 +704,7 @@ void PAL_ShowDialogText(
 --*/
 {
     VIDEO_Rect rect;
-    int x, y;
+    int32_t x, y;
 
     // PAL_ClearKeyState();
     g_TextLib.bIcon = 0;
@@ -737,7 +737,7 @@ void PAL_ShowDialogText(
         //
         // The text should be shown in a small window at the center of the screen
         //
-        unsigned int len = PAL_TextWidth(lpszText) >> 3;
+        uint32_t len = PAL_TextWidth(lpszText) >> 3;
 
         // Create the window box
         rect.x = PAL_X(g_TextLib.posDialogText) - len * 4;
@@ -762,7 +762,7 @@ void PAL_ShowDialogText(
     }
     else
     {
-        int len = (int)wcslen(lpszText);
+        int32_t len = (int)wcslen(lpszText);
         if (g_TextLib.nCurrentDialogLine == 0 &&
             g_TextLib.bDialogPosition != kDialogCenter &&
             (lpszText[len - 1] == 0xff1a ||
@@ -884,7 +884,7 @@ int PAL_DialogIsPlayingRNG(
 
 int PAL_swprintf(
     wchar_t *buffer,
-    int count,
+    int32_t count,
     const wchar_t *format,
     ...)
 /*++
@@ -919,10 +919,10 @@ int PAL_swprintf(
     wchar_t chr_buf[2] = {0, 0};
     const wchar_t *fmt_start = NULL;
     wchar_t *cur_fmt = NULL;
-    int fmt_len = 0;
-    int state, precision = 0, width = 0;
-    int left_aligned = 0, wide = 0, narrow = 0;
-    int width_var = 0, precision_var = 0, precision_defined = 0;
+    int32_t fmt_len = 0;
+    int32_t state, precision = 0, width = 0;
+    int32_t left_aligned = 0, wide = 0, narrow = 0;
+    int32_t width_var = 0, precision_var = 0, precision_defined = 0;
 
     // Buffer & length check
     if (buffer == NULL || format == NULL)
@@ -1049,8 +1049,8 @@ int PAL_swprintf(
                 {
                     // We handle char & str specially
                     wchar_t *buf;
-                    int len;
-                    int i;
+                    int32_t len;
+                    int32_t i;
 
                     // Check width
                     if (width_var)
@@ -1112,7 +1112,7 @@ int PAL_swprintf(
                 else
                 {
                     // For other types, pass them directly into vswprintf
-                    int cur_cnt = 0;
+                    int32_t cur_cnt = 0;
                     va_list apd;
 
                     // We copy this argument's format string into internal buffer
@@ -1150,7 +1150,7 @@ int PAL_swprintf(
                             if (wide == 1)
                                 va_arg(ap, long);
                             else if (wide >= 2)
-                                va_arg(ap, long long);
+                                va_arg(ap, int64_t);
                             else
                                 va_arg(ap, int);
                             break;
@@ -1178,8 +1178,8 @@ int PAL_swprintf(
     // If the format string is malformed, try to copy it into the dest buffer
     if (state && buffer < buffer_end)
     {
-        int fmt_len2 = (int)(format - fmt_start);
-        int buf_len = (int)(buffer_end - buffer);
+        int32_t fmt_len2 = (int)(format - fmt_start);
+        int32_t buf_len = (int)(buffer_end - buffer);
         if (fmt_len2 <= buf_len)
         {
             wcsncpy(buffer, fmt_start, fmt_len2);

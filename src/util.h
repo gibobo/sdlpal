@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
@@ -20,6 +20,8 @@
 
 #ifndef UTIL_H
 #define UTIL_H
+
+#include <stdint.h>
 
 #ifdef ARDUINO_ARCH_ESP32
 #define RESOURCE_PATH "/sdcard"
@@ -55,7 +57,7 @@
 
 long UTIL_FileLength(void *fp);
 
-int RandomLong(int from, int to);
+int RandomLong(int32_t from, int32_t to);
 
 float RandomFloat(float from, float to);
 
@@ -63,26 +65,26 @@ char *UTIL_Filename(const char *fmt, ...);
 
 void TerminateOnError(const char *fmt, ...);
 
-void *UTIL_malloc(unsigned int buffer_size);
+void *UTIL_malloc(uint32_t buffer_size);
 
-void *UTIL_calloc(unsigned int n, unsigned int size);
+void *UTIL_calloc(uint32_t n, uint32_t size);
 
-void *UTIL_realloc(void *ptr, unsigned int n, unsigned int size);
+void *UTIL_realloc(void *ptr, uint32_t n, uint32_t size);
 
 void UTIL_free(void *ptr);
 
 // Platform-specific utilities
-unsigned long UTIL_GetMilliseconds(void);
+uint32_t UTIL_GetMilliseconds(void);
 
 void *UTIL_fopen(const char *_FileName, const char *_Mode);
 
 void *UTIL_fopen_without_checking(const char *_FileName, const char *_Mode);
 
-int UTIL_fseek(void *_Stream, long _Offset, int _Origin);
+int UTIL_fseek(void *_Stream, int64_t _Offset, int _Origin);
 
-unsigned int UTIL_fread(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream);
+uint32_t UTIL_fread(void *_Buffer, uint32_t _ElementSize, uint32_t _ElementCount, void *_Stream);
 
-unsigned int UTIL_fwrite(void *_Buffer, unsigned int _ElementSize, unsigned int _ElementCount, void *_Stream);
+uint32_t UTIL_fwrite(void *_Buffer, uint32_t _ElementSize, uint32_t _ElementCount, void *_Stream);
 
 void UTIL_fclose(void *fp);
 
@@ -90,11 +92,11 @@ void UTIL_fclose(void *fp);
 extern "C" {
 #endif
 
-void UTIL_Sleep(unsigned int ms);
+void UTIL_Sleep(uint32_t ms);
 
-unsigned int UTIL_Delay(unsigned int ms);
+uint32_t UTIL_Delay(uint32_t ms);
 
-unsigned int UTIL_WaitKeys(unsigned int ms, unsigned int wait_keys);
+uint32_t UTIL_WaitKeys(uint32_t ms, uint32_t wait_keys);
 
 #ifdef __cplusplus
 }

@@ -1,31 +1,32 @@
-#include "../src/driver.h"
+﻿#include "../src/driver.h"
 #include "../src/util.h"
 #include "../src/video.h"
 #include "DrvIf_internal.h"
 #include "caca.h"
+#include <stdint.h>
 #include <string.h>
 
-static unsigned char *framebuffer = NULL;
+static uint8_t *framebuffer = NULL;
 static caca_canvas_t *cv = NULL;
 caca_display_t *dp = NULL;
 static caca_dither_t *caca_dither = NULL;
 
 void DRIVER_FrameShow(
-    unsigned char *frame,
-    const unsigned short roi_x,
-    const unsigned short roi_y,
-    const unsigned short roi_w,
-    const unsigned short roi_h,
-    const unsigned char padding_flag)
+    uint8_t *frame,
+    const uint16_t roi_x,
+    const uint16_t roi_y,
+    const uint16_t roi_w,
+    const uint16_t roi_h,
+    const uint8_t padding_flag)
 {
     if (framebuffer == NULL)
         return;
 
-    unsigned short x, y;
-    unsigned short roi_x2 = roi_x + roi_w;
-    unsigned short roi_y2 = roi_y + roi_h;
-    unsigned char *src = frame;
-    unsigned char *dst = framebuffer;
+    uint16_t x, y;
+    uint16_t roi_x2 = roi_x + roi_w;
+    uint16_t roi_y2 = roi_y + roi_h;
+    uint8_t *src = frame;
+    uint8_t *dst = framebuffer;
 
     for (y = 0; y < SCREEN_H; y++)
     {
@@ -60,21 +61,21 @@ void DRIVER_FrameShow(
         caca_refresh_display(dp);
 }
 
-void DRIVER_UpdatePalette(const unsigned char *rgPalette)
+void DRIVER_UpdatePalette(const uint8_t *rgPalette)
 {
     if (rgPalette == NULL)
         return;
 
-    unsigned int r[256] = {0};
-    unsigned int g[256] = {0};
-    unsigned int b[256] = {0};
-    unsigned int a[256] = {0};
-    unsigned int i;
+    uint32_t r[256] = {0};
+    uint32_t g[256] = {0};
+    uint32_t b[256] = {0};
+    uint32_t a[256] = {0};
+    uint32_t i;
     for (i = 0; i < 256; i++)
     {
-        r[i] = (unsigned int)(rgPalette[i * 3 + 0]) * 0xfff / 255;
-        g[i] = (unsigned int)(rgPalette[i * 3 + 1]) * 0xfff / 255;
-        b[i] = (unsigned int)(rgPalette[i * 3 + 2]) * 0xfff / 255;
+        r[i] = (uint32_t)(rgPalette[i * 3 + 0]) * 0xfff / 255;
+        g[i] = (uint32_t)(rgPalette[i * 3 + 1]) * 0xfff / 255;
+        b[i] = (uint32_t)(rgPalette[i * 3 + 2]) * 0xfff / 255;
         a[i] = 0;
     }
     if (caca_dither)
@@ -90,7 +91,7 @@ int DRIVER_Init_Video(void)
         caca_set_display_title(dp, "PAL_CACA");
     caca_dither = caca_create_dither(8, SCREEN_W, SCREEN_H, SCREEN_W, 0, 0, 0, 0);
     // caca_set_dither_algorithm(caca_dither, caca_get_dither_algorithm_list(NULL)[0]);
-    framebuffer = (unsigned char *)UTIL_malloc(SCREEN_SIZE);
+    framebuffer = (uint8_t *)UTIL_malloc(SCREEN_SIZE);
     return 0;
 }
 
