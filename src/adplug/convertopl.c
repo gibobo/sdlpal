@@ -1,4 +1,4 @@
-﻿#include "convertopl.h"
+#include "convertopl.h"
 #include "../util.h"
 #include "nuked/opl3.h"
 #include <stdio.h>

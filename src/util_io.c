@@ -1,4 +1,4 @@
-﻿#include "util.h"
+#include "util.h"
 #include <stdio.h>
 #if defined(_WIN32) || defined(_WIN64)
 #include <io.h>

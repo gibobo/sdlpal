@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.

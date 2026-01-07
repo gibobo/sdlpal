@@ -1,4 +1,4 @@
-﻿#include "resource.h"
+#include "resource.h"
 #include "palcommon.h"
 #include "rngplay.h"
 #include "util.h"
