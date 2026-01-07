@@ -122,7 +122,6 @@ void PAL_FadeOut(int iDelay)
 --*/
 {
     unsigned int i, j;
-    unsigned long time, now;
     unsigned char org_palette[PALETTE_SIZE];
     unsigned char new_palette[PALETTE_SIZE];
 

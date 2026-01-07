@@ -34,6 +34,7 @@ file(GLOB GAME_SOURCES
 # Dependencies
 find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(ZLIB)
 
 # SDL2 configuration
 set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
@@ -199,7 +200,7 @@ target_compile_definitions(${PROJECT_NAME}_glfw PRIVATE _GLLOADER_GLFW)
 # Target link libraries
 target_link_libraries(${PROJECT_NAME}_sdl   ${OPENGL_LIBRARY} SDL2::SDL2)
 target_link_libraries(${PROJECT_NAME}_glfw  ${OPENGL_LIBRARY} glfw)
-target_link_libraries(${PROJECT_NAME}_caca  ${CACA_LIBRARYS})
+target_link_libraries(${PROJECT_NAME}_caca  ${CACA_LIBRARYS} ZLIB::ZLIB)
 if(WIN32)
     target_link_libraries(${PROJECT_NAME}_webserver ws2_32)
 endif()

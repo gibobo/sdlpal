@@ -24,6 +24,7 @@
 // by Wei Mingzhi <whistler_wmz@users.sf.net>.
 //
 
+#include "palcommon.h"
 #include "util.h"
 #include <stdlib.h>
 #include <string.h>

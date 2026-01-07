@@ -167,18 +167,18 @@ void PAL_CreateBoxWithShadow(
     int nColumns,
     int iStyle,
     BOX **lpBox,
-    int nShadowOffset);
+    unsigned char nShadowOffset);
 
 void PAL_CreateSingleLineBox(
     unsigned int pos,
-    int nLen,
+    unsigned short nLen,
     BOX **lpBox);
 
 void PAL_CreateSingleLineBoxWithShadow(
     unsigned int pos,
-    int nLen,
+    unsigned short nLen,
     BOX **lpBox,
-    int nShadowOffset);
+    unsigned char nShadowOffset);
 
 void PAL_DeleteBox(
     BOX *lpBox);

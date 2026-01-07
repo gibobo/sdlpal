@@ -1,3 +1,4 @@
+#include "../src/driver.h"
 #include "DrvIf_internal.h"
 #include <SDL.h>
 

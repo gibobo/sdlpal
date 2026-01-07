@@ -188,6 +188,7 @@ void TerminateOnError(
 #ifdef _WIN32
 int gettimeofday(struct timeval *tp, void *tzp)
 {
+    (void)tzp; // unused parameter
     time_t clock;
     struct tm tm = {0};
     SYSTEMTIME wtm;

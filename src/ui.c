@@ -108,7 +108,7 @@ void PAL_CreateBoxWithShadow(
     int nColumns,
     int iStyle,
     BOX **lpBox,
-    int nShadowOffset)
+    unsigned char nShadowOffset)
 /*++
   Purpose:
 
@@ -205,7 +205,7 @@ void PAL_CreateBoxWithShadow(
 
 void PAL_CreateSingleLineBox(
     unsigned int pos,
-    int nLen,
+    unsigned short nLen,
     BOX **lpBox)
 {
     PAL_CreateSingleLineBoxWithShadow(pos, nLen, lpBox, 6);
@@ -213,9 +213,9 @@ void PAL_CreateSingleLineBox(
 
 void PAL_CreateSingleLineBoxWithShadow(
     unsigned int pos,
-    int nLen,
+    unsigned short nLen,
     BOX **lpBox,
-    int nShadowOffset)
+    unsigned char nShadowOffset)
 /*++
   Purpose:
 

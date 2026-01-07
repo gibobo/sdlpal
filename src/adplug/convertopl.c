@@ -9,6 +9,12 @@ static unsigned int bufsamples = 0;
 static unsigned int rate;
 static unsigned char stereo_flag = 0;
 
+void update_to_internal_buffer(unsigned int samples);
+void update_direct(short *buf, unsigned int samples);
+void update_16s_16m(short *buf, unsigned int samples);
+void update_16s_8s(short *buf, unsigned int samples);
+void update_16s_8m(short *buf, unsigned int samples);
+
 // Resize the internal buffer is necessary before update data into it
 void update_to_internal_buffer(unsigned int samples)
 {
@@ -76,16 +82,16 @@ void Copl_Deinit(void)
 }
 
 // reinitialize OPL chip(s)
-void Copl_Reset()
+void Copl_Reset(void)
 {
     OPL3_Reset(rate);
-};
+}
 
 // combined register select + data write
 void Copl_Write(unsigned short reg, unsigned char val)
 {
-    OPL3_WriteRegBuffered(reg & 0xFF, val);
-};
+    OPL3_WriteRegBuffered((uint8_t)(reg & 0x00FF), val);
+}
 
 // Emulation only: fill buffer
 void Copl_Generate(short *buf, unsigned int samples)

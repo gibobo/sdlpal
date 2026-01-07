@@ -98,7 +98,7 @@ int TEXT_DisplayText(
 
 void PAL_ShowDialogText(
     const wchar_t *lpszText,
-    int iDialogShadow);
+    unsigned char iDialogShadow);
 
 void PAL_ClearDialog(
     char fWaitForKey);

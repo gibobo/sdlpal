@@ -687,7 +687,7 @@ int TEXT_DisplayText(
 
 void PAL_ShowDialogText(
     const wchar_t *lpszText,
-    int iDialogShadow)
+    unsigned char iDialogShadow)
 /*++
   Purpose:
 

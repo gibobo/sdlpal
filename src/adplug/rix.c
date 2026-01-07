@@ -79,22 +79,22 @@ void ad_80_reg(unsigned short);
 void ad_a0b0_reg(unsigned short);
 void ad_a0b0l_reg(unsigned short, unsigned short, unsigned short);
 void ad_a0b0l_reg_(unsigned short, unsigned short, unsigned short);
-void ad_bd_reg();
+void ad_bd_reg(void);
 void ad_bop(unsigned short, unsigned short);
 void ad_C0_reg(unsigned short);
 void ad_E0_reg(unsigned short);
-unsigned short ad_initial();
-void data_initial(); /* done */
+unsigned short ad_initial(void);
+void data_initial(void); /* done */
 void ins_to_reg(unsigned short, unsigned short *, unsigned short);
-void int_08h_entry();
-void music_ctrl();
+void int_08h_entry(void);
+void music_ctrl(void);
 void prepare_a0b0(unsigned short, unsigned short);
 void rix_90_pro(unsigned short);
 void rix_A0_pro(unsigned short, unsigned short);
 void rix_B0_pro(unsigned short, unsigned short);
 void rix_C0_pro(unsigned short, unsigned short);
-void rix_get_ins();
-unsigned short rix_proc();
+void rix_get_ins(void);
+unsigned short rix_proc(void);
 void switch_ad_bd(unsigned short);
 
 /*** public methods *************************************/
