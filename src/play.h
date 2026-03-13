@@ -21,7 +21,14 @@
 #ifndef PLAY_H
 #define PLAY_H
 
-void PAL_GameUpdate(int fTrigger);
+#include <stdint.h>
+
+typedef struct tagTRIGGERRANGE
+{
+    uint32_t rgPos[13];
+} TRIGGERRANGE;
+
+void PAL_GameUpdate(unsigned char fTrigger);
 
 void PAL_GameUseItem(void);
 
@@ -30,6 +37,8 @@ void PAL_GameEquipItem(void);
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+TRIGGERRANGE PAL_GetSearchTriggerRange(void);
 
 void PAL_StartFrame(void);
 

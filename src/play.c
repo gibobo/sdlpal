@@ -34,7 +34,7 @@
 #include <stdlib.h>
 
 void PAL_GameUpdate(
-    int fTrigger)
+    unsigned char fTrigger)
 /*++
   Purpose:
 
@@ -227,9 +227,10 @@ void PAL_GameUpdate(
                     //
                     // move here
                     //
-                    gpGlobals->viewport = PAL_XY_OFFSET(pos,
-                                                        -PAL_X(gpGlobals->partyoffset),
-                                                        -PAL_Y(gpGlobals->partyoffset));
+                    gpGlobals->viewport = PAL_XY_OFFSET(
+                        pos,
+                        -PAL_X(gpGlobals->partyoffset),
+                        -PAL_Y(gpGlobals->partyoffset));
 
                     break;
                 }
@@ -360,12 +361,12 @@ void PAL_GameEquipItem(
     }
 }
 
-void PAL_Search(
+TRIGGERRANGE PAL_GetSearchTriggerRange(
     void)
 /*++
   Purpose:
 
-    Process searching trigger events.
+    Calculate 13 checkpoint coordinates for manual event search.
 
   Parameters:
 
@@ -377,9 +378,8 @@ void PAL_Search(
 
 --*/
 {
-    int32_t x, y, xOffset, yOffset, dx, dy, dh, ex, ey, eh, i, k, l;
-    EVENTOBJECT *p;
-    uint32_t rgPos[13];
+    int32_t x, y, xOffset, yOffset, i;
+    TRIGGERRANGE rgRange;
 
     //
     // Get the party location
@@ -405,25 +405,51 @@ void PAL_Search(
         yOffset = -8;
     }
 
-    rgPos[0] = PAL_XY(x, y);
+    rgRange.rgPos[0] = PAL_XY(x, y);
 
     for (i = 0; i < 4; i++)
     {
-        rgPos[i * 3 + 1] = PAL_XY(x + xOffset, y + yOffset);
-        rgPos[i * 3 + 2] = PAL_XY(x, y + yOffset * 2);
-        rgPos[i * 3 + 3] = PAL_XY(x + xOffset, y);
+        rgRange.rgPos[i * 3 + 1] = PAL_XY(x + xOffset, y + yOffset);
+        rgRange.rgPos[i * 3 + 2] = PAL_XY(x, y + yOffset * 2);
+        rgRange.rgPos[i * 3 + 3] = PAL_XY(x + 2 * xOffset, y);
         x += xOffset;
         y += yOffset;
     }
+
+    return rgRange;
+}
+
+void PAL_Search(
+    void)
+/*++
+  Purpose:
+
+    Process searching trigger events.
+
+  Parameters:
+
+    None.
+
+  Return value:
+
+    None.
+
+--*/
+{
+    int32_t x, y, xOffset, yOffset, dx, dy, dh, ex, ey, eh, i, k, l;
+    EVENTOBJECT *p;
+    TRIGGERRANGE rgRange;
+
+    rgRange = PAL_GetSearchTriggerRange();
 
     for (i = 0; i < 13; i++)
     {
         //
         // Convert to map location
         //
-        dh = ((PAL_X(rgPos[i]) % 32) ? 1 : 0);
-        dx = PAL_X(rgPos[i]) / 32;
-        dy = PAL_Y(rgPos[i]) / 16;
+        dh = ((PAL_X(rgRange.rgPos[i]) % 32) ? 1 : 0);
+        dx = PAL_X(rgRange.rgPos[i]) / 32;
+        dy = PAL_Y(rgRange.rgPos[i]) / 16;
 
         //
         // Loop through all event objects
