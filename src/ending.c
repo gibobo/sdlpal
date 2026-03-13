@@ -60,11 +60,11 @@ static void PAL_ShowFBP(
     uint32_t k;
     VIDEO_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
 
-    RES_MKFDecompressChunk(&buf, SCREEN_SIZE, wChunkNum, Res_FBP);
+    RES_MKFDecompressChunk((void **)&buf, SCREEN_SIZE, wChunkNum, Res_FBP);
 
     if (g_wCurEffectSprite)
     {
-        RES_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, Res_MGO);
+        RES_MKFDecompressChunk((void **)&bufSprite, 0, g_wCurEffectSprite, Res_MGO);
     }
 
     if (wFade > 0)
@@ -138,11 +138,11 @@ static void PAL_ScrollFBP(uint16_t wChunkNum, uint16_t g_wCurEffectSprite)
     VIDEO_Surface *gpScreenBak = VIDEO_GetBackupSurface(0);
     VIDEO_Surface *p = VIDEO_GetBackupSurface(1);
 
-    RES_MKFDecompressChunk(&p->pixels, SCREEN_SIZE, wChunkNum, Res_FBP);
+    RES_MKFDecompressChunk((void **)&p->pixels, SCREEN_SIZE, wChunkNum, Res_FBP);
 
     if (g_wCurEffectSprite)
     {
-        RES_MKFDecompressChunk(&bufSprite, 0, g_wCurEffectSprite, Res_MGO);
+        RES_MKFDecompressChunk((void **)&bufSprite, 0, g_wCurEffectSprite, Res_MGO);
     }
 
     VIDEO_BackupScreen(gpScreen);
@@ -206,10 +206,10 @@ static void PAL_EndingAnimation(void)
     int32_t yPosGirl = 180;
 
     // Load resources
-    RES_MKFDecompressChunk(&pUpper->pixels, SCREEN_SIZE, 69, Res_FBP);
-    RES_MKFDecompressChunk(&pLower->pixels, SCREEN_SIZE, 70, Res_FBP);
-    RES_MKFDecompressChunk(&bufBeast, 0, 571, Res_MGO);
-    RES_MKFDecompressChunk(&bufGirl, 0, 572, Res_MGO);
+    RES_MKFDecompressChunk((void **)&pUpper->pixels, SCREEN_SIZE, 69, Res_FBP);
+    RES_MKFDecompressChunk((void **)&pLower->pixels, SCREEN_SIZE, 70, Res_FBP);
+    RES_MKFDecompressChunk((void **)&bufBeast, 0, 571, Res_MGO);
+    RES_MKFDecompressChunk((void **)&bufGirl, 0, 572, Res_MGO);
 
     gpGlobals->wScreenWave = 2;
 

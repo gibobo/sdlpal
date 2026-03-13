@@ -54,10 +54,10 @@ void PAL_LoadMap(PALMAP *lpMap, int32_t iMapNum)
     lpMap->iMapNum = iMapNum;
 
     // Load the map tiles.
-    lpMap->Len_Tiles = RES_MKFDecompressChunk(&lpMap->Tiles, lpMap->Len_Tiles, iMapNum, Res_MAP);
+    lpMap->Len_Tiles = RES_MKFDecompressChunk((void **)&lpMap->Tiles, lpMap->Len_Tiles, iMapNum, Res_MAP);
 
     // Load the tile bitmaps.
-    lpMap->Len_TileSprite = RES_MKFCreateChunk(&lpMap->pTileSprite, iMapNum, Res_GOP);
+    lpMap->Len_TileSprite = RES_MKFCreateChunk((void **)&lpMap->pTileSprite, iMapNum, Res_GOP);
     RES_MKFReadChunk(lpMap->pTileSprite, lpMap->Len_TileSprite, iMapNum, Res_GOP);
 }
 

@@ -30,6 +30,7 @@
 #include <windows.h>
 #elif defined(ARDUINO_ARCH_ESP32)
 #include <esp_system.h>
+#include <esp_random.h>
 #include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>

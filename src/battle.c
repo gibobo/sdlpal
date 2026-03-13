@@ -51,7 +51,7 @@ uint16_t g_rgPlayerPos[MAX_PLAYERS_IN_PARTY][3][2] = {
     {{180, 180}, {234, 170}, {270, 146}} // three players
 };
 
-void PAL_GetPlayerPos(uint8_t PlayerIndex, int *posX, int *posY)
+void PAL_GetPlayerPos(uint8_t PlayerIndex, int32_t *posX, int32_t *posY)
 {
     (*posX) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][0];
     (*posY) = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][PlayerIndex][1];
@@ -793,7 +793,7 @@ void PAL_LoadBattleSprites(
     {
         s = PAL_GetPlayerBattleSprite(gpGlobals->rgParty[i].wPlayerRole);
 
-        if (!RES_MKFDecompressChunk(&g_Battle->rgPlayer[i].lpSprite, 0, s, Res_F))
+        if (!RES_MKFDecompressChunk((void **)&g_Battle->rgPlayer[i].lpSprite, 0, s, Res_F))
             continue;
 
         //
@@ -812,7 +812,7 @@ void PAL_LoadBattleSprites(
         if (g_Battle->rgEnemy[i].wObjectID == 0)
             continue;
 
-        if (!RES_MKFDecompressChunk(&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, Res_ABC))
+        if (!RES_MKFDecompressChunk((void **)&g_Battle->rgEnemy[i].lpSprite, 0, gpGlobals->g.rgObject[g_Battle->rgEnemy[i].wObjectID].enemy.wEnemyID, Res_ABC))
             continue;
 
         //
@@ -850,7 +850,7 @@ PAL_LoadBattleBackground(
     lpBackground = VIDEO_CreateCompatibleSizedSurface(NULL);
 
     // Load the picture
-    RES_MKFDecompressChunk(&lpBackground->pixels, SCREEN_SIZE, gpGlobals->wNumBattleField, Res_FBP);
+    RES_MKFDecompressChunk((void **)&lpBackground->pixels, SCREEN_SIZE, gpGlobals->wNumBattleField, Res_FBP);
 }
 
 static void
@@ -1471,7 +1471,7 @@ PAL_StartBattle(
     //
     // Load the battle effect sprite.
     //
-    uint32_t buf_size = RES_MKFCreateChunk(&g_Battle->lpEffectSprite, 10, Res_DATA);
+    uint32_t buf_size = RES_MKFCreateChunk((void **)&g_Battle->lpEffectSprite, 10, Res_DATA);
     RES_MKFReadChunk(g_Battle->lpEffectSprite, buf_size, 10, Res_DATA);
 
     g_Battle->Phase = kBattlePhaseSelectAction;

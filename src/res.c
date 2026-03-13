@@ -265,7 +265,7 @@ void PAL_LoadResources(void)
         for (i = 0; i < gpResources->nEventObjectSprites; i++, index++)
         {
             gpResources->lppEventObjectSprites[i] = NULL;
-            if (RES_MKFDecompressChunk(&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, Res_MGO))
+            if (RES_MKFDecompressChunk((void **)&gpResources->lppEventObjectSprites[i], 0, gpGlobals->g.lprgEventObject[index].wSpriteNum, Res_MGO))
                 gpGlobals->g.lprgEventObject[index].nSpriteFramesAuto = PAL_SpriteGetNumFrames(gpResources->lppEventObjectSprites[i]);
         }
         gpGlobals->partyoffset = PAL_XY(160, 112);
@@ -286,7 +286,7 @@ void PAL_LoadResources(void)
             wSpriteNum = gpGlobals->g.PlayerRoles->rgwSpriteNum[wPlayerID];
 
             RES_MKFDecompressChunk(
-                &gpResources->rglpPlayerSprite[i], 0, wSpriteNum, Res_MGO);
+                (void **)&gpResources->rglpPlayerSprite[i], 0, wSpriteNum, Res_MGO);
         }
 
         for (i = 1; i <= gpGlobals->nFollower; i++)
@@ -295,7 +295,7 @@ void PAL_LoadResources(void)
             wSpriteNum = gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].wPlayerRole;
 
             RES_MKFDecompressChunk(
-                &gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum, Res_MGO);
+                (void **)&gpResources->rglpPlayerSprite[gpGlobals->wMaxPartyMemberIndex + i], 0, wSpriteNum, Res_MGO);
         }
     }
 

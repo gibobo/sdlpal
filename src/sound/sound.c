@@ -586,7 +586,7 @@ static int SOUND_Play(
     ResampleMixer mixer = NULL;
     WAVEDATA *cursnd;
     uint8_t *buf = NULL;
-    uint32_t buf_size = RES_MKFCreateChunk(&buf, iSoundNum, Res_SOUNDS);
+    uint32_t buf_size = RES_MKFCreateChunk((void **)&buf, iSoundNum, Res_SOUNDS);
     const void *snddata;
     uint8_t i;
     uint32_t len;

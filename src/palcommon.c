@@ -747,7 +747,7 @@ PAL_SpriteGetNumFrames(
 
 uint8_t *
 PAL_SpriteGetFrame(
-    uint8_t *lpSprite,
+    const uint8_t *lpSprite,
     int iFrameNum)
 /*++
   Purpose:
@@ -786,7 +786,7 @@ PAL_SpriteGetFrame(
     offset = (lpSprite[iFrameNum] | (uint32_t)lpSprite[iFrameNum + 1] << 8) << 1;
     if (offset == 0x18444)
         offset = (uint16_t)offset;
-    return &lpSprite[offset];
+    return (uint8_t *)&lpSprite[offset];
 }
 
 uint32_t PAL_MKFGetChunkCount(void *fp)

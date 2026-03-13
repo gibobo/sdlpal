@@ -23,9 +23,16 @@
 
 #include <stdint.h>
 
-#define PAL_AUDIO_CHANNEL_COUNT     (2U)
-#define PAL_AUDIO_SAMPLING_RATE     (44100U)
-#define PAL_AUDIO_CHUNK_PER_SECOND  (100U)
+#define PAL_AUDIO_CHANNEL_COUNT (2U)
+#if defined(ARDUINO_ARCH_ESP32)
+// ESP32: 22050 Hz / 50 chunks per second reduces Nuked OPL3 CPU load by ~50%
+// while keeping PAL_AUDIO_SAMPLES_PER_CHUNK = 441 (same buffer layout).
+#define PAL_AUDIO_SAMPLING_RATE    (22050U)
+#define PAL_AUDIO_CHUNK_PER_SECOND (50U)
+#else
+#define PAL_AUDIO_SAMPLING_RATE    (44100U)
+#define PAL_AUDIO_CHUNK_PER_SECOND (100U)
+#endif
 #define PAL_AUDIO_BIT_DEPTH         (16U)
 #define PAL_AUDIO_BYTES_PER_SAMPLE  (PAL_AUDIO_BIT_DEPTH >> 3)
 #define PAL_AUDIO_SAMPLES_PER_CHUNK ((PAL_AUDIO_CHUNK_PER_SECOND + PAL_AUDIO_SAMPLING_RATE - 1) / PAL_AUDIO_CHUNK_PER_SECOND)
@@ -73,11 +80,11 @@ static inline PAL_AUDIO_SAMPLE PAL_AudioMixValueToSample(int value)
 #endif
 }
 
-#define AUDIOPLAYER_COMMONS                   \
-    int32_t iMusic;                           \
-    uint8_t fLoop;                            \
-    void (*Shutdown)(void *);                 \
-    int (*Play)(void *, int, uint8_t, float); \
+#define AUDIOPLAYER_COMMONS                       \
+    int32_t iMusic;                               \
+    uint8_t fLoop;                                \
+    void (*Shutdown)(void *);                     \
+    int (*Play)(void *, int32_t, uint8_t, float); \
     void (*FillBuffer)(void *, uint8_t *, uint32_t)
 
 typedef struct tagAUDIOPLAYER

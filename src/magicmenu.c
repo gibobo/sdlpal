@@ -173,7 +173,7 @@ PAL_MagicSelectionMenuUpdate(
             //
             // Draw the text
             //
-            wchar_t *word = PAL_GetWord(rgMagicItem[i].wMagic);
+            const wchar_t *word = PAL_GetWord(rgMagicItem[i].wMagic);
             PAL_DrawText(word, PAL_XY(35 + k * iItemTextWidth, 54 + j * 18 + iBoxYOffset), bColor, true, false);
 
             //
@@ -199,7 +199,7 @@ PAL_MagicSelectionMenuUpdate(
             j = 35 + j * iItemTextWidth;
             k = 54 + k * 18 + iBoxYOffset;
 
-            wchar_t *word = PAL_GetWord(rgMagicItem[g_iCurrentItem].wMagic);
+            const wchar_t *word = PAL_GetWord(rgMagicItem[g_iCurrentItem].wMagic);
             PAL_DrawText(word, PAL_XY(j, k), MENUITEM_COLOR_CONFIRMED, false, true);
 
             //

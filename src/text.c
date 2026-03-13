@@ -391,7 +391,7 @@ void PAL_StartDialogWithOffset(
 --*/
 {
     uint8_t *buf = NULL;
-    uint32_t buf_size = RES_MKFCreateChunk(&buf, iNumCharFace, Res_RGM);
+    uint32_t buf_size = RES_MKFCreateChunk((void **)&buf, iNumCharFace, Res_RGM);
     VIDEO_Rect rect;
 
     if (gpGlobals->fInBattle && !g_fUpdatedInBattle)

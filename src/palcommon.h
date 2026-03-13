@@ -67,7 +67,7 @@ uint16_t PAL_SpriteGetNumFrames(
     const uint8_t *lpSprite);
 
 uint8_t *PAL_SpriteGetFrame(
-    uint8_t *lpSprite,
+    const uint8_t *lpSprite,
     int iFrameNum);
 
 uint32_t PAL_MKFGetChunkCount(void *fp);

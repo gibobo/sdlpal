@@ -164,7 +164,7 @@ void PAL_OpeningMenu(void)
 
     // Draw the background
     // Read the picture from fbp.mkf.
-    RES_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, 2, Res_FBP);
+    RES_MKFDecompressChunk((void **)&gpScreen->pixels, SCREEN_SIZE, 2, Res_FBP);
 
     // ...and blit it to the screen buffer.
     VIDEO_UpdateScreen(NULL);
@@ -981,7 +981,7 @@ void PAL_PlayerStatus(
         iPlayerRole = gpGlobals->rgParty[iCurrent].wPlayerRole;
 
         // Draw the background image
-        RES_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, Res_FBP);
+        RES_MKFDecompressChunk((void **)&gpScreen->pixels, SCREEN_SIZE, STATUS_BACKGROUND_FBPNUM, Res_FBP);
 
         // Draw the image of player role
         if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.PlayerRoles->rgwAvatar[iPlayerRole], Res_RGM))
@@ -1566,7 +1566,7 @@ void PAL_EquipItemMenu(
         wItem = gpGlobals->wLastUnequippedItem;
 
         // Draw the background
-        RES_MKFDecompressChunk(&gpScreen->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM, Res_FBP);
+        RES_MKFDecompressChunk((void **)&gpScreen->pixels, SCREEN_SIZE, EQUIPMENU_BACKGROUND_FBPNUM, Res_FBP);
 
         // Draw the item picture
         if (RES_MKFReadChunk(bufImage, bufImageSize, gpGlobals->g.rgObject[wItem].item.wBitmap, Res_BALL))

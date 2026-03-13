@@ -316,10 +316,10 @@ void PAL_SplashScreen(void)
     }
 
     // Read the bitmaps
-    RES_MKFDecompressChunk(&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, Res_FBP);
-    RES_MKFDecompressChunk(&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, Res_FBP);
-    RES_MKFDecompressChunk(&lpTitleBuf, 0, 0x47, Res_MGO);
-    RES_MKFDecompressChunk(&lpSpriteCrane, 0, 0x49, Res_MGO);
+    RES_MKFDecompressChunk((void **)&lpBitmapUp->pixels, SCREEN_SIZE, 0x03, Res_FBP);
+    RES_MKFDecompressChunk((void **)&lpBitmapDown->pixels, SCREEN_SIZE, 0x04, Res_FBP);
+    RES_MKFDecompressChunk((void **)&lpTitleBuf, 0, 0x47, Res_MGO);
+    RES_MKFDecompressChunk((void **)&lpSpriteCrane, 0, 0x49, Res_MGO);
 
     lpBitmapTitle = (uint8_t *)PAL_SpriteGetFrame(lpTitleBuf, 0);
     iTitleHeight = lpBitmapTitle[2] | ((uint16_t)lpBitmapTitle[3] << 8);
@@ -327,7 +327,7 @@ void PAL_SplashScreen(void)
     lpBitmapTitle[3] = 0; // HACKHACK
 
     // Generate the positions of the cranes
-    cranepos = (int *)UTIL_calloc(crane_num * 3, sizeof(int));
+    cranepos = (int32_t *)UTIL_calloc(crane_num * 3, sizeof(int32_t));
     for (i = 0; i < crane_num; i++)
     {
         cranepos[i * 3 + 0] = RandomLong(300, 600);
