@@ -665,7 +665,13 @@ static int SOUND_Play(
             cursnd->resampler[i] = resampler_create();
         else
             resampler_clear(cursnd->resampler[i]);
-        resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % PAL_AUDIO_SAMPLING_RATE) == 0 || (PAL_AUDIO_SAMPLING_RATE % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN : RESAMPLER_QUALITY_MAX);
+        resampler_set_quality(cursnd->resampler[i], ((wavespec.freq % PAL_AUDIO_SAMPLING_RATE) == 0 || (PAL_AUDIO_SAMPLING_RATE % wavespec.freq) == 0) ? RESAMPLER_QUALITY_MIN :
+#if defined(ESP_PLATFORM)
+            RESAMPLER_QUALITY_LINEAR   /* 8kHz game SFX: linear is inaudible vs SINC, ~8x faster */
+#else
+            RESAMPLER_QUALITY_SINC
+#endif
+        );
         resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)PAL_AUDIO_SAMPLING_RATE);
     }
 

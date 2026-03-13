@@ -40,7 +40,11 @@
 #define OPL_ENABLE_STEREOEXT 0
 #endif
 
+#if defined(ESP_PLATFORM)
+#define OPL_WRITEBUF_SIZE  64
+#else
 #define OPL_WRITEBUF_SIZE  1024
+#endif
 #define OPL_WRITEBUF_DELAY 2
 
 #if defined(ESP_PLATFORM)
@@ -134,7 +138,11 @@ extern "C" {
 
     typedef struct _opl3_writebuf
     {
+#if defined(ESP_PLATFORM)
+        uint32_t time;
+#else
         uint64_t time;
+#endif
         uint16_t reg;
         uint8_t data;
     } opl3_writebuf;
@@ -144,7 +152,11 @@ extern "C" {
         opl3_channel channel[18];
         opl3_slot slot[36];
         uint16_t timer;
+#if defined(ESP_PLATFORM)
+        uint32_t eg_timer;
+#else
         uint64_t eg_timer;
+#endif
         uint8_t eg_timerrem;
         uint8_t eg_state;
         uint8_t eg_add;
@@ -177,10 +189,18 @@ extern "C" {
         int16_t oldsamples[4];
         int16_t samples[4];
 
+#if defined(ESP_PLATFORM)
+        uint32_t writebuf_samplecnt;
+#else
         uint64_t writebuf_samplecnt;
+#endif
         uint32_t writebuf_cur;
         uint32_t writebuf_last;
+#if defined(ESP_PLATFORM)
+        uint32_t writebuf_lasttime;
+#else
         uint64_t writebuf_lasttime;
+#endif
         opl3_writebuf writebuf[OPL_WRITEBUF_SIZE];
     };
 
@@ -190,10 +210,10 @@ extern "C" {
 
     void OPL3_Generate(opl3_chip *chip, int16_t *buf);
     void OPL3_GenerateResampled(opl3_chip *chip, int16_t *buf);
-    void OPL3_GenerateStream(int16_t *sndptr, uint32_t numsamples);
+    OPL3_IRAM_ATTR void OPL3_GenerateStream(int16_t *sndptr, uint32_t numsamples);
 
     void OPL3_Generate4Ch(opl3_chip *chip, int16_t *buf4);
-    void OPL3_Generate4ChResampled(opl3_chip *chip, int16_t *buf4);
+    OPL3_IRAM_ATTR void OPL3_Generate4ChResampled(opl3_chip *chip, int16_t *buf4);
     void OPL3_Generate4ChStream(opl3_chip *chip, int16_t *sndptr1, int16_t *sndptr2, uint32_t numsamples);
 
 #ifdef __cplusplus

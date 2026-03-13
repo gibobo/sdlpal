@@ -20,6 +20,10 @@
  *                                             BSPAL <BSPAL.ys168.com>
  */
 
+#if defined(ESP_PLATFORM)
+#pragma GCC optimize ("O2")
+#endif
+
 #include "rix.h"
 #include "../audio.h"
 #include "../resource.h"
@@ -52,8 +56,28 @@ static uint16_t f_buffer[25 * 12]; // 9C0h-C18h
 static uint16_t a0b0_data2[11];
 static uint8_t a0b0_data3[18];
 static uint8_t a0b0_data4[18];
-static uint8_t a0b0_data5[96];
-static uint8_t addrs_head[96];
+/* addrs_head[k] = k % 12, a0b0_data5[k] = k / 12  (k = 0..95)
+ * These are purely constant lookup tables, placed in ROM (const) to save DRAM. */
+static const uint8_t a0b0_data5[96] = {
+    0,0,0,0,0,0,0,0,0,0,0,0,
+    1,1,1,1,1,1,1,1,1,1,1,1,
+    2,2,2,2,2,2,2,2,2,2,2,2,
+    3,3,3,3,3,3,3,3,3,3,3,3,
+    4,4,4,4,4,4,4,4,4,4,4,4,
+    5,5,5,5,5,5,5,5,5,5,5,5,
+    6,6,6,6,6,6,6,6,6,6,6,6,
+    7,7,7,7,7,7,7,7,7,7,7,7
+};
+static const uint8_t addrs_head[96] = {
+    0,1,2,3,4,5,6,7,8,9,10,11,
+    0,1,2,3,4,5,6,7,8,9,10,11,
+    0,1,2,3,4,5,6,7,8,9,10,11,
+    0,1,2,3,4,5,6,7,8,9,10,11,
+    0,1,2,3,4,5,6,7,8,9,10,11,
+    0,1,2,3,4,5,6,7,8,9,10,11,
+    0,1,2,3,4,5,6,7,8,9,10,11,
+    0,1,2,3,4,5,6,7,8,9,10,11
+};
 static uint16_t insbuf[28];
 static uint16_t displace[11];
 static uint8_t reg_bufs[18][14];
@@ -138,16 +162,14 @@ void CrixPlayer_rewind(uint32_t subsong, uint8_t reinit)
         bd_modify = 0;
         sustain = 0;
 
-        memset(f_buffer, 0, sizeof(f_buffer));
         memset(a0b0_data2, 0, sizeof(a0b0_data2));
         memset(a0b0_data3, 0, sizeof(a0b0_data3));
         memset(a0b0_data4, 0, sizeof(a0b0_data4));
-        memset(a0b0_data5, 0, sizeof(a0b0_data5));
-        memset(addrs_head, 0, sizeof(addrs_head));
         memset(insbuf, 0, sizeof(insbuf));
         memset(displace, 0, sizeof(displace));
         memset(reg_bufs, 0, sizeof(reg_bufs));
         memset(for40reg, 0x7F, sizeof(for40reg));
+        /* f_buffer, addrs_head, a0b0_data5: computed once in ad_initial(), no reset needed */
     }
 
     if (subsong != subsong_id)
@@ -209,31 +231,27 @@ void data_initial()
 /*----------------------------------------------------------*/
 uint16_t ad_initial()
 {
-    uint16_t i, j, k = 0;
-    for (i = 0; i < 25; i++)
+    /* f_buffer contains OPL frequency values for 25 octaves × 12 semitones.
+     * Values are purely deterministic constants — compute only once. */
+    static uint8_t f_buffer_ready = 0;
+    if (!f_buffer_ready)
     {
-        uint32_t res = ((uint32_t)i * 24 + 10000) * 52088 / 250000 * 0x24000 / 0x1B503;
-        f_buffer[i * 12] = ((uint16_t)res + 4) >> 3;
-        for (int t = 1; t < 12; t++)
+        uint16_t i;
+        for (i = 0; i < 25; i++)
         {
-            res = res * 106 / 100;
-            f_buffer[i * 12 + t] = ((uint16_t)res + 4) >> 3;
+            uint32_t res = ((uint32_t)i * 24 + 10000) * 52088 / 250000 * 0x24000 / 0x1B503;
+            f_buffer[i * 12] = ((uint16_t)res + 4) >> 3;
+            for (int t = 1; t < 12; t++)
+            {
+                res = res * 106 / 100;
+                f_buffer[i * 12 + t] = ((uint16_t)res + 4) >> 3;
+            }
         }
+        f_buffer_ready = 1;
     }
-    for (i = 0; i < 8; i++)
-        for (j = 0; j < 12; j++)
-        {
-            a0b0_data5[k] = (uint8_t)i;
-            addrs_head[k] = (uint8_t)j;
-            k++;
-        }
-    // ad_bd_reg();
-    // ad_bop(8, 0);
-    // for(i=0;i<9;i++) ad_a0b0_reg(i);
+    /* addrs_head and a0b0_data5 are now static const tables — no runtime init needed */
     e0_reg_flag = 0x20;
-    // for(i=0;i<18;i++) ad_bop(0xE0+reg_data[i],0);
-    // ad_bop(1,e0_reg_flag);
-    return 1; // ad_test();
+    return 1;
 }
 /*----------------------------------------------------------*/
 void ad_bop(uint16_t reg, uint16_t value)

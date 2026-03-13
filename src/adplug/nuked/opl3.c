@@ -30,6 +30,11 @@
  * version: 1.8
  */
 
+#if defined(ESP_PLATFORM)
+#pragma GCC optimize ("O2")
+#pragma GCC optimize ("unroll-loops")
+#endif
+
 #include "opl3.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -348,16 +353,6 @@ static OPL3_FORCE_INLINE int16_t OPL3_EnvelopeCalcSin7(uint16_t phase, uint16_t 
     out = phase << 3;
     return OPL3_EnvelopeCalcExp(out + (envelope << 3)) ^ neg;
 }
-
-static const envelope_sinfunc envelope_sin[8] = {
-    OPL3_EnvelopeCalcSin0,
-    OPL3_EnvelopeCalcSin1,
-    OPL3_EnvelopeCalcSin2,
-    OPL3_EnvelopeCalcSin3,
-    OPL3_EnvelopeCalcSin4,
-    OPL3_EnvelopeCalcSin5,
-    OPL3_EnvelopeCalcSin6,
-    OPL3_EnvelopeCalcSin7};
 
 enum envelope_gen_num
 {
@@ -1226,7 +1221,11 @@ OPL3_IRAM_ATTR OPL3_FORCE_INLINE void OPL3_Generate4Ch(opl3_chip *chip, int16_t 
 #if defined(__clang__) || defined(__GNUC__)
         if (chip->eg_timer != 0)
         {
+#if defined(ESP_PLATFORM)
+            uint8_t tz = (uint8_t)__builtin_ctz((uint32_t)chip->eg_timer);
+#else
             uint8_t tz = (uint8_t)__builtin_ctzll(chip->eg_timer);
+#endif
             chip->eg_add = (tz > 12) ? 0 : (uint8_t)(tz + 1);
         }
         else
@@ -1245,7 +1244,11 @@ OPL3_IRAM_ATTR OPL3_FORCE_INLINE void OPL3_Generate4Ch(opl3_chip *chip, int16_t 
 
     if (chip->eg_timerrem || chip->eg_state)
     {
+#if defined(ESP_PLATFORM)
+        if (chip->eg_timer == 0xffffffffu)
+#else
         if (chip->eg_timer == UINT64_C(0xfffffffff))
+#endif
         {
             chip->eg_timer = 0;
             chip->eg_timerrem = 1;
@@ -1280,7 +1283,7 @@ void OPL3_Generate(opl3_chip *chip, int16_t *buf)
     buf[1] = samples[1];
 }
 
-void OPL3_Generate4ChResampled(opl3_chip *chip, int16_t *buf4)
+OPL3_IRAM_ATTR void OPL3_Generate4ChResampled(opl3_chip *chip, int16_t *buf4)
 {
     while (chip->samplecnt >= chip->rateratio)
     {
@@ -1487,7 +1490,11 @@ void OPL3_WriteReg(opl3_chip *chip, uint16_t reg, uint8_t v)
 
 void OPL3_WriteRegBuffered(uint8_t reg, uint8_t v)
 {
+#if defined(ESP_PLATFORM)
+    uint32_t time1, time2;
+#else
     uint64_t time1, time2;
+#endif
     opl3_writebuf *writebuf;
     uint32_t writebuf_last;
 
@@ -1534,7 +1541,7 @@ void OPL3_Generate4ChStream(opl3_chip *chip, int16_t *sndptr1, int16_t *sndptr2,
     }
 }
 
-void OPL3_GenerateStream(int16_t *sndptr, uint32_t numsamples)
+OPL3_IRAM_ATTR void OPL3_GenerateStream(int16_t *sndptr, uint32_t numsamples)
 {
     uint_fast32_t i;
 

@@ -52,11 +52,29 @@ static AUDIODEVICE gAudioDevice;
 
 PAL_FORCE_INLINE void AUDIO_MixNative(PAL_AUDIO_SAMPLE *dst, const PAL_AUDIO_SAMPLE *src, uint32_t samples)
 {
+#if defined(ESP_PLATFORM)
+    /* 2-sample unroll: helps Xtensa LX7 pipeline; at -O2 both loads/adds issue together */
+    uint32_t pairs = samples >> 1;
+    while (pairs--)
+    {
+        int32_t m0 = (int32_t)dst[0] + (int32_t)src[0];
+        int32_t m1 = (int32_t)dst[1] + (int32_t)src[1];
+        dst[0] = PAL_AudioMixValueToSample(m0);
+        dst[1] = PAL_AudioMixValueToSample(m1);
+        dst += 2; src += 2;
+    }
+    if (samples & 1)
+    {
+        int32_t m = (int32_t)*dst + (int32_t)*src;
+        *dst = PAL_AudioMixValueToSample(m);
+    }
+#else
     while (samples--)
     {
         int32_t mixed = PAL_AudioSampleToMixValue(*dst) + PAL_AudioSampleToMixValue(*src++);
         *dst++ = PAL_AudioMixValueToSample(mixed);
     }
+#endif
 }
 
 void AUDIO_FillBuffer(void *stream, uint32_t len)

@@ -1,3 +1,7 @@
+#if defined(ESP_PLATFORM)
+#pragma GCC optimize ("O2")
+#endif
+
 #include "convertopl.h"
 #include "../util.h"
 #include "nuked/opl3.h"
