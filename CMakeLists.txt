@@ -133,6 +133,15 @@ endfunction()
 add_definitions(-DRESOURCE_PATH="${RESOURCE_PATH}")
 add_definitions(-DCACHES_PATH="${CACHES_PATH}")
 add_definitions(-DPAL_HAS_JOYSTICKS)
+
+# Desktop opt-in: stream pre-rendered PCM music (see src/pcmmus.c) instead of the
+# live RIX/OPL3 synthesizer, so the same PCM files/player used on ESP32 can be
+# auditioned and debugged on the desktop build. Off by default (desktop keeps RIX);
+# turn on with -DPAL_PRERENDERED_MUSIC=ON. On ESP32 this path is always on.
+option(PAL_PRERENDERED_MUSIC "Desktop: stream pre-rendered PCM music instead of live RIX/OPL3" OFF)
+if(PAL_PRERENDERED_MUSIC)
+    add_definitions(-DPAL_PRERENDERED_MUSIC=1)
+endif()
 # Include directories
 include_directories(
     external
@@ -190,6 +199,26 @@ add_executable(${PROJECT_NAME}_webserver
     ${WEBSERVER_DIR}/mongoose.c
     ${GAME_SOURCES}
 )
+
+# --- Offline music pre-render tool (standalone executable) ---
+# Renders every RIX track to headered PCM using the exact Nuked-OPL3/RIX synthesis,
+# resampling to any target rate with the engine's resampler. Headless (Dummy driver)
+# and has its OWN main() (tools/musrender.c). src/main.c is compiled with PAL_NO_MAIN
+# so its game main() is excluded (avoiding a duplicate main) while its other
+# functions (PAL_Shutdown, etc.) remain available to the linked engine.
+add_executable(palmusrender
+    ${DRIVER_DIR}/DrvIf.c
+    ${DRIVER_DIR}/Audio_Dummy.c
+    ${DRIVER_DIR}/Event_Dummy.c
+    ${DRIVER_DIR}/Video_Dummy.c
+    ${GAME_SOURCES}
+    tools/musrender.c
+)
+target_include_directories(palmusrender PRIVATE ${GAME_DIR} ${DRIVER_DIR})
+# Override the global RESOURCE_PATH/CACHES_PATH (which point at the game's build/resource
+# symlink) so the tool reads game data from the CWD it chdirs into (its --data argument).
+target_compile_options(palmusrender PRIVATE -URESOURCE_PATH -UCACHES_PATH)
+target_compile_definitions(palmusrender PRIVATE PAL_NO_MAIN RESOURCE_PATH="." CACHES_PATH=".")
 
 # Target include directories
 target_include_directories(${PROJECT_NAME}_sdl PUBLIC ${SDL_INCLUDE_DIR})

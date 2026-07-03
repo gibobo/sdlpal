@@ -432,6 +432,7 @@ void PAL_SplashScreen(void)
     PAL_FadeOut(1);
 }
 
+#ifndef PAL_NO_MAIN
 int main(int argc, char *argv[])
 /*++
   Purpose:
@@ -484,3 +485,4 @@ int main(int argc, char *argv[])
     assert(false);
     return 255;
 }
+#endif /* PAL_NO_MAIN */

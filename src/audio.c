@@ -127,7 +127,15 @@ int AUDIO_Startup(void)
     memset(&gAudioDevice, 0, sizeof(AUDIODEVICE));
 
     // Initialize the music subsystem.
+#if PAL_PRERENDERED_MUSIC
+    // Prefer streaming pre-rendered PCM (removes real-time OPL3 synthesis); fall
+    // back to the live RIX/OPL3 player if no pre-rendered tracks are on disk.
+    gAudioDevice.pMusPlayer = PCMMUS_Init();
+    if (gAudioDevice.pMusPlayer == NULL)
+        gAudioDevice.pMusPlayer = RIX_Init();
+#else
     gAudioDevice.pMusPlayer = RIX_Init();
+#endif
     if (gAudioDevice.pMusPlayer == NULL)
     {
         // Music initialization failed, but continue with sound only

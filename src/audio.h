@@ -92,6 +92,17 @@ typedef struct tagAUDIOPLAYER
     AUDIOPLAYER_COMMONS;
 } AUDIOPLAYER;
 
+/* Music backend selection. On ESP32 the default is to stream pre-rendered PCM
+   (PCMMUS), which removes real-time OPL3 FM synthesis from the audio task; on
+   other targets the live RIX/OPL3 player is used. Override with -DPAL_PRERENDERED_MUSIC=0/1. */
+#ifndef PAL_PRERENDERED_MUSIC
+#if defined(ESP_PLATFORM)
+#define PAL_PRERENDERED_MUSIC 1
+#else
+#define PAL_PRERENDERED_MUSIC 0
+#endif
+#endif
+
 int AUDIO_Startup(void);
 
 void AUDIO_CloseDevice(void);
@@ -112,6 +123,10 @@ int AUDIO_GetCurrentMusic(void);
 
 /* RIX */
 AUDIOPLAYER *RIX_Init(void);
+
+/* PCMMUS - streams pre-rendered PCM music from disk (see pcmmus.c). Returns NULL
+   if no pre-rendered tracks exist for the current rate, so the caller can fall back to RIX. */
+AUDIOPLAYER *PCMMUS_Init(void);
 
 /* SOUND */
 AUDIOPLAYER *SOUND_Init(void);
