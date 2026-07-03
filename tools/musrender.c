@@ -71,7 +71,12 @@ static int16_t *resample_channel(const int16_t *in, size_t n_in, double factor, 
                 cap *= 2;
                 out = (int16_t *)realloc(out, cap * sizeof(int16_t));
             }
-            out[o++] = (int16_t)resampler_get_sample(r);
+            /* The resampler output carries 8 headroom bits; shift down and clamp to
+               int16 -- same convention the engine uses in sound.c (get_sample >> 8). */
+            int s = resampler_get_sample(r) >> 8;
+            if (s > 32767) s = 32767;
+            else if (s < -32768) s = -32768;
+            out[o++] = (int16_t)s;
             resampler_remove_sample(r);
         }
         if (i >= n_in && resampler_get_sample_count(r) == 0)
