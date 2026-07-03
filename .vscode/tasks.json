@@ -1,0 +1,83 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ESP web: Compile",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": [
+                "compile",
+                "-p", "${config:esp32.port}",
+                "--fqbn", "${config:esp32.webFqbn}",
+                "--build-property", "compiler.c.extra_flags=-DPAL_ESP32_BACKEND_WEB=1 -DPAL_ESP32_BACKEND_HW=0",
+                "--build-property", "compiler.cpp.extra_flags=-DPAL_ESP32_BACKEND_WEB=1 -DPAL_ESP32_BACKEND_HW=0",
+                "--build-path", "${workspaceFolder}/build_arduino",
+                "${workspaceFolder}"
+            ],
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "ESP web: Compile+Upload",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": [
+                "compile", "-u",
+                "-p", "${config:esp32.port}",
+                "--fqbn", "${config:esp32.webFqbn}",
+                "--build-property", "compiler.c.extra_flags=-DPAL_ESP32_BACKEND_WEB=1 -DPAL_ESP32_BACKEND_HW=0",
+                "--build-property", "compiler.cpp.extra_flags=-DPAL_ESP32_BACKEND_WEB=1 -DPAL_ESP32_BACKEND_HW=0",
+                "--build-path", "${workspaceFolder}/build_arduino",
+                "${workspaceFolder}"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "ESP hw: Compile",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": [
+                "compile",
+                "-p", "${config:esp32.port}",
+                "--fqbn", "${config:esp32.hwFqbn}",
+                "--build-property", "compiler.c.extra_flags=-DPAL_ESP32_BACKEND_WEB=0 -DPAL_ESP32_BACKEND_HW=1 -DOPL3_IRAM_ATTR=",
+                "--build-property", "compiler.cpp.extra_flags=-DPAL_ESP32_BACKEND_WEB=0 -DPAL_ESP32_BACKEND_HW=1 -DOPL3_IRAM_ATTR=",
+                "--build-path", "${workspaceFolder}/build_arduino",
+                "${workspaceFolder}"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "ESP hw: Compile+Upload",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": [
+                "compile", "-u",
+                "-p", "${config:esp32.port}",
+                "--fqbn", "${config:esp32.hwFqbn}",
+                "--build-property", "compiler.c.extra_flags=-DPAL_ESP32_BACKEND_WEB=0 -DPAL_ESP32_BACKEND_HW=1 -DOPL3_IRAM_ATTR=",
+                "--build-property", "compiler.cpp.extra_flags=-DPAL_ESP32_BACKEND_WEB=0 -DPAL_ESP32_BACKEND_HW=1 -DOPL3_IRAM_ATTR=",
+                "--build-path", "${workspaceFolder}/build_arduino",
+                "${workspaceFolder}"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "ESP: Monitor",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": ["monitor", "-p", "${config:esp32.port}", "--config", "baudrate=115200"],
+            "group": "build"
+        },
+        {
+            "label": "ESP: Board list",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": ["board", "list"],
+            "group": "build"
+        }
+    ]
+}

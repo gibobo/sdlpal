@@ -32,8 +32,11 @@ BundleArtifacts/
 *.wasm
 *.wast
 
-# Visual Studio Code files
-.vscode/
+# Visual Studio Code files (keep shared tasks.json / samples; ignore machine-local settings)
+.vscode/*
+!.vscode/tasks.json
+!.vscode/extensions.json
+!.vscode/settings.json.sample
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -292,6 +295,8 @@ vc17/
 .build/
 build/
 out/
+build_arduino/
+.claude/
 src_backup/
 cache_data/res_*.bin
 cache_data/res_*.dat

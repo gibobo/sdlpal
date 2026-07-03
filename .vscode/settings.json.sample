@@ -1,0 +1,15 @@
+{
+    // Copy this file to .vscode/settings.json and adjust the machine-local values below.
+    // (.vscode/settings.json is git-ignored; this .sample is committed.)
+
+    // Serial port of the connected ESP32 board. Find it with the "ESP: Board list" task.
+    "esp32.port": "COM5",
+
+    // FQBN for the hardware backend (ILI9341/composite + Bluepad32). Confirmed working.
+    // Requires the esp32-bluepad32 core installed via arduino-cli.
+    "esp32.hwFqbn": "esp32-bluepad32:esp32:esp32wrover",
+
+    // FQBN for the web-streaming backend (ESP32-S3). "esp32:esp32:esp32s3" (generic S3
+    // Dev Module) is verified to compile; set your actual ESP32-S3-CAM board FQBN if different.
+    "esp32.webFqbn": "esp32:esp32:esp32s3"
+}

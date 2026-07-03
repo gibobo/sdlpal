@@ -26,10 +26,14 @@ set(CACHES_PATH     ${CMAKE_BINARY_DIR}/caches)
 file(GLOB GAME_SOURCES
     ${GAME_DIR}/*.c
     ${GAME_DIR}/adplug/*.c
-    ${GAME_DIR}/adplug/dosbox/*.c    
+    ${GAME_DIR}/adplug/dosbox/*.c
     ${GAME_DIR}/adplug/nuked/*.c
     ${GAME_DIR}/sound/*.c
 )
+# ESP32 backends live under src/driver_esp32/ so arduino-cli compiles them recursively;
+# keep them out of the desktop build. No-op with the non-recursive globs above, but
+# guards against a future switch to GLOB_RECURSE.
+list(FILTER GAME_SOURCES EXCLUDE REGEX "/driver_esp32/")
 
 # Dependencies
 find_package(Threads REQUIRED)
