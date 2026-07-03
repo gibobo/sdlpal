@@ -24,11 +24,13 @@ sdlpal/
 │  └─ settings.json.sample    # 複製為 settings.json，填入序列埠與 FQBN
 ├─ src/                       # 可攜遊戲引擎核心（桌面 CMake 與 ESP32 皆編譯）
 │  ├─ *.c *.h  adplug/  sound/
+│  ├─ pcmmus.c / pcmmus.h     # 預渲染 PCM 音樂播放器（音樂快取，見下）
 │  ├─ driver.h                # 後端共用的 HAL 介面（DRIVER_*）
 │  └─ driver_esp32/           # ESP32 後端（只有 arduino-cli 會編）
 │     ├─ backend_select.h     # 後端選擇器（exactly one）
 │     ├─ web/                 # WiFi 串流後端 + utils/（webserver、pins、index.html）
 │     └─ hw/                  # TFT/複合視訊/手柄後端 + utils/（ili9341、composite、bluepad32、pins）
+├─ tools/musrender.c          # 離線音樂預渲染工具（palmusrender target，見下）
 ├─ driver/                    # 桌面後端（SDL/GLFW/CACA/WEB/Dummy）— ESP32 忽略
 ├─ external/                  # git submodules：SDL / glfw / libcaca / miniaudio / mongoose
 └─ shaders/                   # 桌面 GLSL 後處理 shader
@@ -51,7 +53,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ```
 
-會產生 5 個執行檔（於 `build/`）：
+會產生 5 個遊戲執行檔（於 `build/`），外加離線工具 `palmusrender`（見 [預渲染 PCM 音樂](#預渲染-pcm-音樂音樂快取)）：
 
 | Target | 後端 |
 |---|---|
@@ -119,6 +121,7 @@ arduino-cli compile --fqbn esp32-bluepad32:esp32:esp32wrover \
 ### 執行需求
 
 - **遊戲資料**：放在 SD 卡根目錄（掛載於 `/sdcard`，即 ESP32 上的 `RESOURCE_PATH`）。
+- **（強烈建議）預渲染音樂**：把 `<song>_22050.pcm` 放到 SD 卡 `/sdcard/mus/`，即可免去 ESP32 上即時 OPL3 FM 合成的沉重運算。ESP32 端此功能**預設開啟**；產生方式見 [預渲染 PCM 音樂](#預渲染-pcm-音樂音樂快取)。
 - **web 後端**：另需把 `src/driver_esp32/web/index.html` 放到 SD 卡 `/sdcard/index.html`；開機後連上 WiFi AP **`PAL-AP`**，瀏覽器開 `http://4.3.2.1` 即可看到畫面並操作。
 - **hw 後端**：接好 ILI9341 TFT（S3）或複合視訊輸出（classic ESP32），並配對 Bluepad32 支援的藍牙手柄。腳位定義見各後端的 `utils/esp32_pins.h`。
 
@@ -134,6 +137,60 @@ arduino-cli compile --fqbn esp32-bluepad32:esp32:esp32wrover \
 .\decode-backtrace.ps1              # web 後端（預設）
 .\decode-backtrace.ps1 -Backend hw  # hw 後端
 ```
+
+---
+
+## 預渲染 PCM 音樂（音樂快取）
+
+《仙劍》的背景音樂是 RIX 格式，靠 **Nuked-OPL3 FM 合成**即時產生 —— 這在桌面沒問題，但在 ESP32 上是最吃 CPU 的工作。本功能把合成「離線做一次」：在桌面用引擎**原封不動的同一套 OPL3/RIX 程式碼**把每首曲子渲染成 PCM 存檔，執行期改成單純讀檔播放，ESP32 因此不必再跑即時合成。
+
+分成兩個元件：
+
+| 元件 | 位置 | 作用 |
+|---|---|---|
+| **`palmusrender`**（離線工具）| [tools/musrender.c](tools/musrender.c) | 桌面 CMake target。用引擎的 Nuked-OPL3/RIX 合成每首曲子一次（輸出與遊戲即時播放**位元相同**），再用引擎 resampler 轉成任意取樣率，寫出帶標頭的 PCM 檔。 |
+| **`PCMMUS`**（執行期播放器）| [src/pcmmus.c](src/pcmmus.c) | `AUDIOPLAYER` 後端，直接串流 `<RESOURCE_PATH>/mus/<song>_<rate>.pcm`。找不到預渲染檔時**自動退回** RIX 即時合成。 |
+
+### 開關：`PAL_PRERENDERED_MUSIC`
+
+音樂後端由 [src/audio.h](src/audio.h) 的 `PAL_PRERENDERED_MUSIC` 選擇：
+
+- **ESP32**：預設 **1（開）** —— 有 `mus/` 檔就用快取，否則退回 RIX。
+- **桌面**：預設 **0（關，走 RIX）**。以 CMake 選項開啟，用於**驗證／對照**：
+  ```bash
+  cmake -S . -B build -DPAL_PRERENDERED_MUSIC=ON
+  cmake --build build --target palgame_sdl
+  ```
+
+### 產生 PCM 檔
+
+```bash
+# 1. 建置離線工具
+cmake --build build --target palmusrender
+
+# 2. 渲染（--rate 可重複；預設同時產 22050 與 44100）
+build/palmusrender --data <遊戲資料夾> --out ./mus_pcm --rate 22050 --rate 44100
+#   --data     含 MUS.MKF 的遊戲資料夾（例：Pal98rqptw）
+#   --out      輸出資料夾（自動建立）
+#   --rate     目標取樣率(Hz)，可重複；不綁死於 22050/44100
+#   --quality  resampler 品質 0..4（預設 4 = SINC）
+```
+
+### 檔案格式與命名
+
+- 命名：`<song>_<rate>.pcm`（例：`5_22050.pcm`）。
+- 內容：12-byte 小端標頭（magic `PCM1` + version + channels + sample_rate）後接**交錯立體聲 int16 LE** 原始取樣，與引擎混音緩衝區佈局相同，因此執行期播放只是「讀檔→直接送輸出」。
+
+### 佈署（取樣率須對應目標平台）
+
+平台的輸出取樣率固定於 [src/audio.h](src/audio.h)：**桌面 44100 Hz、ESP32 22050 Hz**。放入對應取樣率的檔案即可：
+
+| 平台 | 放置位置 | 取樣率 |
+|---|---|---|
+| 桌面 | `<build>/resource/mus/`（即 `RESOURCE_PATH/mus/`）| `*_44100.pcm` |
+| ESP32 | SD 卡 `/sdcard/mus/` | `*_22050.pcm` |
+
+> 因為 44100 檔是**未經重取樣的 OPL3 原始輸出**，桌面開啟 `PAL_PRERENDERED_MUSIC` 後聽感應與 RIX 版**完全相同** —— 這正是驗證整條快取鏈路正確性的最佳對照。
 
 ---
 
