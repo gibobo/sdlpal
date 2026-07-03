@@ -296,6 +296,7 @@ vc17/
 build/
 out/
 build_arduino/
+build_arduino_hw/
 .claude/
 src_backup/
 cache_data/res_*.bin
