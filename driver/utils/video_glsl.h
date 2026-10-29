@@ -1,5 +1,4 @@
-/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
-//
+﻿//
 // Copyright (c) 2011-2024, SDLPAL development team.
 // All rights reserved.
 //
@@ -21,26 +20,12 @@
 // multipass shader preset header by palxex, 2018
 //
 
-
 #ifndef video_glsl_h
 #define video_glsl_h
+#include <stdint.h>
 
-#include "main.h"
-
-#if PAL_HAS_GLSL
-# include "mini_glloader.h"
-#endif
-
-PAL_C_LINKAGE_BEGIN
-
-extern SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height);
-extern void VIDEO_GLSL_RenderCopy();
-
-extern void VIDEO_GLSL_Init();
-extern void VIDEO_GLSL_Setup();
-
-extern void VIDEO_GLSL_Destroy();
-
-PAL_C_LINKAGE_END
+void VIDEO_GLSL_Initialize(uint32_t width, uint32_t height);
+void VIDEO_GLSL_RenderCopy(const void *data);
+void VIDEO_GLSL_Destroy(void);
 
 #endif /* video_glsl_h */
