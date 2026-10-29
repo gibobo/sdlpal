@@ -936,7 +936,8 @@ uint32_t PAL_MKFDecompressChunk(
 
   Parameters:
 
-    [OUT] lpBuffer - pointer to the destination buffer.
+    [OUT] lpBuffer - pointer to the destination buffer; allocated when NULL or
+                     when uiBufferSize is 0.
 
     [IN]  uiBufferSize - size of the destination buffer.
 
@@ -946,30 +947,32 @@ uint32_t PAL_MKFDecompressChunk(
 
   Return value:
 
-    Integer value which indicates the size of the chunk.
-    -1 if there are error in parameters, or buffer size is not enough.
-    -3 if cannot allocate memory for decompression.
+    The decompressed size of the chunk; 0 if the chunk is empty.
+    Terminates if a caller-provided buffer is too small.
 
 --*/
 {
     uint32_t len = PAL_MKFGetChunkSize(uiChunkNum, fp);
+    uint32_t size = 0;
 
     if (len > 0)
     {
         uint8_t *buf = (uint8_t *)UTIL_malloc(len);
 
         PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
+        size = *(uint32_t *)buf;
 
         if (uiBufferSize == 0 || *lpBuffer == NULL)
         {
             UTIL_free(*lpBuffer);
-            uiBufferSize = *(uint32_t *)buf;
+            uiBufferSize = size;
             *lpBuffer = UTIL_malloc(uiBufferSize);
         }
 
-        YJ2_Decompress(buf, *lpBuffer);
+        if (YJ2_Decompress(buf, *lpBuffer, uiBufferSize) < 0)
+            TerminateOnError("%s() failed: chunk %u needs %u bytes, the buffer holds %u\n", __func__, uiChunkNum, size, uiBufferSize);
         UTIL_free(buf);
     }
 
-    return len;
+    return size;
 }

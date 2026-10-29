@@ -116,7 +116,10 @@ static void CompareYJ2Stream(Tally *tally, const uint8_t *src, const char *what,
     // Run the development decompressor with a canary after the destination.
     out = (uint8_t *)malloc(size + CANARY_SIZE);
     memset(out + size, CANARY_BYTE, CANARY_SIZE);
-    YJ2_Decompress(src, out);
+    if (YJ2_Decompress(src, out, size) != (int32_t)size)
+        Fail(tally, "%s %u: YJ2_Decompress did not return the decompressed size %u", what, index, size);
+    if (size > 0 && YJ2_Decompress(src, out, size - 1) != -1)
+        Fail(tally, "%s %u: YJ2_Decompress accepted a destination one byte too small", what, index);
     if (memcmp(out, ref, size) != 0)
         Fail(tally, "%s %u: decompressed bytes differ", what, index);
     for (i = 0; i < CANARY_SIZE; i++)

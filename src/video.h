@@ -50,6 +50,10 @@ void VIDEO_Shutdown(void);
 
 void VIDEO_UpdateScreen(const VIDEO_Rect *lpRect);
 
+void VIDEO_SetPalette(const uint8_t *rgPalette);
+
+const uint8_t *VIDEO_GetPalette(void);
+
 void VIDEO_ShakeScreen(
     uint16_t wShakeTime,
     uint16_t wShakeLevel);

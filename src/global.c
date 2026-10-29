@@ -128,6 +128,11 @@ static void PAL_InitGlobalGameData(void)
     PAL_DOALLOCATE(Res_DATA, 6, LEVELUPMAGIC_ALL, gpGlobals->g.lprgLevelUpMagic, gpGlobals->g.nLevelUpMagic);
     PAL_DOALLOCATE(Res_DATA, 3, PLAYERROLES, gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles);
 
+    // Saved games reserve room for at most MAX_EVENT_OBJECTS event objects.
+    if (gpGlobals->g.nEventObject > MAX_EVENT_OBJECTS)
+        TerminateOnError("%s() failed: %d event objects exceed MAX_EVENT_OBJECTS (%d)\n", __func__,
+                         gpGlobals->g.nEventObject, MAX_EVENT_OBJECTS);
+
     RES_MKFReadChunk(gpGlobals->g.rgwBattleEffectIndex, sizeof(gpGlobals->g.rgwBattleEffectIndex), 11, Res_DATA);
     RES_MKFReadChunk(gpGlobals->g.EnemyPos, sizeof(gpGlobals->g.EnemyPos), 13, Res_DATA);
     RES_MKFReadChunk(gpGlobals->g.rgLevelUpExp, sizeof(gpGlobals->g.rgLevelUpExp), 14, Res_DATA);
@@ -155,7 +160,7 @@ static void PAL_LoadDefaultGame(void)
     RES_MKFReadChunk(gpGlobals->g.lprgEventObject, gpGlobals->g.nEventObject * sizeof(EVENTOBJECT), 0, Res_SSS);
     RES_MKFReadChunk(gpGlobals->g.rgScene, sizeof(gpGlobals->g.rgScene), 1, Res_SSS);
     RES_MKFReadChunk(gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject), 2, Res_SSS);
-    RES_MKFReadChunk(gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles * sizeof(LEVELUPMAGIC_ALL), 3, Res_DATA);
+    RES_MKFReadChunk(gpGlobals->g.PlayerRoles, gpGlobals->g.nPlayerRoles * sizeof(PLAYERROLES), 3, Res_DATA);
 
     // Set some other default data.
     gpGlobals->dwCash = 0;
@@ -323,10 +328,13 @@ static int PAL_LoadGame_WIN(int iSaveSlot)
     // Get all the data from the saved game struct.
     //
     if (!PAL_LoadGame_Common(iSaveSlot, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN)))
+    {
+        UTIL_free(s);
         return -1;
+    }
 
     memcpy(gpGlobals->g.rgObject, s->rgObject, sizeof(gpGlobals->g.rgObject));
-    memcpy(gpGlobals->g.lprgEventObject, s->rgEventObject, sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS);
+    memcpy(gpGlobals->g.lprgEventObject, s->rgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
 
     UTIL_free(s);
 
@@ -403,7 +411,7 @@ PAL_SaveGame_WIN(
     // Put all the data to the saved game struct.
     //
     memcpy(&s->rgObject, gpGlobals->g.rgObject, sizeof(gpGlobals->g.rgObject));
-    memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * MAX_EVENT_OBJECTS);
+    memcpy(&s->rgEventObject, gpGlobals->g.lprgEventObject, sizeof(EVENTOBJECT) * gpGlobals->g.nEventObject);
 
     PAL_SaveGame_Common(iSaveSlot, wSavedTimes, (SAVEDGAME_COMMON *)s, sizeof(SAVEDGAME_WIN));
 

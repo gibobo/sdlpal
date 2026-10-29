@@ -104,6 +104,13 @@ int PAL_InitText(void)
             if (*pWordData == 0)
                 nWords++;
         }
+        // Some words in the original table end with a '1' marker that is not displayed.
+        for (i = 0; i < nWords; i++)
+        {
+            size_t len = wcslen(lpWordBuf[i]);
+            if (len > 0 && lpWordBuf[i][len - 1] == L'1')
+                lpWordBuf[i][len - 1] = 0;
+        }
     }
     // Open the message data files.
     {
@@ -236,6 +243,9 @@ wchar_t *PAL_UnescapeText(const wchar_t *lpszText)
             case '\\':
                 lpszText++;
             default:
+                // Keep room for the terminator in the fixed buffer.
+                if (buf - internal_wbuffer >= INTERNAL_WBUFFER_SIZE - 1)
+                    TerminateOnError("%s() failed: text longer than %d characters\n", __func__, INTERNAL_WBUFFER_SIZE - 1);
                 wcsncpy(buf++, lpszText++, 1);
                 break;
         }
@@ -306,15 +316,15 @@ void PAL_DrawTextUnescape(
 
     while (*lpszText)
     {
-        // Draw the character
+        // Draw the character; a character without a glyph takes no space but is still consumed
         char_width = PAL_CharWidth(*lpszText) << 3;
         if (char_width)
         {
             PAL_DrawCharOnSurface(*lpszText, fontX, fontY, bColor, fShadow);
             fontX += char_width;
             urect.w += char_width;
-            *lpszText++;
         }
+        lpszText++;
     }
 
     // Update the screen area
@@ -537,7 +547,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
             new_palette[0xFE * 3 + 1] = t[1];
             new_palette[0xFE * 3 + 2] = t[2];
 
-            DRIVER_UpdatePalette(new_palette);
+            VIDEO_SetPalette(new_palette);
             VIDEO_UpdateScreen(NULL);
         }
     }
@@ -545,7 +555,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
     if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
         g_TextLib.bDialogPosition != kDialogCenter)
     {
-        DRIVER_UpdatePalette(org_palette);
+        VIDEO_SetPalette(org_palette);
         // VIDEO_UpdateScreen(NULL);
     }
 

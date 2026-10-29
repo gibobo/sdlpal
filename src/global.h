@@ -75,8 +75,6 @@
 // maximum number of level
 #define MAX_LEVELS                99
 
-#define BATTLEWIN_LEVELUP_MAGIC   20
-
 // status of characters
 enum tagSTATUS
 {

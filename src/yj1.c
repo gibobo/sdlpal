@@ -136,11 +136,12 @@ static uint32_t yj2_bt(const uint8_t *data, uint32_t pos)
     return (data[pos >> 3] & (uint8_t)(1 << (pos & 0x7))) >> (pos & 0x7);
 }
 
-uint8_t YJ2_Decompress(
+int32_t YJ2_Decompress(
     const void *Source,
-    void *Destination)
+    void *Destination,
+    uint32_t DestSize)
 {
-    uint32_t len = 0;
+    uint32_t length;
     uint32_t ptr = 0;
     uint8_t *src = NULL;
     uint8_t *dest = NULL;
@@ -148,7 +149,12 @@ uint8_t YJ2_Decompress(
     YJ2_TreeNode *node;
 
     if (Source == NULL || Destination == NULL)
-        return 0;
+        return -1;
+
+    // The stream starts with its decompressed length; refuse to overrun the destination.
+    length = *(const uint32_t *)Source;
+    if (length > DestSize)
+        return -1;
 
     yj2_build_tree(&tree);
 
@@ -195,18 +201,14 @@ uint8_t YJ2_Decompress(
             pre = dest - pos - 1;
             for (i = 0; i < val - 0xfd; i++)
                 *dest++ = *pre++;
-            len += val - 0xfd;
         }
         else
         {
             *dest++ = (uint8_t)val;
-            len++;
         }
     }
 
     UTIL_free(tree.list);
     UTIL_free(tree.node);
-    return 1;
+    return (int32_t)length;
 }
-
-int (*Decompress)(const void *, void *, int);

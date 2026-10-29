@@ -586,7 +586,7 @@ static int SOUND_Play(
     ResampleMixer mixer = NULL;
     WAVEDATA *cursnd;
     uint8_t *buf = NULL;
-    uint32_t buf_size = RES_MKFCreateChunk((void **)&buf, iSoundNum, Res_SOUNDS);
+    uint32_t buf_size;
     const void *snddata;
     uint8_t i;
     uint32_t len;
@@ -605,9 +605,12 @@ static int SOUND_Play(
 
     player->lastSFX = iSoundNum;
 
+    // Allocate only after the early returns, so a skipped sound costs no memory.
+    buf_size = RES_MKFCreateChunk((void **)&buf, iSoundNum, Res_SOUNDS);
     len = RES_MKFReadChunk(buf, buf_size, iSoundNum, Res_SOUNDS);
     if (len <= 0)
     {
+        UTIL_free(buf);
         return false;
     }
 

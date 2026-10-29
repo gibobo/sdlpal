@@ -22,6 +22,7 @@
 #include "driver.h"
 #include "global.h"
 #include "input.h"
+#include "palette.h"
 #include "util.h"
 #include <stdbool.h>
 #include <string.h>
@@ -29,9 +30,50 @@
 // The global palette
 VIDEO_Surface *gpScreen = NULL;                  // Screen buffer
 static VIDEO_Surface *gpBackup[] = {NULL, NULL}; // Backup screen buffer
+static uint8_t g_rgShownPalette[PALETTE_SIZE];   // Palette last sent to the driver
 volatile uint8_t g_bRenderPaused = false;
 static uint16_t g_wShakeTime = 0;
 static uint16_t g_wShakeLevel = 0;
+
+void VIDEO_SetPalette(const uint8_t *rgPalette)
+/*++
+  Purpose:
+
+    Send a palette to the driver and remember it as the displayed palette.
+    The screen is not presented here; the next screen update shows it.
+
+  Parameters:
+
+    [IN]  rgPalette - 256 RGB entries (PALETTE_SIZE bytes).
+
+  Return value:
+
+    None.
+
+--*/
+{
+    memcpy(g_rgShownPalette, rgPalette, PALETTE_SIZE);
+    DRIVER_UpdatePalette(rgPalette);
+}
+
+const uint8_t *VIDEO_GetPalette(void)
+/*++
+  Purpose:
+
+    Get the palette currently displayed, which fades must start from.
+
+  Parameters:
+
+    None.
+
+  Return value:
+
+    The palette last passed to VIDEO_SetPalette (PALETTE_SIZE bytes).
+
+--*/
+{
+    return g_rgShownPalette;
+}
 
 int VIDEO_Startup(void)
 /*++

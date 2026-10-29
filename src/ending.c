@@ -21,6 +21,7 @@
 #include "ending.h"
 #include "audio.h"
 #include "global.h"
+#include "input.h"
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
@@ -328,7 +329,7 @@ void PAL_EndingScreen(void)
     PAL_ShowFBP(71, 7, 0x27b);
     PAL_ShowFBP(68, 7, 0x27b);
     PAL_ShowFBP(68, 6, 0x000);
-    UTIL_WaitKeys(0, 0);
+    UTIL_WaitKeys(0, kKeyMenu | kKeySearch);
     AUDIO_PlayMusic(0x00, false, 1);
     UTIL_Delay(500);
 #endif

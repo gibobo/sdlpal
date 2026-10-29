@@ -3045,24 +3045,27 @@ void PAL_BattlePlayerPerformAction(
                         def += (g_Battle->rgEnemy[index[i]].e.wLevel + 6) * 4;
                         res = g_Battle->rgEnemy[index[i]].e.wPhysicalResistance;
 
-                        sDamage = PAL_CalcPhysicalAttackDamage(str, def, res);
+                        // The original keeps the divided damage fractional and truncates it
+                        // together with the health, towards zero and wrapping like x86 does.
+                        float flDamage = (float)PAL_CalcPhysicalAttackDamage(str, def, res);
 
                         if (fCritical)
                         {
                             //
                             // Critical Hit
                             //
-                            sDamage *= 3;
+                            flDamage *= 3;
                         }
 
-                        sDamage /= division;
+                        flDamage /= division;
 
-                        if (sDamage <= 0)
+                        if (flDamage <= 0)
                         {
-                            sDamage = 1;
+                            flDamage = 1;
                         }
 
-                        g_Battle->rgEnemy[index[i]].e.wHealth -= (uint16_t)sDamage;
+                        g_Battle->rgEnemy[index[i]].e.wHealth =
+                            (uint16_t)(int32_t)((float)g_Battle->rgEnemy[index[i]].e.wHealth - flDamage);
 
                         if (g_Battle->rgEnemy[index[i]].wObjectID != 0)
                             division *= 2;

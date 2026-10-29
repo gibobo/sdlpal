@@ -1655,9 +1655,9 @@ PAL_InterpretInstruction(
 
         case 0x004D:
             //
-            // wait for any key
+            // wait for the confirm or menu key
             //
-            UTIL_WaitKeys(0, 0);
+            UTIL_WaitKeys(0, kKeyMenu | kKeySearch);
             break;
 
         case 0x004E:
@@ -1689,8 +1689,9 @@ PAL_InterpretInstruction(
             // screen fade in
             //
             // VIDEO_UpdateScreen(NULL);
+            // The operand is signed: the data uses 0xFFFF (-1) for the shortest fade.
             PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
-                       (pScript->rgwOperand[0]) ? pScript->rgwOperand[0] : 1);
+                       ((int16_t)pScript->rgwOperand[0] > 0) ? pScript->rgwOperand[0] : 1);
             gpGlobals->fNeedToFadeIn = false;
             break;
 
@@ -3352,8 +3353,8 @@ begin:
             XBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 71 : PAL_XY(102, 0);
             YBase = (wEventObjectID & PAL_ITEM_DESC_BOTTOM) ? 151 : 3;
             iDescLine = (wEventObjectID & ~PAL_ITEM_DESC_BOTTOM);
-            const wchar_t *word = PAL_GetWord(pScript->rgwOperand[0]);
-            PAL_DrawText(word, PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, true, false);
+            // Description lines are message numbers, not word numbers.
+            PAL_DrawText(PAL_GetMsg(pScript->rgwOperand[0]), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, true, false);
             wScriptEntry++;
             break;
 

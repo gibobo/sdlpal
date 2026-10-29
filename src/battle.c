@@ -1145,7 +1145,7 @@ PAL_BattleWon(
         //
         j = 0;
 
-        while (j < BATTLEWIN_LEVELUP_MAGIC)
+        while (j < gpGlobals->g.nLevelUpMagic)
         {
             if (gpGlobals->g.lprgLevelUpMagic[j].m[w].wMagic == 0 ||
                 gpGlobals->g.lprgLevelUpMagic[j].m[w].wLevel > gpGlobals->g.PlayerRoles->rgwLevel[w])

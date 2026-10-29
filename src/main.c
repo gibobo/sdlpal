@@ -358,7 +358,7 @@ void PAL_SplashScreen(void)
         {
             for (i = 0; i < PALETTE_SIZE; i++)
                 rgCurrentPalette[i] = (uint8_t)(palette[i] * dwTime / iTitleHeight);
-            DRIVER_UpdatePalette(rgCurrentPalette);
+            VIDEO_SetPalette(rgCurrentPalette);
         }
 
         // Draw the screen
@@ -422,13 +422,13 @@ void PAL_SplashScreen(void)
         for (i = 0; i < PALETTE_SIZE; i++)
             rgCurrentPalette[i] = (uint8_t)(palette[i] * dwTime / iTitleHeight);
         if (present) {
-            DRIVER_UpdatePalette(rgCurrentPalette);
+            VIDEO_SetPalette(rgCurrentPalette);
             VIDEO_UpdateScreen(NULL);
         }
         UTIL_TransitionWait(&title_clock, 8);
         dwTime += 4;
     }
-    DRIVER_UpdatePalette(palette);
+    VIDEO_SetPalette(palette);
     VIDEO_UpdateScreen(NULL);
     UTIL_TransitionFinish(&title_clock, "title-fade");
 

@@ -96,7 +96,7 @@ void PAL_SetPalette(int32_t iPaletteNum, uint8_t fNight)
 
     if (p != NULL)
     {
-        DRIVER_UpdatePalette(p);
+        VIDEO_SetPalette(p);
         // VIDEO_UpdateScreen(NULL);
     }
 }
@@ -125,8 +125,8 @@ void PAL_FadeOut(uint32_t iDelay)
     uint8_t org_palette[PALETTE_SIZE];
     uint8_t new_palette[PALETTE_SIZE];
 
-    // Get the original palette...
-    memcpy(org_palette, gPalette, PALETTE_SIZE);
+    // Fade from the palette on screen, which an earlier fade may have changed.
+    memcpy(org_palette, VIDEO_GetPalette(), PALETTE_SIZE);
     memset(new_palette, 0, PALETTE_SIZE);
 
     //
@@ -143,14 +143,14 @@ void PAL_FadeOut(uint32_t iDelay)
         }
 
         if (present) {
-            DRIVER_UpdatePalette(new_palette);
+            VIDEO_SetPalette(new_palette);
             VIDEO_UpdateScreen(NULL);
         }
         UTIL_TransitionWait(&clock, iDelay * 10);
     }
 
     memset(new_palette, 0, sizeof(new_palette));
-    DRIVER_UpdatePalette(new_palette);
+    VIDEO_SetPalette(new_palette);
     VIDEO_UpdateScreen(NULL);
     UTIL_TransitionFinish(&clock, "fade-out");
 }
@@ -191,13 +191,13 @@ void PAL_FadeIn(int32_t iPaletteNum, uint8_t fNight, uint16_t iDelay)
         }
 
         if (present) {
-            DRIVER_UpdatePalette(newpalette);
+            VIDEO_SetPalette(newpalette);
             VIDEO_UpdateScreen(NULL);
         }
         UTIL_TransitionWait(&clock, iDelay * 10U);
     }
 
-    DRIVER_UpdatePalette(palette);
+    VIDEO_SetPalette(palette);
     // VIDEO_UpdateScreen(NULL);
     if (UTIL_TransitionNeedsFinalFrame())
     {
@@ -266,7 +266,7 @@ void PAL_SceneFade(int32_t iPaletteNum, uint8_t fNight, int iStep)
                 newpalette[j] = (uint8_t)(((uint32_t)palette[j] * (uint32_t)i) >> 6U);
             }
             if (present) {
-                DRIVER_UpdatePalette(newpalette);
+                VIDEO_SetPalette(newpalette);
                 VIDEO_UpdateScreen(NULL);
             }
 
@@ -291,7 +291,7 @@ void PAL_SceneFade(int32_t iPaletteNum, uint8_t fNight, int iStep)
                 newpalette[j] = (uint8_t)(((uint32_t)palette[j] * (uint32_t)i) >> 6U);
             }
             if (present) {
-                DRIVER_UpdatePalette(newpalette);
+                VIDEO_SetPalette(newpalette);
                 VIDEO_UpdateScreen(NULL);
             }
 
@@ -300,7 +300,7 @@ void PAL_SceneFade(int32_t iPaletteNum, uint8_t fNight, int iStep)
     }
     if (UTIL_TransitionNeedsFinalFrame())
     {
-        DRIVER_UpdatePalette(newpalette);
+        VIDEO_SetPalette(newpalette);
         VIDEO_UpdateScreen(NULL);
     }
     UTIL_TransitionFinish(&clock, "scene-fade");
@@ -331,7 +331,8 @@ void PAL_PaletteFade(int32_t iPaletteNum, uint8_t fNight, int fUpdateScene)
     uint8_t org_palette[PALETTE_SIZE];
     uint8_t tmp_palette[PALETTE_SIZE];
 
-    memcpy(org_palette, gPalette, PALETTE_SIZE);
+    // Fade from the palette on screen, which an earlier fade may have changed.
+    memcpy(org_palette, VIDEO_GetPalette(), PALETTE_SIZE);
     memset(tmp_palette, 0xff, PALETTE_SIZE);
     new_palette = PAL_GetPalette(iPaletteNum, fNight);
 
@@ -346,7 +347,7 @@ void PAL_PaletteFade(int32_t iPaletteNum, uint8_t fNight, int fUpdateScene)
         {
             tmp_palette[j] = (uint8_t)(((int)org_palette[j] * (31 - i) + (int)(new_palette[j]) * i) / 31);
         }
-        if (present) DRIVER_UpdatePalette(tmp_palette);
+        if (present) VIDEO_SetPalette(tmp_palette);
         // VIDEO_UpdateScreen(NULL);
 
         if (fUpdateScene)
@@ -362,7 +363,7 @@ void PAL_PaletteFade(int32_t iPaletteNum, uint8_t fNight, int fUpdateScene)
     }
     if (UTIL_TransitionNeedsFinalFrame())
     {
-        DRIVER_UpdatePalette(tmp_palette);
+        VIDEO_SetPalette(tmp_palette);
         VIDEO_UpdateScreen(NULL);
     }
     UTIL_TransitionFinish(&clock, "palette-fade");
@@ -424,13 +425,13 @@ void PAL_ColorFade(int32_t iDelay, uint8_t bColor, int fFrom)
             }
 
             if (present) {
-                DRIVER_UpdatePalette(new_palette);
+                VIDEO_SetPalette(new_palette);
                 VIDEO_UpdateScreen(NULL);
             }
             UTIL_TransitionWait(&clock, iDelay);
         }
 
-        DRIVER_UpdatePalette(org_palette);
+        VIDEO_SetPalette(org_palette);
         // VIDEO_UpdateScreen(NULL);
     }
     else
@@ -448,18 +449,21 @@ void PAL_ColorFade(int32_t iDelay, uint8_t bColor, int fFrom)
             }
 
             if (present) {
-                DRIVER_UpdatePalette(new_palette);
+                VIDEO_SetPalette(new_palette);
                 VIDEO_UpdateScreen(NULL);
             }
             UTIL_TransitionWait(&clock, iDelay);
         }
 
+        // End on every entry set to the target color.
         for (i = 0; i < 256; i++)
         {
-            new_palette[i] = org_palette[bColor];
+            new_palette[i * 3 + 0] = org_palette[bColor * 3 + 0];
+            new_palette[i * 3 + 1] = org_palette[bColor * 3 + 1];
+            new_palette[i * 3 + 2] = org_palette[bColor * 3 + 2];
         }
 
-        DRIVER_UpdatePalette(new_palette);
+        VIDEO_SetPalette(new_palette);
         // VIDEO_UpdateScreen(NULL);
     }
     if (UTIL_TransitionNeedsFinalFrame())
@@ -530,14 +534,14 @@ void PAL_FadeToRed(void)
         }
 
         if (present) {
-            DRIVER_UpdatePalette(new_palette);
+            VIDEO_SetPalette(new_palette);
             VIDEO_UpdateScreen(NULL);
         }
         UTIL_TransitionWait(&clock, 75);
     }
     if (UTIL_TransitionNeedsFinalFrame())
     {
-        DRIVER_UpdatePalette(new_palette);
+        VIDEO_SetPalette(new_palette);
         VIDEO_UpdateScreen(NULL);
     }
     UTIL_TransitionFinish(&clock, "fade-to-red");

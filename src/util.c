@@ -86,8 +86,14 @@ static int lrand(void)
 
 --*/
 {
-    if (glSeed == 0)                          // if the random seed isn't initialized...
-        lsrand((uint32_t)time(NULL));         // initialize it first
+    if (glSeed == 0) // if the random seed isn't initialized...
+    {
+#if defined(ARDUINO_ARCH_ESP32)
+        lsrand(esp_random()); // without an RTC, time() repeats every boot
+#else
+        lsrand((uint32_t)time(NULL)); // initialize it first
+#endif
+    }
     glSeed = 1664525L * glSeed + 1013904223L; // do some twisted math (infinite suite)
     return ((glSeed >> 1) + 1073741824L);     // and return the result.
 }
@@ -153,19 +159,8 @@ int RandomLong(int32_t from, int32_t to)
     if (to <= from)
         return from;
 
-#if defined(ARDUINO_ARCH_ESP32)
-    // Unbiased mapping using rejection sampling with hardware RNG
-    uint32_t range = (uint32_t)((int64_t)to - (int64_t)from + 1);
-    uint32_t limit = UINT32_MAX - (UINT32_MAX % range);
-    uint32_t r;
-    do
-    {
-        r = esp_random();
-    } while (r >= limit);
-    return from + (int)(r % range);
-#else
-    return from + (int)(lrand() / (INT_MAX / (double)((to - from) + 1)));
-#endif
+    // Keep the original integer mapping on every platform: game outcomes depend on it.
+    return from + lrand() / (INT_MAX / (to - from + 1));
 }
 
 float RandomFloat(float from, float to)
@@ -190,14 +185,7 @@ float RandomFloat(float from, float to)
     if (to <= from)
         return from;
 
-#if defined(ARDUINO_ARCH_ESP32)
-    // Map hardware RNG to [0,1] then scale to [from, to]
-    uint32_t r = esp_random();
-    float u = (float)r / 4294967295.0f; // UINT32_MAX as float
-    return from + u * (to - from);
-#else
     return from + (float)lrand() / (INT_MAX / (to - from));
-#endif
 }
 
 char *UTIL_Filename(

@@ -27,7 +27,7 @@
 #define PAL_XY(x, y)            (uint32_t)(((((uint32_t)(y)) << 16) & 0xFFFF0000) | (((uint32_t)(x)) & 0xFFFF))
 #define PAL_X(xy)               (short)((xy) & 0xFFFF)
 #define PAL_Y(xy)               (short)(((xy) >> 16) & 0xFFFF)
-#define PAL_XY_OFFSET(xy, x, y) (uint32_t)(((((int)(y) << 16) & 0xFFFF0000) + ((xy) & 0xFFFF0000)) | (((int)(x) & 0xFFFF) + ((xy) & 0xFFFF)))
+#define PAL_XY_OFFSET(xy, x, y) PAL_XY(PAL_X(xy) + (int)(x), PAL_Y(xy) + (int)(y))
 
 int PAL_RLEBlitToSurface(
     const uint8_t *lpBitmapRLE,
@@ -88,9 +88,10 @@ uint32_t PAL_MKFDecompressChunk(
     uint32_t uiChunkNum,
     void *fp);
 
-// From yj1.c:
-uint8_t YJ2_Decompress(
+// From yj1.c: returns the decompressed length, or -1 if it exceeds DestSize.
+int32_t YJ2_Decompress(
     const void *Source,
-    void *Destination);
+    void *Destination,
+    uint32_t DestSize);
 
 #endif // _PALUTILS_H
