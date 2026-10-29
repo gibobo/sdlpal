@@ -37,10 +37,14 @@ Get-ChildItem -LiteralPath $stagedDrivers -Recurse -File | Where-Object {
         [IO.File]::WriteAllText($_.FullName, $staged, [Text.UTF8Encoding]::new($false))
     }
 }
-# The utility gateway references the external driver in the source checkout.
-$stagedUtil = Join-Path $stagingPath 'src\util.c'
-$utilSource = [IO.File]::ReadAllText($stagedUtil).Replace('"../driver/esp32/', '"driver/esp32/')
-[IO.File]::WriteAllText($stagedUtil, $utilSource, [Text.UTF8Encoding]::new($false))
+# Core files that reach the platform layer reference the external driver in the source checkout.
+Get-ChildItem -LiteralPath (Join-Path $stagingPath 'src') -Filter '*.c' -File | ForEach-Object {
+    $original = [IO.File]::ReadAllText($_.FullName)
+    $staged = $original.Replace('"../driver/esp32/', '"driver/esp32/')
+    if ($staged -ne $original) {
+        [IO.File]::WriteAllText($_.FullName, $staged, [Text.UTF8Encoding]::new($false))
+    }
+}
 $sketch = [IO.File]::ReadAllText((Join-Path $projectRoot 'sdlpal.ino'))
 $sketch = $sketch.Replace('"driver/esp32/', '"src/driver/esp32/')
 [IO.File]::WriteAllText((Join-Path $stagingPath 'sdlpal.ino'), $sketch, [Text.UTF8Encoding]::new($false))
@@ -61,7 +65,13 @@ $cliArgs = @('compile', '--fqbn', $Fqbn, '--build-path', $outputPath,
     '--build-property', "compiler.c.extra_flags=$flags",
     '--build-property', "compiler.cpp.extra_flags=$flags")
 if ($Backend -eq 'p4') {
-    $cliArgs += @('--library', (Join-Path $env:USERPROFILE 'Documents\Arduino\libraries\GFX_Library_for_Arduino'))
+    # Resolve the sketchbook from arduino-cli: Documents may be redirected away from USERPROFILE.
+    $sketchbook = (& arduino-cli config get directories.user | Out-String).Trim()
+    $gfxLibrary = Join-Path $sketchbook 'libraries\GFX_Library_for_Arduino'
+    if (-not (Test-Path -LiteralPath $gfxLibrary)) {
+        throw "GFX Library for Arduino not found at $gfxLibrary; run: arduino-cli lib install `"GFX Library for Arduino`""
+    }
+    $cliArgs += @('--library', $gfxLibrary)
 }
 if ($Upload) { $cliArgs += @('--upload', '--port', $Port) }
 $ErrorActionPreference = 'Continue'

@@ -23,6 +23,12 @@
 
 #include <stdint.h>
 
+#if defined(ARDUINO_ARCH_ESP32) && defined(PAL_ESP32_BACKEND_P4) && PAL_ESP32_BACKEND_P4
+#define UTIL_PLATFORM_P4 1
+#else
+#define UTIL_PLATFORM_P4 0
+#endif
+
 #ifdef ARDUINO_ARCH_ESP32
 #define RESOURCE_PATH "/sdcard"
 #define CACHES_PATH   "/sdcard"
@@ -60,6 +66,10 @@ long UTIL_FileLength(void *fp);
 int RandomLong(int32_t from, int32_t to);
 
 float RandomFloat(float from, float to);
+
+void UTIL_SetRandomSeed(uint32_t iSeed);
+
+uint32_t UTIL_GetRandomState(void);
 
 char *UTIL_Filename(const char *fmt, ...);
 

@@ -243,6 +243,14 @@ set_project_warnings(${PROJECT_NAME}_caca)
 set_project_warnings(${PROJECT_NAME}_dummy)
 set_project_warnings(${PROJECT_NAME}_webserver)
 
+# Differential tests of the core against the upstream implementation.
+option(PAL_BUILD_TESTS "Build the core tests (tools/tests)" OFF)
+if(PAL_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tools/tests/core-diff)
+    add_subdirectory(tools/tests/replay)
+endif()
+
 # Symlink creation
 if(WIN32)
     # set(MKLINK_SCRIPT "${CMAKE_BINARY_DIR}/create_symlinks.bat")

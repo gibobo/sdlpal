@@ -1,0 +1,91 @@
+# Load a saved game, read item descriptions and fight two battles.
+# Uses Pal98rqptw/0.rpg as save slot 1.
+seed 7
+# Splash, opening menu: load slot 1.
+at 300 press search
+at 440 press down
+at 450 press search
+at 470 press search
+# Add items and open the use-item list, which shows their descriptions.
+at 660 item 61 3
+at 661 item 72 1
+at 670 press menu
+at 680 press down
+at 690 press down
+at 700 press search
+at 710 press down
+at 720 press search
+at 735 press down
+at 750 press menu
+at 760 press menu
+at 770 press menu
+# Battle against one enemy, attacking with the default command.
+at 790 battle 1 0
+at 800 press search
+at 810 press search
+at 820 press search
+at 830 press search
+at 840 press search
+at 850 press search
+at 860 press search
+at 870 press search
+at 880 press search
+at 890 press search
+at 900 press search
+at 910 press search
+at 920 press search
+at 930 press search
+at 940 press search
+at 950 press search
+at 960 press search
+at 970 press search
+at 980 press search
+at 990 press search
+at 1000 press search
+at 1010 press search
+at 1020 press search
+at 1030 press search
+at 1040 press search
+at 1050 press search
+at 1060 press search
+at 1070 press search
+at 1080 press search
+at 1090 press search
+at 1100 press search
+# Battle against two enemies; repeat the previous action on the first turn.
+at 1150 battle 2 0
+at 1165 press repeat
+at 1180 press search
+at 1190 press search
+at 1200 press search
+at 1210 press search
+at 1220 press search
+at 1230 press search
+at 1240 press search
+at 1250 press search
+at 1260 press search
+at 1270 press search
+at 1280 press search
+at 1290 press search
+at 1300 press search
+at 1310 press search
+at 1320 press search
+at 1330 press search
+at 1340 press search
+at 1350 press search
+at 1360 press search
+at 1370 press search
+at 1380 press search
+at 1390 press search
+at 1400 press search
+at 1410 press search
+at 1420 press search
+at 1430 press search
+at 1440 press search
+at 1450 press search
+at 1460 press search
+at 1470 press search
+at 1480 press search
+at 1490 press search
+at 1500 press search
+end 1600

@@ -39,11 +39,8 @@
 #include <unistd.h>
 #endif
 
-#if defined(ARDUINO_ARCH_ESP32) && defined(PAL_ESP32_BACKEND_P4) && PAL_ESP32_BACKEND_P4
+#if UTIL_PLATFORM_P4
 #include "../driver/esp32/p4/platform.h"
-#define UTIL_PLATFORM_P4 1
-#else
-#define UTIL_PLATFORM_P4 0
 #endif
 
 static int glSeed = 0; // Our random number generator's seed.
@@ -93,6 +90,45 @@ static int lrand(void)
         lsrand((uint32_t)time(NULL));         // initialize it first
     glSeed = 1664525L * glSeed + 1013904223L; // do some twisted math (infinite suite)
     return ((glSeed >> 1) + 1073741824L);     // and return the result.
+}
+
+void UTIL_SetRandomSeed(uint32_t iSeed)
+/*++
+ Purpose:
+
+ Seed the random number generator explicitly, so that a run can be reproduced.
+
+ Parameters:
+
+   [IN]  iSeed - The initial random seed.
+
+ Return value:
+
+ None.
+
+--*/
+{
+    lsrand(iSeed);
+}
+
+uint32_t UTIL_GetRandomState(void)
+/*++
+ Purpose:
+
+ Get the internal state of the random number generator, for tests that verify
+ the sequence of random numbers consumed by the game.
+
+ Parameters:
+
+ None.
+
+ Return value:
+
+ The current generator state; zero if it has not been seeded yet.
+
+--*/
+{
+    return (uint32_t)glSeed;
 }
 
 int RandomLong(int32_t from, int32_t to)
@@ -191,56 +227,6 @@ void TerminateOnError(
     va_end(argptr);
     fprintf(stderr, "\nFATAL ERROR: %s\n", string);
     PAL_Shutdown(255);
-}
-
-#ifdef _WIN32
-int gettimeofday(struct timeval *tp, void *tzp)
-{
-    (void)tzp; // unused parameter
-    time_t clock;
-    struct tm tm = {0};
-    SYSTEMTIME wtm;
-    GetLocalTime(&wtm);
-    tm.tm_year = wtm.wYear - 1900;
-    tm.tm_mon = wtm.wMonth - 1;
-    tm.tm_mday = wtm.wDay;
-    tm.tm_hour = wtm.wHour;
-    tm.tm_min = wtm.wMinute;
-    tm.tm_sec = wtm.wSecond;
-    tm.tm_isdst = -1;
-    clock = mktime(&tm);
-    tp->tv_sec = (long)clock;
-    tp->tv_usec = wtm.wMilliseconds * 1000;
-    return 0;
-}
-#endif
-
-uint32_t UTIL_GetMilliseconds(void)
-{
-#ifdef ARDUINO_ARCH_ESP32
-    // High resolution monotonic time since boot in microseconds
-    uint32_t raw=(uint32_t)(esp_timer_get_time() / 1000ULL);
-#if UTIL_PLATFORM_P4
-    return P4_GameMilliseconds(raw);
-#else
-    return raw;
-#endif
-#else
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
-#endif
-}
-
-void UTIL_Sleep(uint32_t ms)
-{
-#if defined(ARDUINO_ARCH_ESP32)
-    vTaskDelay(pdMS_TO_TICKS(ms));
-#elif defined(_WIN32)
-    Sleep(ms);
-#else
-    usleep(ms * 1000);
-#endif
 }
 
 uint32_t UTIL_Delay(uint32_t ms)
