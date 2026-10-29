@@ -15,18 +15,23 @@ static void audio_callback(ma_device *pDevice, void *stream, const void *pInput,
 {
     (void)pDevice;
     (void)pInput;
+    // Hold the driver lock while mixing so AUDIO_PlayMusic / SOUND_Play on the
+    // game thread cannot modify the music and sound player state mid-buffer.
+    DRIVER_Audio_Lock();
     AUDIO_FillBuffer(
         stream,
         frameCount * PAL_AUDIO_CHANNEL_COUNT * PAL_AUDIO_BYTES_PER_SAMPLE);
+    DRIVER_Audio_Unlock();
 }
 
 void DRIVER_DeInit_Audio(void)
 {
+    // Stop the device first so the callback can no longer touch the mutex.
+    ma_device_uninit(&device);
+    memset(&device, 0, sizeof(ma_device));
 #ifndef MA_NO_THREADING
     ma_mutex_uninit(&dmutex);
 #endif
-    ma_device_uninit(&device);
-    memset(&device, 0, sizeof(ma_device));
 }
 
 int DRIVER_Init_Audio(void)
