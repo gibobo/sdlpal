@@ -1,4 +1,4 @@
-# Load a saved game, read item descriptions and fight two battles.
+# Load a saved game, read item descriptions and fight three battles.
 # Uses Pal98rqptw/0.rpg as save slot 1.
 seed 7
 # Splash, opening menu: load slot 1.
@@ -88,4 +88,47 @@ at 1470 press search
 at 1480 press search
 at 1490 press search
 at 1500 press search
-end 1600
+# Battle against two enemies with the force key (no attack magic, so it
+# attacks), then cast the first magic from the menu and use the first item.
+at 1580 battle 2 0
+at 1595 press force
+at 1660 hold left
+at 1663 release left
+at 1666 press search
+at 1676 press search
+at 1686 press search
+at 1820 press useitem
+at 1830 press search
+at 1840 press search
+at 1900 press search
+at 1910 press search
+at 1920 press search
+at 1930 press search
+at 1940 press search
+at 1950 press search
+at 1960 press search
+at 1970 press search
+at 1980 press search
+at 1990 press search
+at 2000 press search
+at 2010 press search
+at 2020 press search
+at 2030 press search
+at 2040 press search
+at 2050 press search
+at 2060 press search
+at 2070 press search
+at 2080 press search
+at 2090 press search
+at 2100 press search
+at 2110 press search
+at 2120 press search
+at 2130 press search
+at 2140 press search
+at 2150 press search
+at 2160 press search
+at 2170 press search
+at 2180 press search
+at 2190 press search
+at 2200 press search
+end 2300
