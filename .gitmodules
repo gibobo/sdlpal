@@ -1,12 +1,15 @@
-[submodule "3rd/googletest"]
-	path = 3rd/googletest
-	url = ../googletest
-[submodule "3rd/SDL"]
-	path = 3rd/SDL
-	url = ../SDL.git
-[submodule "3rd/mingw-std-threads"]
-	path = 3rd/mingw-std-threads
-	url = ../mingw-std-threads.git
-[submodule "scripts"]
-	path = scripts
-	url = ../scripts.git
+[submodule "external/SDL"]
+	path = external/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "external/glfw"]
+	path = external/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "external/miniaudio"]
+	path = external/miniaudio
+	url = https://github.com/mackron/miniaudio.git
+[submodule "external/libcaca"]
+	path = external/libcaca
+	url = https://github.com/gibobo/libcaca.git
+[submodule "external/mongoose"]
+	path = external/mongoose
+	url = https://github.com/cesanta/mongoose.git
