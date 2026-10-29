@@ -559,7 +559,7 @@ int PAL_CheckObstacleWithRange(
     //
     if (fCheckRange)
     {
-        if (x < blockX || x >= PALMAP_X || y < blockY || y >= PALMAP_Y)
+        if (x < blockX || x >= PALMAP_X - blockX - 1 || y < blockY || y >= PALMAP_Y)
         {
             return true;
         }
