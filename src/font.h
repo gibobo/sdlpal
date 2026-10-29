@@ -1,0 +1,109 @@
+//
+// Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
+// Copyright (c) 2011-2024, SDLPAL development team.
+// All rights reserved.
+//
+// This file is part of SDLPAL.
+//
+// SDLPAL is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License, version 3
+// as published by the Free Software Foundation.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+#ifndef FONT_H
+#define FONT_H
+
+#include <stdint.h>
+
+#define FONT_HEIGHT (16)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    /*++
+  Purpose:
+
+    Initialize the font subsystem.
+
+  Parameters:
+
+    [IN]  cfg - Pointer to the configuration object.
+
+  Return value:
+
+    None.
+
+--*/
+void PAL_InitFont(void);
+
+    /*++
+  Purpose:
+
+    Deinitialize the font subsystem.
+
+  Parameters:
+
+    None.
+
+  Return value:
+
+    None.
+--*/
+void PAL_DeInitFont(void);
+
+    /*++
+  Purpose:
+
+    Draw a Unicode character on a surface.
+
+  Parameters:
+
+    [IN]  codepoint - the unicode character to be drawn.
+
+    [OUT] lpSurface - the destination surface.
+
+    [IN]  pos - the destination location of the surface.
+
+    [IN]  bColor - the color of the character.
+
+  Return value:
+
+    None.
+
+--*/
+void PAL_DrawCharOnSurface(
+    uint16_t codepoint,
+    const uint16_t x,
+    const uint16_t y,
+    const uint8_t bColor,
+    const uint8_t fShadow);
+
+    /*++
+  Purpose:
+
+    Get the text width of a character.
+
+  Parameters:
+
+    [IN]  codepoint - the unicode character for width calculation.
+
+  Return value:
+
+    The width of the character in pixels, 16 for full-width char and 8 for half-width char.
+
+--*/
+uint8_t PAL_CharWidth(uint16_t codepoint);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
