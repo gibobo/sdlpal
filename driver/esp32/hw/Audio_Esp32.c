@@ -6,6 +6,7 @@
 #include "DrvIf_internal.h"
 #include <driver/i2s.h>
 #include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #include <freertos/task.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,9 @@
 static bool audio_running = false;
 static TaskHandle_t audio_task_handle = NULL;
 static void *buffer = NULL;
+// Mutex protects shared audio state (RIX player, sound queue) between the
+// game loop (AUDIO_PlayMusic / AUDIO_PlaySound) and the audio task.
+static SemaphoreHandle_t audio_mutex = NULL;
 
 void audio_callback(void)
 {
@@ -38,8 +42,11 @@ void audio_callback(void)
     // Clear buffer and fill with audio data
     memset(buffer, 0, I2S_DMA_BUF_LEN);
 
-    // Call the audio fill buffer function
+    // Hold mutex only during synthesis; release before i2s_write so the game
+    // loop can update music/sound state while the DMA is transmitting.
+    DRIVER_Audio_Lock();
     AUDIO_FillBuffer(buffer, I2S_DMA_BUF_LEN);
+    DRIVER_Audio_Unlock();
 
     // Write to I2S transmission, wait for transmission completion
     i2s_write(I2S_NUM, (const char *)buffer, I2S_DMA_BUF_LEN, &bytes_written, 0);
@@ -122,6 +129,14 @@ int DRIVER_Init_Audio(void)
         return ESP_FAIL;
     }
 
+    // Create mutex before the audio task can start mixing
+    audio_mutex = xSemaphoreCreateMutex();
+    if (audio_mutex == NULL)
+    {
+        printf("Failed to create audio mutex\n");
+        return ESP_FAIL;
+    }
+
 #if 0
 // Create playback task with higher priority and more stack
     if (xTaskCreatePinnedToCore(audio_task, "audio_task", 8192, NULL, configMAX_PRIORITIES - 2, &audio_task_handle, 1) != pdPASS)
@@ -147,12 +162,30 @@ void DRIVER_DeInit_Audio(void)
         vTaskDelete(audio_task_handle);
         audio_task_handle = NULL;
     }
+
+    if (audio_mutex != NULL)
+    {
+        vSemaphoreDelete(audio_mutex);
+        audio_mutex = NULL;
+    }
 #if defined(CONFIG_SOUND_ENA)
     i2s_driver_uninstall(I2S_NUM);
 #endif
 }
 
-void DRIVER_Audio_Lock(void) {}
+void DRIVER_Audio_Lock(void)
+{
+    if (audio_mutex != NULL)
+    {
+        xSemaphoreTake(audio_mutex, portMAX_DELAY);
+    }
+}
 
-void DRIVER_Audio_Unlock(void) {}
+void DRIVER_Audio_Unlock(void)
+{
+    if (audio_mutex != NULL)
+    {
+        xSemaphoreGive(audio_mutex);
+    }
+}
 #endif /* ARDUINO_ARCH_ESP32 && PAL_ESP32_BACKEND_HW */
