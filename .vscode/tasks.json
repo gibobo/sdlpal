@@ -1,0 +1,165 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ESP web: Compile",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/tools/build-esp32.ps1",
+                "-Backend",
+                "web",
+                "-Fqbn",
+                "${config:esp32.webFqbn}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "ESP web: Compile+Upload",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/tools/build-esp32.ps1",
+                "-Backend",
+                "web",
+                "-Fqbn",
+                "${config:esp32.webFqbn}",
+                "-Upload",
+                "-Port",
+                "${config:esp32.port}"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "ESP hw: Compile",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/tools/build-esp32.ps1",
+                "-Backend",
+                "hw",
+                "-Fqbn",
+                "${config:esp32.hwFqbn}"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "ESP hw: Compile+Upload",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/tools/build-esp32.ps1",
+                "-Backend",
+                "hw",
+                "-Fqbn",
+                "${config:esp32.hwFqbn}",
+                "-Upload",
+                "-Port",
+                "${config:esp32.port}"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "ESP: Monitor",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": [
+                "monitor",
+                "-p",
+                "${config:esp32.port}",
+                "--config",
+                "baudrate=115200"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "ESP: Board list",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": [
+                "board",
+                "list"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "ESP p4: Compile",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/tools/build-p4.ps1"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "ESP p4: Compile+Upload",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/tools/build-p4.ps1",
+                "-Upload",
+                "-Port",
+                "${config:esp32.port}"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "ESP p4: Monitor",
+            "type": "shell",
+            "command": "arduino-cli",
+            "args": [
+                "monitor",
+                "-p",
+                "${config:esp32.port}",
+                "--config",
+                "baudrate=921600"
+            ],
+            "group": "build"
+        }
+    ]
+}
