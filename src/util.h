@@ -83,6 +83,19 @@ void *UTIL_realloc(void *ptr, uint32_t n, uint32_t size);
 
 void UTIL_free(void *ptr);
 
+// Allocate without zeroing, from PSRAM only on the ESP32; returns NULL instead
+// of terminating on failure. For memory that only saves work, such as caches.
+void *UTIL_TryMalloc(uint32_t buffer_size);
+
+// Whether a block from UTIL_malloc lies in plentiful memory (PSRAM on the
+// boards, any memory on the desktop), so it may be kept between calls; a block
+// in a board's internal RAM should be freed after use instead.
+int UTIL_IsPlentiful(const void *ptr);
+
+// Set the function that frees rebuildable memory (caches) when an allocation
+// fails; it returns the number of bytes freed, and the allocation is retried once.
+void UTIL_SetMemoryReleaseHandler(uint32_t (*handler)(void));
+
 // Platform-specific utilities
 uint32_t UTIL_GetMilliseconds(void);
 

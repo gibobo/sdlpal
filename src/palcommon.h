@@ -70,23 +70,53 @@ uint8_t *PAL_SpriteGetFrame(
     const uint8_t *lpSprite,
     int iFrameNum);
 
-uint32_t PAL_MKFGetChunkCount(void *fp);
+// An open MKF archive with its chunk offset table kept in memory, so a chunk
+// takes one seek and one read.
+typedef struct tagPALMKF
+{
+    void *fp;              // the archive file, owned by this handle
+    uint32_t uiChunkCount; // number of chunks
+    uint32_t *rguiOffsets; // uiChunkCount + 1 chunk offsets from the archive header
+} PALMKF;
+
+void PAL_MKFOpen(
+    PALMKF *lpMKF,
+    void *fp);
+
+void PAL_MKFClose(
+    PALMKF *lpMKF);
+
+uint32_t PAL_MKFGetChunkCount(
+    const PALMKF *lpMKF);
 
 uint32_t PAL_MKFGetChunkSize(
     uint32_t uiChunkNum,
-    void *fp);
+    const PALMKF *lpMKF);
 
 uint32_t PAL_MKFReadChunk(
     void *lpBuffer,
     uint32_t uiBufferSize,
     uint32_t uiChunkNum,
-    void *fp);
+    const PALMKF *lpMKF);
+
+uint32_t PAL_MKFPrepareBuffer(
+    uint8_t **lpBuffer,
+    uint32_t uiBufferSize,
+    uint32_t uiSize,
+    uint32_t uiChunkNum);
 
 uint32_t PAL_MKFDecompressChunk(
     uint8_t **lpBuffer,
     uint32_t uiBufferSize,
     uint32_t uiChunkNum,
-    void *fp);
+    const PALMKF *lpMKF);
+
+// RNG archives are MKF archives whose chunks are MKF archives of frames.
+int32_t PAL_RNGReadFrame(
+    uint8_t **lpBuffer,
+    uint32_t uiRngNum,
+    uint32_t uiFrameNum,
+    const PALMKF *lpRngMKF);
 
 // From yj1.c: returns the decompressed length, or -1 if it exceeds DestSize.
 int32_t YJ2_Decompress(

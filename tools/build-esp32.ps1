@@ -1,6 +1,7 @@
 param(
     [ValidateSet('p4', 'web', 'hw')][string]$Backend = 'p4',
     [switch]$Upload,
+    [switch]$Profiling,
     [string]$Port = 'COM3',
     [string]$Fqbn = ''
 )
@@ -61,6 +62,8 @@ $hwFlag = [int]($Backend -eq 'hw')
 $p4Flag = [int]($Backend -eq 'p4')
 $flags = "-DPAL_ESP32_BACKEND_WEB=$webFlag -DPAL_ESP32_BACKEND_HW=$hwFlag -DPAL_ESP32_BACKEND_P4=$p4Flag -DPAL_NO_MAIN=1"
 if ($Backend -ne 'web') { $flags += ' -DOPL3_IRAM_ATTR=' }
+# PALPROF window reports on the UART every 2 s (see src/profile.h).
+if ($Profiling) { $flags += ' -DPAL_PROFILE=1' }
 $cliArgs = @('compile', '--fqbn', $Fqbn, '--build-path', $outputPath,
     '--build-property', "compiler.c.extra_flags=$flags",
     '--build-property', "compiler.cpp.extra_flags=$flags")

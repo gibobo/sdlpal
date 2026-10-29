@@ -5,9 +5,11 @@
 //
 // Environment: PAL_REPLAY_OUT (trace file, required), PAL_REPLAY_WORK_MS (virtual
 // milliseconds of simulated work per present, default 0), PAL_REPLAY_DUMP
-// (comma-separated present indices to save as <trace>.<index>.png).
+// (comma-separated present indices to save as <trace>.<index>.png),
+// PAL_REPLAY_CACHE_BYTES (chunk cache budget, default: the platform's).
 #include "../../../src/driver.h"
 #include "../../../src/global.h"
+#include "../../../src/resource.h"
 #include "../../../src/util.h"
 #include "../../../src/video.h"
 #include "../../../driver/DrvIf_internal.h"
@@ -138,6 +140,7 @@ int DRIVER_Init_Video(void)
 {
     const char *work = getenv("PAL_REPLAY_WORK_MS");
     const char *dumps = getenv("PAL_REPLAY_DUMP");
+    const char *cache = getenv("PAL_REPLAY_CACHE_BYTES");
 
     g_pszTrace = getenv("PAL_REPLAY_OUT");
     if (g_pszTrace == NULL || (g_fpTrace = fopen(g_pszTrace, "w")) == NULL)
@@ -146,6 +149,8 @@ int DRIVER_Init_Video(void)
         exit(2);
     }
     g_dwWorkMs = work != NULL ? (uint32_t)strtoul(work, NULL, 10) : 0;
+    if (cache != NULL)
+        RES_SetChunkCacheBudget((uint32_t)strtoul(cache, NULL, 10));
     while (dumps != NULL && *dumps != '\0' && g_nDumps < MAX_DUMPS)
     {
         char *end;

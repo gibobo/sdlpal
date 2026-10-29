@@ -21,6 +21,7 @@
 #include "util.h"
 #include "input.h"
 #include "main.h"
+#include "profile.h"
 #include <limits.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -217,6 +218,20 @@ void TerminateOnError(
     PAL_Shutdown(255);
 }
 
+#if UTIL_PLATFORM_P4
+// When the last wait ended, so frame reports can skip frames that waited inside.
+static uint32_t g_dwLastWaitEnd;
+#endif
+
+// Record the end of a wait for the measurements.
+static void UTIL_WaitEnded(void)
+{
+#if UTIL_PLATFORM_P4
+    g_dwLastWaitEnd = UTIL_GetMilliseconds();
+#endif
+    PROF_WAIT_END();
+}
+
 void UTIL_DelayUntil(uint32_t dwDeadline)
 /*++
   Purpose:
@@ -236,21 +251,26 @@ void UTIL_DelayUntil(uint32_t dwDeadline)
 
 --*/
 {
-    if ((int32_t)(dwDeadline - UTIL_GetMilliseconds()) <= 0)
+    int late = (int32_t)(dwDeadline - UTIL_GetMilliseconds()) <= 0;
+
+    PROF_WAIT_BEGIN(late);
+    if (late)
     {
 #if defined(ARDUINO_ARCH_ESP32)
         // Let lower-priority tasks run even when the game is behind schedule.
         UTIL_Sleep(1);
 #endif
         PAL_ProcessEvent();
-        return;
     }
-
-    while ((int32_t)(dwDeadline - UTIL_GetMilliseconds()) > 0)
+    else
     {
-        UTIL_Sleep(1);
-        PAL_ProcessEvent();
+        while ((int32_t)(dwDeadline - UTIL_GetMilliseconds()) > 0)
+        {
+            UTIL_Sleep(1);
+            PAL_ProcessEvent();
+        }
     }
+    UTIL_WaitEnded();
 }
 
 uint32_t UTIL_Delay(uint32_t ms)
@@ -296,11 +316,17 @@ void UTIL_TransitionFinish(UTIL_TransitionClock *clock, const char *name)
 void UTIL_FrameDelay(uint32_t start, uint32_t duration)
 {
     uint32_t work = UTIL_GetMilliseconds() - start;
+#if UTIL_PLATFORM_P4
+    // A frame that waited inside, such as one that ran a menu or a battle, is
+    // not a paced frame, so its length is not reported.
+    int paced = (int32_t)(g_dwLastWaitEnd - start) <= 0;
+#endif
 
     // A frame lasts max(duration, work), like the original game's deadline wait.
     UTIL_DelayUntil(start + duration);
 #if UTIL_PLATFORM_P4
-    P4_FrameReport(start, duration, work);
+    if (paced)
+        P4_FrameReport(start, duration, work);
 #else
     (void)work;
 #endif
@@ -348,12 +374,14 @@ uint32_t UTIL_WaitKeys(uint32_t ms, uint32_t wait_keys)
 
     PALKEY pressed_key = kKeyNone;
     uint32_t end_time = UTIL_GetMilliseconds() + ms;
+    PROF_WAIT_BEGIN(0);
     while ((ms == 0 || (int32_t)(end_time - UTIL_GetMilliseconds()) > 0) && (pressed_key == kKeyNone))
     {
         UTIL_Sleep(1);
         PAL_ProcessEvent();
         pressed_key |= (PAL_GetKeyInput() & wait_keys);
     }
+    UTIL_WaitEnded();
 
     return pressed_key;
 }

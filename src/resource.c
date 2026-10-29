@@ -1,6 +1,6 @@
 #include "resource.h"
 #include "palcommon.h"
-#include "rngplay.h"
+#include "profile.h"
 #include "util.h"
 #include <stdio.h>
 #include <string.h>
@@ -46,24 +46,25 @@ static uint32_t resource_offsets[Res_Count + 1] = {0};
    or uninitialized-data issues across builds. */
 static ResourceIndex g_CachedResourceIndex[Res_Count] = {0};
 #else
-static FILE *g_ResourceFileHandles[Res_Count] = {0};
+static PALMKF g_ResourceArchives[Res_Count] = {0};
 #endif
 
 #ifdef USING_RESOURCE_CACHE
 static void PAL_ExtractAndDecompressMKFChunks(PALRES res)
 {
-    FILE *fp = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
+    PALMKF mkf;
     FILE *fpRes = UTIL_fopen(UTIL_Filename("%s/res_%d.bin", CACHES_PATH, (uint32_t)res), "wb");
     FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/res_%d.dat", CACHES_PATH, (uint32_t)res), "wb");
+    PAL_MKFOpen(&mkf, UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb"));
     uint32_t index = 0;
     uint32_t offset = 0;
     uint32_t frame_num = 1;
-    uint32_t uiChunkCount = PAL_MKFGetChunkCount(fp);
+    uint32_t uiChunkCount = PAL_MKFGetChunkCount(&mkf);
     fwrite(&uiChunkCount, sizeof(uiChunkCount), 1, fpInfo);
     for (index = 0; index < uiChunkCount; index++)
     {
         uint8_t *buffer = NULL;
-        uint32_t len = PAL_MKFDecompressChunk(&buffer, 0, index, fp);
+        uint32_t len = PAL_MKFDecompressChunk(&buffer, 0, index, &mkf);
         if (len < 0)
         {
             break;
@@ -78,26 +79,27 @@ static void PAL_ExtractAndDecompressMKFChunks(PALRES res)
         offset += res_len;
         UTIL_free(buffer);
     }
-    UTIL_fclose(fp);
+    PAL_MKFClose(&mkf);
     UTIL_fclose(fpRes);
     UTIL_fclose(fpInfo);
 }
 
 static void PAL_ExtractRawMKFChunks(PALRES res)
 {
-    FILE *fp = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
+    PALMKF mkf;
     FILE *fpRes = UTIL_fopen(UTIL_Filename("%s/res_%d.bin", CACHES_PATH, (uint32_t)res), "wb");
     FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/res_%d.dat", CACHES_PATH, (uint32_t)res), "wb");
+    PAL_MKFOpen(&mkf, UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb"));
     uint32_t index = 0;
     uint32_t offset = 0;
     uint32_t frame_num = 1;
-    uint32_t uiChunkCount = PAL_MKFGetChunkCount(fp);
+    uint32_t uiChunkCount = PAL_MKFGetChunkCount(&mkf);
     fwrite(&uiChunkCount, sizeof(uiChunkCount), 1, fpInfo);
     for (index = 0; index < uiChunkCount; index++)
     {
         char buffer[1024 * 480]; // 480KB buffer
         memset(buffer, 0, sizeof(buffer));
-        int32_t len = PAL_MKFReadChunk(buffer, sizeof(buffer), index, fp);
+        int32_t len = PAL_MKFReadChunk(buffer, sizeof(buffer), index, &mkf);
         if (len < 0)
         {
             break;
@@ -110,20 +112,21 @@ static void PAL_ExtractRawMKFChunks(PALRES res)
         fwrite(&res_len, sizeof(uint32_t), 1, fpInfo);
         offset += res_len;
     }
-    UTIL_fclose(fp);
+    PAL_MKFClose(&mkf);
     UTIL_fclose(fpRes);
     UTIL_fclose(fpInfo);
 }
 
 static void PAL_ExtractRNGAnimationFrames(PALRES res)
 {
-    FILE *fp = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
+    PALMKF mkf;
     FILE *fpRes = UTIL_fopen(UTIL_Filename("%s/res_%d.bin", CACHES_PATH, (uint32_t)res), "wb");
     FILE *fpInfo = UTIL_fopen(UTIL_Filename("%s/res_%d.dat", CACHES_PATH, (uint32_t)res), "wb");
+    PAL_MKFOpen(&mkf, UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb"));
     uint32_t index = 0;
     uint32_t offset = 0;
     uint32_t frame_num = 0;
-    uint32_t uiChunkCount = PAL_MKFGetChunkCount(fp);
+    uint32_t uiChunkCount = PAL_MKFGetChunkCount(&mkf);
     fwrite(&uiChunkCount, sizeof(uiChunkCount), 1, fpInfo);
     for (index = 0; index < uiChunkCount; index++)
     {
@@ -133,7 +136,7 @@ static void PAL_ExtractRNGAnimationFrames(PALRES res)
         while (1)
         {
             uint8_t *buf = NULL;
-            int32_t buf_size = PAL_RNGReadFrame(&buf, index, frame_num++, fp);
+            int32_t buf_size = PAL_RNGReadFrame(&buf, index, frame_num++, &mkf);
             if (buf_size <= 0)
             {
                 UTIL_free(buf);
@@ -155,9 +158,155 @@ static void PAL_ExtractRNGAnimationFrames(PALRES res)
         fwrite(&frame_num, sizeof(uint32_t), 1, fpInfo);
         fseek(fpInfo, curr_pos, SEEK_SET);
     }
-    UTIL_fclose(fp);
+    PAL_MKFClose(&mkf);
     UTIL_fclose(fpRes);
     UTIL_fclose(fpInfo);
+}
+#endif
+
+#ifndef USING_RESOURCE_CACHE
+// Chunk cache: repeated reads (sound effects, item pictures, portraits, sprites)
+// are copied from memory instead of read and decompressed again. Callers modify
+// what they read, so a hit copies the cached contents into the caller's buffer.
+// Every lookup reorders the cache, so RES_* may only be called from the game
+// thread; the audio threads read the music through their own files.
+#ifndef PAL_CHUNK_CACHE_BYTES
+#if UTIL_PLATFORM_P4 || !defined(ARDUINO_ARCH_ESP32)
+#define PAL_CHUNK_CACHE_BYTES (8u * 1024 * 1024)
+#else
+#define PAL_CHUNK_CACHE_BYTES (512u * 1024)
+#endif
+#endif
+
+typedef struct tagCHUNKCACHEENTRY
+{
+    struct tagCHUNKCACHEENTRY *prev; // the more recently used entry
+    struct tagCHUNKCACHEENTRY *next; // the less recently used entry
+    uint32_t chunk;
+    uint32_t size;        // size of the contents, which follow this header
+    uint8_t resource;
+    uint8_t decompressed; // the decompressed contents rather than the raw chunk
+} CHUNKCACHEENTRY;
+
+// Archives worth caching. The music is read by the audio thread, the RNG
+// movies play once, and DATA, SSS and PAT are read at start or rarely.
+static const uint8_t g_rgChunkCacheable[Res_Count] = {
+    [Res_ABC] = 1, [Res_BALL] = 1, [Res_F] = 1,   [Res_FBP] = 1, [Res_FIRE] = 1,
+    [Res_GOP] = 1, [Res_MAP] = 1,  [Res_MGO] = 1, [Res_RGM] = 1, [Res_SOUNDS] = 1,
+};
+
+static CHUNKCACHEENTRY *g_pChunkCacheHead = NULL; // most recently used
+static CHUNKCACHEENTRY *g_pChunkCacheTail = NULL; // least recently used
+static uint32_t g_dwChunkCacheUsed = 0;
+static uint32_t g_dwChunkCacheBudget = PAL_CHUNK_CACHE_BYTES;
+
+// The cached contents of an entry.
+static uint8_t *ChunkCacheData(CHUNKCACHEENTRY *entry)
+{
+    return (uint8_t *)(entry + 1);
+}
+
+// Remove an entry from the recently-used list.
+static void ChunkCacheUnlink(CHUNKCACHEENTRY *entry)
+{
+    if (entry->prev != NULL)
+        entry->prev->next = entry->next;
+    else
+        g_pChunkCacheHead = entry->next;
+    if (entry->next != NULL)
+        entry->next->prev = entry->prev;
+    else
+        g_pChunkCacheTail = entry->prev;
+}
+
+// Put an entry at the front of the recently-used list.
+static void ChunkCachePushFront(CHUNKCACHEENTRY *entry)
+{
+    entry->prev = NULL;
+    entry->next = g_pChunkCacheHead;
+    if (g_pChunkCacheHead != NULL)
+        g_pChunkCacheHead->prev = entry;
+    else
+        g_pChunkCacheTail = entry;
+    g_pChunkCacheHead = entry;
+}
+
+// Free the least recently used entries until at most limit bytes are cached;
+// returns the number of bytes freed.
+static uint32_t ChunkCacheTrim(uint32_t limit)
+{
+    uint32_t freed = 0;
+
+    while (g_pChunkCacheTail != NULL && g_dwChunkCacheUsed > limit)
+    {
+        CHUNKCACHEENTRY *entry = g_pChunkCacheTail;
+        uint32_t bytes = (uint32_t)sizeof(CHUNKCACHEENTRY) + entry->size;
+        ChunkCacheUnlink(entry);
+        g_dwChunkCacheUsed -= bytes;
+        freed += bytes;
+        UTIL_free(entry);
+    }
+    return freed;
+}
+
+// Free the whole cache; runs when an allocation fails.
+static uint32_t ChunkCacheRelease(void)
+{
+    return ChunkCacheTrim(0);
+}
+
+// Find cached contents and mark them most recently used.
+static CHUNKCACHEENTRY *ChunkCacheFind(uint8_t resource, uint32_t chunk, uint8_t decompressed)
+{
+    CHUNKCACHEENTRY *entry;
+
+    for (entry = g_pChunkCacheHead; entry != NULL; entry = entry->next)
+    {
+        if (entry->resource == resource && entry->chunk == chunk && entry->decompressed == decompressed)
+        {
+            ChunkCacheUnlink(entry);
+            ChunkCachePushFront(entry);
+            return entry;
+        }
+    }
+    return NULL;
+}
+
+// Keep a copy of chunk contents, making room by dropping the least recently used.
+static void ChunkCacheStore(uint8_t resource, uint32_t chunk, uint8_t decompressed, const void *data, uint32_t size)
+{
+    uint32_t bytes = (uint32_t)sizeof(CHUNKCACHEENTRY) + size;
+    CHUNKCACHEENTRY *entry;
+
+    // Skip archives not worth caching, and contents that would crowd out the rest.
+    if (!g_rgChunkCacheable[resource] || bytes > g_dwChunkCacheBudget / 4)
+        return;
+
+    ChunkCacheTrim(g_dwChunkCacheBudget - bytes);
+    entry = (CHUNKCACHEENTRY *)UTIL_TryMalloc(bytes);
+    if (entry == NULL)
+        return;
+
+    entry->chunk = chunk;
+    entry->size = size;
+    entry->resource = resource;
+    entry->decompressed = decompressed;
+    memcpy(ChunkCacheData(entry), data, size);
+    ChunkCachePushFront(entry);
+    g_dwChunkCacheUsed += bytes;
+}
+
+void RES_SetChunkCacheBudget(
+    uint32_t budget)
+{
+    g_dwChunkCacheBudget = budget;
+    ChunkCacheTrim(budget);
+}
+#else
+void RES_SetChunkCacheBudget(
+    uint32_t budget)
+{
+    (void)budget;
 }
 #endif
 
@@ -340,10 +489,15 @@ int PAL_LoadConsolidatedResources(void)
 
     UTIL_free(buffer_u32);
 #else
+    // Keep each archive's chunk offset table in memory: a chunk is then one seek and one read.
     for (PALRES res = 0; res < Res_Count; res++)
     {
-        g_ResourceFileHandles[res] = UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb");
+        PAL_MKFOpen(&g_ResourceArchives[res],
+                    UTIL_fopen(UTIL_Filename("%s/%s", RESOURCE_PATH, g_ResourceFilePaths[res]), "rb"));
     }
+
+    // Give the cached chunks back when memory runs out.
+    UTIL_SetMemoryReleaseHandler(ChunkCacheRelease);
 #endif
     return 0; // Success
 }
@@ -366,12 +520,10 @@ void PAL_FreeResourceIndex(void)
 #else
     for (PALRES res = 0; res < Res_Count; res++)
     {
-        if (g_ResourceFileHandles[res] != NULL)
-        {
-            UTIL_fclose(g_ResourceFileHandles[res]);
-            g_ResourceFileHandles[res] = NULL;
-        }
+        PAL_MKFClose(&g_ResourceArchives[res]);
     }
+    UTIL_SetMemoryReleaseHandler(NULL);
+    ChunkCacheRelease();
 #endif
 }
 
@@ -383,7 +535,7 @@ uint32_t RES_MKFGetChunkCount(
 #ifdef USING_RESOURCE_CACHE
     return g_CachedResourceIndex[resource_id].chunk_count;
 #else
-    return PAL_MKFGetChunkCount(g_ResourceFileHandles[resource_id]);
+    return PAL_MKFGetChunkCount(&g_ResourceArchives[resource_id]);
 #endif
 }
 
@@ -397,9 +549,9 @@ uint32_t RES_MKFGetChunkSize(
 
     return g_CachedResourceIndex[resource_id].resource_file_info[chunk_index][0].data_length;
 #else
-    if (resource_id >= Res_Count || g_ResourceFileHandles[resource_id] == NULL)
+    if (resource_id >= Res_Count)
         return 0;
-    return PAL_MKFGetChunkSize(chunk_index, g_ResourceFileHandles[resource_id]);
+    return PAL_MKFGetChunkSize(chunk_index, &g_ResourceArchives[resource_id]);
 #endif
 }
 
@@ -449,11 +601,11 @@ int RES_RNGReadFrame(
 
     return data_length;
 #else
-    if (resource_id >= Res_Count || g_ResourceFileHandles[resource_id] == NULL)
+    if (resource_id >= Res_Count)
         return 0;
 
     uint8_t *buf = NULL;
-    int32_t buf_size = PAL_RNGReadFrame(&buf, animation_index, frame_index, g_ResourceFileHandles[resource_id]);
+    int32_t buf_size = PAL_RNGReadFrame(&buf, animation_index, frame_index, &g_ResourceArchives[resource_id]);
     if (buf_size < 0 || buf == NULL)
         return 0;
 
@@ -505,13 +657,37 @@ uint32_t RES_MKFDecompressChunk(
         chunk_index,
         resource_id);
 #else
-    if (resource_id >= Res_Count || g_ResourceFileHandles[resource_id] == NULL)
+    CHUNKCACHEENTRY *entry;
+    uint32_t size;
+
+    if (resource_id >= Res_Count)
         return 0;
-    return PAL_MKFDecompressChunk(
+
+    // Copy the cached contents when present. Preparing the buffer may allocate,
+    // and a failed allocation empties the cache, so look the entry up again.
+    entry = ChunkCacheFind(resource_id, chunk_index, 1);
+    if (entry != NULL)
+    {
+        size = entry->size;
+        buffer_size = PAL_MKFPrepareBuffer((uint8_t **)chunk_buffer, buffer_size, size, chunk_index);
+        entry = ChunkCacheFind(resource_id, chunk_index, 1);
+        if (entry != NULL)
+        {
+            PROF_COUNT(PROF_CHUNK_CACHE_HIT, 1);
+            memcpy(*chunk_buffer, ChunkCacheData(entry), size);
+            return size;
+        }
+    }
+
+    // Decompress the chunk and keep a copy.
+    size = PAL_MKFDecompressChunk(
         (uint8_t **)chunk_buffer,
         buffer_size,
         chunk_index,
-        g_ResourceFileHandles[resource_id]);
+        &g_ResourceArchives[resource_id]);
+    if (size != 0)
+        ChunkCacheStore(resource_id, chunk_index, 1, *chunk_buffer, size);
+    return size;
 #endif
 }
 
@@ -542,13 +718,32 @@ uint32_t RES_MKFReadChunk(
 
     return data_length;
 #else
-    if (resource_id >= Res_Count || g_ResourceFileHandles[resource_id] == NULL)
+    CHUNKCACHEENTRY *entry;
+    uint32_t len;
+
+    if (resource_id >= Res_Count || chunk_buffer == NULL || buffer_size == 0)
         return 0;
-    return PAL_MKFReadChunk(
+
+    // Copy the cached contents when present.
+    entry = ChunkCacheFind(resource_id, chunk_index, 0);
+    if (entry != NULL)
+    {
+        if (entry->size > buffer_size)
+            return 0;
+        PROF_COUNT(PROF_CHUNK_CACHE_HIT, 1);
+        memcpy(chunk_buffer, ChunkCacheData(entry), entry->size);
+        return entry->size;
+    }
+
+    // Read the chunk and keep a copy when it was read whole.
+    len = PAL_MKFReadChunk(
         chunk_buffer,
         buffer_size,
         chunk_index,
-        g_ResourceFileHandles[resource_id]);
+        &g_ResourceArchives[resource_id]);
+    if (len != 0 && len == PAL_MKFGetChunkSize(chunk_index, &g_ResourceArchives[resource_id]))
+        ChunkCacheStore(resource_id, chunk_index, 0, chunk_buffer, len);
+    return len;
 #endif
 }
 

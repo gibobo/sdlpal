@@ -66,15 +66,23 @@ static FILE *OpenData(const char *name)
     return fp;
 }
 
+// Open a game data archive with the development MKF reader.
+static PALMKF OpenArchive(const char *name)
+{
+    PALMKF mkf;
+    PAL_MKFOpen(&mkf, OpenData(name));
+    return mkf;
+}
+
 // Read a raw chunk with SPRITE_PADDING zero bytes appended; NULL for empty chunks.
-static uint8_t *ReadRawChunk(FILE *fp, uint32_t chunk, uint32_t *len)
+static uint8_t *ReadRawChunk(const PALMKF *mkf, uint32_t chunk, uint32_t *len)
 {
     uint8_t *buf;
-    *len = PAL_MKFGetChunkSize(chunk, fp);
+    *len = PAL_MKFGetChunkSize(chunk, mkf);
     if (*len == 0)
         return NULL;
     buf = (uint8_t *)calloc(1, *len + SPRITE_PADDING);
-    PAL_MKFReadChunk(buf, *len, chunk, fp);
+    PAL_MKFReadChunk(buf, *len, chunk, mkf);
     return buf;
 }
 
@@ -134,6 +142,114 @@ static void CompareYJ2Stream(Tally *tally, const uint8_t *src, const char *what,
     free(ref);
 }
 
+// Read every chunk of every archive with the development reader, which keeps the
+// offset table in memory, and with the upstream reader, which reads it from the
+// file each time; then read every RNG frame and compare it with the frame taken
+// from the animation chunk.
+static int TestMKFRead(void)
+{
+    static const char *files[] = {"abc.mkf",  "ball.mkf", "data.mkf", "f.mkf",   "fbp.mkf",
+                                  "fire.mkf", "gop.mkf",  "map.mkf",  "mgo.mkf", "mus.mkf",
+                                  "pat.mkf",  "rgm.mkf",  "rng.mkf",  "sounds.mkf", "sss.mkf"};
+    Tally tally = {"mkf_read", 0, 0};
+    uint8_t probe[4];
+    size_t f;
+
+    for (f = 0; f < sizeof(files) / sizeof(files[0]); f++)
+    {
+        PALMKF mkf = OpenArchive(files[f]);
+        FILE *fp = OpenData(files[f]);
+        int count = master_PAL_MKFGetChunkCount(fp);
+        uint32_t chunk;
+
+        tally.cases++;
+        if ((int)PAL_MKFGetChunkCount(&mkf) != count)
+            Fail(&tally, "%s: %u chunks, upstream counts %d", files[f], PAL_MKFGetChunkCount(&mkf), count);
+        for (chunk = 0; chunk < (uint32_t)count; chunk++)
+        {
+            int size = master_PAL_MKFGetChunkSize(chunk, fp);
+            uint32_t len = PAL_MKFGetChunkSize(chunk, &mkf);
+            uint8_t *ref, *buf;
+            int refLen;
+            uint32_t got;
+
+            tally.cases++;
+            if (size < 0 ? len != 0 : len != (uint32_t)size)
+            {
+                Fail(&tally, "%s %u: size %u, upstream %d", files[f], chunk, len, size);
+                continue;
+            }
+            if (len == 0)
+                continue;
+            ref = (uint8_t *)malloc(len);
+            buf = (uint8_t *)malloc(len);
+            refLen = master_PAL_MKFReadChunk(ref, len, chunk, fp);
+            got = PAL_MKFReadChunk(buf, len, chunk, &mkf);
+            if (refLen != (int)len || got != len || memcmp(ref, buf, len) != 0)
+                Fail(&tally, "%s %u: read %u bytes, upstream %d, or the bytes differ", files[f], chunk, got, refLen);
+            if (len > 1 && PAL_MKFReadChunk(buf, len - 1, chunk, &mkf) != 0)
+                Fail(&tally, "%s %u: read into a buffer that is too small", files[f], chunk);
+            free(ref);
+            free(buf);
+        }
+
+        // Past the last chunk there is nothing to read.
+        tally.cases++;
+        if (PAL_MKFGetChunkSize((uint32_t)count, &mkf) != 0 || PAL_MKFReadChunk(probe, sizeof(probe), (uint32_t)count, &mkf) != 0)
+            Fail(&tally, "%s: chunk %d past the end is not empty", files[f], count);
+        fclose(fp);
+        PAL_MKFClose(&mkf);
+    }
+
+    // Every frame of every RNG animation, and one past the last frame.
+    {
+        PALMKF mkf = OpenArchive("rng.mkf");
+        FILE *fp = OpenData("rng.mkf");
+        int count = master_PAL_MKFGetChunkCount(fp), movie;
+
+        for (movie = 0; movie < count; movie++)
+        {
+            int size = master_PAL_MKFGetChunkSize((unsigned int)movie, fp);
+            uint8_t *animation, *buf = NULL;
+            uint32_t frames, frame;
+
+            if (size <= 0)
+            {
+                tally.cases++;
+                if (PAL_RNGReadFrame(&buf, (uint32_t)movie, 0, &mkf) != -3)
+                    Fail(&tally, "rng %d: an empty animation has frames", movie);
+                continue;
+            }
+            animation = (uint8_t *)malloc((size_t)size);
+            master_PAL_MKFReadChunk(animation, (unsigned int)size, (unsigned int)movie, fp);
+            frames = ReadLE32(animation) / 4 - 1;
+            for (frame = 0; frame <= frames; frame++)
+            {
+                int32_t got = PAL_RNGReadFrame(&buf, (uint32_t)movie, frame, &mkf);
+                tally.cases++;
+                if (frame == frames)
+                {
+                    if (got != -4)
+                        Fail(&tally, "rng %d: frame %u past the end returned %d", movie, frame, got);
+                }
+                else
+                {
+                    uint32_t start = ReadLE32(animation + 4 * frame);
+                    uint32_t len = ReadLE32(animation + 4 * frame + 4) - start;
+                    if (got != (int32_t)len || (len != 0 && memcmp(buf, animation + start, len) != 0))
+                        Fail(&tally, "rng %d frame %u: read %d bytes, expected %u", movie, frame, got, len);
+                }
+            }
+            UTIL_free(buf);
+            free(animation);
+        }
+        fclose(fp);
+        PAL_MKFClose(&mkf);
+    }
+    return Report(&tally);
+}
+
+
 // YJ2 decompression of every compressed MKF chunk and every RNG frame.
 static int TestYJ2Chunks(void)
 {
@@ -143,13 +259,13 @@ static int TestYJ2Chunks(void)
 
     for (f = 0; f < sizeof(files) / sizeof(files[0]); f++)
     {
-        FILE *fp = OpenData(files[f]);
-        uint32_t count = PAL_MKFGetChunkCount(fp);
+        PALMKF mkf = OpenArchive(files[f]);
+        uint32_t count = PAL_MKFGetChunkCount(&mkf);
         uint32_t chunk;
         for (chunk = 0; chunk < count; chunk++)
         {
             uint32_t len, size;
-            uint8_t *raw = ReadRawChunk(fp, chunk, &len);
+            uint8_t *raw = ReadRawChunk(&mkf, chunk, &len);
             uint8_t *buf = NULL;
             uint8_t *ref;
             uint32_t ret;
@@ -159,7 +275,7 @@ static int TestYJ2Chunks(void)
 
             // Check the chunk API end to end: upstream returns the decompressed size.
             ref = MasterDecompress(raw, &size);
-            ret = PAL_MKFDecompressChunk(&buf, 0, chunk, fp);
+            ret = PAL_MKFDecompressChunk(&buf, 0, chunk, &mkf);
             tally.cases++;
             if (ref == NULL || buf == NULL || memcmp(buf, ref, size) != 0)
                 Fail(&tally, "%s %u: PAL_MKFDecompressChunk output differs", files[f], chunk);
@@ -170,18 +286,18 @@ static int TestYJ2Chunks(void)
             free(ref);
             free(raw);
         }
-        fclose(fp);
+        PAL_MKFClose(&mkf);
     }
 
     // Decompress every frame of every RNG movie.
     {
-        FILE *fp = OpenData("rng.mkf");
-        uint32_t count = PAL_MKFGetChunkCount(fp);
+        PALMKF mkf = OpenArchive("rng.mkf");
+        uint32_t count = PAL_MKFGetChunkCount(&mkf);
         uint32_t movie;
         for (movie = 0; movie < count; movie++)
         {
             uint32_t len, frames, frame;
-            uint8_t *raw = ReadRawChunk(fp, movie, &len);
+            uint8_t *raw = ReadRawChunk(&mkf, movie, &len);
             if (raw == NULL)
                 continue;
             frames = (ReadLE32(raw) >> 2) - 1;
@@ -194,7 +310,7 @@ static int TestYJ2Chunks(void)
             }
             free(raw);
         }
-        fclose(fp);
+        PAL_MKFClose(&mkf);
     }
 
     return Report(&tally);
@@ -325,12 +441,12 @@ static int TestRLEBlits(void)
     // Compressed sprite sheets.
     for (f = 0; f < sizeof(compressed) / sizeof(compressed[0]); f++)
     {
-        FILE *fp = OpenData(compressed[f]);
-        uint32_t count = PAL_MKFGetChunkCount(fp), chunk;
+        PALMKF mkf = OpenArchive(compressed[f]);
+        uint32_t count = PAL_MKFGetChunkCount(&mkf), chunk;
         for (chunk = 0; chunk < count; chunk++)
         {
             uint32_t len, size;
-            uint8_t *raw = ReadRawChunk(fp, chunk, &len);
+            uint8_t *raw = ReadRawChunk(&mkf, chunk, &len);
             uint8_t *sheet;
             if (raw == NULL)
                 continue;
@@ -340,32 +456,32 @@ static int TestRLEBlits(void)
             free(sheet);
             free(raw);
         }
-        fclose(fp);
+        PAL_MKFClose(&mkf);
     }
 
     // Raw sprite sheets: map tiles (every 8th tile set) and the UI sprites.
     {
-        FILE *fp = OpenData("gop.mkf");
-        uint32_t count = PAL_MKFGetChunkCount(fp), chunk;
+        PALMKF mkf = OpenArchive("gop.mkf");
+        uint32_t count = PAL_MKFGetChunkCount(&mkf), chunk;
         for (chunk = 0; chunk < count; chunk += 8)
         {
             uint32_t len;
-            uint8_t *raw = ReadRawChunk(fp, chunk, &len);
+            uint8_t *raw = ReadRawChunk(&mkf, chunk, &len);
             if (raw != NULL)
                 BlitSheet(&tally, raw, len, "gop.mkf", chunk);
             free(raw);
         }
-        fclose(fp);
+        PAL_MKFClose(&mkf);
 
-        fp = OpenData("data.mkf");
+        mkf = OpenArchive("data.mkf");
         {
             uint32_t len;
-            uint8_t *raw = ReadRawChunk(fp, 9, &len);
+            uint8_t *raw = ReadRawChunk(&mkf, 9, &len);
             if (raw != NULL)
                 BlitSheet(&tally, raw, len, "data.mkf", 9);
             free(raw);
         }
-        fclose(fp);
+        PAL_MKFClose(&mkf);
     }
 
     // Single raw bitmaps: item images and faces.
@@ -373,28 +489,28 @@ static int TestRLEBlits(void)
         static const char *single[] = {"ball.mkf", "rgm.mkf"};
         for (f = 0; f < sizeof(single) / sizeof(single[0]); f++)
         {
-            FILE *fp = OpenData(single[f]);
-            uint32_t count = PAL_MKFGetChunkCount(fp), chunk;
+            PALMKF mkf = OpenArchive(single[f]);
+            uint32_t count = PAL_MKFGetChunkCount(&mkf), chunk;
             for (chunk = 0; chunk < count; chunk++)
             {
                 uint32_t len;
-                uint8_t *raw = ReadRawChunk(fp, chunk, &len);
+                uint8_t *raw = ReadRawChunk(&mkf, chunk, &len);
                 if (raw != NULL)
                     BlitAllPositions(&tally, raw, single[f], chunk);
                 free(raw);
             }
-            fclose(fp);
+            PAL_MKFClose(&mkf);
         }
     }
 
     // Full-screen backgrounds.
     {
-        FILE *fp = OpenData("fbp.mkf");
-        uint32_t count = PAL_MKFGetChunkCount(fp), chunk;
+        PALMKF mkf = OpenArchive("fbp.mkf");
+        uint32_t count = PAL_MKFGetChunkCount(&mkf), chunk;
         for (chunk = 0; chunk < count; chunk++)
         {
             uint32_t len, size;
-            uint8_t *raw = ReadRawChunk(fp, chunk, &len);
+            uint8_t *raw = ReadRawChunk(&mkf, chunk, &len);
             uint8_t *fbp;
             int m, d;
             if (raw == NULL)
@@ -414,7 +530,7 @@ static int TestRLEBlits(void)
             free(fbp);
             free(raw);
         }
-        fclose(fp);
+        PAL_MKFClose(&mkf);
     }
 
     return Report(&tally);
@@ -535,21 +651,21 @@ static int TestRNGStream(void)
 // Load the object, magic and battlefield tables used by the damage formulas.
 static void LoadDamageData(void)
 {
-    FILE *sss = OpenData("sss.mkf");
-    FILE *data = OpenData("data.mkf");
+    PALMKF sss = OpenArchive("sss.mkf");
+    PALMKF data = OpenArchive("data.mkf");
     uint32_t len;
     uint8_t *raw;
 
     gpGlobals = (GLOBALVARS *)calloc(1, sizeof(GLOBALVARS));
-    raw = ReadRawChunk(sss, 2, &len);
+    raw = ReadRawChunk(&sss, 2, &len);
     memcpy(gpGlobals->g.rgObject, raw, len < sizeof(gpGlobals->g.rgObject) ? len : sizeof(gpGlobals->g.rgObject));
     free(raw);
-    gpGlobals->g.lprgMagic = (MAGIC *)ReadRawChunk(data, 4, &len);
+    gpGlobals->g.lprgMagic = (MAGIC *)ReadRawChunk(&data, 4, &len);
     gpGlobals->g.nMagic = (int32_t)(len / sizeof(MAGIC));
-    gpGlobals->g.lprgBattleField = (BATTLEFIELD *)ReadRawChunk(data, 5, &len);
+    gpGlobals->g.lprgBattleField = (BATTLEFIELD *)ReadRawChunk(&data, 5, &len);
     gpGlobals->g.nBattleField = (int32_t)(len / sizeof(BATTLEFIELD));
-    fclose(sss);
-    fclose(data);
+    PAL_MKFClose(&sss);
+    PAL_MKFClose(&data);
 }
 
 // Base, physical and magic damage formulas over the game's value ranges.
@@ -653,13 +769,13 @@ static int TestDamage(void)
 static int TestRNGBlit(void)
 {
     Tally tally = {"rng_blit", 0, 0};
-    FILE *fp = OpenData("rng.mkf");
-    uint32_t count = PAL_MKFGetChunkCount(fp), movie;
+    PALMKF mkf = OpenArchive("rng.mkf");
+    uint32_t count = PAL_MKFGetChunkCount(&mkf), movie;
 
     for (movie = 0; movie < count; movie++)
     {
         uint32_t len, frames, frame;
-        uint8_t *raw = ReadRawChunk(fp, movie, &len);
+        uint8_t *raw = ReadRawChunk(&mkf, movie, &len);
         if (raw == NULL)
             continue;
         memset(g_masterPixels, 0, SCREEN_SIZE);
@@ -688,7 +804,7 @@ static int TestRNGBlit(void)
         }
         free(raw);
     }
-    fclose(fp);
+    PAL_MKFClose(&mkf);
     return Report(&tally);
 }
 
@@ -701,6 +817,7 @@ typedef struct TestEntry
 static const TestEntry g_tests[] = {
     {"yj2_chunks", TestYJ2Chunks}, {"rle_blits", TestRLEBlits}, {"xy_offset", TestXYOffset},
     {"rng_stream", TestRNGStream}, {"damage", TestDamage},       {"rng_blit", TestRNGBlit},
+    {"mkf_read", TestMKFRead},
 };
 
 // Run the named test, or all of them.

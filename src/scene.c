@@ -27,6 +27,7 @@
 #include "map.h"
 #include "palcommon.h"
 #include "palette.h"
+#include "profile.h"
 #include "res.h"
 #include "util.h"
 #include "video.h"
@@ -476,6 +477,7 @@ void PAL_MakeScene(
 --*/
 {
     static VIDEO_Rect rect = {0, 0, SCREEN_W, SCREEN_H};
+    PROF_BEGIN(scene);
 
     //
     // Step 1: Draw the complete map, for both of the layers.
@@ -495,6 +497,8 @@ void PAL_MakeScene(
     // Step 3: Draw all the sprites.
     //
     PAL_SceneDrawSprites();
+
+    PROF_END(scene, PROF_TIME_SCENE);
 
     //
     // Check if we need to fade in.

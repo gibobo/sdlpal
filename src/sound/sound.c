@@ -22,6 +22,7 @@
 #include "../driver.h"
 #include "../global.h"
 #include "../palcommon.h"
+#include "../profile.h"
 #include "../resource.h"
 #include "../util.h"
 #include "resampler.h"
@@ -637,7 +638,9 @@ static int SOUND_Play(
         return false;
     }
 
+    PROF_BEGIN(lock);
     DRIVER_Audio_Lock();
+    PROF_END(lock, PROF_TIME_SOUND_LOCK);
 
     cursnd = &player->soundlist;
     int32_t queue_depth = 0;

@@ -1,6 +1,6 @@
 # Run one replay scenario and compare its trace with the baseline. With
 # PAL_REPLAY_RECORD=1 in the environment the trace replaces the baseline instead.
-# Inputs: PALREPLAY REPLAYCMP SCRIPT BASELINE OUT WORK_MS DATA_DIR [SAVE_SLOT SAVE_SOURCE]
+# Inputs: PALREPLAY REPLAYCMP SCRIPT BASELINE OUT WORK_MS DATA_DIR [SAVE_SLOT SAVE_SOURCE] [CACHE_BYTES]
 
 # Start every run from the same saved games.
 foreach(slot 1 2 3 4 5)
@@ -10,10 +10,14 @@ if(DEFINED SAVE_SLOT)
     configure_file("${SAVE_SOURCE}" "${DATA_DIR}/${SAVE_SLOT}.rpg" COPYONLY)
 endif()
 
-# Play the scenario headless.
+# Play the scenario headless, optionally with a different chunk cache budget.
+set(cache_env "")
+if(DEFINED CACHE_BYTES)
+    set(cache_env PAL_REPLAY_CACHE_BYTES=${CACHE_BYTES})
+endif()
 execute_process(
     COMMAND ${CMAKE_COMMAND} -E env PAL_REPLAY_SCRIPT=${SCRIPT} PAL_REPLAY_OUT=${OUT} PAL_REPLAY_WORK_MS=${WORK_MS}
-        ${PALREPLAY}
+        ${cache_env} ${PALREPLAY}
     RESULT_VARIABLE run_result
     OUTPUT_VARIABLE run_log
     ERROR_VARIABLE run_log)

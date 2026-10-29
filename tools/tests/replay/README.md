@@ -68,3 +68,16 @@ build/palreplay.exe
 
 The replays use a private copy of the game data under the build directory and
 reset the save slots before each run, so scenarios never touch `Pal98rqptw/`.
+
+## Measuring
+
+`palreplay` is built with `PAL_PROFILE` (see `src/profile.h`) and prints one
+`PALPROF total ...` line when the run ends. The counters (file seeks and reads,
+chunk reads, decompressions, allocations, late waits) depend only on the
+scenario and the simulated work, so a change that should reduce them can quote
+exact before and after numbers. The `_us` timers are real time, given as
+count/total/max microseconds, and vary from run to run.
+
+The `.cache0` and `.cache65536` tests rerun scenarios with the chunk cache
+turned off and under constant eviction (`PAL_REPLAY_CACHE_BYTES`); they compare
+against the same baselines, since the cache may only save reads.

@@ -61,6 +61,65 @@ static uint32_t nMsgs = 0;
 
 TEXTLIB g_TextLib;
 
+static wchar_t **PAL_LoadStringTable(const char *lpszPath, wchar_t **lppData, uint32_t *lpnStrings)
+/*++
+  Purpose:
+
+    Load a file of zero-terminated 16-bit strings with one read, widen the
+    characters to wchar_t in place, and index the strings.
+
+  Parameters:
+
+    [IN]  lpszPath - the file to load.
+
+    [OUT] lppData - receives the characters of all strings.
+
+    [OUT] lpnStrings - receives the number of strings.
+
+  Return value:
+
+    The array of pointers to the strings.
+
+--*/
+{
+    void *fp = UTIL_fopen(lpszPath, "rb");
+    uint32_t length = UTIL_FileLength(fp) / sizeof(uint16_t);
+    wchar_t *data = (wchar_t *)UTIL_calloc(length, sizeof(wchar_t));
+    uint16_t *raw = (uint16_t *)data;
+    wchar_t **strings;
+    uint32_t i, n;
+
+    // Read the 16-bit characters into the start of the buffer, then widen them
+    // from the end so no character is overwritten before it is read.
+    if (UTIL_fread(raw, sizeof(uint16_t), length, fp) != length)
+        TerminateOnError("%s() failed: cannot read '%s'\n", __func__, lpszPath);
+    UTIL_fclose(fp);
+    if (sizeof(wchar_t) != sizeof(uint16_t))
+    {
+        for (i = length; i > 0; i--)
+            data[i - 1] = raw[i - 1];
+    }
+
+    // Count the strings, then point at the start of each.
+    for (i = 0, n = 0; i < length; i++)
+    {
+        if (data[i] == 0)
+            n++;
+    }
+    strings = (wchar_t **)UTIL_calloc(n, sizeof(wchar_t *));
+    *lpnStrings = n;
+    for (i = 0, n = 0; i < length && n < *lpnStrings; i++)
+    {
+        if (strings[n] == NULL)
+            strings[n] = data + i;
+        if (data[i] == 0)
+            n++;
+    }
+
+    *lppData = data;
+    return strings;
+}
+
 int PAL_InitText(void)
 /*++
   Purpose:
@@ -79,62 +138,17 @@ int PAL_InitText(void)
 --*/
 {
     uint32_t i;
-    uint8_t wchar_size = sizeof(wchar_t);
 
-    // Open the word data files.
+    // Load the words and the messages.
+    lpWordBuf = PAL_LoadStringTable(UTIL_Filename("%s/word.bin", CACHES_PATH), &WordData, &nWords);
+    lpMsgBuf = PAL_LoadStringTable(UTIL_Filename("%s/msg.bin", CACHES_PATH), &MsgData, &nMsgs);
+
+    // Some words in the original table end with a '1' marker that is not displayed.
+    for (i = 0; i < nWords; i++)
     {
-        uint16_t *pWordData = NULL;
-        void *fpWORD = UTIL_fopen(UTIL_Filename("%s/word.bin", CACHES_PATH), "rb");
-        uint32_t word_buffer_size = UTIL_FileLength(fpWORD) / sizeof(uint16_t);
-        WordData = (wchar_t *)UTIL_calloc(word_buffer_size, wchar_size);
-        pWordData = (uint16_t *)WordData;
-        for (i = 0, nWords = 0; i < word_buffer_size; i++, pWordData += (wchar_size >> 1))
-        {
-            UTIL_fread(pWordData, sizeof(uint16_t), 1, fpWORD);
-            if (*pWordData == 0)
-                nWords++;
-        }
-        UTIL_fclose(fpWORD);
-        lpWordBuf = (wchar_t **)UTIL_calloc(nWords, sizeof(wchar_t *));
-        pWordData = (uint16_t *)WordData;
-        for (i = 0, nWords = 0; i < word_buffer_size; i++, pWordData += (wchar_size >> 1))
-        {
-            if (lpWordBuf[nWords] == NULL)
-                lpWordBuf[nWords] = (wchar_t *)pWordData;
-            if (*pWordData == 0)
-                nWords++;
-        }
-        // Some words in the original table end with a '1' marker that is not displayed.
-        for (i = 0; i < nWords; i++)
-        {
-            size_t len = wcslen(lpWordBuf[i]);
-            if (len > 0 && lpWordBuf[i][len - 1] == L'1')
-                lpWordBuf[i][len - 1] = 0;
-        }
-    }
-    // Open the message data files.
-    {
-        uint16_t *pMsgData = NULL;
-        void *fpMSG = UTIL_fopen(UTIL_Filename("%s/msg.bin", CACHES_PATH), "rb");
-        uint32_t msg_buffer_size = UTIL_FileLength(fpMSG) / sizeof(uint16_t);
-        MsgData = (wchar_t *)UTIL_calloc(msg_buffer_size, wchar_size);
-        pMsgData = (uint16_t *)MsgData;
-        for (i = 0, nMsgs = 0; i < msg_buffer_size; i++, pMsgData += (wchar_size >> 1))
-        {
-            UTIL_fread(pMsgData, sizeof(uint16_t), 1, fpMSG);
-            if (*pMsgData == 0)
-                nMsgs++;
-        }
-        UTIL_fclose(fpMSG);
-        lpMsgBuf = (wchar_t **)UTIL_calloc(nMsgs, sizeof(wchar_t *));
-        pMsgData = (uint16_t *)MsgData;
-        for (i = 0, nMsgs = 0; i < msg_buffer_size; i++, pMsgData += (wchar_size >> 1))
-        {
-            if (lpMsgBuf[nMsgs] == NULL)
-                lpMsgBuf[nMsgs] = (wchar_t *)pMsgData;
-            if (*pMsgData == 0)
-                nMsgs++;
-        }
+        size_t len = wcslen(lpWordBuf[i]);
+        if (len > 0 && lpWordBuf[i][len - 1] == L'1')
+            lpWordBuf[i][len - 1] = 0;
     }
 
     g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;

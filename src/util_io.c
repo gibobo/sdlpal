@@ -1,4 +1,5 @@
 #include "util.h"
+#include "profile.h"
 #include <stdio.h>
 #if defined(_WIN32) || defined(_WIN64)
 #include <io.h>
@@ -37,6 +38,7 @@ int UTIL_fseek(void *_Stream, int64_t _Offset, int _Origin)
     }
     else
     {
+        PROF_COUNT(PROF_FSEEK, 1);
 #if defined(_MSC_VER)
         /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.
            Use this only when the caller guarantees single-threaded access or external synchronization. */
@@ -59,6 +61,8 @@ uint32_t UTIL_fread(void *_Buffer, uint32_t _ElementSize, uint32_t _ElementCount
     /* Match fread signature types to avoid unnecessary casts and allow optimized CRT calls */
     size_t elemSize = (size_t)_ElementSize;
     size_t elemCount = (size_t)_ElementCount;
+    PROF_COUNT(PROF_FREAD, 1);
+    PROF_COUNT(PROF_FREAD_BYTES, _ElementSize * _ElementCount);
 
 #if defined(_MSC_VER)
     /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.
@@ -82,6 +86,8 @@ uint32_t UTIL_fwrite(void *_Buffer, uint32_t _ElementSize, uint32_t _ElementCoun
         /* Match fwrite signature types to avoid unnecessary casts and allow optimized CRT calls */
         size_t elemSize = (size_t)_ElementSize;
         size_t elemCount = (size_t)_ElementCount;
+        PROF_COUNT(PROF_FWRITE, 1);
+        PROF_COUNT(PROF_FWRITE_BYTES, _ElementSize * _ElementCount);
 
 #if defined(_MSC_VER)
         /* On MSVC use the non-locking CRT variant to avoid FILE* locking overhead.

@@ -20,13 +20,10 @@
 
 #include "palcommon.h"
 #include "driver.h"
+#include "profile.h"
 #include "util.h"
 #include <stdbool.h>
 #include <string.h>
-
-#define Check_fread(buf, elem, num, fp)                 \
-    if (UTIL_fread((buf), (elem), (num), (fp)) < (num)) \
-    return 0
 
 int PAL_RLEBlitToSurface(
     const uint8_t *lpBitmapRLE,
@@ -789,7 +786,72 @@ PAL_SpriteGetFrame(
     return (uint8_t *)&lpSprite[offset];
 }
 
-uint32_t PAL_MKFGetChunkCount(void *fp)
+void PAL_MKFOpen(
+    PALMKF *lpMKF,
+    void *fp)
+/*++
+  Purpose:
+
+    Read the chunk offset table of an MKF archive into memory. The handle
+    takes ownership of the file.
+
+  Parameters:
+
+    [OUT] lpMKF - the handle to fill in.
+
+    [IN]  fp - pointer to an fopen'ed MKF file.
+
+  Return value:
+
+    None.
+
+--*/
+{
+    uint32_t uiHeaderSize = 0;
+
+    lpMKF->fp = fp;
+    lpMKF->uiChunkCount = 0;
+    lpMKF->rguiOffsets = NULL;
+
+    // The first offset is the size of the offset table, which ends with the archive size.
+    UTIL_fseek(fp, 0, SEEK_SET);
+    if (UTIL_fread(&uiHeaderSize, sizeof(uint32_t), 1, fp) != 1 || uiHeaderSize < 2 * sizeof(uint32_t))
+        return;
+
+    lpMKF->rguiOffsets = (uint32_t *)UTIL_malloc(uiHeaderSize);
+    UTIL_fseek(fp, 0, SEEK_SET);
+    if (UTIL_fread(lpMKF->rguiOffsets, 1, uiHeaderSize, fp) != uiHeaderSize)
+        TerminateOnError("%s() failed: cannot read the %u byte MKF offset table\n", __func__, uiHeaderSize);
+    lpMKF->uiChunkCount = uiHeaderSize / sizeof(uint32_t) - 1;
+}
+
+void PAL_MKFClose(
+    PALMKF *lpMKF)
+/*++
+  Purpose:
+
+    Close an MKF archive and free its offset table.
+
+  Parameters:
+
+    [IN]  lpMKF - the handle to close.
+
+  Return value:
+
+    None.
+
+--*/
+{
+    if (lpMKF->fp != NULL)
+        UTIL_fclose(lpMKF->fp);
+    UTIL_free(lpMKF->rguiOffsets);
+    lpMKF->fp = NULL;
+    lpMKF->uiChunkCount = 0;
+    lpMKF->rguiOffsets = NULL;
+}
+
+uint32_t PAL_MKFGetChunkCount(
+    const PALMKF *lpMKF)
 /*++
   Purpose:
 
@@ -797,7 +859,7 @@ uint32_t PAL_MKFGetChunkCount(void *fp)
 
   Parameters:
 
-    [IN]  fp - pointer to an fopen'ed MKF file.
+    [IN]  lpMKF - the open MKF archive.
 
   Return value:
 
@@ -805,17 +867,12 @@ uint32_t PAL_MKFGetChunkCount(void *fp)
 
 --*/
 {
-    uint32_t iNumChunk = 0;
-    if (fp)
-    {
-        UTIL_fseek(fp, 0, SEEK_SET);
-        if (UTIL_fread(&iNumChunk, sizeof(uint32_t), 1, fp) == 1)
-            return (iNumChunk >> 2) - 1;
-    }
-    return 0;
+    return lpMKF != NULL ? lpMKF->uiChunkCount : 0;
 }
 
-uint32_t PAL_MKFGetChunkSize(uint32_t uiChunkNum, void *fp)
+uint32_t PAL_MKFGetChunkSize(
+    uint32_t uiChunkNum,
+    const PALMKF *lpMKF)
 /*++
   Purpose:
 
@@ -825,49 +882,29 @@ uint32_t PAL_MKFGetChunkSize(uint32_t uiChunkNum, void *fp)
 
     [IN]  uiChunkNum - the number of the chunk in the MKF archive.
 
-    [IN]  fp - pointer to the fopen'ed MKF file.
+    [IN]  lpMKF - the open MKF archive.
 
   Return value:
 
     Integer value which indicates the size of the chunk.
-    -1 if the chunk does not exist.
+    0 if the chunk does not exist.
 
 --*/
 {
-    uint32_t uiOffset = 0;
-    uint32_t uiNextOffset = 0;
-    uint32_t uiChunkCount = 0;
-
-    if (fp == NULL)
-        return 0;
-    //
-    // Get the total number of chunks.
-    //
-    uiChunkCount = PAL_MKFGetChunkCount(fp);
-    if (uiChunkNum >= uiChunkCount)
+    if (lpMKF == NULL || uiChunkNum >= lpMKF->uiChunkCount)
         return 0;
 
-    //
-    // Get the offset of the specified chunk and the next chunk.
-    //
-    UTIL_fseek(fp, uiChunkNum * sizeof(uint32_t), SEEK_SET);
-    Check_fread(&uiOffset, sizeof(uint32_t), 1, fp);
-    Check_fread(&uiNextOffset, sizeof(uint32_t), 1, fp);
-
-    if (uiOffset > uiNextOffset)
+    if (lpMKF->rguiOffsets[uiChunkNum] > lpMKF->rguiOffsets[uiChunkNum + 1])
         return 0;
-    //
-    // Return the length of the chunk.
-    //
-    return uiNextOffset - uiOffset;
+
+    return lpMKF->rguiOffsets[uiChunkNum + 1] - lpMKF->rguiOffsets[uiChunkNum];
 }
 
-//TO DO
 uint32_t PAL_MKFReadChunk(
     void *lpBuffer,
     uint32_t uiBufferSize,
     uint32_t uiChunkNum,
-    void *fp)
+    const PALMKF *lpMKF)
 /*++
   Purpose:
 
@@ -881,54 +918,74 @@ uint32_t PAL_MKFReadChunk(
 
     [IN]  uiChunkNum - the number of the chunk in the MKF archive to read.
 
-    [IN]  fp - pointer to the fopen'ed MKF file.
+    [IN]  lpMKF - the open MKF archive.
 
   Return value:
 
-    Integer value which indicates the size of the chunk.
-    -1 if there are error in parameters.
-    -2 if buffer size is not enough.
+    The number of bytes read; 0 if the chunk does not exist, is empty or
+    does not fit in the buffer.
 
 --*/
 {
-    uint32_t uiOffset = 0;
-    uint32_t uiNextOffset = 0;
-    uint32_t uiChunkCount;
     uint32_t uiChunkLen;
 
-    if (lpBuffer == NULL || fp == NULL || uiBufferSize == 0)
+    if (lpBuffer == NULL || lpMKF == NULL || lpMKF->fp == NULL || uiBufferSize == 0)
         return 0;
 
-    //
-    // Get the total number of chunks.
-    //
-    uiChunkCount = PAL_MKFGetChunkCount(fp);
-    if (uiChunkNum >= uiChunkCount)
+    uiChunkLen = PAL_MKFGetChunkSize(uiChunkNum, lpMKF);
+    if (uiChunkLen == 0 || uiChunkLen > uiBufferSize)
         return 0;
 
-    // Get the offset of the chunk.
-    UTIL_fseek(fp, sizeof(uint32_t) * uiChunkNum, SEEK_SET);
-    Check_fread(&uiOffset, sizeof(uint32_t), 1, fp);
-    Check_fread(&uiNextOffset, sizeof(uint32_t), 1, fp);
+    PROF_COUNT(PROF_CHUNK_READ, 1);
+    UTIL_fseek(lpMKF->fp, lpMKF->rguiOffsets[uiChunkNum], SEEK_SET);
+    return UTIL_fread(lpBuffer, 1, uiChunkLen, lpMKF->fp);
+}
 
-    if (uiOffset > uiNextOffset)
-        return 0;
+uint32_t PAL_MKFPrepareBuffer(
+    uint8_t **lpBuffer,
+    uint32_t uiBufferSize,
+    uint32_t uiSize,
+    uint32_t uiChunkNum)
+/*++
+  Purpose:
 
-    // Get the length of the chunk.
-    uiChunkLen = uiNextOffset - uiOffset;
+    Make sure lpBuffer can take a decompressed chunk of uiSize bytes.
 
-    if (uiChunkLen > uiBufferSize)
-        return 0;
+  Parameters:
 
-    UTIL_fseek(fp, uiOffset, SEEK_SET);
-    return (int)UTIL_fread(lpBuffer, 1, uiChunkLen, fp);
+    [IN/OUT] lpBuffer - the destination buffer; allocated when NULL or when
+                        uiBufferSize is 0.
+
+    [IN]  uiBufferSize - size of the destination buffer.
+
+    [IN]  uiSize - size of the decompressed chunk.
+
+    [IN]  uiChunkNum - the number of the chunk, for the error message.
+
+  Return value:
+
+    The size of the destination buffer.
+    Terminates if a caller-provided buffer is too small.
+
+--*/
+{
+    if (uiBufferSize == 0 || *lpBuffer == NULL)
+    {
+        UTIL_free(*lpBuffer);
+        uiBufferSize = uiSize;
+        *lpBuffer = UTIL_malloc(uiBufferSize);
+    }
+
+    if (uiSize > uiBufferSize)
+        TerminateOnError("%s() failed: chunk %u needs %u bytes, the buffer holds %u\n", __func__, uiChunkNum, uiSize, uiBufferSize);
+    return uiBufferSize;
 }
 
 uint32_t PAL_MKFDecompressChunk(
     uint8_t **lpBuffer,
     uint32_t uiBufferSize,
     uint32_t uiChunkNum,
-    void *fp)
+    const PALMKF *lpMKF)
 /*++
   Purpose:
 
@@ -943,7 +1000,7 @@ uint32_t PAL_MKFDecompressChunk(
 
     [IN]  uiChunkNum - the number of the chunk in the MKF archive to read.
 
-    [IN]  fp - pointer to the fopen'ed MKF file.
+    [IN]  lpMKF - the open MKF archive.
 
   Return value:
 
@@ -952,27 +1009,125 @@ uint32_t PAL_MKFDecompressChunk(
 
 --*/
 {
-    uint32_t len = PAL_MKFGetChunkSize(uiChunkNum, fp);
+    // The compressed chunk is read into a buffer that only grows, kept between
+    // calls where memory is plentiful.
+    static uint8_t *buf = NULL;
+    static uint32_t buf_size = 0;
+    uint32_t len = PAL_MKFGetChunkSize(uiChunkNum, lpMKF);
     uint32_t size = 0;
 
     if (len > 0)
     {
-        uint8_t *buf = (uint8_t *)UTIL_malloc(len);
-
-        PAL_MKFReadChunk(buf, len, uiChunkNum, fp);
-        size = *(uint32_t *)buf;
-
-        if (uiBufferSize == 0 || *lpBuffer == NULL)
+        if (len > buf_size)
         {
-            UTIL_free(*lpBuffer);
-            uiBufferSize = size;
-            *lpBuffer = UTIL_malloc(uiBufferSize);
+            UTIL_free(buf);
+            buf = (uint8_t *)UTIL_malloc(len);
+            buf_size = len;
         }
 
-        if (YJ2_Decompress(buf, *lpBuffer, uiBufferSize) < 0)
-            TerminateOnError("%s() failed: chunk %u needs %u bytes, the buffer holds %u\n", __func__, uiChunkNum, size, uiBufferSize);
-        UTIL_free(buf);
+        PAL_MKFReadChunk(buf, len, uiChunkNum, lpMKF);
+        size = *(uint32_t *)buf;
+
+        uiBufferSize = PAL_MKFPrepareBuffer(lpBuffer, uiBufferSize, size, uiChunkNum);
+        YJ2_Decompress(buf, *lpBuffer, uiBufferSize);
+
+        // Give internal RAM back: a board without PSRAM cannot spare up to
+        // 126 KB (the largest GOP chunk) between loads.
+        if (!UTIL_IsPlentiful(buf))
+        {
+            UTIL_free(buf);
+            buf = NULL;
+            buf_size = 0;
+        }
     }
 
     return size;
+}
+
+int32_t PAL_RNGReadFrame(
+    uint8_t **lpBuffer,
+    uint32_t uiRngNum,
+    uint32_t uiFrameNum,
+    const PALMKF *lpRngMKF)
+/*++
+  Purpose:
+
+    Read a frame from a RNG animation.
+
+  Parameters:
+
+    [OUT] lpBuffer - receives a newly allocated buffer with the compressed
+                     frame; the previous buffer is freed.
+
+    [IN]  uiRngNum - the number of the RNG animation in the MKF archive.
+
+    [IN]  uiFrameNum - frame number in the RNG animation.
+
+    [IN]  lpRngMKF - the open RNG archive.
+
+  Return value:
+
+    The size of the frame; 0 if the frame is empty.
+    -1 if the parameters are invalid or the archive is truncated.
+    -2 if there is no such animation, -3 if the animation is empty,
+    -4 if there is no such frame.
+
+--*/
+{
+    uint32_t uiOffset = 0;
+    uint32_t rguiSubOffsets[2] = {0, 0};
+    uint32_t uiChunkCount = 0;
+    int32_t iChunkLen = 0;
+    void *fp;
+
+    if (lpRngMKF == NULL || lpRngMKF->fp == NULL || lpBuffer == NULL)
+    {
+        return -1;
+    }
+    fp = lpRngMKF->fp;
+
+    UTIL_free(*lpBuffer);
+    *lpBuffer = NULL;
+
+    // Get the offset of the animation from the offset table in memory.
+    if (uiRngNum >= lpRngMKF->uiChunkCount)
+    {
+        return -2;
+    }
+    uiOffset = lpRngMKF->rguiOffsets[uiRngNum];
+    if (lpRngMKF->rguiOffsets[uiRngNum + 1] == uiOffset)
+    {
+        return -3;
+    }
+
+    // Get the number of frames from the animation's own offset table.
+    UTIL_fseek(fp, uiOffset, SEEK_SET);
+    if (UTIL_fread(&uiChunkCount, sizeof(uint32_t), 1, fp) != 1)
+    {
+        return -1;
+    }
+    uiChunkCount = (uiChunkCount >> 2) - 1;
+    if (uiFrameNum >= uiChunkCount)
+    {
+        return -4;
+    }
+
+    // Get the offsets of the frame and the next one.
+    UTIL_fseek(fp, uiOffset + 4 * uiFrameNum, SEEK_SET);
+    if (UTIL_fread(rguiSubOffsets, sizeof(uint32_t), 2, fp) != 2)
+    {
+        return -1;
+    }
+
+    // Get the length of the frame.
+    iChunkLen = rguiSubOffsets[1] - rguiSubOffsets[0];
+
+    if (iChunkLen != 0)
+    {
+        *lpBuffer = (uint8_t *)UTIL_malloc(iChunkLen);
+        UTIL_fseek(fp, uiOffset + rguiSubOffsets[0], SEEK_SET);
+        return (int)UTIL_fread(*lpBuffer, 1, iChunkLen, fp);
+    }
+
+    return 0;
 }

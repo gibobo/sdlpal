@@ -21,6 +21,7 @@
 #include "audio.h"
 #include "driver.h"
 #include "global.h"
+#include "profile.h"
 #include "util.h"
 #include <limits.h>
 #include <math.h>
@@ -227,7 +228,9 @@ void AUDIO_PlaySound(int iSoundNum)
     // the mutex lock is obtained inside the SOUND_Play function rather than here.
     if (gAudioDevice.pSoundPlayer)
     {
+        PROF_BEGIN(sound);
         gAudioDevice.pSoundPlayer->Play(gAudioDevice.pSoundPlayer, abs(iSoundNum), false, 0.0f);
+        PROF_END(sound, PROF_TIME_SOUND);
     }
 }
 
@@ -235,9 +238,11 @@ void AUDIO_PlayMusic(int32_t iNumRIX, uint8_t fLoop, float flFadeTime)
 {
     if (gAudioDevice.pMusPlayer)
     {
+        PROF_BEGIN(music);
         DRIVER_Audio_Lock();
         gAudioDevice.pMusPlayer->Play(gAudioDevice.pMusPlayer, iNumRIX, fLoop, flFadeTime);
         DRIVER_Audio_Unlock();
+        PROF_END(music, PROF_TIME_MUSIC);
     }
 }
 

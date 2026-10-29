@@ -29,113 +29,129 @@
 typedef struct
 {
     uint16_t codepoint; // The Unicode codepoint of the glyph
-    uint8_t glyphWidth; // The width of the glyph in pixels
+    uint8_t glyphWidth; // The width of the glyph in 8-pixel units; 0 if the entry is empty
+    int16_t next;       // The next entry in the same hash bucket, or -1
     uint8_t data[32];   // The bitmap data for the glyph
 } FontGlyphCacheEntry;
 
 // Font glyph cache definitions
-static const uint16_t kFontCacheCapacity = 256;
+#define FONT_CACHE_CAPACITY 256
+#define FONT_CACHE_BUCKETS 512
 // Unicode codepoint ranges
 static const uint16_t kUnicodeSurrogateRangeBegin = 0xD800;
 static const uint16_t kUnicodePrivateUseBase = 0xF900;
 static const uint16_t kUnicodeInvalidUpperBound = 0xFFFE;
+// The font files skip the surrogate range, so this many glyphs follow each other.
+#define FONT_GLYPH_COUNT (0xFFFE - (0xF900 - 0xD800))
 
 static void *gFontDataStream = NULL;
-static void *gFontSizeStream = NULL;
+static uint8_t *gFontWidthBits = NULL; // one bit per glyph, set for full-width glyphs
 static FontGlyphCacheEntry *gFontCache = NULL;
+static int16_t gFontCacheBuckets[FONT_CACHE_BUCKETS];
 static uint16_t gFontCacheNextIndex = 0;
-static uint16_t gFontCachePopulation = 0;
 static FontGlyphCacheEntry *gFontCacheLastHit = NULL;
+
+// The glyph index of a codepoint, or -1 for a codepoint the font does not cover.
+static int32_t FontGlyphIndex(uint16_t codepoint)
+{
+    if ((codepoint >= kUnicodeSurrogateRangeBegin && codepoint < kUnicodePrivateUseBase) ||
+        (codepoint >= kUnicodeInvalidUpperBound))
+        return -1;
+    if (codepoint >= kUnicodePrivateUseBase)
+        return codepoint - (kUnicodePrivateUseBase - kUnicodeSurrogateRangeBegin);
+    return codepoint;
+}
+
+// The width of a glyph in 8-pixel units.
+static uint8_t FontGlyphWidth(int32_t glyphIndex)
+{
+    return (gFontWidthBits[glyphIndex / 8] & (1U << (glyphIndex % 8))) ? 2 : 1;
+}
+
+// Remove a cache entry from its hash bucket.
+static void FontCacheUnlink(int16_t index)
+{
+    int16_t *link = &gFontCacheBuckets[gFontCache[index].codepoint % FONT_CACHE_BUCKETS];
+    while (*link != index)
+        link = &gFontCache[*link].next;
+    *link = gFontCache[index].next;
+}
 
 static FontGlyphCacheEntry *FontCacheFetchGlyph(uint16_t codepoint)
 {
-    if (gFontCache == NULL || gFontDataStream == NULL || gFontSizeStream == NULL)
-        return NULL;
+    int32_t glyphIndex = FontGlyphIndex(codepoint);
+    int16_t *bucket;
+    int16_t index;
 
-    // Check for invalid char code.
-    if ((codepoint >= kUnicodeSurrogateRangeBegin && codepoint < kUnicodePrivateUseBase) ||
-        (codepoint >= kUnicodeInvalidUpperBound))
+    if (gFontCache == NULL || glyphIndex < 0)
         return NULL;
 
     if (gFontCacheLastHit != NULL && gFontCacheLastHit->glyphWidth > 0 && gFontCacheLastHit->codepoint == codepoint)
         return gFontCacheLastHit;
 
-    for (uint16_t i = 0; i < gFontCachePopulation; i++)
+    // Look the glyph up in its hash bucket.
+    bucket = &gFontCacheBuckets[codepoint % FONT_CACHE_BUCKETS];
+    for (index = *bucket; index >= 0; index = gFontCache[index].next)
     {
-        FontGlyphCacheEntry *entry = &gFontCache[i];
-        if (entry->glyphWidth > 0 && entry->codepoint == codepoint)
+        if (gFontCache[index].codepoint == codepoint)
         {
-            gFontCacheLastHit = entry;
-            return entry;
+            gFontCacheLastHit = &gFontCache[index];
+            return gFontCacheLastHit;
         }
     }
 
-    FontGlyphCacheEntry *cacheEntry = &gFontCache[gFontCacheNextIndex];
-    uint16_t writeIndex = gFontCacheNextIndex;
-    uint8_t entryWasEmpty = (cacheEntry->glyphWidth == 0);
-
-    uint16_t glyphIndex = codepoint;
-    if (glyphIndex >= kUnicodePrivateUseBase)
-        glyphIndex -= (kUnicodePrivateUseBase - kUnicodeSurrogateRangeBegin);
-
-    uint8_t widthBitMask;
-    if (UTIL_fseek(gFontSizeStream, sizeof(uint8_t) * glyphIndex / 8, SEEK_SET) != 0)
+    // Replace the oldest entry with the glyph read from the font file.
+    index = (int16_t)gFontCacheNextIndex;
+    gFontCacheNextIndex = (gFontCacheNextIndex + 1) % FONT_CACHE_CAPACITY;
+    if (gFontCache[index].glyphWidth > 0)
     {
-        cacheEntry->glyphWidth = 0;
+        FontCacheUnlink(index);
+        gFontCache[index].glyphWidth = 0;
+    }
+    if (UTIL_fseek(gFontDataStream, (int64_t)glyphIndex * 32, SEEK_SET) != 0 ||
+        UTIL_fread(gFontCache[index].data, sizeof(uint8_t), 32, gFontDataStream) != 32)
         return NULL;
-    }
-    if (UTIL_fread(&widthBitMask, sizeof(uint8_t), 1, gFontSizeStream) != 1)
-    {
-        cacheEntry->glyphWidth = 0;
-        return NULL;
-    }
-    if (UTIL_fseek(gFontDataStream, sizeof(uint8_t) * glyphIndex * 32, SEEK_SET) != 0)
-    {
-        cacheEntry->glyphWidth = 0;
-        return NULL;
-    }
-    if (UTIL_fread(cacheEntry->data, sizeof(uint8_t), 32, gFontDataStream) != 32)
-    {
-        cacheEntry->glyphWidth = 0;
-        return NULL;
-    }
 
-    cacheEntry->codepoint = codepoint;
-    cacheEntry->glyphWidth = (widthBitMask & (1U << (glyphIndex % 8))) ? 2 : 1;
-    gFontCacheLastHit = cacheEntry;
-
-    if (entryWasEmpty && gFontCachePopulation < kFontCacheCapacity)
-    {
-        if (writeIndex >= gFontCachePopulation)
-            gFontCachePopulation = writeIndex + 1;
-        else
-            gFontCachePopulation++;
-    }
-
-    gFontCacheNextIndex = (writeIndex + 1) % kFontCacheCapacity;
-    return cacheEntry;
+    gFontCache[index].codepoint = codepoint;
+    gFontCache[index].glyphWidth = FontGlyphWidth(glyphIndex);
+    gFontCache[index].next = *bucket;
+    *bucket = index;
+    gFontCacheLastHit = &gFontCache[index];
+    return gFontCacheLastHit;
 }
 
 void PAL_InitFont(void)
 {
+    const uint32_t widthBytes = (FONT_GLYPH_COUNT + 7) / 8;
+    void *fpSize;
+    int i;
+
+    // Keep the glyph widths in memory; glyph bitmaps are read when first drawn.
     gFontDataStream = UTIL_fopen(UTIL_Filename("%s/unicode_font.bin", CACHES_PATH), "rb");
-    gFontSizeStream = UTIL_fopen(UTIL_Filename("%s/unicode_font.dat", CACHES_PATH), "rb");
-    gFontCache = (FontGlyphCacheEntry *)UTIL_calloc(kFontCacheCapacity, sizeof(FontGlyphCacheEntry));
+    if (UTIL_FileLength(gFontDataStream) < (long)FONT_GLYPH_COUNT * 32)
+        TerminateOnError("%s() failed: unicode_font.bin is shorter than %d glyphs\n", __func__, FONT_GLYPH_COUNT);
+    fpSize = UTIL_fopen(UTIL_Filename("%s/unicode_font.dat", CACHES_PATH), "rb");
+    gFontWidthBits = (uint8_t *)UTIL_malloc(widthBytes);
+    if (UTIL_fread(gFontWidthBits, 1, widthBytes, fpSize) != widthBytes)
+        TerminateOnError("%s() failed: unicode_font.dat is shorter than %u bytes\n", __func__, widthBytes);
+    UTIL_fclose(fpSize);
+
+    gFontCache = (FontGlyphCacheEntry *)UTIL_calloc(FONT_CACHE_CAPACITY, sizeof(FontGlyphCacheEntry));
+    for (i = 0; i < FONT_CACHE_BUCKETS; i++)
+        gFontCacheBuckets[i] = -1;
     gFontCacheNextIndex = 0;
-    gFontCachePopulation = 0;
     gFontCacheLastHit = NULL;
 }
 
 void PAL_DeInitFont(void)
 {
     UTIL_fclose(gFontDataStream);
-    UTIL_fclose(gFontSizeStream);
+    UTIL_free(gFontWidthBits);
     UTIL_free(gFontCache);
     gFontDataStream = NULL;
-    gFontSizeStream = NULL;
+    gFontWidthBits = NULL;
     gFontCache = NULL;
     gFontCacheNextIndex = 0;
-    gFontCachePopulation = 0;
     gFontCacheLastHit = NULL;
 }
 
@@ -216,9 +232,9 @@ void PAL_DrawCharOnSurface(
 
 uint8_t PAL_CharWidth(uint16_t codepoint)
 {
-    FontGlyphCacheEntry *glyphEntry = FontCacheFetchGlyph(codepoint);
-    if (glyphEntry == NULL)
+    int32_t glyphIndex = FontGlyphIndex(codepoint);
+    if (gFontWidthBits == NULL || glyphIndex < 0)
         return 0;
 
-    return glyphEntry->glyphWidth;
+    return FontGlyphWidth(glyphIndex);
 }

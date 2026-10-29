@@ -23,12 +23,6 @@
 
 #include <stdint.h>
 
-int32_t PAL_RNGReadFrame(
-    uint8_t **lpBuffer,
-    uint32_t uiRngNum,
-    uint32_t uiFrameNum,
-    void *fpRngMKF);
-
 void PAL_RNGPlay(
     int32_t iNumRNG,
     int32_t iStartFrame,

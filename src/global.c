@@ -21,6 +21,7 @@
 #include "global.h"
 #include "driver.h"
 #include "palcommon.h"
+#include "profile.h"
 #include "res.h"
 #include "resource.h"
 #include "script.h"
@@ -346,7 +347,11 @@ static int PAL_LoadGame_WIN(int iSaveSlot)
 
 static int PAL_LoadGame(int iSaveSlot)
 {
-    return PAL_LoadGame_WIN(iSaveSlot);
+    int result;
+    PROF_BEGIN(load);
+    result = PAL_LoadGame_WIN(iSaveSlot);
+    PROF_END(load, PROF_TIME_LOAD_GAME);
+    return result;
 }
 
 static void PAL_SaveGame_Common(int32_t iSaveSlot, uint16_t wSavedTimes, SAVEDGAME_COMMON *s, uint32_t size)
@@ -422,7 +427,9 @@ void PAL_SaveGame(
     int32_t iSaveSlot,
     uint16_t wSavedTimes)
 {
+    PROF_BEGIN(save);
     PAL_SaveGame_WIN(iSaveSlot, wSavedTimes);
+    PROF_END(save, PROF_TIME_SAVE_GAME);
 }
 
 void PAL_ReloadInNextTick(uint8_t iSaveSlot)

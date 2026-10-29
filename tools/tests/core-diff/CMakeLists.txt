@@ -109,6 +109,6 @@ endif()
 target_link_libraries(core_diff PRIVATE core_diff_dev core_diff_master core_diff_master_fight core_diff_dev)
 
 enable_testing()
-foreach(test_name yj2_chunks rle_blits xy_offset rng_stream damage rng_blit)
+foreach(test_name mkf_read yj2_chunks rle_blits xy_offset rng_stream damage rng_blit)
     add_test(NAME core_diff.${test_name} COMMAND core_diff ${test_name})
 endforeach()

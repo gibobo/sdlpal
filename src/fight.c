@@ -24,6 +24,7 @@
 #include "global.h"
 #include "input.h"
 #include "palcommon.h"
+#include "profile.h"
 #include "resource.h"
 #include "script.h"
 #include "text.h"
@@ -1548,6 +1549,7 @@ PAL_BattleShowPlayerAttackAnim(
     int32_t enemy_y = 0;
     int32_t enemy_h = 0;
     int32_t x, y, dist = 0;
+    PROF_BEGIN(attack);
 
     if (sTarget != -1)
     {
@@ -1767,6 +1769,7 @@ PAL_BattleShowPlayerAttackAnim(
             PAL_BattleDelay(1, 0, true);
         }
     }
+    PROF_END(attack, PROF_TIME_ATTACK);
 }
 
 static void

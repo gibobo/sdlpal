@@ -71,4 +71,8 @@ uint32_t RES_MKFCreateChunk(
     uint32_t chunk_index,
     uint8_t resource_id);
 
+// Set how many bytes the chunk cache may hold; 0 turns it off.
+void RES_SetChunkCacheBudget(
+    uint32_t budget);
+
 #endif // RESOURCE_H

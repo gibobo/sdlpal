@@ -24,6 +24,7 @@
 #include "global.h"
 #include "map.h"
 #include "palcommon.h"
+#include "profile.h"
 #include "resource.h"
 #include "util.h"
 #include <assert.h>
@@ -224,6 +225,8 @@ void PAL_LoadResources(void)
         return;
     }
 
+    PROF_BEGIN(load);
+
     // Load global data
     if (gpResources->bLoadFlags & kLoadGlobalData)
     {
@@ -302,6 +305,7 @@ void PAL_LoadResources(void)
 
     // Clear all of the load flags
     gpResources->bLoadFlags = kLoadNone;
+    PROF_END(load, PROF_TIME_LOAD_RES);
 }
 
 void *PAL_GetCurrentMap(void)

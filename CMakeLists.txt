@@ -140,6 +140,12 @@ option(PAL_PRERENDERED_MUSIC "Desktop: stream pre-rendered PCM music instead of 
 if(PAL_PRERENDERED_MUSIC)
     add_definitions(-DPAL_PRERENDERED_MUSIC=1)
 endif()
+
+# Print PALPROF measurement lines (see src/profile.h); totals at shutdown.
+option(PAL_PROFILE "Build with the performance and memory measurement hooks" OFF)
+if(PAL_PROFILE)
+    add_definitions(-DPAL_PROFILE=1)
+endif()
 # Include directories
 include_directories(
     external

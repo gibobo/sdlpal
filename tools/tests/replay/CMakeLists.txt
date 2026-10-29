@@ -37,7 +37,10 @@ add_executable(palreplay
     vclock.c
     state_hash.c)
 target_include_directories(palreplay PRIVATE ${PAL_REPO_ROOT}/src ${CMAKE_CURRENT_SOURCE_DIR})
+# The measurement hooks only count and time; with the virtual clock and scripted
+# input the counters printed at the end of a run are deterministic.
 target_compile_definitions(palreplay PRIVATE
+    PAL_PROFILE=1
     RESOURCE_PATH="${REPLAY_DATA_DIR}"
     CACHES_PATH="${PAL_REPO_ROOT}/cache_data")
 
@@ -68,29 +71,46 @@ endif()
 
 # Register replay.<scenario>.w<work>: run the scenario with <work> virtual
 # milliseconds of simulated work per present and compare with its baseline.
-# Optional extra arguments: <slot> <file> to start from a copy of a saved game.
+# SAVE <slot> <file> starts from a copy of a saved game; CACHE <bytes> runs with
+# that chunk cache budget (test name suffix .cache<bytes>), which must not change
+# the trace.
 function(pal_add_replay scenario work)
-    set(save_args "")
-    if(ARGC GREATER 2)
-        set(save_args -DSAVE_SLOT=${ARGV2} -DSAVE_SOURCE=${ARGV3})
+    cmake_parse_arguments(REPLAY "" "CACHE" "SAVE" ${ARGN})
+    set(name replay.${scenario}.w${work})
+    set(extra_args "")
+    if(REPLAY_SAVE)
+        list(GET REPLAY_SAVE 0 save_slot)
+        list(GET REPLAY_SAVE 1 save_source)
+        list(APPEND extra_args -DSAVE_SLOT=${save_slot} -DSAVE_SOURCE=${save_source})
     endif()
-    add_test(NAME replay.${scenario}.w${work}
+    if(DEFINED REPLAY_CACHE)
+        set(name ${name}.cache${REPLAY_CACHE})
+        list(APPEND extra_args -DCACHE_BYTES=${REPLAY_CACHE})
+    endif()
+    add_test(NAME ${name}
         COMMAND ${CMAKE_COMMAND}
             -DPALREPLAY=$<TARGET_FILE:palreplay>
             -DREPLAYCMP=$<TARGET_FILE:replaycmp>
             -DSCRIPT=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/${scenario}.txt
             -DBASELINE=${CMAKE_CURRENT_SOURCE_DIR}/baselines/${scenario}.w${work}.txt
-            -DOUT=${CMAKE_CURRENT_BINARY_DIR}/${scenario}.w${work}.txt
+            -DOUT=${CMAKE_CURRENT_BINARY_DIR}/${name}.txt
             -DWORK_MS=${work}
             -DDATA_DIR=${REPLAY_DATA_DIR}
-            ${save_args}
+            ${extra_args}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/run_replay.cmake)
     # Scenarios share the data directory, so they must not run in parallel.
-    set_tests_properties(replay.${scenario}.w${work} PROPERTIES RESOURCE_LOCK replay_data)
+    set_tests_properties(${name} PROPERTIES RESOURCE_LOCK replay_data)
 endfunction()
 
 # Scenarios, each without and with 30 ms of simulated work per present.
 foreach(work 0 30)
     pal_add_replay(intro ${work})
-    pal_add_replay(battle ${work} 1 "${PAL_TEST_RESOURCE_DIR}/0.rpg")
+    pal_add_replay(battle ${work} SAVE 1 "${PAL_TEST_RESOURCE_DIR}/0.rpg")
+endforeach()
+
+# The chunk cache only saves reads: no cache and a cache under constant
+# eviction must give the same traces.
+foreach(cache 0 65536)
+    pal_add_replay(intro 0 CACHE ${cache})
+    pal_add_replay(battle 0 SAVE 1 "${PAL_TEST_RESOURCE_DIR}/0.rpg" CACHE ${cache})
 endforeach()

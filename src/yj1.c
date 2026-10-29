@@ -25,6 +25,7 @@
 //
 
 #include "palcommon.h"
+#include "profile.h"
 #include "util.h"
 #include <stdlib.h>
 #include <string.h>
@@ -106,12 +107,28 @@ static void yj2_adjust_tree(YJ2_Tree tree, uint16_t value)
     node->weight++;
 }
 
+// The decoding tree is rebuilt for every stream, in storage kept between calls
+// where memory is plentiful (see YJ2_Decompress).
+static YJ2_TreeNode **g_YJ2List = NULL;
+static YJ2_TreeNode *g_YJ2Nodes = NULL;
+
 static void yj2_build_tree(YJ2_Tree *tree)
 {
     uint16_t i;
     uint16_t ptr;
-    YJ2_TreeNode **list = (YJ2_TreeNode **)UTIL_calloc(321, sizeof(YJ2_TreeNode *));
-    YJ2_TreeNode *node = (YJ2_TreeNode *)UTIL_calloc(641, sizeof(YJ2_TreeNode));
+    YJ2_TreeNode **list;
+    YJ2_TreeNode *node;
+
+    if (g_YJ2Nodes == NULL)
+    {
+        g_YJ2List = (YJ2_TreeNode **)UTIL_malloc(321 * sizeof(YJ2_TreeNode *));
+        g_YJ2Nodes = (YJ2_TreeNode *)UTIL_malloc(641 * sizeof(YJ2_TreeNode));
+    }
+    list = g_YJ2List;
+    node = g_YJ2Nodes;
+
+    // Start from zeroed nodes, as a fresh allocation would; every list entry is set below.
+    memset(node, 0, 641 * sizeof(YJ2_TreeNode));
     for (i = 0; i <= 0x140; i++)
         list[i] = node + i;
     for (i = 0; i <= 0x280; i++)
@@ -156,6 +173,7 @@ int32_t YJ2_Decompress(
     if (length > DestSize)
         return -1;
 
+    PROF_BEGIN(decompress);
     yj2_build_tree(&tree);
 
     src = (uint8_t *)Source + 4;
@@ -208,7 +226,17 @@ int32_t YJ2_Decompress(
         }
     }
 
-    UTIL_free(tree.list);
-    UTIL_free(tree.node);
+    // Give internal RAM back: the tree takes 11.5 KB.
+    if (!UTIL_IsPlentiful(g_YJ2Nodes))
+    {
+        UTIL_free(g_YJ2List);
+        UTIL_free(g_YJ2Nodes);
+        g_YJ2List = NULL;
+        g_YJ2Nodes = NULL;
+    }
+
+    PROF_END(decompress, PROF_TIME_DECOMPRESS);
+    PROF_COUNT(PROF_DECOMPRESS, 1);
+    PROF_COUNT(PROF_DECOMPRESS_BYTES, length);
     return (int32_t)length;
 }

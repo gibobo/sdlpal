@@ -27,6 +27,7 @@
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
+#include "profile.h"
 #include "resource.h"
 #include "scene.h"
 #include "script.h"
@@ -80,28 +81,40 @@ void PAL_BattleDrawBackground(
 {
     int32_t i;
     uint16_t b;
+    uint8_t rgShift[256];
     uint8_t *pSrc = lpBackground->pixels;
     uint8_t *pDst = lpSceneBuf->pixels;
 
-    // Draw the background
-    for (i = 0; i < SCREEN_SIZE; i++)
+    if (g_Battle->sBackgroundColorShift == 0)
     {
-        b = (*pSrc & 0x0F);
-        b += g_Battle->sBackgroundColorShift;
-
-        if (b & 0x80)
+        // Without a shift every color stays as it is.
+        memcpy(pDst, pSrc, SCREEN_SIZE);
+    }
+    else
+    {
+        // Shift the brightness (low nibble) of each color, clamped to 0..15.
+        for (i = 0; i < 256; i++)
         {
-            b = 0;
+            b = (i & 0x0F);
+            b += g_Battle->sBackgroundColorShift;
+
+            if (b & 0x80)
+            {
+                b = 0;
+            }
+            else if (b & 0x70)
+            {
+                b = 0x0F;
+            }
+
+            rgShift[i] = (uint8_t)(b | (i & 0xF0));
         }
-        else if (b & 0x70)
+
+        // Draw the background
+        for (i = 0; i < SCREEN_SIZE; i++)
         {
-            b = 0x0F;
+            pDst[i] = rgShift[pSrc[i]];
         }
-
-        *pDst = (uint8_t)(b | (*pSrc & 0xF0));
-
-        ++pSrc;
-        ++pDst;
     }
 
     PAL_ApplyWave(lpSceneBuf->pixels);
@@ -550,6 +563,8 @@ void PAL_BattleMakeScene(
 
 --*/
 {
+    PROF_BEGIN(scene);
+
     PAL_BattleDrawBackground();
 
     if (g_Battle->fSpriteAddLock)
@@ -573,6 +588,8 @@ void PAL_BattleMakeScene(
     // Draw all sprite
     //
     PAL_BattleDrawAllSprites();
+
+    PROF_END(scene, PROF_TIME_BATTLE_SCENE);
 }
 
 void PAL_BattleFadeScene(
@@ -1462,8 +1479,10 @@ PAL_StartBattle(
     }
 
     // Load sprites and background
+    PROF_BEGIN(load);
     PAL_LoadBattleSprites();
     PAL_LoadBattleBackground();
+    PROF_END(load, PROF_TIME_BATTLE_LOAD);
 
     // Create the surface for scene buffer
     lpSceneBuf = VIDEO_CreateCompatibleSizedSurface(NULL);

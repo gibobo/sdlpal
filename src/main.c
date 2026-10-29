@@ -28,6 +28,7 @@
 #include "palcommon.h"
 #include "palette.h"
 #include "play.h"
+#include "profile.h"
 #include "res.h"
 #include "resource.h"
 #include "rngplay.h"
@@ -63,6 +64,7 @@ void PAL_Init(void)
 
 --*/
 {
+    PROF_INIT();
     printf("Initializing game...\n");
     // PAL_ConsolidateExtractedResources();
     if (PAL_LoadConsolidatedResources() != 0)
@@ -127,7 +129,10 @@ void PAL_Shutdown(int exit_code)
 
 --*/
 {
-    int driver_stopped = UTIL_PrepareShutdown();
+    int driver_stopped;
+
+    PROF_REPORT("total");
+    driver_stopped = UTIL_PrepareShutdown();
     PAL_FreeResources();
     PAL_FreeUI();
     PAL_FreeText();
