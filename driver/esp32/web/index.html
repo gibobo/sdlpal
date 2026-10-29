@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PAL on ESP32-S3</title>
+  <style>
+    :root { color: #e4e4e4; background:#0a0a0a; font-family: "Segoe UI", sans-serif; }
+    body { margin:0; display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px; }
+    canvas { image-rendering: pixelated; image-rendering: crisp-edges; border:2px solid #3c3c3c; background:#000; }
+    #status { font-size:14px; color:#8fb9ff; }
+  </style>
+</head>
+<body>
+  <div id="status">Connecting...</div>
+  <canvas id="screen" width="320" height="200"></canvas>
+  <script>
+    const W=320,H=200;
+    const palette=new Uint8Array(256*3);
+    const canvas=document.getElementById('screen');
+    const ctx=canvas.getContext('2d');
+    const img=ctx.createImageData(W,H);
+    const statusEl=document.getElementById('status');
+    let lastVer=-1;
+
+    async function fetchFrame(){
+      try{
+        const res=await fetch('/frame', {cache:'no-store'});
+        if(!res.ok){ statusEl.textContent='Waiting for frame...'; requestAnimationFrame(fetchFrame); return; }
+        const buf=new Uint8Array(await res.arrayBuffer());
+        if(buf.length < 256*3 + W*H){ statusEl.textContent='Incomplete frame'; requestAnimationFrame(fetchFrame); return; }
+        palette.set(buf.subarray(0, 256*3));
+        const pixels=buf.subarray(256*3);
+        for(let i=0,j=0;i<pixels.length;i++){
+          const idx=pixels[i]*3;
+          img.data[j++]=palette[idx];
+          img.data[j++]=palette[idx+1];
+          img.data[j++]=palette[idx+2];
+          img.data[j++]=255;
+        }
+        ctx.putImageData(img,0,0);
+        statusEl.textContent='Streaming @ ~'+(Math.round(1000/16))+'fps';
+      }catch(e){
+        statusEl.textContent='Error: '+e;
+      }
+      requestAnimationFrame(fetchFrame);
+    }
+    fetchFrame();
+  </script>
+</body>
+</html>
