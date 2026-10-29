@@ -47,6 +47,8 @@ static const int g_KeyMap[][2] = {
 static SDL_Joystick *g_pJoy = NULL;
 static int joystick_axis_X = 0;
 static int joystick_axis_Y = 0;
+static uint32_t joystick_axis_keys = kKeyNone;
+static uint32_t joystick_hat_keys = kKeyNone;
 #endif
 extern void DRIVER_FrameResize(uint32_t width, uint32_t height);
 
@@ -101,33 +103,40 @@ static void PAL_DetectJoystick(void)
     }
 }
 
+// Report joystick direction changes as arrow key press/release edges, so the
+// joystick walks and steps through menus exactly like the keyboard does.
+static void SDL_UpdateJoystickKeys(void)
+{
+    static const PALKEY rgDirKeys[] = {kKeyUp, kKeyDown, kKeyLeft, kKeyRight};
+    static uint32_t lastKeys = kKeyNone;
+    uint32_t newKeys = joystick_axis_keys | joystick_hat_keys;
+    uint32_t releasedKeys = lastKeys & ~newKeys;
+    uint32_t pressedKeys = newKeys & ~lastKeys;
+    uint8_t i;
+
+    for (i = 0; i < sizeof(rgDirKeys) / sizeof(rgDirKeys[0]); i++)
+    {
+        if (releasedKeys & rgDirKeys[i])
+            PAL_KeyUp(rgDirKeys[i]);
+        if (pressedKeys & rgDirKeys[i])
+            PAL_KeyDown(rgDirKeys[i]);
+    }
+    lastKeys = newKeys;
+}
+
 static void SDL_UpdateJoyStickState(void)
 {
     if (joystick_axis_X == 1 && joystick_axis_Y >= 0)
-    {
-        PAL_SetDirInput(kDirEast);
-        PAL_SetKeyInput(PAL_GetKeyInput() | kKeyRight);
-    }
+        joystick_axis_keys = kKeyRight;
     else if (joystick_axis_X == -1 && joystick_axis_Y <= 0)
-    {
-        PAL_SetDirInput(kDirWest);
-        PAL_SetKeyInput(PAL_GetKeyInput() | kKeyLeft);
-    }
+        joystick_axis_keys = kKeyLeft;
     else if (joystick_axis_Y == 1 && joystick_axis_X <= 0)
-    {
-        PAL_SetDirInput(kDirSouth);
-        PAL_SetKeyInput(PAL_GetKeyInput() | kKeyDown);
-    }
+        joystick_axis_keys = kKeyDown;
     else if (joystick_axis_Y == -1 && joystick_axis_X >= 0)
-    {
-        PAL_SetDirInput(kDirNorth);
-        PAL_SetKeyInput(PAL_GetKeyInput() | kKeyUp);
-    }
+        joystick_axis_keys = kKeyUp;
     else
-    {
-        PAL_SetDirInput(kDirUnknown);
-        PAL_SetKeyInput(kKeyNone);
-    }
+        joystick_axis_keys = kKeyNone;
+    SDL_UpdateJoystickKeys();
 }
 #endif
 
@@ -166,8 +175,16 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
             break;
 
 #ifdef PAL_HAS_JOYSTICKS
-        case SDL_JOYDEVICEADDED:
         case SDL_JOYDEVICEREMOVED:
+            // Release any direction the removed joystick was still holding
+            joystick_axis_X = 0;
+            joystick_axis_Y = 0;
+            joystick_axis_keys = kKeyNone;
+            joystick_hat_keys = kKeyNone;
+            SDL_UpdateJoystickKeys();
+            PAL_DetectJoystick();
+            break;
+        case SDL_JOYDEVICEADDED:
             PAL_DetectJoystick();
             break;
         case SDL_JOYAXISMOTION:
@@ -186,38 +203,34 @@ static int SDLCALL SDL_Event_Filter(const SDL_Event *lpEvent)
             break;
 
         case SDL_JOYHATMOTION:
-            // Pressed the joystick hat button
+            // Pressed the joystick hat button; diagonals map to the matching isometric direction
             switch (lpEvent->jhat.value)
             {
                 case SDL_HAT_LEFT:
                 case SDL_HAT_LEFTUP:
-                    PAL_SetDirInput(kDirWest);
-                    PAL_SetKeyInput(kKeyLeft);
+                    joystick_hat_keys = kKeyLeft;
                     break;
 
                 case SDL_HAT_RIGHT:
                 case SDL_HAT_RIGHTDOWN:
-                    PAL_SetDirInput(kDirEast);
-                    PAL_SetKeyInput(kKeyRight);
+                    joystick_hat_keys = kKeyRight;
                     break;
 
                 case SDL_HAT_UP:
                 case SDL_HAT_RIGHTUP:
-                    PAL_SetDirInput(kDirNorth);
-                    PAL_SetKeyInput(kKeyUp);
+                    joystick_hat_keys = kKeyUp;
                     break;
 
                 case SDL_HAT_DOWN:
                 case SDL_HAT_LEFTDOWN:
-                    PAL_SetDirInput(kDirSouth);
-                    PAL_SetKeyInput(kKeyDown);
+                    joystick_hat_keys = kKeyDown;
                     break;
 
-                case SDL_HAT_CENTERED:
-                    PAL_SetDirInput(kDirUnknown);
-                    PAL_SetKeyInput(kKeyNone);
+                default:
+                    joystick_hat_keys = kKeyNone;
                     break;
             }
+            SDL_UpdateJoystickKeys();
             break;
 
         case SDL_JOYBUTTONDOWN:
