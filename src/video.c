@@ -135,6 +135,40 @@ void VIDEO_Shutdown(void)
     gpBackup[1] = NULL;
 }
 
+static void VIDEO_ShowShaken(uint8_t *pixels, int present)
+/*++
+  Purpose:
+
+    Show one full-screen step of the screen shake, like the original game:
+    an odd shake count moves the picture up and an even one moves it down,
+    by the shake level, with black rows where the picture moved away.
+    Every call uses up one shake step, even if nothing is presented.
+
+  Parameters:
+
+    [IN]  pixels - the full-screen buffer to show.
+
+    [IN]  present - nonzero to present the step.
+
+  Return value:
+
+    None.
+
+--*/
+{
+    uint16_t h = (uint16_t)(SCREEN_H - g_wShakeLevel);
+
+    if (present)
+    {
+        // A padded update shows consecutive rows from the given pointer in the region.
+        if (g_wShakeTime & 1)
+            DRIVER_FrameShow(pixels + g_wShakeLevel * SCREEN_W, 0, 0, SCREEN_W, h, true);
+        else
+            DRIVER_FrameShow(pixels, 0, g_wShakeLevel, SCREEN_W, h, true);
+    }
+    g_wShakeTime--;
+}
+
 void VIDEO_UpdateScreen(const VIDEO_Rect *lpRect)
 /*++
   Purpose:
@@ -160,8 +194,7 @@ void VIDEO_UpdateScreen(const VIDEO_Rect *lpRect)
     }
     else if (g_wShakeTime != 0)
     {
-        g_wShakeTime--;
-        DRIVER_FrameShow(gpScreen->pixels, 0, (uint16_t)((g_wShakeTime & 0x1) * g_wShakeLevel), SCREEN_W, (uint16_t)(SCREEN_H - g_wShakeLevel), true);
+        VIDEO_ShowShaken(gpScreen->pixels, 1);
     }
     else
         DRIVER_FrameShow(gpScreen->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
@@ -244,7 +277,6 @@ void VIDEO_FadeScreen(uint16_t wSpeed)
     uint32_t i, j, k;
     const uint32_t rgIndex[6] = {0, 3, 1, 5, 2, 4};
     uint8_t a, b;
-    VIDEO_Rect ROI = {0, 0, SCREEN_W, SCREEN_H};
 
     wSpeed = (wSpeed + 1) * 10;
 
@@ -257,13 +289,6 @@ void VIDEO_FadeScreen(uint16_t wSpeed)
             // Wait for the previous step first, like the original: 72 steps, 71 waits.
             UTIL_TransitionWait(&clock);
             int present = UTIL_TransitionStep(&clock, wSpeed);
-            // Draw the backup buffer to the screen
-            if (g_wShakeTime != 0)
-            {
-                ROI.y = (g_wShakeTime & 1) ? g_wShakeLevel : 0;
-                ROI.h = SCREEN_H - g_wShakeLevel;
-                g_wShakeTime--;
-            }
 
             for (k = rgIndex[j]; k < SCREEN_SIZE; k += 6)
             {
@@ -279,7 +304,11 @@ void VIDEO_FadeScreen(uint16_t wSpeed)
                 }
                 gpBackup[0]->pixels[k] = (a & 0xF0) | (b & 0x0F);
             }
-            if (present) DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, true);
+            // Draw the backup buffer to the screen
+            if (g_wShakeTime != 0)
+                VIDEO_ShowShaken(gpBackup[0]->pixels, present);
+            else if (present)
+                DRIVER_FrameShow(gpBackup[0]->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
         }
     }
 

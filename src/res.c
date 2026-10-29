@@ -180,7 +180,9 @@ void PAL_SetLoadFlags(
 /*++
   Purpose:
 
-    Set flags to load resources.
+    Set flags to load resources. Like the original, nothing is loaded here:
+    PAL_StartFrame loads at the start of the next frame, and the few callers
+    that need the resources at once call PAL_LoadResources themselves.
 
   Parameters:
 
@@ -195,7 +197,6 @@ void PAL_SetLoadFlags(
     if (gpResources)
     {
         gpResources->bLoadFlags |= bFlags;
-        PAL_LoadResources();
     }
 }
 

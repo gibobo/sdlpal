@@ -105,10 +105,8 @@ void DRIVER_FrameShow(
             }
             else
             {
-                // Non-ROI scanline - fast memset
+                // Non-ROI scanline - fast memset. The ROI starts at the first frame row.
                 memset(dst, 0, VIDEO_SCREEN_W * sizeof(uint16_t));
-                if (y < roi_y2)
-                    src += VIDEO_SCREEN_W;
             }
             dst += VIDEO_SCREEN_W;
         }
@@ -144,12 +142,7 @@ void DRIVER_FrameShow(
                 memcpy(dst + roi_x, src + roi_x, roi_x2 - roi_x);
                 src += VIDEO_SCREEN_W;
             }
-            else
-            {
-                // Non-ROI scanline - fast memset for entire line
-                if (y < roi_y2)
-                    src += VIDEO_SCREEN_W;
-            }
+            // Non-ROI scanlines stay black; the ROI starts at the first frame row.
             dst += VIDEO_SCREEN_W;
         }
     }

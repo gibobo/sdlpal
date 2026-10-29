@@ -559,7 +559,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
         // VIDEO_UpdateScreen(NULL);
     }
 
-    // PAL_ClearKeyState();
+    PAL_ClearKeyState();
 
     g_TextLib.fUserSkip = false;
 }
@@ -683,6 +683,7 @@ int TEXT_DisplayText(
                 if (!isDialog && !g_TextLib.fUserSkip)
                 {
                     VIDEO_UpdateScreen(NULL);
+                    PAL_ClearKeyState();
                     UTIL_Delay(g_TextLib.iDelayTime * 8);
                     if (PAL_GetKeyInput() & (kKeySearch | kKeyMenu))
                     {
@@ -716,7 +717,7 @@ void PAL_ShowDialogText(
     VIDEO_Rect rect;
     int32_t x, y;
 
-    // PAL_ClearKeyState();
+    PAL_ClearKeyState();
     g_TextLib.bIcon = 0;
 
     if (gpGlobals->fInBattle && !g_fUpdatedInBattle)

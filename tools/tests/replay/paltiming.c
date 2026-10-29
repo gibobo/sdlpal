@@ -6,8 +6,10 @@
 // and the time-driven fades last the same no matter how slow presenting is.
 #include "../../../src/driver.h"
 #include "../../../src/global.h"
+#include "../../../src/input.h"
 #include "../../../src/main.h"
 #include "../../../src/palette.h"
+#include "../../../src/res.h"
 #include "../../../src/rngplay.h"
 #include "../../../src/util.h"
 #include "../../../src/video.h"
@@ -23,17 +25,19 @@ static uint32_t g_dwWorkMs = 0;
 static uint32_t g_dwTestStart = 0;
 static const char *g_pszTest = "init";
 static int g_nFailures = 0;
+static const uint8_t *g_pLastFrame = NULL;
+static uint16_t g_rgLastRoi[5];
 
-// Present: charge the simulated work to the virtual clock.
+// Present: remember what was shown and charge the simulated work to the virtual clock.
 void DRIVER_FrameShow(uint8_t *frame, const uint16_t roi_x, const uint16_t roi_y, const uint16_t roi_w,
                       const uint16_t roi_h, const uint8_t padding_flag)
 {
-    (void)frame;
-    (void)roi_x;
-    (void)roi_y;
-    (void)roi_w;
-    (void)roi_h;
-    (void)padding_flag;
+    g_pLastFrame = frame;
+    g_rgLastRoi[0] = roi_x;
+    g_rgLastRoi[1] = roi_y;
+    g_rgLastRoi[2] = roi_w;
+    g_rgLastRoi[3] = roi_h;
+    g_rgLastRoi[4] = padding_flag;
     REPLAY_AdvanceClock(g_dwWorkMs);
 }
 
@@ -94,6 +98,22 @@ static void EndTransition(uint32_t nominal, uint32_t step)
     End(nominal + g_dwWorkMs, step + g_dwWorkMs);
 }
 
+// Report a check that does not measure time.
+static void Check(const char *name, bool ok)
+{
+    printf("%s %s\n", ok ? "PASS" : "FAIL", name);
+    if (!ok)
+        g_nFailures++;
+}
+
+// Whether the last present showed full-width rows of gpScreen from the given row in the given region.
+static bool LastShow(uint32_t first_row, uint16_t roi_y, uint16_t roi_h, uint8_t padding_flag)
+{
+    return g_pLastFrame == gpScreen->pixels + first_row * SCREEN_W && g_rgLastRoi[0] == 0 &&
+           g_rgLastRoi[1] == roi_y && g_rgLastRoi[2] == SCREEN_W && g_rgLastRoi[3] == roi_h &&
+           g_rgLastRoi[4] == padding_flag;
+}
+
 // Run every timing case with the given simulated work per present.
 int main(int argc, char *argv[])
 {
@@ -102,6 +122,7 @@ int main(int argc, char *argv[])
     // Start a new game so scene-based transitions have a scene to draw.
     PAL_Init();
     PAL_ReloadInNextTick(0);
+    PAL_LoadResources();
     PAL_SetPalette(0, false);
     g_dwWorkMs = w;
     printf("simulated work: %u ms per present\n", w);
@@ -114,6 +135,29 @@ int main(int argc, char *argv[])
         UTIL_FrameDelay(start, FRAME_TIME);
     }
     End(w > FRAME_TIME ? w : FRAME_TIME, 1);
+
+    // Like the original game, waiting keeps the keys pressed before the wait;
+    // only an explicit clear or a key wait drops them.
+    PAL_ClearKeyState();
+    PAL_KeyDown(kKeyMenu);
+    PAL_KeyUp(kKeyMenu);
+    UTIL_Delay(FRAME_TIME);
+    Check("delay keeps keys", (PAL_GetKeyInput() & kKeyMenu) != 0);
+    UTIL_FrameDelay(UTIL_GetMilliseconds(), FRAME_TIME);
+    Check("frame delay keeps keys", (PAL_GetKeyInput() & kKeyMenu) != 0);
+    UTIL_WaitKeys(FRAME_TIME, 0);
+    Check("key wait drops old keys", PAL_GetKeyInput() == kKeyNone);
+
+    // Screen shake, like the original game: each present tests the remaining
+    // count before using it up; odd counts move the picture up by the level,
+    // even counts move it down.
+    VIDEO_ShakeScreen(2, 3);
+    VIDEO_UpdateScreen(NULL);
+    Check("shake even count moves down", LastShow(0, 3, SCREEN_H - 3, 1));
+    VIDEO_UpdateScreen(NULL);
+    Check("shake odd count moves up", LastShow(3, 0, SCREEN_H - 3, 1));
+    VIDEO_UpdateScreen(NULL);
+    Check("shake ends", LastShow(0, 0, SCREEN_H, 0));
 
     // Time-driven fades: 60 steps of 10*d ms, ending one step after the last.
     Begin("fade-out d=1");

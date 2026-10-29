@@ -117,9 +117,6 @@ void PAL_BattleUIPlayerReady(
 void PAL_BattleUIUpdate(
     void);
 
-// Draw the persistent auto-attack label without processing input/actions.
-void PAL_BattleUIDrawAutoAttack(void);
-
 void PAL_BattleUIShowNum(
     uint16_t wNum,
     uint32_t pos,

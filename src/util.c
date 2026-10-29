@@ -223,6 +223,8 @@ void UTIL_DelayUntil(uint32_t dwDeadline)
 
     Process events until the given time. A deadline that has already passed
     still polls input once, so a frame whose work overran keeps responding.
+    Like the original game, keys pressed before the wait are kept; callers
+    that want only new presses call PAL_ClearKeyState first.
 
   Parameters:
 
@@ -234,9 +236,6 @@ void UTIL_DelayUntil(uint32_t dwDeadline)
 
 --*/
 {
-    // Clear previous key states
-    PAL_ClearKeyState();
-
     if ((int32_t)(dwDeadline - UTIL_GetMilliseconds()) <= 0)
     {
 #if defined(ARDUINO_ARCH_ESP32)

@@ -1,6 +1,7 @@
 // Replay video driver: records one line per presented frame (present index,
 // virtual time, frame number, state hash, screen hash, palette hash) and can
-// save chosen frames as PNG files for writing scenarios.
+// save chosen frames as PNG files for writing scenarios. The screen hash and the
+// PNG files show the displayed picture, composed like the real video drivers.
 //
 // Environment: PAL_REPLAY_OUT (trace file, required), PAL_REPLAY_WORK_MS (virtual
 // milliseconds of simulated work per present, default 0), PAL_REPLAY_DUMP
@@ -22,6 +23,7 @@ static const char *g_pszTrace = NULL;
 static uint32_t g_nPresents = 0;
 static uint32_t g_dwWorkMs = 0;
 static uint8_t g_rgPalette[256 * 3];
+static uint8_t g_rgDisplay[SCREEN_SIZE];
 static uint64_t g_qwPaletteHash = REPLAY_FNV_OFFSET;
 static uint32_t g_rgDumps[MAX_DUMPS];
 static int g_nDumps = 0;
@@ -168,6 +170,37 @@ void DRIVER_UpdatePalette(const uint8_t *rgPalette)
     g_qwPaletteHash = REPLAY_HashBytes(REPLAY_FNV_OFFSET, g_rgPalette, sizeof(g_rgPalette));
 }
 
+// Copy the region of interest to the displayed picture, as the video drivers do:
+// without padding, rows outside the region keep what was shown before; with
+// padding, the region shows consecutive frame rows from the first one and the
+// rest of the picture is black.
+static void ComposeDisplay(const uint8_t *frame, uint16_t roi_x, uint16_t roi_y, uint16_t roi_w, uint16_t roi_h,
+                           uint8_t padding_flag)
+{
+    const uint8_t *src = frame;
+    uint32_t x, y;
+
+    for (y = 0; y < SCREEN_H; y++)
+    {
+        uint8_t *dst = g_rgDisplay + y * SCREEN_W;
+        if (y >= roi_y && y < (uint32_t)roi_y + roi_h)
+        {
+            for (x = 0; x < SCREEN_W; x++)
+            {
+                if (x >= roi_x && x < (uint32_t)roi_x + roi_w)
+                    dst[x] = src[x];
+                else if (padding_flag)
+                    dst[x] = 0;
+            }
+            src += SCREEN_W;
+        }
+        else if (padding_flag)
+            memset(dst, 0, SCREEN_W);
+        else
+            src += SCREEN_W;
+    }
+}
+
 // Record the presented frame and charge the simulated work to the virtual clock.
 void DRIVER_FrameShow(
     uint8_t *frame,
@@ -177,11 +210,11 @@ void DRIVER_FrameShow(
     const uint16_t roi_h,
     const uint8_t padding_flag)
 {
-    uint16_t roi[5] = {roi_x, roi_y, roi_w, roi_h, padding_flag};
-    uint64_t screen = REPLAY_HashBytes(REPLAY_FNV_OFFSET, frame, SCREEN_SIZE);
+    uint64_t screen;
     int i;
 
-    screen = REPLAY_HashBytes(screen, roi, sizeof(roi));
+    ComposeDisplay(frame, roi_x, roi_y, roi_w, roi_h, padding_flag);
+    screen = REPLAY_HashBytes(REPLAY_FNV_OFFSET, g_rgDisplay, SCREEN_SIZE);
     g_nPresents++;
     REPLAY_AdvanceClock(g_dwWorkMs);
     fprintf(g_fpTrace, "%u %u %u %016llx %016llx %016llx\n", g_nPresents,
@@ -195,7 +228,7 @@ void DRIVER_FrameShow(
         {
             char path[1024];
             snprintf(path, sizeof(path), "%s.%u.png", g_pszTrace, g_nPresents);
-            DumpFrame(frame, path);
+            DumpFrame(g_rgDisplay, path);
         }
     }
 }

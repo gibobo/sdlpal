@@ -12,7 +12,7 @@ time.
 
 Changed-scene tests also cover zero transfers for identical frames, separated
 dirty bands, moving sprites clearing their old position, palette-only changes,
-consecutive padded shake/ROI frames and a covering-rectangle fallback when the
+consecutive ROI frames, shake frames in both directions and a covering-rectangle fallback when the
 caller provides fewer output regions than required.
 
 ```powershell

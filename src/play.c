@@ -24,6 +24,7 @@
 #include "input.h"
 #include "itemmenu.h"
 #include "palcommon.h"
+#include "res.h"
 #include "scene.h"
 #include "script.h"
 #include "ui.h"
@@ -501,7 +502,7 @@ void PAL_Search(
             //
             VIDEO_UpdateScreen(NULL);
             UTIL_Delay(50);
-            // PAL_ClearKeyState();
+            PAL_ClearKeyState();
 
             return; // don't go further
         }
@@ -513,7 +514,9 @@ void PAL_StartFrame(
 /*++
   Purpose:
 
-    Starts a video frame. Called once per video frame.
+    Starts a video frame. Called once per video frame. Like the original
+    game's main loop, the frame waits first and then acts on the keys
+    pressed since the previous frame.
 
   Parameters:
 
@@ -525,7 +528,26 @@ void PAL_StartFrame(
 
 --*/
 {
-    uint32_t frame_start = UTIL_GetMilliseconds();
+    static uint32_t frame_start;
+    static bool frame_started = false;
+
+    // The first frame starts at once.
+    if (!frame_started)
+    {
+        frame_start = UTIL_GetMilliseconds() - FRAME_TIME;
+        frame_started = true;
+    }
+
+    // Load the resources requested since the last frame
+    PAL_LoadResources();
+
+    // Clear the input state of the previous frame
+    PAL_ClearKeyState();
+
+    // Wait for the time of one frame. Accept input here.
+    UTIL_FrameDelay(frame_start, FRAME_TIME);
+    frame_start = UTIL_GetMilliseconds();
+
     // Run the game logic of one frame
     PAL_GameUpdate(true);
     if (gpGlobals->fEnteringScene)
@@ -541,9 +563,6 @@ void PAL_StartFrame(
 
     // Update the screen
     VIDEO_UpdateScreen(NULL);
-
-    // Wait for the time of one frame. Accept input here.
-    UTIL_FrameDelay(frame_start, FRAME_TIME);
 
     if (PAL_GetKeyInput() & kKeyMenu)
     {

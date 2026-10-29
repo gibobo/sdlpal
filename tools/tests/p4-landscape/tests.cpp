@@ -24,11 +24,11 @@ static void present(Rect r) {
             std::memcpy(screen+(y+row)*ScreenW+r.x,band+row*r.w,r.w*sizeof(uint16_t));
     }
 }
-static void referenceUpdate(unsigned x,unsigned y,unsigned w,unsigned h,bool pad) {
+static void referenceUpdate(const uint8_t *source,unsigned x,unsigned y,unsigned w,unsigned h,bool pad) {
     unsigned right=std::min(x+w,(unsigned)GameW), bottom=std::min(y+h,(unsigned)GameH);
     if(!w || !h || x>=GameW || y>=GameH) return;
     // Independent SDL source advancement: padded frames start at source row zero.
-    const uint8_t *src=frame;
+    const uint8_t *src=source;
     for(unsigned row=0;row<GameH;++row) {
         if(row>=y && row<bottom) {
             for(unsigned col=0;col<GameW;++col) {
@@ -44,7 +44,7 @@ static void renderCase(unsigned x,unsigned y,unsigned w,unsigned h,bool pad) {
     std::fill(scene,scene+GameW*GameH,0xbeef);
     std::copy(scene,scene+GameW*GameH,reference);
     present({0,0,ScreenW,ScreenH});
-    referenceUpdate(x,y,w,h,pad);
+    referenceUpdate(frame,x,y,w,h,pad);
     Rect dirty=updateScene(scene,frame,palette,x,y,w,h,pad);
     check(std::memcmp(scene,reference,sizeof(scene))==0,"ROI/shake must match SDL");
     present(dirty);
@@ -134,12 +134,15 @@ static void changedRegionTests() {
     for(int step=0;step<60;++step) {
         for(int y=0;y<GameH;++y) for(int x=0;x<GameW;++x)
             frame[y*GameW+x]=(x>=step*3&&x<step*3+17&&y>=53&&y<81)?1:0;
-        // Alternate normal, clipped ROI and shifted/padded frames, as in shake.
-        unsigned y=step%3==2?4:0, x=step%3==1?13:0;
-        unsigned w=GameW-x,h=GameH-y;
-        bool pad=step%3==2;
-        referenceUpdate(x,y,w,h,pad);
-        n=updateSceneChanges(scene,frame,palette,x,y,w,h,pad,regions,MaxSceneChanges);
+        // Alternate normal, clipped ROI and both shake frames: moved down by a
+        // padded region, and moved up by a padded region read from a later row.
+        bool up=step%4==3;
+        unsigned y=step%4==2?4:0, x=step%4==1?13:0;
+        unsigned w=GameW-x,h=GameH-(up?4:y);
+        bool pad=step%4>=2;
+        const uint8_t *source=up?frame+4*GameW:frame;
+        referenceUpdate(source,x,y,w,h,pad);
+        n=updateSceneChanges(scene,source,palette,x,y,w,h,pad,regions,MaxSceneChanges);
         check(std::memcmp(scene,reference,sizeof(scene))==0,"incremental scene follows independent SDL reference");
         for(int i=0;i<n;++i) present(regions[i]);
         bool same=true;

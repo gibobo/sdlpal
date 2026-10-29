@@ -618,7 +618,8 @@ PAL_BattleUIPickAutoMagic(
     return wMagic;
 }
 
-void PAL_BattleUIDrawAutoAttack(void)
+// Draw the persistent auto-attack label without processing input/actions.
+static void PAL_BattleUIDrawAutoAttack(void)
 {
     if (UI_Battle->fAutoAttack && !gpGlobals->fAutoBattle)
     {

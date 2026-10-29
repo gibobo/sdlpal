@@ -1913,6 +1913,7 @@ PAL_InterpretInstruction(
             if (!gpGlobals->fInBattle && pScript->rgwOperand[2])
             {
                 PAL_SetLoadFlags(kLoadPlayerSprite);
+                PAL_LoadResources();
             }
             break;
 
@@ -2094,6 +2095,7 @@ PAL_InterpretInstruction(
             // Reload the player sprites
             //
             PAL_SetLoadFlags(kLoadPlayerSprite);
+            PAL_LoadResources();
 
             memset(gpGlobals->rgPoisonStatus, 0, sizeof(gpGlobals->rgPoisonStatus));
             PAL_UpdateEquipments();
@@ -2610,6 +2612,7 @@ PAL_InterpretInstruction(
                     gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + curFollower].wPlayerRole = pScript->rgwOperand[i];
 
                     PAL_SetLoadFlags(kLoadPlayerSprite);
+                    PAL_LoadResources();
 
                     //
                     // Update the position and gesture for the follower
@@ -2635,6 +2638,7 @@ PAL_InterpretInstruction(
             {
                 gpGlobals->g.rgScene[gpGlobals->wNumScene - 1].wMapNum = pScript->rgwOperand[1];
                 PAL_SetLoadFlags(kLoadScene);
+                PAL_LoadResources();
             }
             else
             {

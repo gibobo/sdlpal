@@ -41,6 +41,10 @@
 
 BATTLE *g_Battle = NULL;
 BATTLEUI *UI_Battle = NULL;
+// The battle state is allocated per battle, but each player's last action
+// outlives it: Repeat on a battle's first turn repeats the previous battle's
+// action, as with the original's static battle state.
+static BATTLEACTION g_rgPrevAction[MAX_PLAYERS_IN_PARTY];
 static VIDEO_Surface *lpBackground = NULL;
 static VIDEO_Surface *lpSceneBuf = NULL;
 extern uint8_t *gpSpriteUI;
@@ -591,7 +595,9 @@ void PAL_BattleFadeScene(
     int32_t i, j, k;
     uint8_t a, b;
     uint8_t *pSrc = lpSceneBuf->pixels;
-    uint8_t *pDst = gpScreen->pixels;
+    // Blend from the screen the caller backed up, so the battle UI drawn on
+    // top of each step never feeds back into the blend.
+    uint8_t *pDst = VIDEO_GetBackupSurface(0)->pixels;
     const int rgIndex[6] = {0, 3, 1, 5, 2, 4};
 
     UTIL_TransitionClock clock;
@@ -625,13 +631,12 @@ void PAL_BattleFadeScene(
                 pDst[k] = (a & 0xF0) | (b & 0x0F);
             }
 
-            // Keep the auto-attack overlay at its normal color while the scene
-            // blends. Do not run UIUpdate here: it also processes commands.
+            // Show the blend with the battle UI, which keeps taking commands
+            // during the fade like the original.
+            VIDEO_RestoreScreen(gpScreen);
+            PAL_BattleUIUpdate();
             if (present)
-            {
-                PAL_BattleUIDrawAutoAttack();
                 VIDEO_UpdateScreen(NULL);
-            }
         }
     }
 
@@ -665,6 +670,7 @@ PAL_BattleMain(
 --*/
 {
     int32_t i;
+    uint32_t frame_start;
 
     VIDEO_BackupScreen(gpScreen);
 
@@ -718,20 +724,25 @@ PAL_BattleMain(
         g_Battle->BattleResult = kBattleResultOnGoing;
     }
 
+    // The first battle frame starts at once.
+    frame_start = UTIL_GetMilliseconds() - BATTLE_FRAME_TIME;
+
+    PAL_ClearKeyState();
+
     //
     // Run the main battle loop.
     //
     while (g_Battle->BattleResult == kBattleResultOnGoing) // Break out if the battle ended.
     {
-        uint32_t frame_start = UTIL_GetMilliseconds();
+        // Wait for the time of one frame. Accept input here.
+        UTIL_FrameDelay(frame_start, BATTLE_FRAME_TIME);
+        frame_start = UTIL_GetMilliseconds();
+
         // Run the main frame routine.
         PAL_BattleStartFrame();
 
         // Update the screen.
         VIDEO_UpdateScreen(NULL);
-
-        // Wait for the time of one frame. Accept input here.
-        UTIL_FrameDelay(frame_start, BATTLE_FRAME_TIME);
     }
 
     //
@@ -1373,6 +1384,10 @@ PAL_StartBattle(
     g_Battle = (BATTLE *)UTIL_malloc(sizeof(BATTLE));
     UI_Battle = (BATTLEUI *)UTIL_malloc(sizeof(BATTLEUI));
 
+    // Restore each player's last action from the previous battle for Repeat
+    for (i = 0; i < MAX_PLAYERS_IN_PARTY; i++)
+        g_Battle->rgPlayer[i].prevAction = g_rgPrevAction[i];
+
     // Set the screen waving effects
     wPrevWaveLevel = gpGlobals->wScreenWave;
     sPrevWaveProgression = gpGlobals->sWaveProgression;
@@ -1525,6 +1540,8 @@ PAL_StartBattle(
 
     lpBackground = NULL;
     lpSceneBuf = NULL;
+    for (i = 0; i < MAX_PLAYERS_IN_PARTY; i++)
+        g_rgPrevAction[i] = g_Battle->rgPlayer[i].prevAction;
     UTIL_free(g_Battle);
     UTIL_free(UI_Battle);
     g_Battle = NULL;
