@@ -41,6 +41,9 @@
 #include <setjmp.h>
 #include <stdbool.h>
 
+// Length of the splash screen's palette fade-in, in milliseconds.
+#define SPLASH_FADE_TIME 15000U
+
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;
 
@@ -310,7 +313,7 @@ void PAL_SplashScreen(void)
     uint32_t i;
     uint16_t iImgPos = SCREEN_H;
     uint16_t iTitleHeight;
-    uint32_t dwTime = 0;
+    uint32_t dwBeginTime, dwTime = 0, dwFrame = 0;
 
     if (palette == NULL)
     {
@@ -350,19 +353,22 @@ void PAL_SplashScreen(void)
     dstrect.x = 0;
     dstrect.w = SCREEN_W;
 
+    dwBeginTime = UTIL_GetMilliseconds();
     while (true)
     {
-        dwTime++;
-        // Set the palette
-        if (dwTime <= iTitleHeight)
+        // Like the original, the palette fades in over 15 seconds of real time
+        // and each frame starts 85 ms after the previous one's start.
+        dwTime = UTIL_GetMilliseconds() - dwBeginTime;
+        dwFrame++;
+        if (dwTime < SPLASH_FADE_TIME)
         {
             for (i = 0; i < PALETTE_SIZE; i++)
-                rgCurrentPalette[i] = (uint8_t)(palette[i] * dwTime / iTitleHeight);
+                rgCurrentPalette[i] = (uint8_t)(palette[i] * ((float)dwTime / SPLASH_FADE_TIME));
             VIDEO_SetPalette(rgCurrentPalette);
         }
 
         // Draw the screen
-        if (iImgPos)
+        if (iImgPos > 1)
             iImgPos--;
 
         // The lower part...
@@ -385,57 +391,63 @@ void PAL_SplashScreen(void)
         {
             if (cranepos[i * 3 + 0] > -35)
             {
+                // Advance the wing frame and the glide before drawing, as the original does
+                cranepos[i * 3 + 2] = (cranepos[i * 3 + 2] + ((dwFrame - 1) & 1)) % 8;
+                cranepos[i * 3 + 1] += (iImgPos > 1 && (iImgPos & 1)) ? 1 : 0;
                 const uint8_t *lpFrame = PAL_SpriteGetFrame(lpSpriteCrane, cranepos[i * 3 + 2]);
                 PAL_RLEBlitToSurface(lpFrame, gpScreen, PAL_XY(cranepos[i * 3 + 0], cranepos[i * 3 + 1]));
                 cranepos[i * 3 + 0]--;
-                cranepos[i * 3 + 1] += (iImgPos & 1) ? 1 : 0;
-                cranepos[i * 3 + 2] += (dwTime & 1);
-                cranepos[i * 3 + 2] %= 8;
             }
         }
 
         // Draw the title...
-        if (dwTime < iTitleHeight)
+        if (dwFrame < iTitleHeight)
         {
-            lpBitmapTitle[2] = (dwTime & 0xFF);
-            lpBitmapTitle[3] = (dwTime >> 8) & 0xFF;
+            lpBitmapTitle[2] = (dwFrame & 0xFF);
+            lpBitmapTitle[3] = (dwFrame >> 8) & 0xFF;
         }
 
         PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
         VIDEO_UpdateScreen(NULL);
 
-        // Check for keypress...
-        if (UTIL_WaitKeys(85, kKeyMenu | kKeySearch))
+        // Wait for the next frame, then check for a keypress
+        UTIL_DelayUntil(dwBeginTime + dwTime + 85);
+        if (PAL_GetKeyInput() & (kKeyMenu | kKeySearch))
             break;
     }
     // Quit the splash screen
     lpBitmapTitle[2] = (uint8_t)(iTitleHeight & 0xFF);
     lpBitmapTitle[3] = (uint8_t)((iTitleHeight >> 8) & 0xFF); // HACKHACK
     PAL_RLEBlitToSurface(lpBitmapTitle, gpScreen, PAL_XY(255, 10));
-
-    // If the picture has not completed fading in, complete the rest
-    UTIL_TransitionClock title_clock;
-    UTIL_TransitionBegin(&title_clock);
-    while (dwTime < iTitleHeight)
-    {
-        int present = UTIL_TransitionStep(&title_clock, 8);
-        for (i = 0; i < PALETTE_SIZE; i++)
-            rgCurrentPalette[i] = (uint8_t)(palette[i] * dwTime / iTitleHeight);
-        if (present) {
-            VIDEO_SetPalette(rgCurrentPalette);
-            VIDEO_UpdateScreen(NULL);
-        }
-        UTIL_TransitionWait(&title_clock, 8);
-        dwTime += 4;
-    }
-    VIDEO_SetPalette(palette);
     VIDEO_UpdateScreen(NULL);
-    UTIL_TransitionFinish(&title_clock, "title-fade");
+
+    // If the picture has not completed fading in, complete the rest quickly
+    if (dwTime < SPLASH_FADE_TIME)
+    {
+        UTIL_TransitionClock title_clock;
+        UTIL_TransitionBegin(&title_clock);
+        while (dwTime < SPLASH_FADE_TIME)
+        {
+            int present = UTIL_TransitionStep(&title_clock, 8);
+            for (i = 0; i < PALETTE_SIZE; i++)
+                rgCurrentPalette[i] = (uint8_t)(palette[i] * ((float)dwTime / SPLASH_FADE_TIME));
+            if (present)
+            {
+                VIDEO_SetPalette(rgCurrentPalette);
+                VIDEO_UpdateScreen(NULL);
+            }
+            UTIL_TransitionWait(&title_clock);
+            dwTime += 250;
+        }
+        VIDEO_SetPalette(palette);
+        VIDEO_UpdateScreen(NULL);
+        UTIL_TransitionFinish(&title_clock, "title-fade");
+        UTIL_Delay(500);
+    }
 
     UTIL_free(cranepos);
     UTIL_free(lpTitleBuf);
     UTIL_free(lpSpriteCrane);
-    UTIL_Delay(500);
 
     AUDIO_PlayMusic(0x00, false, 1);
     PAL_FadeOut(1);

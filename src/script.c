@@ -150,12 +150,17 @@ PAL_PartyWalkTo(
 --*/
 {
     int32_t xOffset, yOffset, i, dx, dy;
+    uint32_t dwTime = UTIL_GetMilliseconds();
 
     xOffset = x * 32 + h * 16 - (PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset));
     yOffset = y * 16 + h * 8 - (PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset));
 
     while (xOffset != 0 || yOffset != 0)
     {
+        // Wait for the previous step's frame; the first step starts at once
+        UTIL_DelayUntil(dwTime);
+        dwTime = UTIL_GetMilliseconds() + FRAME_TIME;
+
         // Store trail
         for (i = 3; i >= 0; i--)
         {
@@ -204,7 +209,6 @@ PAL_PartyWalkTo(
         PAL_GameUpdate(false);
         PAL_MakeScene();
         VIDEO_UpdateScreen(NULL);
-        UTIL_Delay(FRAME_TIME);
 
         xOffset = x * 32 + h * 16 - (PAL_X(gpGlobals->viewport) + PAL_X(gpGlobals->partyoffset));
         yOffset = y * 16 + h * 8 - (PAL_Y(gpGlobals->viewport) + PAL_Y(gpGlobals->partyoffset));
@@ -247,6 +251,7 @@ PAL_PartyRideEventObject(
 {
     int32_t xOffset, yOffset, dx, dy, i;
     EVENTOBJECT *p;
+    uint32_t dwTime = UTIL_GetMilliseconds();
 
     p = &gpGlobals->g.lprgEventObject[wEventObjectID - 1];
 
@@ -255,6 +260,10 @@ PAL_PartyRideEventObject(
 
     while (xOffset != 0 || yOffset != 0)
     {
+        // Wait for the previous step's frame; the first step starts at once
+        UTIL_DelayUntil(dwTime);
+        dwTime = UTIL_GetMilliseconds() + FRAME_TIME;
+
         if (yOffset < 0)
         {
             gpGlobals->wPartyDirection = ((xOffset < 0) ? kDirWest : kDirNorth);
@@ -306,7 +315,6 @@ PAL_PartyRideEventObject(
         PAL_GameUpdate(false);
         PAL_MakeScene();
         VIDEO_UpdateScreen(NULL);
-        UTIL_Delay(FRAME_TIME);
 
         xOffset = x * 32 + h * 16 - PAL_X(gpGlobals->viewport) - PAL_X(gpGlobals->partyoffset);
         yOffset = y * 16 + h * 8 - PAL_Y(gpGlobals->viewport) - PAL_Y(gpGlobals->partyoffset);
@@ -1679,7 +1687,7 @@ PAL_InterpretInstruction(
             //
             // screen fade out
             //
-            // VIDEO_UpdateScreen(NULL);
+            VIDEO_UpdateScreen(NULL);
             PAL_FadeOut(pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1);
             gpGlobals->fNeedToFadeIn = true;
             break;
@@ -1688,7 +1696,7 @@ PAL_InterpretInstruction(
             //
             // screen fade in
             //
-            // VIDEO_UpdateScreen(NULL);
+            VIDEO_UpdateScreen(NULL);
             // The operand is signed: the data uses 0xFFFF (-1) for the shortest fade.
             PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette,
                        ((int16_t)pScript->rgwOperand[0] > 0) ? pScript->rgwOperand[0] : 1);
@@ -2205,6 +2213,7 @@ PAL_InterpretInstruction(
             }
             else
             {
+                uint32_t dwTime = UTIL_GetMilliseconds() + FRAME_TIME;
                 i = 0;
                 x = (signed short)(pScript->rgwOperand[0]);
                 y = (signed short)(pScript->rgwOperand[1]);
@@ -2251,7 +2260,8 @@ PAL_InterpretInstruction(
                     VIDEO_UpdateScreen(NULL);
 
                     // Delay for one frame
-                    UTIL_Delay(FRAME_TIME);
+                    UTIL_DelayUntil(dwTime);
+                    dwTime = UTIL_GetMilliseconds() + FRAME_TIME;
                 } while (++i < (signed short)(pScript->rgwOperand[2]));
             }
             break;
@@ -3125,17 +3135,23 @@ PAL_RunTriggerScript(
                 // wait for the specified number of frames
                 PAL_ClearDialog(true);
 
-                for (i = 0; i < (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1); i++)
                 {
-                    if (pScript->rgwOperand[2])
+                    // Each frame first waits out the previous one, like the original
+                    uint32_t dwTime = UTIL_GetMilliseconds() + FRAME_TIME;
+                    for (i = 0; i < (pScript->rgwOperand[0] ? pScript->rgwOperand[0] : 1); i++)
                     {
-                        PAL_UpdatePartyGestures(false);
-                    }
+                        UTIL_DelayUntil(dwTime);
+                        dwTime = UTIL_GetMilliseconds() + FRAME_TIME;
 
-                    PAL_GameUpdate(pScript->rgwOperand[1] ? true : false);
-                    PAL_MakeScene();
-                    VIDEO_UpdateScreen(NULL);
-                    UTIL_Delay(FRAME_TIME);
+                        if (pScript->rgwOperand[2])
+                        {
+                            PAL_UpdatePartyGestures(false);
+                        }
+
+                        PAL_GameUpdate(pScript->rgwOperand[1] ? true : false);
+                        PAL_MakeScene();
+                        VIDEO_UpdateScreen(NULL);
+                    }
                 }
                 wScriptEntry++;
                 break;

@@ -218,12 +218,9 @@ void VIDEO_SwitchScreen(void)
         for (j = rgIndex[i]; j < SCREEN_SIZE; j += 6)
             gpBackup[0]->pixels[j] = gpScreen->pixels[j];
         if (present) DRIVER_FrameShow(gpBackup[0]->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
-        UTIL_TransitionWait(&clock, 60);
+        UTIL_TransitionWait(&clock);
     }
-    if (UTIL_TransitionNeedsFinalFrame())
-    {
-        DRIVER_FrameShow(gpBackup[0]->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
-    }
+    DRIVER_FrameShow(gpBackup[0]->pixels, 0, 0, SCREEN_W, SCREEN_H, false);
     UTIL_TransitionFinish(&clock, "screen-switch");
 }
 
@@ -257,6 +254,8 @@ void VIDEO_FadeScreen(uint16_t wSpeed)
     {
         for (j = 0; j < 6; j++)
         {
+            // Wait for the previous step first, like the original: 72 steps, 71 waits.
+            UTIL_TransitionWait(&clock);
             int present = UTIL_TransitionStep(&clock, wSpeed);
             // Draw the backup buffer to the screen
             if (g_wShakeTime != 0)
@@ -281,7 +280,6 @@ void VIDEO_FadeScreen(uint16_t wSpeed)
                 gpBackup[0]->pixels[k] = (a & 0xF0) | (b & 0x0F);
             }
             if (present) DRIVER_FrameShow(gpBackup[0]->pixels, ROI.x, ROI.y, ROI.w, ROI.h, true);
-            UTIL_TransitionWait(&clock, wSpeed);
         }
     }
 

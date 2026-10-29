@@ -104,7 +104,7 @@ static void PAL_ShowFBP(
             }
 
             if (present) VIDEO_UpdateScreen(NULL);
-            UTIL_TransitionWait(&clock, fadeDelay);
+            UTIL_TransitionWait(&clock);
         }
         UTIL_TransitionFinish(&clock, "ending-fade");
     }

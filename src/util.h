@@ -86,17 +86,18 @@ void UTIL_free(void *ptr);
 // Platform-specific utilities
 uint32_t UTIL_GetMilliseconds(void);
 
-// A transition keeps all state updates; the platform decides whether to
-// present overdue steps and whether an explicit final presentation is needed.
+// A transition keeps its original length however slow presenting is: each step
+// adds its duration to a deadline, every state update still runs, and a step
+// that is already late is not presented. Callers always present the final state.
 typedef struct UTIL_TransitionClock {
     uint32_t start, deadline, presented, skipped;
 } UTIL_TransitionClock;
 void UTIL_TransitionBegin(UTIL_TransitionClock *clock);
 int UTIL_TransitionStep(UTIL_TransitionClock *clock, uint32_t duration);
-void UTIL_TransitionWait(UTIL_TransitionClock *clock, uint32_t duration);
+void UTIL_TransitionWait(UTIL_TransitionClock *clock);
 void UTIL_TransitionFinish(UTIL_TransitionClock *clock, const char *name);
-int UTIL_TransitionNeedsFinalFrame(void);
-// Desktop delays retain their original duration; budgeted platforms count work.
+// Wait until a frame that began at 'start' has lasted 'duration' ms; a frame
+// whose work took longer only polls input, so it lasts max(duration, work).
 void UTIL_FrameDelay(uint32_t start, uint32_t duration);
 // Returns nonzero when the driver was stopped before shared resource cleanup.
 int UTIL_PrepareShutdown(void);
@@ -120,6 +121,8 @@ extern "C" {
 #endif
 
 void UTIL_Sleep(uint32_t ms);
+
+void UTIL_DelayUntil(uint32_t dwDeadline);
 
 uint32_t UTIL_Delay(uint32_t ms);
 

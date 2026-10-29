@@ -148,7 +148,8 @@ include_directories(
 
 # Link libraries
 if(WIN32)
-    link_libraries(${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+    # winmm: timeBeginPeriod in src/util_clock.c
+    link_libraries(${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT} winmm)
 else()
     link_libraries(${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT} m)
 endif()

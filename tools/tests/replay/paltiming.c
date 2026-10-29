@@ -88,6 +88,12 @@ static void End(uint32_t expected, uint32_t tolerance)
         g_nFailures++;
 }
 
+// A transition lasts its nominal length plus the work of presenting its final state.
+static void EndTransition(uint32_t nominal, uint32_t step)
+{
+    End(nominal + g_dwWorkMs, step + g_dwWorkMs);
+}
+
 // Run every timing case with the given simulated work per present.
 int main(int argc, char *argv[])
 {
@@ -112,43 +118,46 @@ int main(int argc, char *argv[])
     // Time-driven fades: 60 steps of 10*d ms, ending one step after the last.
     Begin("fade-out d=1");
     PAL_FadeOut(1);
-    End(610, 10 + w);
+    EndTransition(610, 10);
     Begin("fade-out d=3");
     PAL_FadeOut(3);
-    End(1830, 30 + w);
+    EndTransition(1830, 30);
     Begin("fade-in d=1");
     PAL_FadeIn(0, false, 1);
-    End(610, 10 + w);
+    EndTransition(610, 10);
+    Begin("fade-out d=20");
+    PAL_FadeOut(20);
+    EndTransition(610 * 20, 200);
 
     // Stepped fades and screen transitions at their nominal step durations.
     Begin("color-fade d=1");
     PAL_ColorFade(1, 0x0F, false);
-    End(64 * 10, 10 + w);
+    EndTransition(64 * 10, 10);
     Begin("color-fade d=3");
     PAL_ColorFade(3, 0x0F, true);
-    End(64 * 30, 30 + w);
+    EndTransition(64 * 30, 30);
     Begin("palette-fade");
     PAL_PaletteFade(0, false, false);
-    End(32 * (FRAME_TIME / 4), FRAME_TIME / 4 + w);
+    EndTransition(32 * (FRAME_TIME / 4), FRAME_TIME / 4);
     Begin("palette-fade scene");
     PAL_PaletteFade(0, false, true);
-    End(32 * FRAME_TIME, FRAME_TIME + w);
+    EndTransition(32 * FRAME_TIME, FRAME_TIME);
     Begin("scene-fade s=1");
     PAL_SceneFade(0, false, 1);
-    End(64 * FRAME_TIME, FRAME_TIME + w);
+    EndTransition(64 * FRAME_TIME, FRAME_TIME);
     Begin("scene-fade s=-4");
     PAL_SceneFade(0, false, -4);
-    End(16 * FRAME_TIME, FRAME_TIME + w);
+    EndTransition(16 * FRAME_TIME, FRAME_TIME);
     Begin("fade-to-red");
     PAL_FadeToRed();
-    End(32 * 75, 75 + w);
+    EndTransition(32 * 75, 75);
     PAL_SetPalette(0, false);
     Begin("switch-screen");
     VIDEO_SwitchScreen();
-    End(6 * 60, 60 + w);
+    EndTransition(6 * 60, 60);
     Begin("fade-screen s=1");
     VIDEO_FadeScreen(1);
-    End(71 * 20, 20 + w);
+    EndTransition(71 * 20, 1);
 
     // RNG movie: frames 0..20 inclusive at 25 frames per second.
     Begin("rng-play 21 frames");

@@ -297,31 +297,41 @@ void PAL_RNGPlay(
 --*/
 {
     uint8_t *rng = NULL;
-    uint32_t iDelay = 1000 / (iSpeed > 0 ? iSpeed : 16);
+    uint32_t dwFramesPerSecond = (uint32_t)(iSpeed > 0 ? iSpeed : 16);
+    uint32_t dwFrame = 0;
+    UTIL_TransitionClock clock;
 
     // Avoid losing the last frame
     if (iEndFrame > 0)
         iEndFrame++;
 
+    UTIL_TransitionBegin(&clock);
     while (iStartFrame != iEndFrame)
     {
+        // Frame n ends n * 1000 / fps ms after the start, so whole-ms steps do not drift.
+        uint32_t duration = ((dwFrame + 1) * 1000U) / dwFramesPerSecond - (dwFrame * 1000U) / dwFramesPerSecond;
         int32_t RNGBlit_len = RES_RNGReadFrame((void **)&rng, iNumRNG, iStartFrame++, Res_RNG);
+        dwFrame++;
         if (RNGBlit_len <= 0)
             break; // Failed to get the frame, don't go further
         if (PAL_RNGBlitToSurface(rng, RNGBlit_len, gpScreen->pixels) < 0)
             break; // Failed to get the frame, don't go further
 
-        if (gpGlobals)
+        // Update the screen, unless this frame is already late
+        if (UTIL_TransitionStep(&clock, duration))
+            VIDEO_UpdateScreen(NULL);
+
+        // Fade in the screen if needed, then restart the timeline half a frame later
+        if (gpGlobals && gpGlobals->fNeedToFadeIn)
         {
-            // Fade in the screen if needed
-            if (gpGlobals->fNeedToFadeIn)
-                PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
+            PAL_FadeIn(gpGlobals->wNumPalette, gpGlobals->fNightPalette, 1);
             gpGlobals->fNeedToFadeIn = 0;
+            clock.deadline = UTIL_GetMilliseconds() + duration / 2;
         }
-        // Update the screen
-        VIDEO_UpdateScreen(NULL);
-        // Delay for a while
-        UTIL_Delay(iDelay);
+
+        // Delay until the frame's deadline
+        UTIL_TransitionWait(&clock);
     }
+    UTIL_TransitionFinish(&clock, "rng");
     UTIL_free(rng);
 }

@@ -324,10 +324,8 @@ void setup()
 void loop()
 {
 #ifdef PALGAME
-    // Wait for one frame duration and accept input
-    UTIL_Delay(FRAME_TIME);
-
-    // Execute main game frame logic
+    // Run one game frame. PAL_StartFrame waits for the frame deadline and
+    // accepts input itself, so waiting here too would slow the game down.
     PAL_StartFrame();
 #else
     // PAL game engine not enabled, just wait

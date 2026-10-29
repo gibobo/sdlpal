@@ -527,7 +527,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
         }
     }
 
-    while ((fMaxSeconds == 0.0f || UTIL_GetMilliseconds() <= dwTime) &&
+    while ((fMaxSeconds == 0.0f || (int32_t)(dwTime - UTIL_GetMilliseconds()) >= 0) &&
            (UTIL_WaitKeys(FRAME_TIME, 0) == kKeyNone))
     {
         if (g_TextLib.bDialogPosition != kDialogCenterWindow &&

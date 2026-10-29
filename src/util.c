@@ -217,18 +217,46 @@ void TerminateOnError(
     PAL_Shutdown(255);
 }
 
-uint32_t UTIL_Delay(uint32_t ms)
+void UTIL_DelayUntil(uint32_t dwDeadline)
+/*++
+  Purpose:
+
+    Process events until the given time. A deadline that has already passed
+    still polls input once, so a frame whose work overran keeps responding.
+
+  Parameters:
+
+    [IN]  dwDeadline - time to wait for, in UTIL_GetMilliseconds() units.
+
+  Return value:
+
+    None.
+
+--*/
 {
     // Clear previous key states
     PAL_ClearKeyState();
 
-    uint32_t end_time = UTIL_GetMilliseconds() + ms;
-    while (UTIL_GetMilliseconds() < end_time)
+    if ((int32_t)(dwDeadline - UTIL_GetMilliseconds()) <= 0)
+    {
+#if defined(ARDUINO_ARCH_ESP32)
+        // Let lower-priority tasks run even when the game is behind schedule.
+        UTIL_Sleep(1);
+#endif
+        PAL_ProcessEvent();
+        return;
+    }
+
+    while ((int32_t)(dwDeadline - UTIL_GetMilliseconds()) > 0)
     {
         UTIL_Sleep(1);
         PAL_ProcessEvent();
     }
+}
 
+uint32_t UTIL_Delay(uint32_t ms)
+{
+    UTIL_DelayUntil(UTIL_GetMilliseconds() + ms);
     return PAL_GetKeyInput();
 }
 
@@ -240,24 +268,20 @@ void UTIL_TransitionBegin(UTIL_TransitionClock *clock)
 
 int UTIL_TransitionStep(UTIL_TransitionClock *clock, uint32_t duration)
 {
-#if UTIL_PLATFORM_P4
-    return P4_TransitionStep(clock, duration);
-#else
     clock->deadline += duration;
+    // Skip only the presentation of a late step; callers still apply every state update.
+    if ((int32_t)(UTIL_GetMilliseconds() - clock->deadline) >= 0)
+    {
+        clock->skipped++;
+        return 0;
+    }
     clock->presented++;
     return 1;
-#endif
 }
 
-void UTIL_TransitionWait(UTIL_TransitionClock *clock, uint32_t duration)
+void UTIL_TransitionWait(UTIL_TransitionClock *clock)
 {
-#if UTIL_PLATFORM_P4
-    (void)duration;
-    P4_TransitionWait(clock);
-#else
-    (void)clock;
-    UTIL_Delay(duration);
-#endif
+    UTIL_DelayUntil(clock->deadline);
 }
 
 void UTIL_TransitionFinish(UTIL_TransitionClock *clock, const char *name)
@@ -270,18 +294,16 @@ void UTIL_TransitionFinish(UTIL_TransitionClock *clock, const char *name)
 #endif
 }
 
-int UTIL_TransitionNeedsFinalFrame(void)
-{
-    return UTIL_PLATFORM_P4;
-}
-
 void UTIL_FrameDelay(uint32_t start, uint32_t duration)
 {
+    uint32_t work = UTIL_GetMilliseconds() - start;
+
+    // A frame lasts max(duration, work), like the original game's deadline wait.
+    UTIL_DelayUntil(start + duration);
 #if UTIL_PLATFORM_P4
-    P4_FrameDelay(start, duration);
+    P4_FrameReport(start, duration, work);
 #else
-    (void)start;
-    UTIL_Delay(duration);
+    (void)work;
 #endif
 }
 
@@ -327,7 +349,7 @@ uint32_t UTIL_WaitKeys(uint32_t ms, uint32_t wait_keys)
 
     PALKEY pressed_key = kKeyNone;
     uint32_t end_time = UTIL_GetMilliseconds() + ms;
-    while ((ms == 0 || UTIL_GetMilliseconds() < end_time) && (pressed_key == kKeyNone))
+    while ((ms == 0 || (int32_t)(end_time - UTIL_GetMilliseconds()) > 0) && (pressed_key == kKeyNone))
     {
         UTIL_Sleep(1);
         PAL_ProcessEvent();

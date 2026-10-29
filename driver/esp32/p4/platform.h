@@ -6,10 +6,8 @@
 extern "C" {
 #endif
 uint32_t P4_GameMilliseconds(uint32_t raw);
-int P4_TransitionStep(UTIL_TransitionClock *clock, uint32_t duration);
-void P4_TransitionWait(UTIL_TransitionClock *clock);
 void P4_TransitionFinish(UTIL_TransitionClock *clock, const char *name);
-void P4_FrameDelay(uint32_t start, uint32_t duration);
+void P4_FrameReport(uint32_t start, uint32_t duration, uint32_t work);
 void P4_PrepareShutdown(void);
 void P4_FinishShutdown(int exit_code);
 void *P4_OpenMusicFile(const char *path, int32_t track, uint32_t rate, uint16_t channels);

@@ -600,6 +600,8 @@ void PAL_BattleFadeScene(
     {
         for (j = 0; j < 6; j++)
         {
+            // Wait for the previous step first, like the original: 72 steps, 71 waits.
+            UTIL_TransitionWait(&clock);
             int present = UTIL_TransitionStep(&clock, 16);
             // Blend the pixels in the 2 buffers, and put the result into the
             // backup buffer
@@ -630,7 +632,6 @@ void PAL_BattleFadeScene(
                 PAL_BattleUIDrawAutoAttack();
                 VIDEO_UpdateScreen(NULL);
             }
-            UTIL_TransitionWait(&clock, 16);
         }
     }
 
@@ -639,10 +640,7 @@ void PAL_BattleFadeScene(
     //
     PAL_BattleUpdateScreen();
     PAL_BattleUIUpdate();
-    if (UTIL_TransitionNeedsFinalFrame())
-    {
-        VIDEO_UpdateScreen(NULL);
-    }
+    VIDEO_UpdateScreen(NULL);
     UTIL_TransitionFinish(&clock, "battle-fade");
 
     // VIDEO_UpdateScreen(NULL);

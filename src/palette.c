@@ -134,7 +134,8 @@ void PAL_FadeOut(uint32_t iDelay)
     //
     UTIL_TransitionClock clock;
     UTIL_TransitionBegin(&clock);
-    for (j = 60; j > 0; j -= (iDelay > 10 ? iDelay / 10 : 1))
+    // Every level gets 10 * iDelay ms, as in the original's time-driven fade
+    for (j = 60; j > 0; j--)
     {
         int present = UTIL_TransitionStep(&clock, iDelay * 10);
         for (i = 0; i < PALETTE_SIZE; i++)
@@ -146,7 +147,7 @@ void PAL_FadeOut(uint32_t iDelay)
             VIDEO_SetPalette(new_palette);
             VIDEO_UpdateScreen(NULL);
         }
-        UTIL_TransitionWait(&clock, iDelay * 10);
+        UTIL_TransitionWait(&clock);
     }
 
     memset(new_palette, 0, sizeof(new_palette));
@@ -182,7 +183,8 @@ void PAL_FadeIn(int32_t iPaletteNum, uint8_t fNight, uint16_t iDelay)
     // Start fading in...
     UTIL_TransitionClock clock;
     UTIL_TransitionBegin(&clock);
-    for (j = 0; j < 60U; j += (iDelay > 10U ? iDelay / 10U : 1U))
+    // Every level gets 10 * iDelay ms, as in the original's time-driven fade
+    for (j = 0; j < 60U; j++)
     {
         int present = UTIL_TransitionStep(&clock, iDelay * 10U);
         for (i = 0; i < PALETTE_SIZE; i++)
@@ -194,15 +196,12 @@ void PAL_FadeIn(int32_t iPaletteNum, uint8_t fNight, uint16_t iDelay)
             VIDEO_SetPalette(newpalette);
             VIDEO_UpdateScreen(NULL);
         }
-        UTIL_TransitionWait(&clock, iDelay * 10U);
+        UTIL_TransitionWait(&clock);
     }
 
     VIDEO_SetPalette(palette);
     // VIDEO_UpdateScreen(NULL);
-    if (UTIL_TransitionNeedsFinalFrame())
-    {
-        VIDEO_UpdateScreen(NULL);
-    }
+    VIDEO_UpdateScreen(NULL);
     UTIL_TransitionFinish(&clock, "fade-in");
 }
 
@@ -270,7 +269,7 @@ void PAL_SceneFade(int32_t iPaletteNum, uint8_t fNight, int iStep)
                 VIDEO_UpdateScreen(NULL);
             }
 
-            UTIL_TransitionWait(&clock, FRAME_TIME);
+            UTIL_TransitionWait(&clock);
         }
     }
     else
@@ -295,14 +294,11 @@ void PAL_SceneFade(int32_t iPaletteNum, uint8_t fNight, int iStep)
                 VIDEO_UpdateScreen(NULL);
             }
 
-            UTIL_TransitionWait(&clock, FRAME_TIME);
+            UTIL_TransitionWait(&clock);
         }
     }
-    if (UTIL_TransitionNeedsFinalFrame())
-    {
-        VIDEO_SetPalette(newpalette);
-        VIDEO_UpdateScreen(NULL);
-    }
+    VIDEO_SetPalette(newpalette);
+    VIDEO_UpdateScreen(NULL);
     UTIL_TransitionFinish(&clock, "scene-fade");
 }
 
@@ -359,13 +355,10 @@ void PAL_PaletteFade(int32_t iPaletteNum, uint8_t fNight, int fUpdateScene)
         }
 
         if (present) VIDEO_UpdateScreen(NULL);
-        UTIL_TransitionWait(&clock, duration);
+        UTIL_TransitionWait(&clock);
     }
-    if (UTIL_TransitionNeedsFinalFrame())
-    {
-        VIDEO_SetPalette(tmp_palette);
-        VIDEO_UpdateScreen(NULL);
-    }
+    VIDEO_SetPalette(tmp_palette);
+    VIDEO_UpdateScreen(NULL);
     UTIL_TransitionFinish(&clock, "palette-fade");
 }
 
@@ -428,7 +421,7 @@ void PAL_ColorFade(int32_t iDelay, uint8_t bColor, int fFrom)
                 VIDEO_SetPalette(new_palette);
                 VIDEO_UpdateScreen(NULL);
             }
-            UTIL_TransitionWait(&clock, iDelay);
+            UTIL_TransitionWait(&clock);
         }
 
         VIDEO_SetPalette(org_palette);
@@ -452,7 +445,7 @@ void PAL_ColorFade(int32_t iDelay, uint8_t bColor, int fFrom)
                 VIDEO_SetPalette(new_palette);
                 VIDEO_UpdateScreen(NULL);
             }
-            UTIL_TransitionWait(&clock, iDelay);
+            UTIL_TransitionWait(&clock);
         }
 
         // End on every entry set to the target color.
@@ -466,10 +459,7 @@ void PAL_ColorFade(int32_t iDelay, uint8_t bColor, int fFrom)
         VIDEO_SetPalette(new_palette);
         // VIDEO_UpdateScreen(NULL);
     }
-    if (UTIL_TransitionNeedsFinalFrame())
-    {
-        VIDEO_UpdateScreen(NULL);
-    }
+    VIDEO_UpdateScreen(NULL);
     UTIL_TransitionFinish(&clock, "color-fade");
 }
 
@@ -537,12 +527,9 @@ void PAL_FadeToRed(void)
             VIDEO_SetPalette(new_palette);
             VIDEO_UpdateScreen(NULL);
         }
-        UTIL_TransitionWait(&clock, 75);
+        UTIL_TransitionWait(&clock);
     }
-    if (UTIL_TransitionNeedsFinalFrame())
-    {
-        VIDEO_SetPalette(new_palette);
-        VIDEO_UpdateScreen(NULL);
-    }
+    VIDEO_SetPalette(new_palette);
+    VIDEO_UpdateScreen(NULL);
     UTIL_TransitionFinish(&clock, "fade-to-red");
 }
