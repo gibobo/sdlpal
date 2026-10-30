@@ -20,10 +20,12 @@
 
 #include "font.h"
 #include "driver.h"
+#include "profile.h"
 #include "util.h"
 #include "video.h"
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Font glyph cache entry structure
 typedef struct
@@ -45,6 +47,7 @@ static const uint16_t kUnicodeInvalidUpperBound = 0xFFFE;
 #define FONT_GLYPH_COUNT (0xFFFE - (0xF900 - 0xD800))
 
 static void *gFontDataStream = NULL;
+static uint8_t *gFontGlyphs = NULL; // every glyph bitmap where memory allows; else NULL
 static uint8_t *gFontWidthBits = NULL; // one bit per glyph, set for full-width glyphs
 static FontGlyphCacheEntry *gFontCache = NULL;
 static int16_t gFontCacheBuckets[FONT_CACHE_BUCKETS];
@@ -108,9 +111,15 @@ static FontGlyphCacheEntry *FontCacheFetchGlyph(uint16_t codepoint)
         FontCacheUnlink(index);
         gFontCache[index].glyphWidth = 0;
     }
-    if (UTIL_fseek(gFontDataStream, (int64_t)glyphIndex * 32, SEEK_SET) != 0 ||
-        UTIL_fread(gFontCache[index].data, sizeof(uint8_t), 32, gFontDataStream) != 32)
-        return NULL;
+    if (gFontGlyphs != NULL)
+        memcpy(gFontCache[index].data, gFontGlyphs + (size_t)glyphIndex * 32, 32);
+    else
+    {
+        PROF_COUNT(PROF_GLYPH_READ, 1);
+        if (UTIL_fseek(gFontDataStream, (int64_t)glyphIndex * 32, SEEK_SET) != 0 ||
+            UTIL_fread(gFontCache[index].data, sizeof(uint8_t), 32, gFontDataStream) != 32)
+            return NULL;
+    }
 
     gFontCache[index].codepoint = codepoint;
     gFontCache[index].glyphWidth = FontGlyphWidth(glyphIndex);
@@ -130,6 +139,18 @@ void PAL_InitFont(void)
     gFontDataStream = UTIL_fopen(UTIL_Filename("%s/unicode_font.bin", CACHES_PATH), "rb");
     if (UTIL_FileLength(gFontDataStream) < (long)FONT_GLYPH_COUNT * 32)
         TerminateOnError("%s() failed: unicode_font.bin is shorter than %d glyphs\n", __func__, FONT_GLYPH_COUNT);
+#if !defined(ARDUINO_ARCH_ESP32) || UTIL_PLATFORM_P4
+    // Read every glyph bitmap (1.7 MB) up front where memory is plentiful, so
+    // drawing text never waits for the SD card.
+    gFontGlyphs = (uint8_t *)UTIL_TryMalloc((uint32_t)FONT_GLYPH_COUNT * 32);
+    if (gFontGlyphs != NULL)
+    {
+        if (UTIL_fread(gFontGlyphs, 32, FONT_GLYPH_COUNT, gFontDataStream) != FONT_GLYPH_COUNT)
+            TerminateOnError("%s() failed: cannot read unicode_font.bin\n", __func__);
+        UTIL_fclose(gFontDataStream);
+        gFontDataStream = NULL;
+    }
+#endif
     fpSize = UTIL_fopen(UTIL_Filename("%s/unicode_font.dat", CACHES_PATH), "rb");
     gFontWidthBits = (uint8_t *)UTIL_malloc(widthBytes);
     if (UTIL_fread(gFontWidthBits, 1, widthBytes, fpSize) != widthBytes)
@@ -146,9 +167,11 @@ void PAL_InitFont(void)
 void PAL_DeInitFont(void)
 {
     UTIL_fclose(gFontDataStream);
+    UTIL_free(gFontGlyphs);
     UTIL_free(gFontWidthBits);
     UTIL_free(gFontCache);
     gFontDataStream = NULL;
+    gFontGlyphs = NULL;
     gFontWidthBits = NULL;
     gFontCache = NULL;
     gFontCacheNextIndex = 0;

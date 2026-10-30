@@ -10,8 +10,10 @@
 #elif defined(ARDUINO_ARCH_ESP32)
 #include <esp_heap_caps.h>
 #include <esp_timer.h>
+#include <fcntl.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <unistd.h>
 #else
 #include <time.h>
 #if defined(__GLIBC__)
@@ -45,11 +47,12 @@ typedef struct
 
 static const char *const g_rgCounterNames[PROF_COUNTER_COUNT] = {
     "fseek", "fread", "fread_bytes", "fwrite", "fwrite_bytes", "chunk_read", "chunk_cache_hit",
-    "decompress", "decompress_bytes", "malloc", "malloc_bytes", "late_wait",
+    "decompress", "decompress_bytes", "malloc", "malloc_bytes", "late_wait", "glyph_read",
 };
 static const char *const g_rgTimerNames[PROF_TIMER_COUNT] = {
     "decompress_us", "scene_us", "battle_scene_us", "work_us", "load_res_us", "load_game_us",
     "save_game_us", "battle_load_us", "sound_us", "sound_lock_us", "music_us", "attack_us",
+    "read_us",
 };
 
 static PROF_STATS g_Total, g_Window;
@@ -214,6 +217,133 @@ void PROF_Poll(void)
         g_dwWindowStart = now;
     }
 #endif
+}
+
+#if defined(ARDUINO_ARCH_ESP32)
+#define PROF_READ_WAYS 6
+#else
+#define PROF_READ_WAYS 2
+#endif
+// The size of the stream buffers and staging buffer the benchmark tries.
+#define PROF_READ_STAGE 32768
+
+// Read size bytes at offset from path one way; returns the bytes read.
+static uint32_t ReadOneWay(int way, const char *path, long offset, uint8_t *buffer, uint32_t size)
+{
+    uint32_t got = 0;
+
+    if (way < 3)
+    {
+        // Streams: the default buffer, a 32 KB buffer, or a 32 KB buffer in DMA memory.
+        FILE *fp = fopen(path, "rb");
+#if defined(ARDUINO_ARCH_ESP32)
+        void *own = NULL;
+#endif
+        if (fp == NULL)
+            return 0;
+        if (way == 1)
+            setvbuf(fp, NULL, _IOFBF, PROF_READ_STAGE);
+#if defined(ARDUINO_ARCH_ESP32)
+        else if (way == 2 && (own = heap_caps_aligned_alloc(128, PROF_READ_STAGE, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)) != NULL)
+            setvbuf(fp, (char *)own, _IOFBF, PROF_READ_STAGE);
+#endif
+        fseek(fp, offset, SEEK_SET);
+        got = (uint32_t)fread(buffer, 1, size, fp);
+        fclose(fp);
+#if defined(ARDUINO_ARCH_ESP32)
+        heap_caps_free(own);
+#endif
+    }
+#if defined(ARDUINO_ARCH_ESP32)
+    else
+    {
+        // Descriptors: straight into PSRAM, or in 32 KB pieces through DMA memory.
+        int fd = open(path, O_RDONLY);
+        uint8_t *stage = (way == 4) ? (uint8_t *)heap_caps_aligned_alloc(128, PROF_READ_STAGE, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL) : NULL;
+        if (fd >= 0 && lseek(fd, offset, SEEK_SET) == offset && (way != 4 || stage != NULL))
+        {
+            while (got < size)
+            {
+                uint32_t want = (way == 4 && size - got > PROF_READ_STAGE) ? PROF_READ_STAGE : size - got;
+                int n = (int)read(fd, way == 4 ? stage : buffer + got, want);
+                if (n <= 0)
+                    break;
+                if (way == 4)
+                    memcpy(buffer + got, stage, (size_t)n);
+                got += (uint32_t)n;
+            }
+        }
+        if (fd >= 0)
+            close(fd);
+        heap_caps_free(stage);
+    }
+#endif
+    return got;
+}
+
+/*++
+  Read 512 KB of gop.mkf in each way below and print bytes/us for each, to find
+  how the boards read the SD card fastest. Each way reads its own region, so
+  none profits from data another left in a cache.
+
+    default     a stream with its default buffer, from an odd offset
+    buffer32k   a stream with a 32 KB buffer, from an odd offset
+    dmabuf32k   a stream with a 32 KB buffer in DMA memory, from an odd offset
+    fd_psram    one read() straight into PSRAM, from an odd offset
+    fd_stage    read() in 32 KB pieces through DMA memory, from a sector boundary
+    fd_aligned  one read() into 128-byte aligned PSRAM, from a sector boundary
+    util        UTIL_fread, the way the game reads, from an odd offset
+--*/
+void PROF_ReadBenchmark(void)
+{
+    static const char *const names[] = {"default", "buffer32k", "dmabuf32k", "fd_psram", "fd_stage", "fd_aligned"};
+    const uint32_t size = 512 * 1024;
+    const char *path = UTIL_Filename("%s/gop.mkf", RESOURCE_PATH);
+    uint8_t *buffer = (uint8_t *)UTIL_TryMalloc(size);
+    int i;
+
+    if (buffer == NULL)
+        return;
+    printf("PALPROF readbench");
+    for (i = 0; i < PROF_READ_WAYS; i++)
+    {
+        long offset = 1000003L + (long)i * 1048576L;
+        uint8_t *target = buffer;
+        uint32_t start, got;
+
+#if defined(ARDUINO_ARCH_ESP32)
+        // The last two ways start on a sector boundary; the last reads into aligned PSRAM.
+        if (i >= 4)
+            offset &= ~511L;
+        if (i == 5 && (target = (uint8_t *)heap_caps_aligned_alloc(128, size, MALLOC_CAP_SPIRAM)) == NULL)
+            break;
+#endif
+        start = PROF_Microseconds();
+        got = ReadOneWay(i, path, offset, target, size);
+        printf(" %s=%lu/%lu", names[i], (unsigned long)got, (unsigned long)(PROF_Microseconds() - start));
+        fflush(stdout);
+#if defined(ARDUINO_ARCH_ESP32)
+        if (target != buffer)
+            heap_caps_free(target);
+#endif
+    }
+
+    // Read the way the game does, through UTIL_fread from an odd offset.
+    {
+        FILE *fp = (FILE *)UTIL_fopen_without_checking(path, "rb");
+        uint32_t start, got;
+        if (fp != NULL)
+        {
+            fseek(fp, 1000003L + (long)PROF_READ_WAYS * 1048576L, SEEK_SET);
+            start = PROF_Microseconds();
+            got = UTIL_fread(buffer, 1, size, fp);
+            printf(" util=%lu/%lu", (unsigned long)got, (unsigned long)(PROF_Microseconds() - start));
+            fclose(fp);
+        }
+    }
+    printf("\n");
+    fflush(stdout);
+    UTIL_free(buffer);
 }
 
 #endif

@@ -24,6 +24,7 @@ typedef enum
     PROF_MALLOC,           // UTIL_malloc, UTIL_calloc and UTIL_realloc calls
     PROF_MALLOC_BYTES,     // bytes requested from them
     PROF_LATE_WAIT,        // waits that started after their deadline
+    PROF_GLYPH_READ,       // glyphs read from the font file (font cache misses)
     PROF_COUNTER_COUNT
 } PROF_COUNTER;
 
@@ -41,6 +42,7 @@ typedef enum
     PROF_TIME_SOUND_LOCK,   // the part of AUDIO_PlaySound spent waiting for the audio lock
     PROF_TIME_MUSIC,        // AUDIO_PlayMusic
     PROF_TIME_ATTACK,       // a player's normal attack animation (nine battle frames)
+    PROF_TIME_READ,         // UTIL_fread
     PROF_TIMER_COUNT
 } PROF_TIMER;
 
@@ -56,6 +58,7 @@ void PROF_WaitBegin(int late);
 void PROF_WaitEnd(void);
 void PROF_Report(const char *label);
 void PROF_Poll(void);
+void PROF_ReadBenchmark(void);
 
 #define PROF_INIT() PROF_Init()
 #define PROF_COUNT(counter, n) PROF_Count((counter), (n))
@@ -66,6 +69,7 @@ void PROF_Poll(void);
 #define PROF_WAIT_BEGIN(late) PROF_WaitBegin(late)
 #define PROF_WAIT_END() PROF_WaitEnd()
 #define PROF_REPORT(label) PROF_Report(label)
+#define PROF_READ_BENCHMARK() PROF_ReadBenchmark()
 
 #else
 
@@ -78,6 +82,7 @@ void PROF_Poll(void);
 #define PROF_WAIT_BEGIN(late) ((void)0)
 #define PROF_WAIT_END() ((void)0)
 #define PROF_REPORT(label) ((void)0)
+#define PROF_READ_BENCHMARK() ((void)0)
 
 #endif
 

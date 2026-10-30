@@ -69,6 +69,7 @@ void PAL_Init(void)
     // PAL_ConsolidateExtractedResources();
     if (PAL_LoadConsolidatedResources() != 0)
         TerminateOnError("%s() failed: load consolidated resources error\n", __func__);
+    PROF_READ_BENCHMARK();
     fprintf(stdout, "==> Consolidated resources loaded successfully.\n");
 
     // Initialize subsystems.
