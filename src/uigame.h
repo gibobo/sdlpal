@@ -35,6 +35,9 @@ extern "C" {
 
 uint16_t PAL_SaveSlotMenu(uint16_t wDefaultSlot);
 
+// The saved times stored in a save slot's file, or 0 if the slot has no saved game.
+uint16_t PAL_GetSavedTimes(int iSaveSlot);
+
 uint16_t PAL_TripleMenu(uint16_t wThirdWord);
 
 uint8_t PAL_ConfirmMenu(void);

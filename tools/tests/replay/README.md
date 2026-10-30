@@ -31,6 +31,7 @@ seed <n>
 at <present> press|hold|release <key>
 at <present> item <object> <count>
 at <present> battle <enemy team> <battle field>
+at <present> cmd <test command>
 end <present>
 ```
 
@@ -38,6 +39,9 @@ Keys: `up down left right menu search pgup pgdn home end repeat auto defend
 useitem throwitem flee force status`. Input is keyed by present index, which
 performance changes do not move. `item` and `battle` reach states that would
 otherwise take long scripted play; issue them while the party can walk.
+`cmd` runs one of the test commands in `src/testcmd.h` (`state`, `saves`,
+`scene`, `load`, `save`, ...), the same ones the P4 takes over its UART, so a
+scratch scenario can try a command on the desktop before a board run.
 
 ## Running
 

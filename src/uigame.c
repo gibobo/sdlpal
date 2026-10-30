@@ -121,7 +121,7 @@ static const uint32_t MagicDescMsgPos = PAL_XY(102, 0);
 
 extern uint8_t *gpSpriteUI;
 
-static uint16_t GetSavedTimes(int iSaveSlot)
+uint16_t PAL_GetSavedTimes(int iSaveSlot)
 {
     uint16_t wSavedTimes = 0;
     void *fpSAVE = UTIL_fopen_without_checking(UTIL_Filename("%s/%d.rpg", RESOURCE_PATH, iSaveSlot), "rb");
@@ -252,7 +252,7 @@ uint16_t PAL_SaveSlotMenu(
         //
         // Draw the number
         //
-        PAL_DrawNumber((uint32_t)GetSavedTimes(i), 4, PAL_XY(270, 38 * i - 17),
+        PAL_DrawNumber((uint32_t)PAL_GetSavedTimes(i), 4, PAL_XY(270, 38 * i - 17),
                        kNumColorYellow, kNumAlignRight);
     }
 
@@ -511,7 +511,7 @@ PAL_SystemMenu(
 
                 for (i = 1; i <= 5; i++)
                 {
-                    uint16_t curSavedTimes = GetSavedTimes(i);
+                    uint16_t curSavedTimes = PAL_GetSavedTimes(i);
                     if (curSavedTimes > wSavedTimes)
                     {
                         wSavedTimes = curSavedTimes;

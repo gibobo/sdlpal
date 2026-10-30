@@ -300,15 +300,17 @@ P4's internal LDO4 IO supply and a 32-file limit.
 The Arduino loop calls `PAL_StartFrame()` directly because the engine already
 handles frame timing and input polling. On P4, logic and display time are
 subtracted from the 100 ms frame budget instead of adding a fixed 100 ms
-after rendering. A five-second UART timing report shows work and total time;
-work exceeding the budget is reported rather than hidden by extra delay.
+after rendering. Every 2 s `P4 frame` reports the work, total and target time
+of one paced frame; work exceeding the budget is reported rather than hidden by
+extra delay. Frames that waited inside, such as one that ran a menu or a whole
+battle, are not paced frames and are not reported.
 
 Battle frames use the same budget rule at their original 40 ms (25 FPS)
 timing. Ordinary attacks, hit reactions, the main battle loop, and magic
 animations subtract their rendering time from their original frame duration.
-Magic-specific speeds remain unchanged. `P4 battle frame` logs work/total/target
-timing, and `P4 normal attack` logs the full physical attack animation duration
-(nine animation frames, nominally 360 ms, plus resource/audio work).
+Magic-specific speeds remain unchanged. In profiling builds PALPROF `attack_us`
+times a player's whole normal attack animation (nine battle frames, nominally
+360 ms, plus resource/audio work).
 
 Screen shaking uses the same source/destination rules as the SDL driver:
 for padded updates, source row zero moves to destination row `roi_y`.
@@ -320,13 +322,101 @@ time count toward the original duration. Overdue intermediate presentations
 are omitted for fast 8-16 ms effects, while all palette/blending/scene state
 updates still run and the final state is presented. This covers palette and
 color fades, scene fades, screen blending, battle entry, title completion,
-and ending picture fades. Desktop builds retain every presentation and their
-original explicit delays. `P4 transition` logs actual/target duration and the
-numbers of shown/skipped intermediate steps.
+and ending picture fades. The shared core paces transitions this way on every
+platform; on the desktop presenting is fast, so steps are rarely skipped.
+`P4 transition` logs actual/target duration and the numbers of shown/skipped
+intermediate steps.
 
 During battle scene fades, the auto-attack indicator is redrawn at its normal
 color on every presented frame. Its drawing helper only renders the label;
 it does not process input, select targets, or commit battle actions.
+
+## UART test control
+
+Profiling builds (`tools/build-esp32.ps1 -Backend p4 -Profiling`) also take
+the test commands of `src/testcmd.h` on the UART, one per line, after
+`PAL GAME READY`:
+
+| Command | Effect |
+| --- | --- |
+| `key press\|hold\|release <name>` | Tap, hold or release a key (`search`, `menu`, `left`, `force`, ...) |
+| `bkey press\|hold\|release <name>` | The same during a battle; after it, answered `PALCMD skip` and dropped |
+| `state` | Print `PALSTATE` with scene, map position, battle flag, frame, cash and party HP |
+| `saves` | Print `PALSAVES` with the saved times of slots 1-5 (0 = empty) |
+| `item <object> <count>` | Add items to the inventory |
+| `battle <team> <field>` | Run a whole battle, then drop keys still pressed; prints `PALCMD done battle result=<n>` |
+| `scene <number>` | Enter another scene, like script 0x0059 |
+| `load <slot>` | Reload a saved game on the next frame |
+| `save <slot>` | Save to an empty slot 1-5 or to test slot 6-9 |
+
+Each command answers `PALCMD ok <command>` or `PALCMD error <reason>: <command>`.
+Saving never overwrites a saved game in slots 1-5; the menus never show slots
+6-9, so test saves leave the player's games alone.
+
+`tools/p4-drive.py` plays a fixed route with these commands and logs every UART
+line with host timestamps: reset, load the slot with the most saves, walk,
+scroll the item list, save to test slot 6, three battles (attacks, Repeat,
+magic and an item), then load test slot 6 and check that it restored the
+scene, position, cash and HP it was saved with. Battle keys go through `bkey`,
+so a key sent as a battle ends cannot open a menu on the map, and the route
+waits for frames to advance between steps. The PALPROF windows in the log then
+compare directly between builds.
+
+```powershell
+python tools/p4-drive.py --port COM3 --log build/p4-drive.log
+```
+
+## Performance measurements (2026-10-30)
+
+Measured with profiling builds and `tools/p4-drive.py` on the same route and
+save (slot 1, scene 280); "before" is the core with buffered stream I/O, "after"
+adds the sector transfers and the glyph preload below.
+
+=== SD card transfers — read before changing src/util_io.c ===
+The P4's SD card driver moves many sectors per command only when a transfer
+starts on a sector boundary of the file *and* its buffer is 128-byte aligned
+(PSRAM included); everything else goes one sector per command. The boot
+`PALPROF readbench` (512 KB of gop.mkf) measured:
+
+| Way | Speed |
+| --- | --- |
+| stream, default 128-byte buffer | 1.12 MB/s |
+| stream, 32 KB buffer (PSRAM or DMA memory) | 1.23 MB/s |
+| stream, unbuffered (newlib reads it byte by byte) | 0.07 MB/s |
+| `read()` from an odd offset into PSRAM | 1.23 MB/s |
+| `read()` from a sector boundary through a 32 KB DMA stage | 4.1 MB/s |
+| `read()` from a sector boundary into aligned PSRAM | 4.4 MB/s |
+| `UTIL_fread` (now) from an odd offset | 3.9 MB/s |
+
+`UTIL_fread`/`UTIL_fwrite` therefore pass transfers of 4 KB or more to the file
+descriptor in pieces that end on sector boundaries, through an aligned PSRAM
+stage. Never make the game's streams unbuffered. The hw and web boards keep
+plain stream transfers and read glyphs on first use until they are measured.
+================================================================
+
+| Item | Before | After |
+| --- | --- | --- |
+| First load of a save into the game | 807 ms | 351 ms |
+| Reading the 176 KB save file | 153-180 ms | 44-48 ms |
+| Loading a save again (chunks cached) | 187 ms | 55 ms |
+| Saving | 1104 ms | 520 ms |
+| Sound effect, first use (max / average) | 225 / 27 ms | 59 / 9 ms |
+| Normal attack, 4 samples (target 360 ms) | 366-406 ms, average 376 | 362-378 ms, average 369 |
+| First item-menu frame | 195 ms | 51 ms |
+| Glyphs read from the SD card | 235 | 0 |
+| Text tables at boot | 256 ms | 84 ms |
+| Font at boot | 12 ms | 415 ms (reads all 1.7 MB of glyphs) |
+| Boot to `PAL GAME READY` (profiling build) | 10.1 s | 10.6 s |
+
+Unchanged and not limiting: map scene drawing averages 2.6 ms (max 3.1 ms) and
+the battle scene 1.0 ms (max 2.6 ms); full-screen display transfer (42-46 ms)
+dominates frame time, so internal-RAM placement of the frame buffers was not
+pursued. Waiting for the audio lock in `AUDIO_PlaySound` stays under 2 ms. YJ2
+decompression averages 5.5 ms (max 30 ms) and runs only while loading.
+Fades remain display-bound at 600-660 ms for a 600 ms target (12-23 of 60 steps
+shown), screen switches take 364 ms (360 ms) and battle fades 1146-1160 ms
+(1152 ms). Internal RAM stays at about 355 KB free; free PSRAM bottoms out at
+27.8 MB (largest block 27.3 MB) with the chunk cache and the glyphs loaded.
 
 ## Verification on the connected board
 

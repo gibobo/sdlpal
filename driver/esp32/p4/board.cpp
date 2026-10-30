@@ -23,6 +23,7 @@ extern "C" {
 #include "../../../src/input.h"
 #include "../../../src/main.h"
 #include "../../../src/play.h"
+#include "../../../src/testcmd.h"
 #include "../../../src/ui.h"
 #include "../../../src/uigame.h"
 #include "../../../src/util.h"
@@ -626,13 +627,21 @@ static bool powerEvent(uint32_t now) {
     }
     // Exact UART maintenance command exercises real sleep/retention without
     // needing to synthesize a physical key press; normal play has no timer wake.
-    static char command[24];
+    static char command[64];
     static unsigned length=0;
     while (Serial.available()) {
         char c=(char)Serial.read();
         if (c=='\r') continue;
         if (c=='\n') {
             command[length]=0; length=0;
+#ifdef PAL_PROFILE
+            // Profiling builds also take the test commands of src/testcmd.h. A
+            // battle command runs the whole battle, which polls this parser again,
+            // so the line is copied first.
+            char line[sizeof(command)];
+            memcpy(line,command,sizeof(line));
+            if (TESTCMD_Execute(line)) return true;
+#endif
             if (!strcmp(command,"P4POWERLOG")) {
                 uint32_t started=millis();
                 Serial.println("P4 POWER LOG BEGIN");
@@ -666,6 +675,7 @@ static bool powerEvent(uint32_t now) {
 
 extern "C" int DRIVER_Process_Events(void) {
     uint32_t now=millis();
+    TESTCMD_Poll();
     if (gameReady && powerEvent(now)) return 0;
     if (now-lastTouchPoll<12) return 0;
     lastTouchPoll=now;
